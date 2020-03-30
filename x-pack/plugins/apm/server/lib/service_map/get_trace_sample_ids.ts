@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq, take, sortBy } from 'lodash';
-import {
-  Setup,
-  SetupUIFilters,
-  SetupTimeRange
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { rangeFilter } from '../helpers/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import {
@@ -16,9 +12,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRACE_ID,
-  DESTINATION_ADDRESS,
-  SPAN_TYPE,
-  SPAN_SUBTYPE
+  SPAN_DESTINATION_SERVICE_RESOURCE
 } from '../../../common/elasticsearch_fieldnames';
 
 const MAX_TRACES_TO_INSPECT = 1000;
@@ -30,7 +24,7 @@ export async function getTraceSampleIds({
 }: {
   serviceName?: string;
   environment?: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const { start, end, client, indices, config } = setup;
 
@@ -46,7 +40,7 @@ export async function getTraceSampleIds({
         },
         {
           exists: {
-            field: DESTINATION_ADDRESS
+            field: SPAN_DESTINATION_SERVICE_RESOURCE
           }
         },
         rangeQuery
@@ -82,9 +76,9 @@ export async function getTraceSampleIds({
           composite: {
             sources: [
               {
-                [DESTINATION_ADDRESS]: {
+                [SPAN_DESTINATION_SERVICE_RESOURCE]: {
                   terms: {
-                    field: DESTINATION_ADDRESS
+                    field: SPAN_DESTINATION_SERVICE_RESOURCE
                   }
                 }
               },
@@ -99,21 +93,6 @@ export async function getTraceSampleIds({
                 [SERVICE_ENVIRONMENT]: {
                   terms: {
                     field: SERVICE_ENVIRONMENT,
-                    missing_bucket: true
-                  }
-                }
-              },
-              {
-                [SPAN_TYPE]: {
-                  terms: {
-                    field: SPAN_TYPE
-                  }
-                }
-              },
-              {
-                [SPAN_SUBTYPE]: {
-                  terms: {
-                    field: SPAN_SUBTYPE,
                     missing_bucket: true
                   }
                 }

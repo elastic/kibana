@@ -15,19 +15,14 @@ import { HeaderSection } from '../../../../../components/header_section';
 import { StepAboutRule } from '../step_about_rule/';
 import { AboutStepRule } from '../../types';
 
+jest.mock('../../../../../lib/kibana');
+
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('StepAboutRuleToggleDetails', () => {
   let mockRule: AboutStepRule;
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-
     mockRule = mockAboutStepRule();
   });
 
@@ -141,7 +136,7 @@ describe('StepAboutRuleToggleDetails', () => {
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeFalsy();
 
       wrapper
-        .find('input[title="Investigation notes"]')
+        .find('input[title="Investigation guide"]')
         .at(0)
         .simulate('change', { target: { value: 'notes' } });
 
@@ -164,7 +159,7 @@ describe('StepAboutRuleToggleDetails', () => {
       );
 
       wrapper
-        .find('input[title="Investigation notes"]')
+        .find('input[title="Investigation guide"]')
         .at(0)
         .simulate('change', { target: { value: 'notes' } });
 

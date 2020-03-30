@@ -28,6 +28,7 @@ const createSetupContractMock = (): PluginsServiceSetup => ({
     internal: new Map(),
     public: new Map(),
   },
+  initialized: true,
 });
 const createStartContractMock = () => ({ contracts: new Map() });
 const createServiceMock = (): PluginsServiceMock => ({

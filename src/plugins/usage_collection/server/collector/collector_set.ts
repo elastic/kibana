@@ -18,8 +18,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger } from 'kibana/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Logger, APICaller } from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
@@ -31,7 +30,7 @@ interface CollectorSetConfig {
 
 export class CollectorSet {
   private _waitingForAllCollectorsTimestamp?: number;
-  private logger: Logger;
+  private readonly logger: Logger;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private collectors: Array<Collector<any, any>> = [];
   constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
@@ -112,7 +111,7 @@ export class CollectorSet {
   };
 
   public bulkFetch = async (
-    callCluster: CallCluster,
+    callCluster: APICaller,
     collectors: Array<Collector<any, any>> = this.collectors
   ) => {
     const responses = [];
@@ -135,13 +134,13 @@ export class CollectorSet {
   /*
    * @return {new CollectorSet}
    */
-  public getFilteredCollectorSet = (filter: any) => {
+  public getFilteredCollectorSet = (filter: (col: Collector) => boolean) => {
     const filtered = this.collectors.filter(filter);
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: CallCluster) => {
-    const usageCollectors = this.getFilteredCollectorSet((c: any) => c instanceof UsageCollector);
+  public bulkFetchUsage = async (callCluster: APICaller) => {
+    const usageCollectors = this.getFilteredCollectorSet(c => c instanceof UsageCollector);
     return await this.bulkFetch(callCluster, usageCollectors.collectors);
   };
 

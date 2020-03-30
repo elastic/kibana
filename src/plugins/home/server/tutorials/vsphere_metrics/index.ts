@@ -48,7 +48,7 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-vsphere.html',
       },
     }),
-    // euiIconType: 'logoVSphere',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/vsphere.svg',
     isBeta: true,
     artifacts: {
       application: {

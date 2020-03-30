@@ -6,7 +6,7 @@
 
 import { useReducer, useCallback } from 'react';
 
-import { CaseRequest } from '../../../../../../plugins/case/common/api';
+import { CasePostRequest } from '../../../../../../plugins/case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { postCase } from './api';
 import * as i18n from './translations';
@@ -49,7 +49,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 };
 
 interface UsePostCase extends NewCaseState {
-  postCase: (data: CaseRequest) => void;
+  postCase: (data: CasePostRequest) => void;
 }
 export const usePostCase = (): UsePostCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
@@ -59,11 +59,13 @@ export const usePostCase = (): UsePostCase => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const postMyCase = useCallback(async (data: CaseRequest) => {
+  const postMyCase = useCallback(async (data: CasePostRequest) => {
     let cancel = false;
+    const abortCtrl = new AbortController();
+
     try {
       dispatch({ type: 'FETCH_INIT' });
-      const response = await postCase({ ...data, status: 'open' });
+      const response = await postCase(data, abortCtrl.signal);
       if (!cancel) {
         dispatch({
           type: 'FETCH_SUCCESS',
@@ -81,6 +83,7 @@ export const usePostCase = (): UsePostCase => {
       }
     }
     return () => {
+      abortCtrl.abort();
       cancel = true;
     };
   }, []);

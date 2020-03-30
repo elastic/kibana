@@ -48,6 +48,9 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const writeCoverage = (coverageJson: string) => {
+    if (!Fs.existsSync(coverageDir)) {
+      Fs.mkdirSync(coverageDir, { recursive: true });
+    }
     const id = coverageCounter++;
     const timestamp = Date.now();
     const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
@@ -74,12 +77,6 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
         caps.get('chrome').chromedriverVersion
       }, w3c=${isW3CEnabled}, codeCoverage=${collectCoverage}`
     );
-  }
-  // code coverage is supported only in Chrome browser
-  if (collectCoverage) {
-    // We are running xpack tests with different configs and cleanup will delete collected coverage
-    // del.sync(coverageDir);
-    Fs.mkdirSync(coverageDir, { recursive: true });
   }
 
   consoleLog$
