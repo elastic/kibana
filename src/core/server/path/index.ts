@@ -60,7 +60,7 @@ function findFile(paths: string[]) {
 export const getConfigPath = () => findFile(CONFIG_PATHS);
 
 /**
- * Get the path where the config directories are stored
+ * Get the config directory path
  * @internal
  */
 export const getConfigDirectory = () => findFile(CONFIG_DIRECTORIES);
