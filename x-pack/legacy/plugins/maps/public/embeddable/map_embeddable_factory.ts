@@ -11,9 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { EmbeddableFactory, ErrorEmbeddable, IContainer } from 'src/plugins/embeddable/public';
 import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
 import { getIndexPatternService } from '../kibana_services';
+import {
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  IContainer,
+} from '../../../../../../src/plugins/embeddable/public';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
