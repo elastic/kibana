@@ -108,7 +108,7 @@ export const OfExpression = ({
           />
         </ClosablePopoverTitle>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
+          <EuiFlexItem className="ofAggFieldContainer">
             <EuiFormRow
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
