@@ -17,22 +17,14 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { PluginInitializer } from 'kibana/public';
+import {
+  CustomVisualizationsPublicPlugin,
+  CustomVisualizationsSetup,
+  CustomVisualizationsStart,
+} from './plugin';
 
-export default function({ getService, getPageObjects }) {
-  const appsMenu = getService('appsMenu');
-  const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
+export { CustomVisualizationsPublicPlugin as Plugin };
 
-  describe('app navigation', function describeIndexTests() {
-    before(async () => {
-      await PageObjects.common.navigateToApp('settings');
-    });
-
-    it('should show nav link that navigates to the app', async () => {
-      await appsMenu.clickLink('Test Plugin App');
-      const pluginContent = await testSubjects.find('pluginContent');
-      expect(await pluginContent.getVisibleText()).to.be('Super simple app plugin');
-    });
-  });
-}
+export const plugin: PluginInitializer<CustomVisualizationsSetup, CustomVisualizationsStart> = () =>
+  new CustomVisualizationsPublicPlugin();
