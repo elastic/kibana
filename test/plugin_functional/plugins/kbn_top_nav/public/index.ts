@@ -17,10 +17,8 @@
  * under the License.
  */
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      hacks: ['plugins/kbn_tp_custom_visualizations/self_changing_vis/self_changing_vis'],
-    },
-  });
-}
+import { PluginInitializer } from 'kibana/public';
+import { TopNavTestPlugin, TopNavTestPluginSetup, TopNavTestPluginStart } from './plugin';
+
+export const plugin: PluginInitializer<TopNavTestPluginSetup, TopNavTestPluginStart> = () =>
+  new TopNavTestPlugin();

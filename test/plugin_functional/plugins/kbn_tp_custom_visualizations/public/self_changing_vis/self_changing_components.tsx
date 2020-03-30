@@ -16,8 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'ui/autoload/all';
 
-import chrome from 'ui/chrome';
+import React, { useEffect } from 'react';
 
-chrome.setRootTemplate('<div data-test-subj="pluginContent">Super simple app plugin</div>');
+import { EuiBadge } from '@elastic/eui';
+
+interface SelfChangingComponentProps {
+  renderComplete: () => {};
+  visParams: {
+    counter: number;
+  };
+}
+
+export function SelfChangingComponent(props: SelfChangingComponentProps) {
+  useEffect(() => {
+    props.renderComplete();
+  });
+
+  return (
+    <div>
+      <EuiBadge
+        onClick={() => {}}
+        data-test-subj="counter"
+        onClickAriaLabel="Increase counter"
+        color="primary"
+      >
+        {props.visParams.counter}
+      </EuiBadge>
+    </div>
+  );
+}

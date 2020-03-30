@@ -70,6 +70,25 @@ describe('#getActionsColumns', () => {
     expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBe(true);
   });
 
+  test('it renders only duplicate icon (without heading)', () => {
+    const testProps: TimelinesTableProps = {
+      ...getMockTimelinesTableProps(mockResults),
+      actionTimelineToShow: ['duplicate'],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <TimelinesTable {...testProps} />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="open-duplicate"]')
+        .first()
+        .text()
+    ).toEqual('');
+  });
+
   test('it does NOT render the duplicate timeline when actionTimelineToShow is NOT including the action duplicate)', () => {
     const testProps: TimelinesTableProps = {
       ...getMockTimelinesTableProps(mockResults),
