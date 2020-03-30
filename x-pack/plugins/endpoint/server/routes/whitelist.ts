@@ -8,6 +8,7 @@ import { IRouter, RequestHandlerContext, APICaller } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
 import { createHash } from 'crypto';
+import { i18n } from '@kbn/i18n';
 
 import lzma from 'lzma-native';
 import { WhitelistRule, WhitelistSet } from '../../common/types';
@@ -115,18 +116,32 @@ async function handleWhitelistPost(context: RequestHandlerContext, req, res) {
 
     // Don't index an empty list if no rules could be created from the request
     if (newRules.length === 0) {
-      return res.badRequest({ error: 'no allowlist rules could be created from request.' });
+      return res.badRequest({
+        error: i18n.translate('allowlist.badrequest', {
+          defaultMessage: 'No allowlist rules could be created from request.',
+        }),
+      });
     }
 
     // Check that the global whitelist size limit won't be reached
     if (newRules.length + whitelistCount > whitelistLimit) {
-      return res.badRequest({ error: `Allowlist limit of ${whitelistLimit} reached.` });
+      return res.badRequest({
+        error: i18n.translate('allowlist.sizelimit.exceeded', {
+          defaultMessage: 'Allowlist limit of {whitelistLimit} reached.',
+          values: { whitelistLimit },
+          description: 'Allowlist limit exceeded.',
+        }),
+      });
     }
 
     // Add the rules to the global whitelist
     const createdItemIDs = await addWhitelistRule(context, newRules);
     if (createdItemIDs.length === 0) {
-      return res.internalError({ error: 'unable to create whitelist rule.' });
+      return res.internalError({
+        error: i18n.translate('allowlist.internalerror', {
+          defaultMessage: 'Unable to create allowlist items',
+        }),
+      });
     } else {
       const cl = context.core.elasticsearch.dataClient.callAsCurrentUser;
       hydrateWhitelistCache(cl);
@@ -194,7 +209,7 @@ async function getWhitelist(client: APICaller): Promise<WhitelistSet> {
   const response = (await client('search', {
     index: whitelistIdx,
     body: {},
-    size: 1000,
+    size: whitelistLimit,
   })) as SearchResponse<WhitelistRule>;
 
   const resp: WhitelistRule[] = [];
@@ -277,7 +292,12 @@ async function handleWhitelistDownload(context, req, res) {
       .digest('hex');
     if (whitelistHash !== bufferHash) {
       return res.badRequest({
-        body: `The requested artifact with hash ${whitelistHash} does not match current hash of ${bufferHash}`,
+        body: i18n.translate('allowlist.download.fail', {
+          defaultMessage:
+            'The requested artifact with hash {whitelistHash} does not match current hash of {bufferHash}',
+          values: { whitelistHash, bufferHash },
+          description: 'Allowlist download failure.',
+        }),
       });
     }
     return res.ok({ body: whitelistArtifactCache, headers: { 'content-encoding': 'xz' } });
@@ -299,11 +319,23 @@ async function handleWhitelistItemDeletion(context, req, res) {
         refresh: 'true',
       })
       .then(() => {
-        return res.ok({ body: `Successfully deleted ${whitelistID}` });
+        return res.ok({
+          body: i18n.translate('allowlist.delete.success', {
+            defaultMessage: 'Successfully deleted {whitelistID}',
+            values: { whitelistID },
+            description: 'Allowlist delete success.',
+          }),
+        });
       })
       .catch((e: { status: number }) => {
         if (e.status === 404) {
-          return res.badRequest({ body: `No item with id ${whitelistID} in global allowlist` });
+          return res.badRequest({
+            body: i18n.translate('allowlist.delete.fail', {
+              defaultMessage: 'No item with id {whitelistID} in global allowlist',
+              values: { whitelistID },
+              description: 'Allowlist delete failure.',
+            }),
+          });
         } else {
           return res.internalError({});
         }

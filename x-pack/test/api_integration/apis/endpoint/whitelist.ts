@@ -80,7 +80,11 @@ export default function({ getService }: FtrProviderContext) {
             await supertest
               .get(`/api/endpoint/allowlist/download/${whitelistHash}`)
               .set('kbn-xsrf', 'xxx')
-              .then(function(downloadResp) {
+              .then(function(downloadResp: {
+                body: Buffer;
+                statusCode: any;
+                headers: { [x: string]: string | number };
+              }) {
                 const dl: Buffer = downloadResp.body;
                 // TODO
                 // expect(downloadResp.headers['content-encoding']).to.equal('xz');
@@ -144,7 +148,7 @@ export default function({ getService }: FtrProviderContext) {
             event_types: ['malware'],
             sha256: 'somesha256hash',
           })
-          .then(function(res: { statusCode: any; text: string }) {
+          .then(function(res: { statusCode: number; text: string }) {
             expect(res.statusCode).to.equal(200);
             const responseBody = JSON.parse(res.text);
             expect(responseBody.length).to.equal(1);
@@ -157,7 +161,7 @@ export default function({ getService }: FtrProviderContext) {
               .send({
                 whitelist_id: createdID,
               })
-              .then(function(delResp) {
+              .then(function(delResp: { statusCode: number }) {
                 expect(delResp.statusCode).to.equal(200);
               });
           })
@@ -165,7 +169,7 @@ export default function({ getService }: FtrProviderContext) {
             await supertest
               .get('/api/endpoint/allowlist') // Checks that the rule was deleted
               .set('kbn-xsrf', 'xxx')
-              .then(function(getResp) {
+              .then(function(getResp: { text: string; statusCode: number }) {
                 const getRespBody = JSON.parse(getResp.text);
                 expect(getResp.statusCode).to.equal(200);
                 expect(getRespBody.entries.length).to.equal(sizeOfFixture);
@@ -180,7 +184,7 @@ export default function({ getService }: FtrProviderContext) {
           .send({
             whitelist_id: 'xyz2345', // does not exist
           })
-          .then(function(delResp) {
+          .then(function(delResp: { statusCode: number }) {
             expect(delResp.statusCode).to.equal(400);
           });
       });

@@ -3,14 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  Plugin,
-  CoreSetup,
-  PluginInitializerContext,
-  Logger,
-  ScopedClusterClient,
-  ICustomClusterClient,
-} from 'kibana/server';
+import { Plugin, CoreSetup, PluginInitializerContext, Logger } from 'kibana/server';
 import { first } from 'rxjs/operators';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { createConfig$, EndpointConfigType } from './config';
