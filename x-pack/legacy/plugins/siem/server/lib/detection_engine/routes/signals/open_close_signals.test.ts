@@ -49,6 +49,13 @@ describe('set signal status', () => {
       expect(response.status).toEqual(200);
     });
 
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getSetSignalStatusByQueryRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
     test('catches error if callAsCurrentUser throws error', async () => {
       clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
         throw new Error('Test error');
