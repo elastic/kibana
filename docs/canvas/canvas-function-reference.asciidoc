@@ -375,6 +375,17 @@ Clears the _context_, and returns `null`.
 
 
 [float]
+[[clog_fn]]
+=== `clog`
+
+This function is for debug purpose. It outputs the _context_ in the console.
+
+*Accepts:* `any`
+
+*Returns:* `any`
+
+
+[float]
 [[columns_fn]]
 === `columns`
 
