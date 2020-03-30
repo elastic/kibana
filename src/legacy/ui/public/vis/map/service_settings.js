@@ -53,6 +53,7 @@ uiModules
           tileApiUrl: mapConfig.emsTileApiUrl,
           htmlSanitizer: $sanitize,
           landingPageUrl: mapConfig.emsLandingPageUrl,
+          fetchFunction: fetch,
         });
       }
 
