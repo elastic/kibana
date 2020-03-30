@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+
 import { TemplateForm } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { TemplateDeserialized } from '../../../../common';
@@ -32,7 +33,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
       return;
     }
 
-    history.push(getTemplateDetailsLink(name));
+    history.push(getTemplateDetailsLink(name, template._kbnMeta.formatVersion));
   };
 
   const clearSaveError = () => {

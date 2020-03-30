@@ -53,6 +53,9 @@ export interface TemplateListItem {
     name: string;
   };
   isManaged: boolean;
+  _kbnMeta: {
+    formatVersion: IndexTemplateFormatVersion;
+  };
 }
 
 /**
@@ -70,7 +73,7 @@ export interface TemplateDeserialized {
     mappings?: Mappings;
   };
   _kbnMeta: {
-    formatVersion: 1 | 2;
+    formatVersion: IndexTemplateFormatVersion;
   };
   version?: number;
   priority?: number;
@@ -80,3 +83,5 @@ export interface TemplateDeserialized {
   };
   composedOf?: string[];
 }
+
+export type IndexTemplateFormatVersion = 1 | 2;

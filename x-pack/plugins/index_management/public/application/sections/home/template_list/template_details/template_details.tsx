@@ -30,7 +30,7 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
 } from '../../../../../../common/constants';
-import { TemplateDeserialized } from '../../../../../../common';
+import { TemplateDeserialized, IndexTemplateFormatVersion } from '../../../../../../common';
 import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { decodePath } from '../../../../services/routing';
@@ -39,10 +39,10 @@ import { useServices } from '../../../../app_context';
 import { TabSummary, TabMappings, TabSettings, TabAliases } from './tabs';
 
 interface Props {
-  templateName: TemplateDeserialized['name'];
+  template: { name: string; formatVersion: IndexTemplateFormatVersion };
   onClose: () => void;
-  editTemplate: (templateName: TemplateDeserialized['name']) => void;
-  cloneTemplate: (templateName: TemplateDeserialized['name']) => void;
+  editTemplate: (name: string, formatVersion: IndexTemplateFormatVersion) => void;
+  cloneTemplate: (name: string, formatVersion: IndexTemplateFormatVersion) => void;
   reload: () => Promise<SendRequestResponse>;
 }
 
@@ -95,7 +95,7 @@ const tabToUiMetricMap: { [key: string]: string } = {
 };
 
 export const TemplateDetails: React.FunctionComponent<Props> = ({
-  templateName,
+  template: { name: templateName, formatVersion },
   onClose,
   editTemplate,
   cloneTemplate,
@@ -103,9 +103,12 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
 }) => {
   const { uiMetricService } = useServices();
   const decodedTemplateName = decodePath(templateName);
-  const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(decodedTemplateName);
+  const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(
+    decodedTemplateName,
+    formatVersion
+  );
   const isManaged = templateDetails?.isManaged;
-  const [templateToDelete, setTemplateToDelete] = useState<Array<TemplateDeserialized['name']>>([]);
+  const [templateToDelete, setTemplateToDelete] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
@@ -274,7 +277,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                               defaultMessage: 'Edit',
                             }),
                             icon: 'pencil',
-                            onClick: () => editTemplate(decodedTemplateName),
+                            onClick: () => editTemplate(templateName, formatVersion),
                             disabled: isManaged,
                           },
                           {
@@ -282,7 +285,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
                               defaultMessage: 'Clone',
                             }),
                             icon: 'copy',
-                            onClick: () => cloneTemplate(decodedTemplateName),
+                            onClick: () => cloneTemplate(templateName, formatVersion),
                           },
                           {
                             name: i18n.translate(

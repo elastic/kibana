@@ -37,7 +37,11 @@ import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
-import { TemplateDeserialized, TemplateListItem } from '../../../common';
+import {
+  TemplateDeserialized,
+  TemplateListItem,
+  IndexTemplateFormatVersion,
+} from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
 
 // Temporary hack to provide the uiMetricService instance to this file.
@@ -220,10 +224,16 @@ export async function deleteTemplates(names: Array<TemplateDeserialized['name']>
   return result;
 }
 
-export function useLoadIndexTemplate(name: TemplateDeserialized['name']) {
+export function useLoadIndexTemplate(
+  name: TemplateDeserialized['name'],
+  formatVersion: IndexTemplateFormatVersion
+) {
   return useRequest<TemplateDeserialized>({
     path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
     method: 'get',
+    query: {
+      v: formatVersion,
+    },
   });
 }
 
