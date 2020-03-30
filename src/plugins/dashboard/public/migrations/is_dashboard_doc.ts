@@ -17,28 +17,19 @@
  * under the License.
  */
 
-import './index.scss';
+import { DashboardDoc730ToLatest } from '../bwc';
+import { isDoc } from '../../../../legacy/core_plugins/kibana/migrations/is_doc';
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
+export function isDashboardDoc(
+  doc: { [key: string]: unknown } | DashboardDoc730ToLatest
+): doc is DashboardDoc730ToLatest {
+  if (!isDoc(doc)) {
+    return false;
+  }
 
-export { migrations730 } from './migrations';
-export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-export {} from './types';
-export {} from './actions';
-export {
-  DashboardContainer,
-  DashboardContainerInput,
-  DashboardContainerFactory,
-  DASHBOARD_CONTAINER_TYPE,
-} from './embeddable';
+  if (typeof (doc as DashboardDoc730ToLatest).attributes.panelsJSON !== 'string') {
+    return false;
+  }
 
-export { DashboardStart } from './plugin';
-
-export { DashboardEmbeddableContainerPublicPlugin as Plugin };
-
-export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+  return true;
 }

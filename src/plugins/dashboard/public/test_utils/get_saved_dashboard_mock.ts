@@ -17,28 +17,29 @@
  * under the License.
  */
 
-import './index.scss';
+import { searchSourceMock } from '../../../../plugins/data/public/mocks';
+import { SavedObjectDashboard } from '../saved_dashboards';
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
-
-export { migrations730 } from './migrations';
-export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-export {} from './types';
-export {} from './actions';
-export {
-  DashboardContainer,
-  DashboardContainerInput,
-  DashboardContainerFactory,
-  DASHBOARD_CONTAINER_TYPE,
-} from './embeddable';
-
-export { DashboardStart } from './plugin';
-
-export { DashboardEmbeddableContainerPublicPlugin as Plugin };
-
-export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+export function getSavedDashboardMock(
+  config?: Partial<SavedObjectDashboard>
+): SavedObjectDashboard {
+  return {
+    id: '123',
+    title: 'my dashboard',
+    panelsJSON: '[]',
+    searchSource: searchSourceMock,
+    copyOnSave: false,
+    timeRestore: false,
+    timeTo: 'now',
+    timeFrom: 'now-15m',
+    optionsJSON: '',
+    lastSavedTitle: '',
+    destroy: () => {},
+    save: () => {
+      return Promise.resolve('123');
+    },
+    getQuery: () => ({ query: '', language: 'kuery' }),
+    getFilters: () => [],
+    ...config,
+  } as SavedObjectDashboard;
 }

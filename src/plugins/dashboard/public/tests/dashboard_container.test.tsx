@@ -34,12 +34,9 @@ import {
   ContactCardEmbeddableOutput,
   createEditModeAction,
 } from '../embeddable_plugin_test_samples';
-// eslint-disable-next-line
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
-// eslint-disable-next-line
 import { inspectorPluginMock } from '../../../inspector/public/mocks';
 import { KibanaContextProvider } from '../../../kibana_react/public';
-// eslint-disable-next-line
 import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
