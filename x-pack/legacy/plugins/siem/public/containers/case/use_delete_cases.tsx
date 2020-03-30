@@ -5,9 +5,10 @@
  */
 
 import { useCallback, useReducer } from 'react';
-import { errorToToaster, useStateToaster } from '../../components/toasters';
+import { displaySuccessToast, errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { deleteCases } from './api';
+import { DeleteCase } from './types';
 
 interface DeleteState {
   isDisplayConfirmDeleteModal: boolean;
@@ -57,9 +58,10 @@ const dataFetchReducer = (state: DeleteState, action: Action): DeleteState => {
       return state;
   }
 };
+
 interface UseDeleteCase extends DeleteState {
   dispatchResetIsDeleted: () => void;
-  handleOnDeleteConfirm: (caseIds: string[]) => void;
+  handleOnDeleteConfirm: (caseIds: DeleteCase[]) => void;
   handleToggleModal: () => void;
 }
 
@@ -72,19 +74,26 @@ export const useDeleteCases = (): UseDeleteCase => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const dispatchDeleteCases = useCallback((caseIds: string[]) => {
+  const dispatchDeleteCases = useCallback((cases: DeleteCase[]) => {
     let cancel = false;
+    const abortCtrl = new AbortController();
+
     const deleteData = async () => {
       try {
         dispatch({ type: 'FETCH_INIT' });
-        await deleteCases(caseIds);
+        const caseIds = cases.map(theCase => theCase.id);
+        await deleteCases(caseIds, abortCtrl.signal);
         if (!cancel) {
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
+          displaySuccessToast(
+            i18n.DELETED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
+            dispatchToaster
+          );
         }
       } catch (error) {
         if (!cancel) {
           errorToToaster({
-            title: i18n.ERROR_TITLE,
+            title: i18n.ERROR_DELETING,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
@@ -94,6 +103,7 @@ export const useDeleteCases = (): UseDeleteCase => {
     };
     deleteData();
     return () => {
+      abortCtrl.abort();
       cancel = true;
     };
   }, []);

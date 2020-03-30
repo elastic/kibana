@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import copy from 'copy-to-clipboard';
 import { isEmpty } from 'lodash/fp';
@@ -33,8 +40,9 @@ interface UserActionTitleProps {
   labelQuoteAction?: string;
   labelTitle: JSX.Element;
   linkId?: string | null;
+  fullName?: string | null;
   updatedAt?: string | null;
-  userName: string;
+  username: string;
   onEdit?: (id: string) => void;
   onQuote?: (id: string) => void;
   outlineComment?: (id: string) => void;
@@ -48,7 +56,8 @@ export const UserActionTitle = ({
   labelQuoteAction,
   labelTitle,
   linkId,
-  userName,
+  fullName,
+  username,
   updatedAt,
   onEdit,
   onQuote,
@@ -105,7 +114,9 @@ export const UserActionTitle = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
             <EuiFlexItem grow={false}>
-              <strong>{userName}</strong>
+              <EuiToolTip position="top" content={<p>{fullName ?? username}</p>}>
+                <strong>{username}</strong>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{labelTitle}</EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -137,20 +148,24 @@ export const UserActionTitle = ({
           <EuiFlexGroup alignItems="baseline" gutterSize="none">
             {!isEmpty(linkId) && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  aria-label={i18n.MOVE_TO_ORIGINAL_COMMENT}
-                  onClick={handleMoveToLink}
-                  iconType="arrowUp"
-                />
+                <EuiToolTip position="top" content={<p>{i18n.MOVE_TO_ORIGINAL_COMMENT}</p>}>
+                  <EuiButtonIcon
+                    aria-label={i18n.MOVE_TO_ORIGINAL_COMMENT}
+                    onClick={handleMoveToLink}
+                    iconType="arrowUp"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.COPY_LINK_COMMENT}
-                onClick={handleAnchorLink}
-                iconType="link"
-                id={`${id}-permLink`}
-              />
+              <EuiToolTip position="top" content={<p>{i18n.COPY_REFERENCE_LINK}</p>}>
+                <EuiButtonIcon
+                  aria-label={i18n.COPY_REFERENCE_LINK}
+                  onClick={handleAnchorLink}
+                  iconType="link"
+                  id={`${id}-permLink`}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             {propertyActions.length > 0 && (
               <EuiFlexItem grow={false}>
