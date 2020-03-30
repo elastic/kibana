@@ -22,17 +22,13 @@ export interface TemplateV1Serialized extends TemplateBaseSerialized {
   mappings?: Mappings;
 }
 
-export interface TemplateV2Serialized {
-  name: string;
-  index_patterns: string[];
-  version?: number;
-  priority?: number;
-  order?: number;
+export interface TemplateV2Serialized extends TemplateBaseSerialized {
   template: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
   };
+  priority?: number;
   composed_of?: string[];
 }
 

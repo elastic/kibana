@@ -17,7 +17,7 @@ export const getTemplateVersion = (
   return {}.hasOwnProperty.call(template, 'template') ? 2 : 1;
 };
 
-export const getTemplateSetting = (
+export const getTemplateParameter = (
   template: TemplateV1Serialized | TemplateV2Serialized,
   setting: 'aliases' | 'settings' | 'mappings'
 ) => {

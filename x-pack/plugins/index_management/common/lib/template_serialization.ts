@@ -75,7 +75,7 @@ export function deserializeV2Template(
     priority,
     composedOf,
     _kbnMeta: {
-      formatVersion: 1,
+      formatVersion: 2,
     },
   };
 

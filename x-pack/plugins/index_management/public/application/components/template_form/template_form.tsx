@@ -110,9 +110,16 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     if (isValid) {
       // Update the template object with the current step data
       if (path) {
+        // We only update a "slice" of the template
+        const sliceToUpdate = template.current[path as keyof TemplateDeserialized];
+
+        if (sliceToUpdate === null || typeof sliceToUpdate !== 'object') {
+          return { isValid, data };
+        }
+
         template.current = {
           ...template.current,
-          [path]: { ...template.current[path as 'template'], ...data },
+          [path]: { ...sliceToUpdate, ...data },
         };
       } else {
         template.current = { ...template.current, ...data };

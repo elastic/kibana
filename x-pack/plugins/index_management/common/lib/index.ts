@@ -9,4 +9,4 @@ export {
   serializeV1Template,
 } from './template_serialization';
 
-export { getTemplateSetting } from './utils';
+export { getTemplateParameter } from './utils';

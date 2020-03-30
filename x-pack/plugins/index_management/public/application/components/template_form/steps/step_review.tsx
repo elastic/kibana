@@ -26,7 +26,7 @@ import {
   serializeV1Template,
   serializeV2Template,
 } from '../../../../../common/lib/template_serialization';
-import { TemplateDeserialized, getTemplateSetting } from '../../../../../common';
+import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
 import { StepProps } from '../types';
 
 const { stripEmptyFields } = serializers;
@@ -71,9 +71,9 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
   // Name not included in ES request body
   delete serializedTemplate.name;
 
-  const serializedMappings = getTemplateSetting(serializedTemplate, 'mappings');
-  const serializedSettings = getTemplateSetting(serializedTemplate, 'settings');
-  const serializedAliases = getTemplateSetting(serializedTemplate, 'aliases');
+  const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
+  const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');
+  const serializedAliases = getTemplateParameter(serializedTemplate, 'aliases');
 
   const numIndexPatterns = indexPatterns!.length;
 

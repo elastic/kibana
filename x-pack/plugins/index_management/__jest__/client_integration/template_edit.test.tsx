@@ -208,7 +208,7 @@ describe('<TemplateEdit />', () => {
           },
           isManaged: false,
           _kbnMeta: {
-            formatVersion: 1,
+            formatVersion: templateToEdit._kbnMeta.formatVersion,
           },
         };
 
