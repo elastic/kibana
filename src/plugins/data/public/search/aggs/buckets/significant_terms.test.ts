@@ -26,7 +26,6 @@ import { IBucketAggConfig } from './_bucket_agg_type';
 describe('Significant Terms Agg', () => {
   describe('order agg editor UI', () => {
     describe('convert include/exclude from old format', () => {
-      const typesRegistry = mockAggTypesRegistry([significantTermsBucketAgg]);
       const getAggConfigs = (params: Record<string, any> = {}) => {
         const indexPattern = {
           id: '1234',
@@ -52,12 +51,12 @@ describe('Significant Terms Agg', () => {
               params,
             },
           ],
-          { typesRegistry }
+          { typesRegistry: mockAggTypesRegistry([significantTermsBucketAgg]) }
         );
       };
 
       const testSerializeAndWrite = (aggs: IAggConfigs) => {
-        const agg = aggs.aggs[0];
+        const [agg] = aggs.aggs;
         const { [BUCKET_TYPES.SIGNIFICANT_TERMS]: params } = agg.toDsl();
 
         expect(params.field).toBe('field');
