@@ -20,14 +20,23 @@ import React, { memo, ReactNode } from 'react';
 import styled from 'styled-components';
 
 const StyledEuiPage = styled(EuiPage)`
-  padding: 0;
+  &.endpoint--isListView {
+    padding: 0;
 
-  .endpoint-header {
-    padding: ${props => props.theme.eui.euiSizeL};
+    .endpoint-header {
+      padding: ${props => props.theme.eui.euiSizeL};
+    }
+    .endpoint-page-content {
+      border-left: none;
+      border-right: none;
+    }
   }
-  .endpoint-page-content {
-    border-left: none;
-    border-right: none;
+  &.endpoint--isDetailsView {
+    .endpoint-page-content {
+      padding: 0;
+      border: none;
+      background: none;
+    }
   }
 `;
 
@@ -41,7 +50,7 @@ const isStringOrNumber = /(string|number)/;
 export const PageViewHeaderTitle = memo<{ children: ReactNode }>(({ children }) => {
   return (
     <EuiTitle size="l">
-      <h1>{children}</h1>
+      <h1 data-test-subj="pageViewHeaderLeftTitle">{children}</h1>
     </EuiTitle>
   );
 });
@@ -55,7 +64,7 @@ export const PageViewBodyHeaderTitle = memo<{ children: ReactNode }>(
   ({ children, ...otherProps }) => {
     return (
       <EuiTitle {...otherProps}>
-        <h2>{children}</h2>
+        <h2 data-test-subj="pageViewBodyTitle">{children}</h2>
       </EuiTitle>
     );
   }
@@ -84,9 +93,12 @@ export const PageView = memo<
     bodyHeader?: ReactNode;
     children?: ReactNode;
   }
->(({ children, headerLeft, headerRight, bodyHeader, ...otherProps }) => {
+>(({ viewType, children, headerLeft, headerRight, bodyHeader, ...otherProps }) => {
   return (
-    <StyledEuiPage {...otherProps}>
+    <StyledEuiPage
+      className={(viewType === 'list' && 'endpoint--isListView') || 'endpoint--isDetailsView'}
+      {...otherProps}
+    >
       <EuiPageBody>
         {(headerLeft || headerRight) && (
           <EuiPageHeader className="endpoint-header">
@@ -107,7 +119,7 @@ export const PageView = memo<
         <EuiPageContent className="endpoint-page-content">
           {bodyHeader && (
             <EuiPageContentHeader>
-              <EuiPageContentHeaderSection data-test-subj="pageViewBodyTitle">
+              <EuiPageContentHeaderSection data-test-subj="pageViewBodyTitleArea">
                 {isStringOrNumber.test(typeof bodyHeader) ? (
                   <PageViewBodyHeaderTitle>{bodyHeader}</PageViewBodyHeaderTitle>
                 ) : (
