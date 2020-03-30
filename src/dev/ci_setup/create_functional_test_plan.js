@@ -60,7 +60,8 @@ const getTestsTransformed = async (config, overrides = {}) => {
       allSuites[key] = [];
 
       for (const file of configGroups[key]) {
-        const suites = await getTestsTransformed(file, { suiteTags: { include: ['testing'] } });
+        // const suites = await getTestsTransformed(file, { suiteTags: { include: ['testing'] } });
+        const suites = await getTestsTransformed(file);
         suites.forEach(suite => allSuites[key].push(suite));
       }
     }
