@@ -17,20 +17,32 @@
  * under the License.
  */
 
-import {
-  UiActionsAbstractActionStorage,
-  UiActionsSerializedEvent,
-} from '../../../../ui_actions/public';
 import { Embeddable } from '..';
 
-export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
-  constructor(private readonly embbeddable: Embeddable) {
-    super();
-  }
+/**
+ * Below two interfaces are here temporarily, they will move to `ui_actions`
+ * plugin once #58216 is merged.
+ */
+export interface SerializedEvent {
+  eventId: string;
+  triggerId: string;
+  action: unknown;
+}
+export interface ActionStorage {
+  create(event: SerializedEvent): Promise<void>;
+  update(event: SerializedEvent): Promise<void>;
+  remove(eventId: string): Promise<void>;
+  read(eventId: string): Promise<SerializedEvent>;
+  count(): Promise<number>;
+  list(): Promise<SerializedEvent[]>;
+}
 
-  async create(event: UiActionsSerializedEvent) {
+export class EmbeddableActionStorage implements ActionStorage {
+  constructor(private readonly embbeddable: Embeddable<any, any>) {}
+
+  async create(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as UiActionsSerializedEvent[];
+    const events = (input.events || []) as SerializedEvent[];
     const exists = !!events.find(({ eventId }) => eventId === event.eventId);
 
     if (exists) {
@@ -41,13 +53,14 @@ export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
     }
 
     this.embbeddable.updateInput({
+      ...input,
       events: [...events, event],
     });
   }
 
-  async update(event: UiActionsSerializedEvent) {
+  async update(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as UiActionsSerializedEvent[];
+    const events = (input.events || []) as SerializedEvent[];
     const index = events.findIndex(({ eventId }) => eventId === event.eventId);
 
     if (index === -1) {
@@ -59,13 +72,14 @@ export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
     }
 
     this.embbeddable.updateInput({
+      ...input,
       events: [...events.slice(0, index), event, ...events.slice(index + 1)],
     });
   }
 
   async remove(eventId: string) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as UiActionsSerializedEvent[];
+    const events = (input.events || []) as SerializedEvent[];
     const index = events.findIndex(event => eventId === event.eventId);
 
     if (index === -1) {
@@ -77,13 +91,14 @@ export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
     }
 
     this.embbeddable.updateInput({
+      ...input,
       events: [...events.slice(0, index), ...events.slice(index + 1)],
     });
   }
 
-  async read(eventId: string): Promise<UiActionsSerializedEvent> {
+  async read(eventId: string): Promise<SerializedEvent> {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as UiActionsSerializedEvent[];
+    const events = (input.events || []) as SerializedEvent[];
     const event = events.find(ev => eventId === ev.eventId);
 
     if (!event) {
@@ -98,10 +113,14 @@ export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
 
   private __list() {
     const input = this.embbeddable.getInput();
-    return (input.events || []) as UiActionsSerializedEvent[];
+    return (input.events || []) as SerializedEvent[];
   }
 
-  async list(): Promise<UiActionsSerializedEvent[]> {
+  async count(): Promise<number> {
+    return this.__list().length;
+  }
+
+  async list(): Promise<SerializedEvent[]> {
     return this.__list();
   }
 }

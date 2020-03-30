@@ -74,16 +74,12 @@ function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, a
   };
 }
 
-export const kibanaRequestToMetadataGetESQuery = (
-  request: KibanaRequest<any, any, any>,
-  endpointAppContext: EndpointAppContext,
-  index: string
-) => {
+export function getESQueryHostMetadataByID(hostID: string, index: string) {
   return {
     body: {
       query: {
         match: {
-          'host.id': request.params.id,
+          'host.id': hostID,
         },
       },
       sort: [
@@ -97,4 +93,4 @@ export const kibanaRequestToMetadataGetESQuery = (
     },
     index,
   };
-};
+}

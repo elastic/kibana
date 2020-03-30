@@ -42,6 +42,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Index data into Elasticsearch.',
       }
     ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.actionTypeTitle',
+      {
+        defaultMessage: 'Index data',
+      }
+    ),
     validateConnector: (action: EsIndexActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
@@ -73,7 +79,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 >> = ({ action, editActionConfig, errors, http }) => {
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
-    executionTimeField !== undefined
+    executionTimeField != null
   );
 
   const [indexPatterns, setIndexPatterns] = useState([]);
@@ -179,7 +185,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           <>
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
-              defaultMessage="Refresh"
+              defaultMessage="Refresh index"
             />{' '}
             <EuiIconTip
               position="right"
@@ -187,7 +193,8 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               content={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshTooltip',
                 {
-                  defaultMessage: 'This checkbox set refresh index value.',
+                  defaultMessage:
+                    'Refresh the affected shards to make this operation visible to search.',
                 }
               )}
             />
@@ -200,12 +207,17 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         checked={hasTimeFieldCheckbox || false}
         onChange={() => {
           setTimeFieldCheckboxState(!hasTimeFieldCheckbox);
+          // if changing from checked to not checked (hasTimeField === true),
+          // set time field to null
+          if (hasTimeFieldCheckbox) {
+            editActionConfig('executionTimeField', null);
+          }
         }}
         label={
           <>
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
-              defaultMessage="Define time field"
+              defaultMessage="Define time field for each document"
             />
             <EuiIconTip
               position="right"
@@ -213,8 +225,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               content={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
                 {
-                  defaultMessage:
-                    'This is checkbox allows to define execution time field for index.',
+                  defaultMessage: `Automatically add a time field to each document when it's indexed.`,
                 }
               )}
             />
@@ -239,13 +250,13 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               fullWidth
               name="executionTimeField"
               data-test-subj="executionTimeFieldSelect"
-              value={executionTimeField}
+              value={executionTimeField ?? ''}
               onChange={e => {
-                editActionConfig('executionTimeField', e.target.value);
+                editActionConfig('executionTimeField', nullableString(e.target.value));
               }}
               onBlur={() => {
                 if (executionTimeField === undefined) {
-                  editActionConfig('executionTimeField', '');
+                  editActionConfig('executionTimeField', null);
                 }
               }}
             />
@@ -306,3 +317,9 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
     </Fragment>
   );
 };
+
+// if the string == null or is empty, return null, else return string
+function nullableString(str: string | null | undefined) {
+  if (str == null || str.trim() === '') return null;
+  return str;
+}

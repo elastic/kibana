@@ -53,7 +53,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           })
         );
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
       expect(response.body).to.eql({
         id: response.body.id,
@@ -108,7 +108,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }));
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
       expect(response.body.scheduledTaskId).to.eql(undefined);
     });

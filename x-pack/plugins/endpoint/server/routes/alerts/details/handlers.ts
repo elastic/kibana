@@ -10,6 +10,7 @@ import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
 import { IngestIndexPatternRetriever } from '../../../index_pattern';
+import { getHostData } from '../../../routes/metadata';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -27,27 +28,33 @@ export const alertDetailsHandlerWrapper = function(
         id: alertId,
       })) as GetResponse<AlertEvent>;
 
-      const indexPattern = new IngestIndexPatternRetriever(
+      const indexPatternRetriever = new IngestIndexPatternRetriever(
         endpointAppContext.ingestManager.indexPatternService,
         ctx.core.savedObjects.client,
         EndpointAppConstants.EVENT_DATASET,
         endpointAppContext.logFactory.get('alerts')
       );
 
+      const indexPattern = await indexPatternRetriever.get();
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(
         config,
         ctx,
         req.params,
         response,
-        await indexPattern.get()
+        indexPattern
       );
+
+      const currentHostInfo = await getHostData(ctx, response._source.host.id, indexPattern);
 
       return res.ok({
         body: {
           // TODO base64 encode the index in the response
           id: response._id,
           ...response._source,
+          state: {
+            host_metadata: currentHostInfo,
+          },
           next: await pagination.getNextUrl(),
           prev: await pagination.getPrevUrl(),
         },

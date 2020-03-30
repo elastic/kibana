@@ -10,7 +10,6 @@ import { IngestManagerSetupContract } from '../../ingest_manager/server';
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
-import { addRoutes } from './routes';
 import { registerEndpointRoutes } from './routes/metadata';
 import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
@@ -46,6 +45,7 @@ export class EndpointPlugin
       app: ['endpoint', 'kibana'],
       privileges: {
         all: {
+          app: ['endpoint', 'kibana'],
           api: ['resolver'],
           savedObject: {
             all: [],
@@ -54,6 +54,7 @@ export class EndpointPlugin
           ui: ['save'],
         },
         read: {
+          app: ['endpoint', 'kibana'],
           api: [],
           savedObject: {
             all: [],
@@ -73,7 +74,6 @@ export class EndpointPlugin
       },
     } as EndpointAppContext;
     const router = core.http.createRouter();
-    addRoutes(router);
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
     registerAlertRoutes(router, endpointContext);

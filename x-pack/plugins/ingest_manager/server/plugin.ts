@@ -100,6 +100,7 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+            app: [PLUGIN_ID, 'kibana'],
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -108,6 +109,7 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
           },
           read: {
             api: [`${PLUGIN_ID}-read`],
+            app: [PLUGIN_ID, 'kibana'],
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
