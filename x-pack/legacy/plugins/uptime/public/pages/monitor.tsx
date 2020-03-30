@@ -51,6 +51,7 @@ export const MonitorPageComponent: React.FC<Props> = ({
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
   const [selectedLocation, setSelectedLocation] = useState(undefined);
+  const [pingListIndex, setPingListIndex] = useState(0);
 
   const sharedVariables = {
     dateRangeStart,
@@ -81,11 +82,14 @@ export const MonitorPageComponent: React.FC<Props> = ({
           updateUrlParams({ selectedPingStatus: selectedStatus || '' });
           refreshApp();
         }}
+        onPageIndexChange={(index: number) => setPingListIndex(index)}
+        pageIndex={pingListIndex}
         pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
         selectedLocation={selectedLocation}
         variables={{
           ...sharedVariables,
+          page: pingListIndex,
           size: pingListPageCount,
           status: selectedPingStatus,
         }}
