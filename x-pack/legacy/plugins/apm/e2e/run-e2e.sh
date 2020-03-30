@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 
 # variables
 KIBANA_PORT=5701
@@ -60,6 +61,7 @@ fi
 
 # Start apm-integration-testing
 echo "Starting docker-compose"
+ls -ltrah ${APM_IT_DIR}
 ${APM_IT_DIR}/scripts/compose.py start master \
     --no-kibana \
     --elasticsearch-port $ELASTICSEARCH_PORT \
