@@ -305,21 +305,21 @@ export const ComponentStrings = {
       }),
   },
   ElementControls: {
-    getEditTooltip: () =>
-      i18n.translate('xpack.canvas.elementControls.editToolTip', {
-        defaultMessage: 'Edit',
-      }),
-    getEditAriaLabel: () =>
-      i18n.translate('xpack.canvas.elementControls.editAriaLabel', {
-        defaultMessage: 'Edit element',
+    getDeleteAriaLabel: () =>
+      i18n.translate('xpack.canvas.elementControls.deleteAriaLabel', {
+        defaultMessage: 'Delete element',
       }),
     getDeleteTooltip: () =>
       i18n.translate('xpack.canvas.elementControls.deleteToolTip', {
         defaultMessage: 'Delete',
       }),
-    getDeleteAriaLabel: () =>
-      i18n.translate('xpack.canvas.elementControls.deleteAriaLabel', {
-        defaultMessage: 'Delete element',
+    getEditAriaLabel: () =>
+      i18n.translate('xpack.canvas.elementControls.editAriaLabel', {
+        defaultMessage: 'Edit element',
+      }),
+    getEditTooltip: () =>
+      i18n.translate('xpack.canvas.elementControls.editToolTip', {
+        defaultMessage: 'Edit',
       }),
   },
   ElementSettings: {
@@ -587,24 +587,13 @@ export const ComponentStrings = {
       }),
   },
   SavedElementsModal: {
-    getSavedElementsModalCloseButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
-        defaultMessage: 'Close',
+    getAddNewElementDescription: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.addNewElementDescription', {
+        defaultMessage: 'Group and save workpad elements to create new elements',
       }),
-    getEditElementTitle: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.editElementTitle', {
-        defaultMessage: 'Edit element',
-      }),
-    getDeleteElementTitle: (elementName: string) =>
-      i18n.translate('xpack.canvas.savedElementsModal.deleteElementTitle', {
-        defaultMessage: `Delete element '{elementName}'?`,
-        values: {
-          elementName,
-        },
-      }),
-    getDeleteElementDescription: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.deleteElementDescription', {
-        defaultMessage: 'Are you sure you want to delete this element?',
+    getAddNewElementTitle: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.addNewElementTitle', {
+        defaultMessage: 'Add new elements',
       }),
     getCancelButtonLabel: () =>
       i18n.translate('xpack.canvas.savedElementsModal.cancelButtonLabel', {
@@ -614,31 +603,42 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.savedElementsModal.deleteButtonLabel', {
         defaultMessage: 'Delete',
       }),
-    getAddNewElementTitle: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.addNewElementTitle', {
-        defaultMessage: 'Add new elements',
+    getDeleteElementDescription: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.deleteElementDescription', {
+        defaultMessage: 'Are you sure you want to delete this element?',
       }),
-    getAddNewElementDescription: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.addNewElementDescription', {
-        defaultMessage: 'Group and save workpad elements to create new elements',
+    getDeleteElementTitle: (elementName: string) =>
+      i18n.translate('xpack.canvas.savedElementsModal.deleteElementTitle', {
+        defaultMessage: `Delete element '{elementName}'?`,
+        values: {
+          elementName,
+        },
       }),
-    getFindElementPlaceholder: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.findElementPlaceholder', {
-        defaultMessage: 'Find element',
+    getEditElementTitle: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.editElementTitle', {
+        defaultMessage: 'Edit element',
       }),
     getElementsTitle: () =>
       i18n.translate('xpack.canvas.savedElementsModal.elementsTitle', {
         defaultMessage: 'Elements',
         description: 'Title for the "Elements" tab when adding a new element',
       }),
+    getFindElementPlaceholder: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.findElementPlaceholder', {
+        defaultMessage: 'Find element',
+      }),
+    getModalTitle: () =>
+      i18n.translate('xpack.canvas.savedElementsModal.modalTitle', {
+        defaultMessage: 'My elements',
+      }),
     getMyElementsTitle: () =>
       i18n.translate('xpack.canvas.savedElementsModal.myElementsTitle', {
         defaultMessage: 'My elements',
         description: 'Title for the "My elements" tab when adding a new element',
       }),
-    getModalTitle: () =>
-      i18n.translate('xpack.canvas.savedElementsModal.modalTitle', {
-        defaultMessage: 'My elements',
+    getSavedElementsModalCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
+        defaultMessage: 'Close',
       }),
   },
   ShareWebsiteFlyout: {
@@ -908,6 +908,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.textStylePicker.alignRightOption', {
         defaultMessage: 'Align right',
       }),
+    getFontColorLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
+        defaultMessage: 'Font Color',
+      }),
     getStyleBoldOption: () =>
       i18n.translate('xpack.canvas.textStylePicker.styleBoldOption', {
         defaultMessage: 'Bold',
@@ -919,10 +923,6 @@ export const ComponentStrings = {
     getStyleUnderlineOption: () =>
       i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
         defaultMessage: 'Underline',
-      }),
-    getFontColorLabel: () =>
-      i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
-        defaultMessage: 'Font Color',
       }),
   },
   TimePicker: {
@@ -969,6 +969,10 @@ export const ComponentStrings = {
         defaultMessage: `Apply stylesheet`,
         description:
           '"stylesheet" refers to the collection of CSS style rules entered by the user.',
+      }),
+    getBackgroundColorLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.backgroundColorLabel', {
+        defaultMessage: 'Background color',
       }),
     getFlipDimensionAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.swapDimensionsAriaLabel', {
@@ -1020,10 +1024,6 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadConfig.USLetterButtonLabel', {
         defaultMessage: 'US Letter',
         description: 'This is referring to the dimensions of U.S. standard letter paper.',
-      }),
-    getBackgroundColorLabel: () =>
-      i18n.translate('xpack.canvas.workpadConfig.backgroundColorLabel', {
-        defaultMessage: 'Background color',
       }),
   },
   WorkpadCreate: {
@@ -1105,6 +1105,56 @@ export const ComponentStrings = {
         defaultMessage: 'Set a custom interval',
       }),
   },
+  WorkpadHeaderElementMenu: {
+    getAssetsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.manageAssetsMenuItemLabel', {
+        defaultMessage: 'Manage assets',
+      }),
+    getChartMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.chartMenuItemLabel', {
+        defaultMessage: 'Chart',
+      }),
+    getElementMenuButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuButtonLabel', {
+        defaultMessage: 'Add element',
+      }),
+    getElementMenuLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuLabel', {
+        defaultMessage: 'Add an element',
+      }),
+    getEmbedObjectMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
+        defaultMessage: 'Add from Visualize library',
+      }),
+    getFilterMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {
+        defaultMessage: 'Filter',
+      }),
+    getImageMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.imageMenuItemLabel', {
+        defaultMessage: 'Image',
+      }),
+    getMyElementsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.myElementsMenuItemLabel', {
+        defaultMessage: 'My elements',
+      }),
+    getOtherMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.otherMenuItemLabel', {
+        defaultMessage: 'Other',
+      }),
+    getProgressMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.progressMenuItemLabel', {
+        defaultMessage: 'Progress',
+      }),
+    getShapeMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.shapeMenuItemLabel', {
+        defaultMessage: 'Shape',
+      }),
+    getTextMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.textMenuItemLabel', {
+        defaultMessage: 'Text',
+      }),
+  },
   WorkpadHeaderKioskControls: {
     getCycleFormLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.cycleFormLabel', {
@@ -1127,56 +1177,6 @@ export const ComponentStrings = {
     getRefreshTooltip: () =>
       i18n.translate('xpack.canvas.workpadHeaderRefreshControlSettings.refreshTooltip', {
         defaultMessage: 'Refresh data',
-      }),
-  },
-  WorkpadHeaderElementMenu: {
-    getEmbedObjectMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
-        defaultMessage: 'Add from Visualize library',
-      }),
-    getElementMenuLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuLabel', {
-        defaultMessage: 'Add an element',
-      }),
-    getElementMenuButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuButtonLabel', {
-        defaultMessage: 'Add element',
-      }),
-    getChartMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.chartMenuItemLabel', {
-        defaultMessage: 'Chart',
-      }),
-    getImageMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.imageMenuItemLabel', {
-        defaultMessage: 'Image',
-      }),
-    getFilterMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {
-        defaultMessage: 'Filter',
-      }),
-    getProgressMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.progressMenuItemLabel', {
-        defaultMessage: 'Progress',
-      }),
-    getOtherMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.otherMenuItemLabel', {
-        defaultMessage: 'Other',
-      }),
-    getShapeMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.shapeMenuItemLabel', {
-        defaultMessage: 'Shape',
-      }),
-    getTextMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.textMenuItemLabel', {
-        defaultMessage: 'Text',
-      }),
-    getMyElementsMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.myElementsMenuItemLabel', {
-        defaultMessage: 'My elements',
-      }),
-    getAssetsMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.manageAssetsMenuItemLabel', {
-        defaultMessage: 'Manage assets',
       }),
   },
   WorkpadHeaderShareMenu: {
@@ -1305,21 +1305,9 @@ export const ComponentStrings = {
       }),
   },
   WorkpadHeaderViewMenu: {
-    getViewMenuLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuLabel', {
-        defaultMessage: 'View options',
-      }),
-    getViewMenuButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuButtonLabel', {
-        defaultMessage: 'View',
-      }),
     getFullscreenMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.fullscreenMenuLabel', {
         defaultMessage: 'Enter fullscreen mode',
-      }),
-    getShowEditModeLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {
-        defaultMessage: 'Show editing controls',
       }),
     getHideEditModeLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {
@@ -1329,9 +1317,17 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.refreshMenuItemLabel', {
         defaultMessage: 'Refresh data',
       }),
-    getZoomMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomMenuItemLabel', {
-        defaultMessage: 'Zoom',
+    getShowEditModeLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {
+        defaultMessage: 'Show editing controls',
+      }),
+    getViewMenuButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuButtonLabel', {
+        defaultMessage: 'View',
+      }),
+    getViewMenuLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuLabel', {
+        defaultMessage: 'View options',
       }),
     getZoomControlsAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomControlsAriaLabel', {
@@ -1348,6 +1344,10 @@ export const ComponentStrings = {
     getZoomInText: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomInText', {
         defaultMessage: 'Zoom in',
+      }),
+    getZoomMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomMenuItemLabel', {
+        defaultMessage: 'Zoom',
       }),
     getZoomOutText: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomOutText', {

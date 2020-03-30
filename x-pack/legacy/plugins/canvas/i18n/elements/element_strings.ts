@@ -39,7 +39,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   debug: {
     displayName: i18n.translate('xpack.canvas.elements.debugDisplayName', {
-      defaultMessage: 'Debug',
+      defaultMessage: 'Debug data',
     }),
     help: i18n.translate('xpack.canvas.elements.debugHelpText', {
       defaultMessage: 'Just dumps the configuration of the element',
@@ -51,6 +51,14 @@ export const getElementStrings = (): ElementStringDict => ({
     }),
     help: i18n.translate('xpack.canvas.elements.dropdownFilterHelpText', {
       defaultMessage: 'A dropdown from which you can select values for an "exactly" filter',
+    }),
+  },
+  filterDebug: {
+    displayName: i18n.translate('xpack.canvas.elements.filterDebugDisplayName', {
+      defaultMessage: 'Debug filters',
+    }),
+    help: i18n.translate('xpack.canvas.elements.filterDebugHelpText', {
+      defaultMessage: 'Shows the underlying global filters in a workpad',
     }),
   },
   horizontalBarChart: {
