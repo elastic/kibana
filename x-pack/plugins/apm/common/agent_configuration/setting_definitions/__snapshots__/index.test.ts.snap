@@ -3,11 +3,6 @@
 exports[`settingDefinitions should have correct default values 1`] = `
 Array [
   Object {
-    "key": "active",
-    "type": "boolean",
-    "validationName": "(\\"true\\" | \\"false\\")",
-  },
-  Object {
     "key": "api_request_size",
     "type": "bytes",
     "units": Array [
@@ -104,6 +99,11 @@ Array [
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
+  },
+  Object {
+    "key": "recording",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
     "key": "server_timeout",
