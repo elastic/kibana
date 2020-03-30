@@ -1,6 +1,6 @@
 import isString from 'lodash.isstring';
 import { Config } from '../../types/Config';
-import { PromiseReturnType } from '../../types/commons';
+import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { getGlobalConfig } from './globalConfig';
 import { getProjectConfig } from './projectConfig';
 

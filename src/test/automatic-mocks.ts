@@ -5,7 +5,12 @@ jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
 
 jest.mock('../services/child-process-promisified', () => {
   return {
-    exec: jest.fn(async () => 'success'),
+    exec: jest.fn(async (cmd: string) => {
+      const e = new Error(`Mock required for exec with cmd: "${cmd}"`);
+      // @ts-ignore
+      e.stderr = `Dummy stderr`;
+      throw e;
+    }),
 
     execAsCallback: jest.fn((...args) => {
       last(args)();
@@ -74,7 +79,7 @@ jest.mock('ora', () => {
     }),
   };
 
-  return () => ora;
+  return jest.fn(() => ora);
 });
 
 // silence logger

@@ -1,4 +1,4 @@
-import { PromiseReturnType } from '../../types/commons';
+import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { getOptionsFromConfigFiles } from './config';
 
 describe('getOptionsFromConfigFiles', () => {

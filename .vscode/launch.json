@@ -9,8 +9,8 @@
       "request": "launch",
       "name": "Start backport",
       "program": "${workspaceRoot}/src/index.ts",
-      "runtimeArgs": ["-r", "ts-node/register"],
-      "args": ["--branch=6.1", "--upstream=sqren/backport-demo"],
+      "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
+      "args": ["--branch=6.3", "--upstream=sqren/backport-demo"],
       "console": "integratedTerminal"
     },
     {

@@ -1,23 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`cherrypickAndCreatePullRequest when cherry-picking fails and conflicts were not resolved 2`] = `
-Array [
-  Array [
-    "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/commit-mySha elastic/6.x --no-track",
-    Object {
-      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-    },
-  ],
-  Array [
-    "git fetch elastic 7.x:7.x --force && git cherry-pick mySha",
-    Object {
-      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-    },
-  ],
-]
-`;
-
-exports[`cherrypickAndCreatePullRequest when cherry-picking fails and conflicts were resolved 1`] = `
+exports[`cherrypickAndCreatePullRequest when cherry-picking fails should start conflict resolution mode 4`] = `
 Array [
   Array [
     "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/commit-mySha elastic/6.x --no-track",
@@ -32,7 +15,43 @@ Array [
     },
   ],
   Array [
-    "git diff-index --quiet HEAD --",
+    "git --no-pager diff --check",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git --no-pager diff --check",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git --no-pager diff --check",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git --no-pager diff --check",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git add --update --dry-run",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git add --update",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git -c core.editor=true cherry-pick --continue",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },

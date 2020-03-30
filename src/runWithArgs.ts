@@ -9,7 +9,7 @@ export async function runWithArgs(args: string[]) {
 
   try {
     const options = await getOptions(args);
-    return await runWithOptions(options);
+    await runWithOptions(options);
   } catch (e) {
     if (e instanceof HandledError) {
       console.error(e.message);

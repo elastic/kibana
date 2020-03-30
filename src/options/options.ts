@@ -1,6 +1,6 @@
 import isEmpty from 'lodash.isempty';
 import { HandledError } from '../services/HandledError';
-import { PromiseReturnType } from '../types/commons';
+import { PromiseReturnType } from '../types/PromiseReturnType';
 import { getGlobalConfigPath } from '../services/env';
 import { getOptionsFromCliArgs, OptionsFromCliArgs } from './cliArgs';
 import { getOptionsFromConfigFiles } from './config/config';

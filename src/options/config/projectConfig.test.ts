@@ -1,6 +1,6 @@
 import findUp from 'find-up';
 import * as fs from '../../services/fs-promisified';
-import { PromiseReturnType } from '../../types/commons';
+import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { getProjectConfig } from './projectConfig';
 
 describe('getProjectConfig', () => {
