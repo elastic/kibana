@@ -30,11 +30,13 @@ interface UserActionTitleProps {
   id: string;
   isLoading: boolean;
   labelEditAction?: string;
+  labelQuoteAction?: string;
   labelTitle: JSX.Element;
   linkId?: string | null;
   updatedAt?: string | null;
-  userName: string;
+  username: string;
   onEdit?: (id: string) => void;
+  onQuote?: (id: string) => void;
   outlineComment?: (id: string) => void;
 }
 
@@ -43,27 +45,39 @@ export const UserActionTitle = ({
   id,
   isLoading,
   labelEditAction,
+  labelQuoteAction,
   labelTitle,
   linkId,
-  userName,
+  username,
   updatedAt,
   onEdit,
+  onQuote,
   outlineComment,
 }: UserActionTitleProps) => {
   const { detailName: caseId } = useParams();
   const urlSearch = useGetUrlSearch(navTabs.case);
   const propertyActions = useMemo(() => {
-    if (labelEditAction != null && onEdit != null) {
-      return [
-        {
-          iconType: 'pencil',
-          label: labelEditAction,
-          onClick: () => onEdit(id),
-        },
-      ];
-    }
-    return [];
-  }, [id, labelEditAction, onEdit]);
+    return [
+      ...(labelEditAction != null && onEdit != null
+        ? [
+            {
+              iconType: 'pencil',
+              label: labelEditAction,
+              onClick: () => onEdit(id),
+            },
+          ]
+        : []),
+      ...(labelQuoteAction != null && onQuote != null
+        ? [
+            {
+              iconType: 'quote',
+              label: labelQuoteAction,
+              onClick: () => onQuote(id),
+            },
+          ]
+        : []),
+    ];
+  }, [id, labelEditAction, onEdit, labelQuoteAction, onQuote]);
 
   const handleAnchorLink = useCallback(() => {
     copy(
@@ -91,7 +105,7 @@ export const UserActionTitle = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
             <EuiFlexItem grow={false}>
-              <strong>{userName}</strong>
+              <strong>{username}</strong>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{labelTitle}</EuiFlexItem>
             <EuiFlexItem grow={false}>

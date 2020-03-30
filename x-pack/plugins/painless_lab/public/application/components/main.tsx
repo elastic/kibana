@@ -55,7 +55,7 @@ export const Main: React.FunctionComponent = () => {
   return (
     <div className="painlessLabMainContainer">
       <EuiFlexGroup className="painlessLabPanelsContainer" responsive={false} gutterSize="none">
-        <EuiFlexItem>
+        <EuiFlexItem className="painlessLabLeftPane">
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
               {i18n.translate('xpack.painlessLab.title', {

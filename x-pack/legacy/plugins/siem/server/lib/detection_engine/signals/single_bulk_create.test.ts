@@ -144,7 +144,7 @@ describe('singleBulkCreate', () => {
         },
       ],
     });
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleDocSearchResultsNoSortId(),
       ruleParams: sampleParams,
       services: mockService,
@@ -162,7 +162,7 @@ describe('singleBulkCreate', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: null,
     });
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('create successful bulk create with docs with no versioning', async () => {
@@ -176,7 +176,7 @@ describe('singleBulkCreate', () => {
         },
       ],
     });
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleDocSearchResultsNoSortIdNoVersion(),
       ruleParams: sampleParams,
       services: mockService,
@@ -194,13 +194,13 @@ describe('singleBulkCreate', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: null,
     });
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('create unsuccessful bulk create due to empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValue(false);
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
@@ -218,14 +218,14 @@ describe('singleBulkCreate', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: null,
     });
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('create successful bulk create when bulk create has duplicate errors', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
@@ -245,14 +245,14 @@ describe('singleBulkCreate', () => {
     });
 
     expect(mockLogger.error).not.toHaveBeenCalled();
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('create successful bulk create when bulk create has multiple error statuses', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockReturnValue(sampleBulkCreateErrorResult);
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
@@ -272,7 +272,7 @@ describe('singleBulkCreate', () => {
     });
 
     expect(mockLogger.error).toHaveBeenCalled();
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('filter duplicate rules will return an empty array given an empty array', () => {

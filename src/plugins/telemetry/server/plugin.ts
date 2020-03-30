@@ -143,6 +143,9 @@ export class TelemetryPlugin implements Plugin {
           reportFailureVersion: {
             type: 'keyword',
           },
+          allowChangingOptInStatus: {
+            type: 'boolean',
+          },
         },
       },
     });
@@ -160,7 +163,7 @@ export class TelemetryPlugin implements Plugin {
       config$: this.config$,
       getSavedObjectsClient,
     });
-    registerTelemetryUsageCollector(usageCollection);
+    registerTelemetryUsageCollector(usageCollection, this.config$);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(usageCollection, registerType, getSavedObjectsClient);

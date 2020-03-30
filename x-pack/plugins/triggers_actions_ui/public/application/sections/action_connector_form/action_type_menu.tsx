@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 import { ActionType, ActionTypeIndex } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
@@ -81,21 +82,19 @@ export const ActionTypeMenu = ({
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}
           onClick={() => onActionTypeChange(item.actionType)}
-          betaBadgeLabel={
-            checkEnabledResult.isEnabled
-              ? undefined
-              : i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.upgradeBadge',
-                  { defaultMessage: 'Upgrade' }
-                )
-          }
-          betaBadgeTooltipContent={
-            checkEnabledResult.isEnabled ? undefined : checkEnabledResult.message
-          }
         />
       );
 
-      return <EuiFlexItem key={index}>{card}</EuiFlexItem>;
+      return (
+        <EuiFlexItem key={index}>
+          {checkEnabledResult.isEnabled && card}
+          {checkEnabledResult.isEnabled === false && (
+            <EuiToolTip position="top" content={checkEnabledResult.message}>
+              {card}
+            </EuiToolTip>
+          )}
+        </EuiFlexItem>
+      );
     });
 
   return (
