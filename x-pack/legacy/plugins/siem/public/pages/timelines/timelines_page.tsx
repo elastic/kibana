@@ -28,7 +28,7 @@ type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
+export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
   const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
     setImportDataModalToggle(true);
@@ -43,7 +43,11 @@ const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
       <WrapperPage>
         <HeaderPage border title={i18n.PAGE_TITLE}>
           {capabilitiesCanUserCRUD && (
-            <EuiButton iconType="indexOpen" onClick={onImportTimelineBtnClick}>
+            <EuiButton
+              iconType="indexOpen"
+              onClick={onImportTimelineBtnClick}
+              data-test-subj="open-import-data-modal-btn"
+            >
               {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
             </EuiButton>
           )}
@@ -57,6 +61,7 @@ const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
             importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}
             setImportDataModalToggle={setImportDataModalToggle}
             title={i18n.ALL_TIMELINES_PANEL_TITLE}
+            data-test-subj="stateful-open-timeline"
           />
         </TimelinesContainer>
       </WrapperPage>

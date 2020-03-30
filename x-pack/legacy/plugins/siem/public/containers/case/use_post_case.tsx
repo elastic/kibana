@@ -61,9 +61,11 @@ export const usePostCase = (): UsePostCase => {
 
   const postMyCase = useCallback(async (data: CasePostRequest) => {
     let cancel = false;
+    const abortCtrl = new AbortController();
+
     try {
       dispatch({ type: 'FETCH_INIT' });
-      const response = await postCase(data);
+      const response = await postCase(data, abortCtrl.signal);
       if (!cancel) {
         dispatch({
           type: 'FETCH_SUCCESS',
@@ -81,6 +83,7 @@ export const usePostCase = (): UsePostCase => {
       }
     }
     return () => {
+      abortCtrl.abort();
       cancel = true;
     };
   }, []);
