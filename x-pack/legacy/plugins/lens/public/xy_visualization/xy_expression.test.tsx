@@ -39,7 +39,12 @@ function sampleArgs() {
             formatHint: { id: 'number', params: { pattern: '0,0.000' } },
           },
           { id: 'b', name: 'b', formatHint: { id: 'number', params: { pattern: '000,0' } } },
-          { id: 'c', name: 'c', formatHint: { id: 'string' } },
+          {
+            id: 'c',
+            name: 'c',
+            formatHint: { id: 'string' },
+            meta: { type: 'date-histogram', aggConfigParams: { interval: '10s' } },
+          },
           { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
         ],
         rows: [
@@ -179,6 +184,7 @@ describe('xy_expression', () => {
         Object {
           "max": 1546491600000,
           "min": 1546405200000,
+          "minInterval": 10000,
         }
       `);
     });

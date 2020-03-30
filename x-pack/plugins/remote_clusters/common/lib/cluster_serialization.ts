@@ -68,7 +68,8 @@ export interface ClusterSettingsPayloadEs {
 export function deserializeCluster(
   name: string,
   esClusterObject: ClusterInfoEs,
-  deprecatedProxyAddress?: string | undefined
+  deprecatedProxyAddress?: string | undefined,
+  isCloudEnabled?: boolean | undefined
 ): Cluster {
   if (!name || !esClusterObject || typeof esClusterObject !== 'object') {
     throw new Error('Unable to deserialize cluster');
@@ -117,7 +118,7 @@ export function deserializeCluster(
   // If a user has a remote cluster with the deprecated proxy setting,
   // we transform the data to support the new implementation and also flag the deprecation
   if (deprecatedProxyAddress) {
-    // Create server name (address, without port), since field doesn't exist in deprecated implementation
+    // Cloud-specific logic: Create default server name, since field doesn't exist in deprecated implementation
     const defaultServerName = deprecatedProxyAddress.split(':')[0];
 
     deserializedClusterObject = {
@@ -126,7 +127,7 @@ export function deserializeCluster(
       seeds: undefined,
       hasDeprecatedProxySetting: true,
       mode: PROXY_MODE,
-      serverName: defaultServerName,
+      serverName: isCloudEnabled ? defaultServerName : undefined,
     };
   }
 
