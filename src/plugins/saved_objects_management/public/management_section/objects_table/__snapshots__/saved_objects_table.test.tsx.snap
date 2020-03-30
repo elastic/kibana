@@ -58,12 +58,10 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
       Array [
         Object {
           "id": "1",
-          "title": "Title 1",
           "type": "index-pattern",
         },
         Object {
           "id": "3",
-          "title": "Title 2",
           "type": "dashboard",
         },
       ]
@@ -201,21 +199,86 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
 
 exports[`ObjectsTable import should show the flyout 1`] = `
 <Flyout
+  allowedTypes={
+    Array [
+      "index-pattern",
+      "visualization",
+      "dashboard",
+      "search",
+    ]
+  }
   close={[Function]}
-  confirmModalPromise={[MockFunction]}
   done={[Function]}
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "",
+        "get": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   indexPatterns={
     Object {
       "clearCache": [MockFunction],
+      "get": [MockFunction],
+      "make": [Function],
     }
   }
   newIndexPatternUrl=""
-  services={Array []}
+  overlays={
+    Object {
+      "banners": Object {
+        "add": [MockFunction],
+        "get$": [MockFunction],
+        "getComponent": [MockFunction],
+        "remove": [MockFunction],
+        "replace": [MockFunction],
+      },
+      "openConfirm": [MockFunction],
+      "openFlyout": [MockFunction],
+      "openModal": [MockFunction],
+    }
+  }
+  serviceRegistry={
+    Object {
+      "all": [MockFunction],
+      "get": [MockFunction],
+      "register": [MockFunction],
+    }
+  }
 />
 `;
 
 exports[`ObjectsTable relationships should show the flyout 1`] = `
 <Relationships
+  basePath={
+    BasePath {
+      "basePath": "",
+      "get": [Function],
+      "prepend": [Function],
+      "remove": [Function],
+      "serverBasePath": "",
+    }
+  }
+  canGoInApp={[Function]}
   close={[Function]}
   getRelationships={[Function]}
   goInspectObject={[Function]}
@@ -251,7 +314,17 @@ exports[`ObjectsTable should render normally 1`] = `
     size="xs"
   />
   <Table
+    basePath={
+      BasePath {
+        "basePath": "",
+        "get": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "",
+      }
+    }
     canDelete={false}
+    canGoInApp={[Function]}
     filterOptions={
       Array [
         Object {

@@ -17,69 +17,38 @@
  * under the License.
  */
 
+import {
+  extractExportDetailsMock,
+  fetchExportByTypeAndSearchMock,
+  fetchExportObjectsMock,
+  findObjectsMock,
+  getRelationshipsMock,
+  getSavedObjectCountsMock,
+  saveAsMock,
+} from './saved_objects_table.test.mocks';
+
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { mockManagementPlugin } from '../../../../../../../../management/public/np_ready/mocks';
 import { Query } from '@elastic/eui';
+import { ShallowWrapper } from 'enzyme';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { Capabilities } from '../../../../../core/public';
+import {
+  httpServiceMock,
+  overlayServiceMock,
+  notificationServiceMock,
+  savedObjectsServiceMock,
+} from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { serviceRegistryMock } from '../../services/service_registry.mock';
+import {
+  SavedObjectsTable,
+  SavedObjectsTableProps,
+  SavedObjectsTableState,
+} from './saved_objects_table';
+import { Flyout, Relationships } from './components';
+import { SavedObjectWithMetadata } from '../../types';
 
-import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
-import { Flyout } from '../components/flyout/';
-import { Relationships } from '../components/relationships/';
-import { findObjects } from '../../../lib';
-import { extractExportDetails } from '../../../lib/extract_export_details';
-
-jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
-
-jest.mock('../../../../../../../../management/public/legacy', () => ({
-  setup: mockManagementPlugin.createSetupContract(),
-  start: mockManagementPlugin.createStartContract(),
-}));
-
-jest.mock('../../../lib/find_objects', () => ({
-  findObjects: jest.fn(),
-}));
-
-jest.mock('../components/header', () => ({
-  Header: () => 'Header',
-}));
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => '',
-  getInjected: () => ['index-pattern', 'visualization', 'dashboard', 'search'],
-}));
-
-jest.mock('../../../lib/fetch_export_objects', () => ({
-  fetchExportObjects: jest.fn(),
-}));
-
-jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
-  fetchExportByTypeAndSearch: jest.fn(),
-}));
-
-jest.mock('../../../lib/extract_export_details', () => ({
-  extractExportDetails: jest.fn(),
-}));
-
-jest.mock('../../../lib/get_saved_object_counts', () => ({
-  getSavedObjectCounts: jest.fn().mockImplementation(() => {
-    return {
-      'index-pattern': 0,
-      visualization: 0,
-      dashboard: 0,
-      search: 0,
-    };
-  }),
-}));
-
-jest.mock('@elastic/filesaver', () => ({
-  saveAs: jest.fn(),
-}));
-
-jest.mock('../../../lib/get_relationships', () => ({
-  getRelationships: jest.fn(),
-}));
-
-jest.mock('ui/notify', () => ({}));
+const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
 
 const allSavedObjects = [
   {
@@ -112,122 +81,136 @@ const allSavedObjects = [
   },
 ];
 
-const $http = () => {};
-$http.post = jest.fn().mockImplementation(() => []);
-const defaultProps = {
-  goInspectObject: () => {},
-  confirmModalPromise: jest.fn(),
-  savedObjectsClient: {
-    find: jest.fn(),
-    bulkGet: jest.fn(),
-  },
-  indexPatterns: {
-    clearCache: jest.fn(),
-  },
-  $http,
-  basePath: '',
-  newIndexPatternUrl: '',
-  kbnIndex: '',
-  services: [],
-  uiCapabilities: {
-    savedObjectsManagement: {
-      read: true,
-      edit: false,
-      delete: false,
-    },
-  },
-  canDelete: true,
-};
-
-beforeEach(() => {
-  findObjects.mockImplementation(() => ({
-    total: 4,
-    savedObjects: [
-      {
-        id: '1',
-        type: 'index-pattern',
-        meta: {
-          title: `MyIndexPattern*`,
-          icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/index_patterns/1',
-          inAppUrl: {
-            path: '/management/kibana/index_patterns/1',
-            uiCapabilitiesPath: 'management.kibana.index_patterns',
-          },
-        },
-      },
-      {
-        id: '2',
-        type: 'search',
-        meta: {
-          title: `MySearch`,
-          icon: 'search',
-          editUrl: '#/management/kibana/objects/savedSearches/2',
-          inAppUrl: {
-            path: '/discover/2',
-            uiCapabilitiesPath: 'discover.show',
-          },
-        },
-      },
-      {
-        id: '3',
-        type: 'dashboard',
-        meta: {
-          title: `MyDashboard`,
-          icon: 'dashboardApp',
-          editUrl: '#/management/kibana/objects/savedDashboards/3',
-          inAppUrl: {
-            path: '/dashboard/3',
-            uiCapabilitiesPath: 'dashboard.show',
-          },
-        },
-      },
-      {
-        id: '4',
-        type: 'visualization',
-        meta: {
-          title: `MyViz`,
-          icon: 'visualizeApp',
-          editUrl: '#/management/kibana/objects/savedVisualizations/4',
-          inAppUrl: {
-            path: '/visualize/edit/4',
-            uiCapabilitiesPath: 'visualize.show',
-          },
-        },
-      },
-    ],
-  }));
-});
-
-let addDangerMock;
-let addSuccessMock;
-let addWarningMock;
-
 describe('ObjectsTable', () => {
+  let defaultProps: SavedObjectsTableProps;
+  let http: ReturnType<typeof httpServiceMock.createStartContract>;
+  let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
+  let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
+  let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
+
+  const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
+    return (shallowWithI18nProvider(
+      <SavedObjectsTable {...defaultProps} {...overrides} />
+    ) as unknown) as ShallowWrapper<
+      SavedObjectsTableProps,
+      SavedObjectsTableState,
+      SavedObjectsTable
+    >;
+  };
+
   beforeEach(() => {
-    defaultProps.savedObjectsClient.find.mockClear();
-    extractExportDetails.mockReset();
+    http = httpServiceMock.createStartContract();
+    overlays = overlayServiceMock.createStartContract();
+    notifications = notificationServiceMock.createStartContract();
+    savedObjects = savedObjectsServiceMock.createStartContract();
+
+    const capabilities: Capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      savedObjectsManagement: {
+        read: true,
+        edit: false,
+        delete: false,
+      },
+    };
+
+    http.post.mockResolvedValue([]);
+
+    getSavedObjectCountsMock.mockReturnValue({
+      'index-pattern': 0,
+      visualization: 0,
+      dashboard: 0,
+      search: 0,
+    });
+
+    defaultProps = {
+      allowedTypes,
+      serviceRegistry: serviceRegistryMock.create(),
+      savedObjectsClient: savedObjects.client,
+      indexPatterns: dataPluginMock.createStartContract().indexPatterns,
+      http,
+      overlays,
+      notifications,
+      capabilities,
+      perPageConfig: 15,
+      goInspectObject: () => {},
+      canGoInApp: () => true,
+    };
+
+    findObjectsMock.mockImplementation(() => ({
+      total: 4,
+      savedObjects: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          meta: {
+            title: `MyIndexPattern*`,
+            icon: 'indexPatternApp',
+            editUrl: '#/management/kibana/index_patterns/1',
+            inAppUrl: {
+              path: '/management/kibana/index_patterns/1',
+              uiCapabilitiesPath: 'management.kibana.index_patterns',
+            },
+          },
+        },
+        {
+          id: '2',
+          type: 'search',
+          meta: {
+            title: `MySearch`,
+            icon: 'search',
+            editUrl: '#/management/kibana/objects/savedSearches/2',
+            inAppUrl: {
+              path: '/discover/2',
+              uiCapabilitiesPath: 'discover.show',
+            },
+          },
+        },
+        {
+          id: '3',
+          type: 'dashboard',
+          meta: {
+            title: `MyDashboard`,
+            icon: 'dashboardApp',
+            editUrl: '#/management/kibana/objects/savedDashboards/3',
+            inAppUrl: {
+              path: '/dashboard/3',
+              uiCapabilitiesPath: 'dashboard.show',
+            },
+          },
+        },
+        {
+          id: '4',
+          type: 'visualization',
+          meta: {
+            title: `MyViz`,
+            icon: 'visualizeApp',
+            editUrl: '#/management/kibana/objects/savedVisualizations/4',
+            inAppUrl: {
+              path: '/visualize/edit/4',
+              uiCapabilitiesPath: 'visualize.show',
+            },
+          },
+        },
+      ],
+    }));
+  });
+
+  beforeEach(() => {
+    extractExportDetailsMock.mockReset();
     // mock _.debounce to fire immediately with no internal timer
-    require('lodash').debounce = func => {
-      function debounced(...args) {
+    require('lodash').debounce = (func: Function) => {
+      function debounced(...args: any[]) {
+        // @ts-ignore
         return func.apply(this, args);
       }
       return debounced;
     };
-    addDangerMock = jest.fn();
-    addSuccessMock = jest.fn();
-    addWarningMock = jest.fn();
-    require('ui/notify').toastNotifications = {
-      addDanger: addDangerMock,
-      addSuccess: addSuccessMock,
-      addWarning: addWarningMock,
-    };
   });
 
   it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
-      <ObjectsTable {...defaultProps} perPageConfig={15} />
-    );
+    const component = shallowRender({ perPageConfig: 15 });
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -238,19 +221,17 @@ describe('ObjectsTable', () => {
   });
 
   it('should add danger toast when find fails', async () => {
-    findObjects.mockImplementation(() => {
+    findObjectsMock.mockImplementation(() => {
       throw new Error('Simulated find error');
     });
-    const component = shallowWithI18nProvider(
-      <ObjectsTable {...defaultProps} perPageConfig={15} />
-    );
+    const component = shallowRender({ perPageConfig: 15 });
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
-    expect(addDangerMock).toHaveBeenCalled();
+    expect(notifications.toasts.addDanger).toHaveBeenCalled();
   });
 
   describe('export', () => {
@@ -258,7 +239,7 @@ describe('ObjectsTable', () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
         { id: '3', type: 'dashboard' },
-      ];
+      ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
@@ -272,11 +253,7 @@ describe('ObjectsTable', () => {
         })),
       };
 
-      const { fetchExportObjects } = require('../../../lib/fetch_export_objects');
-
-      const component = shallowWithI18nProvider(
-        <ObjectsTable {...defaultProps} savedObjectsClient={mockSavedObjectsClient} />
-      );
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -288,8 +265,8 @@ describe('ObjectsTable', () => {
 
       await component.instance().onExport(true);
 
-      expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
-      expect(addSuccessMock).toHaveBeenCalledWith({
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
       });
     });
@@ -298,7 +275,7 @@ describe('ObjectsTable', () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
         { id: '3', type: 'dashboard' },
-      ];
+      ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
@@ -312,16 +289,13 @@ describe('ObjectsTable', () => {
         })),
       };
 
-      const { fetchExportObjects } = require('../../../lib/fetch_export_objects');
-      extractExportDetails.mockImplementation(() => ({
+      extractExportDetailsMock.mockImplementation(() => ({
         exportedCount: 2,
         missingRefCount: 1,
         missingReferences: [{ id: '7', type: 'visualisation' }],
       }));
 
-      const component = shallowWithI18nProvider(
-        <ObjectsTable {...defaultProps} savedObjectsClient={mockSavedObjectsClient} />
-      );
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -333,8 +307,8 @@ describe('ObjectsTable', () => {
 
       await component.instance().onExport(true);
 
-      expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
-      expect(addWarningMock).toHaveBeenCalledWith({
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
         title:
           'Your file is downloading in the background. ' +
           'Some related objects could not be found. ' +
@@ -343,25 +317,21 @@ describe('ObjectsTable', () => {
     });
 
     it('should allow the user to choose when exporting all', async () => {
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
-      component.find('Header').prop('onExportAll')();
+      (component.find('Header') as any).prop('onExportAll')();
       component.update();
 
       expect(component.find('EuiModal')).toMatchSnapshot();
     });
 
     it('should export all', async () => {
-      const {
-        fetchExportByTypeAndSearch,
-      } = require('../../../lib/fetch_export_by_type_and_search');
-      const { saveAs } = require('@elastic/filesaver');
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -370,23 +340,24 @@ describe('ObjectsTable', () => {
 
       // Set up mocks
       const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
-      fetchExportByTypeAndSearch.mockImplementation(() => blob);
+      fetchExportByTypeAndSearchMock.mockImplementation(() => blob);
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByTypeAndSearch).toHaveBeenCalledWith(POSSIBLE_TYPES, undefined, true);
-      expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
-      expect(addSuccessMock).toHaveBeenCalledWith({
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+        http,
+        allowedTypes,
+        undefined,
+        true
+      );
+      expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
       });
     });
 
     it('should export all, accounting for the current search criteria', async () => {
-      const {
-        fetchExportByTypeAndSearch,
-      } = require('../../../lib/fetch_export_by_type_and_search');
-      const { saveAs } = require('@elastic/filesaver');
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       component.instance().onQueryChange({
         query: Query.parse('test'),
@@ -399,13 +370,18 @@ describe('ObjectsTable', () => {
 
       // Set up mocks
       const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
-      fetchExportByTypeAndSearch.mockImplementation(() => blob);
+      fetchExportByTypeAndSearchMock.mockImplementation(() => blob);
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByTypeAndSearch).toHaveBeenCalledWith(POSSIBLE_TYPES, 'test*', true);
-      expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
-      expect(addSuccessMock).toHaveBeenCalledWith({
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+        http,
+        allowedTypes,
+        'test*',
+        true
+      );
+      expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
       });
     });
@@ -413,7 +389,7 @@ describe('ObjectsTable', () => {
 
   describe('import', () => {
     it('should show the flyout', async () => {
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -427,7 +403,7 @@ describe('ObjectsTable', () => {
     });
 
     it('should hide the flyout', async () => {
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -443,9 +419,7 @@ describe('ObjectsTable', () => {
 
   describe('relationships', () => {
     it('should fetch relationships', async () => {
-      const { getRelationships } = require('../../../lib/get_relationships');
-
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -454,17 +428,11 @@ describe('ObjectsTable', () => {
 
       await component.instance().getRelationships('search', '1');
       const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
-      expect(getRelationships).toHaveBeenCalledWith(
-        'search',
-        '1',
-        savedObjectTypes,
-        defaultProps.$http,
-        defaultProps.basePath
-      );
+      expect(getRelationshipsMock).toHaveBeenCalledWith(http, 'search', '1', savedObjectTypes);
     });
 
     it('should show the flyout', async () => {
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -483,7 +451,7 @@ describe('ObjectsTable', () => {
             uiCapabilitiesPath: 'discover.show',
           },
         },
-      });
+      } as SavedObjectWithMetadata);
       component.update();
 
       expect(component.find(Relationships)).toMatchSnapshot();
@@ -503,7 +471,7 @@ describe('ObjectsTable', () => {
     });
 
     it('should hide the flyout', async () => {
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -522,12 +490,12 @@ describe('ObjectsTable', () => {
 
   describe('delete', () => {
     it('should show a confirm modal', async () => {
-      const component = shallowWithI18nProvider(<ObjectsTable {...defaultProps} />);
+      const component = shallowRender();
 
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern', title: 'Title 1' },
-        { id: '3', type: 'dashboard', title: 'Title 2' },
-      ];
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' },
+      ] as SavedObjectWithMetadata[];
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
@@ -546,7 +514,7 @@ describe('ObjectsTable', () => {
       const mockSelectedSavedObjects = [
         { id: '1', type: 'index-pattern' },
         { id: '3', type: 'dashboard' },
-      ];
+      ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         id: obj.id,
@@ -562,9 +530,7 @@ describe('ObjectsTable', () => {
         delete: jest.fn(),
       };
 
-      const component = shallowWithI18nProvider(
-        <ObjectsTable {...defaultProps} savedObjectsClient={mockSavedObjectsClient} />
-      );
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));

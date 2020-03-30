@@ -76,7 +76,7 @@ interface ExportAllOption {
   label: string;
 }
 
-interface SavedObjectsTableProps {
+export interface SavedObjectsTableProps {
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   savedObjectsClient: SavedObjectsClientContract;
@@ -91,7 +91,7 @@ interface SavedObjectsTableProps {
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
 }
 
-interface SavedObjectsTableState {
+export interface SavedObjectsTableState {
   totalCount: number;
   page: number;
   perPage: number;
