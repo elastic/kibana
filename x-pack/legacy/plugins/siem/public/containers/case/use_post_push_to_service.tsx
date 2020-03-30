@@ -87,7 +87,7 @@ export const usePostPushToService = (): UsePostPushToService => {
       const abortCtrl = new AbortController();
       try {
         dispatch({ type: 'FETCH_INIT' });
-        const casePushData = await getCase(caseId);
+        const casePushData = await getCase(caseId, true, abortCtrl.signal);
         const responseService = await pushToService(
           connectorId,
           formatServiceRequestData(casePushData),
@@ -143,7 +143,6 @@ const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
     updatedAt,
     updatedBy,
   } = myCase;
-
   return {
     caseId,
     createdAt,
@@ -151,23 +150,35 @@ const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
       fullName: createdBy.fullName ?? null,
       username: createdBy?.username,
     },
-    comments: comments.map(c => ({
-      commentId: c.id,
-      comment: c.comment,
-      createdAt: c.createdAt,
-      createdBy: {
-        fullName: c.createdBy.fullName ?? null,
-        username: c.createdBy.username,
-      },
-      updatedAt: c.updatedAt,
-      updatedBy:
-        c.updatedBy != null
-          ? {
-              fullName: c.updatedBy.fullName ?? null,
-              username: c.updatedBy.username,
-            }
-          : null,
-    })),
+    comments: comments
+      .filter(c => {
+        const lastPush = c.pushedAt != null ? new Date(c.pushedAt) : null;
+        const lastUpdate = c.updatedAt != null ? new Date(c.updatedAt) : null;
+        if (
+          lastPush === null ||
+          (lastPush != null && lastUpdate != null && lastPush.getTime() < lastUpdate?.getTime())
+        ) {
+          return true;
+        }
+        return false;
+      })
+      .map(c => ({
+        commentId: c.id,
+        comment: c.comment,
+        createdAt: c.createdAt,
+        createdBy: {
+          fullName: c.createdBy.fullName ?? null,
+          username: c.createdBy.username,
+        },
+        updatedAt: c.updatedAt,
+        updatedBy:
+          c.updatedBy != null
+            ? {
+                fullName: c.updatedBy.fullName ?? null,
+                username: c.updatedBy.username,
+              }
+            : null,
+      })),
     description,
     incidentId: externalService?.externalId ?? null,
     title,
