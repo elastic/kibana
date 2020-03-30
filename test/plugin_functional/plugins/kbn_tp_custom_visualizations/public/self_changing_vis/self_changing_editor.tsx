@@ -19,34 +19,28 @@
 
 import React from 'react';
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { VisOptionsProps } from '../../../../../../src/legacy/core_plugins/vis_default_editor/public/vis_options_props';
 
-export class SelfChangingComponent extends React.Component {
-  onClick = () => {
-    this.props.vis.params.counter++;
-    this.props.vis.updateState();
+interface CounterParams {
+  counter: number;
+}
+
+export class SelfChangingEditor extends React.Component<VisOptionsProps<CounterParams>> {
+  onCounterChange = (ev: any) => {
+    this.props.setValue('counter', parseInt(ev.target.value, 10));
   };
 
   render() {
     return (
-      <div>
-        <EuiBadge
-          data-test-subj="counter"
-          onClick={this.onClick}
-          onClickAriaLabel="Increase counter"
-          color="primary"
-        >
-          {this.props.vis.params.counter}
-        </EuiBadge>
-      </div>
+      <EuiFormRow label="Counter">
+        <EuiFieldNumber
+          value={this.props.stateParams.counter}
+          onChange={this.onCounterChange}
+          step={1}
+          data-test-subj="counterEditor"
+        />
+      </EuiFormRow>
     );
-  }
-
-  componentDidMount() {
-    this.props.renderComplete();
-  }
-
-  componentDidUpdate() {
-    this.props.renderComplete();
   }
 }
