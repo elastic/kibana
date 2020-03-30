@@ -31,24 +31,25 @@ interface Props {
   customLinkSelected?: CustomLink;
   onSave: () => void;
   onDelete: () => void;
+  filters?: Filter[];
 }
 
 export const CustomLinkFlyout = ({
   onClose,
   customLinkSelected,
   onSave,
-  onDelete
+  onDelete,
+  filters
 }: Props) => {
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
   const [label, setLabel] = useState(customLinkSelected?.label || '');
   const [url, setUrl] = useState(customLinkSelected?.url || '');
-  const selectedFilters = customLinkSelected?.filters;
-  const [filters, setFilters] = useState(
-    selectedFilters?.length
-      ? selectedFilters
-      : ([{ key: '', value: '' }] as Filter[])
+  const _filters = customLinkSelected?.filters || filters;
+  const filtersEmptyState: Filter[] = [{ key: '', value: '' }];
+  const [selectedFilters, setSelectedFilters] = useState(
+    _filters?.length ? _filters : filtersEmptyState
   );
 
   const isFormValid = !!label && !!url;
@@ -64,7 +65,7 @@ export const CustomLinkFlyout = ({
       id: customLinkSelected?.id,
       label,
       url,
-      filters,
+      filters: selectedFilters,
       toasts
     });
     setIsSaving(false);
@@ -119,11 +120,14 @@ export const CustomLinkFlyout = ({
 
             <EuiSpacer size="l" />
 
-            <FiltersSection filters={filters} onChangeFilters={setFilters} />
+            <FiltersSection
+              filters={selectedFilters}
+              onChangeFilters={setSelectedFilters}
+            />
 
             <EuiSpacer size="l" />
 
-            <LinkPreview label={label} url={url} filters={filters} />
+            <LinkPreview label={label} url={url} filters={selectedFilters} />
           </EuiFlyoutBody>
 
           <FlyoutFooter

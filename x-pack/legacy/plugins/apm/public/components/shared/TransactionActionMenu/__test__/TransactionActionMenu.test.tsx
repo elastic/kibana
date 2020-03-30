@@ -298,9 +298,6 @@ describe('TransactionActionMenu component', () => {
       expect(getFilterKeyValue('service.name')).toEqual({
         'service.name': 'opbeans-go'
       });
-      expect(getFilterKeyValue('service.environment')).toEqual({
-        'service.environment': ''
-      });
       expect(getFilterKeyValue('transaction.name')).toEqual({
         'transaction.name': 'GET /api/products/:id/customers'
       });

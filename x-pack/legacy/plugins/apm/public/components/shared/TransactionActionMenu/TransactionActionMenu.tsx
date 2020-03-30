@@ -7,10 +7,7 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo, useState } from 'react';
-import {
-  CustomLink as CustomLinkType,
-  Filter
-} from '../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { Filter } from '../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   ActionMenu,
@@ -68,7 +65,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
         { key: 'service.environment', value: transaction?.service.environment },
         { key: 'transaction.name', value: transaction?.transaction.name },
         { key: 'transaction.type', value: transaction?.transaction.type }
-      ] as Filter[],
+      ].filter((filter): filter is Filter => typeof filter.value === 'string'),
     [transaction]
   );
 
@@ -100,7 +97,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     <>
       {isCustomLinkFlyoutOpen && (
         <CustomLinkFlyout
-          customLinkSelected={{ filters } as CustomLinkType}
+          filters={filters}
           onClose={toggleCustomLinkFlyout}
           onSave={() => {
             toggleCustomLinkFlyout();
