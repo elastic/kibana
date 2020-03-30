@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
 import React from 'react';
 

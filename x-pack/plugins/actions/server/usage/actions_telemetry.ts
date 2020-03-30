@@ -54,7 +54,13 @@ export async function getTotalCount(callCluster: APICaller, kibanaIndex: string)
         parseInt(searchResult.aggregations.byActionTypeId.value.types[key], 0) + total,
       0
     ),
-    countByType: searchResult.aggregations.byActionTypeId.value.types,
+    countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
+      (obj: any, key: string) => ({
+        ...obj,
+        [key.replace('.', '__')]: searchResult.aggregations.byActionTypeId.value.types[key],
+      }),
+      {}
+    ),
   };
 }
 
