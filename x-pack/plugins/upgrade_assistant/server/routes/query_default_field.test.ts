@@ -14,7 +14,6 @@ jest.mock('../lib/es_version_precheck', () => ({
 }));
 
 import { registerQueryDefaultFieldRoutes } from './query_default_field';
-import { addDefaultField } from '../lib/query_default_field';
 
 describe('add query default field API', () => {
   let dependencies: any;

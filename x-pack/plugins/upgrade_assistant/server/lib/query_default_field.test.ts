@@ -48,11 +48,6 @@ describe('fixMetricbeatIndex', () => {
       mappings: { properties: { field1: { type: 'text' }, field2: { type: 'float' } } },
     },
   };
-  const mockSettings = {
-    'metricbeat-1': {
-      settings: {},
-    },
-  };
 
   beforeEach(() => (dataClient = elasticsearchServiceMock.createScopedClusterClient()));
 
