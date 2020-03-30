@@ -68,13 +68,9 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
         <EuiSpacer />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={true}>
-            <EuiButtonEmpty
-              style={{ width: 100 }}
-              onClick={() => onClose()}
-              disabled={isCreatingJob || isLoadingMLJob}
-            >
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onClose()} disabled={isCreatingJob || isLoadingMLJob}>
               {labels.CANCEL_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
