@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SavedObject } from 'src/core/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
