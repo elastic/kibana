@@ -12,8 +12,7 @@ pipeline {
   environment {
     BASE_DIR = 'src/github.com/elastic/kibana'
     HOME = "${env.WORKSPACE}"
-    APM_ITS = 'apm-integration-testing'
-    CYPRESS_DIR = 'x-pack/legacy/plugins/apm/e2e'
+    E2E_DIR = 'x-pack/legacy/plugins/apm/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
   }
   options {
@@ -42,32 +41,6 @@ pipeline {
             def regexps =[ "^x-pack/legacy/plugins/apm/.*" ]
             env.APM_UPDATED = isGitRegionMatch(patterns: regexps)
           }
-        }
-        dir("${APM_ITS}"){
-          git changelog: false,
-              credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
-              poll: false,
-              url: "git@github.com:elastic/${APM_ITS}.git"
-        }
-      }
-    }
-    stage('Start services') {
-      options { skipDefaultCheckout() }
-      when {
-        anyOf {
-          expression { return params.FORCE }
-          expression { return env.APM_UPDATED != "false" }
-        }
-      }
-      steps {
-        notifyStatus('Starting services', 'PENDING')
-        dir("${APM_ITS}"){
-          sh './scripts/compose.py start master --no-kibana'
-        }
-      }
-      post {
-        unsuccessful {
-          notifyStatus('Environmental issue', 'FAILURE')
         }
       }
     }
@@ -105,24 +78,19 @@ pipeline {
       steps{
         notifyStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
-          sh '''
-            jobs -l
-            docker build --tag cypress --build-arg NODE_VERSION=$(cat .node-version) ${CYPRESS_DIR}/ci
-            docker run --rm -t --user "$(id -u):$(id -g)" \
-                    -v `pwd`:/app --network="host" \
-                    --name cypress cypress'''
+          sh "${E2E_DIR}/run-e2e.sh"
         }
       }
       post {
         always {
           dir("${BASE_DIR}"){
-            archiveArtifacts(allowEmptyArchive: false, artifacts: "${CYPRESS_DIR}/**/screenshots/**,${CYPRESS_DIR}/**/videos/**,${CYPRESS_DIR}/**/test-results/*e2e-tests.xml")
-            junit(allowEmptyResults: true, testResults: "${CYPRESS_DIR}/**/test-results/*e2e-tests.xml")
-          }
-          dir("${APM_ITS}"){
-            sh 'docker-compose logs > apm-its.log || true'
-            sh 'docker-compose down -v || true'
-            archiveArtifacts(allowEmptyArchive: false, artifacts: 'apm-its.log')
+            archiveArtifacts(allowEmptyArchive: false, artifacts: "${E2E_DIR}/**/screenshots/**,${E2E_DIR}/**/videos/**,${E2E_DIR}/**/test-results/*e2e-tests.xml")
+            junit(allowEmptyResults: true, testResults: "${E2E_DIR}/**/test-results/*e2e-tests.xml")
+            dir('./tmp/apm-integration-testing'){
+              sh 'docker-compose logs > apm-its.log || true'
+              sh 'docker-compose down -v || true'
+              archiveArtifacts(allowEmptyArchive: true, artifacts: 'apm-its.log')
+            }
           }
         }
         unsuccessful {
