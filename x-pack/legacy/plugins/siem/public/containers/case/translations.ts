@@ -26,13 +26,25 @@ export const DELETED_CASES = (totalCases: number, caseTitle?: string) =>
     defaultMessage: 'Deleted {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
 
-export const CLOSED_CASES = (totalCases: number, caseTitle?: string) =>
+export const CLOSED_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
   i18n.translate('xpack.siem.containers.case.closedCases', {
     values: { caseTitle, totalCases },
     defaultMessage: 'Closed {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
 
-export const REOPENED_CASES = (totalCases: number, caseTitle?: string) =>
+export const REOPENED_CASES = ({
+  totalCases,
+  caseTitle,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+}) =>
   i18n.translate('xpack.siem.containers.case.reopenedCases', {
     values: { caseTitle, totalCases },
     defaultMessage: 'Reopened {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',

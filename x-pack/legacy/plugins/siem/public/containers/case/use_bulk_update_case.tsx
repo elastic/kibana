@@ -77,17 +77,16 @@ export const useUpdateCases = (): UseUpdateCase => {
           const firstTitle = patchResponse[0].title;
 
           dispatch({ type: 'FETCH_SUCCESS', payload: true });
-          if (resultCount && patchResponse[0].status === 'open') {
-            displaySuccessToast(
-              i18n.REOPENED_CASES(resultCount, resultCount === 1 ? firstTitle : ''),
-              dispatchToaster
-            );
-          } else {
-            displaySuccessToast(
-              i18n.CLOSED_CASES(resultCount, resultCount === 1 ? firstTitle : ''),
-              dispatchToaster
-            );
-          }
+          const messageArgs = {
+            totalCases: resultCount,
+            caseTitle: resultCount === 1 ? firstTitle : '',
+          };
+          const message =
+            resultCount && patchResponse[0].status === 'open'
+              ? i18n.REOPENED_CASES(messageArgs)
+              : i18n.CLOSED_CASES(messageArgs);
+
+          displaySuccessToast(message, dispatchToaster);
         }
       } catch (error) {
         if (!cancel) {

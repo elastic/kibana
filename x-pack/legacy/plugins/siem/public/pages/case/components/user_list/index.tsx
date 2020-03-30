@@ -41,8 +41,8 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 const renderUsers = (
   users: ElasticUser[],
   handleSendEmail: (emailAddress: string | undefined | null) => void
-) => {
-  return users.map(({ fullName, username, email }, key) => (
+) =>
+  users.map(({ fullName, username, email }, key) => (
     <MyFlexGroup key={key} justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
@@ -66,12 +66,11 @@ const renderUsers = (
           onClick={handleSendEmail.bind(null, email)}
           iconType="email"
           aria-label="email"
-          isDisabled={!email}
+          isDisabled={email == null}
         />
       </EuiFlexItem>
     </MyFlexGroup>
   ));
-};
 
 export const UserList = React.memo(({ email, headline, loading, users }: UserListProps) => {
   const handleSendEmail = useCallback(
