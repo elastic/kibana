@@ -28,11 +28,11 @@ interface UserActionItemProps {
   labelQuoteAction?: string;
   labelTitle?: JSX.Element;
   linkId?: string | null;
-  fullName: string;
+  fullName?: string | null;
   markdown?: React.ReactNode;
   onEdit?: (id: string) => void;
   onQuote?: (id: string) => void;
-  userName: string;
+  username: string;
   updatedAt?: string | null;
   outlineComment?: (id: string) => void;
   showBottomFooter?: boolean;
@@ -125,15 +125,15 @@ export const UserActionItem = ({
   outlineComment,
   showBottomFooter,
   showTopFooter,
-  userName,
+  username,
   updatedAt,
 }: UserActionItemProps) => (
   <UserActionItemContainer gutterSize={'none'} direction="column">
     <EuiFlexItem>
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
-          {fullName.length > 0 || userName.length > 0 ? (
-            <UserActionAvatar name={fullName ?? userName} />
+          {(fullName && fullName.length > 0) || username.length > 0 ? (
+            <UserActionAvatar name={fullName ?? username} />
           ) : (
             <EuiLoadingSpinner className="userAction_loadingAvatar" />
           )}
@@ -154,7 +154,8 @@ export const UserActionItem = ({
                 labelQuoteAction={labelQuoteAction}
                 labelTitle={labelTitle ?? <></>}
                 linkId={linkId}
-                userName={userName}
+                fullName={fullName}
+                username={username}
                 updatedAt={updatedAt}
                 onEdit={onEdit}
                 onQuote={onQuote}

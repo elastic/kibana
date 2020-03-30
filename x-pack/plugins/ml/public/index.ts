@@ -6,8 +6,19 @@
 
 import { PluginInitializer } from 'kibana/public';
 import './index.scss';
-import { MlPlugin, MlPluginSetup, MlPluginStart } from './plugin';
+import {
+  MlPlugin,
+  MlPluginSetup,
+  MlPluginStart,
+  MlSetupDependencies,
+  MlStartDependencies,
+} from './plugin';
 
-export const plugin: PluginInitializer<MlPluginSetup, MlPluginStart> = () => new MlPlugin();
+export const plugin: PluginInitializer<
+  MlPluginSetup,
+  MlPluginStart,
+  MlSetupDependencies,
+  MlStartDependencies
+> = () => new MlPlugin();
 
 export { MlPluginSetup, MlPluginStart };
