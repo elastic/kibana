@@ -19,14 +19,10 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { plugin } from './index';
 
 const instance = plugin({
   env: npSetup.plugins.kibanaLegacy.env,
 } as PluginInitializerContext);
 instance.setup(npSetup.core, npSetup.plugins);
-instance.start(npStart.core, {
-  ...npStart.plugins,
-  visualizations,
-});
+instance.start(npStart.core, npStart.plugins);
