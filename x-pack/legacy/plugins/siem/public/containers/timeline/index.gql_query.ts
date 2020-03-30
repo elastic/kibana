@@ -206,6 +206,7 @@ export const timelineQuery = gql`
                   query
                   to
                   filters
+                  note
                 }
               }
               suricata {
