@@ -45,5 +45,17 @@ export default function({ getService, getPageObjects }) {
       const counter = await getCounterValue();
       expect(counter).to.be('10');
     });
+
+    it.skip('should allow changing params from within the vis', async () => {
+      await testSubjects.click('counter');
+      await renderable.waitForRender();
+      const visValue = await getCounterValue();
+      expect(visValue).to.be('11');
+      const editorValue = await testSubjects.getAttribute('counterEditor', 'value');
+      expect(editorValue).to.be('11');
+      // If changing a param from within the vis it should immediately apply and not bring editor in an unchanged state
+      const isApplyEnabled = await PageObjects.visEditor.isApplyEnabled();
+      expect(isApplyEnabled).to.be(false);
+    });
   });
 }
