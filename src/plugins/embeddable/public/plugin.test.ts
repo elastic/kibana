@@ -46,7 +46,7 @@ test('can set custom embeddable factory provider', async () => {
     getDisplayName: () => 'Intercepted!',
   });
 
-  setup.setEmbeddableFactoryProvider(customProvider);
+  setup.setCustomEmbeddableFactoryProvider(customProvider);
   setup.registerEmbeddableFactory('test', {
     type: 'test',
     create: () => Promise.resolve(undefined),

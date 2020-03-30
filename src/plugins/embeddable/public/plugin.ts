@@ -38,7 +38,7 @@ export interface EmbeddableSetup {
     id: string,
     factory: EmbeddableFactoryDefinition<I, O>
   ) => void;
-  setEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => void;
+  setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
 export interface EmbeddableStart {
@@ -58,7 +58,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     EmbeddableFactoryDefinition
   > = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private embeddableFactoryProvider?: EmbeddableFactoryProvider;
+  private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -67,13 +67,13 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      setEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
-        if (this.embeddableFactoryProvider) {
+      setCustomEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
+        if (this.customEmbeddableFactoryProvider) {
           throw new Error(
             'Custom embeddable factory provider is already set, and can only be set once'
           );
         }
-        this.embeddableFactoryProvider = provider;
+        this.customEmbeddableFactoryProvider = provider;
       },
     };
   }
@@ -82,8 +82,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     this.embeddableFactoryDefinitions.forEach(def => {
       this.embeddableFactories.set(
         def.type,
-        this.embeddableFactoryProvider
-          ? this.embeddableFactoryProvider(def)
+        this.customEmbeddableFactoryProvider
+          ? this.customEmbeddableFactoryProvider(def)
           : defaultEmbeddableFactoryProvider(def)
       );
     });
@@ -140,8 +140,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       if (!def) return;
       this.embeddableFactories.set(
         type,
-        this.embeddableFactoryProvider
-          ? this.embeddableFactoryProvider(def)
+        this.customEmbeddableFactoryProvider
+          ? this.customEmbeddableFactoryProvider(def)
           : defaultEmbeddableFactoryProvider(def)
       );
     }
