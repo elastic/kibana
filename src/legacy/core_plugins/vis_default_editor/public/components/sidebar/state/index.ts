@@ -20,7 +20,7 @@
 import { useReducer, useCallback } from 'react';
 import { EventEmitter } from 'events';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from 'src/plugins/visualizations/public';
 import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction } from './actions';
