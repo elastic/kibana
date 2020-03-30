@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function escapeSearchQueryPhrase(val: string) {
+/**
+ * Escape a value with double quote to use with saved object search
+ * Example: escapeSearchQueryPhrase('-test"toto') => '"-test\"toto""'
+ * @param val
+ */
+export function escapeSearchQueryPhrase(val: string): string {
   return `"${val.replace(/["]/g, '"')}"`;
 }
