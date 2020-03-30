@@ -13,6 +13,7 @@ export type IndexAlias = 'auditbeat' | 'filebeat' | 'packetbeat' | 'ecs' | 'winl
 
 export interface SchemaFields {
   default_field: boolean;
+  default_fields: boolean;
   definition: string;
   deprecated: string;
   description: string;
