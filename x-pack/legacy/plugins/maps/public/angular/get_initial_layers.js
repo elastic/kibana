@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { KibanaTilemapSource } from '../layers/sources/kibana_tilemap_source';
-import { EMSTMSSource } from '../layers/sources/ems_tms_source';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaTilemapSource } from '../../../../../plugins/maps/public/layers/sources/kibana_tilemap_source';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { EMSTMSSource } from '../../../../../plugins/maps/public/layers/sources/ems_tms_source';
 import { getInjectedVarFunc } from '../kibana_services';
 import { getKibanaTileMap } from '../meta';
 

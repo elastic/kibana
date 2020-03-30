@@ -21,10 +21,10 @@ import { SingleFieldSelect } from '../../../../../../legacy/plugins/maps/public/
 
 // @ts-ignore
 import { indexPatternService } from '../../../../../../legacy/plugins/maps/public/kibana_services';
-// @ts-ignore
 import {
   getTermsFields,
   getSourceFields,
+  // @ts-ignore
 } from '../../../../../../legacy/plugins/maps/public/index_pattern_util';
 // @ts-ignore
 import { ValidatedRange } from '../../../../../../legacy/plugins/maps/public/components/validated_range';

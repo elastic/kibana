@@ -5,7 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { GeojsonFileSource } from '../../../layers/sources/client_file_source';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { GeojsonFileSource } from '../../../../../../../plugins/maps/public/layers/sources/client_file_source';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 

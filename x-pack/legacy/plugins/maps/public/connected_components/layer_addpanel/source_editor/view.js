@@ -5,7 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { ALL_SOURCES } from '../../../layers/sources/all_sources';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ALL_SOURCES } from '../../../../../../../plugins/maps/public/layers/sources/all_sources';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 

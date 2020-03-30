@@ -29,7 +29,8 @@ import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../angular/services/gis_map_saved_object_loader';
 import { bindSetupCoreAndPlugins, bindStartCoreAndPlugins } from '../plugin';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderToolTipContent } from '../../../../../plugins/maps/public/layers/tooltips/tooltip_property';
 import {
   EventHandlers,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
