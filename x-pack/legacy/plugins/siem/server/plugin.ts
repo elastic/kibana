@@ -18,6 +18,7 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
+import { MlPluginSetup as MlSetup } from '../../../../plugins/ml/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../../../plugins/spaces/server';
 import { PluginStartContract as ActionsStart } from '../../../../plugins/actions/server';
@@ -48,6 +49,7 @@ export interface SetupPlugins {
   licensing: LicensingPluginSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
+  ml?: MlSetup;
 }
 
 export interface StartPlugins {
@@ -164,6 +166,7 @@ export class Plugin {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
+        ml: plugins.ml,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
