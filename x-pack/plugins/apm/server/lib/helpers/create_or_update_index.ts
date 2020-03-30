@@ -34,10 +34,13 @@ export async function createOrUpdateIndex({
   logger: Logger;
 }) {
   try {
-    /* Some times Kibana starts before ES is ready. When it happens an error is thrown while creating an index.
-     * To make sure create index is called again when ES is ready, it keeps trying for more 10 times.
-     * After that, an error is thrown and the index is not created.
-     * More information here: https://github.com/elastic/kibana/issues/59420
+    /*
+     * In some cases we could be trying to create an index before ES is ready.
+     * When this happens, we retry creating the index with exponential backoff.
+     * We use retry's default formula, meaning that the first retry happens after 2s,
+     * the 5th after 32s, and the final attempt after around 17m. If the final attempt fails,
+     * the error is logged to the console.
+     * See https://github.com/sindresorhus/p-retry and https://github.com/tim-kos/node-retry.
      */
     await pRetry(async () => {
       const { callAsInternalUser } = esClient;
