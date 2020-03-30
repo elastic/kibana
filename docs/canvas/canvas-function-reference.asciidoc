@@ -378,7 +378,7 @@ Clears the _context_, and returns `null`.
 [[clog_fn]]
 === `clog`
 
-This function is for debug purpose. It outputs the _context_ in the console.
+It outputs the _context_ in the console. This function is for debug purpose.
 
 *Expression syntax*
 [source,js]
