@@ -21,7 +21,7 @@ import {
 import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { PublicSetupContract as AlertingPluginPublicSetup } from '../../../../../plugins/alerting/public';
+import { PluginSetupContract as AlertingPluginPublicSetup } from '../../../../../plugins/alerting/public';
 import { AlertType } from '../../../../../plugins/apm/common/alert_types';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
 import {
