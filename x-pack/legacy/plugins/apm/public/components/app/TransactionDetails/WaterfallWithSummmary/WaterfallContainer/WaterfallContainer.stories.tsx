@@ -18,37 +18,45 @@ import {
 } from './waterfallContainer.stories.data';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
-storiesOf('app/Transaction/Waterfall', module).add('simple', () => {
-  const waterfall = getWaterfall(
-    simpleTrace as TraceAPIResponse,
-    '975c8d5bfd1dd20b'
-  );
-  return (
-    <WaterfallContainer
-      location={location}
-      urlParams={urlParams}
-      waterfall={waterfall}
-      exceedsMax={false}
-    />
-  );
-});
+storiesOf('app/TransactionDetails/Waterfall', module).add(
+  'simple',
+  () => {
+    const waterfall = getWaterfall(
+      simpleTrace as TraceAPIResponse,
+      '975c8d5bfd1dd20b'
+    );
+    return (
+      <WaterfallContainer
+        location={location}
+        urlParams={urlParams}
+        waterfall={waterfall}
+        exceedsMax={false}
+      />
+    );
+  },
+  { info: { source: false } }
+);
 
-storiesOf('app/Transaction/Waterfall', module).add('with errors', () => {
-  const waterfall = getWaterfall(
-    (traceWithErrors as unknown) as TraceAPIResponse,
-    '975c8d5bfd1dd20b'
-  );
-  return (
-    <WaterfallContainer
-      location={location}
-      urlParams={urlParams}
-      waterfall={waterfall}
-      exceedsMax={false}
-    />
-  );
-});
+storiesOf('app/TransactionDetails/Waterfall', module).add(
+  'with errors',
+  () => {
+    const waterfall = getWaterfall(
+      (traceWithErrors as unknown) as TraceAPIResponse,
+      '975c8d5bfd1dd20b'
+    );
+    return (
+      <WaterfallContainer
+        location={location}
+        urlParams={urlParams}
+        waterfall={waterfall}
+        exceedsMax={false}
+      />
+    );
+  },
+  { info: { source: false } }
+);
 
-storiesOf('app/Transaction/Waterfall', module).add(
+storiesOf('app/TransactionDetails/Waterfall', module).add(
   'child starts before parent',
   () => {
     const waterfall = getWaterfall(
@@ -63,5 +71,6 @@ storiesOf('app/Transaction/Waterfall', module).add(
         exceedsMax={false}
       />
     );
-  }
+  },
+  { info: { source: false } }
 );

@@ -6,7 +6,6 @@
 
 import { Location } from 'history';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
-import { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
 export const location = {
   pathname: '/services/opbeans-go/transactions/view',
