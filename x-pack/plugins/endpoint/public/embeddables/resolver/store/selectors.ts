@@ -54,11 +54,6 @@ export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataSelectors.processNodePositionsAndEdgeLineSegments
 );
 
-export const processAdjacencies = composeSelectors(
-  dataStateSelector,
-  dataSelectors.processAdjacencies
-);
-
 /**
  * Returns the camera state from within ResolverState
  */

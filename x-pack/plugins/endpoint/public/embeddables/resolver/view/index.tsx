@@ -14,7 +14,6 @@ import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
-import { SymbolDefinitions, NamedColors } from './defs';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../../common/types';
 
@@ -34,14 +33,6 @@ const StyledGraphControls = styled(GraphControls)`
   right: 5px;
 `;
 
-const StyledResolverContainer = styled.div`
-  display: flex;
-  flex-grow: 1;
-  contain: layout;
-`;
-
-const bgColor = NamedColors.resolverBackground;
-
 export const Resolver = styled(
   React.memo(function Resolver({
     className,
@@ -55,8 +46,6 @@ export const Resolver = styled(
     );
 
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
-    const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
-
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
 
@@ -73,35 +62,29 @@ export const Resolver = styled(
             <EuiLoadingSpinner size="xl" />
           </div>
         ) : (
-          <StyledResolverContainer
-            className="resolver-graph kbn-resetFocusState"
-            onMouseDown={onMouseDown}
-            ref={ref}
-            role="tree"
-            tabIndex={0}
-          >
-            {edgeLineSegments.map(([startPosition, endPosition], index) => (
-              <EdgeLine
-                key={index}
-                startPosition={startPosition}
-                endPosition={endPosition}
-                projectionMatrix={projectionMatrix}
-              />
-            ))}
-            {Array.from(processNodePositions).map(([processEvent, position], index) => (
-              <ProcessEventDot
-                key={index}
-                position={position}
-                projectionMatrix={projectionMatrix}
-                event={processEvent}
-                adjacentNodeMap={processToAdjacencyMap.get(processEvent)}
-              />
-            ))}
-          </StyledResolverContainer>
+          <>
+            <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
+              {Array.from(processNodePositions).map(([processEvent, position], index) => (
+                <ProcessEventDot
+                  key={index}
+                  position={position}
+                  projectionMatrix={projectionMatrix}
+                  event={processEvent}
+                />
+              ))}
+              {edgeLineSegments.map(([startPosition, endPosition], index) => (
+                <EdgeLine
+                  key={index}
+                  startPosition={startPosition}
+                  endPosition={endPosition}
+                  projectionMatrix={projectionMatrix}
+                />
+              ))}
+            </div>
+            <StyledPanel />
+            <StyledGraphControls />
+          </>
         )}
-        <StyledPanel />
-        <StyledGraphControls />
-        <SymbolDefinitions />
       </div>
     );
   })
@@ -128,6 +111,4 @@ export const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
-  contain: strict;
-  background-color: ${bgColor};
 `;
