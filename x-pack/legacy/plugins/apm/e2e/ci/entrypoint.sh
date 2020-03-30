@@ -13,6 +13,7 @@ export CYPRESS_BASE_URL=http://${kibana}:5701
 export HOME=/tmp
 npm config set cache ${HOME}
 
+cd /app/x-pack/legacy/plugins/apm/e2e
 ## Install dependencies for cypress
 CI=true npm install
 yarn
@@ -22,4 +23,4 @@ npm install wait-on
 ./node_modules/.bin/wait-on ${CYPRESS_BASE_URL}/status && echo 'Kibana is up and running'
 
 # Run cypress
-npm run cypress:run
+yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
