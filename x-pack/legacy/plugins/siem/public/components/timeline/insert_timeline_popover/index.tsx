@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiPopover, EuiSelectableOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiSelectableOption, EuiToolTip } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -62,13 +62,15 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
 
   const insertTimelineButton = useMemo(
     () => (
-      <EuiButtonIcon
-        aria-label={i18n.INSERT_TIMELINE}
-        data-test-subj="insert-timeline-button"
-        iconType="timeline"
-        isDisabled={isDisabled}
-        onClick={handleOpenPopover}
-      />
+      <EuiToolTip position="top" content={<p>{i18n.INSERT_TIMELINE}</p>}>
+        <EuiButtonIcon
+          aria-label={i18n.INSERT_TIMELINE}
+          data-test-subj="insert-timeline-button"
+          iconType="timeline"
+          isDisabled={isDisabled}
+          onClick={handleOpenPopover}
+        />
+      </EuiToolTip>
     ),
     [handleOpenPopover, isDisabled]
   );

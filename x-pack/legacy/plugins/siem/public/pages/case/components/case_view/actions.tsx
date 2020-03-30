@@ -34,7 +34,7 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData }) => {
         isModalVisible={isDisplayConfirmDeleteModal}
         isPlural={false}
         onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [caseData.id])}
+        onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
       />
     ),
     [isDisplayConfirmDeleteModal, caseData]
