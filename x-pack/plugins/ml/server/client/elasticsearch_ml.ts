@@ -514,7 +514,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     needBody: true,
     method: 'POST',
   });
-
+  // Calendars default size limit is 100 so explicitly set to 1000 for now.
   ml.calendars = ca({
     urls: [
       {
@@ -526,7 +526,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_ml/calendars/',
+        fmt: '/_ml/calendars?size=1000',
       },
     ],
     method: 'GET',
@@ -671,7 +671,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     },
     method: 'DELETE',
   });
-
+  // Filters default size limit is 10 so explicitly set to 1000 for now.
   ml.filters = ca({
     urls: [
       {
@@ -683,7 +683,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_ml/filters/',
+        fmt: '/_ml/filters?size=1000',
       },
     ],
     method: 'GET',
