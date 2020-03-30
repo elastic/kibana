@@ -69,6 +69,7 @@ export interface State {
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
     modelMemoryLimitValidationResult: any;
+    numTopFeatureImportanceValues: number | undefined;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
     sourceIndex: EsIndexName;
@@ -123,6 +124,7 @@ export const getInitialState = (): State => ({
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
     modelMemoryLimitValidationResult: null,
+    numTopFeatureImportanceValues: 0,
     previousJobType: null,
     previousSourceIndex: undefined,
     sourceIndex: '',
@@ -182,6 +184,7 @@ export const getJobConfigFromFormState = (
     jobConfig.analysis = {
       [formState.jobType]: {
         dependent_variable: formState.dependentVariable,
+        num_top_feature_importance_values: formState.numTopFeatureImportanceValues,
         training_percent: formState.trainingPercent,
       },
     };
@@ -216,6 +219,7 @@ export function getCloneFormStateFromJobConfig(
     const analysisConfig = analyticsJobConfig.analysis[jobType];
 
     resultState.dependentVariable = analysisConfig.dependent_variable;
+    resultState.numTopFeatureImportanceValues = analysisConfig.num_top_feature_importance_values;
     resultState.trainingPercent = analysisConfig.training_percent;
   }
 

@@ -97,6 +97,8 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             num_top_feature_importance_values: {
               optional: true,
+              defaultValue: 0,
+              formKey: 'numTopFeatureImportanceValues',
             },
             class_assignment_objective: {
               optional: true,
@@ -164,6 +166,8 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             num_top_feature_importance_values: {
               optional: true,
+              defaultValue: 0,
+              formKey: 'numTopFeatureImportanceValues',
             },
             randomize_seed: {
               optional: true,

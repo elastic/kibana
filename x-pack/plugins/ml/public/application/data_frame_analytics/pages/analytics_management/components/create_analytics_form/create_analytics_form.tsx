@@ -81,6 +81,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     maxDistinctValuesError,
     modelMemoryLimit,
     modelMemoryLimitValidationResult,
+    numTopFeatureImportanceValues,
     previousJobType,
     previousSourceIndex,
     sourceIndex,
@@ -641,6 +642,31 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
                   onChange={e => setFormState({ trainingPercent: e.target.value })}
                   data-test-subj="mlAnalyticsCreateJobFlyoutTrainingPercentSlider"
+                />
+              </EuiFormRow>
+              {/* num_top_feature_importance_values */}
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesLabel',
+                  {
+                    defaultMessage: 'Max. number of feature importance values per document',
+                  }
+                )}
+              >
+                <EuiFieldText
+                  disabled={false}
+                  value={numTopFeatureImportanceValues}
+                  onChange={e =>
+                    setFormState({ numTopFeatureImportanceValues: parseInt(e.target.value, 10) })
+                  }
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesInputAriaLabel',
+                    {
+                      defaultMessage: 'Max. number of feature importance values per document.',
+                    }
+                  )}
+                  isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
+                  data-test-subj="mlAnalyticsCreateJobFlyoutnumTopFeatureImportanceValuesInput"
                 />
               </EuiFormRow>
             </Fragment>
