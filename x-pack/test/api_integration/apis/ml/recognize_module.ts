@@ -17,7 +17,7 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
-  const mlSecurity = getService('mlSecurity');
+  const ml = getService('ml');
 
   const testDataList = [
     {
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {
     const { body } = await supertest
       .get(`/api/ml/modules/recognize/${indexPattern}`)
-      .auth(user, mlSecurity.getPasswordForUser(user))
+      .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_HEADERS)
       .expect(rspCode);
 
