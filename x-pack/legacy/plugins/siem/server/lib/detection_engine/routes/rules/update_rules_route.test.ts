@@ -76,6 +76,13 @@ describe('update_rules', () => {
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getUpdateRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
     test('returns error when updating non-rule', async () => {
       clients.alertsClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(getUpdateRequest(), context);
