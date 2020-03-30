@@ -10,7 +10,7 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const retry = getService('retry');
 
-  describe.skip('full screen mode', () => {
+  describe('full screen mode', () => {
     before(async () => {
       await PageObjects.maps.openNewMap();
     });
