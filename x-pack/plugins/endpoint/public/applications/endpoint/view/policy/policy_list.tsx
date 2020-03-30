@@ -151,6 +151,7 @@ export const PolicyList = React.memo(() => {
 
   return (
     <PageView
+      viewType="list"
       data-test-subj="policyListPage"
       headerLeft={i18n.translate('xpack.endpoint.policyList.viewTitle', {
         defaultMessage: 'Policies',

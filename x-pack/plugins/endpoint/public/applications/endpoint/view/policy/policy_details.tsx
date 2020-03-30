@@ -109,7 +109,7 @@ export const PolicyDetails = React.memo(() => {
   // Else, if we have an error, then show error on the page.
   if (!policyItem) {
     return (
-      <PageView>
+      <PageView viewType="details">
         {isPolicyLoading ? (
           <EuiLoadingSpinner size="xl" />
         ) : policyApiError ? (
@@ -175,6 +175,7 @@ export const PolicyDetails = React.memo(() => {
         />
       )}
       <PageView
+        viewType="details"
         data-test-subj="policyDetailsPage"
         headerLeft={headerLeftContent}
         headerRight={headerRightContent}

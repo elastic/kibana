@@ -67,6 +67,10 @@ export const PageViewBodyHeaderTitle = memo<{ children: ReactNode }>(
 export const PageView = memo<
   EuiPageProps & {
     /**
+     * The type of view
+     */
+    viewType: 'list' | 'details';
+    /**
      * content to be placed on the left side of the header. If a `string` is used, then it will
      * be wrapped with `<EuiTitle><h1></h1></EuiTitle>`, else it will just be used as is.
      */

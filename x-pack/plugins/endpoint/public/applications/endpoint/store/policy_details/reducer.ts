@@ -5,7 +5,7 @@
  */
 
 import { Reducer } from 'redux';
-import { PolicyConfig, PolicyDetailsState } from '../../types';
+import { PolicyData, PolicyDetailsState, UIPolicyConfig } from '../../types';
 import { AppAction } from '../action';
 import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
 
@@ -86,22 +86,18 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
   }
 
   if (action.type === 'userChangedPolicyConfig') {
-    const newState = { ...state };
-    const { windows, linux, mac } = fullPolicy(state) as PolicyConfig;
-    newState.policyItem!.inputs[0].config.policy.value = {
-      windows: {
-        ...windows,
-        ...action.payload.policyConfig.windows,
-      },
-      mac: {
-        ...mac,
-        ...action.payload.policyConfig.mac,
-      },
-      linux: {
-        ...linux,
-        ...action.payload.policyConfig.linux,
-      },
-    };
+    const newState = { ...state, policyItem: { ...(state.policyItem as PolicyData) } };
+    const newPolicy = (newState.policyItem.inputs[0].config.policy.value = {
+      ...fullPolicy(state),
+    });
+
+    Object.entries(action.payload.policyConfig).forEach(([section, newSettings]) => {
+      newPolicy[section as keyof UIPolicyConfig] = {
+        ...newPolicy[section as keyof UIPolicyConfig],
+        ...newSettings,
+      };
+    });
+
     return newState;
   }
 

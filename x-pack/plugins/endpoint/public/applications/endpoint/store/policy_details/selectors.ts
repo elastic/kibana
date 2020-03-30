@@ -32,30 +32,29 @@ export const policyIdFromParams: (state: PolicyDetailsState) => string = createS
   }
 );
 
-/** Returns the full Endpoint Policy, which will include private settings not shown on the UI */
-
-export const fullPolicy: (s: PolicyDetailsState) => PolicyConfig | undefined = createSelector(
+/**
+ * Returns the full Endpoint Policy, which will include private settings not shown on the UI.
+ * Note: this will return a default full policy if the `policyItem` is `undefined`
+ */
+export const fullPolicy: (s: PolicyDetailsState) => PolicyConfig = createSelector(
   policyDetails,
   policyData => {
-    return policyData?.inputs[0].config.policy.value;
+    return policyData?.inputs[0]?.config?.policy?.value ?? generatePolicy();
   }
 );
 
 const fullWindowsPolicySettings: (
   s: PolicyDetailsState
-) => PolicyConfig['windows'] = createSelector(
-  fullPolicy,
-  policy => policy?.windows || generatePolicy().windows
-);
+) => PolicyConfig['windows'] = createSelector(fullPolicy, policy => policy?.windows);
 
 const fullMacPolicySettings: (s: PolicyDetailsState) => PolicyConfig['mac'] = createSelector(
   fullPolicy,
-  policy => policy?.mac || generatePolicy().mac
+  policy => policy?.mac
 );
 
 const fullLinuxPolicySettings: (s: PolicyDetailsState) => PolicyConfig['linux'] = createSelector(
   fullPolicy,
-  policy => policy?.linux || generatePolicy().linux
+  policy => policy?.linux
 );
 
 /** Returns the policy configuration */
