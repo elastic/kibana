@@ -90,7 +90,6 @@ kibanaPipeline(timeoutMinutes: 180) {
 
 
 def maybeFailFast(secret) {
-
   withVaultSecret(secret: secret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: secret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: secret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
