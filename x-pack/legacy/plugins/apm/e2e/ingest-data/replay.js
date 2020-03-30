@@ -32,6 +32,7 @@ const path = require('path');
 const axios = require('axios');
 const readFile = promisify(fs.readFile);
 const pLimit = require('p-limit');
+const pRetry = require('p-retry');
 const { argv } = require('yargs');
 const ora = require('ora');
 
@@ -49,8 +50,6 @@ if (!EVENTS_PATH) {
   process.exit(1);
 }
 
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 const requestProgress = {
   succeeded: 0,
   failed: 0,
@@ -59,7 +58,7 @@ const requestProgress = {
 
 const spinner = ora({ text: 'Warming up...', stream: process.stdout });
 
-function updateSpinnerText({ success }) {
+function incrementSpinnerCount({ success }) {
   success ? requestProgress.succeeded++ : requestProgress.failed++;
   const remaining =
     requestProgress.total -
@@ -71,7 +70,6 @@ function updateSpinnerText({ success }) {
 async function insertItem(item) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
-
     const headers = {
       'content-type': 'application/x-ndjson'
     };
@@ -86,16 +84,11 @@ async function insertItem(item) {
       headers,
       data: item.body
     });
-
-    updateSpinnerText({ success: true });
-
-    // add delay to avoid flooding the queue
-    return delay(500);
   } catch (e) {
     console.error(
       `${e.response ? JSON.stringify(e.response.data) : e.message}`
     );
-    updateSpinnerText({ success: false });
+    throw e;
   }
 }
 
@@ -112,17 +105,34 @@ async function init() {
   requestProgress.total = items.length;
 
   const limit = pLimit(20); // number of concurrent requests
-  await Promise.all(items.map(item => limit(() => insertItem(item))));
+  await Promise.all(
+    items.map(async item => {
+      try {
+        // retry 5 times with exponential backoff
+        await pRetry(() => limit(() => insertItem(item)), { retries: 5 });
+        incrementSpinnerCount({ success: true });
+      } catch (e) {
+        incrementSpinnerCount({ success: false });
+      }
+    })
+  );
 }
 
 init()
+  .then(() => {
+    if (requestProgress.succeeded === requestProgress.total) {
+      spinner.succeed(
+        `Successfully ingested ${requestProgress.succeeded} of ${requestProgress.total} events`
+      );
+      process.exit(0);
+    } else {
+      spinner.fail(
+        `Ingested ${requestProgress.succeeded} of ${requestProgress.total} events`
+      );
+      process.exit(1);
+    }
+  })
   .catch(e => {
     console.log('An error occurred:', e);
     process.exit(1);
-  })
-  .then(() => {
-    spinner.succeed(
-      `Successfully ingested ${requestProgress.succeeded} of ${requestProgress.total} events`
-    );
-    process.exit(0);
   });
