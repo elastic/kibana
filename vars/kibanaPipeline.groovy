@@ -237,6 +237,17 @@ def call(Map params = [:], Closure closure) {
   }
 }
 
+this.finishedSuites = []
+
+def getFinishedSuites() {
+  return this.finishedSuites
+}
+
+def addFinishedSuite(type, suite) {
+  this.finishedSuites[type] = this.finishedSuites[type] ?: []
+  this.finishedSuites[type] << suite
+}
+
 def runFunctionalTestSuite(type, testSuite) {
   // TODO add finishedSuites somewhere
   def testMetadataPath = pwd() + "/target/test_metadata_${type}_${env.TASK_QUEUE_PROCESS_ID}.json"
@@ -307,7 +318,7 @@ def runFunctionalTestSuite(type, testSuite) {
                   if (byFile[it.file]) {
                     it.previousDuration = byFile[it.file].duration
                   }
-                  // finishedSuites << it
+                  addFinishedSuite(type, it)
                 }
               }
               testSuite.files = testSuite.files.findAll { suite -> !suites.find { finishedSuite -> finishedSuite.file == suite.file && finishedSuite.success } }

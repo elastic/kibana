@@ -5,14 +5,11 @@ kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
   githubPr.withDefaultPrComments {
-    def queue = [oss: []]
-    def finishedSuites = [oss: [], xpack: [], ossFirefox: [], xpackFirefox: []]
-
     catchError {
       retryable.enable()
       kibanaPipeline.newPipeline {
         catchError {
-          def metricsJson = toJSON(finishedSuites).toString()
+          def metricsJson = toJSON(kibanaPipeline.getFinishedSuites()).toString()
           dir('target/test-metrics') {
             def date = (new Date()).format("yyyyMMdd-HHmmss")
             def filename = "metrics-${date}.json"
