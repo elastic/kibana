@@ -52,7 +52,6 @@ import { InfraPluginSetup } from '../../infra/server';
 
 export interface LegacyAPI {
   getServerStatus: () => string;
-  infra: any;
 }
 
 interface PluginsSetup {
@@ -201,8 +200,9 @@ export class Plugin {
           name: serverInfo.name,
           index: get(legacyConfig, 'kibana.index'),
           host: serverInfo.host,
-          transport_address: `${serverInfo.host}:${serverInfo.port}`,
+          locale: i18n.getLocale(),
           port: serverInfo.port.toString(),
+          transport_address: `${serverInfo.host}:${serverInfo.port}`,
           version: this.initializerContext.env.packageInfo.version,
           snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
         },
@@ -236,7 +236,7 @@ export class Plugin {
       this.monitoringCore = this.getLegacyShim(
         config,
         legacyConfig,
-        core.getStartServices as () => Promise<[CoreStart, PluginsStart]>,
+        core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         this.licenseService,
         this.cluster
       );
@@ -305,7 +305,7 @@ export class Plugin {
   getLegacyShim(
     config: MonitoringConfig,
     legacyConfig: any,
-    getCoreServices: () => Promise<[CoreStart, PluginsStart]>,
+    getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
     cluster: ICustomClusterClient
   ): MonitoringCore {

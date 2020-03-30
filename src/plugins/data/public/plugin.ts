@@ -109,19 +109,22 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.addTriggerAction(
+    uiActions.attachAction(
       SELECT_RANGE_TRIGGER,
       selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.addTriggerAction(
+    uiActions.attachAction(
       VALUE_CLICK_TRIGGER,
       valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core, this.packageInfo),
+      search: this.searchService.setup(core, {
+        packageInfo: this.packageInfo,
+        query: queryService,
+      }),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
     };
@@ -146,10 +149,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const search = this.searchService.start(core);
     setSearchService(search);
 
-    uiActions.addTriggerAction(
-      APPLY_FILTER_TRIGGER,
-      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
-    );
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
 
     const dataServices = {
       actions: {
