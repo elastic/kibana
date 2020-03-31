@@ -57,30 +57,27 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      if (!context.alerting || !context.actions) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-      const alertsClient = context.alerting.getAlertsClient();
-      const actionsClient = context.actions.getActionsClient();
-      const clusterClient = context.core.elasticsearch.dataClient;
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.siem.getSiemClient();
-
-      if (!actionsClient || !alertsClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-
-      const { filename } = request.body.file.hapi;
-      const fileExtension = extname(filename).toLowerCase();
-      if (fileExtension !== '.ndjson') {
-        return siemResponse.error({
-          statusCode: 400,
-          body: `Invalid file extension ${fileExtension}`,
-        });
-      }
-
-      const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       try {
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.siem?.getSiemClient();
+
+        if (!siemClient || !actionsClient || !alertsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const { filename } = request.body.file.hapi;
+        const fileExtension = extname(filename).toLowerCase();
+        if (fileExtension !== '.ndjson') {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `Invalid file extension ${fileExtension}`,
+          });
+        }
+
+        const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
         const readStream = createRulesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
           request.body.file,

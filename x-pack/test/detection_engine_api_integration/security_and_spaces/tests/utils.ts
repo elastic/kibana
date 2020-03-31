@@ -404,6 +404,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
     'http://www.example.com/some-article-about-attack',
     'Some plain text string here explaining why this is a valid thing to look out for',
   ],
+  throttle: 'no_actions',
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
   updated_by: 'elastic',

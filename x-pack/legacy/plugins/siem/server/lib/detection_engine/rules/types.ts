@@ -16,7 +16,6 @@ import {
 import { AlertsClient, PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { Alert } from '../../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { LegacyRequest } from '../../../types';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 
@@ -37,14 +36,6 @@ export interface FindParamsRest {
   sort_order: 'asc' | 'desc';
   fields: string[];
   filter: string;
-}
-
-export interface PatchRulesRequest extends LegacyRequest {
-  payload: PatchRuleAlertParamsRest;
-}
-
-export interface UpdateRulesRequest extends LegacyRequest {
-  payload: UpdateRuleAlertParamsRest;
 }
 
 export interface RuleAlertType extends Alert {
@@ -93,7 +84,7 @@ export interface IRuleStatusFindType {
   saved_objects: IRuleStatusSavedObject[];
 }
 
-export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
+export type RuleStatusString = 'succeeded' | 'failed' | 'going to run';
 
 export interface HapiReadableStream extends Readable {
   hapi: {

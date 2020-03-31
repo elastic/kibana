@@ -35,12 +35,9 @@ export const deleteRulesRoute = (router: IRouter) => {
 
       try {
         const { id, rule_id: ruleId } = request.query;
-        if (!context.alerting || !context.actions) {
-          return siemResponse.error({ statusCode: 404 });
-        }
 
-        const alertsClient = context.alerting.getAlertsClient();
-        const actionsClient = context.actions.getActionsClient();
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
         if (!actionsClient || !alertsClient) {
