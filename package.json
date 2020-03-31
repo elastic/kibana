@@ -306,6 +306,7 @@
     "@percy/agent": "^0.11.0",
     "@testing-library/react": "^9.3.2",
     "@testing-library/react-hooks": "^3.2.1",
+    "@types/acorn": "^4.0.5",
     "@types/angular": "^1.6.56",
     "@types/angular-mocks": "^1.7.0",
     "@types/babel__core": "^7.1.2",
