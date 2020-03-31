@@ -90,15 +90,15 @@ kibanaPipeline(timeoutMinutes: 180) {
 }
 
 def listVcsEnvVars() {
-  kibanaPipeline.bash(
-
-    '''
-
-    git branch
-
-    ''', "### Tre Debugging"
-
-  )
+//  kibanaPipeline.bash(
+//
+//    '''
+//
+//    git branch
+//
+//    ''', "### Tre Debugging"
+//
+//  )
   kibanaPipeline.bash(
     '''
 
@@ -112,16 +112,20 @@ def listVcsEnvVars() {
       fi
     }
 
-    XS=("${BUILD_DISPLAY_NAME}" \
-        "${GIT_BRANCH}" \
+    CMD="git log --pretty=format"
+    XS=("${SHELL}" \
+        "${VAULT_ADDR}" \
         "$(git rev-parse --abbrev-ref HEAD)" \
-        "$(git log --pretty=format:"%h - %an, %ar : %s" -1)")
+        "$(${CMD}":%h" -1)" \
+        "$(${CMD}":%an" -1)" \
+        "$(${CMD}":%ar" -1)" \
+        "$(${CMD}":%s" -1)")
 
     for X in "${!XS[@]}"; do
     {
       echo "### Checking: $X"
       predicate "${XS[X]}"
-      echo "$X: ${XS[X]}"
+      echo "  ${XS[X]}"
     }
     done
 
