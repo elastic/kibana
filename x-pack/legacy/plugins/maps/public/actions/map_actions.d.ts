@@ -5,8 +5,14 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import { AnyAction } from 'redux';
 import { LAYER_TYPE } from '../../common/constants';
 import { DataMeta, MapFilters } from '../../common/descriptor_types';
+import {
+  MapCenterAndZoom,
+  MapRefreshConfig,
+} from '../../../../../plugins/maps/common/descriptor_types';
 
 export type SyncContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
@@ -24,3 +30,34 @@ export function updateSourceProp(
   value: unknown,
   newLayerType?: LAYER_TYPE
 ): void;
+
+export function setGotoWithCenter(config: MapCenterAndZoom): AnyAction;
+
+export function replaceLayerList(layerList: unknown[]): AnyAction;
+
+export type QueryGroup = {
+  filters: Filter[];
+  query?: Query;
+  timeFilters?: TimeRange;
+  refresh?: boolean;
+};
+
+export function setQuery(query: QueryGroup): AnyAction;
+
+export function setRefreshConfig(config: MapRefreshConfig): AnyAction;
+
+export function disableScrollZoom(): AnyAction;
+
+export function disableInteractive(): AnyAction;
+
+export function disableTooltipControl(): AnyAction;
+
+export function hideToolbarOverlay(): AnyAction;
+
+export function hideLayerControl(): AnyAction;
+
+export function hideViewControl(): AnyAction;
+
+export function setHiddenLayers(hiddenLayerIds: string[]): AnyAction;
+
+export function addLayerWithoutDataSync(layerDescriptor: unknown): AnyAction;

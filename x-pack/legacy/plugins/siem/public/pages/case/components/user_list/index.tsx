@@ -12,6 +12,8 @@ import {
   EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { ElasticUser } from '../../../../containers/case/types';
@@ -22,6 +24,7 @@ interface UserListProps {
     body: string;
   };
   headline: string;
+  loading?: boolean;
   users: ElasticUser[];
 }
 
@@ -38,20 +41,22 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 const renderUsers = (
   users: ElasticUser[],
   handleSendEmail: (emailAddress: string | undefined | null) => void
-) => {
-  return users.map(({ fullName, username, email }, key) => (
+) =>
+  users.map(({ fullName, username, email }, key) => (
     <MyFlexGroup key={key} justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
-            <MyAvatar name={fullName ? fullName : username} />
+            <MyAvatar name={fullName ? fullName : username ?? ''} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <p>
-              <strong>
-                <small data-test-subj="case-view-username">{username}</small>
-              </strong>
-            </p>
+            <EuiToolTip position="top" content={<p>{fullName ?? username}</p>}>
+              <p>
+                <strong>
+                  <small data-test-subj="case-view-username">{username}</small>
+                </strong>
+              </p>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -61,13 +66,13 @@ const renderUsers = (
           onClick={handleSendEmail.bind(null, email)}
           iconType="email"
           aria-label="email"
+          isDisabled={email == null}
         />
       </EuiFlexItem>
     </MyFlexGroup>
   ));
-};
 
-export const UserList = React.memo(({ email, headline, users }: UserListProps) => {
+export const UserList = React.memo(({ email, headline, loading, users }: UserListProps) => {
   const handleSendEmail = useCallback(
     (emailAddress: string | undefined | null) => {
       if (emailAddress && emailAddress != null) {
@@ -76,13 +81,23 @@ export const UserList = React.memo(({ email, headline, users }: UserListProps) =
     },
     [email.subject]
   );
-  return (
+  return users.filter(({ username }) => username != null && username !== '').length > 0 ? (
     <EuiText>
       <h4>{headline}</h4>
       <EuiHorizontalRule margin="xs" />
-      {renderUsers(users, handleSendEmail)}
+      {loading && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {renderUsers(
+        users.filter(({ username }) => username != null && username !== ''),
+        handleSendEmail
+      )}
     </EuiText>
-  );
+  ) : null;
 });
 
 UserList.displayName = 'UserList';
