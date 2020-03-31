@@ -8,7 +8,6 @@
 // Scalars
 // ====================================================
 
-
 export type UnsignedInteger = any;
 
 // ====================================================
@@ -367,7 +366,6 @@ export interface DocCount {
   count: UnsignedInteger;
 }
 
-
 export interface Snapshot {
   counts: SnapshotCount;
 }
@@ -379,7 +377,6 @@ export interface SnapshotCount {
 
   total: number;
 }
-
 
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
@@ -524,7 +521,6 @@ export interface SummaryHistogramPoint {
   down: number;
 }
 
-
 export interface AllPingsQueryArgs {
   /** Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'. */
   sort?: string | null;
@@ -540,6 +536,7 @@ export interface AllPingsQueryArgs {
   dateRangeEnd: string;
   /** Optional: agent location to filter by. */
   location?: string | null;
+  page?: number;
 }
 
 export interface GetMonitorStatesQueryArgs {
@@ -552,6 +549,8 @@ export interface GetMonitorStatesQueryArgs {
   filters?: string | null;
 
   statusFilter?: string | null;
+
+  pageSize: number;
 }
 
 // ====================================================

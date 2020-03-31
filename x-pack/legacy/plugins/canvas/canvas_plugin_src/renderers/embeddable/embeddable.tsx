@@ -14,7 +14,6 @@ import {
   EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
 } from '../../../../../../../src/plugins/embeddable/public';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
@@ -39,8 +38,8 @@ const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) =
         <EmbeddablePanel
           embeddable={embeddableObject}
           getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
-          getEmbeddableFactory={start.getEmbeddableFactory}
-          getAllEmbeddableFactories={start.getEmbeddableFactories}
+          getEmbeddableFactory={npStart.plugins.embeddable.getEmbeddableFactory}
+          getAllEmbeddableFactories={npStart.plugins.embeddable.getEmbeddableFactories}
           notifications={npStart.core.notifications}
           overlays={npStart.core.overlays}
           inspector={npStart.plugins.inspector}
@@ -67,7 +66,7 @@ const embeddable = () => ({
     const uniqueId = handlers.getElementId();
 
     if (!embeddablesRegistry[uniqueId]) {
-      const factory = Array.from(start.getEmbeddableFactories()).find(
+      const factory = Array.from(npStart.plugins.embeddable.getEmbeddableFactories()).find(
         embeddableFactory => embeddableFactory.type === embeddableType
       ) as EmbeddableFactory<EmbeddableInput>;
 
@@ -82,8 +81,13 @@ const embeddable = () => ({
       ReactDOM.unmountComponentAtNode(domNode);
 
       const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
-        handlers.onEmbeddableInputChange(embeddableInputToExpression(updatedInput, embeddableType));
+        const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
+
+        if (updatedExpression) {
+          handlers.onEmbeddableInputChange(updatedExpression);
+        }
       });
+
       ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () => handlers.done());
 
       handlers.onResize(() => {

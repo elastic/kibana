@@ -78,6 +78,14 @@ storiesOf('app/ServiceMap/Cytoscape', module)
         { data: { id: 'cache', label: 'cache', 'span.type': 'cache' } },
         { data: { id: 'database', label: 'database', 'span.type': 'db' } },
         {
+          data: {
+            id: 'elasticsearch',
+            label: 'elasticsearch',
+            'span.type': 'db',
+            'span.subtype': 'elasticsearch'
+          }
+        },
+        {
           data: { id: 'external', label: 'external', 'span.type': 'external' }
         },
         {
@@ -186,6 +194,7 @@ storiesOf('app/ServiceMap/Cytoscape', module)
       const height = 640;
       const width = 1340;
       const serviceName = undefined; // global service map
+
       return (
         <Cytoscape
           elements={elementsFromResponses}

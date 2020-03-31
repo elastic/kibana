@@ -13,6 +13,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
   const retry = getService('retry');
 
   return new (class UptimePage {
+    public get settings() {
+      return uptimeService.settings;
+    }
+
+    public async goToRoot() {
+      await pageObjects.common.navigateToApp('uptime');
+    }
+
     public async goToUptimePageAndSetDateRange(
       datePickerStartValue: string,
       datePickerEndValue: string
@@ -54,12 +62,18 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await uptimeService.setFilterText(filterQuery);
     }
 
-    public async pageHasExpectedIds(monitorIdsToCheck: string[]) {
-      await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+    public async pageHasDataMissing() {
+      return await uptimeService.pageHasDataMissing();
     }
 
-    public async pageUrlContains(value: string, expected: boolean = true) {
-      await retry.try(async () => {
+    public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
+      return retry.tryForTime(15000, async () => {
+        await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+      });
+    }
+
+    public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
+      return retry.tryForTime(12000, async () => {
         expect(await uptimeService.urlContains(value)).to.eql(expected);
       });
     }
@@ -131,6 +145,11 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await alerts.setMonitorStatusSelectableToHours();
       await alerts.setLocationsSelectable();
       await alerts.clickSaveAlertButtion();
+    }
+
+    public async setMonitorListPageSize(size: number): Promise<void> {
+      await uptimeService.openPageSizeSelectPopover();
+      return uptimeService.clickPageSizeSelectPopoverItem(size);
     }
   })();
 }

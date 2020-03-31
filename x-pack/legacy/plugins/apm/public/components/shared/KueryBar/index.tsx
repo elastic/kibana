@@ -79,7 +79,7 @@ export function KueryBar() {
   const disabled = /\/service-map$/.test(location.pathname);
   const disabledPlaceholder = i18n.translate(
     'xpack.apm.kueryBar.disabledPlaceholder',
-    { defaultMessage: 'Search is not available for service maps' }
+    { defaultMessage: 'Search is not available for service map' }
   );
 
   async function onChange(inputValue: string, selectionStart: number) {

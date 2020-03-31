@@ -18,6 +18,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { EventEmitter } from 'events';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -34,28 +35,29 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from '../../../../../../plugins/visualizations/public';
 import { SavedSearch } from '../../../../../../plugins/discover/public';
 
 interface LinkedSearchProps {
   savedSearch: SavedSearch;
-  vis: Vis;
+  eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
   savedSearch?: SavedSearch;
   vis: Vis;
+  eventEmitter: EventEmitter;
 }
 
-export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
+export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const closePopover = useCallback(() => setShowPopover(false), []);
   const onClickButtonLink = useCallback(() => setShowPopover(v => !v), []);
   const onClickUnlikFromSavedSearch = useCallback(() => {
     setShowPopover(false);
-    vis.emit('unlinkFromSavedSearch');
-  }, [vis]);
+    eventEmitter.emit('unlinkFromSavedSearch');
+  }, [eventEmitter]);
 
   const linkButtonAriaLabel = i18n.translate(
     'visDefaultEditor.sidebar.savedSearch.linkButtonAriaLabel',
@@ -151,20 +153,20 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
   );
 }
 
-function SidebarTitle({ savedSearch, vis, isLinkedSearch }: SidebarTitleProps) {
+function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: SidebarTitleProps) {
   return isLinkedSearch && savedSearch ? (
-    <LinkedSearch savedSearch={savedSearch} vis={vis} />
+    <LinkedSearch savedSearch={savedSearch} eventEmitter={eventEmitter} />
   ) : vis.type.options.showIndexSelection ? (
     <EuiTitle size="xs" className="visEditorSidebar__titleContainer eui-textTruncate">
       <h2
         title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
           defaultMessage: 'Index pattern: {title}',
           values: {
-            title: vis.indexPattern.title,
+            title: vis.data.indexPattern!.title,
           },
         })}
       >
-        {vis.indexPattern.title}
+        {vis.data.indexPattern!.title}
       </h2>
     </EuiTitle>
   ) : (

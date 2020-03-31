@@ -129,7 +129,7 @@ function LayerPanels(
               },
             },
             visualization: {
-              activeId: activeVisualization.id,
+              ...prevState.visualization,
               state: newVisualizationState,
             },
             stagedPreview: undefined,

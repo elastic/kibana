@@ -141,6 +141,7 @@ export const Properties = React.memo<Props>(
           showTimelineModal={showTimelineModal}
           showUsersView={title.length > 0}
           timelineId={timelineId}
+          title={title}
           updateDescription={updateDescription}
           updateNote={updateNote}
           usersViewing={usersViewing}

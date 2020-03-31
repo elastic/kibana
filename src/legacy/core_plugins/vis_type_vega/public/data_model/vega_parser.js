@@ -116,7 +116,8 @@ export class VegaParser {
    */
   _compileVegaLite() {
     this.vlspec = this.spec;
-    const logger = vega.logger(vega.Warn);
+    // eslint-disable-next-line import/namespace
+    const logger = vega.logger(vega.Warn); // note: eslint has a false positive here
     logger.warn = this._onWarning.bind(this);
     this.spec = vegaLite.compile(this.vlspec, logger).spec;
 

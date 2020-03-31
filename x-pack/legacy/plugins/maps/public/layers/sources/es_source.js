@@ -231,7 +231,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  _getGeoField = async () => {
+  async _getGeoField() {
     const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this._descriptor.geoField);
     if (!geoField) {
@@ -243,7 +243,7 @@ export class AbstractESSource extends AbstractVectorSource {
       );
     }
     return geoField;
-  };
+  }
 
   async getDisplayName() {
     try {

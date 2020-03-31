@@ -16,6 +16,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
 } from 'src/core/server';
+import { DynamicSettings } from '../../../../legacy/plugins/uptime/common/runtime_types';
 import { UMServerLibs } from '../lib/lib';
 
 /**
@@ -66,6 +67,7 @@ export interface UMRouteParams {
     clientParams?: Record<string, any>,
     options?: CallAPIOptions | undefined
   ) => Promise<any>;
+  dynamicSettings: DynamicSettings;
   savedObjectsClient: Pick<
     SavedObjectsClient,
     | 'errors'

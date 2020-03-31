@@ -17,22 +17,44 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
   }
   const alertUUID = uuid.v4();
 
+  const baseCriterion = {
+    threshold: schema.arrayOf(schema.number()),
+    comparator: schema.oneOf([
+      schema.literal('>'),
+      schema.literal('<'),
+      schema.literal('>='),
+      schema.literal('<='),
+      schema.literal('between'),
+    ]),
+    timeUnit: schema.string(),
+    timeSize: schema.number(),
+    indexPattern: schema.string(),
+  };
+
+  const nonCountCriterion = schema.object({
+    ...baseCriterion,
+    metric: schema.string(),
+    aggType: schema.oneOf([
+      schema.literal('avg'),
+      schema.literal('min'),
+      schema.literal('max'),
+      schema.literal('rate'),
+      schema.literal('cardinality'),
+    ]),
+  });
+
+  const countCriterion = schema.object({
+    ...baseCriterion,
+    aggType: schema.literal('count'),
+    metric: schema.never(),
+  });
+
   alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric Alert - Threshold',
     validate: {
       params: schema.object({
-        criteria: schema.arrayOf(
-          schema.object({
-            threshold: schema.arrayOf(schema.number()),
-            comparator: schema.string(),
-            aggType: schema.string(),
-            metric: schema.string(),
-            timeUnit: schema.string(),
-            timeSize: schema.number(),
-            indexPattern: schema.string(),
-          })
-        ),
+        criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
         groupBy: schema.maybe(schema.string()),
         filterQuery: schema.maybe(schema.string()),
       }),

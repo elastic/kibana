@@ -1,0 +1,16 @@
+{
+  "ml.stop_data_frame_analytics": {
+    "url_params": {
+      "allow_no_match": "__flag__",
+      "force": "__flag__",
+      "timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/data_frame/analytics/{id}/_stop"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/stop-dfanalytics.html"
+  }
+}

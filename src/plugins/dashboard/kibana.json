@@ -5,7 +5,8 @@
     "data",
     "embeddable",
     "inspector",
-    "uiActions"
+    "uiActions",
+    "savedObjects"
   ],
   "optionalPlugins": [
     "share"

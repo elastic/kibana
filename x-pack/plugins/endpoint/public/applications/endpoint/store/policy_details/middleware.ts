@@ -5,23 +5,38 @@
  */
 
 import { MiddlewareFactory, PolicyDetailsState } from '../../types';
-import { selectPolicyIdFromParams, isOnPolicyDetailsPage } from './selectors';
+import { policyIdFromParams, isOnPolicyDetailsPage } from './selectors';
+import { sendGetDatasource } from '../../services/ingest';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
+  const http = coreStart.http;
+
   return ({ getState, dispatch }) => next => async action => {
     next(action);
     const state = getState();
 
     if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
-      const id = selectPolicyIdFromParams(state);
+      const id = policyIdFromParams(state);
 
-      const { getFakeDatasourceDetailsApiResponse } = await import('../policy_list/fake_data');
-      const policyItem = await getFakeDatasourceDetailsApiResponse(id);
+      const { item: policyItem } = await sendGetDatasource(http, id);
 
       dispatch({
         type: 'serverReturnedPolicyDetailsData',
         payload: {
           policyItem,
+          policyConfig: {
+            windows: {
+              malware: {
+                mode: 'detect',
+              },
+              eventing: {
+                process: true,
+                network: true,
+              },
+            },
+            mac: {},
+            linux: {},
+          },
         },
       });
     }

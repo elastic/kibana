@@ -11,6 +11,10 @@ import { getAllCompositeData } from '../../../utils/get_all_composite_data';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Comparator, AlertStates } from './types';
 import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { getDateHistogramOffset } from '../../snapshot/query_helpers';
+
+const TOTAL_BUCKETS = 5;
 
 interface Aggregation {
   aggregatedIntervals: {
@@ -63,7 +67,19 @@ export const getElasticsearchMetricQuery = (
   groupBy?: string,
   filterQuery?: string
 ) => {
+  if (aggType === 'count' && metric) {
+    throw new Error('Cannot aggregate document count with a metric');
+  }
+  if (aggType !== 'count' && !metric) {
+    throw new Error('Can only aggregate without a metric if using the document count aggregator');
+  }
   const interval = `${timeSize}${timeUnit}`;
+  const to = Date.now();
+  const intervalAsSeconds = getIntervalInSeconds(interval);
+  // We need enough data for 5 buckets worth of data. We also need
+  // to convert the intervalAsSeconds to milliseconds.
+  const from = to - intervalAsSeconds * 1000 * TOTAL_BUCKETS;
+  const offset = getDateHistogramOffset(from, interval);
 
   const aggregations =
     aggType === 'count'
@@ -83,6 +99,11 @@ export const getElasticsearchMetricQuery = (
       date_histogram: {
         field: '@timestamp',
         fixed_interval: interval,
+        offset,
+        extended_bounds: {
+          min: from,
+          max: to,
+        },
       },
       aggregations,
     },
@@ -108,25 +129,34 @@ export const getElasticsearchMetricQuery = (
       }
     : baseAggs;
 
+  const rangeFilters = [
+    {
+      range: {
+        '@timestamp': {
+          gte: from,
+          lte: to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
+
+  const metricFieldFilters = metric
+    ? [
+        {
+          exists: {
+            field: metric,
+          },
+        },
+      ]
+    : [];
+
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
   return {
     query: {
       bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: `now-${interval}`,
-              },
-            },
-          },
-          {
-            exists: {
-              field: metric,
-            },
-          },
-        ],
+        filter: [...rangeFilters, ...metricFieldFilters],
         ...parsedFilterQuery,
       },
     },

@@ -82,6 +82,10 @@ export const agentConfigRouteService = {
   getDeletePath: () => {
     return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN;
   },
+
+  getInfoFullPath: (agentConfigId: string) => {
+    return AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
+  },
 };
 
 export const fleetSetupRouteService = {

@@ -17,20 +17,23 @@
  * under the License.
  */
 
-import { useEffect, useReducer, useCallback } from 'react';
-import { isEqual } from 'lodash';
+import { useReducer, useCallback } from 'react';
+import { EventEmitter } from 'events';
 
-import { Vis, VisState, VisParams } from 'src/legacy/core_plugins/visualizations/public';
-import { createEditorStateReducer, initEditorState } from './reducers';
+import { Vis } from 'src/plugins/visualizations/public';
+import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
-import { EditorAction, updateStateParams } from './actions';
+import { EditorAction } from './actions';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 import { VisDefaultEditorKibanaServices } from '../../../types';
 
 export * from './editor_form_state';
 export * from './actions';
 
-export function useEditorReducer(vis: Vis): [VisState, React.Dispatch<EditorAction>] {
+export function useEditorReducer(
+  vis: Vis,
+  eventEmitter: EventEmitter
+): [EditorVisState, React.Dispatch<EditorAction>] {
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
   const [state, dispatch] = useReducer(
     createEditorStateReducer(services.data.search),
@@ -38,28 +41,15 @@ export function useEditorReducer(vis: Vis): [VisState, React.Dispatch<EditorActi
     initEditorState
   );
 
-  useEffect(() => {
-    const handleVisUpdate = (params: VisParams) => {
-      if (!isEqual(params, state.params)) {
-        dispatch(updateStateParams(params));
-      }
-    };
-
-    // fires when visualization state changes, and we need to copy changes to editorState
-    vis.on('updateEditorStateParams', handleVisUpdate);
-
-    return () => vis.off('updateEditorStateParams', handleVisUpdate);
-  }, [vis, state.params]);
-
   const wrappedDispatch = useCallback(
     (action: EditorAction) => {
       dispatch(action);
 
-      vis.emit('dirtyStateChange', {
+      eventEmitter.emit('dirtyStateChange', {
         isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
       });
     },
-    [vis]
+    [eventEmitter]
   );
 
   return [state, wrappedDispatch];

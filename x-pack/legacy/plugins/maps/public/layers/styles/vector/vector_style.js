@@ -503,11 +503,19 @@ export class VectorStyle extends AbstractStyle {
         const dynamicStyleProp = dynamicStyleProps[j];
         const name = dynamicStyleProp.getField().getName();
         const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
-        const styleValue = dynamicStyleProp.getMbValue(feature.properties[name]);
+        const rawValue = feature.properties[name];
         if (dynamicStyleProp.supportsMbFeatureState()) {
-          tmpFeatureState[computedName] = styleValue;
+          tmpFeatureState[name] = dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue); //the same value will be potentially overridden multiple times, if the name remains identical
         } else {
-          feature.properties[computedName] = styleValue;
+          //in practice, a new system property will only be created for:
+          // - label text: this requires the value to be formatted first.
+          // - icon orientation: this is a lay-out property which do not support feature-state (but we're still coercing to a number)
+
+          const formattedValue = dynamicStyleProp.isOrdinal()
+            ? dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue)
+            : dynamicStyleProp.formatField(rawValue);
+
+          feature.properties[computedName] = formattedValue;
         }
       }
       tmpFeatureIdentifier.source = mbSourceId;

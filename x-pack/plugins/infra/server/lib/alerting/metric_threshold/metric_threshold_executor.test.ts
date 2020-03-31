@@ -17,7 +17,7 @@ const alertInstances = new Map();
 
 const services = {
   callCluster(_: string, { body }: any) {
-    const metric = body.query.bool.filter[1].exists.field;
+    const metric = body.query.bool.filter[1]?.exists.field;
     if (body.aggs.groupings) {
       if (body.aggs.groupings.composite.after) {
         return mocks.compositeEndResponse;
@@ -228,6 +228,7 @@ describe('The metric threshold alert type', () => {
               comparator,
               threshold,
               aggType: 'count',
+              metric: undefined,
             },
           ],
         },

@@ -88,6 +88,20 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
   }
 };
 
+export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  search: '',
+  reporters: [],
+  status: 'open',
+  tags: [],
+};
+
+export const DEFAULT_QUERY_PARAMS: QueryParams = {
+  page: DEFAULT_TABLE_ACTIVE_PAGE,
+  perPage: DEFAULT_TABLE_LIMIT,
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+};
+
 const initialData: AllCases = {
   cases: [],
   countClosedCases: null,
@@ -109,23 +123,14 @@ interface UseGetCases extends UseGetCasesState {
   setQueryParams: (queryParams: QueryParams) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
-export const useGetCases = (): UseGetCases => {
+
+export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
-    filterOptions: {
-      search: '',
-      reporters: [],
-      status: 'open',
-      tags: [],
-    },
+    filterOptions: DEFAULT_FILTER_OPTIONS,
     isError: false,
     loading: [],
-    queryParams: {
-      page: DEFAULT_TABLE_ACTIVE_PAGE,
-      perPage: DEFAULT_TABLE_LIMIT,
-      sortField: SortFieldCase.createdAt,
-      sortOrder: 'desc',
-    },
+    queryParams: initialQueryParams ?? DEFAULT_QUERY_PARAMS,
     selectedCases: [],
   });
   const [, dispatchToaster] = useStateToaster();
@@ -144,12 +149,15 @@ export const useGetCases = (): UseGetCases => {
 
   const fetchCases = useCallback((filterOptions: FilterOptions, queryParams: QueryParams) => {
     let didCancel = false;
+    const abortCtrl = new AbortController();
+
     const fetchData = async () => {
       dispatch({ type: 'FETCH_INIT', payload: 'cases' });
       try {
         const response = await getCases({
           filterOptions,
           queryParams,
+          signal: abortCtrl.signal,
         });
         if (!didCancel) {
           dispatch({
@@ -170,6 +178,7 @@ export const useGetCases = (): UseGetCases => {
     };
     fetchData();
     return () => {
+      abortCtrl.abort();
       didCancel = true;
     };
   }, []);
@@ -182,13 +191,17 @@ export const useGetCases = (): UseGetCases => {
   const dispatchUpdateCaseProperty = useCallback(
     ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
       let didCancel = false;
+      const abortCtrl = new AbortController();
+
       const fetchData = async () => {
         dispatch({ type: 'FETCH_INIT', payload: 'caseUpdate' });
         try {
           await patchCase(
             caseId,
             { [updateKey]: updateValue },
-            version ?? '' // saved object versions are typed as string | undefined, hope that's not true
+            // saved object versions are typed as string | undefined, hope that's not true
+            version ?? '',
+            abortCtrl.signal
           );
           if (!didCancel) {
             dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
@@ -204,6 +217,7 @@ export const useGetCases = (): UseGetCases => {
       };
       fetchData();
       return () => {
+        abortCtrl.abort();
         didCancel = true;
       };
     },

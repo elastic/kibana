@@ -11,10 +11,8 @@ import { withRouter } from 'react-router-dom';
 const initialLocation = {} as Location;
 
 const LocationContext = createContext(initialLocation);
-const LocationProvider: React.ComponentClass<{}> = withRouter(
-  ({ location, children }) => {
-    return <LocationContext.Provider children={children} value={location} />;
-  }
-);
+const LocationProvider = withRouter(({ location, children }) => {
+  return <LocationContext.Provider children={children} value={location} />;
+});
 
 export { LocationContext, LocationProvider };

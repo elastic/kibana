@@ -11,6 +11,8 @@ import numeral from '@elastic/numeral';
 import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
+import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib/json_xjson_translation_tools';
+
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State } from './state';
 import {
@@ -29,9 +31,12 @@ import {
 } from '../../../../../../../common/constants/validation';
 import {
   getDependentVar,
+  getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -141,6 +146,7 @@ export const validateAdvancedEditor = (state: State): State => {
 
   let dependentVariableEmpty = false;
   let excludesValid = true;
+  let trainingPercentValid = true;
 
   if (
     jobConfig.analysis === undefined &&
@@ -164,6 +170,30 @@ export const validateAdvancedEditor = (state: State): State => {
           'xpack.ml.dataframe.analytics.create.advancedEditorMessage.excludesInvalid',
           {
             defaultMessage: 'The dependent variable cannot be excluded.',
+          }
+        ),
+        message: '',
+      });
+    }
+
+    const trainingPercent = getTrainingPercent(jobConfig.analysis);
+    if (
+      trainingPercent !== undefined &&
+      (isNaN(trainingPercent) ||
+        trainingPercent < TRAINING_PERCENT_MIN ||
+        trainingPercent > TRAINING_PERCENT_MAX)
+    ) {
+      trainingPercentValid = false;
+
+      state.advancedEditorMessages.push({
+        error: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.trainingPercentInvalid',
+          {
+            defaultMessage: 'The training percent must be a value between {min} and {max}.',
+            values: {
+              min: TRAINING_PERCENT_MIN,
+              max: TRAINING_PERCENT_MAX,
+            },
           }
         ),
         message: '',
@@ -249,6 +279,7 @@ export const validateAdvancedEditor = (state: State): State => {
   state.isValid =
     maxDistinctValuesError === undefined &&
     excludesValid &&
+    trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
@@ -365,7 +396,23 @@ export function reducer(state: State, action: Action): State {
       return getInitialState();
 
     case ACTION.SET_ADVANCED_EDITOR_RAW_STRING:
-      return { ...state, advancedEditorRawString: action.advancedEditorRawString };
+      let resultJobConfig;
+      try {
+        resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
+      } catch (e) {
+        return {
+          ...state,
+          advancedEditorRawString: action.advancedEditorRawString,
+          isAdvancedEditorValidJson: false,
+          advancedEditorMessages: [],
+        };
+      }
+
+      return {
+        ...validateAdvancedEditor({ ...state, jobConfig: resultJobConfig }),
+        advancedEditorRawString: action.advancedEditorRawString,
+        isAdvancedEditorValidJson: true,
+      };
 
     case ACTION.SET_FORM_STATE:
       const newFormState = { ...state.form, ...action.payload };

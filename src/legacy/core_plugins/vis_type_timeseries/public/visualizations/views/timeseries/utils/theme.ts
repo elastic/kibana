@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// @ts-ignore
 import colorJS from 'color';
 import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 

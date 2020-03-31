@@ -74,6 +74,7 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
+        allowSubFeaturePrivileges: false,
         layout:
           rawLicense !== undefined && !rawLicense?.isAvailable
             ? 'error-xpack-unavailable'
@@ -90,16 +91,18 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
+        allowSubFeaturePrivileges: false,
       };
     }
 
-    const showRoleMappingsManagement = rawLicense.hasAtLeast('gold');
+    const isLicenseGoldOrBetter = rawLicense.hasAtLeast('gold');
     const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
       showLogin: true,
       allowLogin: true,
       showLinks: true,
-      showRoleMappingsManagement,
+      showRoleMappingsManagement: isLicenseGoldOrBetter,
+      allowSubFeaturePrivileges: isLicenseGoldOrBetter,
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,

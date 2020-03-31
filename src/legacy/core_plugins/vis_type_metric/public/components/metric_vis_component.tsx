@@ -20,19 +20,19 @@
 import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
-import { getFormat } from '../legacy_imports';
 import { MetricVisValue } from './metric_vis_value';
 import { Input } from '../metric_vis_fn';
 import { FieldFormatsContentType, IFieldFormat } from '../../../../../plugins/data/public';
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { getHeatmapColors } from '../../../../../plugins/charts/public';
 import { VisParams, MetricVisMetric } from '../types';
-import { SchemaConfig, Vis } from '../../../visualizations/public';
+import { getFormatService } from '../services';
+import { SchemaConfig, ExprVis } from '../../../../../plugins/visualizations/public';
 
 export interface MetricVisComponentProps {
   visParams: VisParams;
   visData: Input;
-  vis: Vis;
+  vis: ExprVis;
   renderComplete: () => void;
 }
 
@@ -121,13 +121,13 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
 
     if (dimensions.bucket) {
       bucketColumnId = table.columns[dimensions.bucket.accessor].id;
-      bucketFormatter = getFormat(dimensions.bucket.format);
+      bucketFormatter = getFormatService().deserialize(dimensions.bucket.format);
     }
 
     dimensions.metrics.forEach((metric: SchemaConfig) => {
       const columnIndex = metric.accessor;
       const column = table?.columns[columnIndex];
-      const formatter = getFormat(metric.format);
+      const formatter = getFormatService().deserialize(metric.format);
       table.rows.forEach((row, rowIndex) => {
         let title = column.name;
         let value: any = row[column.id];

@@ -14,7 +14,7 @@ export type MockAuthenticationProviderOptions = ReturnType<
   typeof mockAuthenticationProviderOptions
 >;
 
-export function mockAuthenticationProviderOptions() {
+export function mockAuthenticationProviderOptions(options?: { name: string }) {
   const basePath = httpServiceMock.createSetupContract().basePath;
   basePath.get.mockReturnValue('/base-path');
 
@@ -23,5 +23,6 @@ export function mockAuthenticationProviderOptions() {
     logger: loggingServiceMock.create().get(),
     basePath,
     tokens: { refresh: jest.fn(), invalidate: jest.fn() },
+    name: options?.name ?? 'basic1',
   };
 }

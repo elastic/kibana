@@ -131,6 +131,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
   }
 >
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent={
       <FrameHeading
         isLibraryFrame={false}

@@ -17,6 +17,11 @@ export const setupModuleBodySchema = schema.object({
   end: schema.maybe(schema.number()),
   jobOverrides: schema.maybe(schema.any()),
   datafeedOverrides: schema.maybe(schema.any()),
+  /**
+   * Indicates whether an estimate of the model memory limit
+   * should be made by checking the cardinality of fields in the job configurations.
+   */
+  estimateModelMemory: schema.maybe(schema.boolean()),
 });
 
 export const getModuleIdParamSchema = (optional = false) => {

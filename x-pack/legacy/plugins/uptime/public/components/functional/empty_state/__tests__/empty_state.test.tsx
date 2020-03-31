@@ -7,8 +7,9 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EmptyStateComponent } from '../empty_state';
-import { GraphQLError } from 'graphql';
 import { StatesIndexStatus } from '../../../../../common/runtime_types';
+import { IHttpFetchError } from '../../../../../../../../../target/types/core/public/http';
+import { HttpFetchError } from '../../../../../../../../../src/core/public/http/http_fetch_error';
 
 describe('EmptyState component', () => {
   let statesIndexStatus: StatesIndexStatus;
@@ -41,18 +42,8 @@ describe('EmptyState component', () => {
   });
 
   it(`renders error message when an error occurs`, () => {
-    const errors: GraphQLError[] = [
-      {
-        message: 'An error occurred',
-        locations: undefined,
-        path: undefined,
-        nodes: undefined,
-        source: undefined,
-        positions: undefined,
-        originalError: undefined,
-        extensions: undefined,
-        name: 'foo',
-      },
+    const errors: IHttpFetchError[] = [
+      new HttpFetchError('There was an error fetching your data.', 'error', {} as any),
     ];
     const component = mountWithIntl(
       <EmptyStateComponent statesIndexStatus={null} errors={errors} loading={false}>

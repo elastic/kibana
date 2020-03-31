@@ -14,13 +14,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import {
+  CustomLink,
+  Filter
+} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
 import { LinkSection } from './LinkSection';
 import { saveCustomLink } from './saveCustomLink';
-import { convertFiltersToArray, convertFiltersToObject } from './helper';
+import { LinkPreview } from './LinkPreview';
+import { Documentation } from './Documentation';
 
 interface Props {
   onClose: () => void;
@@ -40,8 +44,11 @@ export const CustomLinkFlyout = ({
 
   const [label, setLabel] = useState(customLinkSelected?.label || '');
   const [url, setUrl] = useState(customLinkSelected?.url || '');
+  const selectedFilters = customLinkSelected?.filters;
   const [filters, setFilters] = useState(
-    convertFiltersToArray(customLinkSelected)
+    selectedFilters?.length
+      ? selectedFilters
+      : ([{ key: '', value: '' }] as Filter[])
   );
 
   const isFormValid = !!label && !!url;
@@ -57,7 +64,7 @@ export const CustomLinkFlyout = ({
       id: customLinkSelected?.id,
       label,
       url,
-      filters: convertFiltersToObject(filters),
+      filters,
       toasts
     });
     setIsSaving(false);
@@ -87,9 +94,17 @@ export const CustomLinkFlyout = ({
                   'xpack.apm.settings.customizeUI.customLink.flyout.label',
                   {
                     defaultMessage:
-                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links and use the filter options to scope them to only appear for specific services. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. TODO: Learn more about it in the docs.'
+                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the'
                   }
-                )}
+                )}{' '}
+                <Documentation
+                  label={i18n.translate(
+                    'xpack.apm.settings.customizeUI.customLink.flyout.label.doc',
+                    {
+                      defaultMessage: 'documentation.'
+                    }
+                  )}
+                />
               </p>
             </EuiText>
 
@@ -105,6 +120,10 @@ export const CustomLinkFlyout = ({
             <EuiSpacer size="l" />
 
             <FiltersSection filters={filters} onChangeFilters={setFilters} />
+
+            <EuiSpacer size="l" />
+
+            <LinkPreview label={label} url={url} filters={filters} />
           </EuiFlyoutBody>
 
           <FlyoutFooter

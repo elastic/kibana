@@ -16,6 +16,7 @@ import { AlertType } from '../../../../../alerting/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
+import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -43,13 +44,16 @@ const bootstrapDependencies = (customRequests?: any) => {
  */
 const mockOptions = (
   params = { numTimes: 5, locations: [], timerange: { from: 'now-15m', to: 'now' } },
-  services = { callCluster: 'mockESFunction' },
+  services = { callCluster: 'mockESFunction', savedObjectsClient: mockSavedObjectsClient },
   state = {}
 ): any => ({
   params,
   services,
   state,
 });
+
+const mockSavedObjectsClient = { get: jest.fn() };
+mockSavedObjectsClient.get.mockReturnValue(defaultDynamicSettings);
 
 describe('status check alert', () => {
   describe('executor', () => {
@@ -69,6 +73,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "callES": "mockESFunction",
+            "dynamicSettings": undefined,
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
@@ -118,6 +123,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "callES": "mockESFunction",
+            "dynamicSettings": undefined,
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {

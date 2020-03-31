@@ -150,6 +150,7 @@ export const datatableVisualization: Visualization<
           accessors: sortedColumns,
           supportsMoreColumns: true,
           filterOperations: () => true,
+          dataTestSubj: 'lnsDatatable_column',
         },
       ],
     };

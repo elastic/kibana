@@ -22,9 +22,9 @@ export const getActions = ({
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
   {
-    description: i18n.DELETE,
+    description: i18n.DELETE_CASE,
     icon: 'trash',
-    name: i18n.DELETE,
+    name: i18n.DELETE_CASE,
     onClick: deleteCaseOnClick,
     type: 'icon',
     'data-test-subj': 'action-delete',
@@ -32,7 +32,7 @@ export const getActions = ({
   caseStatus === 'open'
     ? {
         description: i18n.CLOSE_CASE,
-        icon: 'magnet',
+        icon: 'folderCheck',
         name: i18n.CLOSE_CASE,
         onClick: (theCase: Case) =>
           dispatchUpdate({
@@ -46,7 +46,7 @@ export const getActions = ({
       }
     : {
         description: i18n.REOPEN_CASE,
-        icon: 'magnet',
+        icon: 'folderExclamation',
         name: i18n.REOPEN_CASE,
         onClick: (theCase: Case) =>
           dispatchUpdate({

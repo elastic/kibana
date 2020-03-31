@@ -20,17 +20,25 @@ interface PluginsDependencies {
   telemetry?: TelemetryPluginSetup;
 }
 
-export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
+export interface LicenseManagementUIPluginSetup {
+  enabled: boolean;
+}
+export type LicenseManagementUIPluginStart = void;
+
+export class LicenseManagementUIPlugin
+  implements Plugin<LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart, any, any> {
   private breadcrumbService = new BreadcrumbService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup, plugins: PluginsDependencies) {
+  setup(coreSetup: CoreSetup, plugins: PluginsDependencies): LicenseManagementUIPluginSetup {
     const config = this.initializerContext.config.get<ClientConfigType>();
 
     if (!config.ui.enabled) {
       // No need to go any further
-      return;
+      return {
+        enabled: false,
+      };
     }
 
     const { getStartServices } = coreSetup;
@@ -76,8 +84,12 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
         return renderApp(element, appDependencies);
       },
     });
+
+    return {
+      enabled: true,
+    };
   }
 
-  start() {}
+  start(): LicenseManagementUIPluginStart {}
   stop() {}
 }

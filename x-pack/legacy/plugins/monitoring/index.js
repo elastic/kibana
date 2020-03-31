@@ -9,7 +9,6 @@ import { resolve } from 'path';
 import { config } from './config';
 import { getUiExports } from './ui_exports';
 import { KIBANA_ALERTING_ENABLED } from './common/constants';
-import { telemetryCollectionManager } from '../../../../src/legacy/core_plugins/telemetry/server';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
@@ -32,7 +31,6 @@ export const monitoring = kibana => {
       if (npMonitoring) {
         const kbnServerStatus = this.kbnServer.status;
         npMonitoring.registerLegacyAPI({
-          telemetryCollectionManager,
           getServerStatus: () => {
             const status = kbnServerStatus.toJSON();
             return get(status, 'overall.state');

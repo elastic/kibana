@@ -75,7 +75,7 @@ describe('TimelinesTable', () => {
     expect(
       wrapper
         .find('thead tr th')
-        .at(5)
+        .at(4)
         .text()
     ).toContain(i18n.MODIFIED_BY);
   });
@@ -94,7 +94,7 @@ describe('TimelinesTable', () => {
     expect(
       wrapper
         .find('thead tr th')
-        .at(6)
+        .at(5)
         .find('[data-test-subj="notes-count-header-icon"]')
         .first()
         .exists()

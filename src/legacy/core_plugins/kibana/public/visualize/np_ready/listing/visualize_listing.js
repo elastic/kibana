@@ -18,23 +18,21 @@
  */
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { VisualizeListingTable } from './visualize_listing_table';
+import { withI18nContext } from './visualize_listing_table';
 
 import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
-import { wrapInI18nContext } from '../../legacy_imports';
-
 import { syncQueryStateWithUrl } from '../../../../../../../plugins/data/public';
 
-export function initListingDirective(app) {
+export function initListingDirective(app, I18nContext) {
   app.directive('visualizeListingTable', reactDirective =>
-    reactDirective(wrapInI18nContext(VisualizeListingTable))
+    reactDirective(withI18nContext(I18nContext))
   );
 }
 
-export function VisualizeListingController($injector, $scope, createNewVis, kbnUrlStateStorage) {
+export function VisualizeListingController($scope, createNewVis, kbnUrlStateStorage, history) {
   const {
     addBasePath,
     chrome,
@@ -46,7 +44,6 @@ export function VisualizeListingController($injector, $scope, createNewVis, kbnU
     visualizations,
     core: { docLinks, savedObjects },
   } = getServices();
-  const kbnUrl = $injector.get('kbnUrl');
 
   // syncs `_g` portion of url with query services
   const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
@@ -83,7 +80,11 @@ export function VisualizeListingController($injector, $scope, createNewVis, kbnU
     this.closeNewVisModal = visualizations.showNewVisModal({
       onClose: () => {
         // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
-        kbnUrl.changePath(VisualizeConstants.LANDING_PAGE_PATH);
+        history.push({
+          // Should preserve querystring part so the global state is preserved.
+          ...history.location,
+          pathname: VisualizeConstants.LANDING_PAGE_PATH,
+        });
       },
     });
   }

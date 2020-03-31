@@ -32,6 +32,7 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const query = pipe(
           SavedObjectFindOptionsRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
@@ -39,7 +40,7 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
 
         const args = query
           ? {
-              client: context.core.savedObjects.client,
+              client,
               caseId: request.params.case_id,
               options: {
                 ...query,
@@ -47,7 +48,7 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
               },
             }
           : {
-              client: context.core.savedObjects.client,
+              client,
               caseId: request.params.case_id,
             };
 

@@ -43,6 +43,9 @@ describe('UPDATE remote clusters', () => {
         getLicenseStatus: () => licenseCheckResult,
         elasticsearchService: elasticsearchServiceMock.createInternalSetup(),
         elasticsearch: elasticsearchMock,
+        config: {
+          isCloudEnabled: false,
+        },
       };
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -168,6 +171,85 @@ describe('UPDATE remote clusters', () => {
           seeds: ['127.0.0.1:9300'],
           skipUnavailable: true,
           mode: 'sniff',
+        },
+      },
+    });
+    updateRemoteClustersTest('updates v1 proxy cluster', {
+      apiResponses: [
+        async () => ({
+          test: {
+            connected: true,
+            initial_connect_timeout: '30s',
+            skip_unavailable: false,
+            seeds: ['127.0.0.1:9300'],
+          },
+        }),
+        async () => ({
+          acknowledged: true,
+          persistent: {
+            cluster: {
+              remote: {
+                test: {
+                  connected: true,
+                  proxy_address: '127.0.0.1:9300',
+                  initial_connect_timeout: '30s',
+                  skip_unavailable: true,
+                  mode: 'proxy',
+                  proxy_socket_connections: 18,
+                },
+              },
+            },
+          },
+          transient: {},
+        }),
+      ],
+      params: {
+        name: 'test',
+      },
+      payload: {
+        proxyAddress: '127.0.0.1:9300',
+        skipUnavailable: true,
+        mode: 'proxy',
+        hasDeprecatedProxySetting: true,
+        serverName: '',
+        proxySocketConnections: 18,
+      },
+      asserts: {
+        apiArguments: [
+          ['cluster.remoteInfo'],
+          [
+            'cluster.putSettings',
+            {
+              body: {
+                persistent: {
+                  cluster: {
+                    remote: {
+                      test: {
+                        proxy_address: '127.0.0.1:9300',
+                        skip_unavailable: true,
+                        mode: 'proxy',
+                        node_connections: null,
+                        seeds: null,
+                        proxy_socket_connections: 18,
+                        server_name: null,
+                        proxy: null,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        ],
+        statusCode: 200,
+        result: {
+          initialConnectTimeout: '30s',
+          isConfiguredByNode: false,
+          isConnected: true,
+          proxyAddress: '127.0.0.1:9300',
+          name: 'test',
+          skipUnavailable: true,
+          mode: 'proxy',
         },
       },
     });

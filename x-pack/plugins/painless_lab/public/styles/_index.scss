@@ -1,0 +1,63 @@
+@import '@elastic/eui/src/components/header/variables';
+@import '@elastic/eui/src/components/nav_drawer/variables';
+
+/**
+ * This is a very brittle way of preventing the editor and other content from disappearing
+ * behind the bottom bar.
+ */
+$bottomBarHeight: calc(#{$euiSize} * 3);
+
+.painlessLabBottomBarPlaceholder {
+  height: $bottomBarHeight
+}
+
+.painlessLabLeftPane {
+  padding-top: $euiSizeM;
+  background-color: $euiColorEmptyShade;
+}
+
+.painlessLabRightPane {
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  border-radius: 0;
+  padding-top: 0;
+  height: 100%;
+}
+
+.painlessLabRightPane__tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  [role='tabpanel'] {
+    height: 100%;
+    overflow-y: auto;
+  }
+}
+
+.painlessLab__betaLabelContainer {
+  line-height: 0;
+}
+
+.painlessLabMainContainer {
+  height: calc(100vh - calc(#{$euiHeaderChildSize} * 2) - #{$bottomBarHeight});
+}
+
+.painlessLabPanelsContainer {
+  // The panels container should adopt the height of the main container
+  height: 100%;
+}
+
+/**
+ * 1. Hack EUI so the bottom bar doesn't obscure the nav drawer flyout, but is also not obscured
+ *    by the main content area.
+ */
+.painlessLab__bottomBar {
+  z-index: 5; /* 1 */
+  left: $euiNavDrawerWidthCollapsed;
+}
+
+.painlessLab__bottomBar-isNavDrawerLocked {
+  left: $euiNavDrawerWidthExpanded;
+}

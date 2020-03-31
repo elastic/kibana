@@ -10,7 +10,6 @@ import {
   Ping,
   HttpBody,
 } from '../../../../../legacy/plugins/uptime/common/graphql/types';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetPingsParams {
   /** @member dateRangeStart timestamp bounds */
@@ -33,10 +32,14 @@ export interface GetPingsParams {
 
   /** @member location optional location value for use in filtering*/
   location?: string | null;
+
+  /** @member page the number to provide to Elasticsearch as the "from" parameter */
+  page?: number;
 }
 
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = async ({
   callES,
+  dynamicSettings,
   dateRangeStart,
   dateRangeEnd,
   monitorId,
@@ -44,6 +47,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
   sort,
   size,
   location,
+  page,
 }) => {
   const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
   const sizeParam = size ? { size } : undefined;
@@ -60,8 +64,8 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
     postFilterClause = { post_filter: { term: { 'observer.geo.name': location } } };
   }
   const queryContext = { bool: { filter } };
-  const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+  const params: any = {
+    index: dynamicSettings.heartbeatIndices,
     body: {
       query: {
         ...queryContext,
@@ -80,6 +84,10 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
       ...postFilterClause,
     },
   };
+
+  if (page) {
+    params.body.from = page * (size ?? 25);
+  }
 
   const {
     hits: { hits, total },

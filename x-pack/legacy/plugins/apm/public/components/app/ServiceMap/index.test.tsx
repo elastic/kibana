@@ -8,8 +8,8 @@ import { render } from '@testing-library/react';
 import React, { FunctionComponent } from 'react';
 import { License } from '../../../../../../../plugins/licensing/common/license';
 import { LicenseContext } from '../../../context/LicenseContext';
-import { MockApmPluginContextWrapper } from '../../../utils/testHelpers';
 import { ServiceMap } from './';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
 const expiredLicense = new License({
   signature: 'test signature',

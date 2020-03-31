@@ -9,11 +9,11 @@ import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { ApmRoute } from '@elastic/apm-rum-react';
 import styled from 'styled-components';
-import { metadata } from 'ui/metadata';
+import { i18n } from '@kbn/i18n';
+import { AlertType } from '../../../../../plugins/apm/common/alert_types';
 import {
   CoreSetup,
   CoreStart,
-  PackageInfo,
   Plugin,
   PluginInitializerContext
 } from '../../../../../../src/core/public';
@@ -39,6 +39,12 @@ import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  AlertsContextProvider
+} from '../../../../../plugins/triggers_actions_ui/public';
+import { ErrorRateAlertTrigger } from '../components/shared/ErrorRateAlertTrigger';
+import { TransactionDurationAlertTrigger } from '../components/shared/TransactionDurationAlertTrigger';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
@@ -72,6 +78,7 @@ export interface ApmPluginSetupDeps {
   data: DataPublicPluginSetup;
   home: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ConfigSchema {
@@ -115,14 +122,6 @@ export class ApmPlugin
     // Until then we use a shim to get it from legacy injectedMetadata:
     const config = getConfigFromInjectedMetadata();
 
-    // Once we're actually an NP plugin we'll get the package info from the
-    // initializerContext like:
-    //
-    //     const packageInfo = this.initializerContext.env.packageInfo
-    //
-    // Until then we use a shim to get it from legacy metadata:
-    const packageInfo = metadata as PackageInfo;
-
     // render APM feedback link in global help menu
     setHelpExtension(core);
     setReadonlyBadge(core);
@@ -131,29 +130,62 @@ export class ApmPlugin
     const apmPluginContextValue = {
       config,
       core,
-      packageInfo,
       plugins
     };
 
+    plugins.triggers_actions_ui.alertTypeRegistry.register({
+      id: AlertType.ErrorRate,
+      name: i18n.translate('xpack.apm.alertTypes.errorRate', {
+        defaultMessage: 'Error rate'
+      }),
+      iconClass: 'bell',
+      alertParamsExpression: ErrorRateAlertTrigger,
+      validate: () => ({
+        errors: []
+      })
+    });
+
+    plugins.triggers_actions_ui.alertTypeRegistry.register({
+      id: AlertType.TransactionDuration,
+      name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
+        defaultMessage: 'Transaction duration'
+      }),
+      iconClass: 'bell',
+      alertParamsExpression: TransactionDurationAlertTrigger,
+      validate: () => ({
+        errors: []
+      })
+    });
+
     ReactDOM.render(
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <i18nCore.Context>
-            <Router history={history}>
-              <LocationProvider>
-                <MatchedRouteProvider routes={routes}>
-                  <UrlParamsProvider>
-                    <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <App />
-                      </LicenseProvider>
-                    </LoadingIndicatorProvider>
-                  </UrlParamsProvider>
-                </MatchedRouteProvider>
-              </LocationProvider>
-            </Router>
-          </i18nCore.Context>
-        </KibanaContextProvider>
+        <AlertsContextProvider
+          value={{
+            http: core.http,
+            docLinks: core.docLinks,
+            toastNotifications: core.notifications.toasts,
+            actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
+            alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry
+          }}
+        >
+          <KibanaContextProvider services={{ ...core, ...plugins }}>
+            <i18nCore.Context>
+              <Router history={history}>
+                <LocationProvider>
+                  <MatchedRouteProvider routes={routes}>
+                    <UrlParamsProvider>
+                      <LoadingIndicatorProvider>
+                        <LicenseProvider>
+                          <App />
+                        </LicenseProvider>
+                      </LoadingIndicatorProvider>
+                    </UrlParamsProvider>
+                  </MatchedRouteProvider>
+                </LocationProvider>
+              </Router>
+            </i18nCore.Context>
+          </KibanaContextProvider>
+        </AlertsContextProvider>
       </ApmPluginContext.Provider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );

@@ -18,4 +18,3 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';

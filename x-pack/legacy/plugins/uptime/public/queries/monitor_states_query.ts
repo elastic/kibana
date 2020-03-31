@@ -7,13 +7,14 @@
 import gql from 'graphql-tag';
 
 export const monitorStatesQueryString = `
-query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $pagination: String, $filters: String, $statusFilter: String) {
+query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $pagination: String, $filters: String, $statusFilter: String, $pageSize: Int) {
   monitorStates: getMonitorStates(
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd
     pagination: $pagination
     filters: $filters
     statusFilter: $statusFilter
+    pageSize: $pageSize
   ) {
     prevPagePagination
     nextPagePagination

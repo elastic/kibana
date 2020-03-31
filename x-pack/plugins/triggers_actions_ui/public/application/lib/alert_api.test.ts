@@ -8,7 +8,6 @@ import { Alert, AlertType } from '../../types';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import {
   createAlert,
-  deleteAlert,
   deleteAlerts,
   disableAlerts,
   enableAlerts,
@@ -25,6 +24,7 @@ import {
   updateAlert,
   muteAlertInstance,
   unmuteAlertInstance,
+  health,
 } from './alert_api';
 import uuid from 'uuid';
 
@@ -347,24 +347,11 @@ describe('loadAlerts', () => {
   });
 });
 
-describe('deleteAlert', () => {
-  test('should call delete API for alert', async () => {
-    const id = '1';
-    const result = await deleteAlert({ http, id });
-    expect(result).toEqual(undefined);
-    expect(http.delete.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "/api/alert/1",
-      ]
-    `);
-  });
-});
-
 describe('deleteAlerts', () => {
   test('should call delete API for each alert', async () => {
     const ids = ['1', '2', '3'];
     const result = await deleteAlerts({ http, ids });
-    expect(result).toEqual(undefined);
+    expect(result).toEqual({ errors: [], successes: [undefined, undefined, undefined] });
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -627,6 +614,20 @@ describe('unmuteAlerts', () => {
         ],
         Array [
           "/api/alert/3/_unmute_all",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('health', () => {
+  test('should call health API', async () => {
+    const result = await health({ http });
+    expect(result).toEqual(undefined);
+    expect(http.get.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/_health",
         ],
       ]
     `);

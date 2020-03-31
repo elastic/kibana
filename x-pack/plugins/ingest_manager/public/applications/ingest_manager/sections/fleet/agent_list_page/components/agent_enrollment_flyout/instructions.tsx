@@ -8,7 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonGroup, EuiSteps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useEnrollmentApiKey } from '../enrollment_api_keys';
-import { ShellEnrollmentInstructions, ManualInstructions } from '../enrollment_instructions';
+import {
+  ShellEnrollmentInstructions,
+  ManualInstructions,
+} from '../../../../../components/enrollment_instructions';
 import { useCore, useGetAgents } from '../../../../../hooks';
 import { Loading } from '../../../components';
 

@@ -5,13 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, AppMountParameters } from 'src/core/public';
+import { StartServicesAccessor, ApplicationSetup, AppMountParameters } from 'src/core/public';
 import { AuthenticationServiceSetup } from '../authentication_service';
 
 interface CreateDeps {
-  application: CoreSetup['application'];
+  application: ApplicationSetup;
   authc: AuthenticationServiceSetup;
-  getStartServices: CoreSetup['getStartServices'];
+  getStartServices: StartServicesAccessor;
 }
 
 export const overwrittenSessionApp = Object.freeze({

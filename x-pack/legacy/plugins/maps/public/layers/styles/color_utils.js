@@ -78,17 +78,26 @@ export function getColorRampCenterColor(colorRampName) {
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getOrdinalColorRampStops(colorRampName, numberColors = GRADIENT_INTERVALS) {
+export function getOrdinalColorRampStops(colorRampName, min, max) {
   if (!colorRampName) {
     return null;
   }
-  return getHexColorRangeStrings(colorRampName, numberColors).reduce(
-    (accu, stopColor, idx, srcArr) => {
-      const stopNumber = idx / srcArr.length; // number between 0 and 1, increasing as index increases
-      return [...accu, stopNumber, stopColor];
-    },
-    []
-  );
+
+  if (min > max) {
+    return null;
+  }
+
+  const hexColors = getHexColorRangeStrings(colorRampName, GRADIENT_INTERVALS);
+  if (max === min) {
+    //just return single stop value
+    return [max, hexColors[hexColors.length - 1]];
+  }
+
+  const delta = max - min;
+  return hexColors.reduce((accu, stopColor, idx, srcArr) => {
+    const stopNumber = min + (delta * idx) / srcArr.length;
+    return [...accu, stopNumber, stopColor];
+  }, []);
 }
 
 export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName => ({
