@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
+import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
+
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { TransformId } from '../../../../../../common';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
@@ -148,7 +150,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
     }, []);
 
     const dateFieldNames = searchItems.indexPattern.fields
-      .filter(f => f.type === 'date')
+      .filter(f => f.type === KBN_FIELD_TYPES.DATE)
       .map(f => f.name)
       .sort();
     const isContinuousModeAvailable = dateFieldNames.length > 0;

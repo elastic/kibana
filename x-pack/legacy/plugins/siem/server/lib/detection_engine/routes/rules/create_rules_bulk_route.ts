@@ -19,9 +19,11 @@ import {
   createBulkErrorObject,
   buildRouteValidation,
   buildSiemResponse,
+  validateLicenseForRuleType,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const createRulesBulkRoute = (router: IRouter) => {
   router.post(
@@ -36,15 +38,13 @@ export const createRulesBulkRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      if (!context.alerting || !context.actions) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-      const alertsClient = context.alerting.getAlertsClient();
-      const actionsClient = context.actions.getActionsClient();
+      const alertsClient = context.alerting?.getAlertsClient();
+      const actionsClient = context.actions?.getActionsClient();
       const clusterClient = context.core.elasticsearch.dataClient;
-      const siemClient = context.siem.getSiemClient();
+      const savedObjectsClient = context.core.savedObjects.client;
+      const siemClient = context.siem?.getSiemClient();
 
-      if (!actionsClient || !alertsClient) {
+      if (!siemClient || !actionsClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -90,6 +90,8 @@ export const createRulesBulkRoute = (router: IRouter) => {
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
+              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+
               const finalIndex = outputIndex ?? siemClient.signalsIndex;
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
@@ -112,7 +114,6 @@ export const createRulesBulkRoute = (router: IRouter) => {
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
-                actions,
                 anomalyThreshold,
                 description,
                 enabled,
@@ -136,7 +137,6 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 name,
                 severity,
                 tags,
-                throttle,
                 to,
                 type,
                 threat,
@@ -145,7 +145,18 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 version,
                 lists,
               });
-              return transformValidateBulkError(ruleIdOrUuid, createdRule);
+
+              const ruleActions = await updateRulesNotifications({
+                ruleAlertId: createdRule.id,
+                alertsClient,
+                savedObjectsClient,
+                enabled,
+                actions,
+                throttle,
+                name,
+              });
+
+              return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);
             } catch (err) {
               return transformBulkError(ruleIdOrUuid, err);
             }
