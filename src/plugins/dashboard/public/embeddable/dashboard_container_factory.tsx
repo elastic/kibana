@@ -56,7 +56,7 @@ export class DashboardContainerFactory
     return !!capabilities.createNew && !!capabilities.showWriteControls;
   };
 
-  public getDisplayName() {
+  public readonly getDisplayName = () => {
     return i18n.translate('dashboard.factory.displayName', {
       defaultMessage: 'dashboard',
     });
