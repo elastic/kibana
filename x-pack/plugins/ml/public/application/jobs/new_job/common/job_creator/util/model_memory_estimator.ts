@@ -18,6 +18,7 @@ import {
   pairwise,
   filter,
   skip,
+  tap,
 } from 'rxjs/operators';
 import { useEffect, useState } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
@@ -44,13 +45,23 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
         // clone the object to compare payloads and proceed further only
         // if the configuration has been changed
         map(cloneDeep),
+        tap(v => {
+          // eslint-disable-next-line no-console
+          console.log('Clone object of the incoming config: ', v);
+        }),
         distinctUntilChanged(isEqual),
+        tap(v => {
+          // eslint-disable-next-line no-console
+          console.log('New config: ', v);
+        }),
         // skip the first emitted config (job cloning)
         skip(1),
         // don't call the endpoint with invalid payload
         filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
-        switchMap(payload =>
-          ml.calculateModelMemoryLimit$(payload).pipe(
+        switchMap(payload => {
+          // eslint-disable-next-line no-console
+          console.log('Call calculate endpoint with the payload: ', payload);
+          return ml.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
             catchError(error => {
               // eslint-disable-next-line no-console
@@ -59,8 +70,8 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
               // fallback to the default in case estimation failed
               return of(DEFAULT_MODEL_MEMORY_LIMIT);
             })
-          )
-        )
+          );
+        })
       );
     },
     update(payload: CalculatePayload) {
