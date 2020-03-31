@@ -146,7 +146,7 @@ describe('Deleting prebuilt rules', () => {
     cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
     cy.get(RELOAD_PREBUILT_RULES_BTN)
       .invoke('text')
-      .should('eql', `Reload ${numberOfRulesToBeSelected} deleted Elastic prebuilt rules `);
+      .should('eql', `Install ${numberOfRulesToBeSelected} deleted Elastic prebuilt rules `);
     cy.get(ELASTIC_RULES_BTN)
       .invoke('text')
       .should('eql', `Elastic rules (${expectedNumberOfRulesAfterDeletion})`);
