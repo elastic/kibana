@@ -32,18 +32,20 @@ export const defaultEmbeddableFactoryProvider = <
 ): EmbeddableFactory<I, O, E, T> => {
   const factory: EmbeddableFactory<I, O, E, T> = {
     isContainerType: def.isContainerType ?? false,
-    canCreateNew: def.canCreateNew ?? (() => true),
-    getDefaultInput: def.getDefaultInput ?? (() => ({})),
-    getExplicitInput: def.getExplicitInput ?? (() => Promise.resolve({})),
+    canCreateNew: def.canCreateNew ? def.canCreateNew.bind(def) : () => true,
+    getDefaultInput: def.getDefaultInput ? def.getDefaultInput.bind(def) : () => ({}),
+    getExplicitInput: def.getExplicitInput
+      ? def.getExplicitInput.bind(def)
+      : () => Promise.resolve({}),
     createFromSavedObject:
       def.createFromSavedObject ??
       ((savedObjectId: string, input: Partial<I>, parent?: IContainer) => {
         throw new Error(`Creation from saved object not supported by type ${def.type}`);
       }),
-    create: def.create,
+    create: def.create.bind(def),
     type: def.type,
-    isEditable: def.isEditable,
-    getDisplayName: def.getDisplayName,
+    isEditable: def.isEditable.bind(def),
+    getDisplayName: def.getDisplayName.bind(def),
     savedObjectMetaData: def.savedObjectMetaData,
   };
   return factory;
