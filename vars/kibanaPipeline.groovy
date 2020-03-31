@@ -237,15 +237,15 @@ def call(Map params = [:], Closure closure) {
   }
 }
 
-this.finishedSuites = []
+this.allFinishedSuites = []
 
 def getFinishedSuites() {
-  return this.finishedSuites
+  return this.allFinishedSuites
 }
 
 def addFinishedSuite(type, suite) {
-  this.finishedSuites[type] = this.finishedSuites[type] ?: []
-  this.finishedSuites[type] << suite
+  this.allFinishedSuites[type] = this.allFinishedSuites[type] ?: []
+  this.allFinishedSuites[type] << suite
 }
 
 def runFunctionalTestSuite(type, testSuite) {
@@ -380,68 +380,74 @@ def newPipeline(Closure closure = {}) {
       sh 'git status'
     }
 
-    withTaskQueue(parallel: 24, setup: setupClosure) {
-      sh 'mkdir -p target'
-
-      try {
-        googleStorageDownload(
-          credentialsId: 'kibana-ci-gcs-plugin',
-          bucketUri: "gs://kibana-ci-functional-metrics/${getTargetBranch()}/functional_test_suite_metrics.json",
-          localDirectory: 'target',
-          pathPrefix: getTargetBranch(),
-        )
-      } catch (ex) {
-        buildUtils.printStacktrace(ex)
+    catchErrors {
+      withTaskQueue(parallel: 24, setup: setupClosure) {
+        sh 'mkdir -p target'
 
         try {
           googleStorageDownload(
             credentialsId: 'kibana-ci-gcs-plugin',
-            bucketUri: "gs://kibana-ci-functional-metrics/master/functional_test_suite_metrics.json",
+            bucketUri: "gs://kibana-ci-functional-metrics/${getTargetBranch()}/functional_test_suite_metrics.json",
             localDirectory: 'target',
-            pathPrefix: 'master',
+            pathPrefix: getTargetBranch(),
           )
-        } catch (innerEx) {
-          buildUtils.printStacktrace(innerEx)
-          print "Error reading previous functional test metrics. Will create a non-optimal test plan."
+        } catch (ex) {
+          buildUtils.printStacktrace(ex)
+
+          try {
+            googleStorageDownload(
+              credentialsId: 'kibana-ci-gcs-plugin',
+              bucketUri: "gs://kibana-ci-functional-metrics/master/functional_test_suite_metrics.json",
+              localDirectory: 'target',
+              pathPrefix: 'master',
+            )
+          } catch (innerEx) {
+            buildUtils.printStacktrace(innerEx)
+            print "Error reading previous functional test metrics. Will create a non-optimal test plan."
+          }
         }
-      }
 
-      // TODO
-      bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
-      def testPlan = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
-      // testPlan = [oss: testPlan.oss.reverse().take(1), xpack: []] // TODO
+        // TODO
+        bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
+        def testPlan = toJSON(readFile(file: 'target/test-suites-ci-plan.json'))
+        print testPlan.toString() // TODO
+        // testPlan = [oss: testPlan.oss.reverse().take(1), xpack: []] // TODO
 
-      task {
-        buildOss()
-        bash("mkdir -p ${env.WORKSPACE}/kibana-build-oss; mv build/oss/kibana-*-SNAPSHOT-linux-x86_64 ${env.WORKSPACE}/kibana-build-oss/", "Move OSS build")
+        task {
+          buildOss()
+          bash("mkdir -p ${env.WORKSPACE}/kibana-build-oss; mv build/oss/kibana-*-SNAPSHOT-linux-x86_64 ${env.WORKSPACE}/kibana-build-oss/", "Move OSS build")
 
-        tasks(testPlan.oss.collect { return { runFunctionalTestSuite('oss', it) } })
+          tasks(testPlan.oss.collect { return { runFunctionalTestSuite('oss', it) } })
 
-        // Does this stuff require running out of the same workspace that the build happened in?
-        bash("test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn_tp_sample_panel_action")
-        bash("""
-          source test/scripts/jenkins_test_setup_oss.sh
-          yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-          yarn run grunt run:exampleFunctionalTestsRelease --from=source;
-          yarn run grunt run:interpreterFunctionalTestsRelease;
-        """, "Run OSS plugin functional tests")
-      }
+          // Does this stuff require running out of the same workspace that the build happened in?
+          bash("test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn_tp_sample_panel_action")
+          bash("""
+            source test/scripts/jenkins_test_setup_oss.sh
+            yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+            yarn run grunt run:exampleFunctionalTestsRelease --from=source;
+            yarn run grunt run:interpreterFunctionalTestsRelease;
+          """, "Run OSS plugin functional tests")
+        }
 
-      task {
-        buildXpack()
-        bash("mkdir -p ${env.WORKSPACE}/kibana-build-xpack; mv install/kibana ${env.WORKSPACE}/kibana-build-xpack/", "Move XPack build")
+        task {
+          buildXpack()
+          bash("mkdir -p ${env.WORKSPACE}/kibana-build-xpack; mv install/kibana ${env.WORKSPACE}/kibana-build-xpack/", "Move XPack build")
 
-        tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
+          tasks(testPlan.xpack.collect { return { runFunctionalTestSuite('xpack', it) } })
 
-        // task(getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }))
+          // task(getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }))
 
-        task({ runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') })
+          task({ runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') })
 
-        whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
-          task(functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
+          whenChanged(['x-pack/legacy/plugins/siem/', 'x-pack/test/siem_cypress/']) {
+            task(functionalTestProcess('xpack-siemCypress', './test/scripts/jenkins_siem_cypress.sh'))
+          }
         }
       }
     }
+
+    def metricsJson = toJSON(getFinishedSuites()).toString()
+    print "-- metrics json --\n" + metricsJson
 
     closure.call()
   }

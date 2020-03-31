@@ -24,14 +24,14 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
               )
 
               def status = buildUtils.getBuildStatus()
-              if (status == 'SUCCESS' || status == 'UNSTABLE') {
+              // if (status == 'SUCCESS' || status == 'UNSTABLE') { // TODO
                 sh "cp '${filename}' latest.json"
                 googleStorageUpload(
                   credentialsId: 'kibana-ci-gcs-plugin',
                   bucket: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}",
                   pattern: 'latest.json',
                 )
-              }
+              // }
             }
           }
         }
