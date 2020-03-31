@@ -65,7 +65,7 @@ export interface RenderDeps {
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   embeddable: EmbeddableStart;
   localStorage: Storage;
-  share: SharePluginStart;
+  share?: SharePluginStart;
   config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
 }

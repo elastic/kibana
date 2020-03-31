@@ -89,9 +89,9 @@ declare module '../../share/public' {
 interface SetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
-  share: SharePluginSetup;
+  share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -103,7 +103,7 @@ interface StartDependencies {
   inspector: InspectorStartContract;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
-  share: SharePluginStart;
+  share?: SharePluginStart;
   uiActions: UiActionsStart;
 }
 
@@ -135,12 +135,14 @@ export class DashboardEmbeddableContainerPublicPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
     const startServices = core.getStartServices();
 
-    share.urlGenerators.registerUrlGenerator(
-      createDirectAccessDashboardLinkGenerator(async () => ({
-        appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
-        useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
-      }))
-    );
+    if (share) {
+      share.urlGenerators.registerUrlGenerator(
+        createDirectAccessDashboardLinkGenerator(async () => ({
+          appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
+          useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
+        }))
+      );
+    }
 
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
@@ -262,19 +264,21 @@ export class DashboardEmbeddableContainerPublicPlugin
     });
     kibanaLegacy.registerLegacyApp({ ...app, id: DashboardConstants.DASHBOARDS_ID });
 
-    home.featureCatalogue.register({
-      id: DashboardConstants.DASHBOARD_ID,
-      title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
-        defaultMessage: 'Dashboard',
-      }),
-      description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
-        defaultMessage: 'Display and share a collection of visualizations and saved searches.',
-      }),
-      icon: 'dashboardApp',
-      path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
-    });
+    if (home) {
+      home.featureCatalogue.register({
+        id: DashboardConstants.DASHBOARD_ID,
+        title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
+          defaultMessage: 'Dashboard',
+        }),
+        description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
+          defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+        }),
+        icon: 'dashboardApp',
+        path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.DATA,
+      });
+    }
   }
 
   public start(core: CoreStart, plugins: StartDependencies): DashboardStart {

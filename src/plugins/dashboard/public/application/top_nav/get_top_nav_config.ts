@@ -184,7 +184,7 @@ function getCreateNewConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getShareConfig(action: NavAction) {
+function getShareConfig(action: NavAction | undefined) {
   return {
     id: 'share',
     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
@@ -195,6 +195,8 @@ function getShareConfig(action: NavAction) {
     }),
     testId: 'shareTopNavButton',
     run: action,
+    // disable the Share button if no action specified
+    disableButton: !action,
   };
 }
 

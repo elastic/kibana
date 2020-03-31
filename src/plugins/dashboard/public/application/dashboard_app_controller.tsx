@@ -881,21 +881,25 @@ export class DashboardAppController {
         },
       });
     };
-    navActions[TopNavIds.SHARE] = anchorElement => {
-      share.toggleShareContextMenu({
-        anchorElement,
-        allowEmbed: true,
-        allowShortUrl:
-          !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href),
-        objectId: dash.id,
-        objectType: 'dashboard',
-        sharingData: {
-          title: dash.title,
-        },
-        isDirty: dashboardStateManager.getIsDirty(),
-      });
-    };
+
+    if (share) {
+      // the share button is only availabale if "share" plugin contract enabled
+      navActions[TopNavIds.SHARE] = anchorElement => {
+        share.toggleShareContextMenu({
+          anchorElement,
+          allowEmbed: true,
+          allowShortUrl:
+            !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
+          shareableUrl: unhashUrl(window.location.href),
+          objectId: dash.id,
+          objectType: 'dashboard',
+          sharingData: {
+            title: dash.title,
+          },
+          isDirty: dashboardStateManager.getIsDirty(),
+        });
+      };
+    }
 
     updateViewMode(dashboardStateManager.getViewMode());
 

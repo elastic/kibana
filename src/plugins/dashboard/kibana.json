@@ -4,15 +4,13 @@
   "requiredPlugins": [
     "data",
     "embeddable",
-    "home",
     "inspector",
     "kibanaLegacy",
     "navigation",
     "uiActions",
-    "savedObjects",
-    "share"
+    "savedObjects"
   ],
-  "optionalPlugins": ["usageCollection"],
+  "optionalPlugins": ["home", "share", "usageCollection"],
   "server": false,
   "ui": true
 }
