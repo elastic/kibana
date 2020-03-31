@@ -108,7 +108,7 @@ def listVcsEnvVars() {
     for X in "${!XS[@]}"; do
     {
       predicate "${XS[X]}"
-      echo "$X is DEFINED"
+      echo "$X: ${XS[X]}"
     }
     done
 
