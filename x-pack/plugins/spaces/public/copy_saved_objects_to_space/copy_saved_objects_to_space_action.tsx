@@ -18,12 +18,12 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
 
   public euiAction = {
     name: i18n.translate('xpack.spaces.management.copyToSpace.actionTitle', {
-      defaultMessage: 'Copy to space',
+      defaultMessage: 'Make a copy',
     }),
     description: i18n.translate('xpack.spaces.management.copyToSpace.actionDescription', {
-      defaultMessage: 'Copy this saved object to one or more spaces',
+      defaultMessage: 'Make a copy of this saved object in one or more spaces',
     }),
-    icon: 'spacesApp',
+    icon: 'copy',
     type: 'icon',
     onClick: (object: SavedObjectsManagementRecord) => {
       this.start(object);
