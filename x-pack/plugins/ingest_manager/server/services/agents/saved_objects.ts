@@ -5,7 +5,7 @@
  */
 
 import { SavedObject } from 'src/core/server';
-import { Agent, AgentSOAttributes } from '../../types';
+import { Agent, AgentSOAttributes, AgentAction, AgentActionSOAttributes } from '../../types';
 
 export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
   if (so.error) {
@@ -22,5 +22,16 @@ export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
     user_provided_metadata: JSON.parse(so.attributes.user_provided_metadata),
     access_api_key: undefined,
     status: undefined,
+  };
+}
+
+export function savedObjectToAgentAction(so: SavedObject<AgentActionSOAttributes>): AgentAction {
+  if (so.error) {
+    throw new Error(so.error.message);
+  }
+
+  return {
+    id: so.id,
+    ...so.attributes,
   };
 }

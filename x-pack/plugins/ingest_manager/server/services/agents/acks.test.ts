@@ -3,29 +3,39 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { isBoom } from 'boom';
+import { SavedObjectsClientContract, SavedObjectsBulkResponse } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
 import { Agent, AgentAction, AgentEvent } from '../../../common/types/models';
 import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
 import { acknowledgeAgentActions } from './acks';
-import { isBoom } from 'boom';
 
 describe('test agent acks services', () => {
   it('should succeed on valid and matched actions', async () => {
-    const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockSavedObjectsClient: SavedObjectsClientContract = (savedObjectsClientMock.create() as unknown) as SavedObjectsClientContract;
+
+    mockSavedObjectsClient.bulkGet = async () => {
+      return {
+        saved_objects: [
+          {
+            id: 'action1',
+            attributes: {
+              type: 'CONFIG_CHANGE',
+              agent_id: 'id',
+              sent_at: '2020-03-14T19:45:02.620Z',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              created_at: '2020-03-14T19:45:02.620Z',
+            },
+          },
+        ],
+      } as SavedObjectsBulkResponse<any>;
+    };
+
     const agentActions = await acknowledgeAgentActions(
       mockSavedObjectsClient,
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
-        actions: [
-          {
-            type: 'CONFIG_CHANGE',
-            id: 'action1',
-            sent_at: '2020-03-14T19:45:02.620Z',
-            timestamp: '2019-01-04T14:32:03.36764-05:00',
-            created_at: '2020-03-14T19:45:02.620Z',
-          },
-        ],
       } as unknown) as Agent,
       [
         {
@@ -41,6 +51,7 @@ describe('test agent acks services', () => {
       ({
         type: 'CONFIG_CHANGE',
         id: 'action1',
+        agent_id: 'id',
         sent_at: '2020-03-14T19:45:02.620Z',
         timestamp: '2019-01-04T14:32:03.36764-05:00',
         created_at: '2020-03-14T19:45:02.620Z',
@@ -49,22 +60,20 @@ describe('test agent acks services', () => {
   });
 
   it('should fail for actions that cannot be found on agent actions list', async () => {
-    const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockSavedObjectsClient: SavedObjectsClientContract = (savedObjectsClientMock.create() as unknown) as SavedObjectsClientContract;
+
+    mockSavedObjectsClient.bulkGet = async () => {
+      return {
+        saved_objects: [],
+      } as SavedObjectsBulkResponse<any>;
+    };
+
     try {
       await acknowledgeAgentActions(
         mockSavedObjectsClient,
         ({
           id: 'id',
           type: AGENT_TYPE_PERMANENT,
-          actions: [
-            {
-              type: 'CONFIG_CHANGE',
-              id: 'action1',
-              sent_at: '2020-03-14T19:45:02.620Z',
-              timestamp: '2019-01-04T14:32:03.36764-05:00',
-              created_at: '2020-03-14T19:45:02.620Z',
-            },
-          ],
         } as unknown) as Agent,
         [
           ({
@@ -83,7 +92,24 @@ describe('test agent acks services', () => {
   });
 
   it('should fail for events that have types not in the allowed acknowledgement type list', async () => {
-    const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockSavedObjectsClient: SavedObjectsClientContract = (savedObjectsClientMock.create() as unknown) as SavedObjectsClientContract;
+    mockSavedObjectsClient.bulkGet = async () => {
+      return {
+        saved_objects: [
+          {
+            id: 'action1',
+            attributes: {
+              type: 'CONFIG_CHANGE',
+              agent_id: 'id',
+              sent_at: '2020-03-14T19:45:02.620Z',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              created_at: '2020-03-14T19:45:02.620Z',
+            },
+          },
+        ],
+      } as SavedObjectsBulkResponse<any>;
+    };
+
     try {
       await acknowledgeAgentActions(
         mockSavedObjectsClient,

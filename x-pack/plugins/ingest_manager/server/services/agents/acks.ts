@@ -17,8 +17,14 @@ import {
   AgentEvent,
   AgentEventSOAttributes,
   AgentSOAttributes,
+  AgentActionSOAttributes,
 } from '../../types';
-import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import {
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_ACTION_SAVED_OBJECT_TYPE,
+} from '../../constants';
+import { getAgentActionByIds } from './actions';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
 
@@ -29,8 +35,18 @@ export async function acknowledgeAgentActions(
 ): Promise<AgentAction[]> {
   const now = new Date().toISOString();
 
+  const actionIds = agentEvents
+    .map(event => event.action_id)
+    .filter(actionId => actionId !== undefined);
+  const actions = await getAgentActionByIds(soClient, actionIds as string[]);
+  for (const action of actions) {
+    if (action.agent_id !== agent.id) {
+      throw Boom.badRequest(`${action.id} cannot be allowed by this agent`);
+    }
+  }
+
   const agentActionMap: Map<string, AgentAction> = new Map(
-    agent.actions.map(agentAction => [agentAction.id, agentAction])
+    actions.map(agentAction => [agentAction.id, agentAction])
   );
 
   const matchedUpdatedActions: AgentAction[] = [];
@@ -55,7 +71,7 @@ export async function acknowledgeAgentActions(
       if (action.type !== 'CONFIG_CHANGE') {
         return acc;
       }
-      const data = action.data ? JSON.parse(action.data as string) : {};
+      const data = action.data || {};
 
       if (data?.config?.id !== agent.config_id) {
         return acc;
@@ -64,10 +80,22 @@ export async function acknowledgeAgentActions(
       return data?.config?.revision > acc ? data?.config?.revision : acc;
     }, agent.config_revision || 0);
 
-    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
-      actions: matchedUpdatedActions,
-      config_revision: configRevision,
-    });
+    await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
+      {
+        type: AGENT_SAVED_OBJECT_TYPE,
+        id: agent.id,
+        attributes: {
+          config_revision: configRevision,
+        },
+      },
+      ...matchedUpdatedActions.map(updatedAction => ({
+        type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+        id: updatedAction.id,
+        attributes: {
+          sent_at: updatedAction.sent_at,
+        },
+      })),
+    ]);
   }
 
   return matchedUpdatedActions;
