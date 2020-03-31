@@ -7,7 +7,7 @@
 import {
   dataPluginMock,
   Start as DataPublicStartMock,
-} from '../../../../../../src/plugins/data/public/mocks';
+} from '../../../../../../../src/plugins/data/public/mocks';
 
 type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
   indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {
