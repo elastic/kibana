@@ -394,6 +394,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
                   body={i18n.NO_CASES_BODY}
                   actions={
                     <EuiButton
+                      isDisabled={!userCanCrud}
                       fill
                       size="s"
                       href={getCreateCaseUrl(urlSearch)}
