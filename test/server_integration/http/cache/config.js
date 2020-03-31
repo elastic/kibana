@@ -17,52 +17,17 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-
-import { createKibanaSupertestProvider } from '../../services';
-
 export default async function({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
 
-  const redirectPort = httpConfig.get('servers.kibana.port') + 1;
-  const supertestOptions = {
-    ...httpConfig.get('servers.kibana'),
-    port: redirectPort,
-    // test with non ssl protocol
-    protocol: 'http',
-  };
-
   return {
     testFiles: [require.resolve('./')],
-    services: {
-      ...httpConfig.get('services'),
-      supertest: createKibanaSupertestProvider({
-        certificateAuthorities: [readFileSync(CA_CERT_PATH)],
-        options: supertestOptions,
-      }),
-    },
-    servers: {
-      ...httpConfig.get('servers'),
-      kibana: {
-        ...httpConfig.get('servers.kibana'),
-        // start the server with https
-        protocol: 'https',
-      },
-    },
+    services: httpConfig.get('services'),
+    servers: httpConfig.get('servers'),
     junit: {
-      reportName: 'Http SSL Integration Tests',
+      reportName: 'Http Cache-Control Integration Tests',
     },
     esTestCluster: httpConfig.get('esTestCluster'),
-    kbnTestServer: {
-      ...httpConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...httpConfig.get('kbnTestServer.serverArgs'),
-        '--server.ssl.enabled=true',
-        `--server.ssl.key=${KBN_KEY_PATH}`,
-        `--server.ssl.certificate=${KBN_CERT_PATH}`,
-        `--server.ssl.redirectHttpFromPort=${redirectPort}`,
-      ],
-    },
+    kbnTestServer: httpConfig.get('kbnTestServer'),
   };
 }
