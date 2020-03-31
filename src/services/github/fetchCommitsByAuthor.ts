@@ -63,6 +63,7 @@ export async function fetchCommitsByAuthor(
                                   source {
                                     __typename
                                     ... on PullRequest {
+                                      title
                                       state
                                       baseRefName
                                       commits(first: 20) {
@@ -115,25 +116,28 @@ export async function fetchCommitsByAuthor(
   }
 
   return res.repository.ref.target.history.edges.map((edge) => {
-    const historyNode = edge.node;
+    // it is assumed that there can only be a single PR associated with a commit
+    // that assumption might not hold true forever but for now it works out
+    const pullRequestEdge = edge.node.associatedPullRequests.edges[0];
+    const commitMessage = edge.node.message;
+    const sha = edge.node.oid;
+
     const associatedPullRequest = getAssociatedPullRequest(
-      historyNode.associatedPullRequests.edges[0],
+      pullRequestEdge,
       options
     );
 
     const existingBackports = getExistingBackportPRs(
-      historyNode.message,
+      commitMessage,
       associatedPullRequest
     );
 
-    const sha = historyNode.oid;
-    const firstMessageLine = getFirstCommitMessageLine(historyNode.message);
     const pullNumber =
       associatedPullRequest?.node.number ||
-      getPullNumberFromMessage(firstMessageLine);
+      getPullNumberFromMessage(commitMessage);
 
-    const message = getFormattedCommitMessage({
-      message: firstMessageLine,
+    const formattedMessage = getFormattedCommitMessage({
+      message: commitMessage,
       pullNumber,
       sha,
     });
@@ -141,7 +145,7 @@ export async function fetchCommitsByAuthor(
     return {
       branch: sourceBranch,
       sha,
-      message,
+      formattedMessage,
       pullNumber,
       existingBackports,
     };
@@ -160,9 +164,8 @@ function getAssociatedPullRequest(
   options: BackportOptions
 ) {
   const isAssociated =
-    pullRequestEdge &&
-    pullRequestEdge.node.repository.name === options.repoName &&
-    pullRequestEdge.node.repository.owner.login === options.repoOwner;
+    pullRequestEdge?.node.repository.name === options.repoName &&
+    pullRequestEdge?.node.repository.owner.login === options.repoOwner;
 
   if (isAssociated) {
     return pullRequestEdge;
@@ -170,25 +173,43 @@ function getAssociatedPullRequest(
 }
 
 export function getExistingBackportPRs(
-  message: string,
-  pullRequest: PullRequestEdge | undefined
+  commitMessage: string,
+  associatedPullRequest: PullRequestEdge | undefined
 ) {
-  if (!pullRequest) {
+  if (!associatedPullRequest) {
     return [];
   }
-  const firstMessageLine = getFirstCommitMessageLine(message);
-  return pullRequest.node.timelineItems.edges
+
+  const firstMessageLine = getFirstCommitMessageLine(commitMessage);
+  return associatedPullRequest.node.timelineItems.edges
     .filter(notEmpty)
     .filter((item) => {
       const { source } = item.node;
+
+      const isPullRequest = source.__typename === 'PullRequest';
+      const isMergedOrOpen =
+        source.state === 'MERGED' || source.state === 'OPEN';
+
+      if (!isPullRequest || !isMergedOrOpen) {
+        return false;
+      }
+
+      const commitMatch = source.commits.edges.some((commit) => {
+        return (
+          getFirstCommitMessageLine(commit.node.commit.message) ===
+          firstMessageLine
+        );
+      });
+
+      const prTitleMatch = source.title.includes(firstMessageLine);
+      const prNumberMatch = source.title.includes(
+        associatedPullRequest.node.number.toString()
+      );
+
       return (
-        source.__typename === 'PullRequest' &&
-        (source.state === 'MERGED' || source.state === 'OPEN') &&
-        source.commits.edges.some(
-          (commit) =>
-            getFirstCommitMessageLine(commit.node.commit.message) ===
-            firstMessageLine
-        )
+        isPullRequest &&
+        isMergedOrOpen &&
+        (commitMatch || (prTitleMatch && prNumberMatch))
       );
     })
     .map((item) => {
@@ -245,6 +266,7 @@ export interface TimelineItemEdge {
   node: {
     source: {
       __typename: string;
+      title: string;
       state: 'OPEN' | 'CLOSED' | 'MERGED';
       baseRefName: string;
       commits: {

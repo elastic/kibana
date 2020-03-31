@@ -38,7 +38,7 @@ export async function cherrypickAndCreatePullRequest({
 }) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const commitMessages = commits
-    .map((commit) => ` - ${commit.message}`)
+    .map((commit) => ` - ${commit.formattedMessage}`)
     .join('\n');
   consoleLog(
     `\n${chalk.bold(
@@ -175,7 +175,9 @@ function getPullRequestTitle(
   commits: CommitSelected[],
   prTitle: string
 ) {
-  const commitMessages = commits.map((commit) => commit.message).join(' | ');
+  const commitMessages = commits
+    .map((commit) => commit.formattedMessage)
+    .join(' | ');
   return prTitle
     .replace('{baseBranch}', baseBranch)
     .replace('{commitMessages}', commitMessages)
@@ -195,7 +197,7 @@ function getPullRequestPayload(
   const { prDescription, prTitle } = options;
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const commitMessages = commits
-    .map((commit) => ` - ${commit.message}`)
+    .map((commit) => ` - ${commit.formattedMessage}`)
     .join('\n');
   const bodySuffix = prDescription ? `\n\n${prDescription}` : '';
 

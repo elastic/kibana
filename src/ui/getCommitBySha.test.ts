@@ -20,7 +20,8 @@ describe('getCommitBySha', () => {
 
     expect(commit).toEqual({
       branch: 'master',
-      message: '[Chrome] Bootstrap Angular into document.body (myCommit)',
+      formattedMessage:
+        '[Chrome] Bootstrap Angular into document.body (myCommit)',
       sha: 'myCommitSha',
       pullNumber: undefined,
     });

@@ -59,6 +59,7 @@ Object {
                                   source {
                                     __typename
                                     ... on PullRequest {
+                                      title
                                       state
                                       baseRefName
                                       commits(first: 20) {
@@ -187,6 +188,7 @@ Object {
                                   source {
                                     __typename
                                     ... on PullRequest {
+                                      title
                                       state
                                       baseRefName
                                       commits(first: 20) {

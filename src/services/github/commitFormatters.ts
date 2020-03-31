@@ -17,7 +17,7 @@ export function getFormattedCommitMessage({
 }) {
   const firstMessageLine = getFirstCommitMessageLine(message);
   if (pullNumber) {
-    const messageHasPullNumber = firstMessageLine.includes(`#${pullNumber}`);
+    const messageHasPullNumber = firstMessageLine.includes(`(#${pullNumber})`);
 
     // message already contain pull number
     if (messageHasPullNumber) {

@@ -32,8 +32,8 @@ export async function promptForCommits(
     const position = chalk.gray(`${i + 1}.`);
 
     return {
-      name: `${position} ${c.message} ${backportTags}`,
-      short: c.message,
+      name: `${position} ${c.formattedMessage} ${backportTags}`,
+      short: c.formattedMessage,
       value: c,
     };
   });

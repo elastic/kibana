@@ -7,6 +7,7 @@ import * as logger from '../services/logger';
 import dedent from 'dedent';
 import ora from 'ora';
 import { PromiseReturnType } from '../types/PromiseReturnType';
+import { CommitSelected } from '../services/github/Commit';
 
 type ExecReturnType = PromiseReturnType<typeof childProcess.exec>;
 
@@ -52,17 +53,17 @@ describe('cherrypickAndCreatePullRequest', () => {
         sourceBranch: 'myDefaultRepoBaseBranch',
       } as BackportOptions;
 
-      const commits = [
+      const commits: CommitSelected[] = [
         {
           branch: '7.x',
           sha: 'mySha',
-          message: 'myCommitMessage (#1000)',
+          formattedMessage: 'myCommitMessage (#1000)',
           pullNumber: 1000,
         },
         {
           branch: '7.x',
           sha: 'mySha2',
-          message: 'myOtherCommitMessage (#2000)',
+          formattedMessage: 'myOtherCommitMessage (#2000)',
           pullNumber: 2000,
         },
       ];
@@ -145,7 +146,11 @@ describe('cherrypickAndCreatePullRequest', () => {
       await cherrypickAndCreatePullRequest({
         options,
         commits: [
-          { branch: '7.x', sha: 'mySha', message: 'myCommitMessage (mySha)' },
+          {
+            branch: '7.x',
+            sha: 'mySha',
+            formattedMessage: 'myCommitMessage (mySha)',
+          },
         ],
         baseBranch: '6.x',
       });
@@ -199,7 +204,11 @@ describe('cherrypickAndCreatePullRequest', () => {
         cherrypickAndCreatePullRequest({
           options,
           commits: [
-            { branch: '7.x', sha: 'mySha', message: 'myCommitMessage' },
+            {
+              branch: '7.x',
+              sha: 'mySha',
+              formattedMessage: 'myCommitMessage',
+            },
           ],
           baseBranch: '6.x',
         })

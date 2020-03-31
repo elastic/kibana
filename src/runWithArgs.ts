@@ -17,7 +17,9 @@ export async function runWithArgs(args: string[]) {
       console.error(
         `An unknown error occurred. Please check the logs for addtional details: ${getLogfilePath()}`
       );
+      logger.info('Unknown error:');
       logger.info(e);
+      logger.info(e.stack);
     }
 
     // wait exiting until logs have been flushed to disc

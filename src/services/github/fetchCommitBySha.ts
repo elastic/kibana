@@ -40,14 +40,14 @@ export async function fetchCommitBySha(
     const commitRes = res.data.items[0];
     const fullSha = commitRes.sha;
 
-    const message = getFormattedCommitMessage({
+    const formattedMessage = getFormattedCommitMessage({
       message: commitRes.commit.message,
       sha: fullSha,
     });
 
     return {
       branch: 'master',
-      message,
+      formattedMessage,
       sha: fullSha,
     };
   } catch (e) {

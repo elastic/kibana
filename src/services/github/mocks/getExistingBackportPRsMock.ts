@@ -1,4 +1,6 @@
-export const getExistingBackportPRsMock = (repoName: string) => ({
+import { DataResponse } from '../fetchCommitsByAuthor';
+
+export const getExistingBackportPRsMock = (repoName: string): DataResponse => ({
   repository: {
     ref: {
       target: {
@@ -26,6 +28,7 @@ export const getExistingBackportPRsMock = (repoName: string) => ({
                               node: {
                                 source: {
                                   __typename: 'PullRequest',
+                                  title: 'some title',
                                   state: 'MERGED',
                                   baseRefName: '6.3',
                                   commits: {

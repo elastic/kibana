@@ -51,7 +51,7 @@ export async function fetchCommitByPullNumber(
 
   const baseBranch = res.repository.pullRequest.baseRef.name;
   const sha = res.repository.pullRequest.mergeCommit.oid;
-  const message = getFormattedCommitMessage({
+  const formattedMessage = getFormattedCommitMessage({
     message: res.repository.pullRequest.mergeCommit.message,
     sha,
     pullNumber,
@@ -60,7 +60,7 @@ export async function fetchCommitByPullNumber(
   return {
     branch: baseBranch,
     sha,
-    message,
+    formattedMessage,
     pullNumber,
   };
 }

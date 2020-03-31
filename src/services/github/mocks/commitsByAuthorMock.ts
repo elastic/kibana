@@ -61,6 +61,7 @@ export const commitsWithPullRequestsMock: DataResponse = {
                               node: {
                                 source: {
                                   __typename: 'PullRequest',
+                                  title: 'some title',
                                   state: 'MERGED',
                                   baseRefName: '6.3',
                                   commits: {

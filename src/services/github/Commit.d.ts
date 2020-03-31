@@ -2,7 +2,7 @@
 export interface CommitSelected {
   branch: string;
   sha: string;
-  message: string;
+  formattedMessage: string;
   pullNumber?: number;
 }
 
