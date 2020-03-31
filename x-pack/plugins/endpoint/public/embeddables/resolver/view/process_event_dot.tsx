@@ -84,7 +84,7 @@ export const ProcessEventDot = styled(
       /**
        * map of what nodes are "adjacent" to this one in "up, down, previous, next" directions
        */
-      adjacentNodeMap?: AdjacentProcessMap;
+      adjacentNodeMap: AdjacentProcessMap;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -93,7 +93,7 @@ export const ProcessEventDot = styled(
 
       const [magFactorX] = projectionMatrix;
 
-      const selfId = adjacentNodeMap?.self;
+      const selfId = adjacentNodeMap.self;
 
       const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
       const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
@@ -122,27 +122,31 @@ export const ProcessEventDot = styled(
 
       const labelYHeight = markerSize / 1.7647;
 
-      const levelAttribute = adjacentNodeMap?.level
-        ? {
-            'aria-level': adjacentNodeMap.level,
-          }
-        : {};
+      /**
+       * An element that should be animated when the node is clicked.
+       */
+      const animationTarget: {
+        current:
+          | (SVGAnimationElement & {
+              /**
+               * `beginElement` is by [w3](https://www.w3.org/TR/SVG11/animate.html#__smil__ElementTimeControl__beginElement)
+               * but missing in [TSJS-lib-generator](https://github.com/microsoft/TSJS-lib-generator/blob/15a4678e0ef6de308e79451503e444e9949ee849/inputfiles/addedTypes.json#L1819)
+               */
+              beginElement: () => void;
+            })
+          | null;
+      } = React.createRef();
+      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[
+        nodeType(event)
+      ];
+      const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
-      const flowToAttribute = adjacentNodeMap?.nextSibling
-        ? {
-            'aria-flowto': adjacentNodeMap.nextSibling,
-          }
-        : {};
-
-      const nodeType = getNodeType(event);
-      const clickTargetRef: { current: SVGAnimationElement | null } = React.createRef();
-      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[nodeType];
-      const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
-      const [nodeId, labelId, descriptionId] = [
-        !!selfId ? resolverNodeIdGenerator(String(selfId)) : resolverNodeIdGenerator(),
-        resolverNodeIdGenerator(),
-        resolverNodeIdGenerator(),
-      ] as string[];
+      const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
+        resolverNodeIdGenerator,
+        selfId,
+      ]);
+      const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
+      const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
 
       const isActiveDescendant = useMemo(() => {
         return nodeId === activeDescendantId;
@@ -168,8 +172,8 @@ export const ProcessEventDot = styled(
 
       const handleClick = useCallback(
         (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-          if (clickTargetRef.current !== null) {
-            (clickTargetRef.current as any).beginElement();
+          if (animationTarget.current !== null) {
+            (animationTarget.current as any).beginElement();
           }
           dispatch({
             type: 'userSelectedResolverNode',
@@ -178,7 +182,7 @@ export const ProcessEventDot = styled(
             },
           });
         },
-        [clickTargetRef, dispatch, nodeId]
+        [animationTarget, dispatch, nodeId]
       );
 
       return (
@@ -189,8 +193,10 @@ export const ProcessEventDot = styled(
             viewBox="-15 -15 90 30"
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
-            {...levelAttribute}
-            {...flowToAttribute}
+            aria-level={adjacentNodeMap.level}
+            aria-flowto={
+              adjacentNodeMap.nextSibling === null ? undefined : adjacentNodeMap.nextSibling
+            }
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
@@ -222,7 +228,7 @@ export const ProcessEventDot = styled(
                   begin="click"
                   repeatCount="1"
                   className="squish"
-                  ref={clickTargetRef}
+                  ref={animationTarget}
                 />
               </use>
               <use
@@ -300,7 +306,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
   unknownEvent: 'runningProcessCube',
 };
 
-function getNodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
+function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   const processType = processModel.eventType(processEvent);
 
   if (processType in processTypeToCube) {

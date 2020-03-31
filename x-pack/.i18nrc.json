@@ -16,7 +16,7 @@
     "xpack.features": "plugins/features",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.graph": ["legacy/plugins/graph", "plugins/graph"],
-    "xpack.grokDebugger": "legacy/plugins/grokdebugger",
+    "xpack.grokDebugger": "plugins/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",
     "xpack.infra": "plugins/infra",

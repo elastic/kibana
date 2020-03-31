@@ -89,14 +89,19 @@ export const Resolver = styled(
                 projectionMatrix={projectionMatrix}
               />
             ))}
-            {Array.from(processNodePositions).map(([processEvent, position], index) => {
+            {[...processNodePositions].map(([processEvent, position], index) => {
+              const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
+              if (!adjacentNodeMap) {
+                // This should never happen
+                throw new Error('Issue calculating adjacency node map.');
+              }
               return (
                 <ProcessEventDot
                   key={index}
                   position={position}
                   projectionMatrix={projectionMatrix}
                   event={processEvent}
-                  adjacentNodeMap={processToAdjacencyMap.get(processEvent)}
+                  adjacentNodeMap={adjacentNodeMap}
                 />
               );
             })}

@@ -30,7 +30,7 @@ interface BulkCreateMlSignalsParams {
   interval: string;
   enabled: boolean;
   tags: string[];
-  throttle: string | null;
+  throttle: string;
 }
 
 interface EcsAnomaly extends Anomaly {
