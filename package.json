@@ -132,7 +132,7 @@
     "@hapi/boom": "^7.4.11",
     "@hapi/good-squeeze": "5.2.1",
     "@hapi/hapi": "^18.4.1",
-    "@hapi/wreck": "^15.0.2",
+    "@hapi/wreck": "^15.1.0",
     "@kbn/analytics": "1.0.0",
     "@kbn/babel-code-parser": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
