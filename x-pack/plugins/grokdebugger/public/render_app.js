@@ -14,23 +14,19 @@ import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/publ
 import { InactiveLicenseSlate } from './components/inactive_license';
 
 export function renderApp(license, element, coreStart) {
-  if (!license.isActive) {
-    render(
+  const content = license.isActive ? (
+    <KibanaContextProvider services={{ ...coreStart }}>
       <I18nProvider>
-        <InactiveLicenseSlate license={license} />
-      </I18nProvider>,
-      element
-    );
-    return () => unmountComponentAtNode(element);
-  } else {
-    render(
-      <KibanaContextProvider services={{ ...coreStart }}>
-        <I18nProvider>
-          <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
-        </I18nProvider>
-      </KibanaContextProvider>,
-      element
-    );
-    return () => unmountComponentAtNode(element);
-  }
+        <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
+      </I18nProvider>
+    </KibanaContextProvider>
+  ) : (
+    <I18nProvider>
+      <InactiveLicenseSlate license={license} />
+    </I18nProvider>
+  );
+
+  render(content, element);
+
+  return () => unmountComponentAtNode(element);
 }
