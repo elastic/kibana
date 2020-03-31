@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
+import { KibanaRequest } from 'kibana/server';
 import { IEvent } from '../generated/schemas';
 
 export const ConfigSchema = schema.object({
@@ -29,6 +30,14 @@ export interface IEventLogService {
   getProviderActions(): Map<string, Set<string>>;
 
   getLogger(properties: IEvent): IEventLogger;
+}
+
+export interface IEventLogClientService {
+  getClient(request: KibanaRequest): IEventLogClient;
+}
+
+export interface IEventLogClient {
+  getEventsBySavedObject(type: string, id: string): void;
 }
 
 export interface IEventLogger {

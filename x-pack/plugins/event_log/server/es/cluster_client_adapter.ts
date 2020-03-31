@@ -14,6 +14,11 @@ export interface ConstructorOpts {
   clusterClient: EsClusterClient;
 }
 
+export interface GetEventsOptions {
+  from: number;
+  size: number;
+}
+
 export class ClusterClientAdapter {
   private readonly logger: Logger;
   private readonly clusterClient: EsClusterClient;
@@ -104,6 +109,41 @@ export class ClusterClientAdapter {
       if (err.body?.error?.type !== 'resource_already_exists_exception') {
         throw new Error(`error creating initial index: ${err.message}`);
       }
+    }
+  }
+
+  public async queryEventsBySavedObject(
+    index: string,
+    type: string,
+    id: string,
+    options: Partial<GetEventsOptions> = {}
+  ): Promise<any[]> {
+    try {
+      const {
+        hits: { hits },
+      } = await this.callEs('search', {
+        index,
+        body: {
+          ...options,
+          query: {
+            bool: {
+              must: [
+                { match: { 'kibana.saved_objects.type.keyword': type } },
+                {
+                  match: {
+                    'kibana.saved_objects.id.keyword': id,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      return hits as any[];
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by ${JSON.stringify({ index, type, id })} failed by: ${err.message}`
+      );
     }
   }
 

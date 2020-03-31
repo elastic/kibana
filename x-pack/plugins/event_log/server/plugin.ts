@@ -16,9 +16,16 @@ import {
   SharedGlobalConfig,
 } from 'src/core/server';
 
-import { IEventLogConfig, IEventLogService, IEventLogger, IEventLogConfig$ } from './types';
+import {
+  IEventLogConfig,
+  IEventLogService,
+  IEventLogger,
+  IEventLogConfig$,
+  IEventLogClientService,
+} from './types';
 import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
+import { EventLogClientService } from './event_log_client_service';
 
 export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
@@ -29,7 +36,7 @@ const ACTIONS = {
   stopping: 'stopping',
 };
 
-export class Plugin implements CorePlugin<IEventLogService> {
+export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {
   private readonly config$: IEventLogConfig$;
   private systemLogger: Logger;
   private eventLogService?: IEventLogService;
@@ -74,7 +81,7 @@ export class Plugin implements CorePlugin<IEventLogService> {
     return this.eventLogService;
   }
 
-  async start(core: CoreStart) {
+  async start(core: CoreStart): Promise<IEventLogClientService> {
     this.systemLogger.debug('starting plugin');
 
     if (!this.esContext) throw new Error('esContext not initialized');
@@ -90,6 +97,11 @@ export class Plugin implements CorePlugin<IEventLogService> {
     this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
       message: 'eventLog starting',
+    });
+
+    return new EventLogClientService({
+      esContext: this.esContext,
+      savedObjectsService: core.savedObjects,
     });
   }
 

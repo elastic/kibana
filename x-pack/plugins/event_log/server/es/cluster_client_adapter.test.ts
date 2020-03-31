@@ -195,3 +195,58 @@ describe('createIndex', () => {
     await clusterClientAdapter.createIndex('foo');
   });
 });
+
+describe('queryEventsBySavedObject', () => {
+  test('should call cluster with proper arguments', async () => {
+    await clusterClientAdapter.queryEventsBySavedObject(
+      'index-name',
+      'saved-object-type',
+      'saved-object-id'
+    );
+    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
+      index: 'index-name',
+      body: {
+        query: {
+          bool: {
+            must: [
+              { match: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
+              {
+                match: {
+                  'kibana.saved_objects.id.keyword': 'saved-object-id',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  test('should allow pagination options', async () => {
+    await clusterClientAdapter.queryEventsBySavedObject(
+      'index-name',
+      'saved-object-type',
+      'saved-object-id',
+      { from: 100, size: 10 }
+    );
+    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
+      index: 'index-name',
+      body: {
+        from: 100,
+        size: 10,
+        query: {
+          bool: {
+            must: [
+              { match: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
+              {
+                match: {
+                  'kibana.saved_objects.id.keyword': 'saved-object-id',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+});
