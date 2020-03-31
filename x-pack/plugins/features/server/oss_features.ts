@@ -349,7 +349,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             all: [...savedObjectTypes],
             read: [],
           },
-          ui: ['read', 'edit', 'delete', 'copyIntoSpace'],
+          ui: ['read', 'edit', 'delete', 'copyIntoSpace', 'shareIntoSpace'],
         },
         read: {
           app: ['kibana'],

@@ -310,6 +310,7 @@ Array [
         "edit",
         "delete",
         "copyIntoSpace",
+        "shareIntoSpace",
       ],
     },
     "privilegeId": "all",

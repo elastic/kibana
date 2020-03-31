@@ -13,7 +13,11 @@ import { SpacesAuditLogger } from '../audit_logger';
 import { ConfigType } from '../../config';
 import { GetSpacePurpose } from '../../../common/model/types';
 
-const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObjectsIntoSpace'];
+const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = [
+  'any',
+  'copySavedObjectsIntoSpace',
+  'shareSavedObjectsIntoSpace',
+];
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
@@ -22,6 +26,8 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   any: authorization => authorization.actions.login,
   copySavedObjectsIntoSpace: authorization =>
     authorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
+  shareSavedObjectsIntoSpace: authorization =>
+    authorization.actions.ui.get('savedObjectsManagement', 'shareIntoSpace'),
 };
 
 export class SpacesClient {

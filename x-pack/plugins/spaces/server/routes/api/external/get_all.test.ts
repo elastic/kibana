@@ -119,6 +119,22 @@ describe('GET /spaces/space', () => {
     expect(response.payload).toEqual(spaces);
   });
 
+  it(`returns all available spaces with the 'shareSavedObjectsIntoSpace' purpose`, async () => {
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      query: {
+        purpose: 'shareSavedObjectsIntoSpace',
+      },
+      method: 'get',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual(spaces);
+  });
+
   it(`returns http/403 when the license is invalid`, async () => {
     const { routeHandler } = await setup();
 
