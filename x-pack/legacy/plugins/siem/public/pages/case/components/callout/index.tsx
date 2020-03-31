@@ -5,22 +5,28 @@
  */
 
 import { EuiCallOut, EuiButton, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState } from 'react';
 
 import * as i18n from './translations';
 
-interface ErrorsPushServiceCallOut {
-  errors: Array<{ title: string; description: JSX.Element }>;
+export * from './helpers';
+
+interface CaseCallOutProps {
+  title: string;
+  message?: string;
+  messages?: Array<{ title: string; description: JSX.Element }>;
 }
 
-const ErrorsPushServiceCallOutComponent = ({ errors }: ErrorsPushServiceCallOut) => {
+const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) => {
   const [showCallOut, setShowCallOut] = useState(true);
   const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
 
   return showCallOut ? (
     <>
-      <EuiCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} color="primary" iconType="gear">
-        <EuiDescriptionList listItems={errors} />
+      <EuiCallOut title={title} color="primary" iconType="gear">
+        {!isEmpty(messages) && <EuiDescriptionList listItems={messages} />}
+        {!isEmpty(message) && <p>{message}</p>}
         <EuiButton color="primary" onClick={handleCallOut}>
           {i18n.DISMISS_CALLOUT}
         </EuiButton>
@@ -30,4 +36,4 @@ const ErrorsPushServiceCallOutComponent = ({ errors }: ErrorsPushServiceCallOut)
   ) : null;
 };
 
-export const ErrorsPushServiceCallOut = memo(ErrorsPushServiceCallOutComponent);
+export const CaseCallOut = memo(CaseCallOutComponent);

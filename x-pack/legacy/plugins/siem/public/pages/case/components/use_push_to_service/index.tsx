@@ -5,8 +5,8 @@
  */
 
 import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useState, useMemo } from 'react';
 
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import { Case } from '../../../../containers/case/types';
@@ -15,7 +15,8 @@ import { usePostPushToService } from '../../../../containers/case/use_post_push_
 import { getConfigureCasesUrl } from '../../../../components/link_to';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { navTabs } from '../../../home/home_navigations';
-import { ErrorsPushServiceCallOut } from '../errors_push_service_callout';
+import { CaseCallOut } from '../callout';
+import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
 
 interface UsePushToService {
@@ -23,6 +24,7 @@ interface UsePushToService {
   caseStatus: string;
   isNew: boolean;
   updateCase: (newCase: Case) => void;
+  userCanCrud: boolean;
 }
 
 interface Connector {
@@ -38,8 +40,9 @@ interface ReturnUsePushToService {
 export const usePushToService = ({
   caseId,
   caseStatus,
-  updateCase,
   isNew,
+  updateCase,
+  userCanCrud,
 }: UsePushToService): ReturnUsePushToService => {
   const urlSearch = useGetUrlSearch(navTabs.case);
   const [connector, setConnector] = useState<Connector | null>(null);
@@ -69,25 +72,7 @@ export const usePushToService = ({
   const errorsMsg = useMemo(() => {
     let errors: Array<{ title: string; description: JSX.Element }> = [];
     if (actionLicense != null && !actionLicense.enabledInLicense) {
-      errors = [
-        ...errors,
-        {
-          title: i18n.PUSH_DISABLE_BY_LICENSE_TITLE,
-          description: (
-            <FormattedMessage
-              defaultMessage="To open cases in external systems, you must update your license to Platinum, start a free 30-day trial, or spin up a {link} on AWS, GCP, or Azure."
-              id="xpack.siem.case.caseView.pushToServiceDisableByLicenseDescription"
-              values={{
-                link: (
-                  <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
-                    {i18n.LINK_CLOUD_DEPLOYMENT}
-                  </EuiLink>
-                ),
-              }}
-            />
-          ),
-        },
-      ];
+      errors = [...errors, getLicenseError()];
     }
     if (connector == null && !loadingCaseConfigure && !loadingLicense) {
       errors = [
@@ -125,25 +110,7 @@ export const usePushToService = ({
       ];
     }
     if (actionLicense != null && !actionLicense.enabledInConfig) {
-      errors = [
-        ...errors,
-        {
-          title: i18n.PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE,
-          description: (
-            <FormattedMessage
-              defaultMessage="The kibana.yml file is configured to only allow specific connectors. To enable opening a case in external systems, add .servicenow to the xpack.actions.enabledActiontypes setting. For more information, see {link}."
-              id="xpack.siem.case.caseView.pushToServiceDisableByConfigDescription"
-              values={{
-                link: (
-                  <EuiLink href="#" target="_blank">
-                    {'coming soon...'}
-                  </EuiLink>
-                ),
-              }}
-            />
-          ),
-        },
-      ];
+      errors = [...errors, getKibanaConfigError()];
     }
     return errors;
   }, [actionLicense, caseStatus, connector, loadingCaseConfigure, loadingLicense, urlSearch]);
@@ -154,13 +121,27 @@ export const usePushToService = ({
         fill
         iconType="importAction"
         onClick={handlePushToService}
-        disabled={isLoading || loadingLicense || loadingCaseConfigure || errorsMsg.length > 0}
+        disabled={
+          isLoading ||
+          loadingLicense ||
+          loadingCaseConfigure ||
+          errorsMsg.length > 0 ||
+          !userCanCrud
+        }
         isLoading={isLoading}
       >
         {isNew ? i18n.PUSH_SERVICENOW : i18n.UPDATE_PUSH_SERVICENOW}
       </EuiButton>
     ),
-    [isNew, handlePushToService, isLoading, loadingLicense, loadingCaseConfigure, errorsMsg]
+    [
+      isNew,
+      handlePushToService,
+      isLoading,
+      loadingLicense,
+      loadingCaseConfigure,
+      errorsMsg,
+      userCanCrud,
+    ]
   );
 
   const objToReturn = useMemo(
@@ -177,7 +158,10 @@ export const usePushToService = ({
         ) : (
           <>{pushToServiceButton}</>
         ),
-      pushCallouts: errorsMsg.length > 0 ? <ErrorsPushServiceCallOut errors={errorsMsg} /> : null,
+      pushCallouts:
+        errorsMsg.length > 0 ? (
+          <CaseCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={errorsMsg} />
+        ) : null,
     }),
     [errorsMsg, pushToServiceButton]
   );

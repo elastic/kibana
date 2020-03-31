@@ -6,10 +6,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
-  'xpack.siem.case.errorsPushServiceCallOutTitle',
+export const READ_ONLY_SAVED_OBJECT_TITLE = i18n.translate(
+  'xpack.siem.case.readOnlySavedObjectTitle',
   {
-    defaultMessage: 'To send cases to external systems, you need to:',
+    defaultMessage: 'You have read-only feature privileges',
+  }
+);
+
+export const READ_ONLY_SAVED_OBJECT_MSG = i18n.translate(
+  'xpack.siem.case.readOnlySavedObjectDescription',
+  {
+    defaultMessage:
+      'You are only allowed to view cases. If you need to open and update cases, contact your Kibana administrator',
   }
 );
 

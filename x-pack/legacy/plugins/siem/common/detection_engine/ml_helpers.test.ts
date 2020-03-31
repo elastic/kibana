@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isJobStarted, isJobLoading, isJobFailed } from './';
+import { isJobStarted, isJobLoading, isJobFailed } from './ml_helpers';
 
 describe('isJobStarted', () => {
   test('returns false if only jobState is enabled', () => {

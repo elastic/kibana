@@ -18,6 +18,7 @@
  */
 
 import normalizePath from 'normalize-path';
+import Qs from 'querystring';
 
 /**
  * Parse an absolute path, supporting normalized paths from webpack,
@@ -33,11 +34,19 @@ export function parseDirPath(path: string) {
 }
 
 export function parseFilePath(path: string) {
-  const normalized = normalizePath(path);
+  let normalized = normalizePath(path);
+  let query;
+  const queryIndex = normalized.indexOf('?');
+  if (queryIndex !== -1) {
+    query = Qs.parse(normalized.slice(queryIndex + 1));
+    normalized = normalized.slice(0, queryIndex);
+  }
+
   const [root, ...others] = normalized.split('/');
   return {
     root: root === '' ? '/' : root,
     dirs: others.slice(0, -1),
+    query,
     filename: others[others.length - 1] || undefined,
   };
 }

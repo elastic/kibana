@@ -87,7 +87,7 @@ describe('AllCases', () => {
   it('should render AllCases', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(
@@ -132,7 +132,7 @@ describe('AllCases', () => {
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -149,7 +149,7 @@ describe('AllCases', () => {
   it('closes case when row action icon clicked', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -182,7 +182,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -213,7 +213,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -238,7 +238,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -259,7 +259,7 @@ describe('AllCases', () => {
 
     mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(refetchCases).toBeCalled();
@@ -274,7 +274,7 @@ describe('AllCases', () => {
 
     mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(refetchCases).toBeCalled();
