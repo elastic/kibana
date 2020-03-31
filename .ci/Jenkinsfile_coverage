@@ -10,84 +10,114 @@ kibanaPipeline(timeoutMinutes: 180) {
     ]) {
 
       workers.base(name: 'fail-fast-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
-        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
+//        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
+        listVcsEnvVars()
       }
 
-      parallel([
-        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-        'x-pack-intake-agent': {
-          withEnv([
-            'NODE_ENV=test' // Needed for jest tests only
-          ]) {
-            workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-          }
-        },
-        'kibana-oss-agent'   : workers.functional(
-          'kibana-oss-tests',
-          { kibanaPipeline.buildOss() },
-          ossProks()
-        ),
-        'kibana-xpack-agent' : workers.functional(
-          'kibana-xpack-tests',
-          { kibanaPipeline.buildXpack() },
-          xpackProks()
-        ),
-      ])
+//      parallel([
+//        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
+//        'x-pack-intake-agent': {
+//          withEnv([
+//            'NODE_ENV=test' // Needed for jest tests only
+//          ]) {
+//            workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
+//          }
+//        },
+//        'kibana-oss-agent'   : workers.functional(
+//          'kibana-oss-tests',
+//          { kibanaPipeline.buildOss() },
+//          ossProks()
+//        ),
+//        'kibana-xpack-agent' : workers.functional(
+//          'kibana-xpack-tests',
+//          { kibanaPipeline.buildXpack() },
+//          xpackProks()
+//        ),
+//      ])
 
-      workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
-        kibanaPipeline.downloadCoverageArtifacts()
-
-        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-        withEnv([
-          "TIME_STAMP=${timestamp}",
-          "QA_TEAM_ROCKS=true"
-        ]) {
-
-          def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
-          withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
-            withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
-              withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-                kibanaPipeline.bash("""
-                source src/dev/ci_setup/setup_env.sh
-
-                # bootstrap from x-pack folder
-                cd x-pack
-                yarn kbn bootstrap --prefer-offline
-
-                # Return to project root
-                cd ..
-
-                . src/dev/code_coverage/shell_scripts/extract_archives.sh
-
-                . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-
-                . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-
-                . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
-
-                . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
-
-                """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
-              }
-            }
-          }
-          kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
-        }
-
-        sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
-        sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
-        sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
-
-      }
+//      workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
+//        kibanaPipeline.downloadCoverageArtifacts()
+//
+//        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+//        withEnv([
+//          "TIME_STAMP=${timestamp}",
+//          "QA_TEAM_ROCKS=true"
+//        ]) {
+//
+//          def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
+//          withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+//            withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+//              withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+//                kibanaPipeline.bash("""
+//                source src/dev/ci_setup/setup_env.sh
+//
+//                # bootstrap from x-pack folder
+//                cd x-pack
+//                yarn kbn bootstrap --prefer-offline
+//
+//                # Return to project root
+//                cd ..
+//
+//                . src/dev/code_coverage/shell_scripts/extract_archives.sh
+//
+//                . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
+//
+//                . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
+//
+//                . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
+//
+//                . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
+//
+//                """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
+//              }
+//            }
+//          }
+//          kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
+//        }
+//
+//        sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
+//        kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
+//        sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
+//        kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
+//        sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
+//        kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
+//
+//      }
 
     }
   }
   kibanaPipeline.sendMail()
 }
 
+def listVcsEnvVars() {
+  kibanaPipeline.bash(
+    '''
+
+    predicate() {
+      x=$1
+      if [ -n "$x" ]; then
+        echo "### DEFINED"
+      else
+        echo "### 1 or more variables that Code Coverage needs, are undefined"
+        exit 1
+      fi
+    }
+
+
+    XS=(${BUILD_DISPLAY_NAME} ${BRANCH_NAME})
+
+
+    for X in "${!XS[@]}"; do
+    {
+      predicate "${X}"
+      echo "${XS[X]}"
+    }
+    done
+
+
+    ''', "### List VCS Environment Variables"
+  )
+}
 
 def maybeFailFast(secret) {
   withVaultSecret(secret: secret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
