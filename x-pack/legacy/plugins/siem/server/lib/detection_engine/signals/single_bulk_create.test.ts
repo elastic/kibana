@@ -160,7 +160,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(success).toEqual(true);
   });
@@ -192,7 +192,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(success).toEqual(true);
   });
@@ -216,7 +216,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(success).toEqual(true);
   });
@@ -241,7 +241,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
 
     expect(mockLogger.error).not.toHaveBeenCalled();
@@ -268,7 +268,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
 
     expect(mockLogger.error).toHaveBeenCalled();

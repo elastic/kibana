@@ -90,7 +90,7 @@ export enum SortFieldCase {
 export interface ElasticUser {
   readonly email?: string | null;
   readonly fullName?: string | null;
-  readonly username: string;
+  readonly username?: string | null;
 }
 
 export interface FetchCasesProps extends ApiProps {
@@ -113,4 +113,9 @@ export interface ActionLicense {
   enabled: boolean;
   enabledInConfig: boolean;
   enabledInLicense: boolean;
+}
+
+export interface DeleteCase {
+  id: string;
+  title?: string;
 }

@@ -21,6 +21,7 @@ import { createDirectAccessDashboardLinkGenerator } from './url_generator';
 import { hashedItemStore } from '../../kibana_utils/public';
 // eslint-disable-next-line
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
+import { esFilters } from '../../data/public';
 
 const APP_BASE_PATH: string = 'xyz/app/kibana';
 
@@ -50,12 +51,13 @@ describe('dashboard url generator', () => {
     );
   });
 
-  test('creates a link with filters, time range and query to a saved object', async () => {
+  test('creates a link with filters, time range, refresh interval and query to a saved object', async () => {
     const generator = createDirectAccessDashboardLinkGenerator(() =>
       Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
     );
     const url = await generator.createUrl!({
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      refreshInterval: { pause: false, value: 300 },
       dashboardId: '123',
       filters: [
         {
@@ -66,11 +68,22 @@ describe('dashboard url generator', () => {
           },
           query: { query: 'hi' },
         },
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: { query: 'hi' },
+          $state: {
+            store: esFilters.FilterStateStore.GLOBAL_STATE,
+          },
+        },
       ],
       query: { query: 'bye', language: 'kuery' },
     });
     expect(url).toMatchInlineSnapshot(
-      `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(time:(from:now-15m,mode:relative,to:now))"`
+      `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))"`
     );
   });
 
