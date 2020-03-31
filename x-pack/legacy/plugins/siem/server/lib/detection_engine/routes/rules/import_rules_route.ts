@@ -109,7 +109,6 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     return null;
                   }
                   const {
-                    actions,
                     anomaly_threshold: anomalyThreshold,
                     description,
                     enabled,
@@ -132,7 +131,6 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     severity,
                     tags,
                     threat,
-                    throttle,
                     to,
                     type,
                     references,
@@ -168,7 +166,6 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                       await createRules({
                         alertsClient,
                         actionsClient,
-                        actions,
                         anomalyThreshold,
                         description,
                         enabled,
@@ -195,7 +192,6 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         to,
                         type,
                         threat,
-                        throttle,
                         references,
                         note,
                         version,
@@ -206,7 +202,6 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                       await patchRules({
                         alertsClient,
                         actionsClient,
-                        actions,
                         savedObjectsClient,
                         description,
                         enabled,
@@ -233,7 +228,6 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         to,
                         type,
                         threat,
-                        throttle,
                         references,
                         note,
                         version,
