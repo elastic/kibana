@@ -181,6 +181,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -202,6 +203,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
@@ -223,9 +225,9 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiSpacer size="xs" />
           <FieldMapping
             disabled={true}
             mapping={mapping as CasesConfigurationMapping[]}
