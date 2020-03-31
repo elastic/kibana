@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
-
 import { Redirect } from 'react-router-dom';
 import * as i18n from './translations';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
@@ -16,9 +16,10 @@ import { Case } from '../../../../containers/case/types';
 
 interface CaseViewActions {
   caseData: Case;
+  disabled?: boolean;
 }
 
-const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData }) => {
+const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData, disabled = false }) => {
   // Delete case
   const {
     handleToggleModal,
@@ -43,11 +44,12 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData }) => {
   const propertyActions = useMemo(
     () => [
       {
+        disabled,
         iconType: 'trash',
         label: i18n.DELETE_CASE,
         onClick: handleToggleModal,
       },
-      ...(caseData.externalService?.externalUrl !== null
+      ...(caseData.externalService != null && !isEmpty(caseData.externalService?.externalUrl)
         ? [
             {
               iconType: 'popout',
@@ -57,7 +59,7 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData }) => {
           ]
         : []),
     ],
-    [handleToggleModal, caseData]
+    [disabled, handleToggleModal, caseData]
   );
 
   if (isDeleted) {
