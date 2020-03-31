@@ -114,7 +114,7 @@ def listVcsEnvVars() {
 
     XS=("${BUILD_DISPLAY_NAME}" \
         "${GIT_BRANCH}" \
-        "$(git rev-parse --abbrev-ref HEAD)" \\
+        "$(git rev-parse --abbrev-ref HEAD)" \
         "$(git log --pretty=format:"%h - %an, %ar : %s" -1)")
 
     for X in "${!XS[@]}"; do
