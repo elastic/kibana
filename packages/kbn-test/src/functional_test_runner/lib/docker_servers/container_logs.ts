@@ -22,6 +22,10 @@ import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ToolingLog, observeLines } from '@kbn/dev-utils';
 
+/**
+ * Observe the logs for a container, reflecting the log lines
+ * to the ToolingLog and the returned Observable
+ */
 export function observeContainerLogs(name: string, containerId: string, log: ToolingLog) {
   log.debug(`[docker:${name}] streaming logs from container [id=${containerId}]`);
   const logsProc = execa('docker', ['logs', '--follow', containerId], {
@@ -35,5 +39,5 @@ export function observeContainerLogs(name: string, containerId: string, log: Too
     observeLines(logsProc.stderr).pipe(tap(line => log.error(`[docker:${name}] ${line}`)))
   ).subscribe(logLine$);
 
-  return logLine$;
+  return logLine$.asObservable();
 }

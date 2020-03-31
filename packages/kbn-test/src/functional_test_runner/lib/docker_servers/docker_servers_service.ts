@@ -66,19 +66,49 @@ export class DockerServersService {
     return { ...server };
   }
 
+  private async dockerRun(server: DockerServer) {
+    try {
+      this.log.info(`[docker:${server.name}] running image "${server.image}"`);
+
+      const res = await execa('docker', [
+        'run',
+        '-dit',
+        '-p',
+        `${server.port}:${server.portInContainer}`,
+        server.image,
+      ]);
+
+      return res.stdout.trim();
+    } catch (error) {
+      if (error?.exitCode === 125 && error?.message.includes('port is already allocated')) {
+        throw new Error(`
+          [docker:${server.name}] Another process is already listening on port ${server.port}.
+
+          This usually happens because the functional test runner didn't have a chance to
+          cleanup the running docker containers before being killed.
+
+          To see if this is the case:
+
+           1. make sure that there aren't other instances of the functional test runner running
+           2. run \`docker ps\` to see the containers running
+           3. if one of them lists that it is using port ${server.port} then kill it with \`docker kill "container ID"\`
+        `);
+      }
+      throw error;
+    }
+  }
+
   private async startServer(server: DockerServer) {
     const { log, lifecycle } = this;
-    const { image, name, port, portInContainer, waitFor, waitForLogLine } = server;
+    const { image, name, waitFor, waitForLogLine } = server;
 
     // pull image from registry
     log.info(`[docker:${name}] pulling docker image "${image}"`);
     await execa('docker', ['pull', image]);
 
     // run the image that we just pulled
-    log.info(`[docker:${name}] running image "${image}"`);
-    const containerId = (
-      await execa('docker', ['run', '-dit', '-p', `${port}:${portInContainer}`, image])
-    ).stdout.trim();
+    const containerId = await this.dockerRun(server);
+
     lifecycle.cleanup.add(() => {
       try {
         execa.sync('docker', ['kill', containerId]);
@@ -123,15 +153,15 @@ export class DockerServersService {
       log.info(`[docker:${name}] Waiting for waitFor() promise to resolve`);
     }
     if (waitForLogLine === undefined && waitFor === undefined) {
-      log.warning(
-        `[docker:${name}] No "waitFor*" condition defined, you should always ` +
-          `define a wait condition to avoid race conditions that are more likely ` +
-          `to fail on CI because we're not waiting for the contained server to be ready.`
-      );
+      log.warning(`
+        [docker:${name}] No "waitFor*" condition defined, you should always
+          define a wait condition to avoid race conditions that are more likely
+          to fail on CI because we're not waiting for the contained server to be ready.
+      `);
     }
 
     await Promise.all<unknown>([
-      waitFor !== undefined && waitFor(server, logLine$.asObservable()),
+      waitFor !== undefined && waitFor(server, logLine$),
       waitForLogLine !== undefined &&
         logLine$
           .pipe(
