@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { ILicense, LICENSE_CHECK_STATE } from '../../../../plugins/licensing/common/types';

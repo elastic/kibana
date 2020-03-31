@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
 import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server';

@@ -7,7 +7,7 @@ import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_
 import { Agent, AgentAction, AgentEvent } from '../../../common/types/models';
 import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
 import { acknowledgeAgentActions } from './acks';
-import { isBoom } from 'boom';
+import { isBoom } from '@hapi/boom';
 
 describe('test agent acks services', () => {
   it('should succeed on valid and matched actions', async () => {

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';

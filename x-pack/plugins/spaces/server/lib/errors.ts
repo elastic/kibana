@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify, isBoom } from 'boom';
+import { boomify, isBoom } from '@hapi/boom';
 import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {

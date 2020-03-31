@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RequestHandlerContext } from 'kibana/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { AnalysisConfig } from '../../common/types/anomaly_detection_jobs';

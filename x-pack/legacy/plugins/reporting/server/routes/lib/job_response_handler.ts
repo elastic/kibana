@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { ResponseToolkit } from '@hapi/hapi';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';

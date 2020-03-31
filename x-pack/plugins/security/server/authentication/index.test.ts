@@ -9,7 +9,7 @@ import { licenseMock } from '../../common/licensing/index.mock';
 jest.mock('./api_keys');
 jest.mock('./authenticator');
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import {
   loggingServiceMock,

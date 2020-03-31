@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { createDefaultSpace } from './create_default_space';
 import { SavedObjectsLegacyService, IClusterClient } from 'src/core/server';
 

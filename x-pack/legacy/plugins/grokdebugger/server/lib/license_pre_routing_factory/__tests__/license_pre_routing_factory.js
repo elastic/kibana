@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { licensePreRoutingFactory } from '../license_pre_routing_factory';
 
 describe('license_pre_routing_factory', () => {

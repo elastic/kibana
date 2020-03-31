@@ -9,7 +9,7 @@ jest.mock('tls');
 
 import { Socket } from 'net';
 import { PeerCertificate, TLSSocket } from 'tls';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';

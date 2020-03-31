@@ -5,7 +5,7 @@
 ```ts
 
 import { APICaller as APICaller_2 } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';

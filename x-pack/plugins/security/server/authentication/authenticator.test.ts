@@ -9,7 +9,7 @@ jest.mock('./providers/token');
 jest.mock('./providers/saml');
 jest.mock('./providers/http');
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { duration, Duration } from 'moment';
 import { SessionStorage } from '../../../../../src/core/server';
 

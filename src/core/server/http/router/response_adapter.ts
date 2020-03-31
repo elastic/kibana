@@ -21,7 +21,7 @@ import {
   ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
 import typeDetect from 'type-detect';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import * as stream from 'stream';
 
 import {

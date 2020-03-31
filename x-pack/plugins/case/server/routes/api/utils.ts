@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { boomify, isBoom } from 'boom';
+import { boomify, isBoom } from '@hapi/boom';
 import {
   CustomHttpResponseOptions,
   ResponseError,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { ReportingCore } from '../../../../server';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';

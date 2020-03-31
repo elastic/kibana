@@ -5,7 +5,7 @@
  */
 
 import fs from 'fs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
 import { APICaller, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';

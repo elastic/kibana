@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import Bluebird from 'bluebird';
 import { unlinkSync as unlink } from 'fs';
 const writeFile = Bluebird.promisify(require('fs').writeFile);

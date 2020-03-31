@@ -5,7 +5,7 @@
  */
 
 import { difference } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
 

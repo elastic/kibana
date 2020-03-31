@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 import { isKnownError, handleKnownError } from './known_errors';
 import { isAuthError, handleAuthError } from './auth_errors';
 

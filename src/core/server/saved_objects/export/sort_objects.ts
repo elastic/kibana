@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { SavedObject } from '../types';
 
 export function sortObjects(savedObjects: SavedObject[]): SavedObject[] {

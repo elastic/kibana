@@ -162,7 +162,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
     packageNames: [
       '@hapi/hapi',
       'joi',
-      'boom',
+      '@hapi/boom',
       'hoek',
       'h2o2',
       '@elastic/good',

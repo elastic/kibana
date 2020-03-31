@@ -27,7 +27,7 @@ import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 const ROOT = `/${GIS_API_PATH}`;
 
