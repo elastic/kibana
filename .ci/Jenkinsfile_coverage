@@ -96,7 +96,7 @@ def listVcsEnvVars() {
     predicate() {
       x=$1
       if [ -n "$x" ]; then
-        echo ""
+        return
       else
         echo "### 1 or more variables that Code Coverage needs, are undefined"
         exit 1
@@ -104,7 +104,6 @@ def listVcsEnvVars() {
     }
 
     XS=("${BUILD_DISPLAY_NAME}" \
-        "${GIT_COMMIT}" \
         "${GIT_BRANCH}" \
         "${GIT_COMMITTER_NAME}" \
         "${GIT_COMMITTER_EMAIL}" \
@@ -113,6 +112,7 @@ def listVcsEnvVars() {
 
     for X in "${!XS[@]}"; do
     {
+      echo "### Checking: $X"
       predicate "${XS[X]}"
       echo "$X: ${XS[X]}"
     }
