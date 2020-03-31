@@ -24,7 +24,7 @@ export const querySignalsRoute = (router: IRouter) => {
     async (context, request, response) => {
       const { query, aggs, _source, track_total_hits, size } = request.body;
       const clusterClient = context.core.elasticsearch.dataClient;
-      const siemClient = context.siem.getSiemClient();
+      const siemClient = context.siem!.getSiemClient();
       const siemResponse = buildSiemResponse(response);
 
       try {
