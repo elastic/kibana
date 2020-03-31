@@ -58,7 +58,7 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
-} from '../../../../embeddable_api/public/np_ready/public';
+} from '../../../../../../plugins/embeddable/public';
 import { NavAction, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';

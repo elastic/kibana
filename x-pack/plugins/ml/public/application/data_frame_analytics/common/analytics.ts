@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
-import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
+import { getErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
 import { SortDirection } from '../../components/ml_in_memory_table';
 
