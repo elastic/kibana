@@ -37,7 +37,7 @@ export interface ResolverUIState {
   /**
    * The ID attribute of the resolver's aria-activedescendent.
    */
-  readonly activeDescendentId: string | null;
+  readonly activeDescendantId: string | null;
   /**
    * The ID attribute of the resolver's currently selected descendant.
    */

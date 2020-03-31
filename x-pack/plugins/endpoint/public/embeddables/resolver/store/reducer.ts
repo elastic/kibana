@@ -10,7 +10,7 @@ import { dataReducer } from './data/reducer';
 import { ResolverState, ResolverAction, ResolverUIState } from '../types';
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
-  uiState = { activeDescendentId: null, selectedDescendantId: null },
+  uiState = { activeDescendantId: null, selectedDescendantId: null },
   action
 ) => {
   if (action.type === 'userFocusedOnResolverNode') {

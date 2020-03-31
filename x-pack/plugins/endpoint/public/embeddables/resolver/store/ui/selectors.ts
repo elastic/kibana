@@ -12,8 +12,9 @@ import { ResolverUIState } from '../../types';
  */
 export const activeDescendantId = createSelector(
   (uiState: ResolverUIState) => uiState,
-  ({ activeDescendentId }) => {
-    return activeDescendentId;
+  /* eslint-disable no-shadow */
+  ({ activeDescendantId }) => {
+    return activeDescendantId;
   }
 );
 
