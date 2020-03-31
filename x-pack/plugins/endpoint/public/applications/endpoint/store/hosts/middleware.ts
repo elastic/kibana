@@ -5,19 +5,17 @@
  */
 
 import { MiddlewareFactory } from '../../types';
-import { pageIndex, pageSize, hasSelectedHost, uiQueryParams } from './selectors';
+import { pageIndex, pageSize } from './selectors';
 import { HostListState } from '../../types';
 import { AppAction } from '../action';
-import { isOnHostPage } from '../../lib/is_on_page';
+import { isOnHostPage, uiQueryParams, hasSelectedHost } from '../../lib/is_on_page';
 
 export const hostMiddlewareFactory: MiddlewareFactory<HostListState> = coreStart => {
   return ({ getState, dispatch }) => next => async (action: AppAction) => {
     next(action);
     const state = getState();
     if (
-      (action.type === 'userChangedUrl' &&
-        isOnHostPage(state) &&
-        hasSelectedHost(state) !== true) ||
+      (action.type === 'userChangedUrl' && isOnHostPage() && hasSelectedHost() !== true) ||
       action.type === 'userPaginatedHostList'
     ) {
       const hostPageIndex = pageIndex(state);
@@ -33,8 +31,8 @@ export const hostMiddlewareFactory: MiddlewareFactory<HostListState> = coreStart
         payload: response,
       });
     }
-    if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== false) {
-      const { selected_host: selectedHost } = uiQueryParams(state);
+    if (action.type === 'userChangedUrl' && hasSelectedHost() !== false) {
+      const { selected_host: selectedHost } = uiQueryParams();
       try {
         const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
         dispatch({

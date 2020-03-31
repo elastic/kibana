@@ -29,6 +29,7 @@ import { HostAction } from '../../store/hosts/action';
 import { useHostListSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
+import { hasSelectedHost, uiQueryParams as queryParams } from '../../lib/is_on_page';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const HostList = () => {
@@ -40,8 +41,6 @@ export const HostList = () => {
     pageSize,
     totalHits: totalItemCount,
     isLoading,
-    uiQueryParams: queryParams,
-    hasSelectedHost,
   } = useHostListSelector(selector);
 
   const paginationSetup = useMemo(() => {
@@ -77,10 +76,10 @@ export const HostList = () => {
             // eslint-disable-next-line @elastic/eui/href-or-on-click
             <EuiLink
               data-test-subj="hostnameCellLink"
-              href={'?' + urlFromQueryParams({ ...queryParams, selected_host: id }).search}
+              href={'?' + urlFromQueryParams({ ...queryParams(), selected_host: id }).search}
               onClick={(ev: React.MouseEvent) => {
                 ev.preventDefault();
-                history.push(urlFromQueryParams({ ...queryParams, selected_host: id }));
+                history.push(urlFromQueryParams({ ...queryParams(), selected_host: id }));
               }}
             >
               {hostname}
@@ -148,11 +147,11 @@ export const HostList = () => {
         },
       },
     ];
-  }, [queryParams, history]);
+  }, [history]);
 
   return (
     <HostPage>
-      {hasSelectedHost && <HostDetailsFlyout />}
+      {hasSelectedHost() && <HostDetailsFlyout />}
       <EuiPage className="hostPage">
         <EuiPageBody>
           <EuiPageHeader className="hostHeader">
