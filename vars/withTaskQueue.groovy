@@ -24,7 +24,7 @@ def call(Map options = [:], Closure closure) {
         ]) {
 
           // sh "rm -rf ${WORKSPACE}/parallel/${j}" // TODO
-          dir("${WORKSPACE}/parallel/${j}/kibana") {
+          dir("${WORKSPACE}/kibana") {
             if (config.setup) {
               config.setup.call(j)
             }

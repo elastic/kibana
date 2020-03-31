@@ -368,10 +368,14 @@ def newPipeline(Closure closure = {}) {
       // sh 'cp -R ${WORKSPACE}/kibana/. .'
 
       def currentDir = pwd()
-      sh "rsync -a ${WORKSPACE}/kibana/* . --exclude node_modules; rsync -a ${WORKSPACE}/kibana/.??* . --exclude .git"
-      sh "cd ${WORKSPACE}/kibana; find . -type d -name node_modules -prune -print0 | xargs -0I % ln -s '${WORKSPACE}/kibana/%' '${currentDir}/%'"
-      sh "ln -s ${WORKSPACE}/kibana/.git .git"
+      sh "rsync -a ${WORKSPACE}/kibana/* . --exclude node_modules; rsync -a ${WORKSPACE}/kibana/.??* ."
+      sh "cd ${WORKSPACE}/kibana; find . -type d -name node_modules -not -path '*__fixtures__*' -prune -print0 | xargs -0I % ln -s '${WORKSPACE}/kibana/%' '${currentDir}/%'"
+      // sh "ln -s ${WORKSPACE}/kibana/.git .git"
+      sh "unlink node_modules; mkdir node_modules; ln -s ${WORKSPACE}/kibana/node_modules/* node_modules/"
+      sh "unlink node_modules/@kbn; cp -R ${WORKSPACE}/kibana/node_modules/@kbn node_modules/"
       sh 'ls -alh'
+      sh 'ls -alh node_modules'
+      sh 'git reset --hard '
       sh 'git status'
     }
 
