@@ -59,7 +59,7 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
       path: `${BASE_ALERTS_ROUTE}/{id}`,
       validate: {
         params: alertingIndexAlertDetailsParamsSchema,
-        body: alertingIndexPatchQuerySchema,
+        body: alertingIndexPatchBodySchema,
       },
       options: { authRequired: true },
     },

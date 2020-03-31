@@ -79,7 +79,15 @@ export const alertDetailsUpdateHandlerWrapper = function(
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('update', {
         index: EndpointAppConstants.ALERT_INDEX_NAME,
         id: alertId,
-        doc: req.body,
+        body: {
+          doc: req.body,
+        },
+        /*
+        script: {
+         source: `doc['state']['active'] = ${req.body.state.active}`,
+            lang: 'painless',
+        },
+        */
       })) as UpdateResponse<AlertEvent>;
 
       return res.ok({ body: response });
