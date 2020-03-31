@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
@@ -21,6 +20,7 @@ const bodySchema = schema.object(
   {
     type: schema.string(),
     isNew: schema.boolean(),
+    isActive: schema.boolean({ defaultValue: true }),
   },
   { unknowns: 'allow' }
 );
@@ -85,7 +85,7 @@ export function registerSaveRoute(deps: RouteDependencies) {
         return response.ok({
           body: await dataClient.callAsCurrentUser('watcher.putWatch', {
             id,
-            active: isActive ?? true,
+            active: isActive,
             body: serializedWatch,
           }),
         });
