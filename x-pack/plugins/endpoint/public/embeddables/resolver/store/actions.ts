@@ -43,6 +43,7 @@ interface UserChangedSelectedEvent {
 interface AppRequestedResolverData {
   readonly type: 'appRequestedResolverData';
 }
+
 /**
  * When the user switches the active descendent of the Resolver.
  */
@@ -50,7 +51,7 @@ interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
   readonly payload: {
     /**
-     * Used to identify the process node that should be brought into view.
+     * Used to identify the process node that the user focused on (in the DOM)
      */
     readonly nodeId: string;
   };

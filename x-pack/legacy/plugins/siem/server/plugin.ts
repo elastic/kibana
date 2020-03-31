@@ -36,6 +36,7 @@ import {
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
+  ruleActionsSavedObjectType,
 } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
@@ -121,6 +122,11 @@ export class Plugin {
               pinnedEventSavedObjectType,
               timelineSavedObjectType,
               ruleStatusSavedObjectType,
+              ruleActionsSavedObjectType,
+              'cases',
+              'cases-comments',
+              'cases-configure',
+              'cases-user-actions',
             ],
             read: ['config'],
           },
@@ -147,6 +153,11 @@ export class Plugin {
               pinnedEventSavedObjectType,
               timelineSavedObjectType,
               ruleStatusSavedObjectType,
+              ruleActionsSavedObjectType,
+              'cases',
+              'cases-comments',
+              'cases-configure',
+              'cases-user-actions',
             ],
           },
           ui: [

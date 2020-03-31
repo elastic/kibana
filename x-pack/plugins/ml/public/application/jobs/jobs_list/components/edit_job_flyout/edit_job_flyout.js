@@ -366,7 +366,7 @@ export class EditJobFlyoutUI extends Component {
                 <FormattedMessage
                   id="xpack.ml.jobsList.editJobFlyout.pageTitle"
                   defaultMessage="Edit {jobId}"
-                  values={{ jobId: job.id }}
+                  values={{ jobId: job.job_id }}
                 />
               </h2>
             </EuiTitle>

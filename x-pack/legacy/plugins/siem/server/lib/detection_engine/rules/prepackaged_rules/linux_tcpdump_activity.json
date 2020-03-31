@@ -7,9 +7,8 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Network Sniffing via Tcpdump",
-  "query": "process.name: tcpdump and event.action:executed",
+  "query": "process.name:tcpdump and event.action:executed",
   "risk_score": 21,
   "rule_id": "7a137d76-ce3d-48e2-947d-2747796a78c0",
   "severity": "low",
