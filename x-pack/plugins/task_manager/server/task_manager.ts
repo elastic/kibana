@@ -9,7 +9,7 @@ import { filter } from 'rxjs/operators';
 import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import {
   SavedObjectsSerializer,
   IScopedClusterClient,
