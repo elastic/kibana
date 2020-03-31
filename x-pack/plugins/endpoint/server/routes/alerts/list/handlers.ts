@@ -45,7 +45,6 @@ export const alertListUpdateHandlerWrapper = function(
     AlertingIndexPatchBodyResult
   > = async (ctx, req, res) => {
     try {
-      // console.log(req.body);
       const reqWrapper: UpdateDocumentByQueryParams = {
         index: EndpointAppConstants.ALERT_INDEX_NAME,
         body: {
@@ -55,7 +54,7 @@ export const alertListUpdateHandlerWrapper = function(
             },
           },
           script: {
-            source: `doc['state']['active'] = ${req.body.state.active}`,
+            source: `doc['state'] = ${req.body.state}`,
             lang: 'painless',
           },
         },
@@ -63,12 +62,10 @@ export const alertListUpdateHandlerWrapper = function(
       for (const id of req.query.alert_ids) {
         reqWrapper.body.query.ids.values.push(id);
       }
-      // console.log(JSON.stringify(reqWrapper));
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
         'updateByQuery',
         reqWrapper
       )) as UpdateDocumentByQueryResponse;
-      // console.log(response);
       return res.ok({ body: response });
     } catch (err) {
       return res.internalError({ body: err });

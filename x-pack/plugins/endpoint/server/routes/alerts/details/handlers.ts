@@ -45,6 +45,7 @@ export const alertDetailsGetHandlerWrapper = function(
           id: response._id,
           ...response._source,
           state: {
+            active: response._source.state.active,
             host_metadata: currentHostInfo,
           },
           next: await pagination.getNextUrl(),
