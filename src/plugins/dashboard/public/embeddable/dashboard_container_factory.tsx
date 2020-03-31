@@ -60,7 +60,7 @@ export class DashboardContainerFactory
     return i18n.translate('dashboard.factory.displayName', {
       defaultMessage: 'dashboard',
     });
-  }
+  };
 
   public getDefaultInput(): Partial<DashboardContainerInput> {
     return {

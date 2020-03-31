@@ -13,7 +13,7 @@ import { npStart } from 'ui/new_platform';
 import {
   EmbeddablePanel,
   ErrorEmbeddable,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../../../../src/plugins/embeddable/public';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
