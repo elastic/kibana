@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import { memoize } from 'lodash';
 import { createMockReportingCore } from '../../test_helpers';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 
@@ -23,6 +22,7 @@ import { registerJobInfoRoutes } from './jobs';
 let mockServer;
 let exportTypesRegistry;
 let mockReportingPlugin;
+let mockReportingConfig;
 const mockLogger = {
   error: jest.fn(),
   debug: jest.fn(),
@@ -30,7 +30,6 @@ const mockLogger = {
 
 beforeEach(async () => {
   mockServer = new Hapi.Server({ debug: false, port: 8080, routes: { log: { collect: true } } });
-  mockServer.config = memoize(() => ({ get: jest.fn() }));
   exportTypesRegistry = new ExportTypesRegistry();
   exportTypesRegistry.register({
     id: 'unencoded',
@@ -43,8 +42,11 @@ beforeEach(async () => {
     jobContentEncoding: 'base64',
     jobContentExtension: 'pdf',
   });
+
   mockReportingPlugin = await createMockReportingCore();
   mockReportingPlugin.getExportTypesRegistry = () => exportTypesRegistry;
+
+  mockReportingConfig = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
 });
 
 const mockPlugins = {
@@ -70,7 +72,13 @@ test(`returns 404 if job not found`, async () => {
     callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(getHits())),
   };
 
-  registerJobInfoRoutes(mockReportingPlugin, mockServer, mockPlugins, mockLogger);
+  registerJobInfoRoutes(
+    mockReportingPlugin,
+    mockReportingConfig,
+    mockServer,
+    mockPlugins,
+    mockLogger
+  );
 
   const request = {
     method: 'GET',
@@ -89,7 +97,13 @@ test(`returns 401 if not valid job type`, async () => {
       .mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' }))),
   };
 
-  registerJobInfoRoutes(mockReportingPlugin, mockServer, mockPlugins, mockLogger);
+  registerJobInfoRoutes(
+    mockReportingPlugin,
+    mockReportingConfig,
+    mockServer,
+    mockPlugins,
+    mockLogger
+  );
 
   const request = {
     method: 'GET',
@@ -110,7 +124,13 @@ describe(`when job is incomplete`, () => {
         ),
     };
 
-    registerJobInfoRoutes(mockReportingPlugin, mockServer, mockPlugins, mockLogger);
+    registerJobInfoRoutes(
+      mockReportingPlugin,
+      mockReportingConfig,
+      mockServer,
+      mockPlugins,
+      mockLogger
+    );
 
     const request = {
       method: 'GET',
@@ -152,7 +172,13 @@ describe(`when job is failed`, () => {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
     };
 
-    registerJobInfoRoutes(mockReportingPlugin, mockServer, mockPlugins, mockLogger);
+    registerJobInfoRoutes(
+      mockReportingPlugin,
+      mockReportingConfig,
+      mockServer,
+      mockPlugins,
+      mockLogger
+    );
 
     const request = {
       method: 'GET',
@@ -197,7 +223,13 @@ describe(`when job is completed`, () => {
       callAsInternalUser: jest.fn().mockReturnValue(Promise.resolve(hits)),
     };
 
-    registerJobInfoRoutes(mockReportingPlugin, mockServer, mockPlugins, mockLogger);
+    registerJobInfoRoutes(
+      mockReportingPlugin,
+      mockReportingConfig,
+      mockServer,
+      mockPlugins,
+      mockLogger
+    );
 
     const request = {
       method: 'GET',

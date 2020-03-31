@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CancellationToken } from '../../common/cancellation_token';
 import { PLUGIN_ID } from '../../common/constants';
+import { ReportingConfig } from '../../server/types';
 import {
   ESQueueInstance,
   ESQueueWorkerExecuteFn,
@@ -15,25 +15,22 @@ import {
   JobDocPayload,
   JobSource,
   Logger,
-  QueueConfig,
   RequestFacade,
-  ServerFacade,
 } from '../../types';
 import { ReportingCore } from '../core';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 
-export function createWorkerFactory<JobParamsType>(
+export async function createWorkerFactory<JobParamsType>(
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
+  config: ReportingConfig,
   logger: Logger
 ) {
   type JobDocPayloadType = JobDocPayload<JobParamsType>;
-  const config = server.config();
-  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
-  const kibanaName: string = config.get('server.name');
-  const kibanaId: string = config.get('server.uuid');
+
+  const queueConfig = config.get('queue');
+  const kibanaName = config.kbnConfig.get('server', 'name');
+  const kibanaId = config.kbnConfig.get('server', 'uuid');
 
   // Once more document types are added, this will need to be passed in
   return async function createWorker(queue: ESQueueInstance) {
@@ -47,12 +44,7 @@ export function createWorkerFactory<JobParamsType>(
       ExportTypeDefinition<JobParamsType, unknown, unknown, any>
     >) {
       // TODO: the executeJobFn should be unwrapped in the register method of the export types registry
-      const jobExecutor = await exportType.executeJobFactory(
-        reporting,
-        server,
-        elasticsearch,
-        logger
-      );
+      const jobExecutor = await exportType.executeJobFactory(reporting, logger);
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 

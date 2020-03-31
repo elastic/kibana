@@ -36,11 +36,12 @@ describe('CSV Execute Job', function() {
   let defaultElasticsearchResponse;
   let encryptedHeaders;
 
-  let cancellationToken;
-  let mockReportingPlugin;
-  let mockServer;
   let clusterStub;
+  let configGetStub;
+  let mockReportingConfig;
+  let mockReportingPlugin;
   let callAsCurrentUserStub;
+  let cancellationToken;
 
   const mockElasticsearch = {
     dataClient: {
@@ -58,7 +59,17 @@ describe('CSV Execute Job', function() {
 
   beforeEach(async function() {
     mockReportingPlugin = await createMockReportingCore();
-    mockReportingPlugin.getUiSettingsServiceFactory = () => mockUiSettingsClient;
+
+    configGetStub = sinon.stub();
+    configGetStub.withArgs('encryptionKey').returns(encryptionKey);
+    configGetStub.withArgs('csv', 'maxSizeBytes').returns(1024 * 1000); // 1mB
+    configGetStub.withArgs('csv', 'scroll').returns({});
+    mockReportingConfig = { get: configGetStub, kbnConfig: { get: configGetStub } };
+
+    mockReportingPlugin.getConfig = () => Promise.resolve(mockReportingConfig);
+    mockReportingPlugin.getUiSettingsServiceFactory = () => Promise.resolve(mockUiSettingsClient);
+    mockReportingPlugin.getElasticsearchService = () => Promise.resolve(mockElasticsearch);
+
     cancellationToken = new CancellationToken();
 
     defaultElasticsearchResponse = {
@@ -75,7 +86,6 @@ describe('CSV Execute Job', function() {
       .stub(clusterStub, 'callAsCurrentUser')
       .resolves(defaultElasticsearchResponse);
 
-    const configGetStub = sinon.stub();
     mockUiSettingsClient.get.withArgs('csv:separator').returns(',');
     mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(true);
 
@@ -93,36 +103,11 @@ describe('CSV Execute Job', function() {
         return fieldFormatsRegistry;
       },
     });
-
-    mockServer = {
-      config: function() {
-        return {
-          get: configGetStub,
-        };
-      },
-    };
-    mockServer
-      .config()
-      .get.withArgs('xpack.reporting.encryptionKey')
-      .returns(encryptionKey);
-    mockServer
-      .config()
-      .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-      .returns(1024 * 1000); // 1mB
-    mockServer
-      .config()
-      .get.withArgs('xpack.reporting.csv.scroll')
-      .returns({});
   });
 
   describe('basic Elasticsearch call behavior', function() {
     it('should decrypt encrypted headers and pass to callAsCurrentUser', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -138,12 +123,7 @@ describe('CSV Execute Job', function() {
         testBody: true,
       };
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const job = {
         headers: encryptedHeaders,
         fields: [],
@@ -170,12 +150,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: scrollId,
       });
       callAsCurrentUserStub.onSecondCall().resolves(defaultElasticsearchResponse);
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -189,12 +164,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should not execute scroll if there are no hits from the search', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -224,12 +194,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -264,12 +229,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: lastScrollId,
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -297,12 +257,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: lastScrollId,
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -321,10 +276,7 @@ describe('CSV Execute Job', function() {
 
   describe('Cells with formula values', () => {
     it('returns `csv_contains_formulas` when cells contain formulas', async function() {
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.checkForFormulas')
-        .returns(true);
+      configGetStub.withArgs('csv', 'checkForFormulas').returns(true);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: '=SUM(A1:A2)', two: 'bar' } }],
@@ -332,12 +284,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -354,10 +301,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('returns warnings when headings contain formulas', async function() {
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.checkForFormulas')
-        .returns(true);
+      configGetStub.withArgs('csv', 'checkForFormulas').returns(true);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { '=SUM(A1:A2)': 'foo', two: 'bar' } }],
@@ -365,12 +309,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['=SUM(A1:A2)', 'two'],
@@ -387,10 +326,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('returns no warnings when cells have no formulas', async function() {
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.checkForFormulas')
-        .returns(true);
+      configGetStub.withArgs('csv', 'checkForFormulas').returns(true);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -398,12 +334,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -420,10 +351,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('returns no warnings when configured not to', async () => {
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.checkForFormulas')
-        .returns(false);
+      configGetStub.withArgs('csv', 'checkForFormulas').returns(false);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: '=SUM(A1:A2)', two: 'bar' } }],
@@ -431,12 +359,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -456,12 +379,7 @@ describe('CSV Execute Job', function() {
   describe('Elasticsearch call errors', function() {
     it('should reject Promise if search call errors out', async function() {
       callAsCurrentUserStub.rejects(new Error());
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -480,12 +398,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
       callAsCurrentUserStub.onSecondCall().rejects(new Error());
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -506,12 +419,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: undefined,
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -532,12 +440,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: undefined,
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -565,12 +468,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: undefined,
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -598,12 +496,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: undefined,
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: [],
@@ -639,12 +532,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should stop calling Elasticsearch when cancellationToken.cancel is called', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -659,12 +547,7 @@ describe('CSV Execute Job', function() {
     });
 
     it(`shouldn't call clearScroll if it never got a scrollId`, async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -678,12 +561,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should call clearScroll if it got a scrollId', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       executeJob(
         'job345',
         { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
@@ -701,12 +579,7 @@ describe('CSV Execute Job', function() {
 
   describe('csv content', function() {
     it('should write column headers to output, even if there are no results', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -718,12 +591,7 @@ describe('CSV Execute Job', function() {
 
     it('should use custom uiSettings csv:separator for header', async function() {
       mockUiSettingsClient.get.withArgs('csv:separator').returns(';');
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -735,12 +603,7 @@ describe('CSV Execute Job', function() {
 
     it('should escape column headers if uiSettings csv:quoteValues is true', async function() {
       mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(true);
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
@@ -752,12 +615,7 @@ describe('CSV Execute Job', function() {
 
     it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function() {
       mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(false);
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
@@ -768,12 +626,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should write column headers to output, when there are results', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{ one: '1', two: '2' }],
@@ -793,12 +646,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should use comma separated values of non-nested fields from _source', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -819,12 +667,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should concatenate the hits from multiple responses', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -852,12 +695,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should use field formatters to format fields', async function() {
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -897,17 +735,9 @@ describe('CSV Execute Job', function() {
       let maxSizeReached;
 
       beforeEach(async function() {
-        mockServer
-          .config()
-          .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-          .returns(1);
+        configGetStub.withArgs('csv', 'maxSizeBytes').returns(1);
 
-        const executeJob = await executeJobFactory(
-          mockReportingPlugin,
-          mockServer,
-          mockElasticsearch,
-          mockLogger
-        );
+        const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -935,17 +765,9 @@ describe('CSV Execute Job', function() {
       let maxSizeReached;
 
       beforeEach(async function() {
-        mockServer
-          .config()
-          .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-          .returns(9);
+        configGetStub.withArgs('csv', 'maxSizeBytes').returns(9);
 
-        const executeJob = await executeJobFactory(
-          mockReportingPlugin,
-          mockServer,
-          mockElasticsearch,
-          mockLogger
-        );
+        const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -973,10 +795,7 @@ describe('CSV Execute Job', function() {
       let maxSizeReached;
 
       beforeEach(async function() {
-        mockServer
-          .config()
-          .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-          .returns(9);
+        configGetStub.withArgs('csv', 'maxSizeBytes').returns(9);
 
         callAsCurrentUserStub.onFirstCall().returns({
           hits: {
@@ -985,12 +804,7 @@ describe('CSV Execute Job', function() {
           _scroll_id: 'scrollId',
         });
 
-        const executeJob = await executeJobFactory(
-          mockReportingPlugin,
-          mockServer,
-          mockElasticsearch,
-          mockLogger
-        );
+        const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -1020,10 +834,7 @@ describe('CSV Execute Job', function() {
 
       beforeEach(async function() {
         mockReportingPlugin.getUiSettingsServiceFactory = () => mockUiSettingsClient;
-        mockServer
-          .config()
-          .get.withArgs('xpack.reporting.csv.maxSizeBytes')
-          .returns(18);
+        configGetStub.withArgs('csv', 'maxSizeBytes').returns(18);
 
         callAsCurrentUserStub.onFirstCall().returns({
           hits: {
@@ -1032,12 +843,7 @@ describe('CSV Execute Job', function() {
           _scroll_id: 'scrollId',
         });
 
-        const executeJob = await executeJobFactory(
-          mockReportingPlugin,
-          mockServer,
-          mockElasticsearch,
-          mockLogger
-        );
+        const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
         const jobParams = {
           headers: encryptedHeaders,
           fields: ['one', 'two'],
@@ -1065,10 +871,7 @@ describe('CSV Execute Job', function() {
   describe('scroll settings', function() {
     it('passes scroll duration to initial search call', async function() {
       const scrollDuration = 'test';
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.scroll')
-        .returns({ duration: scrollDuration });
+      configGetStub.withArgs('csv', 'scroll').returns({ duration: scrollDuration });
 
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
@@ -1077,12 +880,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -1099,10 +897,7 @@ describe('CSV Execute Job', function() {
 
     it('passes scroll size to initial search call', async function() {
       const scrollSize = 100;
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.scroll')
-        .returns({ size: scrollSize });
+      configGetStub.withArgs('csv', 'scroll').returns({ size: scrollSize });
 
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
@@ -1111,12 +906,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
@@ -1133,10 +923,7 @@ describe('CSV Execute Job', function() {
 
     it('passes scroll duration to subsequent scroll call', async function() {
       const scrollDuration = 'test';
-      mockServer
-        .config()
-        .get.withArgs('xpack.reporting.csv.scroll')
-        .returns({ duration: scrollDuration });
+      configGetStub.withArgs('csv', 'scroll').returns({ duration: scrollDuration });
 
       callAsCurrentUserStub.onFirstCall().resolves({
         hits: {
@@ -1145,12 +932,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const executeJob = await executeJobFactory(
-        mockReportingPlugin,
-        mockServer,
-        mockElasticsearch,
-        mockLogger
-      );
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = {
         headers: encryptedHeaders,
         fields: ['one', 'two'],
