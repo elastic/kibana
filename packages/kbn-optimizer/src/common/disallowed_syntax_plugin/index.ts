@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from '../../../../../../plugins/embeddable/public';
+export * from './disallowed_syntax_plugin';

@@ -17,5 +17,28 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-export * from '../../../../../../plugins/embeddable/public/mocks';
+import { parseFilePath, parseDirPath } from './parse_path';
+
+const DIRS = ['/', '/foo/bar/baz/', 'c:\\', 'c:\\foo\\bar\\baz\\'];
+const AMBIGUOUS = ['/foo', '/foo/bar/baz', 'c:\\foo', 'c:\\foo\\bar\\baz'];
+const FILES = [
+  '/foo/bar/baz.json',
+  'c:/foo/bar/baz.json',
+  'c:\\foo\\bar\\baz.json',
+  '/foo/bar/baz.json?light',
+  '/foo/bar/baz.json?light=true&dark=false',
+  'c:\\foo\\bar\\baz.json?dark',
+  'c:\\foo\\bar\\baz.json?dark=true&light=false',
+];
+
+describe('parseFilePath()', () => {
+  it.each([...FILES, ...AMBIGUOUS])('parses %s', path => {
+    expect(parseFilePath(path)).toMatchSnapshot();
+  });
+});
+
+describe('parseDirPath()', () => {
+  it.each([...DIRS, ...AMBIGUOUS])('parses %s', path => {
+    expect(parseDirPath(path)).toMatchSnapshot();
+  });
+});

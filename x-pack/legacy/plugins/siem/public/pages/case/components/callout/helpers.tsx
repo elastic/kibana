@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getOpenTOCDetails(state: unknown): string[];
+import * as i18n from './translations';
 
-export function getIsLayerTOCOpen(state: unknown): boolean;
+export const getSavedObjectReadOnly = () => ({
+  title: i18n.READ_ONLY_SAVED_OBJECT_TITLE,
+  description: i18n.READ_ONLY_SAVED_OBJECT_MSG,
+});
