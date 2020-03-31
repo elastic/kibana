@@ -12,12 +12,15 @@ kibanaPipeline(timeoutMinutes: 180) {
       workers.base(name: 'fail-fast-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
 //        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
         listVcsEnvVars()
-        withEnv([
-          "TIME_STAMP=${timestamp}",
-          "QA_TEAM_ROCKS=true"
-        ]) {
 
-        }
+//        withEnv([
+//          "",
+//          "",
+//          "",
+//
+//        ]) {
+//
+//        }
       }
 
 //      parallel([
@@ -111,7 +114,8 @@ def listVcsEnvVars() {
 
     CMD="git log --pretty=format"
 
-    XS=("$(git rev-parse --abbrev-ref HEAD)" \
+    XS=("${GIT_BRANCH}" \
+        "$(git rev-parse --abbrev-ref HEAD)" \
         "$(${CMD}":%h" -1)" \
         "$(${CMD}":%an" -1)" \
         "$(${CMD}":%s" -1)")
