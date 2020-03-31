@@ -120,7 +120,17 @@ export const ProcessEventDot = styled(
       /**
        * An element that should be animated when the node is clicked.
        */
-      const animationTarget: { current: SVGAnimationElement | null } = React.createRef();
+      const animationTarget: {
+        current:
+          | (SVGAnimationElement & {
+              /**
+               * `beginElement` is by [w3](https://www.w3.org/TR/SVG11/animate.html#__smil__ElementTimeControl__beginElement)
+               * but missing in [TSJS-lib-generator](https://github.com/microsoft/TSJS-lib-generator/blob/15a4678e0ef6de308e79451503e444e9949ee849/inputfiles/addedTypes.json#L1819)
+               */
+              beginElement: () => void;
+            })
+          | null;
+      } = React.createRef();
       const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[
         nodeType(event)
       ];
@@ -150,8 +160,7 @@ export const ProcessEventDot = styled(
 
       const handleClick = useCallback(() => {
         if (animationTarget.current !== null) {
-          // Use undocumented `beginElement` API on SVG element
-          (animationTarget.current as any).beginElement();
+          animationTarget.current.beginElement();
         }
       }, [animationTarget]);
 
