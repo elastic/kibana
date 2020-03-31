@@ -41,7 +41,7 @@ const isKibanaDir = (dir: string) => {
 // search for the kibana directory, since this file is moved around it might
 // not be where we think but should always be a relatively close parent
 // of this directory
-const startDir = Fs.realpathSync(__dirname);
+const startDir = Fs.realpathSync(process.env.KIBANA_DIR || __dirname);
 const { root: rootDir } = Path.parse(startDir);
 let cursor = startDir;
 while (true) {

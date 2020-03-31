@@ -360,12 +360,19 @@ def getTargetBranch() {
 }
 
 def newPipeline(Closure closure = {}) {
-  def config = [name: 'parallel-worker', label: 'tests-xxl', ramDisk: false]
+  def config = [name: 'parallel-worker', label: 'tests-xxl', ramDisk: true]
 
   workers.ci(config) {
 
     def setupClosure = {
-      sh 'cp -R ${WORKSPACE}/kibana/. .'
+      // sh 'cp -R ${WORKSPACE}/kibana/. .'
+
+      def currentDir = pwd()
+      sh "rsync -a ${WORKSPACE}/kibana/* . --exclude node_modules; rsync -a ${WORKSPACE}/kibana/.??* . --exclude .git"
+      sh "cd ${WORKSPACE}/kibana; find . -type d -name node_modules -prune -print0 | xargs -0I % ln -s '${WORKSPACE}/kibana/%' '${currentDir}/%'"
+      sh "ln -s ${WORKSPACE}/kibana/.git .git"
+      sh 'ls -alh'
+      sh 'git status'
     }
 
     withTaskQueue(parallel: 24, setup: setupClosure) {
