@@ -21,6 +21,7 @@ import * as i18n from './translations';
 
 interface UserActionItemProps {
   createdAt: string;
+  disabled: boolean;
   id: string;
   isEditable: boolean;
   isLoading: boolean;
@@ -110,6 +111,7 @@ const PushedInfoContainer = styled.div`
 
 export const UserActionItem = ({
   createdAt,
+  disabled,
   id,
   idToOutline,
   isEditable,
@@ -148,6 +150,7 @@ export const UserActionItem = ({
             >
               <UserActionTitle
                 createdAt={createdAt}
+                disabled={disabled}
                 id={id}
                 isLoading={isLoading}
                 labelEditAction={labelEditAction}

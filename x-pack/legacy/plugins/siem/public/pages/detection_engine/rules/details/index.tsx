@@ -277,7 +277,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                               <EuiButton
                                 href={getEditRuleUrl(ruleId ?? '')}
                                 iconType="controlsHorizontal"
-                                isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
+                                isDisabled={userHasNoPermissions ?? true}
                               >
                                 {ruleI18n.EDIT_RULE_SETTINGS}
                               </EuiButton>

@@ -107,7 +107,12 @@ describe('rule helpers', () => {
         ],
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m', isNew: false };
-      const ruleActionsStepData = { enabled: true, throttle: undefined, isNew: false, actions: [] };
+      const ruleActionsStepData = {
+        enabled: true,
+        throttle: 'no_actions',
+        isNew: false,
+        actions: [],
+      };
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
@@ -303,7 +308,7 @@ describe('rule helpers', () => {
         actions: [],
         enabled: mockedRule.enabled,
         isNew: false,
-        throttle: undefined,
+        throttle: 'no_actions',
       };
 
       expect(result).toEqual(expected);
