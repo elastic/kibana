@@ -14,6 +14,7 @@ import {
   initializeLensTelemetry,
   scheduleLensTelemetry,
 } from './usage';
+import { setupSavedObjects } from './saved_objects';
 
 export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
@@ -33,6 +34,7 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
     this.telemetryLogger = initializerContext.logger.get('telemetry');
   }
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
+    setupSavedObjects(core);
     setupRoutes(core);
     if (plugins.usageCollection && plugins.taskManager) {
       registerLensUsageCollector(

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import { ImportRulesResponse, ImportRulesProps } from '../../containers/detection_engine/rules';
+import { ImportDataResponse, ImportDataProps } from '../../containers/detection_engine/rules';
 import {
   displayErrorToast,
   displaySuccessToast,
@@ -37,7 +37,7 @@ interface ImportDataModalProps {
   errorMessage: string;
   failedDetailed: (id: string, statusCode: number, message: string) => string;
   importComplete: () => void;
-  importData: (arg: ImportRulesProps) => Promise<ImportRulesResponse>;
+  importData: (arg: ImportDataProps) => Promise<ImportDataResponse>;
   showCheckBox: boolean;
   showModal: boolean;
   submitBtnText: string;
@@ -75,7 +75,7 @@ export const ImportDataModalComponent = ({
     closeModal();
   }, [setIsImporting, setSelectedFiles, closeModal]);
 
-  const importRulesCallback = useCallback(async () => {
+  const importDataCallback = useCallback(async () => {
     if (selectedFiles != null) {
       setIsImporting(true);
       const abortCtrl = new AbortController();
@@ -152,7 +152,7 @@ export const ImportDataModalComponent = ({
             <EuiModalFooter>
               <EuiButtonEmpty onClick={handleCloseModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
               <EuiButton
-                onClick={importRulesCallback}
+                onClick={importDataCallback}
                 disabled={selectedFiles == null || isImporting}
                 fill
               >

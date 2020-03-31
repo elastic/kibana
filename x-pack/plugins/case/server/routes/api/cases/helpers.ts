@@ -62,11 +62,14 @@ export const getCaseToUpdate = (
   Object.entries(queryCase).reduce(
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
-      if (isTwoArraysDifference(value, currentValue)) {
-        return {
-          ...acc,
-          [key]: value,
-        };
+      if (Array.isArray(currentValue) && Array.isArray(value)) {
+        if (isTwoArraysDifference(value, currentValue)) {
+          return {
+            ...acc,
+            [key]: value,
+          };
+        }
+        return acc;
       } else if (currentValue != null && value !== currentValue) {
         return {
           ...acc,

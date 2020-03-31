@@ -7,8 +7,11 @@
 
 import { AbstractLayer } from './layer';
 import { IVectorSource } from './sources/vector_source';
-import { VectorLayerDescriptor } from '../../common/descriptor_types';
-import { MapFilters, VectorSourceRequestMeta } from '../../common/data_request_descriptor_types';
+import {
+  MapFilters,
+  VectorLayerDescriptor,
+  VectorSourceRequestMeta,
+} from '../../common/descriptor_types';
 import { ILayer } from './layer';
 import { IJoin } from './joins/join';
 import { IVectorStyle } from './styles/vector/vector_style';

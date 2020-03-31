@@ -266,6 +266,14 @@
         ],
       },
       {
+        groupSlug: 'estree',
+        groupName: 'estree related packages',
+        packageNames: [
+          'estree',
+          '@types/estree',
+        ],
+      },
+      {
         groupSlug: 'fancy-log',
         groupName: 'fancy-log related packages',
         packageNames: [

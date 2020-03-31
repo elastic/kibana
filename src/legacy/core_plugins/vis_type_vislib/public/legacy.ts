@@ -25,20 +25,15 @@ import {
   VisTypeVislibPluginSetupDependencies,
   VisTypeVislibPluginStartDependencies,
 } from './plugin';
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../visualizations/public/np_ready/public/legacy';
 
 const setupPlugins: Readonly<VisTypeVislibPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
-  visualizations: visualizationsSetup,
+  visualizations: npSetup.plugins.visualizations,
   charts: npSetup.plugins.charts,
 };
 
 const startPlugins: Readonly<VisTypeVislibPluginStartDependencies> = {
-  expressions: npStart.plugins.expressions,
-  visualizations: visualizationsStart,
+  data: npStart.plugins.data,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

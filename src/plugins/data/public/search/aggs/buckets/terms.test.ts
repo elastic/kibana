@@ -23,7 +23,6 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
-    const typesRegistry = mockAggTypesRegistry();
     const getAggConfigs = (params: Record<string, any> = {}) => {
       const indexPattern = {
         id: '1234',
@@ -48,7 +47,7 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry }
+        { typesRegistry: mockAggTypesRegistry() }
       );
     };
 

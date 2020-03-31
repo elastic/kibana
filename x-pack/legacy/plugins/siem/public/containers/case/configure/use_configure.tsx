@@ -7,9 +7,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
-import { useStateToaster, errorToToaster } from '../../../components/toasters';
-import * as i18n from '../translations';
+import { useStateToaster, errorToToaster, displaySuccessToast } from '../../../components/toasters';
+import * as i18n from './translations';
 import { ClosureType } from './types';
+import { CurrentConfiguration } from '../../../pages/case/components/configure_cases/reducer';
 
 interface PersistCaseConfigure {
   connectorId: string;
@@ -27,14 +28,17 @@ export interface ReturnUseCaseConfigure {
 interface UseCaseConfigure {
   setConnector: (newConnectorId: string, newConnectorName?: string) => void;
   setClosureType?: (newClosureType: ClosureType) => void;
+  setCurrentConfiguration?: (configuration: CurrentConfiguration) => void;
 }
 
 export const useCaseConfigure = ({
   setConnector,
   setClosureType,
+  setCurrentConfiguration,
 }: UseCaseConfigure): ReturnUseCaseConfigure => {
   const [, dispatchToaster] = useStateToaster();
   const [loading, setLoading] = useState(true);
+  const [firstLoad, setFirstLoad] = useState(false);
   const [persistLoading, setPersistLoading] = useState(false);
   const [version, setVersion] = useState('');
 
@@ -54,6 +58,16 @@ export const useCaseConfigure = ({
               setClosureType(res.closureType);
             }
             setVersion(res.version);
+
+            if (!firstLoad) {
+              setFirstLoad(true);
+              if (setCurrentConfiguration != null) {
+                setCurrentConfiguration({
+                  connectorId: res.connectorId,
+                  closureType: res.closureType,
+                });
+              }
+            }
           }
         }
       } catch (error) {
@@ -104,6 +118,14 @@ export const useCaseConfigure = ({
               setClosureType(res.closureType);
             }
             setVersion(res.version);
+            if (setCurrentConfiguration != null) {
+              setCurrentConfiguration({
+                connectorId: res.connectorId,
+                closureType: res.closureType,
+              });
+            }
+
+            displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
           }
         } catch (error) {
           if (!didCancel) {

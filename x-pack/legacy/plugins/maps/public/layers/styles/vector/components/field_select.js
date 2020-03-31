@@ -72,7 +72,7 @@ function groupFieldsByOrigin(fields) {
   return optionGroups;
 }
 
-export function FieldSelect({ fields, selectedFieldName, onChange, ...rest }) {
+export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ...rest }) {
   const onFieldChange = selectedFields => {
     onChange({
       field: selectedFields.length > 0 ? selectedFields[0].value : null,
@@ -98,6 +98,7 @@ export function FieldSelect({ fields, selectedFieldName, onChange, ...rest }) {
         defaultMessage: 'Select a field',
       })}
       renderOption={renderOption}
+      data-test-subj={`styleFieldSelect_${styleName}`}
       {...rest}
     />
   );

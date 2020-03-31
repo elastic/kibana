@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
 // @ts-ignore
 import migrations from './migrations';
 import mappings from './mappings.json';
@@ -29,41 +27,6 @@ export const graph: LegacyPluginInitializer = kibana => {
           .valid(['config', 'configAndDataWithConsent', 'configAndData', 'none'])
           .default('configAndData'),
       }).default();
-    },
-
-    init(server) {
-      server.plugins.xpack_main.registerFeature({
-        id: 'graph',
-        name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
-          defaultMessage: 'Graph',
-        }),
-        order: 1200,
-        icon: 'graphApp',
-        navLinkId: 'graph',
-        app: ['graph', 'kibana'],
-        catalogue: ['graph'],
-        validLicenses: ['platinum', 'enterprise', 'trial'],
-        privileges: {
-          all: {
-            app: ['graph', 'kibana'],
-            catalogue: ['graph'],
-            savedObject: {
-              all: ['graph-workspace'],
-              read: ['index-pattern'],
-            },
-            ui: ['save', 'delete'],
-          },
-          read: {
-            app: ['graph', 'kibana'],
-            catalogue: ['graph'],
-            savedObject: {
-              all: [],
-              read: ['index-pattern', 'graph-workspace'],
-            },
-            ui: [],
-          },
-        },
-      });
     },
   });
 };

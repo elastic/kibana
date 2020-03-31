@@ -8,11 +8,12 @@
 import { IStyleProperty } from './style_property';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
 import {
-  FieldMetaOptions,
+  CategoryFieldMeta,
   DynamicStylePropertyOptions,
-} from '../../../../../common/style_property_descriptor_types';
+  FieldMetaOptions,
+  RangeFieldMeta,
+} from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
-import { CategoryFieldMeta, RangeFieldMeta } from '../../../../../common/descriptor_types';
 
 export interface IDynamicStyleProperty extends IStyleProperty {
   getOptions(): DynamicStylePropertyOptions;
