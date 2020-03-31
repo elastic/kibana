@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
