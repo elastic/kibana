@@ -43,7 +43,7 @@ const CasesTableFiltersComponent = ({
   initial = defaultInitial,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setselectedReporters] = useState(
-    initial.reporters.map(r => r.full_name ?? r.username)
+    initial.reporters.map(r => r.full_name ?? r.username ?? '')
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);

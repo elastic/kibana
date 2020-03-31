@@ -7418,7 +7418,6 @@
     "xpack.ml.calendarsEdit.newEventModal.startDateAriaLabel": "开始日期",
     "xpack.ml.calendarsEdit.newEventModal.toLabel": "到：",
     "xpack.ml.calendarsList.deleteCalendars.calendarsLabel": "{calendarsToDeleteCount} 个日历",
-    "xpack.ml.calendarsList.deleteCalendars.deletingCalendarErrorMessage": "删除日历 {calendarId} 时出错。{errorMessage}",
     "xpack.ml.calendarsList.deleteCalendars.deletingCalendarsNotificationMessage": "正在删除 {messageId}",
     "xpack.ml.calendarsList.deleteCalendars.deletingCalendarSuccessNotificationMessage": "已删除 {messageId}",
     "xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel": "取消",
