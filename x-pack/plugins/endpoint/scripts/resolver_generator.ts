@@ -141,10 +141,19 @@ async function main() {
   const random = seedrandom(seed);
   for (let i = 0; i < argv.numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
-    await client.index({
-      index: argv.metadataIndex,
-      body: generator.generateHostMetadata(),
-    });
+    const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
+    const numMetadataDocs = 5;
+    const timestamp = new Date().getTime();
+    for (let j = 0; j < numMetadataDocs; j++) {
+      generator.updateHostData();
+      await client.index({
+        index: argv.metadataIndex,
+        body: generator.generateHostMetadata(
+          timestamp - timeBetweenDocs * (numMetadataDocs - j - 1)
+        ),
+      });
+    }
+
     for (let j = 0; j < argv.alertsPerHost; j++) {
       const resolverDocGenerator = generator.fullResolverTreeGenerator(
         argv.ancestors,

@@ -114,6 +114,10 @@ export class EndpointDocGenerator {
     this.commonInfo = this.createHostData();
   }
 
+  public updateHostData() {
+    this.commonInfo.host.ip = this.randomArray(3, () => this.randomIP());
+  }
+
   private createHostData(): HostInfo {
     return {
       agent: {
