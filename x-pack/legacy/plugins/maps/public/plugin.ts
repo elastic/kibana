@@ -26,7 +26,10 @@ import {
   setAutocompleteService,
 } from './kibana_services';
 // @ts-ignore
-import { setInjectedVarFunc as npSetInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import {
+  bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
+  bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
+} from '../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -68,7 +71,6 @@ export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   setHttp(http);
   setUiSettings(core.uiSettings);
   setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-  npSetInjectedVarFunc(core.injectedMetadata.getInjectedVar);
   setToasts(core.notifications.toasts);
 };
 
@@ -92,11 +94,13 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
       });
 
     bindSetupCoreAndPlugins(core, np);
+    bindNpSetupCoreAndPlugins(core, np);
 
     np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
     bindStartCoreAndPlugins(core, plugins);
+    bindNpStartCoreAndPlugins(core, plugins);
   }
 }
