@@ -100,6 +100,8 @@ describe('SavedObjectsTable', () => {
   };
 
   beforeEach(() => {
+    extractExportDetailsMock.mockReset();
+
     http = httpServiceMock.createStartContract();
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
@@ -198,18 +200,6 @@ describe('SavedObjectsTable', () => {
         },
       ],
     }));
-  });
-
-  beforeEach(() => {
-    extractExportDetailsMock.mockReset();
-    // mock _.debounce to fire immediately with no internal timer
-    require('lodash').debounce = (func: Function) => {
-      function debounced(...args: any[]) {
-        // @ts-ignore
-        return func.apply(this, args);
-      }
-      return debounced;
-    };
   });
 
   it('should render normally', async () => {
