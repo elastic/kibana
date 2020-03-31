@@ -17,36 +17,14 @@
  * under the License.
  */
 
-import React from 'react';
+import { PluginInitializer } from 'kibana/public';
+import {
+  CustomVisualizationsPublicPlugin,
+  CustomVisualizationsSetup,
+  CustomVisualizationsStart,
+} from './plugin';
 
-import { EuiBadge } from '@elastic/eui';
+export { CustomVisualizationsPublicPlugin as Plugin };
 
-export class SelfChangingComponent extends React.Component {
-  onClick = () => {
-    this.props.vis.params.counter++;
-    this.props.vis.updateState();
-  };
-
-  render() {
-    return (
-      <div>
-        <EuiBadge
-          data-test-subj="counter"
-          onClick={this.onClick}
-          onClickAriaLabel="Increase counter"
-          color="primary"
-        >
-          {this.props.vis.params.counter}
-        </EuiBadge>
-      </div>
-    );
-  }
-
-  componentDidMount() {
-    this.props.renderComplete();
-  }
-
-  componentDidUpdate() {
-    this.props.renderComplete();
-  }
-}
+export const plugin: PluginInitializer<CustomVisualizationsSetup, CustomVisualizationsStart> = () =>
+  new CustomVisualizationsPublicPlugin();
