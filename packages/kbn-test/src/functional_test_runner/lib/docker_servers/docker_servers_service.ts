@@ -19,13 +19,16 @@
 
 import Url from 'url';
 import execa from 'execa';
-import { filter, take } from 'rxjs/operators';
+import * as Rx from 'rxjs';
+import { filter, take, map } from 'rxjs/operators';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
 import { DockerServer, DockerServerSpec } from './define_docker_servers_config';
+
+const SECOND = 1000;
 
 export class DockerServersService {
   private servers: DockerServer[];
@@ -162,20 +165,39 @@ export class DockerServersService {
       `);
     }
 
-    await Promise.all<unknown>([
-      waitFor !== undefined && waitFor(server, logLine$),
-      waitForLogLine !== undefined &&
-        logLine$
-          .pipe(
-            filter(line =>
-              waitForLogLine instanceof RegExp
-                ? waitForLogLine.test(line)
-                : line.includes(waitForLogLine)
+    function takeFirstWithTimeout(
+      source$: Rx.Observable<unknown>,
+      errorMsg: string,
+      ms = 30 * SECOND
+    ) {
+      return Rx.race(
+        source$.pipe(take(1)),
+        Rx.timer(ms).pipe(
+          map(() => {
+            throw new Error(`[docker:${name}] ${errorMsg} within ${ms / SECOND} seconds`);
+          })
+        )
+      );
+    }
+
+    await Rx.merge(
+      takeFirstWithTimeout(
+        waitFor === undefined ? Rx.EMPTY : waitFor(server, logLine$),
+        `didn't find a line containing "${waitForLogLine}"`
+      ),
+      takeFirstWithTimeout(
+        waitForLogLine === undefined
+          ? Rx.EMPTY
+          : logLine$.pipe(
+              filter(line =>
+                waitForLogLine instanceof RegExp
+                  ? waitForLogLine.test(line)
+                  : line.includes(waitForLogLine)
+              )
             ),
-            take(1)
-          )
-          .toPromise(),
-    ]);
+        `waitForLogLine didn't emit anything`
+      )
+    ).toPromise();
   }
 
   private async startServers() {

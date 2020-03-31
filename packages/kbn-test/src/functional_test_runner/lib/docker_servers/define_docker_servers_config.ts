@@ -24,7 +24,8 @@ export interface DockerServerSpec {
   port: number;
   image: string;
   waitForLogLine?: RegExp | string;
-  waitFor?: (server: DockerServer, logLine$: Rx.Observable<string>) => Promise<boolean>;
+  /** a function that should return an obeservable that will allow the tests to execute as soon as it emits anything */
+  waitFor?: (server: DockerServer, logLine$: Rx.Observable<string>) => Rx.Observable<unknown>;
 }
 
 export interface DockerServer extends DockerServerSpec {
