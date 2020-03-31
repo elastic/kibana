@@ -175,7 +175,7 @@ describe.skip('onPostAuthInterceptor', () => {
 
     const spacesService = await service.setup({
       http: (http as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}],
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),

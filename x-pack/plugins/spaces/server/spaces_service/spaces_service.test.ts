@@ -68,7 +68,7 @@ const createService = async (serverBasePath: string = '') => {
 
   const spacesServiceSetup = await spacesService.setup({
     http: httpSetup,
-    getStartServices: async () => [coreStart, {}],
+    getStartServices: async () => [coreStart, {}, {}],
     config$: Rx.of(spacesConfig),
     authorization: securityMock.createSetup().authz,
     getSpacesAuditLogger: () => new SpacesAuditLogger({}),

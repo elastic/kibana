@@ -42,7 +42,7 @@ describe('Spaces Public API', () => {
     const service = new SpacesService(log);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}],
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
@@ -64,7 +64,7 @@ describe('Spaces Public API', () => {
 
     initDeleteSpacesApi({
       externalRouter: router,
-      getStartServices: async () => [coreStart, {}],
+      getStartServices: async () => [coreStart, {}, {}],
       getImportExportObjectLimit: () => 1000,
       log,
       spacesService,

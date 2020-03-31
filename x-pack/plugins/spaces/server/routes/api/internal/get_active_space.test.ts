@@ -22,7 +22,7 @@ describe('GET /internal/spaces/_active_space', () => {
     const service = new SpacesService(null as any);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}],
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: null,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
