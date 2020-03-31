@@ -3,6 +3,10 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load() // load from the Jenkins instance
 
+def testsLarge = 'debian-tests-l && oraclelinux-tests-l && ubuntu-tests-l && centos-tests-l'
+def testsExtraLarge = 'debian-tests-xl && oraclelinux-tests-xl && ubuntu-16-tests-xl && ubuntu-18-tests-xl && centos-tests-xl'
+def testsExtraExtraLarge = 'debian-tests-xxl && oraclelinux-tests-xxl && ubuntu-16-tests-xxl && ubuntu-18-tests-xxl && centos-tests-xxl'
+
 kibanaPipeline(timeoutMinutes: 180) {
   catchErrors {
     withEnv([
@@ -44,7 +48,7 @@ kibanaPipeline(timeoutMinutes: 180) {
           'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
         ]),
       ])
-      workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
+      workers.base(name: 'coverage-worker', label: workers.labelL, ramDisk: false, bootstrapped: false) {
         kibanaPipeline.downloadCoverageArtifacts()
         kibanaPipeline.bash(
           '''
