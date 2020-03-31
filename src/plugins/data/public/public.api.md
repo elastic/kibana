@@ -1524,7 +1524,7 @@ export type SavedQueryTimeFilter = TimeRange & {
 export const search: {
     aggs: {
         AggConfigs: typeof AggConfigs;
-        aggGroupNamesMap: () => Record<"buckets" | "metrics", string>;
+        aggGroupNamesMap: () => Record<"metrics" | "buckets", string>;
         aggTypeFilters: import("./search/aggs/filter/agg_type_filters").AggTypeFilters;
         CidrMask: typeof CidrMask;
         convertDateRangeToString: typeof convertDateRangeToString;

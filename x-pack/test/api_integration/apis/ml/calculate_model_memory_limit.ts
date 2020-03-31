@@ -15,7 +15,7 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
-  const mlSecurity = getService('mlSecurity');
+  const ml = getService('ml');
 
   const testDataList = [
     {
@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`calculates the model memory limit ${testData.testTitleSuffix}`, async () => {
         await supertest
           .post('/api/ml/validate/calculate_model_memory_limit')
-          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+          .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);

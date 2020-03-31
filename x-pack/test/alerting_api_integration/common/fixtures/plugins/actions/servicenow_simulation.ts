@@ -21,7 +21,7 @@ export function initPlugin(server: Hapi.Server, path: string) {
     options: {
       auth: false,
     },
-    handler: createHandler,
+    handler: createHandler as Hapi.Lifecycle.Method,
   });
 
   server.route({
@@ -35,7 +35,7 @@ export function initPlugin(server: Hapi.Server, path: string) {
         }),
       },
     },
-    handler: updateHandler,
+    handler: updateHandler as Hapi.Lifecycle.Method,
   });
 
   server.route({
@@ -44,7 +44,7 @@ export function initPlugin(server: Hapi.Server, path: string) {
     options: {
       auth: false,
     },
-    handler: getHandler,
+    handler: getHandler as Hapi.Lifecycle.Method,
   });
 }
 

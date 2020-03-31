@@ -24,7 +24,6 @@ import {
   setToasts,
   setIndexPatternService,
   setAutocompleteService,
-  // @ts-ignore
 } from './kibana_services';
 // @ts-ignore
 import { setInjectedVarFunc as npSetInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths

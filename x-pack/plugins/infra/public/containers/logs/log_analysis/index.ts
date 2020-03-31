@@ -7,6 +7,10 @@
 export * from './log_analysis_capabilities';
 export * from './log_analysis_cleanup';
 export * from './log_analysis_module';
+export * from './log_analysis_module_configuration';
+export * from './log_analysis_module_definition';
 export * from './log_analysis_module_status';
 export * from './log_analysis_module_types';
 export * from './log_analysis_setup_state';
+
+export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';

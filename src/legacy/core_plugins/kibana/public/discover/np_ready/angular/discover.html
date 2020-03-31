@@ -1,4 +1,4 @@
-<discover-app class="app-container">
+<discover-app class="app-container" data-fetch-counter="{{fetchCounter}}">
   <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
 
   <!-- Local nav. -->
@@ -20,20 +20,21 @@
 
   <main class="container-fluid">
     <div class="row">
-      <div class="col-md-2 sidebar-container collapsible-sidebar" id="discover-sidebar" data-test-subj="discover-sidebar">
+      <div class="col-md-2 dscSidebar__container collapsible-sidebar" id="discover-sidebar" data-test-subj="discover-sidebar">
         <div class="dscFieldChooser">
-          <disc-field-chooser
+          <discover-sidebar
             columns="state.columns"
-            hits="rows"
             field-counts="fieldCounts"
-            index-pattern="searchSource.getField('index')"
+            hits="rows"
             index-pattern-list="opts.indexPatternList"
-            state="state"
             on-add-field="addColumn"
             on-add-filter="filterQuery"
             on-remove-field="removeColumn"
+            selected-index-pattern="searchSource.getField('index')"
+            set-index-pattern="setIndexPattern"
+            state="state"
           >
-          </disc-field-chooser>
+          </discover-sidebar>
         </div>
       </div>
 
