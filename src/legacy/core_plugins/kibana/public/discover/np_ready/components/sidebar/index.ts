@@ -17,7 +17,5 @@
  * under the License.
  */
 
-export interface IndexPatternRef {
-  id: string;
-  title: string;
-}
+export { DiscoverSidebar } from './discover_sidebar';
+export { createDiscoverSidebarDirective } from './discover_sidebar_directive';

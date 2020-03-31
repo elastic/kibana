@@ -18,25 +18,29 @@
  */
 
 import _ from 'lodash';
-import { pluginInstance } from 'plugins/kibana/discover/legacy';
-import ngMock from 'ng_mock';
-import { fieldCalculator } from '../../np_ready/components/field_chooser/lib/field_calculator';
-import expect from '@kbn/expect';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+// @ts-ignore
+import realHits from 'fixtures/real_hits.js';
+// @ts-ignore
+import StubIndexPattern from 'test_utils/stub_index_pattern';
+// @ts-ignore
+import stubbedLogstashFields from 'fixtures/logstash_fields';
+import { coreMock } from '../../../../../../../../../core/public/mocks';
+import { IndexPattern } from '../../../../../../../../../plugins/data/public';
+// @ts-ignore
+import { fieldCalculator } from './field_calculator';
 
-// Load the kibana app dependencies.
-
-let indexPattern;
+let indexPattern: IndexPattern;
 
 describe('fieldCalculator', function() {
-  beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(ngMock.module('app/discover'));
-  beforeEach(
-    ngMock.inject(function(Private) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    })
-  );
-
+  beforeEach(function() {
+    indexPattern = new StubIndexPattern(
+      'logstash-*',
+      (cfg: any) => cfg,
+      'time',
+      stubbedLogstashFields(),
+      coreMock.createStart()
+    );
+  });
   it('should have a _countMissing that counts nulls & undefineds in an array', function() {
     const values = [
       ['foo', 'bar'],
@@ -52,13 +56,13 @@ describe('fieldCalculator', function() {
       'foo',
       undefined,
     ];
-    expect(fieldCalculator._countMissing(values)).to.be(5);
+    expect(fieldCalculator._countMissing(values)).toBe(5);
   });
 
   describe('_groupValues', function() {
-    let groups;
-    let params;
-    let values;
+    let groups: Record<string, any>;
+    let params: any;
+    let values: any;
     beforeEach(function() {
       values = [
         ['foo', 'bar'],
@@ -79,36 +83,36 @@ describe('fieldCalculator', function() {
     });
 
     it('should have a _groupValues that counts values', function() {
-      expect(groups).to.be.an(Object);
+      expect(groups).toBeInstanceOf(Object);
     });
 
     it('should throw an error if any value is a plain object', function() {
       expect(function() {
         fieldCalculator._groupValues([{}, true, false], params);
-      }).to.throwError();
+      }).toThrowError();
     });
 
     it('should handle values with dots in them', function() {
       values = ['0', '0.........', '0.......,.....'];
       params = {};
       groups = fieldCalculator._groupValues(values, params);
-      expect(groups[values[0]].count).to.be(1);
-      expect(groups[values[1]].count).to.be(1);
-      expect(groups[values[2]].count).to.be(1);
+      expect(groups[values[0]].count).toBe(1);
+      expect(groups[values[1]].count).toBe(1);
+      expect(groups[values[2]].count).toBe(1);
     });
 
     it('should have a a key for value in the array when not grouping array terms', function() {
-      expect(_.keys(groups).length).to.be(3);
-      expect(groups.foo).to.be.a(Object);
-      expect(groups.bar).to.be.a(Object);
-      expect(groups.baz).to.be.a(Object);
+      expect(_.keys(groups).length).toBe(3);
+      expect(groups.foo).toBeInstanceOf(Object);
+      expect(groups.bar).toBeInstanceOf(Object);
+      expect(groups.baz).toBeInstanceOf(Object);
     });
 
     it('should count array terms independently', function() {
-      expect(groups['foo,bar']).to.be(undefined);
-      expect(groups.foo.count).to.be(5);
-      expect(groups.bar.count).to.be(3);
-      expect(groups.baz.count).to.be(1);
+      expect(groups['foo,bar']).toBe(undefined);
+      expect(groups.foo.count).toBe(5);
+      expect(groups.bar.count).toBe(3);
+      expect(groups.baz.count).toBe(1);
     });
 
     describe('grouped array terms', function() {
@@ -118,27 +122,27 @@ describe('fieldCalculator', function() {
       });
 
       it('should group array terms when passed params.grouped', function() {
-        expect(_.keys(groups).length).to.be(4);
-        expect(groups['foo,bar']).to.be.a(Object);
+        expect(_.keys(groups).length).toBe(4);
+        expect(groups['foo,bar']).toBeInstanceOf(Object);
       });
 
       it('should contain the original array as the value', function() {
-        expect(groups['foo,bar'].value).to.eql(['foo', 'bar']);
+        expect(groups['foo,bar'].value).toEqual(['foo', 'bar']);
       });
 
       it('should count the pairs separately from the values they contain', function() {
-        expect(groups['foo,bar'].count).to.be(2);
-        expect(groups.foo.count).to.be(3);
-        expect(groups.bar.count).to.be(1);
+        expect(groups['foo,bar'].count).toBe(2);
+        expect(groups.foo.count).toBe(3);
+        expect(groups.bar.count).toBe(1);
       });
     });
   });
 
   describe('getFieldValues', function() {
-    let hits;
+    let hits: any;
 
     beforeEach(function() {
-      hits = _.each(require('fixtures/real_hits.js'), indexPattern.flattenHit);
+      hits = _.each(_.cloneDeep(realHits), indexPattern.flattenHit);
     });
 
     it('Should return an array of values for _source fields', function() {
@@ -146,32 +150,32 @@ describe('fieldCalculator', function() {
         hits,
         indexPattern.fields.getByName('extension')
       );
-      expect(extensions).to.be.an(Array);
+      expect(extensions).toBeInstanceOf(Array);
       expect(
         _.filter(extensions, function(v) {
           return v === 'html';
         }).length
-      ).to.be(8);
-      expect(_.uniq(_.clone(extensions)).sort()).to.eql(['gif', 'html', 'php', 'png']);
+      ).toBe(8);
+      expect(_.uniq(_.clone(extensions)).sort()).toEqual(['gif', 'html', 'php', 'png']);
     });
 
     it('Should return an array of values for core meta fields', function() {
       const types = fieldCalculator.getFieldValues(hits, indexPattern.fields.getByName('_type'));
-      expect(types).to.be.an(Array);
+      expect(types).toBeInstanceOf(Array);
       expect(
         _.filter(types, function(v) {
           return v === 'apache';
         }).length
-      ).to.be(18);
-      expect(_.uniq(_.clone(types)).sort()).to.eql(['apache', 'nginx']);
+      ).toBe(18);
+      expect(_.uniq(_.clone(types)).sort()).toEqual(['apache', 'nginx']);
     });
   });
 
   describe('getFieldValueCounts', function() {
-    let params;
+    let params: { hits: any; field: any; count: number };
     beforeEach(function() {
       params = {
-        hits: require('fixtures/real_hits.js'),
+        hits: _.cloneDeep(realHits),
         field: indexPattern.fields.getByName('extension'),
         count: 3,
       };
@@ -179,36 +183,36 @@ describe('fieldCalculator', function() {
 
     it('counts the top 3 values', function() {
       const extensions = fieldCalculator.getFieldValueCounts(params);
-      expect(extensions).to.be.an(Object);
-      expect(extensions.buckets).to.be.an(Array);
-      expect(extensions.buckets.length).to.be(3);
-      expect(_.pluck(extensions.buckets, 'value')).to.eql(['html', 'php', 'gif']);
-      expect(extensions.error).to.be(undefined);
+      expect(extensions).toBeInstanceOf(Object);
+      expect(extensions.buckets).toBeInstanceOf(Array);
+      expect(extensions.buckets.length).toBe(3);
+      expect(_.pluck(extensions.buckets, 'value')).toEqual(['html', 'php', 'gif']);
+      expect(extensions.error).toBe(undefined);
     });
 
     it('fails to analyze geo and attachment types', function() {
       params.field = indexPattern.fields.getByName('point');
-      expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
+      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
 
       params.field = indexPattern.fields.getByName('area');
-      expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
+      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
 
       params.field = indexPattern.fields.getByName('request_body');
-      expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
+      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function() {
       params.field = indexPattern.fields.getByName('ip');
-      expect(fieldCalculator.getFieldValueCounts(params).error).to.not.be(undefined);
+      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
     });
 
     it('counts the total hits', function() {
-      expect(fieldCalculator.getFieldValueCounts(params).total).to.be(params.hits.length);
+      expect(fieldCalculator.getFieldValueCounts(params).total).toBe(params.hits.length);
     });
 
     it('counts the hits the field exists in', function() {
       params.field = indexPattern.fields.getByName('phpmemory');
-      expect(fieldCalculator.getFieldValueCounts(params).exists).to.be(5);
+      expect(fieldCalculator.getFieldValueCounts(params).exists).toBe(5);
     });
   });
 });
