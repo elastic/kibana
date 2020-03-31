@@ -27,13 +27,6 @@ export async function loadIndexTemplates() {
   return await sendGet(`templates`);
 }
 
-export async function loadIndexTemplate(templateName) {
-  if (!templateName) {
-    return {};
-  }
-  return await sendGet(`templates/${templateName}`);
-}
-
 export async function loadPolicies(withIndices) {
   const query = withIndices ? '?withIndices=true' : '';
   return await sendGet('policies', query);
