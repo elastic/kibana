@@ -148,13 +148,14 @@ export const UserActionTree = React.memo(
       () => (
         <AddComment
           caseId={caseData.id}
+          disabled={!userCanCrud}
           insertQuote={insertQuote}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
         />
       ),
-      [caseData.id, handleUpdate, insertQuote]
+      [caseData.id, handleUpdate, insertQuote, userCanCrud]
     );
 
     useEffect(() => {
@@ -181,7 +182,7 @@ export const UserActionTree = React.memo(
           markdown={MarkdownDescription}
           onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
           onQuote={handleManageQuote.bind(null, caseData.description)}
-          username={caseData.createdBy.username ?? ''}
+          username={caseData.createdBy.username ?? 'Unknown'}
         />
 
         {caseUserActions.map((action, index) => {
