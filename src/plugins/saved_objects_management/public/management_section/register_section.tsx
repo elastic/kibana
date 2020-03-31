@@ -24,7 +24,7 @@ import { parse } from 'query-string';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreSetup, CoreStart, ChromeBreadcrumb } from 'src/core/public';
+import { CoreSetup, CoreStart, ChromeBreadcrumb, Capabilities } from 'src/core/public';
 import { ManagementSetup } from '../../../management/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { StartDependencies } from '../plugin';
@@ -55,26 +55,31 @@ export const registerManagementSection = ({ core, sections, serviceRegistry }: R
     mount: async ({ element, basePath, setBreadcrumbs }) => {
       const [coreStart, { data }] = await core.getStartServices();
       const allowedTypes = await getAllowedTypes(coreStart.http);
+      const capabilities = coreStart.application.capabilities;
 
       ReactDOM.render(
         <I18nProvider>
           <HashRouter basename={basePath}>
             <Switch>
               <Route path={'/:service/:id'} exact={true}>
-                <SavedObjectsEditionPage
-                  coreStart={coreStart}
-                  serviceRegistry={serviceRegistry}
-                  setBreadcrumbs={setBreadcrumbs}
-                />
+                <RedirectToHomeIfUnauthorized capabilities={capabilities}>
+                  <SavedObjectsEditionPage
+                    coreStart={coreStart}
+                    serviceRegistry={serviceRegistry}
+                    setBreadcrumbs={setBreadcrumbs}
+                  />
+                </RedirectToHomeIfUnauthorized>
               </Route>
               <Route path={'/'} exact={false}>
-                <SavedObjectsTablePage
-                  coreStart={coreStart}
-                  dataStart={data}
-                  serviceRegistry={serviceRegistry}
-                  allowedTypes={allowedTypes}
-                  setBreadcrumbs={setBreadcrumbs}
-                />
+                <RedirectToHomeIfUnauthorized capabilities={capabilities}>
+                  <SavedObjectsTablePage
+                    coreStart={coreStart}
+                    dataStart={data}
+                    serviceRegistry={serviceRegistry}
+                    allowedTypes={allowedTypes}
+                    setBreadcrumbs={setBreadcrumbs}
+                  />
+                </RedirectToHomeIfUnauthorized>
               </Route>
             </Switch>
           </HashRouter>
@@ -87,6 +92,17 @@ export const registerManagementSection = ({ core, sections, serviceRegistry }: R
       };
     },
   });
+};
+
+const RedirectToHomeIfUnauthorized: React.FunctionComponent<{
+  capabilities: Capabilities;
+}> = ({ children, capabilities }) => {
+  const allowed = capabilities?.management?.kibana?.objects ?? false;
+  if (!allowed) {
+    window.location.hash = '/home';
+    return null;
+  }
+  return children! as React.ReactElement;
 };
 
 const SavedObjectsEditionPage = ({
@@ -177,9 +193,10 @@ const SavedObjectsTablePage = ({
       goInspectObject={savedObject => {
         const { editUrl } = savedObject.meta;
         if (editUrl) {
-          // TODO: it seems only editable objects are done from without the management page.
           // previously, kbnUrl.change(object.meta.editUrl); was used.
-          // using direct access to location.hash seems the only option for now.
+          // using direct access to location.hash seems the only option for now,
+          // as using react-router-dom will prefix the url with the router's basename
+          // which should be ignored there.
           window.location.hash = editUrl;
         }
       }}
