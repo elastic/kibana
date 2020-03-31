@@ -223,6 +223,7 @@
     "opn": "^5.5.0",
     "oppsy": "^2.0.0",
     "pegjs": "0.10.0",
+    "podium": "3.1.2",
     "postcss-loader": "^3.0.0",
     "prop-types": "15.6.0",
     "proxy-from-env": "1.0.0",
