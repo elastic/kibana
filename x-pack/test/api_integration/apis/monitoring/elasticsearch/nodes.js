@@ -34,8 +34,7 @@ export default function({ getService }) {
         return esArchiver.unload(archive);
       });
 
-      // https://github.com/elastic/kibana/issues/61366
-      it.skip('should return data for 2 active nodes', async () => {
+      it('should return data for 2 active nodes', async () => {
         const { body } = await supertest
           .post('/api/monitoring/v1/clusters/fHJwISmKTFO8bj57oFBLUQ/elasticsearch/nodes')
           .set('kbn-xsrf', 'xxx')
