@@ -48,19 +48,7 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
     return pathname && encodedSearch ? `${pathname}?${encodedSearch}` : pathname;
   }, [pathname, encodedSearch]);
 
-  const internalLinkResult = useMemo(() => {
-    // When the logs / metrics apps are first mounted a history instance is passed through with the app mount parameters,
-    // this is setup with a 'basename' in advance (E.g. /BASE_PATH/s/SPACE_ID/app/APP_ID). With internal
-    // linking we are using 'createAbsoluteHref' and 'push' on top of this history instance. So a pathname of /inventory used within
-    // the metrics app will ultimatey end up as /BASE_PATH/s/SPACE_ID/app/metrics/inventory. React-router responds to this
-    // as it is instantiated with the same history instance.
-    return history?.createAbsoluteHref({
-      pathname: pathname ? formatPathname(pathname) : undefined,
-      search: encodedSearch,
-    });
-  }, [history, pathname, encodedSearch]);
-
-  const externalLinkResult = useMemo(() => {
+  const href = useMemo(() => {
     const link = url.format({
       pathname,
       hash: mergedHash,
@@ -71,41 +59,17 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
   }, [mergedHash, hash, encodedSearch, pathname, prefixer, app]);
 
   const onClick = useMemo(() => {
-    // If these results are equal we know we're trying to navigate within the same application
-    // that the current history instance is representing
-    if (internalLinkResult && linksAreEquivalent(externalLinkResult, internalLinkResult)) {
-      return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-        e.preventDefault();
-        if (history) {
-          history.push({
-            pathname: pathname ? formatPathname(pathname) : undefined,
-            search: encodedSearch,
-          });
-        }
-      };
-    } else {
-      return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-        e.preventDefault();
-        if (navigateToApp) {
-          const navigationPath = mergedHash ? `#${mergedHash}` : mergedPathname;
-          navigateToApp(app, { path: navigationPath ? navigationPath : undefined });
-        }
-      };
-    }
-  }, [
-    internalLinkResult,
-    externalLinkResult,
-    history,
-    pathname,
-    encodedSearch,
-    navigateToApp,
-    mergedHash,
-    mergedPathname,
-    app,
-  ]);
+    return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+      e.preventDefault();
+      if (navigateToApp) {
+        const navigationPath = mergedHash ? `#${mergedHash}` : mergedPathname;
+        navigateToApp(app, { path: navigationPath ? navigationPath : undefined });
+      }
+    };
+  }, [navigateToApp, mergedHash, mergedPathname, app]);
 
   return {
-    href: externalLinkResult,
+    href,
     onClick,
   };
 };
@@ -114,20 +78,10 @@ const encodeSearch = (search: Search) => {
   return stringify(urlUtils.encodeQuery(search), { sort: false, encode: false });
 };
 
-const formatPathname = (pathname: string) => {
-  return pathname[0] === '/' ? pathname : `/${pathname}`;
-};
-
 const validateParams = ({ app, pathname, hash, search }: LinkDescriptor) => {
   if (!app && hash) {
     throw new Error(
       'The metrics and logs apps use browserHistory. Please provide a pathname rather than a hash.'
     );
   }
-};
-
-const linksAreEquivalent = (externalLink: string, internalLink: string): boolean => {
-  // Compares with trailing slashes removed. This handles the case where the pathname is '/'
-  // and 'createHref' will include the '/' but Kibana's 'getUrlForApp' will remove it.
-  return externalLink.replace(/\/$/, '') === internalLink.replace(/\/$/, '');
 };
