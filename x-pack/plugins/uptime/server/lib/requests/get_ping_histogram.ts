@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { INDEX_NAMES, QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
+import { QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
 import { getFilterClause } from '../helper';
 import { HistogramQueryResult } from './types';
 import { HistogramResult } from '../../../../../legacy/plugins/uptime/common/types';
@@ -26,7 +26,7 @@ export interface GetPingHistogramParams {
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ callES, from, to, filters, monitorId, statusFilter }) => {
+> = async ({ callES, dynamicSettings, from, to, filters, monitorId, statusFilter }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -38,7 +38,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   const filter = getFilterClause(from, to, additionalFilters);
 
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       query: {
         bool: {
@@ -74,7 +74,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   };
 
   const result = await callES('search', params);
-  const interval = result.aggregations.timeseries?.interval;
+  const interval = result.aggregations?.timeseries?.interval;
   const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map(bucket => {
     const x: number = bucket.key;

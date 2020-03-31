@@ -79,7 +79,7 @@ const defaultRequestBody = {
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
-  const mlSecurity = getService('mlSecurity');
+  const ml = getService('ml');
 
   const testDataList = [
     {
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 5,
         validationChecks: [
           {
-            id: 0,
+            id: 3,
             valid: 'valid',
             message: '1000 field values analyzed, 95% contain 3 or more tokens.',
           },
@@ -117,12 +117,12 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 5,
         validationChecks: [
           {
-            id: 1,
+            id: 4,
             valid: 'partially_valid',
             message: 'The median length for the field values analyzed is over 400 characters.',
           },
           {
-            id: 4,
+            id: 2,
             valid: 'invalid',
             message:
               'Tokenization of field value examples has failed due to more than 10000 tokens being found in a sample of 50 values.',
@@ -144,12 +144,12 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 5,
         validationChecks: [
           {
-            id: 0,
+            id: 3,
             valid: 'valid',
             message: '250 field values analyzed, 95% contain 3 or more tokens.',
           },
           {
-            id: 2,
+            id: 5,
             valid: 'partially_valid',
             message: 'More than 75% of field values are null.',
           },
@@ -170,12 +170,12 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 5,
         validationChecks: [
           {
-            id: 0,
+            id: 3,
             valid: 'valid',
             message: '500 field values analyzed, 100% contain 3 or more tokens.',
           },
           {
-            id: 1,
+            id: 4,
             valid: 'partially_valid',
             message: 'The median length for the field values analyzed is over 400 characters.',
           },
@@ -196,7 +196,7 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 0,
         validationChecks: [
           {
-            id: 3,
+            id: 0,
             valid: 'invalid',
             message:
               'No examples for this field could be found. Please ensure the selected date range contains data.',
@@ -218,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 5,
         validationChecks: [
           {
-            id: 0,
+            id: 3,
             valid: 'invalid',
             message: '1000 field values analyzed, 0% contain 3 or more tokens.',
           },
@@ -242,7 +242,7 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 5,
         validationChecks: [
           {
-            id: 0,
+            id: 3,
             valid: 'valid',
             message: '1000 field values analyzed, 100% contain 3 or more tokens.',
           },
@@ -263,7 +263,7 @@ export default ({ getService }: FtrProviderContext) => {
         exampleLength: 5,
         validationChecks: [
           {
-            id: 0,
+            id: 3,
             valid: 'partially_valid',
             message: '1000 field values analyzed, 50% contain 3 or more tokens.',
           },
@@ -300,7 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(testData.title, async () => {
         const { body } = await supertest
           .post('/api/ml/jobs/categorization_field_examples')
-          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+          .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, ChangeEvent } from 'react';
+import React, { useCallback, ChangeEvent, useEffect } from 'react';
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -98,6 +98,21 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
 
+  /**
+   * We need to distinguish between the add flyout and the edit flyout.
+   * useEffect will run only once on component mount.
+   * This guarantees that the function below will run only once.
+   * On the first render of the component the apiUrl can be either undefined or filled.
+   * If it is filled then we are on the edit flyout. Otherwise we are on the add flyout.
+   */
+
+  useEffect(() => {
+    if (!isEmpty(apiUrl)) {
+      editActionSecrets('username', '');
+      editActionSecrets('password', '');
+    }
+  }, []);
+
   if (isEmpty(mapping)) {
     editActionConfig('casesConfiguration', {
       ...action.config.casesConfiguration,
@@ -166,10 +181,11 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="username"
+            id="connector-servicenow-username"
             fullWidth
             error={errors.username}
             isInvalid={isUsernameInvalid}
@@ -178,7 +194,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
             <EuiFieldText
               fullWidth
               isInvalid={isUsernameInvalid}
-              name="username"
+              name="connector-servicenow-username"
               value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="usernameFromInput"
               onChange={handleOnChangeSecretConfig.bind(null, 'username')}
@@ -187,10 +203,11 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
-            id="password"
+            id="connector-servicenow-password"
             fullWidth
             error={errors.password}
             isInvalid={isPasswordInvalid}
@@ -199,7 +216,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
             <EuiFieldPassword
               fullWidth
               isInvalid={isPasswordInvalid}
-              name="password"
+              name="connector-servicenow-password"
               value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="passwordFromInput"
               onChange={handleOnChangeSecretConfig.bind(null, 'password')}
@@ -208,11 +225,11 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiSpacer size="xs" />
           <FieldMapping
-            disabled={false}
+            disabled={true}
             mapping={mapping as CasesConfigurationMapping[]}
             onChangeMapping={handleOnChangeMappingConfig}
           />

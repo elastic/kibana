@@ -6,14 +6,22 @@
 
 import React, { FC, useState } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIconTip,
+  EuiInputPopover,
+  EuiSuperSelect,
+  EuiText,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../../common/constants/search';
 
 import {
   esKuery,
@@ -21,8 +29,6 @@ import {
   Query,
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
-
-import { getToastNotifications } from '../../../../util/dependency_cache';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -56,20 +62,6 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map(v => {
   };
 });
 
-const kqlSyntaxErrorMessage = i18n.translate(
-  'xpack.ml.datavisualizer.invalidKqlSyntaxErrorMessage',
-  {
-    defaultMessage:
-      'Invalid syntax in search bar. The input must be valid Kibana Query Language (KQL)',
-  }
-);
-const luceneSyntaxErrorMessage = i18n.translate(
-  'xpack.ml.datavisualizer.invalidLuceneSyntaxErrorMessage',
-  {
-    defaultMessage: 'Invalid syntax in search bar. The input must be valid Lucene',
-  }
-);
-
 export const SearchPanel: FC<Props> = ({
   indexPattern,
   searchString,
@@ -87,6 +79,7 @@ export const SearchPanel: FC<Props> = ({
     query: searchString || '',
     language: searchQueryLanguage,
   });
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   const searchHandler = (query: Query) => {
     let filterQuery;
@@ -106,13 +99,8 @@ export const SearchPanel: FC<Props> = ({
       setSearchString(query.query);
       setSearchQueryLanguage(query.language);
     } catch (e) {
-      console.log('Invalid syntax', e); // eslint-disable-line no-console
-      const toastNotifications = getToastNotifications();
-      const notification =
-        query.language === SEARCH_QUERY_LANGUAGE.KUERY
-          ? kqlSyntaxErrorMessage
-          : luceneSyntaxErrorMessage;
-      toastNotifications.addDanger(notification);
+      console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
+      setErrorMessage({ query: query.query as string, message: e.message });
     }
   };
   const searchChangeHandler = (query: Query) => setSearchInput(query);
@@ -120,22 +108,40 @@ export const SearchPanel: FC<Props> = ({
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center" data-test-subj="mlDataVisualizerSearchPanel">
       <EuiFlexItem>
-        <QueryStringInput
-          bubbleSubmitEvent={true}
-          query={searchInput}
-          indexPatterns={[indexPattern]}
-          onChange={searchChangeHandler}
-          onSubmit={searchHandler}
-          placeholder={i18n.translate(
-            'xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText',
-            {
-              defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
-            }
-          )}
-          disableAutoFocus={true}
-          dataTestSubj="transformQueryInput"
-          languageSwitcherPopoverAnchorPosition="rightDown"
-        />
+        <EuiInputPopover
+          style={{ maxWidth: '100%' }}
+          closePopover={() => setErrorMessage(undefined)}
+          input={
+            <QueryStringInput
+              bubbleSubmitEvent={true}
+              query={searchInput}
+              indexPatterns={[indexPattern]}
+              onChange={searchChangeHandler}
+              onSubmit={searchHandler}
+              placeholder={i18n.translate(
+                'xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText',
+                {
+                  defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
+                }
+              )}
+              disableAutoFocus={true}
+              dataTestSubj="transformQueryInput"
+              languageSwitcherPopoverAnchorPosition="rightDown"
+            />
+          }
+          isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
+        >
+          <EuiCode>
+            {i18n.translate(
+              'xpack.ml.datavisualizer.searchPanel.invalidKuerySyntaxErrorMessageQueryBar',
+              {
+                defaultMessage: 'Invalid query',
+              }
+            )}
+            {': '}
+            {errorMessage?.message.split('\n')[0]}
+          </EuiCode>
+        </EuiInputPopover>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

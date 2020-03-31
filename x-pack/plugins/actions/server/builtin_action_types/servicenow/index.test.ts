@@ -9,7 +9,7 @@ import { ActionType, Services, ActionTypeExecutorOptions } from '../../types';
 import { validateConfig, validateSecrets, validateParams } from '../../lib';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from '../index.test';
-import { configUtilsMock } from '../../actions_config.mock';
+import { actionsConfigMock } from '../../actions_config.mock';
 
 import { ACTION_TYPE_ID } from './constants';
 import * as i18n from './translations';
@@ -109,7 +109,7 @@ describe('validateConfig()', () => {
   test('should validate and pass when the servicenow url is whitelisted', () => {
     actionType = getActionType({
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: url => {
           expect(url).toEqual(mockOptions.config.apiUrl);
         },
@@ -122,7 +122,7 @@ describe('validateConfig()', () => {
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
     actionType = getActionType({
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: _ => {
           throw new Error(`target url is not whitelisted`);
         },
@@ -226,7 +226,11 @@ describe('execute()', () => {
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
       config: mockOptions.config,
-      params: { ...mockOptions.params, executorAction: 'updateIncident' },
+      params: {
+        ...mockOptions.params,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
+      },
       secrets: mockOptions.secrets,
       services,
     };
@@ -244,7 +248,11 @@ describe('execute()', () => {
     const executorOptions: ActionTypeExecutorOptions = {
       actionId,
       config: mockOptions.config,
-      params: { ...mockOptions.params, executorAction: 'updateIncident' },
+      params: {
+        ...mockOptions.params,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
+      },
       secrets: mockOptions.secrets,
       services,
     };

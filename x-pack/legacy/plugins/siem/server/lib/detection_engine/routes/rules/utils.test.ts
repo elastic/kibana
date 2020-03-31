@@ -12,7 +12,7 @@ import {
   transformTags,
   getIdBulkError,
   transformOrBulkError,
-  transformRulesToNdjson,
+  transformDataToNdjson,
   transformAlertsToRules,
   transformOrImportError,
   getDuplicates,
@@ -215,17 +215,20 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 });
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, []);
       expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformFindAlerts({
-        page: 1,
-        perPage: 0,
-        total: 0,
-        data: [getResult()],
-      });
+      const output = transformFindAlerts(
+        {
+          page: 1,
+          perPage: 0,
+          total: 0,
+          data: [getResult()],
+        },
+        []
+      );
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual({
         page: 1,
@@ -237,12 +240,15 @@ describe('utils', () => {
 
     test('returns 500 if the data is not of type siem alert', () => {
       const unsafeCast = ([{ name: 'something else' }] as unknown) as SanitizedAlert[];
-      const output = transformFindAlerts({
-        data: unsafeCast,
-        page: 1,
-        perPage: 1,
-        total: 1,
-      });
+      const output = transformFindAlerts(
+        {
+          data: unsafeCast,
+          page: 1,
+          perPage: 1,
+          total: 1,
+        },
+        []
+      );
       expect(output).toBeNull();
     });
   });
@@ -364,14 +370,24 @@ describe('utils', () => {
 
   describe('transformOrBulkError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', getResult());
+      const output = transformOrBulkError('rule-1', getResult(), {
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        actions: [],
+        ruleThrottle: 'no_actions',
+        alertThrottle: null,
+      });
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
       const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
-      const output = transformOrBulkError('rule-1', unsafeCast);
+      const output = transformOrBulkError('rule-1', unsafeCast, {
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        actions: [],
+        ruleThrottle: 'no_actions',
+        alertThrottle: null,
+      });
       const expected: BulkError = {
         rule_id: 'rule-1',
         error: { message: 'Internal error transforming', status_code: 500 },
@@ -380,15 +396,15 @@ describe('utils', () => {
     });
   });
 
-  describe('transformRulesToNdjson', () => {
+  describe('transformDataToNdjson', () => {
     test('if rules are empty it returns an empty string', () => {
-      const ruleNdjson = transformRulesToNdjson([]);
+      const ruleNdjson = transformDataToNdjson([]);
       expect(ruleNdjson).toEqual('');
     });
 
     test('single rule will transform with new line ending character for ndjson', () => {
       const rule = sampleRule();
-      const ruleNdjson = transformRulesToNdjson([rule]);
+      const ruleNdjson = transformDataToNdjson([rule]);
       expect(ruleNdjson.endsWith('\n')).toBe(true);
     });
 
@@ -399,7 +415,7 @@ describe('utils', () => {
       result2.rule_id = 'some other id';
       result2.name = 'Some other rule';
 
-      const ruleNdjson = transformRulesToNdjson([result1, result2]);
+      const ruleNdjson = transformDataToNdjson([result1, result2]);
       // this is how we count characters in JavaScript :-)
       const count = ruleNdjson.split('\n').length - 1;
       expect(count).toBe(2);
@@ -412,7 +428,7 @@ describe('utils', () => {
       result2.rule_id = 'some other id';
       result2.name = 'Some other rule';
 
-      const ruleNdjson = transformRulesToNdjson([result1, result2]);
+      const ruleNdjson = transformDataToNdjson([result1, result2]);
       const ruleStrings = ruleNdjson.split('\n');
       const reParsed1 = JSON.parse(ruleStrings[0]);
       const reParsed2 = JSON.parse(ruleStrings[1]);

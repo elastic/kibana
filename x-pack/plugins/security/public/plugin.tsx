@@ -11,6 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/public';
+import { FeaturesPluginStart } from '../../features/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
@@ -40,6 +41,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   data: DataPublicPluginStart;
+  features: FeaturesPluginStart;
   management?: ManagementStart;
 }
 

@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
+import { getTimeFilter, getIndexPatternService, getInspector } from '../kibana_services';
 import { Provider } from 'react-redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
@@ -52,7 +52,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { docTitle } from 'ui/doc_title';
-import { indexPatternService, getInspector } from '../kibana_services';
+
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
@@ -310,9 +310,15 @@ app.controller(
       const layerListConfigOnly = copyPersistentState(layerList);
 
       const savedLayerList = savedMap.getLayerList();
-      const oldConfig = savedLayerList ? savedLayerList : initialLayerListConfig;
 
-      return !_.isEqual(layerListConfigOnly, oldConfig);
+      return !savedLayerList
+        ? !_.isEqual(layerListConfigOnly, initialLayerListConfig)
+        : // savedMap stores layerList as a JSON string using JSON.stringify.
+          // JSON.stringify removes undefined properties from objects.
+          // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
+          // Need to perform the same process for layerListConfigOnly to compare apples to apples
+          // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
+          !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
     }
 
     function isOnMapNow() {
@@ -396,7 +402,7 @@ app.controller(
       const indexPatterns = [];
       const getIndexPatternPromises = nextIndexPatternIds.map(async indexPatternId => {
         try {
-          const indexPattern = await indexPatternService.get(indexPatternId);
+          const indexPattern = await getIndexPatternService().get(indexPatternId);
           indexPatterns.push(indexPattern);
         } catch (err) {
           // unable to fetch index pattern
@@ -519,8 +525,8 @@ app.controller(
     }
 
     // Hide angular timepicer/refresh UI from top nav
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
+    getTimeFilter().disableTimeRangeSelector();
+    getTimeFilter().disableAutoRefreshSelector();
     $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
     $scope.topNavMenu = [
       {

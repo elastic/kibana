@@ -13,10 +13,13 @@ import {
   getFindResultWithSingleHit,
   getFindResultStatusEmpty,
   nonRuleFindResult,
+  typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+jest.mock('../../rules/update_rules_notifications');
 
 describe('update_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -34,6 +37,7 @@ describe('update_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
+    clients.alertsClient.get.mockResolvedValue(getResult()); // existing rule
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.alertsClient.update.mockResolvedValue(getResult()); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatusEmpty()); // successful transform
@@ -43,6 +47,12 @@ describe('update_rules', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
+      (updateRulesNotifications as jest.Mock).mockResolvedValue({
+        id: 'id',
+        actions: [],
+        alertThrottle: null,
+        ruleThrottle: 'no_actions',
+      });
       const response = await server.inject(getUpdateRequest(), context);
       expect(response.status).toEqual(200);
     });
@@ -62,6 +72,13 @@ describe('update_rules', () => {
       context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(getUpdateRequest(), context);
 
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getUpdateRequest(), contextWithoutSiem);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
@@ -86,6 +103,22 @@ describe('update_rules', () => {
       expect(response.body).toEqual({
         message: 'Test error',
         status_code: 500,
+      });
+    });
+
+    it('rejects the request if licensing is not adequate', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const request = requestMock.create({
+        method: 'put',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: typicalMlRulePayload(),
+      });
+
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: 'Your license does not support machine learning. Please upgrade your license.',
+        status_code: 400,
       });
     });
   });

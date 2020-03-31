@@ -5,18 +5,23 @@
  */
 
 import ApolloClient from 'apollo-client';
-import { getOr, set } from 'lodash/fp';
+import { getOr, set, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
+import uuid from 'uuid';
 
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
 import { TimelineResult, GetOneTimeline, NoteResult } from '../../graphql/types';
-import { addNotes as dispatchAddNotes } from '../../store/app/actions';
+import {
+  addNotes as dispatchAddNotes,
+  updateNote as dispatchUpdateNote,
+} from '../../store/app/actions';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
 import {
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
+  addNote as dispatchAddGlobalTimelineNote,
 } from '../../store/timeline/actions';
 
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
@@ -32,6 +37,7 @@ import {
 
 import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
+import { createNote } from '../notes/helpers';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -250,6 +256,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   notes,
   timeline,
   to,
+  ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
   dispatch(dispatchAddTimeline({ id, timeline }));
@@ -281,6 +288,14 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
       })
     );
   }
+
+  if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
+    const getNewNoteId = (): string => uuid.v4();
+    const newNote = createNote({ newNote: ruleNote, getNewNoteId });
+    dispatch(dispatchUpdateNote({ note: newNote }));
+    dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
+  }
+
   if (!duplicate) {
     dispatch(
       dispatchAddNotes({

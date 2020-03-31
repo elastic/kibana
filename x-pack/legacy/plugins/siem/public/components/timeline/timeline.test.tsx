@@ -115,7 +115,7 @@ describe('Timeline', () => {
           .find('[data-test-subj="timeline-title"]')
           .first()
           .props().placeholder
-      ).toContain('Untitled Timeline');
+      ).toContain('Untitled timeline');
     });
 
     test('it renders the timeline table', () => {
