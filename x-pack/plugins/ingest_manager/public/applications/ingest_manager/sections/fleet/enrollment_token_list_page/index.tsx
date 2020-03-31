@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { CSSProperties } from 'styled-components';
 import {
   EuiSpacer,
   EuiBasicTable,
@@ -30,6 +31,12 @@ import { SearchBar } from '../../../components/search_bar';
 import { NewEnrollmentTokenFlyout } from './components/new_enrollment_key_flyout';
 import {} from '@elastic/eui';
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
+
+const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
 
 const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
   const { notifications } = useCore();
@@ -145,6 +152,14 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       }),
       truncateText: true,
       width: '300px',
+      textOnly: true,
+      render: (name: string) => {
+        return (
+          <EuiText style={NO_WRAP_TRUNCATE_STYLE} title={name}>
+            {name}
+          </EuiText>
+        );
+      },
     },
     {
       field: 'id',
@@ -173,7 +188,9 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       }),
       width: '200px',
       render: (createdAt: string) => {
-        return <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />;
+        return createdAt ? (
+          <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
+        ) : null;
       },
     },
     {

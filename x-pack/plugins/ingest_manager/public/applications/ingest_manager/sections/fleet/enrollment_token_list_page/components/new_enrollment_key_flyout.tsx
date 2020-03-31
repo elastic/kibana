@@ -146,14 +146,6 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onClose}>
-              <FormattedMessage
-                id="xpack.ingestManager.newEnrollmentKey.continueButtonLabel"
-                defaultMessage="Continue"
-              />
-            </EuiButton>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
