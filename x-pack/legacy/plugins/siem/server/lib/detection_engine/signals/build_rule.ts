@@ -20,7 +20,7 @@ interface BuildRuleParams {
   updatedBy: string;
   interval: string;
   tags: string[];
-  throttle: string | null;
+  throttle: string;
 }
 
 export const buildRule = ({

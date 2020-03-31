@@ -31,7 +31,7 @@ interface SearchAfterAndBulkCreateParams {
   pageSize: number;
   filter: unknown;
   tags: string[];
-  throttle: string | null;
+  throttle: string;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
