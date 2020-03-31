@@ -70,6 +70,7 @@ export const getActions = (
     enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
+    'data-test-subj': 'deleteRuleAction',
     description: i18n.DELETE_RULE,
     type: 'icon',
     icon: 'trash',

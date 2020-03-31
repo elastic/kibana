@@ -14,6 +14,7 @@ import { StatefulOpenTimeline } from '../../components/open_timeline';
 import { WrapperPage } from '../../components/wrapper_page';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -27,18 +28,29 @@ type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
-  const [importCompleteToggle, setImportCompleteToggle] = useState<boolean>(false);
+export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
+  const [importDataModalToggle, setImportDataModalToggle] = useState<boolean>(false);
   const onImportTimelineBtnClick = useCallback(() => {
-    setImportCompleteToggle(true);
-  }, [setImportCompleteToggle]);
+    setImportDataModalToggle(true);
+  }, [setImportDataModalToggle]);
+
+  const uiCapabilities = useKibana().services.application.capabilities;
+  const capabilitiesCanUserCRUD: boolean =
+    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+
   return (
     <>
       <WrapperPage>
         <HeaderPage border title={i18n.PAGE_TITLE}>
-          <EuiButton iconType="indexOpen" onClick={onImportTimelineBtnClick}>
-            {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
-          </EuiButton>
+          {capabilitiesCanUserCRUD && (
+            <EuiButton
+              iconType="indexOpen"
+              onClick={onImportTimelineBtnClick}
+              data-test-subj="open-import-data-modal-btn"
+            >
+              {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+            </EuiButton>
+          )}
         </HeaderPage>
 
         <TimelinesContainer>
@@ -46,9 +58,10 @@ const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
             apolloClient={apolloClient}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             isModal={false}
-            importCompleteToggle={importCompleteToggle}
-            setImportCompleteToggle={setImportCompleteToggle}
+            importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}
+            setImportDataModalToggle={setImportDataModalToggle}
             title={i18n.ALL_TIMELINES_PANEL_TITLE}
+            data-test-subj="stateful-open-timeline"
           />
         </TimelinesContainer>
       </WrapperPage>

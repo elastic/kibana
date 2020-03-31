@@ -2551,10 +2551,10 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@elastic/charts@^18.1.0":
-  version "18.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-18.1.0.tgz#ee98b3e7680239d79807c09f0ee6efa6c1afa84b"
-  integrity sha512-cUobkGiKHPKHNytxsO7sSJyH6fOcAsZvcxAfnJPBn143P2d5oEsjSJmJTqu0z/obCs2v476Xlg6POVGainUj1Q==
+"@elastic/charts@^18.1.1":
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-18.2.0.tgz#e141151b4d7ecc71c9f6f235f8ce141665c67195"
+  integrity sha512-OWsARaHI/4Ict/GkeKIO3a+e2c86esGw3FtSGRLPFVgzpwBXdjvjYyraGntKOIVs/NAGNVWYj5XoRRb5C6cMlQ==
   dependencies:
     classnames "^2.2.6"
     d3-array "^1.2.4"
@@ -5080,10 +5080,10 @@
     "@types/cp-file" "*"
     "@types/glob" "*"
 
-"@types/cytoscape@^3.8.2":
-  version "3.8.2"
-  resolved "https://registry.yarnpkg.com/@types/cytoscape/-/cytoscape-3.8.2.tgz#428e85e12fb8dba94b05b1b1a8b04fd6f91b9c2d"
-  integrity sha512-b9n8dwMnU+64++Vky7bfab3Fod6JRbhZRrRJgnyKd03sh/vgNYHsq9N3W1MlU32d3AanxWUDH/1+jC+l5V9BeQ==
+"@types/cytoscape@^3.14.0":
+  version "3.14.0"
+  resolved "https://registry.yarnpkg.com/@types/cytoscape/-/cytoscape-3.14.0.tgz#346b5430a7a1533784bcf44fcbe6c5255b948d36"
+  integrity sha512-qOhhZFGb35457vmCu9YHqwjqleraSAEikaIFmMUPWzTC7FrwkS7VR/6ymqRHW7Z8wivHuzsZDYCoePIepd69qg==
 
 "@types/d3-array@^1.2.7":
   version "1.2.7"

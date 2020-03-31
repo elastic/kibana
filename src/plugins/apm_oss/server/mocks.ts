@@ -24,6 +24,7 @@ import { APMOSSPluginSetup } from './plugin';
 const apmStar = 'apm-*';
 
 const defaultConfig = {
+  enabled: true,
   errorIndices: apmStar,
   indexPattern: apmStar,
   metricsIndices: apmStar,
