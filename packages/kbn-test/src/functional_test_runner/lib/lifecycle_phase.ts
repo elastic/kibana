@@ -46,6 +46,12 @@ export class LifecyclePhase<Args extends readonly any[]> {
     this.handlers.push(fn);
   }
 
+  public addSub(sub: Rx.Subscription) {
+    this.handlers.push(() => {
+      sub.unsubscribe();
+    });
+  }
+
   public async trigger(...args: Args) {
     if (this.beforeSubj.isStopped) {
       throw new Error(`singular lifecycle event can only be triggered once`);
@@ -57,18 +63,20 @@ export class LifecyclePhase<Args extends readonly any[]> {
     }
 
     // catch the first error but still execute all handlers
-    let error;
+    let error: Error | undefined;
 
     // shuffle the handlers to prevent relying on their order
-    for (const fn of shuffle(this.handlers)) {
-      try {
-        await fn(...args);
-      } catch (_error) {
-        if (!error) {
-          error = _error;
+    await Promise.all(
+      shuffle(this.handlers).map(async fn => {
+        try {
+          await fn(...args);
+        } catch (_error) {
+          if (!error) {
+            error = _error;
+          }
         }
-      }
-    }
+      })
+    );
 
     this.afterSubj.next(undefined);
     if (this.options.singular) {

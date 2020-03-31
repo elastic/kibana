@@ -17,10 +17,23 @@
  * under the License.
  */
 
-export { Lifecycle } from './lifecycle';
-export { LifecyclePhase } from './lifecycle_phase';
-export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Provider } from './providers';
-export { runTests, setupMocha } from './mocha';
-export { FailureMetadata } from './failure_metadata';
-export * from './docker_servers';
+import execa from 'execa';
+import * as Rx from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { ToolingLog, observeLines } from '@kbn/dev-utils';
+
+export function observeContainerLogs(name: string, containerId: string, log: ToolingLog) {
+  log.debug(`[docker:${name}] streaming logs from container [id=${containerId}]`);
+  const logsProc = execa('docker', ['logs', '--follow', containerId], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+
+  const logLine$ = new Rx.Subject<string>();
+
+  Rx.merge(
+    observeLines(logsProc.stdout).pipe(tap(line => log.info(`[docker:${name}] ${line}`))),
+    observeLines(logsProc.stderr).pipe(tap(line => log.error(`[docker:${name}] ${line}`)))
+  ).subscribe(logLine$);
+
+  return logLine$;
+}

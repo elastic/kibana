@@ -17,10 +17,25 @@
  * under the License.
  */
 
-export { Lifecycle } from './lifecycle';
-export { LifecyclePhase } from './lifecycle_phase';
-export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Provider } from './providers';
-export { runTests, setupMocha } from './mocha';
-export { FailureMetadata } from './failure_metadata';
-export * from './docker_servers';
+import * as Rx from 'rxjs';
+
+export interface DockerServiceConfig {
+  portInContainer: number;
+  port: number;
+  image: string;
+  waitForLogLine?: RegExp | string;
+  waitFor?: (server: DockerServer, logLine$: Rx.Observable<string>) => Promise<boolean>;
+}
+
+export interface DockerServer extends DockerServiceConfig {
+  name: string;
+  url: string;
+}
+
+/**
+ * Helper that helps authors use the type definitions for the section of the FTR config
+ * under the `dockerServers` key.
+ */
+export function defineDockerServersConfig(config: { [name: string]: DockerServiceConfig }) {
+  return config;
+}

@@ -29,6 +29,7 @@ import {
   readProviderSpec,
   setupMocha,
   runTests,
+  DockerServersService,
   Config,
 } from './lib';
 
@@ -94,7 +95,16 @@ export class FunctionalTestRunner {
         }));
 
       const providers = new ProviderCollection(this.log, [
-        ...coreProviders,
+        ...coreProviders.map(p =>
+          p.name !== 'dockerServers'
+            ? p
+            : {
+                ...p,
+                fn: () => ({
+                  then: () => {},
+                }),
+              }
+        ),
         ...readStubbedProviderSpec('Service', config.get('services')),
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),
       ]);
@@ -127,12 +137,19 @@ export class FunctionalTestRunner {
         throw new Error('No tests defined.');
       }
 
+      const dockerServers = new DockerServersService(
+        config.get('dockerServers'),
+        this.log,
+        this.lifecycle
+      );
+
       // base level services that functional_test_runner exposes
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => this.lifecycle,
         log: () => this.log,
         failureMetadata: () => this.failureMetadata,
         config: () => config,
+        dockerServers: () => dockerServers,
       });
 
       return await handler(config, coreProviders);

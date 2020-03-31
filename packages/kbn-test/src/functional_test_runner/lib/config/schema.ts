@@ -53,6 +53,17 @@ const appUrlPartsSchema = () =>
     })
     .default();
 
+const dockerServerSchema = () =>
+  Joi.object()
+    .keys({
+      image: Joi.string().required(),
+      port: Joi.number().required(),
+      portInContainer: Joi.number().required(),
+      waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
+      waitFor: Joi.func().optional(),
+    })
+    .default();
+
 const defaultRelativeToConfigPath = (path: string) => {
   const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
   makeDefault.description = `<config.js directory>/${path}`;
@@ -269,6 +280,10 @@ export const schema = Joi.object()
           .default(['superuser']),
         disableTestUser: Joi.boolean(),
       })
+      .default(),
+
+    dockerServers: Joi.object()
+      .pattern(Joi.string(), dockerServerSchema())
       .default(),
   })
   .default();
