@@ -12,7 +12,6 @@ import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
     policyItem: undefined,
-    policyConfig: undefined,
     isLoading: false,
     agentStatusSummary: {
       error: 0,

@@ -102,8 +102,6 @@ export interface PolicyDetailsState {
   policyItem?: PolicyData;
   /** API error if loading data failed */
   apiError?: ServerApiError;
-  /** data is being retrieved from server */
-  policyConfig?: PolicyConfig;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;

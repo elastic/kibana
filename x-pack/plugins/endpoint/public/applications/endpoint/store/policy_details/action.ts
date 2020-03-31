@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyData, PolicyConfig, PolicyDetailsState, ServerApiError } from '../../types';
+import { PolicyData, PolicyDetailsState, ServerApiError, UIPolicyConfig } from '../../types';
 import { GetAgentStatusResponse } from '../../../../../../ingest_manager/common/types/rest_spec';
 
 interface ServerReturnedPolicyDetailsData {
@@ -25,7 +25,7 @@ interface ServerFailedToReturnPolicyDetailsData {
 interface UserChangedPolicyConfig {
   type: 'userChangedPolicyConfig';
   payload: {
-    policyConfig: PolicyConfig;
+    policyConfig: UIPolicyConfig;
   };
 }
 
