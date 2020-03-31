@@ -10,14 +10,7 @@ import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util'
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiTextColor } from '@elastic/eui';
 import { Category } from '../components/legend/category';
 import { BreakedLegend } from './components/breaked_legend';
 
@@ -150,11 +143,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
 
     return (
       <div>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {categories}
-        </EuiFlexGroup>
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
               <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
@@ -164,6 +153,9 @@ export class DynamicIconProperty extends DynamicStyleProperty {
               </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {categories}
         </EuiFlexGroup>
       </div>
     );

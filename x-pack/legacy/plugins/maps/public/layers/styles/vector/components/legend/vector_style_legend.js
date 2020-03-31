@@ -19,7 +19,7 @@ export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId 
   const filtered = rows.filter(row => row !== null);
 
   return filtered.map((row, index) => {
-    const separator = index < filtered.length - 1 ? <EuiSpacer size={'xs'} /> : null;
+    const separator = index < filtered.length - 1 ? <EuiSpacer size={'s'} /> : null;
 
     return (
       <Fragment key={index}>

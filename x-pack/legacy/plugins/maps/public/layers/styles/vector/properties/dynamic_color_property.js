@@ -13,14 +13,7 @@ import {
 } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiTextColor } from '@elastic/eui';
 import { Category } from '../components/legend/category';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
@@ -311,10 +304,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     const categories = [];
     const { stops, defaultColor } = this._getColorStops();
 
-    stops.map(({ stop, color }) => {
+    stops.map(({ stop, color }, index) => {
       categories.push(
         <Category
-          key={stop}
+          key={index}
           styleName={this.getStyleName()}
           label={this.formatField(stop)}
           color={color}
@@ -341,7 +334,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
     return (
       <div>
-        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>

@@ -7,12 +7,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 
 export function RangedStyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fieldLabel }) {
   return (
     <div>
-      <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" title={propertyLabel} content={fieldLabel}>
