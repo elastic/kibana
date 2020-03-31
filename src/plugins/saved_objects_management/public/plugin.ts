@@ -25,8 +25,9 @@ import { DashboardStart } from '../../dashboard/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import {
-  SavedObjectsManagementActionRegistry,
-  ISavedObjectsManagementActionRegistry,
+  SavedObjectsManagementActionService,
+  SavedObjectsManagementActionServiceSetup,
+  SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementServiceRegistry,
   ISavedObjectsManagementServiceRegistry,
 } from './services';
@@ -34,12 +35,13 @@ import { registerManagementSection } from './management_section';
 import { registerServices } from './register_services';
 
 export interface SavedObjectsManagementPluginSetup {
-  actionRegistry: ISavedObjectsManagementActionRegistry;
+  actions: SavedObjectsManagementActionServiceSetup;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsManagementPluginStart {}
+export interface SavedObjectsManagementPluginStart {
+  actions: SavedObjectsManagementActionServiceStart;
+}
 
 export interface SetupDependencies {
   management: ManagementSetup;
@@ -60,7 +62,7 @@ export class SavedObjectsManagementPlugin
       SetupDependencies,
       StartDependencies
     > {
-  private actionRegistry = new SavedObjectsManagementActionRegistry();
+  private actionService = new SavedObjectsManagementActionService();
   private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
   public setup(
@@ -82,6 +84,8 @@ export class SavedObjectsManagementPlugin
       category: FeatureCatalogueCategory.ADMIN,
     });
 
+    const actionSetup = this.actionService.setup();
+
     registerManagementSection({
       core,
       serviceRegistry: this.serviceRegistry,
@@ -92,12 +96,15 @@ export class SavedObjectsManagementPlugin
     registerServices(this.serviceRegistry, core.getStartServices);
 
     return {
-      actionRegistry: this.actionRegistry,
+      actions: actionSetup,
       serviceRegistry: this.serviceRegistry,
     };
   }
 
   public start(core: CoreStart) {
-    return {};
+    const actionStart = this.actionService.start();
+    return {
+      actions: actionStart,
+    };
   }
 }

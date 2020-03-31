@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectsManagementActionRegistry } from './action_registry';
-import { SavedObjectsManagementAction } from './action_types';
+import {
+  SavedObjectsManagementActionService,
+  SavedObjectsManagementActionServiceSetup,
+} from './action_service';
+import { SavedObjectsManagementAction } from './types';
 
 class DummyAction extends SavedObjectsManagementAction {
   constructor(public id: string) {
@@ -36,27 +39,30 @@ class DummyAction extends SavedObjectsManagementAction {
 }
 
 describe('SavedObjectsManagementActionRegistry', () => {
-  let registry: SavedObjectsManagementActionRegistry;
+  let service: SavedObjectsManagementActionService;
+  let setup: SavedObjectsManagementActionServiceSetup;
 
   const createAction = (id: string): SavedObjectsManagementAction => {
     return new DummyAction(id);
   };
 
   beforeEach(() => {
-    registry = new SavedObjectsManagementActionRegistry();
+    service = new SavedObjectsManagementActionService();
+    setup = service.setup();
   });
 
   describe('#register', () => {
     it('allows actions to be registered and retrieved', () => {
       const action = createAction('foo');
-      registry.register(action);
-      expect(registry.getAll()).toContain(action);
+      setup.register(action);
+      const start = service.start();
+      expect(start.getAll()).toContain(action);
     });
 
     it('does not allow actions with duplicate ids to be registered', () => {
       const action = createAction('my-action');
-      registry.register(action);
-      expect(() => registry.register(action)).toThrowErrorMatchingInlineSnapshot(
+      setup.register(action);
+      expect(() => setup.register(action)).toThrowErrorMatchingInlineSnapshot(
         `"Saved Objects Management Action with id 'my-action' already exists"`
       );
     });
@@ -65,12 +71,14 @@ describe('SavedObjectsManagementActionRegistry', () => {
   describe('#has', () => {
     it('returns true when an action with a matching ID exists', () => {
       const action = createAction('existing-action');
-      registry.register(action);
-      expect(registry.has('existing-action')).toEqual(true);
+      setup.register(action);
+      const start = service.start();
+      expect(start.has('existing-action')).toEqual(true);
     });
 
     it(`returns false when an action doesn't exist`, () => {
-      expect(registry.has('missing-action')).toEqual(false);
+      const start = service.start();
+      expect(start.has('missing-action')).toEqual(false);
     });
   });
 });

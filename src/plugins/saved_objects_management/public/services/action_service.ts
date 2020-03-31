@@ -17,36 +17,44 @@
  * under the License.
  */
 
-import { SavedObjectsManagementAction } from './action_types';
+import { SavedObjectsManagementAction } from './types';
 
-export type ISavedObjectsManagementActionRegistry = PublicMethodsOf<
-  SavedObjectsManagementActionRegistry
->;
-
-export class SavedObjectsManagementActionRegistry {
-  private readonly actions = new Map<string, SavedObjectsManagementAction>();
-
+export interface SavedObjectsManagementActionServiceSetup {
   /**
    * register given action in the registry.
    */
-  register(action: SavedObjectsManagementAction) {
-    if (this.actions.has(action.id)) {
-      throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
-    }
-    this.actions.set(action.id, action);
-  }
+  register: (action: SavedObjectsManagementAction) => void;
+}
 
+export interface SavedObjectsManagementActionServiceStart {
   /**
    * return true if the registry contains given action, false otherwise.
    */
-  has(actionId: string) {
-    return this.actions.has(actionId);
-  }
-
+  has: (actionId: string) => boolean;
   /**
    * return all {@link SavedObjectsManagementAction | actions} currently registered.
    */
-  getAll() {
-    return [...this.actions.values()];
+  getAll: () => SavedObjectsManagementAction[];
+}
+
+export class SavedObjectsManagementActionService {
+  private readonly actions = new Map<string, SavedObjectsManagementAction>();
+
+  setup(): SavedObjectsManagementActionServiceSetup {
+    return {
+      register: action => {
+        if (this.actions.has(action.id)) {
+          throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
+        }
+        this.actions.set(action.id, action);
+      },
+    };
+  }
+
+  start(): SavedObjectsManagementActionServiceStart {
+    return {
+      has: actionId => this.actions.has(actionId),
+      getAll: () => [...this.actions.values()],
+    };
   }
 }

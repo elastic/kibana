@@ -22,7 +22,9 @@ import { SavedObjectsManagementPlugin } from './plugin';
 
 export { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
 export {
-  ISavedObjectsManagementActionRegistry,
+  SavedObjectsManagementActionService,
+  SavedObjectsManagementActionServiceSetup,
+  SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
   ISavedObjectsManagementServiceRegistry,
