@@ -622,7 +622,7 @@ export interface ContextSetup {
 export type CoreId = symbol;
 
 // @public
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
@@ -630,7 +630,7 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
-    getStartServices: StartServicesAccessor<TPluginsStart>;
+    getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
@@ -2028,6 +2028,8 @@ export interface SavedObjectsLegacyService {
     // (undocumented)
     getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
     // (undocumented)
+    importAndExportableTypes: string[];
+    // (undocumented)
     importExport: {
         objectLimit: number;
         importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
@@ -2270,7 +2272,7 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 }>;
 
 // @public
-export type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
+export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 // @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
@@ -2348,8 +2350,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:166:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:47:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:228:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:232:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

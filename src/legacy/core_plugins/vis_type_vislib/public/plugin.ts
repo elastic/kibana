@@ -25,7 +25,7 @@ import {
 } from 'kibana/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
@@ -41,7 +41,7 @@ import {
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { setFormatService } from './services';
+import { setFormatService, setDataActions } from './services';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -57,15 +57,13 @@ export interface VisTypeVislibPluginSetupDependencies {
 
 /** @internal */
 export interface VisTypeVislibPluginStartDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
-  visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
 }
 
-type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies>;
+type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
+export class VisTypeVislibPlugin implements Plugin<void, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
@@ -111,7 +109,8 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart, deps: VisTypeVislibPluginStartDependencies) {
-    setFormatService(deps.data.fieldFormats);
+  public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
+    setDataActions({ createFiltersFromEvent: data.actions.createFiltersFromEvent });
   }
 }
