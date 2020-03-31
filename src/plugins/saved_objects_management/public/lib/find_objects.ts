@@ -25,7 +25,7 @@ interface SavedObjectsFindResponse {
   total: number;
   page: number;
   perPage: number;
-  savedObjects: SavedObjectWithMetadata[]; // TODO: this is camelCased, so not exactly the same type...
+  savedObjects: SavedObjectWithMetadata[];
 }
 
 export async function findObjects(
