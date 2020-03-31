@@ -19,8 +19,6 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 const { fail404 } = testCaseFailures;
-const fail400 = (param: string, condition?: boolean): { failure?: 400; fail400Param?: string } =>
-  condition !== false ? { failure: 400, fail400Param: param } : {};
 
 /**
  * Single-namespace test cases
@@ -47,41 +45,20 @@ const createMultiTestCases = () => {
   const nonExistentSpaceId = 'does_not_exist'; // space that doesn't exist
   let id = CASES.DEFAULT_SPACE_ONLY.id;
   const one = [
-    { id, namespaces: [nonExistentSpaceId], ...fail400(nonExistentSpaceId) },
-    {
-      id,
-      namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID],
-      ...fail400(`${SPACE_1_ID},${SPACE_2_ID}`),
-    },
-    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID], ...fail400(SPACE_1_ID) },
-    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_2_ID], ...fail400(SPACE_2_ID) },
-    { id, namespaces: [SPACE_1_ID, SPACE_2_ID], ...fail400(`${SPACE_1_ID},${SPACE_2_ID}`) },
-    { id, namespaces: [DEFAULT_SPACE_ID] },
+    { id, namespaces: [nonExistentSpaceId] },
+    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID] },
     { id, namespaces: [DEFAULT_SPACE_ID], ...fail404() }, // this saved object no longer exists
   ];
   id = CASES.DEFAULT_AND_SPACE_1.id;
   const two = [
-    {
-      id,
-      namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, nonExistentSpaceId],
-      ...fail400(nonExistentSpaceId),
-    },
-    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID], ...fail400(SPACE_2_ID) },
-    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_2_ID], ...fail400(SPACE_2_ID) },
-    { id, namespaces: [SPACE_1_ID, SPACE_2_ID], ...fail400(SPACE_2_ID) },
-    { id, namespaces: [DEFAULT_SPACE_ID] },
+    { id, namespaces: [DEFAULT_SPACE_ID, nonExistentSpaceId] },
     // this saved object will not be found in the context of the current namespace ('default')
     { id, namespaces: [DEFAULT_SPACE_ID], ...fail404() }, // this object's namespaces no longer contains DEFAULT_SPACE_ID
     { id, namespaces: [SPACE_1_ID], ...fail404() }, // this object's namespaces does contain SPACE_1_ID
   ];
   id = CASES.ALL_SPACES.id;
   const three = [
-    {
-      id,
-      namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID, nonExistentSpaceId],
-      ...fail400(nonExistentSpaceId),
-    },
-    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID] },
+    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, nonExistentSpaceId] },
     // this saved object will not be found in the context of the current namespace ('default')
     { id, namespaces: [DEFAULT_SPACE_ID], ...fail404() }, // this object's namespaces no longer contains DEFAULT_SPACE_ID
     { id, namespaces: [SPACE_1_ID], ...fail404() }, // this object's namespaces no longer contains SPACE_1_ID

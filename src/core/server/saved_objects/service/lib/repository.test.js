@@ -379,20 +379,6 @@ describe('SavedObjectsRepository', () => {
         expectClusterCalls('get');
       });
 
-      it(`throws when the document already exists in one or more of the targeted namespaces`, async () => {
-        mockGetResponse(type, id); // this._callCluster('get', ...)
-        const namespaces = [newNs1, currentNs1, newNs2, currentNs2];
-        const existing = [currentNs1, currentNs2].join(', ');
-        await expect(
-          savedObjectsRepository.addNamespaces(type, id, namespaces)
-        ).rejects.toThrowError(
-          createBadRequestError(
-            `${type}:${id} already exists in the following namespace(s): ${existing}`
-          )
-        );
-        expectClusterCalls('get');
-      });
-
       it(`throws when ES is unable to find the document during update`, async () => {
         mockGetResponse(type, id); // this._callCluster('get', ...)
         callAdminCluster.mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
@@ -416,6 +402,11 @@ describe('SavedObjectsRepository', () => {
     describe('returns', () => {
       it(`returns an empty object on success`, async () => {
         const result = await addNamespacesSuccess(type, id, [newNs1, newNs2]);
+        expect(result).toEqual({});
+      });
+
+      it(`succeeds when adding existing namespaces`, async () => {
+        const result = await addNamespacesSuccess(type, id, [currentNs1]);
         expect(result).toEqual({});
       });
     });
@@ -2758,19 +2749,6 @@ describe('SavedObjectsRepository', () => {
         expectClusterCalls('get');
       });
 
-      it(`throws when the document doesn't exist in all of the targeted namespaces`, async () => {
-        mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
-        const missing = [namespace2, namespace3].join(', ');
-        await expect(
-          savedObjectsRepository.removeNamespaces(type, id, [namespace1, namespace2, namespace3])
-        ).rejects.toThrowError(
-          createBadRequestError(
-            `${type}:${id} doesn't exist in the following namespace(s): ${missing}`
-          )
-        );
-        expectClusterCalls('get');
-      });
-
       it(`throws when ES is unable to find the document during delete`, async () => {
         mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
         callAdminCluster.mockResolvedValue({ result: 'not_found' }); // this._writeToCluster('delete', ...)
@@ -2836,6 +2814,13 @@ describe('SavedObjectsRepository', () => {
         };
         await test([namespace2]);
         await test([namespace2, namespace3]);
+      });
+
+      it(`succeeds when the document doesn't exist in all of the targeted namespaces`, async () => {
+        const namespaces = [namespace2];
+        const currentNamespaces = [namespace1];
+        const result = await removeNamespacesSuccess(type, id, namespaces, currentNamespaces);
+        expect(result).toEqual({});
       });
     });
   });

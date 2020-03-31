@@ -24,37 +24,10 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 const { fail404 } = testCaseFailures;
-const fail400 = (param: string, condition?: boolean): { failure?: 400; fail400Param?: string } =>
-  condition !== false ? { failure: 400, fail400Param: param } : {};
 
 const createTestCases = (spaceId: string) => {
-  // Test cases to check removing all three namespaces from different saved objects that exist in two spaces
-  // These are non-exhaustive, they only check some cases that should result in 400 or 404 errors
-  // More permutations are covered in the corresponding spaces_only test suite
-  let namespaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
-  const multipleSpaces = [
-    {
-      id: CASES.DEFAULT_AND_SPACE_1.id,
-      namespaces,
-      ...fail400(SPACE_2_ID, spaceId !== SPACE_2_ID),
-      ...fail404(spaceId === SPACE_2_ID),
-    },
-    {
-      id: CASES.DEFAULT_AND_SPACE_2.id,
-      namespaces,
-      ...fail400(SPACE_1_ID, spaceId !== SPACE_1_ID),
-      ...fail404(spaceId === SPACE_1_ID),
-    },
-    {
-      id: CASES.SPACE_1_AND_SPACE_2.id,
-      namespaces,
-      ...fail400(DEFAULT_SPACE_ID, spaceId !== DEFAULT_SPACE_ID),
-      ...fail404(spaceId === DEFAULT_SPACE_ID),
-    },
-  ] as RemoveNamespacesTestCase[];
-
   // Test cases to check removing the target namespace from different saved objects
-  namespaces = [spaceId];
+  let namespaces = [spaceId];
   const singleSpace = [
     { id: CASES.DEFAULT_SPACE_ONLY.id, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
     { id: CASES.SPACE_1_ONLY.id, namespaces, ...fail404(spaceId !== SPACE_1_ID) },
@@ -66,7 +39,18 @@ const createTestCases = (spaceId: string) => {
     { id: CASES.DOES_NOT_EXIST.id, namespaces, ...fail404() },
   ] as RemoveNamespacesTestCase[];
 
-  const allCases = multipleSpaces.concat(singleSpace);
+  // Test cases to check removing all three namespaces from different saved objects that exist in two spaces
+  // These are non-exhaustive, they only check some cases -- each object will result in a 404, either because
+  // it never existed in the target namespace, or it was removed in one of the test cases above
+  // More permutations are covered in the corresponding spaces_only test suite
+  namespaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
+  const multipleSpaces = [
+    { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces, ...fail404() },
+    { id: CASES.DEFAULT_AND_SPACE_2.id, namespaces, ...fail404() },
+    { id: CASES.SPACE_1_AND_SPACE_2.id, namespaces, ...fail404() },
+  ] as RemoveNamespacesTestCase[];
+
+  const allCases = singleSpace.concat(multipleSpaces);
   return { singleSpace, multipleSpaces, allCases };
 };
 

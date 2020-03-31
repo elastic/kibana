@@ -25,48 +25,17 @@ const {
 const { fail404 } = testCaseFailures;
 
 const createTestCases = (spaceId: string) => {
-  const fail400 = (condition?: boolean): { failure?: 400; fail400Param?: string } =>
-    condition !== false ? { failure: 400, fail400Param: spaceId } : {};
   const namespaces = [spaceId];
+  const allNamespaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
   return [
     // Test cases to check adding the target namespace to different saved objects
-    {
-      ...CASES.DEFAULT_SPACE_ONLY,
-      namespaces,
-      ...fail400(spaceId === DEFAULT_SPACE_ID),
-      ...fail404(spaceId !== DEFAULT_SPACE_ID),
-    },
-    {
-      ...CASES.SPACE_1_ONLY,
-      namespaces,
-      ...fail400(spaceId === SPACE_1_ID),
-      ...fail404(spaceId !== SPACE_1_ID),
-    },
-    {
-      ...CASES.SPACE_2_ONLY,
-      namespaces,
-      ...fail400(spaceId === SPACE_2_ID),
-      ...fail404(spaceId !== SPACE_2_ID),
-    },
-    {
-      ...CASES.DEFAULT_AND_SPACE_1,
-      namespaces,
-      ...fail400(spaceId !== SPACE_2_ID),
-      ...fail404(spaceId === SPACE_2_ID),
-    },
-    {
-      ...CASES.DEFAULT_AND_SPACE_2,
-      namespaces,
-      ...fail400(spaceId !== SPACE_1_ID),
-      ...fail404(spaceId === SPACE_1_ID),
-    },
-    {
-      ...CASES.SPACE_1_AND_SPACE_2,
-      namespaces,
-      ...fail400(spaceId !== DEFAULT_SPACE_ID),
-      ...fail404(spaceId === DEFAULT_SPACE_ID),
-    },
-    { ...CASES.ALL_SPACES, namespaces, ...fail400() },
+    { ...CASES.DEFAULT_SPACE_ONLY, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+    { ...CASES.SPACE_1_ONLY, namespaces, ...fail404(spaceId !== SPACE_1_ID) },
+    { ...CASES.SPACE_2_ONLY, namespaces, ...fail404(spaceId !== SPACE_2_ID) },
+    { ...CASES.DEFAULT_AND_SPACE_1, namespaces, ...fail404(spaceId === SPACE_2_ID) },
+    { ...CASES.DEFAULT_AND_SPACE_2, namespaces, ...fail404(spaceId === SPACE_1_ID) },
+    { ...CASES.SPACE_1_AND_SPACE_2, namespaces, ...fail404(spaceId === DEFAULT_SPACE_ID) },
+    { ...CASES.ALL_SPACES, namespaces },
     { ...CASES.DOES_NOT_EXIST, namespaces, ...fail404() },
     // Test cases to check adding multiple namespaces to different saved objects that exist in one space
     // These are non-exhaustive, they only check cases for adding two additional namespaces to a saved object

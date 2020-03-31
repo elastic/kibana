@@ -947,23 +947,13 @@ export class SavedObjectsRepository {
     const rawId = this._serializer.generateRawId(undefined, type, id);
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
-
-    if (existingNamespaces?.length) {
-      // there should never be a case where a multi-namespace object does not have any existing namespaces
-      // however, it is a possibility if someone manually modifies the document in Elasticsearch
-      const intersection = existingNamespaces.filter(x => namespaces.includes(x));
-      if (intersection.length) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          `${rawId} already exists in the following namespace(s): ${intersection.join(', ')}`
-        );
-      }
-    }
-
+    // there should never be a case where a multi-namespace object does not have any existing namespaces
+    // however, it is a possibility if someone manually modifies the document in Elasticsearch
     const time = this._getCurrentTime();
 
     const doc = {
       updated_at: time,
-      namespaces: existingNamespaces ? existingNamespaces.concat(namespaces) : namespaces,
+      namespaces: existingNamespaces ? unique(existingNamespaces.concat(namespaces)) : namespaces,
     };
 
     const updateResponse = await this._writeToCluster('update', {
@@ -1010,17 +1000,7 @@ export class SavedObjectsRepository {
     const rawId = this._serializer.generateRawId(undefined, type, id);
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
-
-    if (existingNamespaces) {
-      // if there are somehow no existing namespaces, don't treat this as a missing namespace --
-      // instead, allow the operation to proceed and delete this saved object
-      const missing = namespaces.filter(x => !existingNamespaces.includes(x));
-      if (missing.length) {
-        throw SavedObjectsErrorHelpers.createBadRequestError(
-          `${rawId} doesn't exist in the following namespace(s): ${missing.join(', ')}`
-        );
-      }
-    }
+    // if there are somehow no existing namespaces, allow the operation to proceed and delete this saved object
     const remainingNamespaces = existingNamespaces?.filter(x => !namespaces.includes(x));
 
     if (remainingNamespaces?.length) {
@@ -1375,7 +1355,6 @@ export class SavedObjectsRepository {
    * @param types The types whose indices should be retrieved
    */
   private getIndicesForTypes(types: string[]) {
-    const unique = (array: string[]) => [...new Set(array)];
     return unique(types.map(t => this.getIndexForType(t)));
   }
 
@@ -1525,3 +1504,5 @@ function getSavedObjectNamespaces(
   }
   return [getNamespaceString(namespace)];
 }
+
+const unique = (array: string[]) => [...new Set(array)];

@@ -19,8 +19,6 @@ const {
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 const { fail404 } = testCaseFailures;
-const fail400 = (param: string, condition?: boolean): { failure?: 400; fail400Param?: string } =>
-  condition !== false ? { failure: 400, fail400Param: param } : {};
 
 /**
  * Single-namespace test cases
@@ -46,29 +44,11 @@ const createSingleTestCases = (spaceId: string) => {
 const createMultiTestCases = () => {
   const allSpaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
   let id = CASES.DEFAULT_SPACE_ONLY.id;
-  const one = [
-    { id, namespaces: allSpaces, ...fail400(DEFAULT_SPACE_ID) },
-    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID], ...fail400(DEFAULT_SPACE_ID) },
-    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_2_ID], ...fail400(DEFAULT_SPACE_ID) },
-    { id, namespaces: [DEFAULT_SPACE_ID], ...fail400(DEFAULT_SPACE_ID) },
-    { id, namespaces: [SPACE_1_ID, SPACE_2_ID] },
-    { id, namespaces: [SPACE_1_ID, SPACE_2_ID], ...fail400(`${SPACE_1_ID},${SPACE_2_ID}`) }, // already exists in these namespaces
-  ];
+  const one = [{ id, namespaces: allSpaces }];
   id = CASES.DEFAULT_AND_SPACE_1.id;
-  const two = [
-    { id, namespaces: allSpaces, ...fail400(`${DEFAULT_SPACE_ID},${SPACE_1_ID}`) },
-    {
-      id,
-      namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID],
-      ...fail400(`${DEFAULT_SPACE_ID},${SPACE_1_ID}`),
-    },
-    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_2_ID], ...fail400(DEFAULT_SPACE_ID) },
-    { id, namespaces: [SPACE_1_ID, SPACE_2_ID], ...fail400(SPACE_1_ID) },
-    { id, namespaces: [SPACE_2_ID] },
-    { id, namespaces: [SPACE_2_ID], ...fail400(SPACE_2_ID) }, // already exists in this namespace
-  ];
+  const two = [{ id, namespaces: allSpaces }];
   id = CASES.ALL_SPACES.id;
-  const three = [{ id, namespaces: allSpaces, ...fail400(allSpaces.join(',')) }];
+  const three = [{ id, namespaces: allSpaces }];
   return { one, two, three };
 };
 
