@@ -63,7 +63,7 @@ describe('policy details: ', () => {
       }
 
       const newPayload1 = clone(config);
-      newPayload1.windows.eventing.process = true;
+      newPayload1.windows.events.process = true;
 
       dispatch({
         type: 'userChangedPolicyConfig',

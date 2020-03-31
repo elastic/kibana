@@ -27,7 +27,11 @@ export const EventingCheckbox: React.FC<{
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (policyDetailsConfig) {
         const newPayload = clone(policyDetailsConfig);
-        newPayload[os].eventing[protectionField] = event.target.checked;
+        if (os === OS.linux || os === OS.mac) {
+          newPayload[os].events.process = event.target.checked;
+        } else {
+          newPayload[os].events[protectionField] = event.target.checked;
+        }
 
         dispatch({
           type: 'userChangedPolicyConfig',

@@ -65,7 +65,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   (windows, mac, linux) => {
     return {
       windows: {
-        eventing: windows.eventing,
+        events: windows.events,
         malware: windows.malware,
       },
       mac: {
@@ -82,14 +82,14 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
 /** Returns an object of all the windows eventing configuration */
 export const windowsEventing = (state: PolicyDetailsState) => {
   const config = policyConfig(state);
-  return config && config.windows.eventing;
+  return config && config.windows.events;
 };
 
 /** Returns the total number of possible windows eventing configurations */
 export const totalWindowsEventing = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
-    return Object.keys(config.windows.eventing).length;
+    return Object.keys(config.windows.events).length;
   }
   return 0;
 };
@@ -98,7 +98,7 @@ export const totalWindowsEventing = (state: PolicyDetailsState): number => {
 export const selectedWindowsEventing = (state: PolicyDetailsState): number => {
   const config = policyConfig(state);
   if (config) {
-    return Object.values(config.windows.eventing).reduce((count, event) => {
+    return Object.values(config.windows.events).reduce((count, event) => {
       return event === true ? count + 1 : count;
     }, 0);
   }

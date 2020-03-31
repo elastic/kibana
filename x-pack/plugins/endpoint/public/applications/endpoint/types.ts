@@ -119,7 +119,7 @@ export interface PolicyDetailsState {
  */
 export interface PolicyConfig {
   windows: {
-    eventing: {
+    events: {
       process: boolean;
       network: boolean;
     };
@@ -175,7 +175,7 @@ interface PolicyConfigAdvancedOptions {
 /**
  * Windows-specific policy configuration that is supported via the UI
  */
-type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'eventing' | 'malware'>;
+type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
 
 /**
  * Mac-specific policy configuration that is supported via the UI
