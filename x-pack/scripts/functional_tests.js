@@ -27,6 +27,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/oidc_api_integration/implicit_flow.config.ts'),
   require.resolve('../test/pki_api_integration/config.ts'),
   require.resolve('../test/login_selector_api_integration/config.ts'),
+  require.resolve('../test/encrypted_saved_objects_api_integration/config.ts'),
   require.resolve('../test/spaces_api_integration/spaces_only/config.ts'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_trial.ts'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_basic.ts'),
