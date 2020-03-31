@@ -1008,7 +1008,6 @@
     "kbn.dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage": "无法迁移用于“6.1.0”向后兼容的面板数据，面板不包含所需的列和/或行字段",
     "kbn.dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage": "无法迁移用于“6.3.0”向后兼容的面板数据，面板不包含预期字段：{key}",
     "kbn.dashboard.savedDashboard.newDashboardTitle": "新建仪表板",
-    "kbn.dashboard.savedDashboardsTitle": "仪表板",
     "kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage": "时间未随此仪表板保存，因此无法同步。",
     "kbn.dashboard.strings.dashboardEditTitle": "编辑 {title}",
     "kbn.dashboard.strings.dashboardUnsavedEditTitle": "编辑 {title}（未保存）",
