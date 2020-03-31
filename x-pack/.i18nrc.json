@@ -20,7 +20,6 @@
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",
     "xpack.infra": "plugins/infra",
-    "xpack.ingestManager": "plugins/ingest_manager",
     "xpack.lens": "legacy/plugins/lens",
     "xpack.licenseMgmt": "plugins/license_management",
     "xpack.licensing": "plugins/licensing",

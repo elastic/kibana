@@ -115,7 +115,6 @@ export default function({ getService }: FtrProviderContext) {
             'uptime',
             'siem',
             'endpoint',
-            'ingestManager',
           ].sort()
         );
       });
