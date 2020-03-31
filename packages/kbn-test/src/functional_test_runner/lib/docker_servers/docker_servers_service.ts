@@ -37,17 +37,15 @@ export class DockerServersService {
     private log: ToolingLog,
     private lifecycle: Lifecycle
   ) {
-    this.servers = Object.entries(configs).map(([name, config]) => {
-      return {
-        ...config,
-        name,
-        url: Url.format({
-          protocol: 'http:',
-          hostname: 'localhost',
-          port: config.port,
-        }),
-      };
-    });
+    this.servers = Object.entries(configs).map(([name, config]) => ({
+      ...config,
+      name,
+      url: Url.format({
+        protocol: 'http:',
+        hostname: 'localhost',
+        port: config.port,
+      }),
+    }));
 
     this.lifecycle.beforeTests.add(async () => {
       await this.startServers();
@@ -94,6 +92,7 @@ export class DockerServersService {
            3. if one of them lists that it is using port ${server.port} then kill it with \`docker kill "container ID"\`
         `);
       }
+
       throw error;
     }
   }
