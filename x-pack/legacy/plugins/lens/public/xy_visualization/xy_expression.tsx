@@ -213,10 +213,10 @@ export function XYChart({
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
   // add minInterval only for single row value as it cannot be determined from dataset
-  const minInterval =
-    data.tables[layers[0].layerId].rows.length === 1
-      ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
-      : undefined;
+
+  const minInterval = layers.every(layer => data.tables[layer.layerId].rows.length <= 1)
+    ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
+    : undefined;
 
   const xDomain =
     data.dateRange && layers.every(l => l.xScaleType === 'time')
