@@ -303,7 +303,7 @@ export class TimeSeriesExplorer extends React.Component {
       focusAggregationInterval,
       selectedForecastId,
       modelPlotEnabled,
-      entityControls.filter(entity => entity.fieldValue.length > 0),
+      entityControls.filter(entity => entity.fieldValue !== null),
       searchBounds,
       selectedJob,
       TIME_FIELD_NAME
