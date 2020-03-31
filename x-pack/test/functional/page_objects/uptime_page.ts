@@ -151,5 +151,19 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await uptimeService.openPageSizeSelectPopover();
       return uptimeService.clickPageSizeSelectPopoverItem(size);
     }
+
+    public async checkPingListInteractions(
+      timestamps: string[],
+      location?: string,
+      status?: string
+    ): Promise<void> {
+      if (location) {
+        await uptimeService.setPingListLocation(location);
+      }
+      if (status) {
+        await uptimeService.setPingListStatus(status);
+      }
+      return uptimeService.checkForPingListTimestamps(timestamps);
+    }
   })();
 }

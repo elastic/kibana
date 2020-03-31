@@ -34,7 +34,11 @@ interface ExpandedRowMap {
   [key: string]: JSX.Element;
 }
 
-export const AllLocationOption = { text: 'All', value: '' };
+export const AllLocationOption = {
+  'data-test-subj': 'xpack.uptime.pingList.locationOptions.all',
+  text: 'All',
+  value: '',
+};
 
 export const toggleDetails = (
   ping: Ping,
@@ -71,18 +75,21 @@ const DEFAULT_PAGE_SIZE = 10;
 
 const statusOptions = [
   {
+    'data-test-subj': 'xpack.uptime.pingList.statusOptions.all',
     text: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
       defaultMessage: 'All',
     }),
     value: '',
   },
   {
+    'data-test-subj': 'xpack.uptime.pingList.statusOptions.up',
     text: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
       defaultMessage: 'Up',
     }),
     value: 'up',
   },
   {
+    'data-test-subj': 'xpack.uptime.pingList.statusOptions.down',
     text: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
       defaultMessage: 'Down',
     }),
@@ -122,9 +129,11 @@ export const PingListComponent = (props: Props) => {
   const locationOptions = !locations
     ? [AllLocationOption]
     : [AllLocationOption].concat(
-        locations.map(name => {
-          return { text: name, value: name };
-        })
+        locations.map(name => ({
+          text: name,
+          'data-test-subj': `xpack.uptime.pingList.locationOptions.${name}`,
+          value: name,
+        }))
       );
 
   const hasStatus: boolean = pings.reduce(
@@ -140,7 +149,7 @@ export const PingListComponent = (props: Props) => {
         defaultMessage: 'Status',
       }),
       render: (pingStatus: string, item: Ping) => (
-        <div>
+        <div data-test-subj={`xpack.uptime.pingList.ping-${item['@timestamp']}`}>
           <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
             {pingStatus === 'up'
               ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
@@ -274,6 +283,7 @@ export const PingListComponent = (props: Props) => {
               aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
                 defaultMessage: 'Status',
               })}
+              data-test-subj="xpack.uptime.pingList.statusSelect"
               value={status}
               onChange={selected => {
                 setStatus(selected.target.value);
@@ -294,6 +304,7 @@ export const PingListComponent = (props: Props) => {
               aria-label={i18n.translate('xpack.uptime.pingList.locationLabel', {
                 defaultMessage: 'Location',
               })}
+              data-test-subj="xpack.uptime.pingList.locationSelect"
               onChange={selected => {
                 setSelectedLocation(selected.target.value);
               }}

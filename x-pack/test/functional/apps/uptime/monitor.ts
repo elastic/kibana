@@ -25,5 +25,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '0000-intermittent'
       );
     });
+
+    it('displays ping data as expected', async () => {
+      await pageObjects.uptime.loadDataAndGoToMonitorPage(
+        'Sep 10, 2019 @ 12:40:08.078',
+        'Sep 11, 2019 @ 19:40:08.078',
+        '0000-intermittent'
+      );
+      await pageObjects.uptime.checkPingListInteractions(
+        [
+          '2019-09-11T03:40:34.371Z',
+          '2019-09-11T03:40:04.370Z',
+          '2019-09-11T03:39:34.370Z',
+          '2019-09-11T03:39:04.370Z',
+          '2019-09-11T03:38:34.370Z',
+          '2019-09-11T03:38:04.370Z',
+          '2019-09-11T03:37:34.370Z',
+          '2019-09-11T03:37:04.371Z',
+          '2019-09-11T03:36:34.370Z',
+          '2019-09-11T03:36:04.370Z',
+        ],
+        'mpls',
+        'up'
+      );
+    });
   });
 };
