@@ -5784,8 +5784,6 @@
     "xpack.grokDebugger.displayName": "Grok Debugger",
     "xpack.grokDebugger.grokPatternLabel": "Grok 模式",
     "xpack.grokDebugger.patternsErrorMessage": "提供的 {grokLogParsingTool} 模式不匹配输入中的数据",
-    "xpack.grokDebugger.registryProviderDescription": "采集时模拟和调试用于数据转换的 {grokLogParsingTool} 模式。",
-    "xpack.grokDebugger.registryProviderTitle": "{grokLogParsingTool} Debugger",
     "xpack.grokDebugger.sampleDataLabel": "样例数据",
     "xpack.grokDebugger.simulateButtonLabel": "模拟",
     "xpack.grokDebugger.structuredDataLabel": "结构化数据",

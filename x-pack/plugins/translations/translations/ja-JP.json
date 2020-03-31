@@ -5784,8 +5784,6 @@
     "xpack.grokDebugger.displayName": "Grok デバッガー",
     "xpack.grokDebugger.grokPatternLabel": "Grok パターン",
     "xpack.grokDebugger.patternsErrorMessage": "提供された {grokLogParsingTool} パターンがインプットのデータと一致していません",
-    "xpack.grokDebugger.registryProviderDescription": "{grokLogParsingTool} パターンを、投入時にデータ変換用にシミュレートしデバッグします。",
-    "xpack.grokDebugger.registryProviderTitle": "{grokLogParsingTool} デバッガー",
     "xpack.grokDebugger.sampleDataLabel": "サンプルデータ",
     "xpack.grokDebugger.simulateButtonLabel": "シミュレート",
     "xpack.grokDebugger.structuredDataLabel": "構造化データ",

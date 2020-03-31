@@ -23,7 +23,7 @@ export const InactiveLicenseSlate = () => {
     defaultMessage: 'register a license',
   });
 
-  const trialLicense = i18n.translate('xpack.grokdDebugger.trialLicenseTitle', {
+  const trialLicense = i18n.translate('xpack.grokDebugger.trialLicenseTitle', {
     defaultMessage: 'Trial',
   });
 
