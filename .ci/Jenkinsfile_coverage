@@ -44,7 +44,7 @@ kibanaPipeline(timeoutMinutes: 180) {
           'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
         ]),
       ])
-      workers.base(name: 'coverage-worker', label: workers.labelL, ramDisk: false, bootstrapped: false) {
+      workers.base(name: 'coverage-worker', label: workers.label('l'), ramDisk: false, bootstrapped: false) {
         kibanaPipeline.downloadCoverageArtifacts()
         kibanaPipeline.bash(
           '''

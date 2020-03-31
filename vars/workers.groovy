@@ -1,16 +1,26 @@
 // "Workers" in this file will spin up an instance, do some setup etc depending on the configuration, and then execute some work that you define
 // e.g. workers.base(name: 'my-worker') { sh "echo 'ready to execute some kibana scripts'" }
 
-def labelS = 'ubuntu-18.04 && immutable'
-def labelL = 'ubuntu-tests-l'
-def labelXL = 'ubuntu-18-tests-xl'
-def labelXXL = 'ubuntu-18-tests-xxl'
+def label(size) {
+  switch(size) {
+    case 's':
+      return 'ubuntu-18.04 && immutable'
+    case 'l':
+      return 'ubuntu-tests-l'
+    case 'xl':
+      return 'ubuntu-18-tests-xl'
+    case 'xxl':
+      return 'ubuntu-18-tests-xxl'
+  }
+
+  error "unknown size '${size}'"
+}
 
 /*
   The base worker that all of the others use. Will clone the scm (assumed to be kibana), and run kibana bootstrap processes by default.
 
   Parameters:
-    label - gobld/agent label to use, e.g. workers.labelS (or just labelS in this file)
+    label - gobld/agent label to use, e.g. workers.label('s') (or just label('s') in this file)
     ramDisk - Should the workspace be mounted in memory? Default: true
     bootstrapped - If true, download kibana dependencies, run kbn bootstrap, etc. Default: true
     name - Name of the worker for display purposes, filenames, etc.
@@ -19,7 +29,7 @@ def labelXXL = 'ubuntu-18-tests-xxl'
 def base(Map params, Closure closure) {
   def config = [label: '', ramDisk: true, bootstrapped: true, name: 'unnamed-worker', scm: scm] + params
   if (!config.label) {
-    error "You must specify an agent label, such as workers.labelXL or workers.labelS, when using workers.base()"
+    error "You must specify an agent label, such as workers.label('xl') or workers.label('s'), when using workers.base()"
   }
 
   node(config.label) {
@@ -93,7 +103,7 @@ def ci(Map params, Closure closure) {
 // Worker for running the current intake jobs. Just runs a single script after bootstrap.
 def intake(jobName, String script) {
   return {
-    ci(name: jobName, label: workers.labelS, ramDisk: false) {
+    ci(name: jobName, label: label('s'), ramDisk: false) {
       withEnv(["JOB=${jobName}"]) {
         runbld(script, "Execute ${jobName}")
       }
@@ -104,7 +114,7 @@ def intake(jobName, String script) {
 // Worker for running functional tests. Runs a setup process (e.g. the kibana build) then executes a map of closures in parallel (e.g. one for each ciGroup)
 def functional(name, Closure setup, Map processes) {
   return {
-    parallelProcesses(name: name, setup: setup, processes: processes, delayBetweenProcesses: 20, label: labelXL)
+    parallelProcesses(name: name, setup: setup, processes: processes, delayBetweenProcesses: 20, label: label('xl'))
   }
 }
 
@@ -116,10 +126,10 @@ def functional(name, Closure setup, Map processes) {
     setup: Closure to execute after the agent is bootstrapped, before starting the parallel work
     processes: Map of closures that will execute in parallel after setup. Each closure is passed a unique number.
     delayBetweenProcesses: Number of seconds to wait between starting the parallel processes. Useful to spread the load of heavy init processes, e.g. Elasticsearch starting up. Default: 0
-    label: gobld/agent label to use, e.g. workers.labelS. Default: workers.labelXL, a 32 CPU machine used for running many functional test suites in parallel
+    label: gobld/agent label to use, e.g. workers.label('s'). Default: workers.label('xl'), a 32 CPU machine used for running many functional test suites in parallel
 */
 def parallelProcesses(Map params) {
-  def config = [name: 'parallel-worker', setup: {}, processes: [:], delayBetweenProcesses: 0, label: labelXL] + params
+  def config = [name: 'parallel-worker', setup: {}, processes: [:], delayBetweenProcesses: 0, label: label('xl')] + params
 
   ci(label: config.label, name: config.name) {
     config.setup()
