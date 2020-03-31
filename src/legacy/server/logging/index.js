@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import good from '@hapi/good';
+import good from '@elastic/good';
 import loggingConfiguration from './configuration';
 import { logWithMetadata } from './log_with_metadata';
 import { setupLoggingRotate } from './rotate';
