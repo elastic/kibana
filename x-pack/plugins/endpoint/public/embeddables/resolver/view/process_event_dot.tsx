@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
@@ -15,6 +16,7 @@ import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../../common/models/event';
 import * as processModel from '../models/process_event';
+import * as selectors from '../store/selectors';
 
 const nodeAssets = {
   runningProcessCube: {
@@ -93,6 +95,8 @@ export const ProcessEventDot = styled(
 
       const selfId = adjacentNodeMap?.self;
 
+      const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+
       const nodeViewportStyle = useMemo(
         () => ({
           left: `${left}px`,
@@ -139,6 +143,10 @@ export const ProcessEventDot = styled(
         resolverNodeIdGenerator(),
       ] as string[];
 
+      const isActiveDescendant = useMemo(() => {
+        return nodeId === activeDescendantId;
+      }, [activeDescendantId, nodeId]);
+
       const dispatch = useResolverDispatch();
 
       const handleFocus = useCallback(
@@ -176,6 +184,7 @@ export const ProcessEventDot = styled(
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
+            aria-selected={isActiveDescendant ? 'true' : undefined}
             style={nodeViewportStyle}
             id={nodeId}
             onClick={handleClick}

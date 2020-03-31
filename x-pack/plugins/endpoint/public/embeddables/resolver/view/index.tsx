@@ -66,6 +66,7 @@ export const Resolver = styled(
         payload: { selectedEvent },
       });
     }, [dispatch, selectedEvent]);
+
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
         {isLoading ? (
@@ -88,15 +89,17 @@ export const Resolver = styled(
                 projectionMatrix={projectionMatrix}
               />
             ))}
-            {Array.from(processNodePositions).map(([processEvent, position], index) => (
-              <ProcessEventDot
-                key={index}
-                position={position}
-                projectionMatrix={projectionMatrix}
-                event={processEvent}
-                adjacentNodeMap={processToAdjacencyMap.get(processEvent)}
-              />
-            ))}
+            {Array.from(processNodePositions).map(([processEvent, position], index) => {
+              return (
+                <ProcessEventDot
+                  key={index}
+                  position={position}
+                  projectionMatrix={projectionMatrix}
+                  event={processEvent}
+                  adjacentNodeMap={processToAdjacencyMap.get(processEvent)}
+                />
+              );
+            })}
           </StyledResolverContainer>
         )}
         <StyledPanel />
