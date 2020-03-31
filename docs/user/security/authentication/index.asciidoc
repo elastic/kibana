@@ -104,7 +104,7 @@ xpack.security.authc.providers:
 NOTE: Trusted CAs can also be specified in a PKCS #12 keystore bundled with your {kib} server certificate/key using
 `server.ssl.keystore.path` or in a separate trust store using `server.ssl.truststore.path`.
 
-PKI support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both PKI and basic authentication for the same {kib} instance:
+You can also configure both PKI and basic authentication for the same {kib} instance:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ xpack.security.authc.providers:
 [float]
 ===== SAML and basic authentication
 
-SAML support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both SAML and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+You can also configure both SAML and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -224,7 +224,7 @@ xpack.security.authc.providers:
 [float]
 ===== OpenID Connect and basic authentication
 
-Similar to SAML, OpenID Connect support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both OpenID Connect and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+You can also configure both OpenID Connect and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
 
 [source,yaml]
 --------------------------------------------------------------------------------
