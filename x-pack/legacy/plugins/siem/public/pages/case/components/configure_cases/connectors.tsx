@@ -48,7 +48,9 @@ const ConnectorsComponent: React.FC<Props> = ({
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink onClick={handleShowAddFlyout}>{i18n.ADD_NEW_CONNECTOR}</EuiLink>
+        <EuiLink disabled={disabled} onClick={handleShowAddFlyout}>
+          {i18n.ADD_NEW_CONNECTOR}
+        </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
