@@ -31,6 +31,7 @@ const initialCommentValue: CommentRequest = {
 
 interface AddCommentProps {
   caseId: string;
+  disabled?: boolean;
   insertQuote: string | null;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
@@ -38,7 +39,7 @@ interface AddCommentProps {
 }
 
 export const AddComment = React.memo<AddCommentProps>(
-  ({ caseId, insertQuote, showLoading = true, onCommentPosted, onCommentSaving }) => {
+  ({ caseId, disabled, insertQuote, showLoading = true, onCommentPosted, onCommentSaving }) => {
     const { isLoading, postComment } = usePostComment(caseId);
     const { form } = useForm<CommentRequest>({
       defaultValue: initialCommentValue,
@@ -87,7 +88,7 @@ export const AddComment = React.memo<AddCommentProps>(
               bottomRightContent: (
                 <EuiButton
                   iconType="plusInCircle"
-                  isDisabled={isLoading}
+                  isDisabled={isLoading || disabled}
                   isLoading={isLoading}
                   onClick={onSubmit}
                   size="s"

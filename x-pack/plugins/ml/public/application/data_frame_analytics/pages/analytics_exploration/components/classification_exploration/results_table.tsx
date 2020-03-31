@@ -86,7 +86,7 @@ const showingFirstDocs = i18n.translate(
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus: DATA_FRAME_TASK_STATE;
+  jobStatus?: DATA_FRAME_TASK_STATE;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
 }
 
@@ -381,9 +381,11 @@ export const ResultsTable: FC<Props> = React.memo(
             <EuiFlexItem grow={false}>
               <ExplorationTitle jobId={jobConfig.id} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{getTaskStateBadge(jobStatus)}</span>
-            </EuiFlexItem>
+            {jobStatus !== undefined && (
+              <EuiFlexItem grow={false}>
+                <span>{getTaskStateBadge(jobStatus)}</span>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiCallOut
             title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.indexError', {
@@ -415,9 +417,11 @@ export const ResultsTable: FC<Props> = React.memo(
               <EuiFlexItem grow={false}>
                 <ExplorationTitle jobId={jobConfig.id} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span>{getTaskStateBadge(jobStatus)}</span>
-              </EuiFlexItem>
+              {jobStatus !== undefined && (
+                <EuiFlexItem grow={false}>
+                  <span>{getTaskStateBadge(jobStatus)}</span>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
