@@ -26,15 +26,16 @@ exports[`PageView component should display body header custom element 1`] = `
       body header
     </p>
   }
+  viewType="list"
 >
   <Styled(EuiPage)
-    className="endpoint--isDetailsView"
+    className="endpoint--isListView"
   >
     <EuiPage
-      className="c0 endpoint--isDetailsView"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0 endpoint--isDetailsView"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -111,15 +112,16 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
 
 <Memo()
   bodyHeader="body header"
+  viewType="list"
 >
   <Styled(EuiPage)
-    className="endpoint--isDetailsView"
+    className="endpoint--isListView"
   >
     <EuiPage
-      className="c0 endpoint--isDetailsView"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0 endpoint--isDetailsView"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -204,15 +206,16 @@ exports[`PageView component should display header left and right 1`] = `
 <Memo()
   headerLeft="page title"
   headerRight="right side actions"
+  viewType="list"
 >
   <Styled(EuiPage)
-    className="endpoint--isDetailsView"
+    className="endpoint--isListView"
   >
     <EuiPage
-      className="c0 endpoint--isDetailsView"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0 endpoint--isDetailsView"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -308,15 +311,17 @@ exports[`PageView component should display only body if not header props used 1`
   background: none;
 }
 
-<Memo()>
+<Memo()
+  viewType="list"
+>
   <Styled(EuiPage)
-    className="endpoint--isDetailsView"
+    className="endpoint--isListView"
   >
     <EuiPage
-      className="c0 endpoint--isDetailsView"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0 endpoint--isDetailsView"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -375,15 +380,16 @@ exports[`PageView component should display only header left 1`] = `
 
 <Memo()
   headerLeft="page title"
+  viewType="list"
 >
   <Styled(EuiPage)
-    className="endpoint--isDetailsView"
+    className="endpoint--isListView"
   >
     <EuiPage
-      className="c0 endpoint--isDetailsView"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0 endpoint--isDetailsView"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -471,15 +477,16 @@ exports[`PageView component should display only header right but include an empt
 
 <Memo()
   headerRight="right side actions"
+  viewType="list"
 >
   <Styled(EuiPage)
-    className="endpoint--isDetailsView"
+    className="endpoint--isListView"
   >
     <EuiPage
-      className="c0 endpoint--isDetailsView"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0 endpoint--isDetailsView"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -567,6 +574,7 @@ exports[`PageView component should pass through EuiPage props 1`] = `
   className="test-class-name-here"
   data-test-subj="test-data-test-subj-here"
   restrictWidth="1000"
+  viewType="list"
 >
   <Styled(EuiPage)
     aria-label="test-aria-label-here"
@@ -651,15 +659,16 @@ exports[`PageView component should use custom element for header left and not wr
       title here
     </p>
   }
+  viewType="list"
 >
   <Styled(EuiPage)
-    className="endpoint--isDetailsView"
+    className="endpoint--isListView"
   >
     <EuiPage
-      className="c0 endpoint--isDetailsView"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0 endpoint--isDetailsView"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main

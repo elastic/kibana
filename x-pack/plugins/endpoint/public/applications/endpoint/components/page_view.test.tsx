@@ -14,42 +14,67 @@ describe('PageView component', () => {
     mount(ui, { wrappingComponent: EuiThemeProvider });
 
   it('should display only body if not header props used', () => {
-    expect(render(<PageView>body content</PageView>)).toMatchSnapshot();
+    expect(render(<PageView viewType="list">body content</PageView>)).toMatchSnapshot();
   });
   it('should display header left and right', () => {
     expect(
       render(
-        <PageView headerLeft="page title" headerRight="right side actions">
+        <PageView viewType="list" headerLeft="page title" headerRight="right side actions">
           body content
         </PageView>
       )
     ).toMatchSnapshot();
   });
   it('should display only header left', () => {
-    expect(render(<PageView headerLeft="page title">body content</PageView>)).toMatchSnapshot();
+    expect(
+      render(
+        <PageView viewType="list" headerLeft="page title">
+          body content
+        </PageView>
+      )
+    ).toMatchSnapshot();
   });
   it('should display only header right but include an empty left side', () => {
     expect(
-      render(<PageView headerRight="right side actions">body content</PageView>)
+      render(
+        <PageView viewType="list" headerRight="right side actions">
+          body content
+        </PageView>
+      )
     ).toMatchSnapshot();
   });
   it(`should use custom element for header left and not wrap in EuiTitle`, () => {
     expect(
-      render(<PageView headerLeft={<p>title here</p>}>body content</PageView>)
+      render(
+        <PageView viewType="list" headerLeft={<p>title here</p>}>
+          body content
+        </PageView>
+      )
     ).toMatchSnapshot();
   });
   it('should display body header wrapped in EuiTitle', () => {
-    expect(render(<PageView bodyHeader="body header">body content</PageView>)).toMatchSnapshot();
+    expect(
+      render(
+        <PageView viewType="list" bodyHeader="body header">
+          body content
+        </PageView>
+      )
+    ).toMatchSnapshot();
   });
   it('should display body header custom element', () => {
     expect(
-      render(<PageView bodyHeader={<p>body header</p>}>body content</PageView>)
+      render(
+        <PageView viewType="list" bodyHeader={<p>body header</p>}>
+          body content
+        </PageView>
+      )
     ).toMatchSnapshot();
   });
   it('should pass through EuiPage props', () => {
     expect(
       render(
         <PageView
+          viewType="list"
           restrictWidth="1000"
           className="test-class-name-here"
           aria-label="test-aria-label-here"

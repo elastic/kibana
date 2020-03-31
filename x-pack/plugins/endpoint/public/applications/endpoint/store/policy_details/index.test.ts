@@ -9,6 +9,7 @@ import { createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction } from './index';
 import { policyConfig, windowsEventing } from './selectors';
 import { clone } from '../../models/policy_details_config';
+import { generatePolicy } from '../../models/policy';
 
 describe('policy details: ', () => {
   let store: Store<PolicyDetailsState>;
@@ -30,7 +31,18 @@ describe('policy details: ', () => {
           config_id: '',
           enabled: true,
           output_id: '',
-          inputs: [],
+          inputs: [
+            {
+              type: 'endpoint',
+              enabled: true,
+              streams: [],
+              config: {
+                policy: {
+                  value: generatePolicy(),
+                },
+              },
+            },
+          ],
           namespace: '',
           package: {
             name: '',
@@ -38,32 +50,6 @@ describe('policy details: ', () => {
             version: '',
           },
           revision: 1,
-        },
-        policyConfig: {
-          windows: {
-            malware: {
-              mode: 'detect',
-            },
-            eventing: {
-              process: false,
-              network: false,
-            },
-          },
-          mac: {
-            malware: {
-              mode: '',
-            },
-            eventing: {
-              process: false,
-              network: false,
-            },
-          },
-          linux: {
-            eventing: {
-              process: false,
-              network: false,
-            },
-          },
         },
       },
     });
