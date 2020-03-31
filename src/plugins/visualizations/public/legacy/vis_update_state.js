@@ -18,6 +18,15 @@
  */
 
 import _ from 'lodash';
+import {
+  AxisModes,
+  AxisTypes,
+  Positions,
+  ScaleTypes,
+} from '../../../../legacy/core_plugins/vis_type_vislib/public/utils/collections';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Rotates } from '../../../charts/public/static/components';
+import { countLabel } from '../../../../legacy/core_plugins/vis_type_vislib/public/utils/common_config';
 
 /**
  * Will figure out if an heatmap state was saved before the auto coloring
@@ -75,6 +84,77 @@ function convertDateHistogramScaleMetrics(visState) {
   }
 }
 
+function convertSeriesParams(visState) {
+  if (visState.params.seriesParams) {
+    return;
+  }
+
+  // update value axis options
+  const isUserDefinedYAxis = visState.params.setYExtents;
+  const defaultYExtents = visState.params.defaultYExtents;
+  const mode = ['stacked', 'overlap'].includes(visState.params.mode)
+    ? 'normal'
+    : visState.params.mode || 'normal';
+
+  if (!visState.params.valueAxes || !visState.params.valueAxes.length) {
+    visState.params.valueAxes = [
+      {
+        id: 'ValueAxis-1',
+        name: 'LeftAxis-1',
+        type: AxisTypes.VALUE,
+        position: Positions.LEFT,
+        show: true,
+        style: {},
+        scale: {
+          type: ScaleTypes.LINEAR,
+          mode: AxisModes.NORMAL,
+        },
+        labels: {
+          show: true,
+          rotate: Rotates.HORIZONTAL,
+          filter: false,
+          truncate: 100,
+        },
+        title: {
+          text: countLabel,
+        },
+      },
+    ];
+  }
+
+  visState.params.valueAxes[0].scale = {
+    ...visState.params.valueAxes[0].scale,
+    type: visState.params.scale || 'linear',
+    setYExtents: visState.params.setYExtents || false,
+    defaultYExtents: visState.params.defaultYExtents || false,
+    boundsMargin: defaultYExtents ? visState.params.boundsMargin : 0,
+    min: isUserDefinedYAxis ? visState.params.yAxis.min : undefined,
+    max: isUserDefinedYAxis ? visState.params.yAxis.max : undefined,
+    mode: mode,
+  };
+
+  // update series options
+  const interpolate = visState.params.smoothLines ? 'cardinal' : visState.params.interpolate;
+  const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(visState.params.mode);
+  visState.params.seriesParams = [
+    {
+      show: true,
+      type: visState.params.type || 'line',
+      mode: stacked ? 'stacked' : 'normal',
+      interpolate: interpolate,
+      drawLinesBetweenPoints: visState.params.drawLinesBetweenPoints,
+      showCircles: visState.params.showCircles,
+      radiusRatio: visState.params.radiusRatio,
+      data: {
+        label: countLabel,
+        id: '1',
+      },
+      lineWidth: 2,
+      valueAxis: 'ValueAxis-1',
+    },
+  ];
+}
+
 /**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
@@ -89,6 +169,10 @@ export const updateOldState = visState => {
   convertTermAggregation(newState);
   convertPropertyNames(newState);
   convertDateHistogramScaleMetrics(newState);
+
+  if (visState.params && ['line', 'area', 'histogram'].includes(visState.params.type)) {
+    convertSeriesParams(newState);
+  }
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;
