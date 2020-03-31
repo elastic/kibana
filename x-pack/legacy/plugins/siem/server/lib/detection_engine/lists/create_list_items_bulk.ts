@@ -4,32 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkResponse,
-} from '../../../../../../../../src/core/server';
-import { SiemListItemSchema } from '../routes/schemas/saved_objects/siem_list_item_schema';
+import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 
 export const createListItemsBulk = async ({
   listId,
   ips,
-  savedObjectsClient,
+  clusterClient,
+  listsItemsIndex,
 }: {
   listId: string;
   ips: string[] | undefined;
-  savedObjectsClient: SavedObjectsClientContract;
-}): Promise<SavedObjectsBulkResponse<SiemListItemSchema> | null> => {
-  if (ips == null) {
-    return null;
+  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+  listsItemsIndex: string;
+}): Promise<void> => {
+  if (ips == null || !ips.length) {
+    return;
   }
-  const bulk: Array<SavedObjectsBulkCreateObject<SiemListItemSchema>> = ips.map(ip => ({
-    type: 'siem_list_item',
-    attributes: {
-      list_id: listId,
-      ip,
-      created_at: new Date().toISOString(),
-    },
-  }));
-  return savedObjectsClient.bulkCreate<SiemListItemSchema>(bulk);
+  const createdAt = new Date().toISOString();
+
+  const data = ips.reduce<Array<{}>>((accum, ip) => {
+    return [
+      ...accum,
+      { create: { _index: listsItemsIndex } },
+      { list_id: listId, ip, created_at: createdAt },
+    ];
+  }, []);
+
+  await clusterClient.callAsCurrentUser('bulk', {
+    body: data,
+    index: listsItemsIndex,
+  });
 };

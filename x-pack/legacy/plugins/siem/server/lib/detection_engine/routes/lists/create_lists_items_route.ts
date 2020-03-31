@@ -7,44 +7,61 @@
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_ITEM_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
-import { listsItemsSchema, ListsItemsSchema } from '../schemas/request/lists_items_schema';
+import {
+  createListsItemsSchema,
+  CreateListsItemsSchema,
+} from '../schemas/request/create_lists_items_schema';
 import { createListItem } from '../../lists/create_list_item';
-import { getListByListId } from '../../lists/get_list_by_list_id';
-import { getListItemByListId } from '../../lists/get_list_item_by_list_id';
+import { getList } from '../../lists/get_list';
+import { getListItemByValue } from '../../lists/get_list_item_by_value';
 
 export const createListsItemsRoute = (router: IRouter): void => {
   router.post(
     {
       path: DETECTION_ENGINE_LIST_ITEM_URL,
       validate: {
-        body: buildRouteValidationIoTS<ListsItemsSchema>(listsItemsSchema),
+        body: buildRouteValidationIoTS<CreateListsItemsSchema>(createListsItemsSchema),
       },
       options: {
         tags: ['access:siem'],
       },
     },
     async (context, request, response) => {
-      const { list_id: listId, ip } = request.body;
       const siemResponse = buildSiemResponse(response);
       try {
-        const savedObjectsClient = context.core.savedObjects.client;
-        const savedList = await getListByListId({ listId, savedObjectsClient });
-        if (savedList == null) {
+        const { id, list_id: listId, ip } = request.body;
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
+        const { listsIndex, listsItemsIndex } = siemClient;
+        const list = await getList({ id: listId, clusterClient, listsIndex });
+        if (list == null) {
           return siemResponse.error({
             statusCode: 404,
-            body: `list_id: "${listId}" does not exist`,
+            body: `list id: "${listId}" does not exist`,
           });
         } else {
-          const savedListItem = await getListItemByListId({ listId, ip, savedObjectsClient });
-          if (savedListItem != null) {
+          const listItem = await getListItemByValue({
+            listId,
+            ip,
+            clusterClient,
+            listsItemsIndex,
+          });
+          if (listItem != null) {
             return siemResponse.error({
               statusCode: 409,
-              body: `list_id: "${listId}" already contains list value`,
+              // TODO: Improve this error message by providing which list value
+              body: `list_id: "${listId}" already contains the given list value`,
             });
           } else {
-            const listItem = await createListItem({ listId, ip, savedObjectsClient });
+            const createdListItem = await createListItem({
+              id,
+              listId,
+              ip,
+              clusterClient,
+              listsItemsIndex,
+            });
             // TODO: Transform and return this result set
-            return response.ok({ body: listItem });
+            return response.ok({ body: createdListItem });
           }
         }
       } catch (err) {

@@ -7,16 +7,17 @@
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
-import { createListsSchema, CreateListsSchema } from '../schemas/request/create_lists_schema';
-import { createList } from '../../lists/create_list';
-import { getList } from '../../lists/get_list';
+import { deleteListsSchema, DeleteListsSchema } from '../schemas/request/delete_lists_schema';
+import { deleteList } from '../../lists/delete_list';
 
-export const createListsRoute = (router: IRouter): void => {
-  router.post(
+// TODO: Have you added a specific deleteListsItemsRoute to delete a list item one at a time?
+
+export const deleteListsRoute = (router: IRouter): void => {
+  router.delete(
     {
       path: DETECTION_ENGINE_LIST_URL,
       validate: {
-        body: buildRouteValidationIoTS<CreateListsSchema>(createListsSchema),
+        query: buildRouteValidationIoTS<DeleteListsSchema>(deleteListsSchema),
       },
       options: {
         tags: ['access:siem'],
@@ -25,22 +26,20 @@ export const createListsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, description, id } = request.body;
+        const { id } = request.query;
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem.getSiemClient();
-        const listsIndex = siemClient.listsIndex;
-        if (id != null) {
-          const list = await getList({ id, clusterClient, listsIndex });
-          if (list != null) {
-            return siemResponse.error({
-              statusCode: 409,
-              body: `list id: "${id}" already exists`,
-            });
-          }
+        const { listsIndex, listsItemsIndex } = siemClient;
+        const deleted = await deleteList({ id, clusterClient, listsIndex, listsItemsIndex });
+        if (deleted == null) {
+          return siemResponse.error({
+            statusCode: 404,
+            body: `list_id: "${id}" not found`,
+          });
+        } else {
+          // TODO: outbound validation
+          return response.ok({ body: deleted });
         }
-        const list = await createList({ name, description, id, clusterClient, listsIndex });
-        // TODO: outbound validation
-        return response.ok({ body: list });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

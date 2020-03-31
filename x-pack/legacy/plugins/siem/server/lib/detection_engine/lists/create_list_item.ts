@@ -4,22 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObject } from '../../../../../../../../src/core/server';
-import { SiemListItemSchema } from '../routes/schemas/saved_objects/siem_list_item_schema';
+import { ScopedClusterClient } from '../../../../../../../../src/core/server';
+import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
+import { CreateResponse } from '../../types';
 
 export const createListItem = async ({
   listId,
   ip,
-  savedObjectsClient,
+  id,
+  clusterClient,
+  listsItemsIndex,
 }: {
   listId: string;
+  id: string | undefined;
   ip: string | undefined;
-  savedObjectsClient: SavedObjectsClientContract;
-}): Promise<SavedObject<SiemListItemSchema>> => {
+  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+  listsItemsIndex: string;
+}): Promise<ListsItemsSchema> => {
   // TODO: Do something with the undefined ip above?
-  return savedObjectsClient.create<SiemListItemSchema>('siem_list_item', {
+  const createdAt = new Date().toISOString();
+  const response: CreateResponse = await clusterClient.callAsCurrentUser('index', {
+    index: listsItemsIndex,
+    id,
+    body: { list_id: listId, ip, created_at: createdAt },
+  });
+  return {
+    id: response._id,
     ip,
     list_id: listId,
-    created_at: new Date().toISOString(),
-  });
+    created_at: createdAt,
+    // TODO: Add the rest of the elements
+  };
 };

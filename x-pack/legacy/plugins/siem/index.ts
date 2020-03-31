@@ -28,8 +28,12 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SIGNALS_INDEX_KEY,
+  LISTS_INDEX_KEY,
+  LISTS_ITEMS_INDEX_KEY,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  DEFAULT_LISTS_INDEX,
+  DEFAULT_LISTS_ITEMS_INDEX,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
@@ -186,6 +190,8 @@ export const siem = (kibana: any) => {
         .keys({
           enabled: Joi.boolean().default(true),
           [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
+          [LISTS_INDEX_KEY]: Joi.string().default(DEFAULT_LISTS_INDEX),
+          [LISTS_ITEMS_INDEX_KEY]: Joi.string().default(DEFAULT_LISTS_ITEMS_INDEX),
         })
         .default();
     },

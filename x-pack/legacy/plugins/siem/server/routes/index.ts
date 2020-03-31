@@ -37,6 +37,12 @@ import { readListsItemsRoute } from '../lib/detection_engine/routes/lists/read_l
 import { createListsItemsRoute } from '../lib/detection_engine/routes/lists/create_lists_items_route';
 import { importListsItemsRoute } from '../lib/detection_engine/routes/lists/import_lists_items_route';
 import { exportListsItemsRoute } from '../lib/detection_engine/routes/lists/export_lists_items_route';
+import { patchListsRoute } from '../lib/detection_engine/routes/lists/patch_lists_route';
+import { patchListsItemsRoute } from '../lib/detection_engine/routes/lists/patch_lists_items_route';
+import { deleteListsRoute } from '../lib/detection_engine/routes/lists/delete_lists_route';
+import { createListsIndexRoute } from '../lib/detection_engine/routes/lists/create_lists_index_route';
+import { deleteListsIndexRoute } from '../lib/detection_engine/routes/lists/delete_lists_index_route';
+import { readListsIndexRoute } from '../lib/detection_engine/routes/lists/read_lists_index_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -85,12 +91,22 @@ export const initRoutes = (
   readPrivilegesRoute(router, usingEphemeralEncryptionKey);
 
   if (hasListsFeature()) {
+    // Detection Engine list routes that have the REST endpoints of /api/detection_engine/lists
+    // All REST index creation, policy management of lists
+    createListsIndexRoute(router);
+    readListsIndexRoute(router);
+    deleteListsIndexRoute(router);
+
     // list routes
     createListsRoute(router);
     readListsRoute(router);
+    patchListsRoute(router);
+    deleteListsRoute(router);
 
+    // list items routes
     createListsItemsRoute(router);
     readListsItemsRoute(router);
+    patchListsItemsRoute(router);
     importListsItemsRoute(router);
     exportListsItemsRoute(router);
   }

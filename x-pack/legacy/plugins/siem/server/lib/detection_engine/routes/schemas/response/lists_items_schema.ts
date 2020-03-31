@@ -8,14 +8,16 @@ import * as t from 'io-ts';
 
 /* eslint-disable @typescript-eslint/camelcase */
 
-import { list_id, ip, meta, created_at } from '../common/schemas';
+import { list_id, ip, id, meta, created_at } from '../common/schemas';
 
-export const siemListItem = t.intersection([
+export const listsItemsSchema = t.intersection([
   t.type({
+    id,
     list_id,
     created_at,
     // TODO: Add all the other possible data types
   }),
   t.exact(t.partial({ meta, ip })),
 ]);
-export type SiemListItemSchema = t.TypeOf<typeof siemListItem>;
+
+export type ListsItemsSchema = t.TypeOf<typeof listsItemsSchema>;

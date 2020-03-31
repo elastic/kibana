@@ -9,9 +9,19 @@
 set -e
 ./check_env_variables.sh
 
+# Clean up and remove all actions and alerts from SIEM
+# within saved objects
 ./delete_all_actions.sh
 ./delete_all_alerts.sh
 ./delete_all_alert_tasks.sh
+
+# delete all the statuses from the signal index
 ./delete_all_statuses.sh
+
+# re-create the signal index
 ./delete_signal_index.sh
 ./post_signal_index.sh
+
+# re-create the list and list item indexes
+./delete_list_index.sh
+./post_list_index.sh

@@ -12,8 +12,8 @@ import {
   exportListsItemsQuerySchema,
   ExportListsItemsQuerySchema,
 } from '../schemas/request/export_lists_items_query_schema';
-import { getListByListId } from '../../lists/get_list_by_list_id';
 import { writeListItemsToStream } from '../../lists/write_list_items_to_stream';
+import { getList } from '../../lists/get_list';
 
 export const exportListsItemsRoute = (router: IRouter): void => {
   router.post(
@@ -30,12 +30,14 @@ export const exportListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const savedObjectsClient = context.core.savedObjects.client;
         // TODO: Implement type and make it default to string
         // TODO: Make list_id optional and default to the file name with the upload
         // TODO: Make an overwrite flag and set its default to false and implement overwrite
         const { list_id: listId } = request.query;
-        const list = await getListByListId({ listId, savedObjectsClient });
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
+        const { listsIndex, listsItemsIndex } = siemClient;
+        const list = await getList({ id: listId, clusterClient, listsIndex });
         if (list == null) {
           return siemResponse.error({
             statusCode: 400,
@@ -43,10 +45,10 @@ export const exportListsItemsRoute = (router: IRouter): void => {
           });
         } else {
           // TODO: Allow the API to override the fileName
-          const fileName = list.attributes.name;
+          const fileName = list.name;
 
           const stream = new Stream.PassThrough();
-          writeListItemsToStream({ listId, savedObjectsClient, stream });
+          writeListItemsToStream({ listId, stream, clusterClient, listsItemsIndex });
 
           return response.ok({
             headers: {

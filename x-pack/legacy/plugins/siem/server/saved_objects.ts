@@ -18,9 +18,6 @@ import {
   ruleStatusSavedObjectType,
 } from './lib/detection_engine/rules/saved_object_mappings';
 
-import listsMapping from './lib/detection_engine/lists/mappings.json';
-import { hasListsFeature } from './lib/detection_engine/feature_flags';
-
 export {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
@@ -28,12 +25,9 @@ export {
   timelineSavedObjectType,
 };
 
-const savedObjectListsMapping = hasListsFeature() ? listsMapping : {};
-
 export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,
   ...pinnedEventSavedObjectMappings,
   ...ruleStatusSavedObjectMappings,
-  ...savedObjectListsMapping,
 };

@@ -8,17 +8,19 @@ import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_ITEM_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
 import {
-  ReadListsItemsSchema,
-  readListsItemsSchema,
-} from '../schemas/request/read_lists_items_schema';
-import { getListItemByValue } from '../../lists/get_list_item_by_value';
+  patchListsItemsSchema,
+  PatchListsItemsSchema,
+} from '../schemas/request/patch_lists_items_schema';
+import { updateListItem } from '../../lists/update_list_item';
 
-export const readListsItemsRoute = (router: IRouter): void => {
-  router.get(
+// TODO: Make sure you write updateListItemRoute and update_list_item.sh routes
+
+export const patchListsItemsRoute = (router: IRouter): void => {
+  router.patch(
     {
       path: DETECTION_ENGINE_LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidationIoTS<ReadListsItemsSchema>(readListsItemsSchema),
+        body: buildRouteValidationIoTS<PatchListsItemsSchema>(patchListsItemsSchema),
       },
       options: {
         tags: ['access:siem'],
@@ -27,21 +29,24 @@ export const readListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        // TODO: Make getting list_items by their id possible and not just their value
-        const { list_id: listId, ip } = request.query;
+        const { ip, list_id: listId } = request.body;
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem.getSiemClient();
         const { listsItemsIndex } = siemClient;
-        const listItem = await getListItemByValue({ listId, ip, clusterClient, listsItemsIndex });
-        if (listItem == null) {
-          // TODO: More specific error message that figures out which item value does not exist
+        const list = await updateListItem({
+          listId,
+          ip,
+          clusterClient,
+          listsItemsIndex,
+        });
+        if (list == null) {
           return siemResponse.error({
             statusCode: 404,
-            body: `list_id: "${listId}" item does not exist`,
+            body: `list_id: "${listId}" found found`,
           });
         } else {
-          // TODO: outbound validation
-          return response.ok({ body: listItem });
+          // TODO: Transform and check the list on exit as well as validate it
+          return response.ok({ body: list });
         }
       } catch (err) {
         const error = transformError(err);

@@ -102,7 +102,6 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
-
     return {
       inspect,
       firstSeen: get('firstSeen.value_as_string', aggregations),

@@ -7,33 +7,32 @@
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
-import { getListByListId } from '../../lists/get_list_by_list_id';
-import {
-  ListsItemsQuerySchema,
-  listsItemsQuerySchema,
-} from '../schemas/request/lists_items_query_schema';
+import { ReadListsSchema, readListsSchema } from '../schemas/request/read_lists_schema';
+import { getList } from '../../lists/get_list';
 
 export const readListsRoute = (router: IRouter): void => {
   router.get(
     {
       path: DETECTION_ENGINE_LIST_URL,
       validate: {
-        query: buildRouteValidationIoTS<ListsItemsQuerySchema>(listsItemsQuerySchema),
+        query: buildRouteValidationIoTS<ReadListsSchema>(readListsSchema),
       },
       options: {
         tags: ['access:siem'],
       },
     },
     async (context, request, response) => {
-      const { list_id: listId } = request.query;
       const siemResponse = buildSiemResponse(response);
       try {
-        const savedObjectsClient = context.core.savedObjects.client;
-        const list = await getListByListId({ listId, savedObjectsClient });
+        const { id } = request.query;
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
+        const listsIndex = siemClient.listsIndex;
+        const list = await getList({ id, clusterClient, listsIndex });
         if (list == null) {
           return siemResponse.error({
             statusCode: 404,
-            body: `list_id: "${listId}" does not exist`,
+            body: `list id: "${id}" does not exist`,
           });
         } else {
           // TODO: outbound validation

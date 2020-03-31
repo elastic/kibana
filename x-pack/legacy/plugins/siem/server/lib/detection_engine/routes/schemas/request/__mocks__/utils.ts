@@ -9,5 +9,5 @@ import { CreateListsSchema } from '../create_lists_schema';
 export const getListRequest = (): CreateListsSchema => ({
   name: 'Name of a list item',
   description: 'Description of a list item',
-  list_id: 'some-list-id',
+  id: 'some-list-id',
 });

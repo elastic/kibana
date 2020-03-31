@@ -1,0 +1,17 @@
+{
+  "dynamic": "strict",
+  "properties": {
+    "list_id": {
+      "type": "keyword"
+    },
+    "ip": {
+      "type": "ip"
+    },
+    "meta": {
+      "type": "keyword"
+    },
+    "created_at": {
+      "type": "date"
+    }
+  }
+}

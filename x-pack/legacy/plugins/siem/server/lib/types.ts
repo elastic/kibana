@@ -182,3 +182,24 @@ export interface AggregationRequest {
     };
   };
 }
+
+export interface CreateResponse {
+  _index: string;
+  _id: string;
+  _version: number;
+  result: 'created' | 'updated';
+  _shards: ShardsResponse;
+  _seq_no: number;
+  _primary_term: number;
+}
+
+export type UpdateResponse = CreateResponse;
+
+export interface DeleteResponse {
+  _id: string;
+  _version: number;
+  result: 'deleted';
+  _shards: ShardsResponse;
+  _seq_no: number;
+  _primary_term: number;
+}

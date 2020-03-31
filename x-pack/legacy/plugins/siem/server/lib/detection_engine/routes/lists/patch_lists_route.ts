@@ -7,30 +7,34 @@
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
-import { createListsSchema, CreateListsSchema } from '../schemas/request/create_lists_schema';
-import { updateListByListId } from '../../lists/update_list_by_list_id';
+import { patchListsSchema, PatchListsSchema } from '../schemas/request/patch_lists_schema';
+import { updateList } from '../../lists/update_list';
 
-export const updateListsRoute = (router: IRouter): void => {
-  router.put(
+// TODO: Make sure you write updateListRoute and update_list.sh routes
+
+export const patchListsRoute = (router: IRouter): void => {
+  router.patch(
     {
       path: DETECTION_ENGINE_LIST_URL,
       validate: {
-        body: buildRouteValidationIoTS<CreateListsSchema>(createListsSchema),
+        body: buildRouteValidationIoTS<PatchListsSchema>(patchListsSchema),
       },
       options: {
         tags: ['access:siem'],
       },
     },
     async (context, request, response) => {
-      const { name, description, list_id: listId } = request.body;
       const siemResponse = buildSiemResponse(response);
       try {
-        const savedObjectsClient = context.core.savedObjects.client;
-        const list = await updateListByListId({ name, description, listId, savedObjectsClient });
+        const { name, description, id } = request.body;
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
+        const listsIndex = siemClient.listsIndex;
+        const list = await updateList({ id, name, description, listsIndex, clusterClient });
         if (list == null) {
           return siemResponse.error({
             statusCode: 404,
-            body: `list_id: "${listId}" found found`,
+            body: `list_id: "${id}" found found`,
           });
         } else {
           // TODO: Transform and check the list on exit as well as validate it

@@ -7,35 +7,53 @@
 import readLine from 'readline';
 
 import { Readable } from 'stream';
-import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 import { createListItemsBulk } from '../lists/create_list_items_bulk';
+import { ScopedClusterClient } from '../../../../../../../../src/core/server';
+import { getListItemsByValues } from './get_list_items_by_values';
 
 // TODO: Implement overwrite and overwrite values if the flag is set through a readBulk and writeBulk
 export const writeLinesToBulkListItems = ({
   listId,
   stream,
-  savedObjectsClient,
+  clusterClient,
+  listsItemsIndex,
 }: {
   listId: string;
   stream: Readable;
-  savedObjectsClient: SavedObjectsClientContract;
+  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+  listsItemsIndex: string;
 }): Promise<number> => {
   return new Promise<number>((resolve, reject) => {
     const bufferSize = 100;
-    let buffer: string[] = [];
+    const buffer = new Set<string>();
     let linesProcessed = 0;
+
     const readline = readLine.createInterface({
       input: stream,
     });
-    readline.on('line', line => {
+
+    readline.on('line', async line => {
       linesProcessed++;
-      buffer = [...buffer, line];
-      if (buffer.length === bufferSize) {
-        createListItemsBulk({ listId, ips: buffer, savedObjectsClient });
-        buffer = [];
+      buffer.add(line);
+      if (buffer.size === bufferSize) {
+        const arrayFromBuffer = Array.from(buffer);
+        // TODO: Do we want to check for the existence first and reject those?
+        getListItemsByValues({
+          listId,
+          clusterClient,
+          listsItemsIndex,
+          ips: arrayFromBuffer,
+        });
+        createListItemsBulk({ listId, ips: arrayFromBuffer, clusterClient, listsItemsIndex });
+        buffer.clear();
       }
     });
-    readline.on('close', () => {
+
+    readline.on('close', async () => {
+      const arrayFromBuffer = Array.from(buffer);
+      // TODO: Do we want to check for the existence first and reject those?
+      createListItemsBulk({ listId, ips: arrayFromBuffer, clusterClient, listsItemsIndex });
+      buffer.clear();
       resolve(linesProcessed);
     });
   });

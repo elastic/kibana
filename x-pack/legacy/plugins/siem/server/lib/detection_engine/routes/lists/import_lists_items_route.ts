@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { extname } from 'path';
-
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_LIST_ITEM_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
@@ -18,6 +16,7 @@ import {
   ImportListsItemsSchema,
 } from '../schemas/request/import_lists_items_schema';
 import { writeLinesToBulkListItems } from '../../lists/write_lines_to_bulk_list_items';
+import { getList } from '../../lists/get_list';
 
 export const importListsItemsRoute = (router: IRouter): void => {
   router.post(
@@ -37,17 +36,29 @@ export const importListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const savedObjectsClient = context.core.savedObjects.client;
         // TODO: Implement type and make it default to string
         // TODO: Make list_id optional and default to the file name with the upload
         // TODO: Make an overwrite flag and set its default to false and implement overwrite
-        const { list_id: listId, type } = request.query;
-        const { filename } = request.body.file.hapi;
-        const fileExtension = extname(filename).toLowerCase();
+        // TODO: Use "type" for the data type from the request.query for what type this is being imported into
+        // const { filename } = request.body.file.hapi;
+        // const fileExtension = extname(filename).toLowerCase();
+
+        const { list_id: listId } = request.query;
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem.getSiemClient();
+        const { listsIndex, listsItemsIndex } = siemClient;
+        const list = await getList({ id: listId, clusterClient, listsIndex });
+        if (list == null) {
+          return siemResponse.error({
+            statusCode: 409,
+            body: `list id: "${listId}" does not exist`,
+          });
+        }
         const linesProcessed = await writeLinesToBulkListItems({
           listId,
           stream: request.body.file,
-          savedObjectsClient,
+          clusterClient,
+          listsItemsIndex,
         });
         return response.accepted({ body: { lines_processed: linesProcessed } });
       } catch (err) {

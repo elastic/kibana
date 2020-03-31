@@ -10,10 +10,14 @@ import * as t from 'io-ts';
 
 export const name = t.string;
 export const description = t.string;
+
+// TODO: We should be able to remove this and not use it
 export const list_id = t.string;
+
 export const item = t.string;
 export const ip = t.string;
 export const meta = t.object;
 export const created_at = t.string;
 export const type = t.string;
 export const file = t.object;
+export const id = t.string;

@@ -8,14 +8,12 @@
 
 import * as t from 'io-ts';
 
-import { list_id, type } from '../common/schemas';
+import { id } from '../common/schemas';
 
-export const importListsItemsQuerySchema = t.exact(
+export const readListsSchema = t.exact(
   t.type({
-    list_id,
-    type, // TODO: Utilize type or delete it if there is nothing we are doing with it
-    // TODO: Add overwrite boolean true or false here
+    id,
   })
 );
 
-export type ImportListsItemsQuerySchema = t.TypeOf<typeof importListsItemsQuerySchema>;
+export type ReadListsSchema = t.TypeOf<typeof readListsSchema>;

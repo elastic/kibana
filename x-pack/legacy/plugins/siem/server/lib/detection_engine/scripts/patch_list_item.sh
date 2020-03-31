@@ -10,10 +10,10 @@ set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
-LISTS=(${@:-./lists/new/list_ip.json})
+LISTS=(${@:-./lists/patches/list_ip_item.json})
 
-# Example: ./post_list.sh
-# Example: ./post_list.sh ./lists/new/list_ip.json
+# Example: ./patch_list.sh
+# Example: ./patch_list.sh ./lists/patches/list_ip_item.json
 for LIST in "${LISTS[@]}"
 do {
   [ -e "$LIST" ] || continue
@@ -21,8 +21,8 @@ do {
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists \
-   -d @${LIST} \
+  -X PATCH ${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists/items \
+  -d @${LIST} \
   | jq .;
 } &
 done
