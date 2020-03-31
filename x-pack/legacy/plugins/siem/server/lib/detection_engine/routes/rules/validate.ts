@@ -22,9 +22,11 @@ import { rulesSchema, RulesSchema } from '../schemas/response/rules_schema';
 import { exactCheck } from '../schemas/response/exact_check';
 import { transformFindAlerts, transform, transformAlertToRule } from './utils';
 import { findRulesSchema } from '../schemas/response/find_rules_schema';
+import { RuleActions } from '../../rule_actions/types';
 
 export const transformValidateFindAlerts = (
   findResults: FindResult,
+  ruleActions: Array<RuleActions | null>,
   ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
 ): [
   {
@@ -35,7 +37,7 @@ export const transformValidateFindAlerts = (
   } | null,
   string | null
 ] => {
-  const transformed = transformFindAlerts(findResults, ruleStatuses);
+  const transformed = transformFindAlerts(findResults, ruleActions, ruleStatuses);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -54,9 +56,10 @@ export const transformValidateFindAlerts = (
 
 export const transformValidate = (
   alert: PartialAlert,
+  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [RulesSchema | null, string | null] => {
-  const transformed = transform(alert, ruleStatus);
+  const transformed = transform(alert, ruleActions, ruleStatus);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -67,11 +70,16 @@ export const transformValidate = (
 export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert,
+  ruleActions?: RuleActions | null,
   ruleStatus?: unknown
 ): RulesSchema | BulkError => {
   if (isAlertType(alert)) {
     if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
-      const transformed = transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
+      const transformed = transformAlertToRule(
+        alert,
+        ruleActions,
+        ruleStatus?.saved_objects[0] ?? ruleStatus
+      );
       const [validated, errors] = validate(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({
