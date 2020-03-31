@@ -75,8 +75,7 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
   response
 ) => {
   try {
-    const { pkgkey, filePath } = request.params;
-    const [pkgName, pkgVersion] = pkgkey.split('-');
+    const { pkgName, pkgVersion, filePath } = request.params;
     const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
     const contentType = registryResponse.headers.get('Content-Type');
     const customResponseObj: CustomHttpResponseOptions<typeof registryResponse.body> = {
