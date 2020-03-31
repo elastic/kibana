@@ -109,24 +109,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     let nextQuery = null;
-    if (nextProps.query && prevState.query && nextProps.query.query !== prevState.query.query) {
-      nextQuery = nextProps.query;
-    }
-    /* if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
+    if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
       };
-    } else if (
-      nextProps.query &&
-      prevState.query &&
-      nextProps.query.language !== prevState.query.language
-    ) {
-      nextQuery = {
-        query: '',
-        language: nextProps.query.language,
-      };
-    }*/
+    }
 
     let nextDateRange = null;
     if (
@@ -232,7 +220,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
-
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
