@@ -24,7 +24,7 @@ import crypto from 'crypto';
 import Chance from 'chance';
 import expect from '@kbn/expect';
 import Hapi from '@hapi/hapi';
-import Inert from 'inert';
+import Inert from '@hapi/inert';
 import sinon from 'sinon';
 
 import { createBundlesRoute } from '../bundles_route';

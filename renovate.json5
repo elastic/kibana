@@ -396,8 +396,8 @@
           '@types/hapi__good',
           'good-squeeze',
           '@types/good-squeeze',
-          'inert',
-          '@types/inert',
+          '@hapi/inert',
+          '@types/hapi__inert',
         ],
       },
       {
