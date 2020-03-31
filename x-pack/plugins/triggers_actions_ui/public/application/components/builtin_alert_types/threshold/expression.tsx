@@ -145,6 +145,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     }
   };
 
+  const closeIndexPopover = () => {
+    setIndexPopoverOpen(false);
+    if (timeField === undefined) {
+      setAlertParams('timeField', '');
+    }
+  };
+
   useEffect(() => {
     const indexPatternsFunction = async () => {
       setIndexPatterns(await getIndexPatterns());
@@ -298,13 +305,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                     onClick={() => {
                       setIndexPopoverOpen(true);
                     }}
-                    color={index && index.length > 0 ? 'secondary' : 'danger'}
+                    color={index && index.length > 0 && timeField !== '' ? 'secondary' : 'danger'}
                   />
                 }
                 isOpen={indexPopoverOpen}
-                closePopover={() => {
-                  setIndexPopoverOpen(false);
-                }}
+                closePopover={closeIndexPopover}
                 ownFocus
                 withTitle
                 anchorPosition="downLeft"
@@ -331,9 +336,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                               defaultMessage: 'Close',
                             }
                           )}
-                          onClick={() => {
-                            setIndexPopoverOpen(false);
-                          }}
+                          onClick={closeIndexPopover}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
