@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
+import { ClosablePopoverTitle } from './components';
 
 interface ThresholdExpressionProps {
   thresholdComparator: string;
@@ -97,7 +97,9 @@ export const ThresholdExpression = ({
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>{comparators[thresholdComparator].text}</EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>
+          <>{comparators[thresholdComparator].text}</>
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSelect

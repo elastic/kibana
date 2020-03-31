@@ -4,16 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { cloneDeep, omit } from 'lodash/fp';
+import { Dispatch } from 'redux';
 
-import { mockTimelineResults } from '../../mock/timeline_results';
+import {
+  mockTimelineResults,
+  mockTimelineResult,
+  mockTimelineModel,
+} from '../../mock/timeline_results';
 import { timelineDefaults } from '../../store/timeline/defaults';
+import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
+import {
+  setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
+  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
+  addTimeline as dispatchAddTimeline,
+  addNote as dispatchAddGlobalTimelineNote,
+} from '../../store/timeline/actions';
+import {
+  addNotes as dispatchAddNotes,
+  updateNote as dispatchUpdateNote,
+} from '../../store/app/actions';
 import {
   defaultTimelineToTimelineModel,
   getNotesCount,
   getPinnedEventCount,
   isUntitled,
+  omitTypenameInTimeline,
+  dispatchUpdateTimeline,
 } from './helpers';
-import { OpenTimelineResult } from './types';
+import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
+import { KueryFilterQueryKind } from '../../store/model';
+import { Note } from '../../lib/note';
+import moment from 'moment';
+import sinon from 'sinon';
+
+jest.mock('../../store/inputs/actions');
+jest.mock('../../store/timeline/actions');
+jest.mock('../../store/app/actions');
+jest.mock('uuid', () => {
+  return {
+    v1: jest.fn(() => 'uuid.v1()'),
+    v4: jest.fn(() => 'uuid.v4()'),
+  };
+});
 
 describe('helpers', () => {
   let mockResults: OpenTimelineResult[];
@@ -617,6 +649,231 @@ describe('helpers', () => {
         },
         width: 1100,
         id: 'savedObject-1',
+      });
+    });
+  });
+
+  describe('omitTypenameInTimeline', () => {
+    test('it does not modify the passed in timeline if no __typename exists', () => {
+      const result = omitTypenameInTimeline(mockTimelineResult);
+
+      expect(result).toEqual(mockTimelineResult);
+    });
+
+    test('it returns timeline with __typename removed when it exists', () => {
+      const mockTimeline = {
+        ...mockTimelineResult,
+        __typename: 'something, something',
+      };
+      const result = omitTypenameInTimeline(mockTimeline);
+      const expectedTimeline = {
+        ...mockTimeline,
+        __typename: undefined,
+      };
+
+      expect(result).toEqual(expectedTimeline);
+    });
+  });
+
+  describe('dispatchUpdateTimeline', () => {
+    const dispatch = jest.fn() as Dispatch;
+    const anchor = '2020-03-27T20:34:51.337Z';
+    const unix = moment(anchor).valueOf();
+    let clock: sinon.SinonFakeTimers;
+    let timelineDispatch: DispatchUpdateTimeline;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      clock = sinon.useFakeTimers(unix);
+      timelineDispatch = dispatchUpdateTimeline(dispatch);
+    });
+
+    afterEach(function() {
+      clock.restore();
+    });
+
+    test('it invokes date range picker dispatch', () => {
+      timelineDispatch({
+        duplicate: true,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [],
+        timeline: mockTimelineModel,
+      })();
+
+      expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
+        from: 1585233356356,
+        to: 1585233716356,
+      });
+    });
+
+    test('it invokes add timeline dispatch', () => {
+      timelineDispatch({
+        duplicate: true,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [],
+        timeline: mockTimelineModel,
+      })();
+
+      expect(dispatchAddTimeline).toHaveBeenCalledWith({
+        id: 'timeline-1',
+        timeline: mockTimelineModel,
+      });
+    });
+
+    test('it does not invoke kql filter query dispatches if timeline.kqlQuery.filterQuery is null', () => {
+      timelineDispatch({
+        duplicate: true,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [],
+        timeline: mockTimelineModel,
+      })();
+
+      expect(dispatchSetKqlFilterQueryDraft).not.toHaveBeenCalled();
+      expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
+    });
+
+    test('it does not invoke notes dispatch if duplicate is true', () => {
+      timelineDispatch({
+        duplicate: true,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [],
+        timeline: mockTimelineModel,
+      })();
+
+      expect(dispatchAddNotes).not.toHaveBeenCalled();
+    });
+
+    test('it does not invoke kql filter query dispatches if timeline.kqlQuery.kuery is null', () => {
+      const mockTimeline = {
+        ...mockTimelineModel,
+        kqlQuery: {
+          filterQuery: {
+            kuery: null,
+            serializedQuery: 'some-serialized-query',
+          },
+          filterQueryDraft: null,
+        },
+      };
+      timelineDispatch({
+        duplicate: true,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [],
+        timeline: mockTimeline,
+      })();
+
+      expect(dispatchSetKqlFilterQueryDraft).not.toHaveBeenCalled();
+      expect(dispatchApplyKqlFilterQuery).not.toHaveBeenCalled();
+    });
+
+    test('it invokes kql filter query dispatches if timeline.kqlQuery.filterQuery.kuery is not null', () => {
+      const mockTimeline = {
+        ...mockTimelineModel,
+        kqlQuery: {
+          filterQuery: {
+            kuery: { expression: 'expression', kind: 'kuery' as KueryFilterQueryKind },
+            serializedQuery: 'some-serialized-query',
+          },
+          filterQueryDraft: null,
+        },
+      };
+      timelineDispatch({
+        duplicate: true,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [],
+        timeline: mockTimeline,
+      })();
+
+      expect(dispatchSetKqlFilterQueryDraft).toHaveBeenCalledWith({
+        id: 'timeline-1',
+        filterQueryDraft: {
+          kind: 'kuery',
+          expression: 'expression',
+        },
+      });
+      expect(dispatchApplyKqlFilterQuery).toHaveBeenCalledWith({
+        id: 'timeline-1',
+        filterQuery: {
+          kuery: {
+            kind: 'kuery',
+            expression: 'expression',
+          },
+          serializedQuery: 'some-serialized-query',
+        },
+      });
+    });
+
+    test('it invokes dispatchAddNotes if duplicate is false', () => {
+      timelineDispatch({
+        duplicate: false,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [
+          {
+            created: 1585233356356,
+            updated: 1585233356356,
+            noteId: 'note-id',
+            note: 'I am a note',
+          },
+        ],
+        timeline: mockTimelineModel,
+      })();
+
+      expect(dispatchAddGlobalTimelineNote).not.toHaveBeenCalled();
+      expect(dispatchUpdateNote).not.toHaveBeenCalled();
+      expect(dispatchAddNotes).toHaveBeenCalledWith({
+        notes: [
+          {
+            created: new Date('2020-03-26T14:35:56.356Z'),
+            id: 'note-id',
+            lastEdit: new Date('2020-03-26T14:35:56.356Z'),
+            note: 'I am a note',
+            user: 'unknown',
+            saveObjectId: 'note-id',
+            version: undefined,
+          },
+        ],
+      });
+    });
+
+    test('it invokes dispatch to create a timeline note if duplicate is true and ruleNote exists', () => {
+      timelineDispatch({
+        duplicate: true,
+        id: 'timeline-1',
+        from: 1585233356356,
+        to: 1585233716356,
+        notes: [],
+        timeline: mockTimelineModel,
+        ruleNote: '# this would be some markdown',
+      })();
+      const expectedNote: Note = {
+        created: new Date(anchor),
+        id: 'uuid.v4()',
+        lastEdit: null,
+        note: '# this would be some markdown',
+        saveObjectId: null,
+        user: 'elastic',
+        version: null,
+      };
+
+      expect(dispatchAddNotes).not.toHaveBeenCalled();
+      expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
+      expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
+        id: 'timeline-1',
+        noteId: 'uuid.v4()',
       });
     });
   });

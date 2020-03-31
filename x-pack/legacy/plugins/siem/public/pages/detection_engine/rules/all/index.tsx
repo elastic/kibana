@@ -300,7 +300,9 @@ export const AllRules = React.memo<AllRulesProps>(
                 <UtilityBar border>
                   <UtilityBarSection>
                     <UtilityBarGroup>
-                      <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
+                      <UtilityBarText dataTestSubj="showingRules">
+                        {i18n.SHOWING_RULES(pagination.total ?? 0)}
+                      </UtilityBarText>
                     </UtilityBarGroup>
 
                     <UtilityBarGroup>

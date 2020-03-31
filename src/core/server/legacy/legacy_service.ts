@@ -334,6 +334,9 @@ export class LegacyService implements CoreService {
           plugins: startDeps.plugins,
         },
         __internals: {
+          http: {
+            registerStaticDir: setupDeps.core.http.registerStaticDir,
+          },
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,

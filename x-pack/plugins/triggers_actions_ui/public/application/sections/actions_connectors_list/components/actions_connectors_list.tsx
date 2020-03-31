@@ -16,6 +16,8 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -410,7 +412,13 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && <EuiLoadingSpinner size="xl" />}
+      {(isLoadingActions || isLoadingActionTypes) && (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {data.length !== 0 && table}
       {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && emptyPrompt}
       {data.length === 0 && !canSave && noPermissionPrompt}

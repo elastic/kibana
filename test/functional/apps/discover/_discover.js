@@ -199,5 +199,22 @@ export default function({ getService, getPageObjects }) {
         expect(rowData.startsWith('Sep 22, 2015 @ 16:50:13.253')).to.be.ok();
       });
     });
+    describe('usage of discover:searchOnPageLoad', () => {
+      it('should fetch data from ES initially when discover:searchOnPageLoad is false', async function() {
+        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+
+        expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
+      });
+
+      it('should not fetch data from ES initially when discover:searchOnPageLoad is true', async function() {
+        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+
+        expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
+      });
+    });
   });
 }

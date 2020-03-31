@@ -19,7 +19,7 @@
 
 import { cloneDeep } from 'lodash';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from 'src/plugins/visualizations/public';
 import { AggGroupNames, DataPublicPluginStart } from '../../../../../../../plugins/data/public';
 import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';

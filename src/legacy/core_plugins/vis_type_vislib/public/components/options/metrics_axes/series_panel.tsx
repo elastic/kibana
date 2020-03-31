@@ -23,7 +23,7 @@ import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from '../../../../../../../plugins/visualizations/public';
 import { ValueAxis, SeriesParam } from '../../../types';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from './';
