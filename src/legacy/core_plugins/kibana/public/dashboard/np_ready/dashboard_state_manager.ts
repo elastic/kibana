@@ -35,7 +35,7 @@ import {
   TimefilterContract as Timefilter,
 } from '../../../../../../plugins/data/public';
 
-import { getAppStateDefaults, migrateAppState } from './lib';
+import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';
 import {
@@ -51,7 +51,6 @@ import {
   ReduxLikeStateContainer,
   syncState,
 } from '../../../../../../plugins/kibana_utils/public';
-import { getDashboardIdFromUrl } from './url_helper';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
