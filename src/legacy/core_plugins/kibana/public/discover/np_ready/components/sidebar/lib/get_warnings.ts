@@ -16,20 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
-import { getServices, wrapInI18nContext } from '../../../kibana_services';
+import { i18n } from '@kbn/i18n';
+import { IndexPatternField } from '../../../../../../../../../plugins/data/public';
 
-export function FieldNameDirectiveProvider(reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(FieldName),
-    [
-      ['field', { watchDepth: 'collection' }],
-      ['fieldName', { watchDepth: 'reference' }],
-      ['fieldType', { watchDepth: 'reference' }],
-    ],
-    { restrict: 'AE' },
-    {
-      useShortDots: getServices().uiSettings.get('shortDots:enable'),
-    }
-  );
+export function getWarnings(field: IndexPatternField) {
+  let warnings = [];
+
+  if (field.scripted) {
+    warnings.push(
+      i18n.translate(
+        'kbn.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
+        {
+          defaultMessage: 'Scripted fields can take a long time to execute.',
+        }
+      )
+    );
+  }
+
+  if (warnings.length > 1) {
+    warnings = warnings.map(function(warning, i) {
+      return (i > 0 ? '\n' : '') + (i + 1) + ' - ' + warning;
+    });
+  }
+
+  return warnings;
 }

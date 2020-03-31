@@ -34,8 +34,7 @@ describe('DiscoverFieldSearch', () => {
 
   function mountComponent(props?: Props) {
     const compProps = props || defaultProps;
-    const comp = mountWithIntl(<DiscoverFieldSearch {...compProps} />);
-    return comp;
+    return mountWithIntl(<DiscoverFieldSearch {...compProps} />);
   }
 
   function findButtonGroup(component: ReactWrapper, id: string) {
