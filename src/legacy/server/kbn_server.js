@@ -207,6 +207,6 @@ export default class KbnServer {
     };
     const plain = JSON.stringify(subset, null, 2);
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
-    this.server.plugins['@elastic/good'].reconfigure(loggingOptions);
+    this.server.plugins['@hapi/good'].reconfigure(loggingOptions);
   }
 }

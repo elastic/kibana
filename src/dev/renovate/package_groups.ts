@@ -165,7 +165,7 @@ export const RENOVATE_PACKAGE_GROUPS: PackageGroup[] = [
       '@hapi/boom',
       'hoek',
       'h2o2',
-      '@elastic/good',
+      '@hapi/good',
       'good-squeeze',
       'inert',
     ],

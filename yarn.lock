@@ -1315,16 +1315,6 @@
     async-retry "^1.2.3"
     strip-ansi "^5.2.0"
 
-"@elastic/good@8.1.1-kibana2":
-  version "8.1.1-kibana2"
-  resolved "https://registry.yarnpkg.com/@elastic/good/-/good-8.1.1-kibana2.tgz#3ba7413da9fae4c67f128f3e9b1dc28f24523c7a"
-  integrity sha512-2AYmQMBjmh2896FePnnGr9nwoqRxZ6bTjregDRI0CB9r4sIpIzG6J7oMa0GztdDMlrk5CslX1g9SN5EihddPlw==
-  dependencies:
-    hoek "5.x.x"
-    joi "13.x.x"
-    oppsy "2.x.x"
-    pumpify "1.3.x"
-
 "@elastic/makelogs@^5.0.1":
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/@elastic/makelogs/-/makelogs-5.0.1.tgz#f4f9f5edc61299c7c81f5f30629e3a6fe72a50d7"
@@ -1626,6 +1616,16 @@
     "@hapi/hoek" "8.x.x"
     fast-safe-stringify "2.x.x"
 
+"@hapi/good@^8.2.4":
+  version "8.2.4"
+  resolved "https://registry.yarnpkg.com/@hapi/good/-/good-8.2.4.tgz#35ad2ab7f3fa5115cddb17f723d504aeae866ee6"
+  integrity sha512-Paj7BX4C295I+opJ5eIV0XvLhRPcKDLpP9RsnUWGXH/gLRi1SwVMOCYAqitSBjhYSIeZoq+jMmJn6+hUg4W3ug==
+  dependencies:
+    "@hapi/hoek" "8.x.x"
+    "@hapi/joi" "16.x.x"
+    "@hapi/oppsy" "2.x.x"
+    pumpify "1.x.x"
+
 "@hapi/hapi@^18.4.1":
   version "18.4.1"
   resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-18.4.1.tgz#023fbc131074b1cb2cd7f6766d65f4b0e92df788"
@@ -1716,6 +1716,13 @@
   dependencies:
     "@hapi/hoek" "8.x.x"
     "@hapi/vise" "3.x.x"
+
+"@hapi/oppsy@2.x.x":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@hapi/oppsy/-/oppsy-2.1.2.tgz#357a509694e9d26b5d21ca2361a47871101ce4e7"
+  integrity sha512-V/KNuFemyA//sowFFpeMRY4zE6szuy8vh6v2vWDPDhZFowOIwB7kqdFvmnBogk+aHHR+iKgKCU/SuUiv/xZyzg==
+  dependencies:
+    "@hapi/hoek" "8.x.x"
 
 "@hapi/pez@^4.1.2":
   version "4.1.2"
@@ -21800,7 +21807,7 @@ opn@^5.5.0:
   dependencies:
     is-wsl "^1.1.0"
 
-oppsy@2.x.x, oppsy@^2.0.0:
+oppsy@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/oppsy/-/oppsy-2.0.0.tgz#3a194517adc24c3c61cdc56f35f4537e93a35e34"
   integrity sha1-OhlFF63CTDxhzcVvNfRTfpOjXjQ=
@@ -23450,16 +23457,7 @@ pump@^3.0.0:
     end-of-stream "^1.1.0"
     once "^1.3.1"
 
-pumpify@1.3.x:
-  version "1.3.6"
-  resolved "https://registry.yarnpkg.com/pumpify/-/pumpify-1.3.6.tgz#00d40e5ded0a3bf1e0788b1c0cf426a42882ab64"
-  integrity sha512-BurGAcvezsINL5US9T9wGHHcLNrG6MCp//ECtxron3vcR+Rfx5Anqq7HbZXNJvFQli8FGVsWCAvywEJFV5Hx/Q==
-  dependencies:
-    duplexify "^3.5.3"
-    inherits "^2.0.3"
-    pump "^2.0.0"
-
-pumpify@^1.3.3:
+pumpify@1.x.x, pumpify@^1.3.3:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/pumpify/-/pumpify-1.5.1.tgz#36513be246ab27570b1a374a5ce278bfd74370ce"
   integrity sha512-oClZI37HvuUJJxSKKrC17bZ9Cu0ZYhEAGPsPUy9KlMUmv9dKX2o77RUmq7f3XjIxbwyGwYzbzQ1L2Ks8sIradQ==
