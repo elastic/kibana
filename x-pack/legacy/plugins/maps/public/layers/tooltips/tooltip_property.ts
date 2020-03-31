@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { PhraseFilter } from '../../../../../../../src/plugins/data/public';
+import { TooltipFeature } from '../../../../../../plugins/maps/common/descriptor_types';
 
 export interface ITooltipProperty {
   getPropertyKey(): string;
@@ -14,11 +15,6 @@ export interface ITooltipProperty {
   getRawValue(): string | undefined;
   isFilterable(): boolean;
   getESFilters(): Promise<PhraseFilter[]>;
-}
-
-export interface MapFeature {
-  id: number;
-  layerId: string;
 }
 
 export interface LoadFeatureProps {
@@ -34,7 +30,7 @@ export interface FeatureGeometry {
 export interface RenderTooltipContentParams {
   addFilters(filter: object): void;
   closeTooltip(): void;
-  features: MapFeature[];
+  features: TooltipFeature[];
   isLocked: boolean;
   getLayerName(layerId: string): Promise<string>;
   loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<ITooltipProperty[]>;
