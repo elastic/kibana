@@ -15,13 +15,13 @@
 - <<kerberos>>
 - <<http-authentication>>
 
-It is possible to enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. You must make sure each configured provider has a distinct name (e.g. `basic1` or `saml1` in the config example below) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
+Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
 
-When two or more providers are configured user will be presented with the Login Selector screen where they can choose which provider to use to log in to {kib}. The order provider appears in at the Login Selector screen is determined by its `order` setting. The appearance of the specific provider entry can be customized with the `description` setting.
+When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the order setting. The appearance of the specific provider entry can be customized with the `description` setting.
 
-If you don't want specific provider to show up at the Login Selector screen (e.g. to only support third-party initiated login) you can hide it with `showInSelector` setting set to `false`. However in this case provider will still be presented in the provider chain and may be consulted during authentication based on its `order`. To completely disable provider use `enabled` setting instead.
+If you don't want a specific provider to show up at the Login Selector UI (e.g. to only support third-party initiated login) you can hide it with `showInSelector` setting set to `false`. However, in this case, the provider is presented in the provider chain and may be consulted during authentication based on its `order`. To disable the provider, use the `enabled` setting.
 
-TIP: Login Selector screen can also be explicitly disabled or enabled with `xpack.security.authc.selector.enabled` setting. 
+TIP: The Login Selector UI can also be disabled or enabled with `xpack.security.authc.selector.enabled` setting. 
 
 Here is how your `kibana.yml` can look like if you deal with multiple authentication providers:
 
@@ -45,7 +45,7 @@ xpack.security.authc.providers:
 [[basic-authentication]]
 ==== Basic authentication
 
-To successfully log in to {kib}, basic authentication requires a username and password. Basic authentication is enabled by default, and is based on the Native security realm or LDAP security realm that is provided by {es}. The basic authentication provider uses a {kib} provided login form, and supports authentication using the `Authorization` request header `Basic` scheme.
+To successfully log in to {kib}, basic authentication requires a username and password. Basic authentication is enabled by default, and is based on the Native, LDAP, or Active Directory security realm that is provided by {es}. The basic authentication provider uses a {kib} provided login form, and supports authentication using the `Authorization` request header `Basic` scheme.
 
 The session cookies that are issued by the basic authentication provider are stateless. Therefore, logging out of {kib} when using the basic authentication provider clears the session cookies from the browser, but does not invalidate the session cookie for reuse.
 
@@ -74,7 +74,7 @@ xpack.security.authc.providers:
     order: 0
 --------------------------------------------------------------------------------
 
-Switching to token authentication provider from basic one will make {kib} to reject requests from applications like `curl` that usually use `Authorization` request header with the `Basic` scheme for authentication. If you still want to support such applications you'll have to either switch to using `Bearer` scheme with the tokens {ref}/security-api-get-token.html[created by {es} token API] or add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
+Switching to the token authentication provider from basic one will make {kib} to reject requests from applications like `curl` that usually use `Authorization` request header with the `Basic` scheme for authentication. If you still want to support such applications you'll have to either switch to using `Bearer` scheme with the tokens {ref}/security-api-get-token.html[created by {es} token API] or add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
 
 [[pki-authentication]]
 ==== Public key infrastructure (PKI) authentication
@@ -104,7 +104,7 @@ xpack.security.authc.providers:
 NOTE: Trusted CAs can also be specified in a PKCS #12 keystore bundled with your {kib} server certificate/key using
 `server.ssl.keystore.path` or in a separate trust store using `server.ssl.truststore.path`.
 
-PKI support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both PKI and Basic authentication for the same {kib} instance:
+PKI support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both PKI and basic authentication for the same {kib} instance:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -132,9 +132,9 @@ xpack.security.authc.providers:
     realm: saml1
 --------------------------------------------------------------------------------
 
-Users will be able to log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. Users who aren't authenticated are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session—users who logged in to a different application using the same Identity Provider in the same browser are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force user to re-authenticate. This login scenario is called _Service Provider initiated login_.
+You can log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. If you aren't authenticated, you are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session. If you log in to a different application using the same Identity Provider in the same browser, you are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force you to re-authenticate. This login scenario is called _Service Provider initiated login_.
 
-It's also possible to configure multiple SAML authentication providers at the same time. In this case users will need to choose which provider to use for login at the Login Selector screen:
+It's also possible to configure multiple SAML authentication providers at the same time. In this case, you will need to choose which provider to use for login at the Login Selector UI:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ xpack.security.authc.providers:
 [float]
 ===== SAML and basic authentication
 
-SAML support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both SAML and Basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+SAML support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both SAML and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -165,9 +165,9 @@ xpack.security.authc.providers:
     order: 1
 --------------------------------------------------------------------------------
 
-Basic authentication is supported _only_ if `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting in addition to `saml`.
+Basic authentication is supported _only_ if the `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting, in addition to `saml`.
 
-However, if you don't need username/password login form and just want to support `Basic` authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy) then it's recommended to add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>> instead.
+To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
 
 [float]
 ===== SAML and long URLs
@@ -206,7 +206,7 @@ xpack.security.authc.providers:
 
 If you want to use Third Party initiated Single Sign-On, configure your OpenID Provider to use `/api/security/oidc/initiate_login` as `Initiate Login URI`.
 
-It's also possible to configure multiple OpenID Connect authentication providers at the same time. In this case users will need to choose which provider to use for login at the Login Selector screen:
+It's also possible to configure multiple OpenID Connect authentication providers at the same time. In this case, you need to choose which provider to use for login at the Login Selector UI:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -224,7 +224,7 @@ xpack.security.authc.providers:
 [float]
 ===== OpenID Connect and basic authentication
 
-Similar to SAML, OpenID Connect support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both OpenID Connect and Basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+Similar to SAML, OpenID Connect support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both OpenID Connect and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -237,9 +237,9 @@ xpack.security.authc.providers:
     order: 1
 --------------------------------------------------------------------------------
 
-Basic authentication is supported _only_ if `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting in addition to `oidc`.
+Basic authentication is supported _only_ if the `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting, in addition to `oidc`.
 
-However, if you don't need username/password login form and just want to support `Basic` authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy) then it's recommended to add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>> instead.
+To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
 
 [float]
 ==== Single sign-on provider details
@@ -325,4 +325,4 @@ NOTE: Don't forget to explicitly specify default `apikey` scheme when you just w
 xpack.security.authc.http.schemes: [apikey, basic, something-custom]
 --------------------------------------------------------------------------------
 
-With the configuration above users can send requests to {kib} with the `Authorization` header using `ApiKey`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood {kib} will just relay this header to {es} that will try to authenticate request using the credentials provided within the header.
+With this configuration, you can send requests to {kib} with the `Authorization` header using `ApiKey`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {kib} relays this header to {es}, then {es} authenticates the request using the credentials in the header.
