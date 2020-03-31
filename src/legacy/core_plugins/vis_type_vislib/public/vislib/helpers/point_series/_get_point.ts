@@ -18,8 +18,43 @@
  */
 
 import { getFormatService } from '../../../services';
+import { Aspect, Table, Row } from './point_series';
 
-export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
+type RowValue = number | 'NaN';
+interface Raw {
+  table: Table;
+  column: number;
+  row: number;
+  value: RowValue;
+}
+export interface Point {
+  x: RowValue | '_all';
+  y: RowValue;
+  z?: RowValue;
+  extraMetrics: [];
+  seriesRaw?: Raw;
+  xRaw: Raw;
+  yRaw: Raw;
+  zRaw?: Raw;
+  tableRaw?: {
+    table: Table;
+    column: number;
+    row: number;
+    value: number;
+    title: string;
+  };
+  parent: Aspect | null;
+  series?: string;
+}
+export function getPoint(
+  table: Table,
+  x: Aspect,
+  series: Aspect[],
+  row: Row,
+  rowIndex: number,
+  y: Aspect,
+  z: Aspect
+): Point | undefined {
   const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
   const yRow = row[y.accessor];
   const zRow = z && row[z.accessor];
@@ -29,7 +64,6 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
     y: yRow,
     z: zRow,
     extraMetrics: [],
-    yScale: yScale,
     seriesRaw: series && {
       table,
       column: series[0].column,
@@ -62,7 +96,7 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
       title: table.$parent.name,
     },
     parent: series ? series[0] : null,
-  };
+  } as Point;
 
   if (point.y === 'NaN') {
     // filter out NaN from stats
@@ -71,8 +105,7 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
   }
 
   if (series) {
-    const seriesArray = series.length ? series : [series];
-    point.series = seriesArray
+    point.series = series
       .map(s => {
         const fieldFormatter = getFormatService().deserialize(s.format);
         return fieldFormatter.convert(row[s.accessor]);
@@ -82,10 +115,6 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
     // If the data is not split up with a series aspect, then
     // each point's "series" becomes the y-agg that produced it
     point.series = y.title;
-  }
-
-  if (yScale) {
-    point.y *= yScale;
   }
 
   return point;

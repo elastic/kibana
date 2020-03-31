@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { getPoint } from './_get_point';
 import { setFormatService } from '../../../services';
 
@@ -42,29 +41,27 @@ describe('getPoint', function() {
     let seriesAspect: any;
     let xAspect: object;
     let yAspect: { [key: string]: any };
-    let yScale: number;
 
     beforeEach(function() {
       seriesAspect = null;
       xAspect = { accessor: 0 };
       yAspect = { accessor: 1, title: 'Y' };
-      yScale = 5;
     });
 
-    it('properly unwraps and scales values', function() {
+    it('properly unwraps values', function() {
       const row = table.rows[0];
       const zAspect = { accessor: 2 };
-      const point = getPoint(table, xAspect, seriesAspect, yScale, row, 0, yAspect, zAspect);
+      const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect, zAspect);
 
       expect(point).toHaveProperty('x', 1);
-      expect(point).toHaveProperty('y', 10);
+      expect(point).toHaveProperty('y', 2);
       expect(point).toHaveProperty('z', 3);
       expect(point).toHaveProperty('series', yAspect.title);
     });
 
     it('ignores points with a y value of NaN', function() {
       const row = table.rows[1];
-      const point = getPoint(table, xAspect, seriesAspect, yScale, row, 1, yAspect);
+      const point = getPoint(table, xAspect, seriesAspect, row, 1, yAspect);
       expect(point).toBe(void 0);
     });
   });
@@ -73,18 +70,16 @@ describe('getPoint', function() {
     let row: object;
     let xAspect: object;
     let yAspect: object;
-    let yScale: null;
 
     beforeEach(function() {
       row = table.rows[0];
       xAspect = { accessor: 0 };
       yAspect = { accessor: 2 };
-      yScale = null;
     });
 
-    it('properly unwraps and scales values', function() {
+    it('properly unwraps values', function() {
       const seriesAspect = [{ accessor: 1 }];
-      const point = getPoint(table, xAspect, seriesAspect, yScale, row, 0, yAspect);
+      const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect);
 
       expect(point).toHaveProperty('x', 1);
       expect(point).toHaveProperty('series', '2');
@@ -93,7 +88,7 @@ describe('getPoint', function() {
 
     it('properly formats series values', function() {
       const seriesAspect = [{ accessor: 1, format: { id: 'number', params: { pattern: '$' } } }];
-      const point = getPoint(table, xAspect, seriesAspect, yScale, row, 0, yAspect);
+      const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect);
 
       expect(point).toHaveProperty('x', 1);
       expect(point).toHaveProperty('series', '2');

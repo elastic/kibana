@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-// @ts-ignore
 import { getSeries } from './_get_series';
 import { setFormatService } from '../../../services';
 
@@ -47,7 +46,7 @@ describe('getSeries', function() {
       aspects: {
         x: [{ accessor: 0 }],
         y: [{ accessor: 1, title: 'y' }],
-        z: { accessor: 2 },
+        z: [{ accessor: 2 }],
       },
     };
 

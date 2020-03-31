@@ -17,30 +17,22 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
-import moment from 'moment';
+import { Chart, DateParams } from './point_series';
 
-export function initXAxis(chart, table) {
-  const { format, title, params, accessor } = chart.aspects.x[0];
+export function orderedDateAxis(chart: Chart) {
+  const x = chart.aspects.x[0];
+  const { bounds } = x.params as DateParams;
 
-  chart.xAxisOrderedValues =
-    accessor === -1 ? [params.defaultValue] : uniq(table.rows.map(r => r[accessor]));
-  chart.xAxisFormat = format;
-  chart.xAxisLabel = title;
+  chart.ordered.date = true;
 
-  const { interval, date } = params;
-  if (interval) {
-    if (date) {
-      const { intervalESUnit, intervalESValue } = params;
-      chart.ordered = {
-        interval: moment.duration(interval),
-        intervalESUnit: intervalESUnit,
-        intervalESValue: intervalESValue,
-      };
-    } else {
-      chart.ordered = {
-        interval,
-      };
-    }
+  if (bounds) {
+    chart.ordered.min = isNaN(bounds.min as number)
+      ? Date.parse(bounds.min as string)
+      : (bounds.min as number);
+    chart.ordered.max = isNaN(bounds.max as number)
+      ? Date.parse(bounds.max as string)
+      : (bounds.max as number);
+  } else {
+    chart.ordered.endzones = false;
   }
 }

@@ -17,26 +17,44 @@
  * under the License.
  */
 
-import { getSeries } from './_get_series';
-import { getAspects } from './_get_aspects';
-import { initYAxis } from './_init_y_axis';
-import { initXAxis } from './_init_x_axis';
-import { orderedDateAxis } from './_ordered_date_axis';
+import { Point } from './_get_point';
+import { Dimension } from './point_series';
 
-export const buildPointSeriesData = (table, dimensions) => {
-  const chart = {
-    aspects: getAspects(table, dimensions),
-  };
+export interface Serie {
+  id: string;
+  rawId: string;
+  label: string;
+  count: number;
+  values: Point[];
+  format: Dimension['format'];
+  zLabel?: string;
+  zFormat?: Dimension['format'];
+}
 
-  initXAxis(chart, table);
-  initYAxis(chart);
+export function addToSiri(
+  series: Map<string, Serie>,
+  point: Point,
+  id: string,
+  yLabel: string,
+  yFormat: Dimension['format'],
+  zFormat?: Dimension['format'],
+  zLabel?: string
+) {
+  id = id == null ? '' : id + '';
 
-  if (chart.aspects.x[0].params.date) {
-    orderedDateAxis(chart);
+  if (series.has(id)) {
+    (series.get(id) as Serie).values.push(point);
+    return;
   }
 
-  chart.series = getSeries(table, chart);
-
-  delete chart.aspects;
-  return chart;
-};
+  series.set(id, {
+    id: id.split('-').pop() as string,
+    rawId: id,
+    label: yLabel == null ? id : yLabel,
+    count: 0,
+    values: [point],
+    format: yFormat,
+    zLabel,
+    zFormat,
+  });
+}

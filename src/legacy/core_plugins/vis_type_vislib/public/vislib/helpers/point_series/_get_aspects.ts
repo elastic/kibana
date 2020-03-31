@@ -18,6 +18,7 @@
  */
 
 import { makeFakeXAspect } from './_fake_x_aspect';
+import { Dimensions, Dimension, Table, Aspects } from './point_series';
 
 /**
  * Identify and group the columns based on the aspect of the pointSeries
@@ -26,10 +27,12 @@ import { makeFakeXAspect } from './_fake_x_aspect';
  * @return {object} - an object with a key for each aspect (see map). The values
  *                    may be undefined, a single aspect, or an array of aspects.
  */
-export function getAspects(table, dimensions) {
-  const aspects = {};
-  Object.keys(dimensions).forEach(name => {
-    const dimension = Array.isArray(dimensions[name]) ? dimensions[name] : [dimensions[name]];
+export function getAspects(table: Table, dimensions: Dimensions) {
+  const aspects: Aspects = {} as Aspects;
+  (Object.keys(dimensions) as Array<keyof Dimensions>).forEach(name => {
+    const dimension = Array.isArray(dimensions[name])
+      ? (dimensions[name] as Dimension[])
+      : [dimensions[name] as Dimension];
     dimension.forEach(d => {
       if (!d) {
         return;

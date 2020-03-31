@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-// @ts-ignore
 import { buildPointSeriesData } from './point_series';
 import { setFormatService } from '../../../services';
 

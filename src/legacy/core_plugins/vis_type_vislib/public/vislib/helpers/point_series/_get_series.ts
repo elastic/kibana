@@ -19,27 +19,26 @@
 
 import _ from 'lodash';
 import { getPoint } from './_get_point';
-import { addToSiri } from './_add_to_siri';
+import { addToSiri, Serie } from './_add_to_siri';
+import { Chart, Table } from './point_series';
 
-export function getSeries(table, chart) {
+export function getSeries(table: Table, chart: Chart) {
   const aspects = chart.aspects;
   const xAspect = aspects.x[0];
   const yAspect = aspects.y[0];
-  const zAspect = aspects.z && aspects.z.length ? aspects.z[0] : aspects.z;
+  const zAspect = aspects.z && aspects.z[0];
   const multiY = Array.isArray(aspects.y) && aspects.y.length > 1;
-  const yScale = chart.yScale;
 
-  const partGetPoint = _.partial(getPoint, table, xAspect, aspects.series, yScale);
-
-  let series = _(table.rows)
-    .transform(function(series, row, rowIndex) {
+  const partGetPoint = _.partial(getPoint, table, xAspect, aspects.series);
+  return _(table.rows)
+    .transform((seriesMap: any, row, rowIndex) => {
       if (!multiY) {
         const point = partGetPoint(row, rowIndex, yAspect, zAspect);
         if (point) {
           const id = `${point.series}-${yAspect.accessor}`;
           point.seriesId = id;
           addToSiri(
-            series,
+            seriesMap as Map<string, Serie>,
             point,
             id,
             point.series,
@@ -53,7 +52,9 @@ export function getSeries(table, chart) {
 
       aspects.y.forEach(function(y) {
         const point = partGetPoint(row, rowIndex, y, zAspect);
-        if (!point) return;
+        if (!point) {
+          return;
+        }
 
         // use the point's y-axis as it's series by default,
         // but augment that with series aspect if it's actually
@@ -69,32 +70,16 @@ export function getSeries(table, chart) {
 
         point.seriesId = seriesId;
         addToSiri(
-          series,
+          seriesMap,
           point,
-          seriesId,
+          seriesId as string,
           seriesLabel,
           y.format,
           zAspect && zAspect.format,
           zAspect && zAspect.title
         );
       });
-    }, new Map())
-    .thru(series => [...series.values()])
-    .value();
-
-  if (multiY) {
-    series = _.sortBy(series, function(siri) {
-      const firstVal = siri.values[0];
-      let y;
-
-      if (firstVal) {
-        y = _.find(aspects.y, function(y) {
-          return y.accessor === firstVal.accessor;
-        });
-      }
-
-      return y ? y.i : series.length;
-    });
-  }
-  return series;
+    }, new Map<string, Serie>() as any)
+    .thru(s => [...s.values()])
+    .value() as Serie[];
 }

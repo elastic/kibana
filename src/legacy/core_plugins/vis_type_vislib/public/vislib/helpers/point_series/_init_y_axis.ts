@@ -17,16 +17,20 @@
  * under the License.
  */
 
-export function orderedDateAxis(chart) {
-  const x = chart.aspects.x[0];
-  const { bounds } = x.params;
+import { Chart } from './point_series';
 
-  chart.ordered.date = true;
+export function initYAxis(chart: Chart) {
+  const y = chart.aspects.y;
 
-  if (bounds) {
-    chart.ordered.min = isNaN(bounds.min) ? Date.parse(bounds.min) : bounds.min;
-    chart.ordered.max = isNaN(bounds.max) ? Date.parse(bounds.max) : bounds.max;
-  } else {
-    chart.ordered.endzones = false;
+  if (Array.isArray(y)) {
+    // TODO: vis option should allow choosing this format
+    chart.yAxisFormat = y[0].format;
+    chart.yAxisLabel = y.length > 1 ? '' : y[0].title;
+  }
+
+  const z = chart.aspects.series;
+  if (z) {
+    chart.zAxisFormat = z[0].format;
+    chart.zAxisLabel = '';
   }
 }

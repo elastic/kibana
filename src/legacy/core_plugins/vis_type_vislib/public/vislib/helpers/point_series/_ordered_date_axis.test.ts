@@ -19,7 +19,6 @@
 
 import moment from 'moment';
 import _ from 'lodash';
-// @ts-ignore
 import { orderedDateAxis } from './_ordered_date_axis';
 
 describe('orderedDateAxis', function() {
