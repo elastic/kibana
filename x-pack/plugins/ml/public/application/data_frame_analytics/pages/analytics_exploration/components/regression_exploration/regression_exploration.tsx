@@ -18,6 +18,7 @@ import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
@@ -47,11 +48,12 @@ const jobCapsErrorTitle = i18n.translate(
 
 interface Props {
   jobId: string;
-  jobStatus: DATA_FRAME_TASK_STATE;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
+export const RegressionExploration: FC<Props> = ({ jobId }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
+  const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
+  const [indexPattern, setIndexPattern] = useState<any | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
@@ -65,6 +67,15 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
     setIsLoadingJobConfig(true);
     try {
       const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+      const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+      const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
+        ? analyticsStats.data_frame_analytics[0]
+        : undefined;
+
+      if (stats !== undefined && stats.state) {
+        setJobStatus(stats.state);
+      }
+
       if (
         Array.isArray(analyticsConfigs.data_frame_analytics) &&
         analyticsConfigs.data_frame_analytics.length > 0
@@ -89,11 +100,27 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const initializeJobCapsService = async () => {
     if (jobConfig !== undefined) {
       try {
-        const sourceIndex = jobConfig.source.index[0];
-        const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-        const indexPattern: IIndexPattern = await mlContext.indexPatterns.get(indexPatternId);
-        if (indexPattern !== undefined) {
-          await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+        const destIndex = Array.isArray(jobConfig.dest.index)
+          ? jobConfig.dest.index[0]
+          : jobConfig.dest.index;
+        const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
+        let indexP: IIndexPattern | undefined;
+
+        try {
+          indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+        } catch (e) {
+          indexP = undefined;
+        }
+
+        if (indexP === undefined) {
+          const sourceIndex = jobConfig.source.index[0];
+          const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+          indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+        }
+
+        if (indexP !== undefined) {
+          setIndexPattern(indexP);
+          await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
         }
         setIsInitialized(true);
       } catch (e) {
@@ -108,7 +135,7 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
 
   useEffect(() => {
     initializeJobCapsService();
-  }, [JSON.stringify(jobConfig)]);
+  }, [jobConfig && jobConfig.id]);
 
   if (jobConfigErrorMessage !== undefined || jobCapsServiceErrorMessage !== undefined) {
     return (
@@ -134,13 +161,17 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
       )}
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
-        <ResultsTable
-          jobConfig={jobConfig}
-          jobStatus={jobStatus}
-          setEvaluateSearchQuery={setSearchQuery}
-        />
-      )}
+      {isLoadingJobConfig === false &&
+        jobConfig !== undefined &&
+        indexPattern !== undefined &&
+        isInitialized === true && (
+          <ResultsTable
+            jobConfig={jobConfig}
+            indexPattern={indexPattern}
+            jobStatus={jobStatus}
+            setEvaluateSearchQuery={setSearchQuery}
+          />
+        )}
     </Fragment>
   );
 };
