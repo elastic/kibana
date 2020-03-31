@@ -7,9 +7,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ICON_TYPES, EuiIcon, EuiIconProps } from '@elastic/eui';
 import { PackageInfo, PackageListItem } from '../../../../common/types/models';
 import { useLinks } from '../sections/epm/hooks';
-import { epmRouteService } from '../../../../common/services';
-import { sendRequest } from '../hooks/use_request';
-import { GetInfoResponse } from '../types';
 type Package = PackageInfo | PackageListItem;
 
 const CACHED_ICONS = new Map<string, string>();
@@ -19,14 +16,25 @@ export const PackageIcon: React.FunctionComponent<{
   version?: string;
   icons?: Package['icons'];
 } & Omit<EuiIconProps, 'type'>> = ({ packageName, version, icons, ...euiIconProps }) => {
-  const iconType = usePackageIcon(packageName, version, icons);
+  const iconType = usePackageIconType({ packageName, version, icons });
   return <EuiIcon size="s" type={iconType} {...euiIconProps} />;
 };
 
-const usePackageIcon = (packageName: string, version?: string, icons?: Package['icons']) => {
+interface UsePackageIconType {
+  packageName: string;
+  version?: string;
+  icons?: Package['icons'];
+}
+
+export const usePackageIconType = ({
+  packageName = '',
+  version = '',
+  icons = [],
+}: UsePackageIconType) => {
   const { toImage } = useLinks();
   const [iconType, setIconType] = useState<string>(''); // FIXME: use `empty` icon during initialization - see: https://github.com/elastic/kibana/issues/60622
-  const pkgKey = `${packageName}-${version ?? ''}`;
+  const pkgKey = `${packageName}-${version}`;
+  const defaultType = 'package';
 
   // Generates an icon path or Eui Icon name based on an icon list from the package
   // or by using the package name against logo icons from Eui
@@ -47,8 +55,8 @@ const usePackageIcon = (packageName: string, version?: string, icons?: Package['
         return;
       }
 
-      CACHED_ICONS.set(pkgKey, 'package');
-      setIconType('package');
+      CACHED_ICONS.set(pkgKey, defaultType);
+      setIconType(defaultType);
     };
   }, [packageName, pkgKey, toImage]);
 
@@ -59,22 +67,10 @@ const usePackageIcon = (packageName: string, version?: string, icons?: Package['
     }
 
     // Use API to see if package has icons defined
-    if (!icons && version !== undefined) {
-      fromPackageInfo(pkgKey)
-        .catch(() => undefined) // ignore API errors
-        .then(fromInput);
-    } else {
+    if (icons) {
       fromInput(icons);
     }
   }, [icons, toImage, packageName, version, fromInput, pkgKey]);
 
   return iconType;
-};
-
-const fromPackageInfo = async (pkgKey: string) => {
-  const { data } = await sendRequest<GetInfoResponse>({
-    path: epmRouteService.getInfoPath(pkgKey),
-    method: 'get',
-  });
-  return data?.response?.icons;
 };
