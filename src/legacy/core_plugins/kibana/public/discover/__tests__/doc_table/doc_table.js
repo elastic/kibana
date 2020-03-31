@@ -61,6 +61,7 @@ const destroy = function() {
 describe('docTable', function() {
   let $elem;
   beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));
   beforeEach(function() {
     $elem = angular.element(`

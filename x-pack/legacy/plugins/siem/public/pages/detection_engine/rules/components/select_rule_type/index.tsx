@@ -16,10 +16,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
+import { RuleType } from '../../../../../../common/detection_engine/types';
 import { FieldHook } from '../../../../../shared_imports';
-import { RuleType } from '../../../../../containers/detection_engine/rules/types';
 import * as i18n from './translations';
-import { isMlRule } from '../../helpers';
 
 const MlCardDescription = ({ hasValidLicense = false }: { hasValidLicense?: boolean }) => (
   <EuiText size="s">

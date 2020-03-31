@@ -71,7 +71,7 @@ export const mockRule = (id: string): Rule => ({
   to: 'now',
   type: 'saved_query',
   threat: [],
-  throttle: null,
+  throttle: 'no_actions',
   note: '# this is some markdown documentation',
   version: 1,
 });
@@ -145,7 +145,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
       ],
     },
   ],
-  throttle: null,
+  throttle: 'no_actions',
   note: '# this is some markdown documentation',
   version: 1,
 });
@@ -184,7 +184,7 @@ export const mockActionsStepRule = (isNew = false, enabled = false): ActionsStep
   actions: [],
   kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
   enabled,
-  throttle: null,
+  throttle: 'no_actions',
 });
 
 export const mockDefineStepRule = (isNew = false): DefineStepRule => ({

@@ -7,9 +7,13 @@
 import { CaseProps } from '../index';
 import { Case } from '../../../../../containers/case/types';
 
+const updateCase = jest.fn();
+const fetchCase = jest.fn();
+
 export const caseProps: CaseProps = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
-  initialData: {
+  userCanCrud: true,
+  caseData: {
     closedAt: null,
     closedBy: null,
     id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
@@ -46,12 +50,14 @@ export const caseProps: CaseProps = {
     },
     version: 'WzQ3LDFd',
   },
+  fetchCase,
+  updateCase,
 };
 
 export const caseClosedProps: CaseProps = {
   ...caseProps,
-  initialData: {
-    ...caseProps.initialData,
+  caseData: {
+    ...caseProps.caseData,
     closedAt: '2020-02-20T23:06:33.798Z',
     closedBy: {
       username: 'elastic',
@@ -61,11 +67,11 @@ export const caseClosedProps: CaseProps = {
 };
 
 export const data: Case = {
-  ...caseProps.initialData,
+  ...caseProps.caseData,
 };
 
 export const dataClosed: Case = {
-  ...caseClosedProps.initialData,
+  ...caseClosedProps.caseData,
 };
 
 export const caseUserActions = [
