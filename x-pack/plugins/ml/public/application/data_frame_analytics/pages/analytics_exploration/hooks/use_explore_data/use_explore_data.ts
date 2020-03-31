@@ -116,12 +116,32 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
   useEffect(() => {
     (async () => {
       if (jobConfig !== undefined) {
-        const sourceIndex = jobConfig.source.index[0];
-        const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-        const jobCapsIndexPattern: IndexPattern = await mlContext.indexPatterns.get(indexPatternId);
-        if (jobCapsIndexPattern !== undefined) {
-          setIndexPattern(jobCapsIndexPattern);
-          await newJobCapsService.initializeFromIndexPattern(jobCapsIndexPattern, false, false);
+        try {
+          const destIndex = Array.isArray(jobConfig.dest.index)
+            ? jobConfig.dest.index[0]
+            : jobConfig.dest.index;
+          const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
+          let indexP: IndexPattern | undefined;
+
+          try {
+            indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+          } catch (e) {
+            indexP = undefined;
+          }
+
+          if (indexP === undefined) {
+            const sourceIndex = jobConfig.source.index[0];
+            const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+            indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+          }
+
+          if (indexP !== undefined) {
+            setIndexPattern(indexP);
+            await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
+          }
+        } catch (e) {
+          // eslint-disable-next-line
+          console.log('Error loading index field data', e);
         }
       }
     })();

@@ -1,31 +1,11 @@
 discover-app {
   flex-grow: 1;
-
-  .sidebar-container {
-    background-color: transparent;
-  }
 }
 
 .dscHistogram {
   display: flex;
   height: 200px;
   padding: $euiSizeS;
-}
-
-// SASSTODO: replace the margin-top value with a variable
-.dscSidebar__listHeader {
-  margin-top: 5px;
-}
-
-.dscFieldList--popular {
-  padding-top: $euiSizeS;
-}
-
-.dscFieldList--selected,
-.dscFieldList--unpopular,
-.dscFieldList--popular {
-  padding-left: $euiSizeS;
-  padding-right: $euiSizeS;
 }
 
 // SASSTODO: replace the z-index value with a variable
@@ -107,107 +87,6 @@ discover-app {
   background-color: $euiColorLightShade;
   padding: 5px 10px;
   text-align: center;
-}
-
-/**
- * 1. Override sidebar-item-title styles.
- */
-.dscSidebarItem {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0 !important; /* 1 */
-  padding-bottom: 0 !important; /* 1 */
-  height: $euiSizeXL;
-
-  &:hover,
-  &:focus {
-    .dscSidebarItem__action {
-      opacity: 1;
-    }
-  }
-}
-
-.dscSidebarItem--active {
-  background: shade($euiColorLightestShade, 5%);
-  color: $euiColorFullShade;
-  font-weight: bold;
-}
-
-/**
- * 1. Truncate long text so it doesn't push the actions outside of the container.
- */
-.dscSidebarItem__label {
-  overflow: hidden; /* 1 */
-  text-overflow: ellipsis; /* 1 */
-}
-
-/**
- * 1. Only visually hide the action, so that it's still accessible to screen readers.
- * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
- */
-.dscSidebarItem__action {
-  opacity: 0; /* 1 */
-
-  &:focus {
-    opacity: 1; /* 2 */
-  }
-}
-
-.dscFieldSearch {
-  padding: $euiSizeS;
-}
-
-.dscFieldFilter {
-  margin-top: $euiSizeS;
-}
-
-.dscFieldDetails {
-  padding: $euiSizeS;
-  background-color: $euiColorLightestShade;
-  color: $euiTextColor;
-}
-
-// SASSTODO: replace the padding and margin values with variables
-.dscFieldDetails__progress {
-  background-color: $euiColorEmptyShade;
-  color: $euiColorDarkShade;
-  padding: $euiSizeXS;
-}
-
-// SASSTODO: replace the margin-top value with a variable
-.dscFieldDetailsItem {
-  margin-top: 5px;
-}
-
-.dscFieldDetails__filter {
-  cursor: pointer;
-}
-
-.dscFieldDetailsItem__title {
-  line-height: 1.5;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/**
- * 1. If the field name is very long, don't let it squash the buttons.
- */
-.dscFieldDetailsItem__buttonGroup {
-  flex: 0 0 auto; /* 1 */
-}
-
-.dscFieldDetailsItem__button {
-  appearance: none;
-  border: none;
-  padding: 0;
-  background-color: transparent;
-}
-
-.dscFieldName--noResults {
-  color: $euiColorDarkShade;
 }
 
 .dscResults {
