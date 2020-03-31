@@ -57,8 +57,12 @@ const FormWrapper = styled.div`
       margin-top 40px;
     }
 
-    padding-top: ${theme.eui.paddingSizes.l};
-    padding-bottom: ${theme.eui.paddingSizes.l};
+    & > :first-child {
+      margin-top: 0;
+    }
+
+    padding-top: ${theme.eui.paddingSizes.xl};
+    padding-bottom: ${theme.eui.paddingSizes.xl};
   `}
 `;
 
@@ -80,7 +84,11 @@ const actionTypes: ActionType[] = [
   },
 ];
 
-const ConfigureCasesComponent: React.FC = () => {
+interface ConfigureCasesComponentProps {
+  userCanCrud: boolean;
+}
+
+const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
   const search = useGetUrlSearch(navTabs.case);
   const { http, triggers_actions_ui, notifications, application } = useKibana().services;
 
@@ -251,7 +259,7 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <Connectors
           connectors={connectors ?? []}
-          disabled={persistLoading || isLoadingConnectors}
+          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           isLoading={isLoadingConnectors}
           onChangeConnector={setConnectorId}
           handleShowAddFlyout={onClickAddConnector}
@@ -261,14 +269,14 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <ClosureOptions
           closureTypeSelected={closureType}
-          disabled={persistLoading || isLoadingConnectors || connectorId === 'none'}
+          disabled={persistLoading || isLoadingConnectors || connectorId === 'none' || !userCanCrud}
           onChangeClosureType={setClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
         <Mapping
           disabled
-          updateConnectorDisabled={updateConnectorDisabled}
+          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           mapping={mapping}
           onChangeMapping={setMapping}
           setEditFlyoutVisibility={onClickUpdateConnector}

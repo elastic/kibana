@@ -169,12 +169,12 @@ class JobService {
 
       function error(err) {
         console.log('jobService error getting list of jobs:', err);
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
             defaultMessage: 'Jobs list could not be retrieved',
           })
         );
-        msgs.error('', err);
+        msgs.notify.error('', err);
         reject({ jobs, err });
       }
     });
@@ -256,12 +256,12 @@ class JobService {
 
       function error(err) {
         console.log('JobService error getting list of jobs:', err);
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.jobsListCouldNotBeRetrievedErrorMessage', {
             defaultMessage: 'Jobs list could not be retrieved',
           })
         );
-        msgs.error('', err);
+        msgs.notify.error('', err);
         reject({ jobs, err });
       }
     });
@@ -302,12 +302,12 @@ class JobService {
 
       function error(err) {
         console.log('loadDatafeeds error getting list of datafeeds:', err);
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.datafeedsListCouldNotBeRetrievedErrorMessage', {
             defaultMessage: 'datafeeds list could not be retrieved',
           })
         );
-        msgs.error('', err);
+        msgs.notify.error('', err);
         reject({ jobs, err });
       }
     });
@@ -586,6 +586,7 @@ class JobService {
             const data = {
               index: job.datafeed_config.indices,
               body,
+              ...(job.datafeed_config.indices_options || {}),
             };
 
             ml.esSearch(data)
