@@ -42,7 +42,7 @@
 }
 
 .mapTocEntry-isSelected {
-  background-color: $euiColorLightShade;
+  background-color: tintOrShade($euiColorLightShade, 60%, 20%);
 }
 
 
