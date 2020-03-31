@@ -96,15 +96,19 @@ export class ReportingCore {
     __LEGACY: ServerFacade,
     plugins: ReportingSetupDeps
   ) {
+    // legacy plugin status
     mirrorPluginStatus(xpackMainPlugin, reporting);
+
+    // legacy license check
     const checkLicense = checkLicenseFactory(this.exportTypesRegistry);
     (xpackMainPlugin as any).status.once('green', () => {
       // Register a function that is called whenever the xpack info changes,
       // to re-compute the license check results for this plugin
       xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
     });
-    // Reporting routes
-    registerRoutes(this, this.config, __LEGACY, plugins, this.logger);
+
+    // legacy routes
+    registerRoutes(this, __LEGACY, plugins, this.logger);
   }
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {

@@ -19,13 +19,13 @@ const esErrors = elasticsearchErrors as Record<string, any>;
 
 export function registerJobGenerationRoutes(
   reporting: ReportingCore,
-  config: ReportingConfig,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const DOWNLOAD_BASE_URL =
-    `${config.kbnConfig.get('server', 'basePath')}` + `${API_BASE_URL}/jobs/download`;
+  const config = reporting.getConfig();
+  const downloadBaseUrl =
+    config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
 
   /*
    * Generates enqueued job details to use in responses
@@ -48,7 +48,7 @@ export function registerJobGenerationRoutes(
 
     return h
       .response({
-        path: `${DOWNLOAD_BASE_URL}/${jobJson.id}`,
+        path: `${downloadBaseUrl}/${jobJson.id}`,
         job: jobJson,
       })
       .type('application/json');

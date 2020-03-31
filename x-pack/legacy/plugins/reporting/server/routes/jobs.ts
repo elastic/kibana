@@ -17,7 +17,7 @@ import {
   ServerFacade,
 } from '../../types';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
@@ -37,11 +37,11 @@ function isResponse(response: Boom<null> | ResponseObject): response is Response
 
 export function registerJobInfoRoutes(
   reporting: ReportingCore,
-  config: ReportingConfig,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
+  const config = reporting.getConfig();
   const { elasticsearch } = plugins;
   const jobsQuery = jobsQueryFactory(config, elasticsearch);
   const getRouteConfig = getRouteConfigFactoryManagementPre(config, plugins, logger);
