@@ -15,7 +15,6 @@ import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
 import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../saved_object_types';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -54,7 +53,6 @@ export function initPushCaseUserActionApi({
             client,
             caseId,
             options: {
-              filter: `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.pushed_at: *`,
               fields: [],
               page: 1,
               perPage: 1,
@@ -72,7 +70,6 @@ export function initPushCaseUserActionApi({
           client,
           caseId,
           options: {
-            filter: `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.pushed_at: *`,
             fields: [],
             page: 1,
             perPage: totalCommentsFindByCases.total,
@@ -105,16 +102,16 @@ export function initPushCaseUserActionApi({
           }),
           caseService.patchComments({
             client,
-            comments: comments.saved_objects.map(comment => ({
-              commentId: comment.id,
-              updatedAttributes: {
-                pushed_at: pushedDate,
-                pushed_by: { username, full_name, email },
-                updated_at: pushedDate,
-                updated_by: { username, full_name, email },
-              },
-              version: comment.version,
-            })),
+            comments: comments.saved_objects
+              .filter(comment => comment.attributes.pushed_at == null)
+              .map(comment => ({
+                commentId: comment.id,
+                updatedAttributes: {
+                  pushed_at: pushedDate,
+                  pushed_by: { username, full_name, email },
+                },
+                version: comment.version,
+              })),
           }),
           userActionService.postUserActions({
             client,
