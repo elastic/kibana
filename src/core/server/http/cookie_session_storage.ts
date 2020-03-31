@@ -132,7 +132,7 @@ export async function createCookieSessionStorageFactory<T>(
     }
   }
 
-  await server.register(hapiAuthCookie);
+  await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
     cookie: cookieOptions.name,
