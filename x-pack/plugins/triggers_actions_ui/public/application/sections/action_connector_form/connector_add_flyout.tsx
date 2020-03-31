@@ -285,7 +285,7 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
   >
     <FormattedMessage
       id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerMessage"
-      defaultMessage="With an upgraded license, you have the option to connect to more 3rd party services."
+      defaultMessage="Upgrade your license or start a 30-day free trial for immediate access to more third-party connectors."
     />
     <EuiSpacer size="s" />
     <EuiFlexGroup gutterSize="s" wrap={true}>
