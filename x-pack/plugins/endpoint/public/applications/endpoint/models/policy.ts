@@ -14,8 +14,7 @@ import { PolicyConfig } from '../types';
 export const generatePolicy = (): PolicyConfig => {
   return {
     windows: {
-      // FIXME: needs to be changed to `events` and UI code refactored (Candace's PR?)
-      eventing: {
+      events: {
         process: true,
         network: true,
       },
