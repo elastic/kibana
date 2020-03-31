@@ -106,6 +106,7 @@ const createInternalSetupContractMock = () => {
     }),
     status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
       level: ServiceStatusLevel.available,
+      summary: 'Elasticsearch is available',
     }),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
