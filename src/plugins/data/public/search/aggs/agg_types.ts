@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient, NotificationsSetup } from 'src/core/public';
+import { QuerySetup } from '../../query/query_service';
 
 import { countMetricAgg } from './metrics/count';
 import { avgMetricAgg } from './metrics/avg';
@@ -36,10 +37,10 @@ import { derivativeMetricAgg } from './metrics/derivative';
 import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
 import { movingAvgMetricAgg } from './metrics/moving_avg';
 import { serialDiffMetricAgg } from './metrics/serial_diff';
-import { dateHistogramBucketAgg } from './buckets/date_histogram';
-import { histogramBucketAgg } from './buckets/histogram';
+import { getDateHistogramBucketAgg } from './buckets/date_histogram';
+import { getHistogramBucketAgg } from './buckets/histogram';
 import { rangeBucketAgg } from './buckets/range';
-import { dateRangeBucketAgg } from './buckets/date_range';
+import { getDateRangeBucketAgg } from './buckets/date_range';
 import { ipRangeBucketAgg } from './buckets/ip_range';
 import { termsBucketAgg } from './buckets/terms';
 import { filterBucketAgg } from './buckets/filter';
@@ -52,44 +53,47 @@ import { bucketAvgMetricAgg } from './metrics/bucket_avg';
 import { bucketMinMetricAgg } from './metrics/bucket_min';
 import { bucketMaxMetricAgg } from './metrics/bucket_max';
 
-export function getAggTypes(deps: { uiSettings: IUiSettingsClient }) {
-  const { uiSettings } = deps;
-  return {
-    metrics: [
-      countMetricAgg,
-      avgMetricAgg,
-      sumMetricAgg,
-      medianMetricAgg,
-      minMetricAgg,
-      maxMetricAgg,
-      stdDeviationMetricAgg,
-      cardinalityMetricAgg,
-      percentilesMetricAgg,
-      percentileRanksMetricAgg,
-      topHitMetricAgg,
-      derivativeMetricAgg,
-      cumulativeSumMetricAgg,
-      movingAvgMetricAgg,
-      serialDiffMetricAgg,
-      bucketAvgMetricAgg,
-      bucketSumMetricAgg,
-      bucketMinMetricAgg,
-      bucketMaxMetricAgg,
-      geoBoundsMetricAgg,
-      geoCentroidMetricAgg,
-    ],
-    buckets: [
-      dateHistogramBucketAgg,
-      histogramBucketAgg,
-      rangeBucketAgg,
-      dateRangeBucketAgg,
-      ipRangeBucketAgg,
-      termsBucketAgg,
-      filterBucketAgg,
-      getFiltersBucketAgg({ uiSettings }),
-      significantTermsBucketAgg,
-      geoHashBucketAgg,
-      geoTileBucketAgg,
-    ],
-  };
+export interface AggTypesDependencies {
+  notifications: NotificationsSetup;
+  uiSettings: IUiSettingsClient;
+  query: QuerySetup;
 }
+
+export const getAggTypes = ({ notifications, uiSettings, query }: AggTypesDependencies) => ({
+  metrics: [
+    countMetricAgg,
+    avgMetricAgg,
+    sumMetricAgg,
+    medianMetricAgg,
+    minMetricAgg,
+    maxMetricAgg,
+    stdDeviationMetricAgg,
+    cardinalityMetricAgg,
+    percentilesMetricAgg,
+    percentileRanksMetricAgg,
+    topHitMetricAgg,
+    derivativeMetricAgg,
+    cumulativeSumMetricAgg,
+    movingAvgMetricAgg,
+    serialDiffMetricAgg,
+    bucketAvgMetricAgg,
+    bucketSumMetricAgg,
+    bucketMinMetricAgg,
+    bucketMaxMetricAgg,
+    geoBoundsMetricAgg,
+    geoCentroidMetricAgg,
+  ],
+  buckets: [
+    getDateHistogramBucketAgg({ uiSettings, query }),
+    getHistogramBucketAgg({ uiSettings, notifications }),
+    rangeBucketAgg,
+    getDateRangeBucketAgg({ uiSettings }),
+    ipRangeBucketAgg,
+    termsBucketAgg,
+    filterBucketAgg,
+    getFiltersBucketAgg({ uiSettings }),
+    significantTermsBucketAgg,
+    geoHashBucketAgg,
+    geoTileBucketAgg,
+  ],
+});

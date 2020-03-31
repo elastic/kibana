@@ -123,6 +123,7 @@ export class ColorMapSelect extends Component {
       {
         value: CUSTOM_COLOR_MAP,
         inputDisplay: this.props.customOptionLabel,
+        'data-test-subj': `colorMapSelectOption_${CUSTOM_COLOR_MAP}`,
       },
       ...this.props.colorMapOptions,
     ];
@@ -150,6 +151,7 @@ export class ColorMapSelect extends Component {
             onChange={this._onColorMapSelect}
             valueOfSelected={valueOfSelected}
             hasDividers={true}
+            data-test-subj={`colorMapSelect_${this.props.styleProperty.getStyleName()}`}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

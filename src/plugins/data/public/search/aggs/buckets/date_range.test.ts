@@ -17,20 +17,22 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { setUiSettings } from '../../../../public/services';
-import { dateRangeBucketAgg } from './date_range';
+import { getDateRangeBucketAgg, DateRangeBucketAggDependencies } from './date_range';
 import { AggConfigs } from '../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 describe('date_range params', () => {
-  beforeEach(() => {
-    mockDataServices();
-  });
+  let aggTypesDependencies: DateRangeBucketAggDependencies;
 
-  const typesRegistry = mockAggTypesRegistry([dateRangeBucketAgg]);
+  beforeEach(() => {
+    const { uiSettings } = coreMock.createSetup();
+
+    aggTypesDependencies = {
+      uiSettings,
+    };
+  });
 
   const getAggConfigs = (params: Record<string, any> = {}, hasIncludeTypeMeta: boolean = true) => {
     const field = {
@@ -67,12 +69,12 @@ describe('date_range params', () => {
           params,
         },
       ],
-      { typesRegistry }
+      { typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]) }
     );
   };
 
   describe('getKey', () => {
-    it('should return object', () => {
+    test('should return object', () => {
       const aggConfigs = getAggConfigs();
       const dateRange = aggConfigs.aggs[0];
       const bucket = { from: 'from-date', to: 'to-date', key: 'from-dateto-date' };
@@ -82,7 +84,7 @@ describe('date_range params', () => {
   });
 
   describe('time_zone', () => {
-    it('should use the specified time_zone', () => {
+    test('should use the specified time_zone', () => {
       const aggConfigs = getAggConfigs({
         time_zone: 'Europe/Minsk',
         field: 'bytes',
@@ -93,7 +95,7 @@ describe('date_range params', () => {
       expect(params.time_zone).toBe('Europe/Minsk');
     });
 
-    it('should use the fixed time_zone from the index pattern typeMeta', () => {
+    test('should use the fixed time_zone from the index pattern typeMeta', () => {
       const aggConfigs = getAggConfigs({
         field: 'bytes',
       });
@@ -103,12 +105,14 @@ describe('date_range params', () => {
       expect(params.time_zone).toBe('defaultTimeZone');
     });
 
-    it('should use the Kibana time_zone if no parameter specified', () => {
-      const core = coreMock.createStart();
-      setUiSettings({
-        ...core.uiSettings,
-        get: () => 'kibanaTimeZone' as any,
-      });
+    test('should use the Kibana time_zone if no parameter specified', () => {
+      aggTypesDependencies = {
+        ...aggTypesDependencies,
+        uiSettings: {
+          ...aggTypesDependencies.uiSettings,
+          get: () => 'kibanaTimeZone' as any,
+        },
+      };
 
       const aggConfigs = getAggConfigs(
         {
@@ -118,8 +122,6 @@ describe('date_range params', () => {
       );
       const dateRange = aggConfigs.aggs[0];
       const params = dateRange.toDsl()[BUCKET_TYPES.DATE_RANGE];
-
-      setUiSettings(core.uiSettings); // clean up
 
       expect(params.time_zone).toBe('kibanaTimeZone');
     });

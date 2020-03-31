@@ -25,7 +25,6 @@ export const EXPLORER_ACTION = {
   SET_EXPLORER_DATA: 'setExplorerData',
   SET_FILTER_DATA: 'setFilterData',
   SET_INFLUENCER_FILTER_SETTINGS: 'setInfluencerFilterSettings',
-  SET_SEARCH_INPUT: 'setSearchInput',
   SET_SELECTED_CELLS: 'setSelectedCells',
   SET_SWIMLANE_CONTAINER_WIDTH: 'setSwimlaneContainerWidth',
   SET_SWIMLANE_LIMIT: 'setSwimlaneLimit',
@@ -56,7 +55,3 @@ export const MAX_INFLUENCER_FIELD_NAMES = 50;
 export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', {
   defaultMessage: 'job ID',
 });
-
-export const QUERY_LANGUAGE_KUERY = 'kuery';
-export const QUERY_LANGUAGE_LUCENE = 'lucene';
-export type QUERY_LANGUAGE = 'kuery' | 'lucene';

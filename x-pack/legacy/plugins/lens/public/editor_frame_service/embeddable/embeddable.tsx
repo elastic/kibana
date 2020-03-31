@@ -17,7 +17,7 @@ import {
 
 import { Subscription } from 'rxjs';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 
 import {
   Embeddable as AbstractEmbeddable,

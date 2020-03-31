@@ -43,12 +43,12 @@ describe('filterByAgent', () => {
   describe('options per agent', () => {
     it('go', () => {
       expect(getSettingKeysForAgent('go')).toEqual([
-        'active',
         'api_request_size',
         'api_request_time',
         'capture_body',
         'capture_headers',
         'log_level',
+        'recording',
         'server_timeout',
         'span_frames_min_duration',
         'stack_trace_limit',
@@ -59,7 +59,6 @@ describe('filterByAgent', () => {
 
     it('java', () => {
       expect(getSettingKeysForAgent('java')).toEqual([
-        'active',
         'api_request_size',
         'api_request_time',
         'capture_body',
@@ -72,6 +71,7 @@ describe('filterByAgent', () => {
         'profiling_inferred_spans_included_classes',
         'profiling_inferred_spans_min_duration',
         'profiling_inferred_spans_sampling_interval',
+        'recording',
         'server_timeout',
         'span_frames_min_duration',
         'stack_trace_limit',
@@ -88,24 +88,26 @@ describe('filterByAgent', () => {
 
     it('js-base', () => {
       expect(getSettingKeysForAgent('js-base')).toEqual([
+        'recording',
         'transaction_sample_rate'
       ]);
     });
 
     it('rum-js', () => {
       expect(getSettingKeysForAgent('rum-js')).toEqual([
+        'recording',
         'transaction_sample_rate'
       ]);
     });
 
     it('nodejs', () => {
       expect(getSettingKeysForAgent('nodejs')).toEqual([
-        'active',
         'api_request_size',
         'api_request_time',
         'capture_body',
         'capture_headers',
         'log_level',
+        'recording',
         'server_timeout',
         'stack_trace_limit',
         'transaction_max_spans',
@@ -119,6 +121,7 @@ describe('filterByAgent', () => {
         'api_request_time',
         'capture_body',
         'capture_headers',
+        'recording',
         'span_frames_min_duration',
         'transaction_max_spans',
         'transaction_sample_rate'
@@ -130,6 +133,7 @@ describe('filterByAgent', () => {
         'capture_body',
         'capture_headers',
         'log_level',
+        'recording',
         'span_frames_min_duration',
         'stack_trace_limit',
         'transaction_max_spans',
@@ -139,12 +143,12 @@ describe('filterByAgent', () => {
 
     it('ruby', () => {
       expect(getSettingKeysForAgent('ruby')).toEqual([
-        'active',
         'api_request_size',
         'api_request_time',
         'capture_body',
         'capture_headers',
         'log_level',
+        'recording',
         'span_frames_min_duration',
         'transaction_max_spans',
         'transaction_sample_rate'
@@ -155,6 +159,7 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual([
         'capture_body',
         'capture_headers',
+        'recording',
         'transaction_max_spans',
         'transaction_sample_rate'
       ]);

@@ -16,10 +16,10 @@ import { TestProviders } from '../../../../mock';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 import { wait } from '../../../../lib/helpers';
-import { usePushToService } from './push_to_service';
+import { usePushToService } from '../use_push_to_service';
 jest.mock('../../../../containers/case/use_update_case');
 jest.mock('../../../../containers/case/use_get_case_user_actions');
-jest.mock('./push_to_service');
+jest.mock('../use_push_to_service');
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const usePushToServiceMock = usePushToService as jest.Mock;
@@ -67,7 +67,6 @@ describe('CaseView ', () => {
   /* eslint-enable no-console */
 
   const defaultUpdateCaseState = {
-    caseData: data,
     isLoading: false,
     isError: false,
     updateKey: null,
@@ -186,12 +185,7 @@ describe('CaseView ', () => {
     wrapper
       .find('input[data-test-subj="toggle-case-status"]')
       .simulate('change', { target: { checked: true } });
-
-    expect(updateCaseProperty).toBeCalledWith({
-      fetchCaseUserActions,
-      updateKey: 'status',
-      updateValue: 'closed',
-    });
+    expect(updateCaseProperty).toHaveBeenCalled();
   });
 
   it('should render comments', async () => {
