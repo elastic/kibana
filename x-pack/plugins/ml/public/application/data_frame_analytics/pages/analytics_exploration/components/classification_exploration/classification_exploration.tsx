@@ -15,7 +15,7 @@ import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/
 import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
 import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
@@ -53,6 +53,7 @@ interface Props {
 export const ClassificationExploration: FC<Props> = ({ jobId }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
@@ -108,11 +109,27 @@ export const ClassificationExploration: FC<Props> = ({ jobId }) => {
   const initializeJobCapsService = async () => {
     if (jobConfig !== undefined) {
       try {
-        const sourceIndex = jobConfig.source.index[0];
-        const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-        const indexPattern: IIndexPattern = await mlContext.indexPatterns.get(indexPatternId);
-        if (indexPattern !== undefined) {
-          await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+        const destIndex = Array.isArray(jobConfig.dest.index)
+          ? jobConfig.dest.index[0]
+          : jobConfig.dest.index;
+        const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
+        let indexP: IndexPattern | undefined;
+
+        try {
+          indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+        } catch (e) {
+          indexP = undefined;
+        }
+
+        if (indexP === undefined) {
+          const sourceIndex = jobConfig.source.index[0];
+          const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+          indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+        }
+
+        if (indexP !== undefined) {
+          setIndexPattern(indexP);
+          await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
         }
         setIsInitialized(true);
       } catch (e) {
@@ -127,7 +144,7 @@ export const ClassificationExploration: FC<Props> = ({ jobId }) => {
 
   useEffect(() => {
     initializeJobCapsService();
-  }, [JSON.stringify(jobConfig)]);
+  }, [jobConfig && jobConfig.id]);
 
   if (jobConfigErrorMessage !== undefined || jobCapsServiceErrorMessage !== undefined) {
     return (
@@ -153,13 +170,17 @@ export const ClassificationExploration: FC<Props> = ({ jobId }) => {
       )}
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
-        <ResultsTable
-          jobConfig={jobConfig}
-          jobStatus={jobStatus}
-          setEvaluateSearchQuery={setSearchQuery}
-        />
-      )}
+      {isLoadingJobConfig === false &&
+        jobConfig !== undefined &&
+        indexPattern !== undefined &&
+        isInitialized === true && (
+          <ResultsTable
+            jobConfig={jobConfig}
+            indexPattern={indexPattern}
+            jobStatus={jobStatus}
+            setEvaluateSearchQuery={setSearchQuery}
+          />
+        )}
     </Fragment>
   );
 };

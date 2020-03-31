@@ -17,12 +17,19 @@
  * under the License.
  */
 import { wrapInI18nContext } from '../../../kibana_services';
-import { DiscoverFieldSearch } from './discover_field_search';
+import { DiscoverSidebar } from './discover_sidebar';
 
-export function createFieldSearchDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverFieldSearch), [
-    ['onChange', { watchDepth: 'reference' }],
-    ['value', { watchDepth: 'value' }],
-    ['types', { watchDepth: 'value' }],
+export function createDiscoverSidebarDirective(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(DiscoverSidebar), [
+    ['columns', { watchDepth: 'reference' }],
+    ['fieldCounts', { watchDepth: 'reference' }],
+    ['hits', { watchDepth: 'reference' }],
+    ['indexPatternList', { watchDepth: 'reference' }],
+    ['onAddField', { watchDepth: 'reference' }],
+    ['onAddFilter', { watchDepth: 'reference' }],
+    ['onRemoveField', { watchDepth: 'reference' }],
+    ['selectedIndexPattern', { watchDepth: 'reference' }],
+    ['setIndexPattern', { watchDepth: 'reference' }],
+    ['state', { watchDepth: 'reference' }],
   ]);
 }
