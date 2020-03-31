@@ -113,8 +113,8 @@ def listVcsEnvVars() {
     }
 
     CMD="git log --pretty=format"
-    XS=("${SHELL}" \
-        "${VAULT_ADDR}" \
+    XS=("${BUILD_DISPLAY_NAME}" \
+        "${GIT_BRANCH}" \
         "$(git rev-parse --abbrev-ref HEAD)" \
         "$(${CMD}":%h" -1)" \
         "$(${CMD}":%an" -1)" \
