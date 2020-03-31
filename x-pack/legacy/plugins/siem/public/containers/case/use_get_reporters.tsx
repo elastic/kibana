@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { isEmpty } from 'lodash/fp';
 import { User } from '../../../../../../plugins/case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getReporters } from './api';
@@ -44,9 +45,12 @@ export const useGetReporters = (): UseGetReporters => {
       });
       try {
         const response = await getReporters(abortCtrl.signal);
+        const myReporters = response
+          .map(r => (r.full_name == null || isEmpty(r.full_name) ? r.username ?? '' : r.full_name))
+          .filter(u => !isEmpty(u));
         if (!didCancel) {
           setReporterState({
-            reporters: response.map(r => r.full_name ?? r.username ?? 'N/A'),
+            reporters: myReporters,
             respReporters: response,
             isLoading: false,
             isError: false,
