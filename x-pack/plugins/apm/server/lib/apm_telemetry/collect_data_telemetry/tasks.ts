@@ -236,7 +236,7 @@ export const tasks: TelemetryTask[] = [
         .map(part => Number(part));
 
       return {
-        versions: {
+        version: {
           apm_server: {
             major,
             minor,
