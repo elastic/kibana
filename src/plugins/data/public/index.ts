@@ -299,6 +299,7 @@ import {
   propFilter,
   siblingPipelineType,
   termsAggFilter,
+  TimeBuckets,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -403,6 +404,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    TimeBuckets,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

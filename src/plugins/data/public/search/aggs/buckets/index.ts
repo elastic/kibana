@@ -25,5 +25,6 @@ export * from './ip_range';
 export * from './lib/cidr_mask';
 export * from './lib/date_range';
 export * from './lib/ip_range';
+export * from './lib/time_buckets';
 export * from './migrate_include_exclude_format';
 export * from './terms';
