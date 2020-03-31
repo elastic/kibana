@@ -17,11 +17,16 @@ import {
   ruleStatusSavedObjectMappings,
   ruleStatusSavedObjectType,
 } from './lib/detection_engine/rules/saved_object_mappings';
+import {
+  ruleActionsSavedObjectMappings,
+  ruleActionsSavedObjectType,
+} from './lib/detection_engine/rule_actions/saved_object_mappings';
 
 export {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   ruleStatusSavedObjectType,
+  ruleActionsSavedObjectType,
   timelineSavedObjectType,
 };
 export const savedObjectMappings = {
@@ -29,4 +34,5 @@ export const savedObjectMappings = {
   ...noteSavedObjectMappings,
   ...pinnedEventSavedObjectMappings,
   ...ruleStatusSavedObjectMappings,
+  ...ruleActionsSavedObjectMappings,
 };
