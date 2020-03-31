@@ -28,7 +28,7 @@ import {
 import { esFilters, Filter, Query } from '../../../../../../../plugins/data/public';
 import { migrateLegacyQuery } from '../../../../../../../plugins/kibana_legacy/public';
 
-interface AppState {
+export interface AppState {
   /**
    * Columns displayed in the table
    */
