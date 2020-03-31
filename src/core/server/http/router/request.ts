@@ -33,7 +33,7 @@ const requestSymbol = Symbol('request');
 /**
  * @internal
  */
-export interface KibanaRouteState extends ApplicationState {
+export interface KibanaRouteState extends RequestApplicationState {
   xsrfRequired: boolean;
 }
 /**
