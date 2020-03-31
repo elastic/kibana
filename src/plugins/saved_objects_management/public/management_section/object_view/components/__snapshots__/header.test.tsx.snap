@@ -23,7 +23,7 @@ exports[`Intro component renders correctly 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Edit {title}"
-                id="kbn.management.objects.view.editItemTitle"
+                id="savedObjectsManagement.view.editItemTitle"
                 values={
                   Object {
                     "title": "search",
@@ -85,7 +85,7 @@ exports[`Intro component renders correctly 1`] = `
                         >
                           <FormattedMessage
                             defaultMessage="View {title}"
-                            id="kbn.management.objects.view.viewItemButtonLabel"
+                            id="savedObjectsManagement.view.viewItemButtonLabel"
                             values={
                               Object {
                                 "title": "search",
@@ -140,7 +140,7 @@ exports[`Intro component renders correctly 1`] = `
                         >
                           <FormattedMessage
                             defaultMessage="Delete {title}"
-                            id="kbn.management.objects.view.deleteItemButtonLabel"
+                            id="savedObjectsManagement.view.deleteItemButtonLabel"
                             values={
                               Object {
                                 "title": "search",

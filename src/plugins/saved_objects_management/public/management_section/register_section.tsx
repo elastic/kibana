@@ -39,7 +39,7 @@ interface RegisterOptions {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
 
-const title = i18n.translate('kbn.management.objects.savedObjectsSectionLabel', {
+const title = i18n.translate('savedObjectsManagement.managementSectionLabel', {
   defaultMessage: 'Saved Objects',
 });
 
@@ -124,13 +124,13 @@ const SavedObjectsEditionPage = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: i18n.translate('kbn.management.savedObjects.indexBreadcrumb', {
+        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
         href: '#/management/kibana/objects',
       },
       {
-        text: i18n.translate('kbn.management.savedObjects.editBreadcrumb', {
+        text: i18n.translate('savedObjectsManagement.breadcrumb.edit', {
           defaultMessage: 'Edit {savedObjectType}',
           values: { savedObjectType: service?.service.type ?? 'object' },
         }),
@@ -171,7 +171,7 @@ const SavedObjectsTablePage = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: i18n.translate('kbn.management.savedObjects.indexBreadcrumb', {
+        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
         href: '#/management/kibana/objects',

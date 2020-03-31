@@ -8,7 +8,7 @@ exports[`Intro component renders correctly 1`] = `
     title={
       <FormattedMessage
         defaultMessage="Proceed with caution!"
-        id="kbn.management.objects.view.howToModifyObjectTitle"
+        id="savedObjectsManagement.view.howToModifyObjectTitle"
         values={Object {}}
       />
     }
@@ -37,7 +37,7 @@ exports[`Intro component renders correctly 1`] = `
         >
           <FormattedMessage
             defaultMessage="Proceed with caution!"
-            id="kbn.management.objects.view.howToModifyObjectTitle"
+            id="savedObjectsManagement.view.howToModifyObjectTitle"
             values={Object {}}
           >
             Proceed with caution!
@@ -53,7 +53,7 @@ exports[`Intro component renders correctly 1`] = `
           <div>
             <FormattedMessage
               defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be."
-              id="kbn.management.objects.view.howToModifyObjectDescription"
+              id="savedObjectsManagement.view.howToModifyObjectDescription"
               values={Object {}}
             >
               Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn’t be.

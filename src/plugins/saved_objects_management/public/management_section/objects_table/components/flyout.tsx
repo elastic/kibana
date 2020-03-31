@@ -172,7 +172,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate('kbn.management.objects.objectsTable.flyout.importFileErrorMessage', {
+        error: i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
           defaultMessage: 'The file could not be processed.',
         }),
       });
@@ -230,7 +230,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       this.setState({
         status: 'error',
         error: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
+          'savedObjectsManagement.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
           { defaultMessage: 'The file could not be processed.' }
         ),
       });
@@ -253,7 +253,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       this.setState({
         status: 'error',
         error: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.importLegacyFileErrorMessage',
+          'savedObjectsManagement.objectsTable.flyout.importLegacyFileErrorMessage',
           { defaultMessage: 'The file could not be processed.' }
         ),
       });
@@ -264,7 +264,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       this.setState({
         status: 'error',
         error: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage',
+          'savedObjectsManagement.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage',
           { defaultMessage: 'Saved objects file format is invalid and cannot be imported.' }
         ),
       });
@@ -379,7 +379,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         // Do not Promise.all these calls as the order matters
         this.setState({
           loadingMessage: i18n.translate(
-            'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.resolvingConflictsLoadingMessage',
+            'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.resolvingConflictsLoadingMessage',
             { defaultMessage: 'Resolving conflicts…' }
           ),
         });
@@ -392,7 +392,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         }
         this.setState({
           loadingMessage: i18n.translate(
-            'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savingConflictsLoadingMessage',
+            'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.savingConflictsLoadingMessage',
             { defaultMessage: 'Saving conflicts…' }
           ),
         });
@@ -402,7 +402,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         );
         this.setState({
           loadingMessage: i18n.translate(
-            'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.savedSearchAreLinkedProperlyLoadingMessage',
+            'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.savedSearchAreLinkedProperlyLoadingMessage',
             { defaultMessage: 'Ensure saved searches are linked properly…' }
           ),
         });
@@ -414,7 +414,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         );
         this.setState({
           loadingMessage: i18n.translate(
-            'kbn.management.objects.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
+            'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
             { defaultMessage: 'Retrying failed objects…' }
           ),
         });
@@ -469,11 +469,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       {
         field: 'existingIndexPatternId',
         name: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnIdName',
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnIdName',
           { defaultMessage: 'ID' }
         ),
         description: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnIdDescription',
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnIdDescription',
           { defaultMessage: 'ID of the index pattern' }
         ),
         sortable: true,
@@ -481,11 +481,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       {
         field: 'list',
         name: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountName',
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnCountName',
           { defaultMessage: 'Count' }
         ),
         description: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountDescription',
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnCountDescription',
           { defaultMessage: 'How many affected objects' }
         ),
         render: (list: any[]) => {
@@ -495,11 +495,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       {
         field: 'list',
         name: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsName',
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsName',
           { defaultMessage: 'Sample of affected objects' }
         ),
         description: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
           { defaultMessage: 'Sample of affected objects' }
         ),
         render: (list: any[]) => {
@@ -515,7 +515,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       {
         field: 'existingIndexPatternId',
         name: i18n.translate(
-          'kbn.management.objects.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
           { defaultMessage: 'New index pattern' }
         ),
         render: (id: string) => {
@@ -569,7 +569,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         <EuiCallOut
           title={
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.errorCalloutTitle"
+              id="savedObjectsManagement.objectsTable.flyout.errorCalloutTitle"
               defaultMessage="Sorry, there was an error"
             />
           }
@@ -616,7 +616,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           data-test-subj="importSavedObjectsFailedWarning"
           title={
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.importFailedTitle"
+              id="savedObjectsManagement.objectsTable.flyout.importFailedTitle"
               defaultMessage="Import failed"
             />
           }
@@ -625,7 +625,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         >
           <p>
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.importFailedDescription"
+              id="savedObjectsManagement.objectsTable.flyout.importFailedDescription"
               defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
               values={{
                 failedImportCount: failedImports.length,
@@ -639,7 +639,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
                 if (error.type === 'missing_references') {
                   return error.references.map(reference => {
                     return i18n.translate(
-                      'kbn.management.objects.objectsTable.flyout.importFailedMissingReference',
+                      'savedObjectsManagement.objectsTable.flyout.importFailedMissingReference',
                       {
                         defaultMessage: '{type} [id={id}] could not locate {refType} [id={refId}]',
                         values: {
@@ -653,7 +653,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
                   });
                 } else if (error.type === 'unsupported_type') {
                   return i18n.translate(
-                    'kbn.management.objects.objectsTable.flyout.importFailedUnsupportedType',
+                    'savedObjectsManagement.objectsTable.flyout.importFailedUnsupportedType',
                     {
                       defaultMessage: '{type} [id={id}] unsupported type',
                       values: {
@@ -678,7 +678,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             data-test-subj="importSavedObjectsSuccessNoneImported"
             title={
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.flyout.importSuccessfulCallout.noObjectsImportedTitle"
+                id="savedObjectsManagement.objectsTable.flyout.importSuccessfulCallout.noObjectsImportedTitle"
                 defaultMessage="No objects imported"
               />
             }
@@ -692,7 +692,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           data-test-subj="importSavedObjectsSuccess"
           title={
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.importSuccessfulTitle"
+              id="savedObjectsManagement.objectsTable.flyout.importSuccessfulTitle"
               defaultMessage="Import successful"
             />
           }
@@ -701,7 +701,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         >
           <p>
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.importSuccessfulDescription"
+              id="savedObjectsManagement.objectsTable.flyout.importSuccessfulDescription"
               defaultMessage="Successfully imported {importCount} objects."
               values={{ importCount }}
             />
@@ -719,7 +719,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.selectFileToImportFormRowLabel"
+              id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
               defaultMessage="Please select a file to import"
             />
           }
@@ -727,7 +727,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <EuiFilePicker
             initialPromptText={
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.flyout.importPromptText"
+                id="savedObjectsManagement.objectsTable.flyout.importPromptText"
                 defaultMessage="Import"
               />
             }
@@ -739,7 +739,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             name="overwriteAll"
             label={
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.flyout.overwriteSavedObjectsLabel"
+                id="savedObjectsManagement.objectsTable.flyout.overwriteSavedObjectsLabel"
                 defaultMessage="Automatically overwrite all saved objects?"
               />
             }
@@ -762,7 +762,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       confirmButton = (
         <EuiButton onClick={done} size="s" fill data-test-subj="importSavedObjectsDoneBtn">
           <FormattedMessage
-            id="kbn.management.objects.objectsTable.flyout.importSuccessful.confirmButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.importSuccessful.confirmButtonLabel"
             defaultMessage="Done"
           />
         </EuiButton>
@@ -777,7 +777,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           data-test-subj="importSavedObjectsConfirmBtn"
         >
           <FormattedMessage
-            id="kbn.management.objects.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
             defaultMessage="Confirm all changes"
           />
         </EuiButton>
@@ -792,7 +792,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           data-test-subj="importSavedObjectsImportBtn"
         >
           <FormattedMessage
-            id="kbn.management.objects.objectsTable.flyout.import.confirmButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.import.confirmButtonLabel"
             defaultMessage="Import"
           />
         </EuiButton>
@@ -804,7 +804,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={close} size="s">
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.import.cancelButtonLabel"
+              id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -826,7 +826,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           data-test-subj="importSavedObjectsLegacyWarning"
           title={
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
+              id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
               defaultMessage="Support for JSON files is going away"
             />
           }
@@ -835,7 +835,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         >
           <p>
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.legacyFileUsedBody"
+              id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
               defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
             />
           </p>
@@ -850,7 +850,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           data-test-subj="importSavedObjectsConflictsWarning"
           title={
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+              id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
               defaultMessage="Index Pattern Conflicts"
             />
           }
@@ -859,7 +859,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         >
           <p>
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+              id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
               defaultMessage="The following saved objects use index patterns that do not exist.
               Please select the index patterns you'd like re-associated with
               them. You can {indexPatternLink} if necessary."
@@ -867,7 +867,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
                 indexPatternLink: (
                   <EuiLink href={this.props.newIndexPatternUrl}>
                     <FormattedMessage
-                      id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                      id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                       defaultMessage="create a new index pattern"
                     />
                   </EuiLink>
@@ -918,18 +918,18 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         <EuiOverlayMask>
           <EuiConfirmModal
             title={i18n.translate(
-              'kbn.management.objects.objectsTable.flyout.confirmOverwriteTitle',
+              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteTitle',
               {
                 defaultMessage: 'Overwrite {type}?',
                 values: { type: this.state.conflictingRecord.type },
               }
             )}
             cancelButtonText={i18n.translate(
-              'kbn.management.objects.objectsTable.flyout.confirmOverwriteCancelButtonText',
+              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteCancelButtonText',
               { defaultMessage: 'Cancel' }
             )}
             confirmButtonText={i18n.translate(
-              'kbn.management.objects.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
+              'savedObjectsManagement.objectsTable.flyout.confirmOverwriteOverwriteButtonText',
               { defaultMessage: 'Overwrite' }
             )}
             buttonColor="danger"
@@ -939,7 +939,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           >
             <p>
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.flyout.confirmOverwriteBody"
+                id="savedObjectsManagement.objectsTable.flyout.confirmOverwriteBody"
                 defaultMessage="Are you sure you want to overwrite {title}?"
                 values={{
                   title:
@@ -959,7 +959,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <EuiTitle size="m">
             <h2>
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.flyout.importSavedObjectTitle"
+                id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
                 defaultMessage="Import saved objects"
               />
             </h2>

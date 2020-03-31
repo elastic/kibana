@@ -52,7 +52,7 @@ export const Header = ({
           {canEdit ? (
             <h1>
               <FormattedMessage
-                id="kbn.management.objects.view.editItemTitle"
+                id="savedObjectsManagement.view.editItemTitle"
                 defaultMessage="Edit {title}"
                 values={{ title: type }}
               />
@@ -60,7 +60,7 @@ export const Header = ({
           ) : (
             <h1>
               <FormattedMessage
-                id="kbn.management.objects.view.viewItemTitle"
+                id="savedObjectsManagement.view.viewItemTitle"
                 defaultMessage="View {title}"
                 values={{ title: type }}
               />
@@ -79,7 +79,7 @@ export const Header = ({
                 data-test-subj="savedObjectEditViewInApp"
               >
                 <FormattedMessage
-                  id="kbn.management.objects.view.viewItemButtonLabel"
+                  id="savedObjectsManagement.view.viewItemButtonLabel"
                   defaultMessage="View {title}"
                   values={{ title: type }}
                 />
@@ -96,7 +96,7 @@ export const Header = ({
                 data-test-subj="savedObjectEditDelete"
               >
                 <FormattedMessage
-                  id="kbn.management.objects.view.deleteItemButtonLabel"
+                  id="savedObjectsManagement.view.deleteItemButtonLabel"
                   defaultMessage="Delete {title}"
                   values={{ title: type }}
                 />

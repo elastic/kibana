@@ -92,7 +92,7 @@ export class Form extends Component<FormProps, FormState> {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill={true}
-                aria-label={i18n.translate('kbn.management.objects.view.saveButtonAriaLabel', {
+                aria-label={i18n.translate('savedObjectsManagement.view.saveButtonAriaLabel', {
                   defaultMessage: 'Save { title } object',
                   values: {
                     title: service.type,
@@ -103,7 +103,7 @@ export class Form extends Component<FormProps, FormState> {
                 data-test-subj="savedObjectEditSave"
               >
                 <FormattedMessage
-                  id="kbn.management.objects.view.saveButtonLabel"
+                  id="savedObjectsManagement.view.saveButtonLabel"
                   defaultMessage="Save { title } object"
                   values={{ title: service.type }}
                 />
@@ -113,14 +113,14 @@ export class Form extends Component<FormProps, FormState> {
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              aria-label={i18n.translate('kbn.management.objects.view.cancelButtonAriaLabel', {
+              aria-label={i18n.translate('savedObjectsManagement.view.cancelButtonAriaLabel', {
                 defaultMessage: 'Cancel',
               })}
               onClick={this.onCancel}
               data-test-subj="savedObjectEditCancel"
             >
               <FormattedMessage
-                id="kbn.management.objects.view.cancelButtonLabel"
+                id="savedObjectsManagement.view.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>

@@ -154,7 +154,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       {
         type: 'field_value_selection',
         field: 'type',
-        name: i18n.translate('kbn.management.objects.objectsTable.table.typeFilterName', {
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.typeFilterName', {
           defaultMessage: 'Type',
         }),
         multiSelect: 'or',
@@ -173,13 +173,13 @@ export class Table extends PureComponent<TableProps, TableState> {
     const columns = [
       {
         field: 'type',
-        name: i18n.translate('kbn.management.objects.objectsTable.table.columnTypeName', {
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTypeName', {
           defaultMessage: 'Type',
         }),
         width: '50px',
         align: 'center',
         description: i18n.translate(
-          'kbn.management.objects.objectsTable.table.columnTypeDescription',
+          'savedObjectsManagement.objectsTable.table.columnTypeDescription',
           { defaultMessage: 'Type of the saved object' }
         ),
         sortable: false,
@@ -199,11 +199,11 @@ export class Table extends PureComponent<TableProps, TableState> {
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {
         field: 'meta.title',
-        name: i18n.translate('kbn.management.objects.objectsTable.table.columnTitleName', {
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTitleName', {
           defaultMessage: 'Title',
         }),
         description: i18n.translate(
-          'kbn.management.objects.objectsTable.table.columnTitleDescription',
+          'savedObjectsManagement.objectsTable.table.columnTitleDescription',
           { defaultMessage: 'Title of the saved object' }
         ),
         dataType: 'string',
@@ -221,17 +221,17 @@ export class Table extends PureComponent<TableProps, TableState> {
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {
-        name: i18n.translate('kbn.management.objects.objectsTable.table.columnActionsName', {
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.columnActionsName', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             name: i18n.translate(
-              'kbn.management.objects.objectsTable.table.columnActions.inspectActionName',
+              'savedObjectsManagement.objectsTable.table.columnActions.inspectActionName',
               { defaultMessage: 'Inspect' }
             ),
             description: i18n.translate(
-              'kbn.management.objects.objectsTable.table.columnActions.inspectActionDescription',
+              'savedObjectsManagement.objectsTable.table.columnActions.inspectActionDescription',
               { defaultMessage: 'Inspect this saved object' }
             ),
             type: 'icon',
@@ -242,11 +242,11 @@ export class Table extends PureComponent<TableProps, TableState> {
           },
           {
             name: i18n.translate(
-              'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionName',
+              'savedObjectsManagement.objectsTable.table.columnActions.viewRelationshipsActionName',
               { defaultMessage: 'Relationships' }
             ),
             description: i18n.translate(
-              'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionDescription',
+              'savedObjectsManagement.objectsTable.table.columnActions.viewRelationshipsActionDescription',
               {
                 defaultMessage:
                   'View the relationships this saved object has to other saved objects',
@@ -283,7 +283,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     let queryParseError;
     if (!this.state.isSearchTextValid) {
       const parseErrorMsg = i18n.translate(
-        'kbn.management.objects.objectsTable.searchBar.unableToParseQueryErrorMessage',
+        'savedObjectsManagement.objectsTable.searchBar.unableToParseQueryErrorMessage',
         { defaultMessage: 'Unable to parse query' }
       );
       queryParseError = (
@@ -299,7 +299,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         isDisabled={selectedSavedObjects.length === 0}
       >
         <FormattedMessage
-          id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
+          id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
           defaultMessage="Export"
         />
       </EuiButton>
@@ -324,14 +324,14 @@ export class Table extends PureComponent<TableProps, TableState> {
               title={
                 this.props.canDelete
                   ? undefined
-                  : i18n.translate('kbn.management.objects.objectsTable.table.deleteButtonTitle', {
+                  : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
                       defaultMessage: 'Unable to delete saved objects',
                     })
               }
               data-test-subj="savedObjectsManagementDelete"
             >
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
+                id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
                 defaultMessage="Delete"
               />
             </EuiButton>,
@@ -344,7 +344,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                    id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
                     defaultMessage="Options"
                   />
                 }
@@ -353,7 +353,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                   name="includeReferencesDeep"
                   label={
                     <FormattedMessage
-                      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                      id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                       defaultMessage="Include related objects"
                     />
                   }
@@ -364,7 +364,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               <EuiFormRow>
                 <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
                   <FormattedMessage
-                    id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                    id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"
                   />
                 </EuiButton>

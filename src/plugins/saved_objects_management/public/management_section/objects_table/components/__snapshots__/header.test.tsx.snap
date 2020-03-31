@@ -13,7 +13,7 @@ exports[`Header should render normally 1`] = `
         <h1>
           <FormattedMessage
             defaultMessage="Saved Objects"
-            id="kbn.management.objects.objectsTable.header.savedObjectsTitle"
+            id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
             values={Object {}}
           />
         </h1>
@@ -38,7 +38,7 @@ exports[`Header should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
-              id="kbn.management.objects.objectsTable.header.exportButtonLabel"
+              id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
               values={
                 Object {
                   "filteredCount": 2,
@@ -58,7 +58,7 @@ exports[`Header should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Import"
-              id="kbn.management.objects.objectsTable.header.importButtonLabel"
+              id="savedObjectsManagement.objectsTable.header.importButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -73,7 +73,7 @@ exports[`Header should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Refresh"
-              id="kbn.management.objects.objectsTable.header.refreshButtonLabel"
+              id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
               values={Object {}}
             />
           </EuiButtonEmpty>
@@ -93,7 +93,7 @@ exports[`Header should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen."
-          id="kbn.management.objects.objectsTable.howToDeleteSavedObjectsDescription"
+          id="savedObjectsManagement.objectsTable.howToDeleteSavedObjectsDescription"
           values={Object {}}
         />
       </EuiTextColor>

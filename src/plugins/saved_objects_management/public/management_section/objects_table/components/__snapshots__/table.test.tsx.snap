@@ -36,7 +36,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         >
           <FormattedMessage
             defaultMessage="Delete"
-            id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
+            id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
             values={Object {}}
           />
         </EuiButton>,
@@ -51,7 +51,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Export"
-                id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
+                id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
                 values={Object {}}
               />
             </EuiButton>
@@ -72,7 +72,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Options"
-                id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
                 values={Object {}}
               />
             }
@@ -83,7 +83,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               label={
                 <FormattedMessage
                   defaultMessage="Include related objects"
-                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={Object {}}
                 />
               }
@@ -106,7 +106,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Export"
-                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                 values={Object {}}
               />
             </EuiButton>
@@ -251,7 +251,7 @@ exports[`Table should render normally 1`] = `
         >
           <FormattedMessage
             defaultMessage="Delete"
-            id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
+            id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
             values={Object {}}
           />
         </EuiButton>,
@@ -266,7 +266,7 @@ exports[`Table should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Export"
-                id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
+                id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
                 values={Object {}}
               />
             </EuiButton>
@@ -287,7 +287,7 @@ exports[`Table should render normally 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Options"
-                id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
                 values={Object {}}
               />
             }
@@ -298,7 +298,7 @@ exports[`Table should render normally 1`] = `
               label={
                 <FormattedMessage
                   defaultMessage="Include related objects"
-                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={Object {}}
                 />
               }
@@ -321,7 +321,7 @@ exports[`Table should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Export"
-                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                 values={Object {}}
               />
             </EuiButton>

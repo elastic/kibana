@@ -31,21 +31,21 @@ export const NotFoundErrors = ({ type }: NotFoundErrors) => {
       case 'search':
         return (
           <FormattedMessage
-            id="kbn.management.objects.view.savedSearchDoesNotExistErrorMessage"
+            id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
             defaultMessage="The saved search associated with this object no longer exists."
           />
         );
       case 'index-pattern':
         return (
           <FormattedMessage
-            id="kbn.management.objects.view.indexPatternDoesNotExistErrorMessage"
+            id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
             defaultMessage="The index pattern associated with this object no longer exists."
           />
         );
       case 'index-pattern-field':
         return (
           <FormattedMessage
-            id="kbn.management.objects.view.fieldDoesNotExistErrorMessage"
+            id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
             defaultMessage="A field associated with this object no longer exists in the index pattern."
           />
         );
@@ -58,7 +58,7 @@ export const NotFoundErrors = ({ type }: NotFoundErrors) => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+          id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
           defaultMessage="There is a problem with this saved object"
         />
       }
@@ -68,7 +68,7 @@ export const NotFoundErrors = ({ type }: NotFoundErrors) => {
       <div>{getMessage()}</div>
       <div>
         <FormattedMessage
-          id="kbn.management.objects.view.howToFixErrorDescription"
+          id="savedObjectsManagement.view.howToFixErrorDescription"
           defaultMessage="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
         />
       </div>

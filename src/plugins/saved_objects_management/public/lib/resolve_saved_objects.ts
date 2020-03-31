@@ -47,7 +47,7 @@ function addJsonFieldToIndexPattern(
       target[fieldName] = JSON.parse(sourceString);
     } catch (error) {
       throw new Error(
-        i18n.translate('kbn.management.objects.parsingFieldErrorMessage', {
+        i18n.translate('savedObjectsManagement.parsingFieldErrorMessage', {
           defaultMessage:
             'Error encountered parsing {fieldName} for index pattern {indexName}: {errorMessage}',
           values: {
@@ -95,18 +95,21 @@ async function importIndexPattern(
   if (!newId) {
     // We can override and we want to prompt for confirmation
     const isConfirmed = await openConfirm(
-      i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', {
+      i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteLabel', {
         values: { title },
         defaultMessage: "Are you sure you want to overwrite '{title}'?",
       }),
       {
-        title: i18n.translate('kbn.management.indexPattern.confirmOverwriteTitle', {
+        title: i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteTitle', {
           defaultMessage: 'Overwrite {type}?',
           values: { type },
         }),
-        confirmButtonText: i18n.translate('kbn.management.indexPattern.confirmOverwriteButton', {
-          defaultMessage: 'Overwrite',
-        }),
+        confirmButtonText: i18n.translate(
+          'savedObjectsManagement.indexPattern.confirmOverwriteButton',
+          {
+            defaultMessage: 'Overwrite',
+          }
+        ),
       }
     );
 

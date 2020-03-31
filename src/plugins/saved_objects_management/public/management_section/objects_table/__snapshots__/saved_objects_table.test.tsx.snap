@@ -6,14 +6,14 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
   cancelButtonText={
     <FormattedMessage
       defaultMessage="Cancel"
-      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
       values={Object {}}
     />
   }
   confirmButtonText={
     <FormattedMessage
       defaultMessage="Delete"
-      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
       values={Object {}}
     />
   }
@@ -23,7 +23,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
   title={
     <FormattedMessage
       defaultMessage="Delete saved objects"
-      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModalTitle"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
       values={Object {}}
     />
   }
@@ -31,7 +31,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
   <p>
     <FormattedMessage
       defaultMessage="This action will delete the following saved objects:"
-      id="kbn.management.objects.deleteSavedObjectsConfirmModalDescription"
+      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
       values={Object {}}
     />
   </p>
@@ -82,7 +82,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
     <EuiModalHeaderTitle>
       <FormattedMessage
         defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-        id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
+        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
         values={
           Object {
             "filteredItemCount": 4,
@@ -101,7 +101,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
       label={
         <FormattedMessage
           defaultMessage="Select which types to export"
-          id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+          id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
           values={Object {}}
         />
       }
@@ -147,7 +147,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
       label={
         <FormattedMessage
           defaultMessage="Include related objects"
-          id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+          id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
           values={Object {}}
         />
       }
@@ -171,7 +171,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
             >
               <FormattedMessage
                 defaultMessage="Cancel"
-                id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
+                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
                 values={Object {}}
               />
             </EuiButtonEmpty>
@@ -185,7 +185,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
             >
               <FormattedMessage
                 defaultMessage="Export all"
-                id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
                 values={Object {}}
               />
             </EuiButton>

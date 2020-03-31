@@ -104,9 +104,9 @@ export class Field extends PureComponent<FieldProps> {
             id={this.fieldId}
             label={
               !!currentValue ? (
-                <FormattedMessage id="kbn.management.objects.field.onLabel" defaultMessage="On" />
+                <FormattedMessage id="savedObjectsManagement.field.onLabel" defaultMessage="On" />
               ) : (
-                <FormattedMessage id="kbn.management.objects.field.offLabel" defaultMessage="Off" />
+                <FormattedMessage id="savedObjectsManagement.field.offLabel" defaultMessage="Off" />
               )
             }
             checked={!!currentValue}

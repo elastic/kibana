@@ -18,7 +18,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"
-          id="kbn.management.objects.objectsTable.flyout.importSavedObjectTitle"
+          id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
           values={Object {}}
         />
       </h2>
@@ -36,7 +36,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         title={
           <FormattedMessage
             defaultMessage="Index Pattern Conflicts"
-            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
             values={Object {}}
           />
         }
@@ -44,7 +44,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
-            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
                 "indexPatternLink": <ForwardRef
@@ -52,7 +52,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
-                    id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                    id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
                 </ForwardRef>,
@@ -131,7 +131,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="kbn.management.objects.objectsTable.flyout.import.cancelButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -148,7 +148,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         >
           <FormattedMessage
             defaultMessage="Confirm all changes"
-            id="kbn.management.objects.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -267,7 +267,7 @@ exports[`Flyout conflicts should handle errors 1`] = `
   title={
     <FormattedMessage
       defaultMessage="Import failed"
-      id="kbn.management.objects.objectsTable.flyout.importFailedTitle"
+      id="savedObjectsManagement.objectsTable.flyout.importFailedTitle"
       values={Object {}}
     />
   }
@@ -275,7 +275,7 @@ exports[`Flyout conflicts should handle errors 1`] = `
   <p>
     <FormattedMessage
       defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
-      id="kbn.management.objects.objectsTable.flyout.importFailedDescription"
+      id="savedObjectsManagement.objectsTable.flyout.importFailedDescription"
       values={
         Object {
           "failedImportCount": 1,
@@ -296,7 +296,7 @@ exports[`Flyout errors should display unsupported type errors properly 1`] = `
   title={
     <FormattedMessage
       defaultMessage="Import failed"
-      id="kbn.management.objects.objectsTable.flyout.importFailedTitle"
+      id="savedObjectsManagement.objectsTable.flyout.importFailedTitle"
       values={Object {}}
     />
   }
@@ -304,7 +304,7 @@ exports[`Flyout errors should display unsupported type errors properly 1`] = `
   <p>
     <FormattedMessage
       defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
-      id="kbn.management.objects.objectsTable.flyout.importFailedDescription"
+      id="savedObjectsManagement.objectsTable.flyout.importFailedDescription"
       values={
         Object {
           "failedImportCount": 1,
@@ -337,7 +337,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"
-          id="kbn.management.objects.objectsTable.flyout.importSavedObjectTitle"
+          id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
           values={Object {}}
         />
       </h2>
@@ -355,7 +355,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         title={
           <FormattedMessage
             defaultMessage="Support for JSON files is going away"
-            id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
+            id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
             values={Object {}}
           />
         }
@@ -363,7 +363,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
-            id="kbn.management.objects.objectsTable.flyout.legacyFileUsedBody"
+            id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
             values={Object {}}
           />
         </p>
@@ -380,7 +380,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         title={
           <FormattedMessage
             defaultMessage="Index Pattern Conflicts"
-            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
             values={Object {}}
           />
         }
@@ -388,7 +388,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
-            id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+            id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
                 "indexPatternLink": <ForwardRef
@@ -396,7 +396,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
-                    id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                    id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
                 </ForwardRef>,
@@ -486,7 +486,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="kbn.management.objects.objectsTable.flyout.import.cancelButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -503,7 +503,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         >
           <FormattedMessage
             defaultMessage="Confirm all changes"
-            id="kbn.management.objects.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
             values={Object {}}
           />
         </EuiButton>
@@ -522,7 +522,7 @@ Array [
     title={
       <FormattedMessage
         defaultMessage="Support for JSON files is going away"
-        id="kbn.management.objects.objectsTable.flyout.legacyFileUsedTitle"
+        id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
         values={Object {}}
       />
     }
@@ -530,7 +530,7 @@ Array [
     <p>
       <FormattedMessage
         defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
-        id="kbn.management.objects.objectsTable.flyout.legacyFileUsedBody"
+        id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
         values={Object {}}
       />
     </p>
@@ -542,7 +542,7 @@ Array [
     title={
       <FormattedMessage
         defaultMessage="Index Pattern Conflicts"
-        id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsTitle"
+        id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
         values={Object {}}
       />
     }
@@ -550,7 +550,7 @@ Array [
     <p>
       <FormattedMessage
         defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
-        id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
+        id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
             "indexPatternLink": <ForwardRef
@@ -558,7 +558,7 @@ Array [
             >
               <FormattedMessage
                 defaultMessage="create a new index pattern"
-                id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
+                id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                 values={Object {}}
               />
             </ForwardRef>,
@@ -572,7 +572,7 @@ Array [
     title={
       <FormattedMessage
         defaultMessage="Sorry, there was an error"
-        id="kbn.management.objects.objectsTable.flyout.errorCalloutTitle"
+        id="savedObjectsManagement.objectsTable.flyout.errorCalloutTitle"
         values={Object {}}
       />
     }
@@ -602,7 +602,7 @@ exports[`Flyout should render import step 1`] = `
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"
-          id="kbn.management.objects.objectsTable.flyout.importSavedObjectTitle"
+          id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
           values={Object {}}
         />
       </h2>
@@ -619,7 +619,7 @@ exports[`Flyout should render import step 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Please select a file to import"
-            id="kbn.management.objects.objectsTable.flyout.selectFileToImportFormRowLabel"
+            id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
             values={Object {}}
           />
         }
@@ -631,7 +631,7 @@ exports[`Flyout should render import step 1`] = `
           initialPromptText={
             <FormattedMessage
               defaultMessage="Import"
-              id="kbn.management.objects.objectsTable.flyout.importPromptText"
+              id="savedObjectsManagement.objectsTable.flyout.importPromptText"
               values={Object {}}
             />
           }
@@ -652,7 +652,7 @@ exports[`Flyout should render import step 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Automatically overwrite all saved objects?"
-              id="kbn.management.objects.objectsTable.flyout.overwriteSavedObjectsLabel"
+              id="savedObjectsManagement.objectsTable.flyout.overwriteSavedObjectsLabel"
               values={Object {}}
             />
           }
@@ -675,7 +675,7 @@ exports[`Flyout should render import step 1`] = `
         >
           <FormattedMessage
             defaultMessage="Cancel"
-            id="kbn.management.objects.objectsTable.flyout.import.cancelButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -692,7 +692,7 @@ exports[`Flyout should render import step 1`] = `
         >
           <FormattedMessage
             defaultMessage="Import"
-            id="kbn.management.objects.objectsTable.flyout.import.confirmButtonLabel"
+            id="savedObjectsManagement.objectsTable.flyout.import.confirmButtonLabel"
             values={Object {}}
           />
         </EuiButton>

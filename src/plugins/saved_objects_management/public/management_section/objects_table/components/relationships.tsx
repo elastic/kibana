@@ -99,7 +99,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
       <EuiCallOut
         title={
           <FormattedMessage
-            id="kbn.management.objects.objectsTable.relationships.renderErrorMessage"
+            id="savedObjectsManagement.objectsTable.relationships.renderErrorMessage"
             defaultMessage="Error"
           />
         }
@@ -125,13 +125,13 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     const columns = [
       {
         field: 'type',
-        name: i18n.translate('kbn.management.objects.objectsTable.relationships.columnTypeName', {
+        name: i18n.translate('savedObjectsManagement.objectsTable.relationships.columnTypeName', {
           defaultMessage: 'Type',
         }),
         width: '50px',
         align: 'center',
         description: i18n.translate(
-          'kbn.management.objects.objectsTable.relationships.columnTypeDescription',
+          'savedObjectsManagement.objectsTable.relationships.columnTypeDescription',
           { defaultMessage: 'Type of the saved object' }
         ),
         sortable: false,
@@ -151,7 +151,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
       {
         field: 'relationship',
         name: i18n.translate(
-          'kbn.management.objects.objectsTable.relationships.columnRelationshipName',
+          'savedObjectsManagement.objectsTable.relationships.columnRelationshipName',
           { defaultMessage: 'Direct relationship' }
         ),
         dataType: 'string',
@@ -163,7 +163,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
             return (
               <EuiText size="s">
                 <FormattedMessage
-                  id="kbn.management.objects.objectsTable.relationships.columnRelationship.parentAsValue"
+                  id="savedObjectsManagement.objectsTable.relationships.columnRelationship.parentAsValue"
                   defaultMessage="Parent"
                 />
               </EuiText>
@@ -173,7 +173,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
             return (
               <EuiText size="s">
                 <FormattedMessage
-                  id="kbn.management.objects.objectsTable.relationships.columnRelationship.childAsValue"
+                  id="savedObjectsManagement.objectsTable.relationships.columnRelationship.childAsValue"
                   defaultMessage="Child"
                 />
               </EuiText>
@@ -183,11 +183,11 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
       },
       {
         field: 'meta.title',
-        name: i18n.translate('kbn.management.objects.objectsTable.relationships.columnTitleName', {
+        name: i18n.translate('savedObjectsManagement.objectsTable.relationships.columnTitleName', {
           defaultMessage: 'Title',
         }),
         description: i18n.translate(
-          'kbn.management.objects.objectsTable.relationships.columnTitleDescription',
+          'savedObjectsManagement.objectsTable.relationships.columnTitleDescription',
           { defaultMessage: 'Title of the saved object' }
         ),
         dataType: 'string',
@@ -211,17 +211,17 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
       },
       {
         name: i18n.translate(
-          'kbn.management.objects.objectsTable.relationships.columnActionsName',
+          'savedObjectsManagement.objectsTable.relationships.columnActionsName',
           { defaultMessage: 'Actions' }
         ),
         actions: [
           {
             name: i18n.translate(
-              'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionName',
+              'savedObjectsManagement.objectsTable.relationships.columnActions.inspectActionName',
               { defaultMessage: 'Inspect' }
             ),
             description: i18n.translate(
-              'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionDescription',
+              'savedObjectsManagement.objectsTable.relationships.columnActions.inspectActionDescription',
               { defaultMessage: 'Inspect this saved object' }
             ),
             type: 'icon',
@@ -251,7 +251,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           type: 'field_value_selection',
           field: 'relationship',
           name: i18n.translate(
-            'kbn.management.objects.objectsTable.relationships.search.filters.relationship.name',
+            'savedObjectsManagement.objectsTable.relationships.search.filters.relationship.name',
             { defaultMessage: 'Direct relationship' }
           ),
           multiSelect: 'or',
@@ -260,7 +260,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
               value: 'parent',
               name: 'parent',
               view: i18n.translate(
-                'kbn.management.objects.objectsTable.relationships.search.filters.relationship.parentAsValue.view',
+                'savedObjectsManagement.objectsTable.relationships.search.filters.relationship.parentAsValue.view',
                 { defaultMessage: 'Parent' }
               ),
             },
@@ -268,7 +268,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
               value: 'child',
               name: 'child',
               view: i18n.translate(
-                'kbn.management.objects.objectsTable.relationships.search.filters.relationship.childAsValue.view',
+                'savedObjectsManagement.objectsTable.relationships.search.filters.relationship.childAsValue.view',
                 { defaultMessage: 'Child' }
               ),
             },
@@ -278,7 +278,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           type: 'field_value_selection',
           field: 'type',
           name: i18n.translate(
-            'kbn.management.objects.objectsTable.relationships.search.filters.type.name',
+            'savedObjectsManagement.objectsTable.relationships.search.filters.type.name',
             { defaultMessage: 'Type' }
           ),
           multiSelect: 'or',
@@ -292,7 +292,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
         <EuiCallOut>
           <p>
             {i18n.translate(
-              'kbn.management.objects.objectsTable.relationships.relationshipsTitle',
+              'savedObjectsManagement.objectsTable.relationships.relationshipsTitle',
               {
                 defaultMessage:
                   'Here are the saved objects related to {title}. ' +

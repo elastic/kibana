@@ -245,7 +245,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       }
       notifications.toasts.addDanger({
         title: i18n.translate(
-          'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
+          'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
           { defaultMessage: 'Unable find saved objects' }
         ),
         text: `${error}`,
@@ -314,7 +314,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
     } catch (e) {
       notifications.toasts.addDanger({
-        title: i18n.translate('kbn.management.objects.objectsTable.export.dangerNotification', {
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
       });
@@ -348,7 +348,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       );
     } catch (e) {
       notifications.toasts.addDanger({
-        title: i18n.translate('kbn.management.objects.objectsTable.export.dangerNotification', {
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
           defaultMessage: 'Unable to generate export',
         }),
       });
@@ -367,7 +367,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (exportDetails && exportDetails.missingReferences.length > 0) {
       notifications.toasts.addWarning({
         title: i18n.translate(
-          'kbn.management.objects.objectsTable.export.successWithMissingRefsNotification',
+          'savedObjectsManagement.objectsTable.export.successWithMissingRefsNotification',
           {
             defaultMessage:
               'Your file is downloading in the background. ' +
@@ -378,7 +378,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       });
     } else {
       notifications.toasts.addSuccess({
-        title: i18n.translate('kbn.management.objects.objectsTable.export.successNotification', {
+        title: i18n.translate('savedObjectsManagement.objectsTable.export.successNotification', {
           defaultMessage: 'Your file is downloading in the background',
         }),
       });
@@ -506,7 +506,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <EuiConfirmModal
           title={
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModalTitle"
+              id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
               defaultMessage="Delete saved objects"
             />
           }
@@ -515,19 +515,19 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           buttonColor="danger"
           cancelButtonText={
             <FormattedMessage
-              id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+              id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
           confirmButtonText={
             isDeleting ? (
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
+                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
                 defaultMessage="Deleting…"
               />
             ) : (
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
                 defaultMessage="Delete"
               />
             )
@@ -536,7 +536,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         >
           <p>
             <FormattedMessage
-              id="kbn.management.objects.deleteSavedObjectsConfirmModalDescription"
+              id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
               defaultMessage="This action will delete the following saved objects:"
             />
           </p>
@@ -546,7 +546,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               {
                 field: 'type',
                 name: i18n.translate(
-                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
+                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
                   { defaultMessage: 'Type' }
                 ),
                 width: '50px',
@@ -559,14 +559,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               {
                 field: 'id',
                 name: i18n.translate(
-                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
+                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
                   { defaultMessage: 'Id' }
                 ),
               },
               {
                 field: 'meta.title',
                 name: i18n.translate(
-                  'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
+                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
                   { defaultMessage: 'Title' }
                 ),
               },
@@ -610,7 +610,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
-                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
+                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
                 defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
                 values={{
                   filteredItemCount,
@@ -622,7 +622,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
                   defaultMessage="Select which types to export"
                 />
               }
@@ -650,7 +650,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               name="includeReferencesDeep"
               label={
                 <FormattedMessage
-                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   defaultMessage="Include related objects"
                 />
               }
@@ -665,7 +665,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty onClick={this.closeExportAllModal}>
                       <FormattedMessage
-                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
+                        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
                         defaultMessage="Cancel"
                       />
                     </EuiButtonEmpty>
@@ -673,7 +673,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                   <EuiFlexItem grow={false}>
                     <EuiButton fill onClick={this.onExportAll}>
                       <FormattedMessage
-                        id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+                        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
                         defaultMessage="Export all"
                       />
                     </EuiButton>

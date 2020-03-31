@@ -10,7 +10,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
     title={
       <FormattedMessage
         defaultMessage="There is a problem with this saved object"
-        id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
         values={Object {}}
       />
     }
@@ -39,7 +39,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
         >
           <FormattedMessage
             defaultMessage="There is a problem with this saved object"
-            id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
             values={Object {}}
           >
             There is a problem with this saved object
@@ -55,7 +55,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
           <div>
             <FormattedMessage
               defaultMessage="The index pattern associated with this object no longer exists."
-              id="kbn.management.objects.view.indexPatternDoesNotExistErrorMessage"
+              id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
               values={Object {}}
             >
               The index pattern associated with this object no longer exists.
@@ -64,7 +64,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
           <div>
             <FormattedMessage
               defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-              id="kbn.management.objects.view.howToFixErrorDescription"
+              id="savedObjectsManagement.view.howToFixErrorDescription"
               values={Object {}}
             >
               If you know what this error means, go ahead and fix it — otherwise click the delete button above.
@@ -87,7 +87,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
     title={
       <FormattedMessage
         defaultMessage="There is a problem with this saved object"
-        id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
         values={Object {}}
       />
     }
@@ -116,7 +116,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
         >
           <FormattedMessage
             defaultMessage="There is a problem with this saved object"
-            id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
             values={Object {}}
           >
             There is a problem with this saved object
@@ -132,7 +132,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
           <div>
             <FormattedMessage
               defaultMessage="A field associated with this object no longer exists in the index pattern."
-              id="kbn.management.objects.view.fieldDoesNotExistErrorMessage"
+              id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
               values={Object {}}
             >
               A field associated with this object no longer exists in the index pattern.
@@ -141,7 +141,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
           <div>
             <FormattedMessage
               defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-              id="kbn.management.objects.view.howToFixErrorDescription"
+              id="savedObjectsManagement.view.howToFixErrorDescription"
               values={Object {}}
             >
               If you know what this error means, go ahead and fix it — otherwise click the delete button above.
@@ -164,7 +164,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
     title={
       <FormattedMessage
         defaultMessage="There is a problem with this saved object"
-        id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
         values={Object {}}
       />
     }
@@ -193,7 +193,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
         >
           <FormattedMessage
             defaultMessage="There is a problem with this saved object"
-            id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
             values={Object {}}
           >
             There is a problem with this saved object
@@ -209,7 +209,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
           <div>
             <FormattedMessage
               defaultMessage="The saved search associated with this object no longer exists."
-              id="kbn.management.objects.view.savedSearchDoesNotExistErrorMessage"
+              id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
               values={Object {}}
             >
               The saved search associated with this object no longer exists.
@@ -218,7 +218,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
           <div>
             <FormattedMessage
               defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-              id="kbn.management.objects.view.howToFixErrorDescription"
+              id="savedObjectsManagement.view.howToFixErrorDescription"
               values={Object {}}
             >
               If you know what this error means, go ahead and fix it — otherwise click the delete button above.
@@ -241,7 +241,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
     title={
       <FormattedMessage
         defaultMessage="There is a problem with this saved object"
-        id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+        id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
         values={Object {}}
       />
     }
@@ -270,7 +270,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
         >
           <FormattedMessage
             defaultMessage="There is a problem with this saved object"
-            id="kbn.management.objects.view.savedObjectProblemErrorMessage"
+            id="savedObjectsManagement.view.savedObjectProblemErrorMessage"
             values={Object {}}
           >
             There is a problem with this saved object
@@ -287,7 +287,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
           <div>
             <FormattedMessage
               defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-              id="kbn.management.objects.view.howToFixErrorDescription"
+              id="savedObjectsManagement.view.howToFixErrorDescription"
               values={Object {}}
             >
               If you know what this error means, go ahead and fix it — otherwise click the delete button above.

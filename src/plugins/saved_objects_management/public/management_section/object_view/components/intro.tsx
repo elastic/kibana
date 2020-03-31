@@ -26,7 +26,7 @@ export const Intro = () => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="kbn.management.objects.view.howToModifyObjectTitle"
+          id="savedObjectsManagement.view.howToModifyObjectTitle"
           defaultMessage="Proceed with caution!"
         />
       }
@@ -35,7 +35,7 @@ export const Intro = () => {
     >
       <div>
         <FormattedMessage
-          id="kbn.management.objects.view.howToModifyObjectDescription"
+          id="savedObjectsManagement.view.howToModifyObjectDescription"
           defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be."
         />
       </div>

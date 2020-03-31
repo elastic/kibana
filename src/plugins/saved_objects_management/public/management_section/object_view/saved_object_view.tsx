@@ -135,17 +135,17 @@ export class SavedObjectEdition extends Component<
     const { type, object } = this.state;
 
     const confirmed = await overlays.openConfirm(
-      i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
+      i18n.translate('savedObjectsManagement.deleteConfirm.modalDescription', {
         defaultMessage: 'This action permanently removes the object from Kibana.',
       }),
       {
         confirmButtonText: i18n.translate(
-          'kbn.management.objects.confirmModalOptions.deleteButtonLabel',
+          'savedObjectsManagement.deleteConfirm.modalDeleteButtonLabel',
           {
             defaultMessage: 'Delete',
           }
         ),
-        title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
+        title: i18n.translate('savedObjectsManagement.deleteConfirm.modalTitle', {
           defaultMessage: `Delete '{title}'?`,
           values: {
             title: object?.attributes?.title || 'saved Kibana object',

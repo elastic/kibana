@@ -202,7 +202,7 @@ exports[`Relationships should render errors 1`] = `
       title={
         <FormattedMessage
           defaultMessage="Error"
-          id="kbn.management.objects.objectsTable.relationships.renderErrorMessage"
+          id="savedObjectsManagement.objectsTable.relationships.renderErrorMessage"
           values={Object {}}
         />
       }
