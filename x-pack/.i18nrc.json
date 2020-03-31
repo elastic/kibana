@@ -12,7 +12,6 @@
     "xpack.dashboardMode": "legacy/plugins/dashboard_mode",
     "xpack.data": "plugins/data_enhanced",
     "xpack.drilldowns": "plugins/drilldowns",
-    "xpack.endpoint": "plugins/endpoint",
     "xpack.features": "plugins/features",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.graph": ["legacy/plugins/graph", "plugins/graph"],
