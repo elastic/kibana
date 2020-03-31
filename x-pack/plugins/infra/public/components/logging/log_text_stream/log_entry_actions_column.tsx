@@ -32,7 +32,7 @@ const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsM
 });
 
 const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetailsButton', {
-  defaultMessage: 'Log details',
+  defaultMessage: 'View actions for line',
 });
 
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
