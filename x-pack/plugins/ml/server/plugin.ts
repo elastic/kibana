@@ -82,7 +82,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         }),
         privileges: [
           {
-            id: 'ml_admin',
+            id: 'ml',
             privilege: {
               app: [PLUGIN_ID, 'kibana'],
               catalogue: [PLUGIN_ID],

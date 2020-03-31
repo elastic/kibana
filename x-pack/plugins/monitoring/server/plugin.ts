@@ -274,7 +274,7 @@ export class Plugin {
         }),
         privileges: [
           {
-            id: 'monitoring_user',
+            id: 'monitoring',
             privilege: {
               app: ['monitoring', 'kibana'],
               catalogue: ['monitoring'],
