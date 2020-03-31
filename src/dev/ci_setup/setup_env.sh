@@ -168,4 +168,8 @@ if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
   export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
 fi
 
+echo " -- downloading es snapshot"
+node scripts/es snapshot --download-only;
+node scripts/es snapshot --license=oss --download-only;
+
 export CI_ENV_SETUP=true
