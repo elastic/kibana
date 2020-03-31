@@ -18,7 +18,7 @@ export function serializeV1Template(template: TemplateDeserialized): TemplateV1S
     version,
     order,
     indexPatterns,
-    template: { settings, aliases, mappings } = {},
+    template: { settings, aliases, mappings } = {} as TemplateDeserialized['template'],
   } = template;
 
   const serializedTemplate: TemplateV1Serialized = {
