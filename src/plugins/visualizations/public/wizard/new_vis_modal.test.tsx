@@ -64,6 +64,12 @@ describe('NewVisModal', () => {
   const settingsGet = jest.fn();
   const uiSettings: any = { get: settingsGet };
 
+  beforeAll(() => {
+    // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
+    delete window.location;
+    (window as any).location = { assign: jest.fn() };
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -102,7 +108,6 @@ describe('NewVisModal', () => {
 
   describe('open editor', () => {
     it('should open the editor for visualizations without search', () => {
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -119,7 +124,6 @@ describe('NewVisModal', () => {
     });
 
     it('passes through editor params to the editor URL', () => {
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -138,7 +142,6 @@ describe('NewVisModal', () => {
 
     it('closes and redirects properly if visualization with aliasUrl and addToDashboard in editorParams', () => {
       const onClose = jest.fn();
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -158,7 +161,6 @@ describe('NewVisModal', () => {
 
     it('closes and redirects properly if visualization with aliasUrl and without addToDashboard in editorParams', () => {
       const onClose = jest.fn();
-      window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
