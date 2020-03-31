@@ -4,7 +4,6 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Adobe Hijack Persistence",
   "query": "file.path:(\"C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\" or \"C:\\Program Files\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\") and event.action:\"File created (rule: FileCreate)\" and not process.name:msiexec.exe",
   "risk_score": 21,
