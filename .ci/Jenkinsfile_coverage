@@ -91,6 +91,18 @@ kibanaPipeline(timeoutMinutes: 180) {
 
 def listVcsEnvVars() {
   kibanaPipeline.bash(
+
+    '''
+    env
+    set
+
+    env |grep "GIT*"
+    set |grep "GIT*"
+
+    ''', "### Tre Debugging"
+
+  )
+  kibanaPipeline.bash(
     '''
 
     predicate() {
