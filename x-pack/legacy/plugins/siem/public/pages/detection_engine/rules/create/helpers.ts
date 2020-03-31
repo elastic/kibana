@@ -12,8 +12,10 @@ import {
   NOTIFICATION_THROTTLE_RULE,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
 } from '../../../../../common/constants';
-import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
 import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
+import { RuleType } from '../../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../../common/detection_engine/ml_helpers';
+import { NewRule } from '../../../../containers/detection_engine/rules';
 
 import {
   AboutStepRule,
@@ -25,7 +27,6 @@ import {
   AboutStepRuleJson,
   ActionsStepRuleJson,
 } from '../types';
-import { isMlRule } from '../helpers';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {

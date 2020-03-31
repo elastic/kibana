@@ -12,11 +12,11 @@ import {
   ReturnRulesStatuses,
 } from './use_rule_status';
 import * as api from './api';
-import { RuleType } from '../rules/types';
+import { Rule } from '../rules/types';
 
 jest.mock('./api');
 
-const testRule = {
+const testRule: Rule = {
   actions: [
     {
       group: 'fake group',
@@ -57,7 +57,7 @@ const testRule = {
   threat: [],
   throttle: null,
   to: 'now',
-  type: 'query' as RuleType,
+  type: 'query',
   updated_at: 'mm/dd/yyyyTHH:MM:sssz',
   updated_by: 'mockUser',
 };

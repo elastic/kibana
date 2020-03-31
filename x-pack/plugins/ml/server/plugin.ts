@@ -11,6 +11,7 @@ import {
   IScopedClusterClient,
   Logger,
   PluginInitializerContext,
+  ICustomClusterClient,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
@@ -49,7 +50,9 @@ declare module 'kibana/server' {
   }
 }
 
-export type MlPluginSetup = SharedServices;
+export interface MlPluginSetup extends SharedServices {
+  mlClient: ICustomClusterClient;
+}
 export type MlPluginStart = void;
 
 export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
@@ -135,7 +138,10 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
+    return {
+      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud),
+      mlClient,
+    };
   }
 
   public start(): MlPluginStart {}
