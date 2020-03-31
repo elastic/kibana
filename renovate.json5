@@ -762,14 +762,6 @@
         ],
       },
       {
-        groupSlug: 'podium',
-        groupName: 'podium related packages',
-        packageNames: [
-          'podium',
-          '@types/podium',
-        ],
-      },
-      {
         groupSlug: 'proper-lockfile',
         groupName: 'proper-lockfile related packages',
         packageNames: [
