@@ -82,8 +82,11 @@ export class DockerServersService {
         throw new Error(`
           [docker:${server.name}] Another process is already listening on port ${server.port}.
 
-          This usually happens because the functional test runner didn't have a chance to
-          cleanup the running docker containers before being killed.
+          When this happens on CI it is usually because the port number isn't taking into
+          account parallel workers running on the same machine.
+
+          When this happens locally it is usually because the functional test runner didn't
+          have a chance to cleanup the running docker containers before being killed.
 
           To see if this is the case:
 
