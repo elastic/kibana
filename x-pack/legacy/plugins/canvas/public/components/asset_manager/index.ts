@@ -8,29 +8,35 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { set, get } from 'lodash';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
-import { notify } from '../../lib/notify';
+import { notifyService } from '../../services';
 import { getAssets } from '../../state/selectors/assets';
+// @ts-ignore Untyped local
 import { removeAsset, createAsset } from '../../state/actions/assets';
+// @ts-ignore Untyped local
 import { elementsRegistry } from '../../lib/elements_registry';
+// @ts-ignore Untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { encode } from '../../../common/lib/dataurl';
 import { getId } from '../../lib/get_id';
+// @ts-ignore Untyped Local
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { AssetManager as Component } from './asset_manager';
 
-const mapStateToProps = state => ({
+import { State, ExpressionAstExpression } from '../../../types';
+
+const mapStateToProps = (state: State) => ({
   assets: getAssets(state),
   selectedPage: getSelectedPage(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-  onAddImageElement: pageId => assetId => {
+  onAddImageElement: (pageId: string) => (assetId: string) => {
     const imageElement = elementsRegistry.get('image');
     const elementAST = fromExpression(imageElement.expression);
     const selector = ['chain', '0', 'arguments', 'dataurl'];
-    const subExp = [
+    const subExp: ExpressionAstExpression = [
       {
         type: 'expression',
         chain: [
@@ -44,11 +50,11 @@ const mapDispatchToProps = dispatch => ({
         ],
       },
     ];
-    const newAST = set(elementAST, selector, subExp);
+    const newAST = set<ExpressionAstExpression>(elementAST, selector, subExp);
     imageElement.expression = toExpression(newAST);
     dispatch(addElement(pageId, imageElement));
   },
-  onAssetAdd: (type, content) => {
+  onAssetAdd: (type: string, content: string) => {
     // make the ID here and pass it into the action
     const assetId = getId('asset');
     dispatch(createAsset(type, content, assetId));
@@ -56,7 +62,7 @@ const mapDispatchToProps = dispatch => ({
     // then return the id, so the caller knows the id that will be created
     return assetId;
   },
-  onAssetDelete: assetId => dispatch(removeAsset(assetId)),
+  onAssetDelete: (assetId: string) => dispatch(removeAsset(assetId)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -90,5 +96,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
 export const AssetManager = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withProps({ onAssetCopy: asset => notify.success(`Copied '${asset.id}' to clipboard`) })
+  withProps({
+    onAssetCopy: asset => notifyService.getService().success(`Copied '${asset.id}' to clipboard`),
+  })
 )(Component);
