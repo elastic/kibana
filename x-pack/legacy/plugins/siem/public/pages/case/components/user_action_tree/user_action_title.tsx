@@ -34,6 +34,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 interface UserActionTitleProps {
   createdAt: string;
+  disabled: boolean;
   id: string;
   isLoading: boolean;
   labelEditAction?: string;
@@ -50,6 +51,7 @@ interface UserActionTitleProps {
 
 export const UserActionTitle = ({
   createdAt,
+  disabled,
   id,
   isLoading,
   labelEditAction,
@@ -70,6 +72,7 @@ export const UserActionTitle = ({
       ...(labelEditAction != null && onEdit != null
         ? [
             {
+              disabled,
               iconType: 'pencil',
               label: labelEditAction,
               onClick: () => onEdit(id),
@@ -79,6 +82,7 @@ export const UserActionTitle = ({
       ...(labelQuoteAction != null && onQuote != null
         ? [
             {
+              disabled,
               iconType: 'quote',
               label: labelQuoteAction,
               onClick: () => onQuote(id),
@@ -86,7 +90,7 @@ export const UserActionTitle = ({
           ]
         : []),
     ];
-  }, [id, labelEditAction, onEdit, labelQuoteAction, onQuote]);
+  }, [disabled, id, labelEditAction, onEdit, labelQuoteAction, onQuote]);
 
   const handleAnchorLink = useCallback(() => {
     copy(
