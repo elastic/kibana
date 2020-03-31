@@ -7,6 +7,7 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
+import { npStart } from 'ui/new_platform';
 
 import {
   ViewMode,
@@ -14,7 +15,6 @@ import {
   ErrorEmbeddable,
   isErrorEmbeddable,
 } from '../../../../../../../../../src/plugins/embeddable/public';
-import { start } from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
 import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../../plugins/maps/public';
@@ -52,9 +52,11 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   const { colors } = useContext(UptimeThemeContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-  const factory = start.getEmbeddableFactory<MapEmbeddableInput, EmbeddableOutput, MapEmbeddable>(
-    MAP_SAVED_OBJECT_TYPE
-  );
+  const factory = npStart.plugins.embeddable.getEmbeddableFactory<
+    MapEmbeddableInput,
+    EmbeddableOutput,
+    MapEmbeddable
+  >(MAP_SAVED_OBJECT_TYPE);
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),

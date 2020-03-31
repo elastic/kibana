@@ -11,13 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'src/plugins/saved_objects/public';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
+import { getIndexPatternService } from '../kibana_services';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
-import { getIndexPatternService } from '../kibana_services';
+} from '../../../../../../src/plugins/embeddable/public';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -146,4 +145,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 }
 
-setup.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+npSetup.plugins.embeddable.registerEmbeddableFactory(
+  MAP_SAVED_OBJECT_TYPE,
+  new MapEmbeddableFactory()
+);
