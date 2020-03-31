@@ -18,7 +18,7 @@
  */
 
 import { SavedObjectReference } from 'kibana/public';
-import { GridData } from '../embeddable';
+import { GridData } from '../application';
 
 export interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {

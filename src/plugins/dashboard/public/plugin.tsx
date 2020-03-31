@@ -61,10 +61,16 @@ import {
 } from '../../../plugins/kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 
-import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
-import { ExpandPanelAction, ReplacePanelAction } from './actions';
-import { ExpandPanelActionContext, ACTION_EXPAND_PANEL } from './actions/expand_panel_action';
-import { ReplacePanelActionContext, ACTION_REPLACE_PANEL } from './actions/replace_panel_action';
+import {
+  DashboardContainerFactory,
+  ExpandPanelAction,
+  ExpandPanelActionContext,
+  ReplacePanelAction,
+  ReplacePanelActionContext,
+  ACTION_EXPAND_PANEL,
+  ACTION_REPLACE_PANEL,
+  RenderDeps,
+} from './application';
 import {
   DashboardAppLinkGeneratorState,
   DASHBOARD_APP_URL_GENERATOR,
@@ -72,7 +78,6 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
-import { RenderDeps } from './application';
 import { getSavedDashboardLoader, setSavedDashboardLoader } from './services';
 
 declare module '../../share/public' {
@@ -237,7 +242,7 @@ export class DashboardEmbeddableContainerPublicPlugin
           localStorage: new Storage(localStorage),
           usageCollection,
         };
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {
           unmount();

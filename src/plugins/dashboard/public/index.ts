@@ -43,8 +43,6 @@ export {
   SavedDashboardPanel730ToLatest,
 } from './types';
 
-export {} from './types';
-export {} from './actions';
 export {
   DashboardContainer,
   DashboardContainerInput,
@@ -54,7 +52,7 @@ export {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_PANEL_HEIGHT,
   GridData,
-} from './embeddable';
+} from './application';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
 export { DashboardStart } from './plugin';
