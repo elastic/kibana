@@ -15420,8 +15420,6 @@
     "xpack.spaces.management.confirmDeleteModal.deletingSpaceWarningMessage": "删除空间会永久删除空间及其 {allContents}。此操作无法撤消。",
     "xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage": "您即将删除当前空间 {name}。如果继续，系统会将您重定向到选择其他空间的位置。",
     "xpack.spaces.management.confirmDeleteModal.spaceNamesDoNoMatchErrorMessage": "空间名称不匹配。",
-    "xpack.spaces.management.copyToSpace.actionDescription": "将此已保存对象复制到一个或多个工作区",
-    "xpack.spaces.management.copyToSpace.actionTitle": "复制到工作区",
     "xpack.spaces.management.copyToSpace.automaticallyOverwrite": "自动覆盖所有已保存对象",
     "xpack.spaces.management.copyToSpace.copyDetail.overwriteButton": "覆盖",
     "xpack.spaces.management.copyToSpace.copyDetail.skipOverwriteButton": "跳过",

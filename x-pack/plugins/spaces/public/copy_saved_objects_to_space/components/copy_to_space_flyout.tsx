@@ -208,7 +208,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="spacesApp" />
+            <EuiIcon size="m" type="copy" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">

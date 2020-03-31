@@ -15416,8 +15416,6 @@
     "xpack.spaces.management.confirmDeleteModal.deletingSpaceWarningMessage": "スペースを削除すると、スペースと {allContents} が永久に削除されます。この操作は元に戻すことができません。",
     "xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage": "現在のスペース {name} を削除しようとしています。続行すると、別のスペースを選択する画面に移動します。",
     "xpack.spaces.management.confirmDeleteModal.spaceNamesDoNoMatchErrorMessage": "スペース名が一致していません。",
-    "xpack.spaces.management.copyToSpace.actionDescription": "この保存されたオブジェクトを1つまたは複数のスペースにコピーします。",
-    "xpack.spaces.management.copyToSpace.actionTitle": "スペースにコピー",
     "xpack.spaces.management.copyToSpace.automaticallyOverwrite": "すべての保存されたオブジェクトを自動的に上書き",
     "xpack.spaces.management.copyToSpace.copyDetail.overwriteButton": "上書き",
     "xpack.spaces.management.copyToSpace.copyDetail.skipOverwriteButton": "スキップ",
