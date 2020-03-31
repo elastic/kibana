@@ -164,7 +164,9 @@ export const ProcessEventDot = styled(
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
             aria-level={adjacentNodeMap.level}
-            aria-flowto={adjacentNodeMap.nextSibling}
+            aria-flowto={
+              adjacentNodeMap.nextSibling === null ? undefined : adjacentNodeMap.nextSibling
+            }
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
