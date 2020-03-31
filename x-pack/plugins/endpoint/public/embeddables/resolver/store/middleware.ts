@@ -41,7 +41,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         api.dispatch({ type: 'appRequestedResolverData' });
         try {
           let lifecycle: ResolverEvent[];
-          let children: [];
+          let children: Node[];
           if (event.isLegacyEvent(action.payload.selectedEvent)) {
             const uniquePid = action.payload.selectedEvent?.endgame?.unique_pid;
             const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
