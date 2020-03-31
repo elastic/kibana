@@ -31,12 +31,12 @@ import React from 'react';
 import { Query } from '@elastic/eui';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { Capabilities } from '../../../../../core/public';
 import {
   httpServiceMock,
   overlayServiceMock,
   notificationServiceMock,
   savedObjectsServiceMock,
+  applicationServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { serviceRegistryMock } from '../../services/service_registry.mock';
@@ -82,7 +82,7 @@ const allSavedObjects = [
   },
 ];
 
-describe('ObjectsTable', () => {
+describe('SavedObjectsTable', () => {
   let defaultProps: SavedObjectsTableProps;
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
@@ -105,7 +105,8 @@ describe('ObjectsTable', () => {
     notifications = notificationServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
 
-    const capabilities: Capabilities = {
+    const applications = applicationServiceMock.createStartContract();
+    applications.capabilities = {
       navLinks: {},
       management: {},
       catalogue: {},
@@ -134,7 +135,7 @@ describe('ObjectsTable', () => {
       http,
       overlays,
       notifications,
-      capabilities,
+      applications,
       perPageConfig: 15,
       goInspectObject: () => {},
       canGoInApp: () => true,

@@ -53,7 +53,7 @@ import {
   HttpStart,
   OverlayStart,
   NotificationsStart,
-  Capabilities,
+  ApplicationStart,
 } from 'src/core/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -88,9 +88,8 @@ export interface SavedObjectsTableProps {
   http: HttpStart;
   overlays: OverlayStart;
   notifications: NotificationsStart;
-  capabilities: Capabilities;
+  applications: ApplicationStart;
   perPageConfig: number;
-  // newIndexPatternUrl - kbnUrl.eval('#/management/kibana/index_pattern')
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
 }
@@ -453,6 +452,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (!this.state.isShowingImportFlyout) {
       return null;
     }
+    const { applications } = this.props;
+    const newIndexPatternUrl = applications.getUrlForApp('kibana', {
+      path: '#/management/kibana/index_pattern',
+    });
 
     return (
       <Flyout
@@ -461,7 +464,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         http={this.props.http}
         serviceRegistry={this.props.serviceRegistry}
         indexPatterns={this.props.indexPatterns}
-        newIndexPatternUrl={''} // TODO: fix
+        newIndexPatternUrl={newIndexPatternUrl}
         allowedTypes={this.props.allowedTypes}
         overlays={this.props.overlays}
       />
@@ -701,7 +704,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isSearching,
       savedObjectCounts,
     } = this.state;
-    const { http, allowedTypes } = this.props;
+    const { http, allowedTypes, applications } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -736,7 +739,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
           onExport={this.onExport}
-          canDelete={this.props.capabilities.savedObjectsManagement.delete as boolean}
+          canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
           onDelete={this.onDelete}
           goInspectObject={this.props.goInspectObject}
           pageIndex={page}

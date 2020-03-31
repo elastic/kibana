@@ -78,9 +78,9 @@ export interface FlyoutProps {
 }
 
 export interface FlyoutState {
-  conflictedIndexPatterns?: any[]; // TODO
-  conflictedSavedObjectsLinkedToSavedSearches?: any[]; // TODO
-  conflictedSearchDocs?: any[]; // TODO
+  conflictedIndexPatterns?: any[];
+  conflictedSavedObjectsLinkedToSavedSearches?: any[];
+  conflictedSearchDocs?: any[];
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
   failedImports?: ProcessedImportResponse['failedImports'];
   conflictingRecord?: ConflictingRecord;
@@ -91,7 +91,7 @@ export interface FlyoutState {
   isOverwriteAllChecked: boolean;
   loadingMessage?: string;
   isLegacyFile: boolean;
-  status: string; // TODO: improve type
+  status: string;
 }
 
 interface ConflictingRecord {

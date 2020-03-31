@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ObjectsTable delete should show a confirm modal 1`] = `
+exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 <EuiConfirmModal
   buttonColor="danger"
   cancelButtonText={
@@ -74,7 +74,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
 </EuiConfirmModal>
 `;
 
-exports[`ObjectsTable export should allow the user to choose when exporting all 1`] = `
+exports[`SavedObjectsTable export should allow the user to choose when exporting all 1`] = `
 <EuiModal
   onClose={[Function]}
 >
@@ -197,7 +197,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
 </EuiModal>
 `;
 
-exports[`ObjectsTable import should show the flyout 1`] = `
+exports[`SavedObjectsTable import should show the flyout 1`] = `
 <Flyout
   allowedTypes={
     Array [
@@ -242,7 +242,6 @@ exports[`ObjectsTable import should show the flyout 1`] = `
       "make": [Function],
     }
   }
-  newIndexPatternUrl=""
   overlays={
     Object {
       "banners": Object {
@@ -267,7 +266,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
 />
 `;
 
-exports[`ObjectsTable relationships should show the flyout 1`] = `
+exports[`SavedObjectsTable relationships should show the flyout 1`] = `
 <Relationships
   basePath={
     BasePath {
@@ -300,7 +299,7 @@ exports[`ObjectsTable relationships should show the flyout 1`] = `
 />
 `;
 
-exports[`ObjectsTable should render normally 1`] = `
+exports[`SavedObjectsTable should render normally 1`] = `
 <EuiPageContent
   horizontalPosition="center"
 >
