@@ -17,13 +17,16 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const filterBar = getService('filterBar');
   const inspector = getService('inspector');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -71,6 +74,77 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         ['10,840', '1'],
         ['13,080', '1'],
         ['13,360', '1'],
+      ];
+      await inspector.open();
+      await inspector.expectTableData(expectedTableData);
+      await inspector.close();
+    });
+
+    it('should preserve app filters in visualize', async () => {
+      await filterBar.addFilter('bytes', 'is between', '3500', '4000');
+      await PageObjects.discover.clickFieldListItem('geo.src');
+      log.debug('visualize a geo.src field with filter applied');
+      await PageObjects.discover.clickFieldListItemVisualize('geo.src');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await filterBar.hasFilter('bytes', '3,500 to 4,000')).to.be(true);
+      const expectedTableData = [
+        ['CN', '133'],
+        ['IN', '120'],
+        ['US', '58'],
+        ['ID', '28'],
+        ['BD', '25'],
+        ['BR', '22'],
+        ['EG', '14'],
+        ['NG', '14'],
+        ['PK', '13'],
+        ['IR', '12'],
+        ['PH', '12'],
+        ['JP', '11'],
+        ['RU', '11'],
+        ['DE', '8'],
+        ['FR', '8'],
+        ['MX', '8'],
+        ['TH', '8'],
+        ['TR', '8'],
+        ['CA', '6'],
+        ['SA', '6'],
+      ];
+      await inspector.open();
+      await inspector.expectTableData(expectedTableData);
+      await inspector.close();
+    });
+
+    it('should preserve query in visualize', async () => {
+      await queryBar.setQuery('machine.os : ios');
+      await queryBar.submitQuery();
+      await PageObjects.discover.clickFieldListItem('geo.dest');
+      log.debug('visualize a geo.dest field with query applied');
+      await PageObjects.discover.clickFieldListItemVisualize('geo.dest');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
+      const expectedTableData = [
+        ['CN', '519'],
+        ['IN', '495'],
+        ['US', '275'],
+        ['ID', '82'],
+        ['PK', '75'],
+        ['BR', '71'],
+        ['NG', '54'],
+        ['BD', '51'],
+        ['JP', '47'],
+        ['MX', '47'],
+        ['IR', '44'],
+        ['PH', '44'],
+        ['RU', '42'],
+        ['ET', '33'],
+        ['TH', '33'],
+        ['EG', '32'],
+        ['VN', '32'],
+        ['DE', '31'],
+        ['FR', '30'],
+        ['GB', '30'],
       ];
       await inspector.open();
       await inspector.expectTableData(expectedTableData);

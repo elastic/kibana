@@ -163,6 +163,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
           schema = 'boolean';
           break;
         case ES_FIELD_TYPES.DATE:
+        case ES_FIELD_TYPES.DATE_NANOS:
           schema = 'datetime';
           break;
         case ES_FIELD_TYPES.BYTE:
@@ -235,7 +236,11 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
           return null;
         }
 
-        if (previewMappings.properties[columnId].type === ES_FIELD_TYPES.DATE) {
+        if (
+          [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS].includes(
+            previewMappings.properties[columnId].type
+          )
+        ) {
           return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
         }
 

@@ -14,6 +14,7 @@ import {
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   FALSE_POSITIVES_INPUT,
+  INVESTIGATION_NOTES_TEXTAREA,
   MACHINE_LEARNING_DROPDOWN,
   MACHINE_LEARNING_LIST,
   MACHINE_LEARNING_TYPE,
@@ -81,6 +82,8 @@ export const fillAboutRuleAndContinue = (rule: CustomRule | MachineLearningRule)
 
     cy.get(MITRE_BTN).click({ force: true });
   });
+
+  cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
 
   cy.get(ABOUT_CONTINUE_BTN)
     .should('exist')

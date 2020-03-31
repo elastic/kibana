@@ -22,24 +22,29 @@ import { getAggTypes } from './index';
 
 import { isBucketAggType } from './buckets/_bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
-
-const aggTypes = getAggTypes({ uiSettings: coreMock.createStart().uiSettings });
-
-const bucketAggs = aggTypes.buckets;
-const metricAggs = aggTypes.metrics;
+import { QueryStart } from '../../query';
 
 describe('AggTypesComponent', () => {
+  const core = coreMock.createSetup();
+  const aggTypes = getAggTypes({
+    uiSettings: core.uiSettings,
+    notifications: core.notifications,
+    query: {} as QueryStart,
+  });
+
+  const { buckets, metrics } = aggTypes;
+
   describe('bucket aggs', () => {
-    it('all extend BucketAggType', () => {
-      bucketAggs.forEach(bucketAgg => {
+    test('all extend BucketAggType', () => {
+      buckets.forEach(bucketAgg => {
         expect(isBucketAggType(bucketAgg)).toBeTruthy();
       });
     });
   });
 
   describe('metric aggs', () => {
-    it('all extend MetricAggType', () => {
-      metricAggs.forEach(metricAgg => {
+    test('all extend MetricAggType', () => {
+      metrics.forEach(metricAgg => {
         expect(isMetricAggType(metricAgg)).toBeTruthy();
       });
     });
