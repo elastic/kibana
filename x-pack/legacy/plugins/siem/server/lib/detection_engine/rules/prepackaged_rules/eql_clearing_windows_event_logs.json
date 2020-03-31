@@ -4,9 +4,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Clearing Windows Event Logs",
-  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and (process.name:\"wevtutil.exe\" and process.args:\"cl\") or (process.name:\"powershell.exe\" and process.args:\"Clear-EventLog\")",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:wevtutil.exe and process.args:cl or process.name:powershell.exe and process.args:Clear-EventLog",
   "risk_score": 21,
   "rule_id": "d331bbe2-6db4-4941-80a5-8270db72eb61",
   "severity": "low",
