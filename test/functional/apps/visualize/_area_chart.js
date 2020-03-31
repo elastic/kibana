@@ -554,5 +554,76 @@ export default function({ getService, getPageObjects }) {
         });
       });
     });
+
+    describe('date histogram interval', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('Visualization AreaChart');
+        await PageObjects.visChart.waitForVisualization();
+      });
+
+      beforeEach(async () => {
+        const fromTime = 'Sep 20, 2015 @ 00:00:00.000';
+        const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      });
+
+      it('should update collapsed accordion label when time range is changed', async () => {
+        const accordionLabel = await find.byCssSelector(
+          '[data-test-subj="visEditorAggAccordion2"] .visEditorSidebar__aggGroupAccordionButtonContent'
+        );
+        let accordionLabelText = await accordionLabel.getVisibleText();
+        expect(accordionLabelText).to.include.string('per 30 minutes');
+        const fromTime = 'Sep 20, 2015 @ 08:30:00.000';
+        const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        accordionLabelText = await accordionLabel.getVisibleText();
+        expect(accordionLabelText).to.include.string('per 10 minutes');
+      });
+
+      describe('expanded accordion', () => {
+        before(async () => await PageObjects.visEditor.toggleAccordion('visEditorAggAccordion2'));
+
+        it('should update label inside the opened accordion when scaled to milliseconds', async () => {
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(false);
+          await PageObjects.visEditor.setInterval('Millisecond');
+          const helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+        });
+
+        it('should display updated scaled label text after time range is changed', async () => {
+          await PageObjects.visEditor.setInterval('Millisecond');
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(true);
+          let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          const fromTime = 'Sep 20, 2015 @ 22:30:00.000';
+          const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 30 seconds');
+        });
+
+        it('should update scaled label text after custom interval is set and time range is changed', async () => {
+          await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(true);
+          let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          const fromTime = 'Sep 20, 2015 @ 21:30:00.000';
+          const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to minute');
+        });
+      });
+    });
   });
 }

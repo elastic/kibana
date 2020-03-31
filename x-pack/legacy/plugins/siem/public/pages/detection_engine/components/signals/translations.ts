@@ -95,9 +95,9 @@ export const ACTION_CLOSE_SIGNAL = i18n.translate(
   }
 );
 
-export const ACTION_VIEW_IN_TIMELINE = i18n.translate(
-  'xpack.siem.detectionEngine.signals.actions.viewInTimelineTitle',
+export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.siem.detectionEngine.signals.actions.investigateInTimelineTitle',
   {
-    defaultMessage: 'View in timeline',
+    defaultMessage: 'Investigate in timeline',
   }
 );
