@@ -20,14 +20,14 @@ kibanaPipeline(timeoutMinutes: 180) {
           "VCS_AUTHOR=${CMD}'%an' -1",
           "VCS_COMMIT_MSG=${CMD}'%an' -1",
         ]) {
-          kibanaPipeline.bash("""
+          kibanaPipeline.bash('''
 
           echo "### VCS_BRANCH: ${VCS_BRANCH}"
           echo "### VCS_SHA: ${VCS_SHA}"
           echo "### VCS_AUTHOR: ${VCS_AUTHOR}"
           echo "### VCS_COMMIT_MSG: ${VCS_COMMIT_MSG}"
 
-          """, "### Tre' Debugging")
+          ''', "### Tre' Debugging")
         }
 
       }
