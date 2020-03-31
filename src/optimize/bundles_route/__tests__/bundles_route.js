@@ -61,7 +61,7 @@ describe('optimizer/bundle route', () => {
     } = options;
 
     const server = new Hapi.Server();
-    server.register([Inert]);
+    server.register(Inert);
 
     server.route(
       createBundlesRoute({
