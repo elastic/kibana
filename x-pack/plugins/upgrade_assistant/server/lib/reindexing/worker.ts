@@ -125,7 +125,7 @@ export class ReindexWorker {
         ) {
           // TODO: This tight loop needs something to relax potentially high CPU demands so this padding is added.
           // This scheduler should be revisited in future.
-          await new Promise(res => setTimeout(res, WORKER_PADDING_MS));
+          await new Promise(resolve => setTimeout(resolve, WORKER_PADDING_MS));
         }
       }
     } finally {
