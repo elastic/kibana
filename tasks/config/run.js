@@ -58,6 +58,7 @@ module.exports = function(grunt) {
     '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
+    '--optimize.validateSyntaxOfNodeModules=false',
     '--server.port=5610',
     '--migrations.skip=true',
   ];
