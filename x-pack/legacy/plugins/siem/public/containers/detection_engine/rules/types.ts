@@ -6,12 +6,7 @@
 
 import * as t from 'io-ts';
 
-export const RuleTypeSchema = t.keyof({
-  query: null,
-  saved_query: null,
-  machine_learning: null,
-});
-export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
+import { RuleTypeSchema } from '../../../../common/detection_engine/types';
 
 /**
  * Params is an "record", since it is a type of AlertActionParams which is action templates.
@@ -194,7 +189,7 @@ export interface BasicFetchProps {
   signal: AbortSignal;
 }
 
-export interface ImportRulesProps {
+export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
   signal: AbortSignal;
@@ -208,7 +203,7 @@ export interface ImportRulesResponseError {
   };
 }
 
-export interface ImportRulesResponse {
+export interface ImportDataResponse {
   success: boolean;
   success_count: number;
   errors: ImportRulesResponseError[];

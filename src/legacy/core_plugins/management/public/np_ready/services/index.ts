@@ -18,4 +18,3 @@
  */
 
 export * from './index_pattern_management';
-export * from './saved_objects_management';
