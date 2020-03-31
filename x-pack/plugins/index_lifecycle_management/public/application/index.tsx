@@ -8,11 +8,12 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { I18nStart } from 'kibana/public';
+import { UnmountCallback } from 'src/core/public';
 
 import { App } from './app';
 import { indexLifecycleManagementStore } from './store';
 
-export const renderApp = (element: HTMLElement | null, I18nContext: I18nStart['Context']) => {
+export const renderApp = (element: Element, I18nContext: I18nStart['Context']): UnmountCallback => {
   render(
     <I18nContext>
       <Provider store={indexLifecycleManagementStore()}>

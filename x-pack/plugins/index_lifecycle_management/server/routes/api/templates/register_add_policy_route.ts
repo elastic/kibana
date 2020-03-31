@@ -20,7 +20,7 @@ async function updateIndexTemplate(
   callAsCurrentUser: APICaller,
   templateName: string,
   policyName: string,
-  aliasName: string
+  aliasName?: string
 ): Promise<any> {
   // Fetch existing template
   const template = await getIndexTemplate(callAsCurrentUser, templateName);

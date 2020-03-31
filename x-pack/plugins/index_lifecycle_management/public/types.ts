@@ -6,10 +6,12 @@
 
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { IndexManagementPluginSetup } from '../../index_management/public';
 
 export interface PluginsDependencies {
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  indexManagement?: IndexManagementPluginSetup;
 }
 
 export interface ClientConfigType {

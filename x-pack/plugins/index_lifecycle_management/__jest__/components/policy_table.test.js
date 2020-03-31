@@ -12,17 +12,15 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import sinon from 'sinon';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
-import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
-import { fetchedPolicies } from '../../public/np_ready/application/store/actions';
-import { indexLifecycleManagementStore } from '../../public/np_ready/application/store';
-import { PolicyTable } from '../../public/np_ready/application/sections/policy_table';
-import { init as initHttp } from '../../public/np_ready/application/services/http';
-import { init as initUiMetric } from '../../public/np_ready/application/services/ui_metric';
+import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { fetchedPolicies } from '../../public/application/store/actions';
+import { indexLifecycleManagementStore } from '../../public/application/store';
+import { PolicyTable } from '../../public/application/sections/policy_table';
+import { init as initHttp } from '../../public/application/services/http';
+import { init as initUiMetric } from '../../public/application/services/ui_metric';
 
 initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
-initUiMetric(() => () => {});
-
-jest.mock('ui/new_platform');
+initUiMetric({ reportUiStats: () => {} });
 
 let server = null;
 

@@ -8,7 +8,7 @@ import moment from 'moment-timezone';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -16,21 +16,18 @@ import {
   ilmBannerExtension,
   ilmFilterExtension,
   ilmSummaryExtension,
-} from '../public/np_ready/extend_index_management';
-import { init as initHttp } from '../public/np_ready/application/services/http';
-import { init as initUiMetric } from '../public/np_ready/application/services/ui_metric';
+} from '../public/extend_index_management';
+import { init as initHttp } from '../public/application/services/http';
+import { init as initUiMetric } from '../public/application/services/ui_metric';
 
 // We need to init the http with a mock for any tests that depend upon the http service.
 // For example, add_lifecycle_confirm_modal makes an API request in its componentDidMount
 // lifecycle method. If we don't mock this, CI will fail with "Call retries were exceeded".
 initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
-initUiMetric(() => () => {});
+initUiMetric({ reportUiStats: () => {} });
 
-jest.mock('ui/new_platform');
-jest.mock('../../../../plugins/index_management/public', async () => {
-  const { indexManagementMock } = await import(
-    '../../../../plugins/index_management/public/mocks.ts'
-  );
+jest.mock('../../../plugins/index_management/public', async () => {
+  const { indexManagementMock } = await import('../../../plugins/index_management/public/mocks.ts');
   return indexManagementMock.createSetup();
 });
 

@@ -10,11 +10,7 @@ import { APICaller } from 'src/core/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(
-  callAsCurrentUser: APICaller,
-  name: string,
-  phases: string
-): Promise<any> {
+async function createPolicy(callAsCurrentUser: APICaller, name: string, phases: any): Promise<any> {
   const body = {
     policy: {
       phases,

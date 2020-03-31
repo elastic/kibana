@@ -13,13 +13,13 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
-import { fetchedPolicies, fetchedNodes } from '../../public/np_ready/application/store/actions';
-import { indexLifecycleManagementStore } from '../../public/np_ready/application/store';
-import { EditPolicy } from '../../public/np_ready/application/sections/edit_policy';
-import { init as initHttp } from '../../public/np_ready/application/services/http';
-import { init as initUiMetric } from '../../public/np_ready/application/services/ui_metric';
-import { init as initNotification } from '../../public/np_ready/application/services/notification';
+import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { fetchedPolicies, fetchedNodes } from '../../public/application/store/actions';
+import { indexLifecycleManagementStore } from '../../public/application/store';
+import { EditPolicy } from '../../public/application/sections/edit_policy';
+import { init as initHttp } from '../../public/application/services/http';
+import { init as initUiMetric } from '../../public/application/services/ui_metric';
+import { init as initNotification } from '../../public/application/services/notification';
 import {
   positiveNumbersAboveZeroErrorMessage,
   positiveNumberRequiredMessage,
@@ -33,15 +33,13 @@ import {
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
   maximumDocumentsRequiredMessage,
-} from '../../public/np_ready/application/store/selectors/lifecycle';
+} from '../../public/application/store/selectors/lifecycle';
 
 initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
-initUiMetric(() => () => {});
+initUiMetric({ reportUiStats: () => {} });
 initNotification({
   addDanger: () => {},
 });
-
-jest.mock('ui/new_platform');
 
 let server;
 let store;

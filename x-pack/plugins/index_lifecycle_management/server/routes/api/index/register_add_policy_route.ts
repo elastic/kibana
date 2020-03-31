@@ -33,7 +33,7 @@ async function addLifecyclePolicy(
 const bodySchema = schema.object({
   indexName: schema.string(),
   policyName: schema.string(),
-  alias: schema.maybe(schema.string({ defaultValue: '' })),
+  alias: schema.maybe(schema.string()),
 });
 
 export function registerAddPolicyRoute({ router, license, lib }: RouteDependencies) {
