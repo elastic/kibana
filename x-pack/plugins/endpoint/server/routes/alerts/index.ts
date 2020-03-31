@@ -6,13 +6,19 @@
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../../types';
 import { EndpointAppConstants } from '../../../common/types';
-import { alertListHandlerWrapper } from './list';
-import { alertDetailsHandlerWrapper, alertDetailsReqSchema } from './details';
-import { alertingIndexGetQuerySchema } from '../../../common/schema/alert_index';
+import { alertListGetHandlerWrapper, alertListUpdateHandlerWrapper } from './list';
+import { alertDetailsGetHandlerWrapper, alertDetailsUpdateHandlerWrapper } from './details';
+import {
+  alertingIndexGetQuerySchema,
+  alertingIndexPatchQuerySchema,
+  alertingIndexPatchBodySchema,
+  alertingIndexAlertDetailsParamsSchema,
+} from '../../../common/schema/alert_index';
 
 export const BASE_ALERTS_ROUTE = `${EndpointAppConstants.BASE_API_URL}/alerts`;
 
 export function registerAlertRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+  // Alert List
   router.get(
     {
       path: BASE_ALERTS_ROUTE,
@@ -21,17 +27,42 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
       },
       options: { authRequired: true },
     },
-    alertListHandlerWrapper(endpointAppContext)
+    alertListGetHandlerWrapper(endpointAppContext)
   );
 
+  router.patch(
+    {
+      path: BASE_ALERTS_ROUTE,
+      validate: {
+        query: alertingIndexPatchQuerySchema,
+        body: alertingIndexPatchBodySchema,
+      },
+      options: { authRequired: true },
+    },
+    alertListUpdateHandlerWrapper(endpointAppContext)
+  );
+
+  // Alert Details
   router.get(
     {
       path: `${BASE_ALERTS_ROUTE}/{id}`,
       validate: {
-        params: alertDetailsReqSchema,
+        params: alertingIndexAlertDetailsParamsSchema,
       },
       options: { authRequired: true },
     },
-    alertDetailsHandlerWrapper(endpointAppContext)
+    alertDetailsGetHandlerWrapper(endpointAppContext)
+  );
+
+  router.patch(
+    {
+      path: `${BASE_ALERTS_ROUTE}/{id}`,
+      validate: {
+        params: alertingIndexAlertDetailsParamsSchema,
+        body: alertingIndexPatchQuerySchema,
+      },
+      options: { authRequired: true },
+    },
+    alertDetailsUpdateHandlerWrapper(endpointAppContext)
   );
 }

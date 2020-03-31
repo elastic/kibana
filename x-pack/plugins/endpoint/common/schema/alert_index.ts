@@ -108,3 +108,28 @@ export const alertingIndexGetQuerySchema = schema.object(
     },
   }
 );
+
+/**
+ * Used to validate URL query params for modifications via alert list API.
+ */
+export const alertingIndexPatchQuerySchema = schema.object({
+  alert_ids: schema.arrayOf(schema.string(), {
+    minLength: 1,
+  }),
+});
+
+/**
+ * Used to validate JSON body params for modifications via alert list and detail APIs.
+ */
+export const alertingIndexPatchBodySchema = schema.object({
+  state: schema.object({
+    active: schema.maybe(schema.boolean()),
+  }),
+});
+
+/**
+ * Used to validate the URL params for alert details requests.
+ */
+export const alertingIndexAlertDetailsParamsSchema = schema.object({
+  id: schema.string(),
+});

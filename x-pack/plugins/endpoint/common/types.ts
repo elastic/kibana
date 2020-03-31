@@ -6,7 +6,12 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
-import { alertingIndexGetQuerySchema } from './schema/alert_index';
+import {
+  alertingIndexGetQuerySchema,
+  alertingIndexPatchQuerySchema,
+  alertingIndexPatchBodySchema,
+  alertingIndexAlertDetailsParamsSchema,
+} from './schema/alert_index';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -31,7 +36,7 @@ export type Direction = 'asc' | 'desc';
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
-  static ALERT_INDEX_NAME = 'events-endpoint-1';
+  static ALERT_INDEX_NAME = '.alerts-endpoint-*';
   static EVENT_INDEX_NAME = 'events-endpoint-*';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
@@ -242,6 +247,7 @@ interface AlertMetadata {
 interface AlertState {
   state: {
     host_metadata: HostMetadata;
+    active: boolean;
   };
 }
 
@@ -413,6 +419,23 @@ export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
 >;
 
 /**
- * Result of the validated query params when handling alert index requests.
+ * Result of the validated query params when handling alert index get requests.
  */
 export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+/**
+ * Result of the validated query params when handling alert index patch requests.
+ */
+export type AlertingIndexPatchQueryResult = TypeOf<typeof alertingIndexPatchQuerySchema>;
+
+/**
+ * Result of the validated body params when handling alert index patch requests.
+ */
+export type AlertingIndexPatchBodyResult = TypeOf<typeof alertingIndexPatchBodySchema>;
+
+/**
+ * Result of the validated alert details URL params.
+ */
+export type AlertingIndexAlertDetailsParamResult = TypeOf<
+  typeof alertingIndexAlertDetailsParamsSchema
+>;

@@ -3,15 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { GetResponse } from 'elasticsearch';
+import { UpdateResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
-import { AlertEvent, EndpointAppConstants } from '../../../../common/types';
+import {
+  AlertEvent,
+  AlertingIndexPatchBodyResult,
+  EndpointAppConstants,
+} from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
 import { getHostData } from '../../../routes/metadata';
 
-export const alertDetailsHandlerWrapper = function(
+export const alertDetailsGetHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
 ): RequestHandler<AlertDetailsRequestParams, unknown, unknown> {
   const alertDetailsHandler: RequestHandler<AlertDetailsRequestParams, unknown, unknown> = async (
@@ -47,6 +51,38 @@ export const alertDetailsHandlerWrapper = function(
           prev: await pagination.getPrevUrl(),
         },
       });
+    } catch (err) {
+      if (err.status === 404) {
+        return res.notFound({ body: err });
+      }
+      return res.internalError({ body: err });
+    }
+  };
+
+  return alertDetailsHandler;
+};
+
+export const alertDetailsUpdateHandlerWrapper = function(
+  endpointAppContext: EndpointAppContext
+): RequestHandler<AlertDetailsRequestParams, unknown, AlertingIndexPatchBodyResult> {
+  const alertDetailsHandler: RequestHandler<
+    AlertDetailsRequestParams,
+    unknown,
+    AlertingIndexPatchBodyResult
+  > = async (
+    ctx,
+    req: KibanaRequest<AlertDetailsRequestParams, unknown, AlertingIndexPatchBodyResult>,
+    res
+  ) => {
+    try {
+      const alertId = req.params.id;
+      const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('update', {
+        index: EndpointAppConstants.ALERT_INDEX_NAME,
+        id: alertId,
+        doc: req.body,
+      })) as UpdateResponse<AlertEvent>;
+
+      return res.ok({ body: response });
     } catch (err) {
       if (err.status === 404) {
         return res.notFound({ body: err });
