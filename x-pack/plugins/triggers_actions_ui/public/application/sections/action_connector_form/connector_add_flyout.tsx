@@ -280,28 +280,15 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
   <EuiCallOut
     title={i18n.translate(
       'xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerTitle',
-      { defaultMessage: 'Upgrade your plan to access more connector types' }
+      { defaultMessage: 'Upgrade your license to access all connectors' }
     )}
   >
     <FormattedMessage
       id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerMessage"
-      defaultMessage="Upgrade your license or start a 30-day free trial for immediate access to more third-party connectors."
+      defaultMessage="Upgrade your license or start a 30-day free trial for immediate access to all third-party connectors."
     />
     <EuiSpacer size="s" />
     <EuiFlexGroup gutterSize="s" wrap={true}>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          href={VIEW_LICENSE_OPTIONS_LINK}
-          iconType="popout"
-          iconSide="right"
-          target="_blank"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerLinkTitle"
-            defaultMessage="Upgrade now"
-          />
-        </EuiButton>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           href={`${http.basePath.get()}/app/kibana#${LICENSE_MANAGEMENT_BASE_PATH}`}
@@ -311,6 +298,19 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.actionConnectorAdd.manageLicensePlanBannerLinkTitle"
             defaultMessage="Manage license"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          href={VIEW_LICENSE_OPTIONS_LINK}
+          iconType="popout"
+          iconSide="right"
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerLinkTitle"
+            defaultMessage="Subscription plans"
           />
         </EuiButton>
       </EuiFlexItem>
