@@ -4,7 +4,7 @@
 def label(size) {
   switch(size) {
     case 's':
-      return 'ubuntu-18.04 && immutable'
+      return 'linux && immutable'
     case 'l':
       return 'tests-l'
     case 'xl':
