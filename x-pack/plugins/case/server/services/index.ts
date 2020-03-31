@@ -24,9 +24,15 @@ import { readReporters } from './reporters/read_reporters';
 import { readTags } from './tags/read_tags';
 
 export { CaseConfigureService, CaseConfigureServiceSetup } from './configure';
+export { CaseUserActionService, CaseUserActionServiceSetup } from './user_actions';
 
-interface ClientArgs {
+export interface ClientArgs {
   client: SavedObjectsClientContract;
+}
+
+interface PushedArgs {
+  pushed_at: string;
+  pushed_by: User;
 }
 
 interface GetCaseArgs extends ClientArgs {
@@ -37,7 +43,7 @@ interface GetCasesArgs extends ClientArgs {
   caseIds: string[];
 }
 
-interface GetCommentsArgs extends GetCaseArgs {
+interface FindCommentsArgs extends GetCaseArgs {
   options?: SavedObjectFindOptions;
 }
 
@@ -47,6 +53,7 @@ interface FindCasesArgs extends ClientArgs {
 interface GetCommentArgs extends ClientArgs {
   commentId: string;
 }
+
 interface PostCaseArgs extends ClientArgs {
   attributes: CaseAttributes;
 }
@@ -58,7 +65,7 @@ interface PostCommentArgs extends ClientArgs {
 
 interface PatchCase {
   caseId: string;
-  updatedAttributes: Partial<CaseAttributes>;
+  updatedAttributes: Partial<CaseAttributes & PushedArgs>;
   version?: string;
 }
 type PatchCaseArgs = PatchCase & ClientArgs;
@@ -72,30 +79,41 @@ interface UpdateCommentArgs extends ClientArgs {
   version?: string;
 }
 
+interface PatchComment {
+  commentId: string;
+  updatedAttributes: Partial<CommentAttributes>;
+  version?: string;
+}
+
+interface PatchComments extends ClientArgs {
+  comments: PatchComment[];
+}
+
 interface GetUserArgs {
   request: KibanaRequest;
   response: KibanaResponseFactory;
 }
 
 interface CaseServiceDeps {
-  authentication: SecurityPluginSetup['authc'];
+  authentication: SecurityPluginSetup['authc'] | null;
 }
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
   findCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<CaseAttributes>>;
-  getAllCaseComments(args: GetCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
+  getAllCaseComments(args: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
   getCase(args: GetCaseArgs): Promise<SavedObject<CaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
-  getUser(args: GetUserArgs): Promise<AuthenticatedUser>;
+  getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
   postNewCase(args: PostCaseArgs): Promise<SavedObject<CaseAttributes>>;
   postNewComment(args: PostCommentArgs): Promise<SavedObject<CommentAttributes>>;
   patchCase(args: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>>;
   patchCases(args: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseAttributes>>;
   patchComment(args: UpdateCommentArgs): Promise<SavedObjectsUpdateResponse<CommentAttributes>>;
+  patchComments(args: PatchComments): Promise<SavedObjectsBulkUpdateResponse<CommentAttributes>>;
 }
 
 export class CaseService {
@@ -157,7 +175,7 @@ export class CaseService {
         throw error;
       }
     },
-    getAllCaseComments: async ({ client, caseId, options }: GetCommentsArgs) => {
+    getAllCaseComments: async ({ client, caseId, options }: FindCommentsArgs) => {
       try {
         this.log.debug(`Attempting to GET all comments for case ${caseId}`);
         return await client.find({
@@ -189,13 +207,28 @@ export class CaseService {
       }
     },
     getUser: async ({ request, response }: GetUserArgs) => {
-      this.log.debug(`Attempting to authenticate a user`);
-      const user = authentication!.getCurrentUser(request);
-      if (!user) {
-        this.log.debug(`Error on GET user: Bad User`);
-        throw new Error('Bad User - the user is not authenticated');
+      try {
+        this.log.debug(`Attempting to authenticate a user`);
+        if (authentication != null) {
+          const user = authentication.getCurrentUser(request);
+          if (!user) {
+            return {
+              username: null,
+              full_name: null,
+              email: null,
+            };
+          }
+          return user;
+        }
+        return {
+          username: null,
+          full_name: null,
+          email: null,
+        };
+      } catch (error) {
+        this.log.debug(`Error on GET cases: ${error}`);
+        throw error;
       }
-      return user;
     },
     postNewCase: async ({ client, attributes }: PostCaseArgs) => {
       try {
@@ -258,6 +291,26 @@ export class CaseService {
         );
       } catch (error) {
         this.log.debug(`Error on UPDATE comment ${commentId}: ${error}`);
+        throw error;
+      }
+    },
+    patchComments: async ({ client, comments }: PatchComments) => {
+      try {
+        this.log.debug(
+          `Attempting to UPDATE comments ${comments.map(c => c.commentId).join(', ')}`
+        );
+        return await client.bulkUpdate(
+          comments.map(c => ({
+            type: CASE_COMMENT_SAVED_OBJECT,
+            id: c.commentId,
+            attributes: c.updatedAttributes,
+            version: c.version,
+          }))
+        );
+      } catch (error) {
+        this.log.debug(
+          `Error on UPDATE comments ${comments.map(c => c.commentId).join(', ')}: ${error}`
+        );
         throw error;
       }
     },

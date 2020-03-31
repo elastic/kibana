@@ -12,6 +12,8 @@ export const ADD_FALSE_POSITIVE_BTN =
 export const ADD_REFERENCE_URL_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] .euiButtonEmpty__text';
 
+export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
+
 export const MITRE_BTN = '[data-test-subj="addMitre"]';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
@@ -20,10 +22,19 @@ export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
-export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="continue"]';
+export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
+
+export const INVESTIGATION_NOTES_TEXTAREA =
+  '[data-test-subj="detectionEngineStepAboutRuleNote"] textarea';
 
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
+
+export const MACHINE_LEARNING_DROPDOWN = '[data-test-subj="mlJobSelect"] button';
+
+export const MACHINE_LEARNING_LIST = '.euiContextMenuItem__text';
+
+export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';
 
@@ -43,7 +54,10 @@ export const RULE_DESCRIPTION_INPUT =
 export const RULE_NAME_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleName"] [data-test-subj="input"]';
 
-export const SEVERITY_DROPDOWN = '[data-test-subj="select"]';
+export const SCHEDULE_CONTINUE_BUTTON = '[data-test-subj="schedule-continue"]';
+
+export const SEVERITY_DROPDOWN =
+  '[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]';
 
 export const TAGS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxSearchInput"]';

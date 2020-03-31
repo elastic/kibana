@@ -1012,6 +1012,8 @@ export interface RuleField {
   updated_by?: Maybe<string[]>;
 
   version?: Maybe<string[]>;
+
+  note?: Maybe<string[]>;
 }
 
 export interface SuricataEcsFields {
@@ -1859,15 +1861,13 @@ export interface TlsNode {
 
   timestamp?: Maybe<string>;
 
-  alternativeNames?: Maybe<string[]>;
-
   notAfter?: Maybe<string[]>;
 
-  commonNames?: Maybe<string[]>;
+  subjects?: Maybe<string[]>;
 
   ja3?: Maybe<string[]>;
 
-  issuerNames?: Maybe<string[]>;
+  issuers?: Maybe<string[]>;
 }
 
 export interface UncommonProcessesData {
@@ -4662,6 +4662,8 @@ export namespace GetTimelineQuery {
     to: Maybe<string[]>;
 
     filters: Maybe<ToAny>;
+
+    note: Maybe<string[]>;
   };
 
   export type Suricata = {
@@ -5679,13 +5681,11 @@ export namespace GetTlsQuery {
 
     _id: Maybe<string>;
 
-    alternativeNames: Maybe<string[]>;
-
-    commonNames: Maybe<string[]>;
+    subjects: Maybe<string[]>;
 
     ja3: Maybe<string[]>;
 
-    issuerNames: Maybe<string[]>;
+    issuers: Maybe<string[]>;
 
     notAfter: Maybe<string[]>;
   };

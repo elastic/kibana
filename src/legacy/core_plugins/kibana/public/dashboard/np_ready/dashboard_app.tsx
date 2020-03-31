@@ -21,8 +21,8 @@ import moment from 'moment';
 import { Subscription } from 'rxjs';
 import { History } from 'history';
 
-import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
-import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
+import { ViewMode } from '../../../../../../plugins/embeddable/public';
+import { SavedObjectDashboard } from '../../../../../../plugins/dashboard/public';
 import { DashboardAppState, SavedDashboardPanel } from './types';
 import {
   IIndexPattern,
