@@ -9,7 +9,7 @@
                 "properties": {
                   "version": {
                     "type": "keyword",
-                    "ignore_above": 256
+                    "ignore_above": 1024
                   }
                 }
               },
@@ -19,15 +19,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -35,7 +35,7 @@
                     "properties": {
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -43,15 +43,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   }
@@ -65,7 +65,7 @@
                 "properties": {
                   "version": {
                     "type": "keyword",
-                    "ignore_above": 256
+                    "ignore_above": 1024
                   }
                 }
               },
@@ -75,15 +75,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -91,15 +91,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -107,15 +107,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   }
@@ -129,7 +129,7 @@
                 "properties": {
                   "version": {
                     "type": "keyword",
-                    "ignore_above": 256
+                    "ignore_above": 1024
                   }
                 }
               },
@@ -139,15 +139,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -155,15 +155,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -171,15 +171,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   }
@@ -193,7 +193,7 @@
                 "properties": {
                   "version": {
                     "type": "keyword",
-                    "ignore_above": 256
+                    "ignore_above": 1024
                   }
                 }
               },
@@ -203,15 +203,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -219,15 +219,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -235,15 +235,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   }
@@ -257,7 +257,7 @@
                 "properties": {
                   "version": {
                     "type": "keyword",
-                    "ignore_above": 256
+                    "ignore_above": 1024
                   }
                 }
               },
@@ -267,15 +267,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -283,15 +283,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -299,15 +299,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   }
@@ -321,7 +321,7 @@
                 "properties": {
                   "version": {
                     "type": "keyword",
-                    "ignore_above": 256
+                    "ignore_above": 1024
                   }
                 }
               },
@@ -331,15 +331,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -347,15 +347,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -363,15 +363,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   }
@@ -385,7 +385,7 @@
                 "properties": {
                   "version": {
                     "type": "keyword",
-                    "ignore_above": 256
+                    "ignore_above": 1024
                   }
                 }
               },
@@ -395,15 +395,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -411,15 +411,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -427,15 +427,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   }
@@ -449,7 +449,7 @@
                 "properties": {
                   "version": {
                     "type": "keyword",
-                    "ignore_above": 256
+                    "ignore_above": 1024
                   }
                 }
               },
@@ -459,15 +459,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -475,15 +475,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   },
@@ -491,15 +491,15 @@
                     "properties": {
                       "composite": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "name": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       },
                       "version": {
                         "type": "keyword",
-                        "ignore_above": 256
+                        "ignore_above": 1024
                       }
                     }
                   }
