@@ -22,6 +22,7 @@ import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const patchRulesBulkRoute = (router: IRouter) => {
   router.patch(
@@ -37,11 +38,8 @@ export const patchRulesBulkRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      if (!context.alerting || !context.actions) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-      const alertsClient = context.alerting.getAlertsClient();
-      const actionsClient = context.actions.getActionsClient();
+      const alertsClient = context.alerting?.getAlertsClient();
+      const actionsClient = context.actions?.getActionsClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
       if (!actionsClient || !alertsClient) {
@@ -92,7 +90,6 @@ export const patchRulesBulkRoute = (router: IRouter) => {
             const rule = await patchRules({
               alertsClient,
               actionsClient,
-              actions,
               description,
               enabled,
               falsePositives,
@@ -118,7 +115,6 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               threat,
-              throttle,
               references,
               note,
               version,
@@ -126,6 +122,15 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               machineLearningJobId,
             });
             if (rule != null) {
+              const ruleActions = await updateRulesNotifications({
+                ruleAlertId: rule.id,
+                alertsClient,
+                savedObjectsClient,
+                enabled: rule.enabled!,
+                actions,
+                throttle,
+                name: rule.name!,
+              });
               const ruleStatuses = await savedObjectsClient.find<
                 IRuleSavedAttributesSavedObjectAttributes
               >({
@@ -136,7 +141,12 @@ export const patchRulesBulkRoute = (router: IRouter) => {
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(
+                rule.id,
+                rule,
+                ruleActions,
+                ruleStatuses.saved_objects[0]
+              );
             } else {
               return getIdBulkError({ id, ruleId });
             }

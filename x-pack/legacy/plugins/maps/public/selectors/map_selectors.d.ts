@@ -5,12 +5,14 @@
  */
 
 import { AnyAction } from 'redux';
-import { MapCenter } from '../actions/map_actions';
+import { MapCenter } from '../../common/descriptor_types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MapStoreState } from '../../../../../plugins/maps/public/reducers/store';
 
-export function getHiddenLayerIds(state: unknown): string[];
+export function getHiddenLayerIds(state: MapStoreState): string[];
 
-export function getMapZoom(state: unknown): number;
+export function getMapZoom(state: MapStoreState): number;
 
-export function getMapCenter(state: unknown): MapCenter;
+export function getMapCenter(state: MapStoreState): MapCenter;
 
-export function getQueryableUniqueIndexPatternIds(state: unknown): string[];
+export function getQueryableUniqueIndexPatternIds(state: MapStoreState): string[];
