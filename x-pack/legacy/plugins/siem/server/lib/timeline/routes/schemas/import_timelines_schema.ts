@@ -3,55 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
-import {
-  columns,
-  created,
-  createdBy,
-  dataProviders,
-  dateRange,
-  description,
-  eventNotes,
-  eventType,
-  favorite,
-  filters,
-  globalNotes,
-  kqlMode,
-  kqlQuery,
-  savedObjectId,
-  savedQueryId,
-  sort,
-  title,
-  updated,
-  updatedBy,
-  version,
-  pinnedEventIds,
-} from './schemas';
+import * as runtimeTypes from 'io-ts';
 
-export const importTimelinesPayloadSchema = Joi.object({
-  file: Joi.object().required(),
-});
+import { eventNotes, globalNotes, pinnedEventIds } from './schemas';
+import { SavedTimelineRuntimeType } from '../../types';
 
-export const importTimelinesSchema = Joi.object({
-  columns,
-  created,
-  createdBy,
-  dataProviders,
-  dateRange,
-  description,
-  eventNotes,
-  eventType,
-  filters,
-  favorite,
-  globalNotes,
-  kqlMode,
-  kqlQuery,
-  savedObjectId,
-  savedQueryId,
-  sort,
-  title,
-  updated,
-  updatedBy,
-  version,
-  pinnedEventIds,
-});
+const file = runtimeTypes.intersection([
+  runtimeTypes.UnknownRecord,
+  runtimeTypes.type({
+    hapi: runtimeTypes.type({ filename: runtimeTypes.string }),
+  }),
+]);
+export const importTimelinesPayloadSchema = runtimeTypes.type({ file });
+
+export const importTimelinesSchema = runtimeTypes.intersection([
+  SavedTimelineRuntimeType,
+  runtimeTypes.type({
+    savedObjectId: runtimeTypes.string,
+    version: runtimeTypes.string,
+  }),
+  runtimeTypes.type({
+    globalNotes,
+    eventNotes,
+    pinnedEventIds,
+  }),
+]);

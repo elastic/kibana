@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import * as runtimeTypes from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
-import { ids, exclude_export_details, file_name } from './schemas';
-/* eslint-disable @typescript-eslint/camelcase */
+const ids = runtimeTypes.array(runtimeTypes.string);
+export const exportTimelinesSchema = runtimeTypes.type({ ids });
 
-export const exportTimelinesSchema = Joi.object({
-  ids,
-}).min(1);
-
-export const exportTimelinesQuerySchema = Joi.object({
-  file_name: file_name.default('export.ndjson'),
-  exclude_export_details: exclude_export_details.default(false),
+export const exportTimelinesQuerySchema = runtimeTypes.type({
+  file_name: runtimeTypes.string,
+  exclude_export_details: runtimeTypes.boolean,
 });

@@ -4,22 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
+
 import { set as _set } from 'lodash/fp';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
-import { ExportTimelineRequestParams } from '../types';
 
-import {
-  transformError,
-  buildRouteValidation,
-  buildSiemResponse,
-} from '../../detection_engine/routes/utils';
+import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
-
-import {
-  exportTimelinesSchema,
-  exportTimelinesQuerySchema,
-} from './schemas/export_timelines_schema';
 
 import { getExportTimelineByObjectIds } from './utils/export_timelines';
 
@@ -28,10 +20,13 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
     {
       path: TIMELINE_EXPORT_URL,
       validate: {
-        query: buildRouteValidation<ExportTimelineRequestParams['query']>(
-          exportTimelinesQuerySchema
-        ),
-        body: buildRouteValidation<ExportTimelineRequestParams['body']>(exportTimelinesSchema),
+        query: schema.object({
+          file_name: schema.string(),
+          exclude_export_details: schema.boolean(),
+        }),
+        body: schema.object({
+          ids: schema.arrayOf(schema.string()),
+        }),
       },
       options: {
         tags: ['access:siem'],
@@ -42,6 +37,7 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
         const siemResponse = buildSiemResponse(response);
         const savedObjectsClient = context.core.savedObjects.client;
         const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
+
         if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
           return siemResponse.error({
             statusCode: 400,

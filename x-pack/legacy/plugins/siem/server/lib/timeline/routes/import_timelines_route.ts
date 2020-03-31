@@ -6,8 +6,13 @@
 
 import { extname } from 'path';
 import { chunk, omit, set } from 'lodash/fp';
+import Boom from 'boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { schema } from '@kbn/config-schema';
+import { Readable } from 'stream';
 import {
-  buildRouteValidation,
   buildSiemResponse,
   createBulkErrorObject,
   BulkError,
@@ -23,7 +28,6 @@ import {
   isBulkError,
   isImportRegular,
   ImportTimelineResponse,
-  ImportTimelinesRequestParams,
   ImportTimelinesSchema,
   PromiseFromStreams,
 } from './utils/import_timelines';
@@ -38,6 +42,7 @@ import { LegacyServices } from '../../../types';
 import { Timeline } from '../saved_object';
 import { validate } from '../../detection_engine/routes/rules/validate';
 import { FrameworkRequest } from '../../framework';
+import { throwErrors } from '../../../../../../../plugins/case/common/api';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -52,9 +57,7 @@ export const importTimelinesRoute = (
     {
       path: `${TIMELINE_IMPORT_URL}`,
       validate: {
-        body: buildRouteValidation<ImportTimelinesRequestParams['body']>(
-          importTimelinesPayloadSchema
-        ),
+        body: schema.object({}, { unknowns: 'allow' }),
       },
       options: {
         tags: ['access:siem'],
@@ -65,28 +68,34 @@ export const importTimelinesRoute = (
       },
     },
     async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const savedObjectsClient = context.core.savedObjects.client;
-      if (!savedObjectsClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-      const { filename } = request.body.file.hapi;
-
-      const fileExtension = extname(filename).toLowerCase();
-
-      if (fileExtension !== '.ndjson') {
-        return siemResponse.error({
-          statusCode: 400,
-          body: `Invalid file extension ${fileExtension}`,
-        });
-      }
-
-      const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
-
       try {
+        const siemResponse = buildSiemResponse(response);
+        const savedObjectsClient = context.core.savedObjects.client;
+        if (!savedObjectsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const { file } = pipe(
+          importTimelinesPayloadSchema.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
+        const { filename } = file.hapi;
+
+        const fileExtension = extname(filename).toLowerCase();
+
+        if (fileExtension !== '.ndjson') {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `Invalid file extension ${fileExtension}`,
+          });
+        }
+
+        const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
+
         const readStream = createTimelinesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-          request.body.file,
+          (file as unknown) as Readable,
           ...readStream,
         ]);
         const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueTimeline(
@@ -215,6 +224,7 @@ export const importTimelinesRoute = (
         }
       } catch (err) {
         const error = transformError(err);
+        const siemResponse = buildSiemResponse(response);
 
         return siemResponse.error({
           body: error.message,

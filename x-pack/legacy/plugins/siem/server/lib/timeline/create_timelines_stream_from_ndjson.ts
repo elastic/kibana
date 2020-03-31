@@ -5,6 +5,10 @@
  */
 
 import { Transform } from 'stream';
+import { identity } from 'fp-ts/lib/function';
+import Boom from 'boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
 import {
   createConcatStream,
   createSplitStream,
@@ -15,22 +19,14 @@ import {
   filterExportedCounts,
   createLimitStream,
 } from '../detection_engine/rules/create_rules_stream_from_ndjson';
-import { importTimelinesSchema } from './routes/schemas/import_timelines_schema';
-import { BadRequestError } from '../detection_engine/errors/bad_request_error';
+
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
+import { throwErrors } from '../../../../../../plugins/case/common/api';
+import { importTimelinesSchema } from './routes/schemas/import_timelines_schema';
 
 export const validateTimelines = (): Transform => {
   return createMapStream((obj: ImportTimelineResponse) => {
-    if (!(obj instanceof Error)) {
-      const validated = importTimelinesSchema.validate(obj);
-      if (validated.error != null) {
-        return new BadRequestError(validated.error.message);
-      } else {
-        return validated.value;
-      }
-    } else {
-      return obj;
-    }
+    return pipe(importTimelinesSchema.decode(obj), fold(throwErrors(Boom.badRequest), identity));
   });
 };
 
