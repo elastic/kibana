@@ -165,11 +165,7 @@ export class DockerServersService {
       `);
     }
 
-    function takeFirstWithTimeout(
-      source$: Rx.Observable<unknown>,
-      errorMsg: string,
-      ms = 30 * SECOND
-    ) {
+    function firstWithTimeout(source$: Rx.Observable<any>, errorMsg: string, ms = 30 * SECOND) {
       return Rx.race(
         source$.pipe(take(1)),
         Rx.timer(ms).pipe(
@@ -181,22 +177,25 @@ export class DockerServersService {
     }
 
     await Rx.merge(
-      takeFirstWithTimeout(
-        waitFor === undefined ? Rx.EMPTY : waitFor(server, logLine$),
-        `didn't find a line containing "${waitForLogLine}"`
-      ),
-      takeFirstWithTimeout(
-        waitForLogLine === undefined
-          ? Rx.EMPTY
-          : logLine$.pipe(
+      waitFor === undefined
+        ? Rx.EMPTY
+        : firstWithTimeout(
+            waitFor(server, logLine$),
+            `didn't find a line containing "${waitForLogLine}"`
+          ),
+
+      waitForLogLine === undefined
+        ? Rx.EMPTY
+        : firstWithTimeout(
+            logLine$.pipe(
               filter(line =>
                 waitForLogLine instanceof RegExp
                   ? waitForLogLine.test(line)
                   : line.includes(waitForLogLine)
               )
             ),
-        `waitForLogLine didn't emit anything`
-      )
+            `waitForLogLine didn't emit anything`
+          )
     ).toPromise();
   }
 
