@@ -16,9 +16,9 @@ kibanaPipeline(timeoutMinutes: 180) {
         def CMD = "git log --pretty=format"
         withEnv([
           "VCS_BRANCH=${GIT_BRANCH}",
-          "VCS_SHA=${CMD}':%h' -1)",
-          "VCS_AUTHOR=${CMD}'%an' -1)",
-          "VCS_COMMIT_MSG=${CMD}'%an' -1)",
+          "VCS_SHA=${CMD}':%h' -1",
+          "VCS_AUTHOR=${CMD}'%an' -1",
+          "VCS_COMMIT_MSG=${CMD}'%an' -1",
         ]) {
           kibanaPipeline.bash("""
 
