@@ -15,7 +15,6 @@ import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
 import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../saved_object_types';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
