@@ -60,6 +60,13 @@ describe('create_rules', () => {
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getCreateRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
     it('returns 200 if license is not platinum', async () => {
       (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
 
