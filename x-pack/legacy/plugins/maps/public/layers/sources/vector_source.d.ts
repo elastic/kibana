@@ -38,3 +38,12 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField;
 }
+
+type TiledSingleLayerVectorSourceMeta = {
+  urlTemplate: string;
+  layerName: string;
+};
+
+export interface ITiledSingleLayerVectorSource extends IVectorSource {
+  getUrlTemplateWithMeta(): Promise<TiledSingleLayerVectorSourceMeta>;
+}

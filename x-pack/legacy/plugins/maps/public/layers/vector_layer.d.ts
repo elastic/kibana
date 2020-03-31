@@ -20,7 +20,7 @@ import { SyncContext } from '../actions/map_actions';
 
 type VectorLayerArguments = {
   source: IVectorSource;
-  joins: IJoin[];
+  joins?: IJoin[];
   layerDescriptor: VectorLayerDescriptor;
 };
 
@@ -44,6 +44,16 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
+  _syncSourceStyleMeta(
+    syncContext: SyncContext,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): Promise<void>;
+  _syncSourceFormatters(
+    syncContext: SyncContext,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): Promise<void>;
   _getSearchFilters(
     dataFilters: MapFilters,
     source: IVectorSource,

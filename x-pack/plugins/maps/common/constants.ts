@@ -49,6 +49,7 @@ export enum LAYER_TYPE {
   VECTOR_TILE = 'VECTOR_TILE',
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
+  TILED_VECTOR = 'TILED_VECTOR',
 }
 
 export enum SORT_ORDER {
@@ -62,6 +63,7 @@ export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
+export const MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER';
 
 export enum FIELD_ORIGIN {
   SOURCE = 'source',
