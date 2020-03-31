@@ -62,5 +62,13 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     executor: createMetricThresholdExecutor(alertUUID),
+    actionVariables: {
+      context: [
+        { name: 'group', description: 'Alerting group' },
+        { name: 'valueOf', description: 'Values' },
+        { name: 'thresholdOf', description: 'Thresholds' },
+        { name: 'metricOf', description: 'Metrics' },
+      ],
+    },
   });
 }
