@@ -104,7 +104,6 @@ def listVcsEnvVars() {
     }
 
     XS=("${BUILD_DISPLAY_NAME}" \
-        "${BRANCH_NAME}" \
         "${GIT_COMMIT}" \
         "${GIT_BRANCH}" \
         "${GIT_COMMITTER_NAME}" \
