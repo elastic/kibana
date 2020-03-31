@@ -144,5 +144,7 @@ export const replaceLogPositionInQueryString = (time: number) =>
           time,
           tiebreaker: 0,
         },
+        end: new Date(time + ONE_HOUR).toISOString(),
+        start: new Date(time - ONE_HOUR).toISOString(),
         streamLive: false,
       });

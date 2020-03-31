@@ -48,7 +48,6 @@ export const getActions = (
     icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
-    enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
     description: i18n.DUPLICATE_RULE,
@@ -67,6 +66,7 @@ export const getActions = (
     enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
+    'data-test-subj': 'deleteRuleAction',
     description: i18n.DELETE_RULE,
     icon: 'trash',
     name: i18n.DELETE_RULE,

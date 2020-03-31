@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -64,11 +65,15 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
             <em>{labels.TAKE_SOME_TIME_TEXT}</em>
           </p>
         </EuiText>
-
         <EuiSpacer />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onClose()} disabled={isCreatingJob || isLoadingMLJob}>
+              {labels.CANCEL_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => onClickCreate()}

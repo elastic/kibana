@@ -44,7 +44,7 @@ export async function initPlugin(server: Hapi.Server, path: string) {
         ],
       },
     },
-    handler: newsfeedHandler,
+    handler: newsfeedHandler as Hapi.Lifecycle.Method,
   });
 
   server.route({

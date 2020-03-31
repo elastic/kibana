@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from '../../../../../../../plugins/visualizations/public';
 import { Axis, ValueAxis, SeriesParam, Style } from '../../../types';
 import {
   ChartTypes,

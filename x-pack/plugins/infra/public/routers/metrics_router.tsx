@@ -9,7 +9,7 @@ import { Route, Router, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from '../pages/404';
 import { InfrastructurePage } from '../pages/infrastructure';
-import { LinkToPage } from '../pages/link_to';
+import { LinkToMetricsPage } from '../pages/link_to';
 import { MetricDetail } from '../pages/metrics';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
@@ -20,7 +20,7 @@ export const MetricsRouter: AppRouter = ({ history }) => {
   return (
     <Router history={history}>
       <Switch>
-        <Route path="/link-to" component={LinkToPage} />
+        <Route path="/link-to" component={LinkToMetricsPage} />
         {uiCapabilities?.infrastructure?.show && (
           <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
         )}

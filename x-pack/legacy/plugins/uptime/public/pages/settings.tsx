@@ -78,7 +78,8 @@ export const SettingsPageComponent = ({
     }
   };
 
-  const onApply = () => {
+  const onApply = (event: React.FormEvent) => {
+    event.preventDefault();
     if (formFields) {
       dispatchSetDynamicSettings(formFields);
     }
@@ -176,7 +177,9 @@ export const SettingsPageComponent = ({
                     }
                   >
                     <EuiFieldText
-                      data-test-subj="heartbeat-indices-input"
+                      data-test-subj={`heartbeat-indices-input-${
+                        dss.loading ? 'loading' : 'loaded'
+                      }`}
                       fullWidth
                       disabled={isFormDisabled}
                       isLoading={dss.loading}

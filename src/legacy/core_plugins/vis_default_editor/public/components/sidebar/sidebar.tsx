@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from 'src/plugins/visualizations/public';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -33,6 +33,7 @@ import { PersistedState } from '../../../../../../plugins/visualizations/public'
 import { SavedSearch } from '../../../../../../plugins/discover/public';
 import { AggGroupNames } from '../../../../../../plugins/data/public';
 import { getSchemasByGroup } from '../../schemas';
+import { TimeRange } from '../../../../../../plugins/data/public';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -43,6 +44,7 @@ interface DefaultEditorSideBarProps {
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
   savedSearch?: SavedSearch;
+  timeRange: TimeRange;
 }
 
 function DefaultEditorSideBar({
@@ -54,6 +56,7 @@ function DefaultEditorSideBar({
   isLinkedSearch,
   eventEmitter,
   savedSearch,
+  timeRange,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
@@ -214,6 +217,7 @@ function DefaultEditorSideBar({
                   <Editor
                     isTabSelected={isTabSelected}
                     {...(name === 'data' ? dataTabProps : optionTabProps)}
+                    timeRange={timeRange}
                   />
                 </div>
               );

@@ -387,9 +387,17 @@ export class ExplorerSwimlane extends React.Component {
       .each(function() {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
-            .on('mouseover', label => {
+            .on('mouseover', value => {
               mlChartTooltipService.show(
-                [{ skipHeader: true }, { name: swimlaneData.fieldName, value: label }],
+                [
+                  { skipHeader: true },
+                  {
+                    label: swimlaneData.fieldName,
+                    value,
+                    seriesIdentifier: { key: value },
+                    valueAccessor: 'fieldName',
+                  },
+                ],
                 this,
                 {
                   x: laneLabelWidth,
@@ -400,7 +408,7 @@ export class ExplorerSwimlane extends React.Component {
             .on('mouseout', () => {
               mlChartTooltipService.hide();
             })
-            .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`);
+            .attr('aria-label', value => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(value)}`);
         }
       });
 

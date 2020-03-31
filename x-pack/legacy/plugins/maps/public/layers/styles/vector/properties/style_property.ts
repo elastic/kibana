@@ -8,10 +8,7 @@
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import {
-  FieldMetaOptions,
-  StylePropertyOptions,
-} from '../../../../../common/style_property_descriptor_types';
+import { FieldMetaOptions, StylePropertyOptions } from '../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../common/constants';
 
 type LegendProps = {

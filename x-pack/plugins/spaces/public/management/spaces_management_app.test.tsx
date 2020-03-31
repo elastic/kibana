@@ -51,7 +51,7 @@ async function mountApp(basePath: string, spaceId?: string) {
     .create({
       spacesManager,
       securityLicense,
-      getStartServices: async () => [coreStart, pluginsStart as PluginsStart],
+      getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
     })
     .mount({ basePath, element: container, setBreadcrumbs });
 

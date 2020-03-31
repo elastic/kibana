@@ -5,7 +5,7 @@
  */
 
 import { MiddlewareFactory, PolicyDetailsState } from '../../types';
-import { selectPolicyIdFromParams, isOnPolicyDetailsPage } from './selectors';
+import { policyIdFromParams, isOnPolicyDetailsPage } from './selectors';
 import { sendGetDatasource } from '../../services/ingest';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
@@ -16,7 +16,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
     const state = getState();
 
     if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
-      const id = selectPolicyIdFromParams(state);
+      const id = policyIdFromParams(state);
 
       const { item: policyItem } = await sendGetDatasource(http, id);
 
@@ -24,6 +24,19 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         type: 'serverReturnedPolicyDetailsData',
         payload: {
           policyItem,
+          policyConfig: {
+            windows: {
+              malware: {
+                mode: 'detect',
+              },
+              eventing: {
+                process: true,
+                network: true,
+              },
+            },
+            mac: {},
+            linux: {},
+          },
         },
       });
     }

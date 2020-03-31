@@ -34,7 +34,7 @@ import {
   Query,
   IFieldType,
 } from '../../../../../../../plugins/data/public';
-import { Container, Embeddable } from '../../../../../embeddable_api/public/np_ready/public';
+import { Container, Embeddable } from '../../../../../../../plugins/embeddable/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';

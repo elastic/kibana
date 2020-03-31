@@ -33,6 +33,7 @@
     "newsfeed": "src/plugins/newsfeed",
     "regionMap": "src/legacy/core_plugins/region_map",
     "savedObjects": "src/plugins/saved_objects",
+    "savedObjectsManagement": "src/plugins/saved_objects_management",
     "server": "src/legacy/server",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": [
@@ -51,10 +52,7 @@
     "visTypeVega": "src/legacy/core_plugins/vis_type_vega",
     "visTypeVislib": "src/legacy/core_plugins/vis_type_vislib",
     "visTypeXy": "src/legacy/core_plugins/vis_type_xy",
-    "visualizations": [
-      "src/plugins/visualizations",
-      "src/legacy/core_plugins/visualizations"
-    ]
+    "visualizations": "src/plugins/visualizations"
   },
   "exclude": [
     "src/legacy/ui/ui_render/ui_render_mixin.js"

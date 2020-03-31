@@ -33,7 +33,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     defaultPageSize,
     isLoading,
     itemIdToExpandedNotesRowMap,
-    importCompleteToggle,
+    importDataModalToggle,
     onAddTimelinesToFavorites,
     onDeleteSelected,
     onlyFavorites,
@@ -50,7 +50,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     searchResults,
     selectedItems,
     sortDirection,
-    setImportCompleteToggle,
+    setImportDataModalToggle,
     sortField,
     title,
     totalSearchResultsCount,
@@ -103,18 +103,18 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [refetch]);
 
     const handleCloseModal = useCallback(() => {
-      if (setImportCompleteToggle != null) {
-        setImportCompleteToggle(false);
+      if (setImportDataModalToggle != null) {
+        setImportDataModalToggle(false);
       }
-    }, [setImportCompleteToggle]);
+    }, [setImportDataModalToggle]);
     const handleComplete = useCallback(() => {
-      if (setImportCompleteToggle != null) {
-        setImportCompleteToggle(false);
+      if (setImportDataModalToggle != null) {
+        setImportDataModalToggle(false);
       }
       if (refetch != null) {
         refetch();
       }
-    }, [setImportCompleteToggle, refetch]);
+    }, [setImportDataModalToggle, refetch]);
 
     return (
       <>
@@ -136,7 +136,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           importData={importTimelines}
           successMessage={i18n.SUCCESSFULLY_IMPORTED_TIMELINES}
           showCheckBox={false}
-          showModal={importCompleteToggle ?? false}
+          showModal={importDataModalToggle ?? false}
           submitBtnText={i18n.IMPORT_TIMELINE_BTN_TITLE}
           subtitle={i18n.INITIAL_PROMPT_TEXT}
           title={i18n.IMPORT_TIMELINE}

@@ -9,7 +9,7 @@ import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { isRefreshOnlyQuery } from './is_refresh_only_query';
 import { ISource } from '../sources/source';
-import { DataMeta } from '../../../common/data_request_descriptor_types';
+import { DataMeta } from '../../../common/descriptor_types';
 import { DataRequest } from './data_request';
 
 const SOURCE_UPDATE_REQUIRED = true;
