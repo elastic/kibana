@@ -30,7 +30,7 @@ def functionalTestProcess(String name, Closure closure) {
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-      "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}"
+      "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
       "IS_PIPELINE_JOB=1",
       "JOB=${name}",
       "KBN_NP_PLUGINS_BUILT=true",
