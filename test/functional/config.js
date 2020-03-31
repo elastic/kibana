@@ -43,25 +43,29 @@ export default async function({ readConfigFile }) {
     pageObjects,
     services,
 
-    dockerServers: defineDockerServersConfig({
-      helloWorld: {
-        image: 'docker.elastic.co/package-registry/package-registry:master',
-        portInContainer: '8080',
-        port: 8080,
-        waitForLogLine: 'package manifests loaded into memory',
-        async waitFor(server, logLine$) {
-          await logLine$
-            .pipe(
-              first(line => line.includes('Package registry started')),
-              tap(line => {
-                console.log(`waitFor found log line "${line}"`);
-                console.log('marking server ready', server);
-              })
-            )
-            .toPromise();
-        },
-      },
-    }),
+    dockerServers: defineDockerServersConfig(
+      process.env.FLEET_PACKAGE_REGISTRY_PORT
+        ? {
+            helloWorld: {
+              image: 'docker.elastic.co/package-registry/package-registry:master',
+              portInContainer: 8080,
+              port: process.env.FLEET_PACKAGE_REGISTRY_PORT,
+              waitForLogLine: 'package manifests loaded into memory',
+              async waitFor(server, logLine$) {
+                await logLine$
+                  .pipe(
+                    first(line => line.includes('Package registry started')),
+                    tap(line => {
+                      console.log(`waitFor found log line "${line}"`);
+                      console.log('marking server ready', server);
+                    })
+                  )
+                  .toPromise();
+              },
+            },
+          }
+        : {}
+    ),
 
     servers: commonConfig.get('servers'),
 

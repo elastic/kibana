@@ -25,14 +25,14 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { Lifecycle } from '../lifecycle';
 import { observeContainerRunning } from './container_running';
 import { observeContainerLogs } from './container_logs';
-import { DockerServer, DockerServiceConfig } from './define_docker_servers_config';
+import { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 
 export class DockerServersService {
   private servers: DockerServer[];
 
   constructor(
     configs: {
-      [name: string]: DockerServiceConfig;
+      [name: string]: DockerServerSpec;
     },
     private log: ToolingLog,
     private lifecycle: Lifecycle

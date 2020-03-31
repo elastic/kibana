@@ -19,7 +19,7 @@
 
 import * as Rx from 'rxjs';
 
-export interface DockerServiceConfig {
+export interface DockerServerSpec {
   portInContainer: number;
   port: number;
   image: string;
@@ -27,7 +27,7 @@ export interface DockerServiceConfig {
   waitFor?: (server: DockerServer, logLine$: Rx.Observable<string>) => Promise<boolean>;
 }
 
-export interface DockerServer extends DockerServiceConfig {
+export interface DockerServer extends DockerServerSpec {
   name: string;
   url: string;
 }
@@ -36,6 +36,6 @@ export interface DockerServer extends DockerServiceConfig {
  * Helper that helps authors use the type definitions for the section of the FTR config
  * under the `dockerServers` key.
  */
-export function defineDockerServersConfig(config: { [name: string]: DockerServiceConfig }) {
+export function defineDockerServersConfig(config: { [name: string]: DockerServerSpec }) {
   return config;
 }
