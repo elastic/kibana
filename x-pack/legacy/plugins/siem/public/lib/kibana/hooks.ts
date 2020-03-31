@@ -58,6 +58,19 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
           if (!didCancel) {
             setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
           }
+        } else {
+          setUser({
+            username: i18n.translate('xpack.siem.getCurrentUser.unknownUser', {
+              defaultMessage: 'Unknown',
+            }),
+            email: '',
+            fullName: '',
+            roles: [],
+            enabled: false,
+            authenticationRealm: { name: '', type: '' },
+            lookupRealm: { name: '', type: '' },
+            authenticationProvider: '',
+          });
         }
       } catch (error) {
         if (!didCancel) {
