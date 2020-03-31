@@ -211,14 +211,19 @@ export function XYChart({
   const shouldRotate = isHorizontalChart(layers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
-  const interval = parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval);
+
+  // add minInterval only for single row value as it cannot be determined from dataset
+  const minInterval =
+    data.tables[layers[0].layerId].rows.length === 1
+      ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
+      : undefined;
 
   const xDomain =
     data.dateRange && layers.every(l => l.xScaleType === 'time')
       ? {
           min: data.dateRange.fromDate.getTime(),
           max: data.dateRange.toDate.getTime(),
-          minInterval: interval?.asMilliseconds(),
+          minInterval,
         }
       : undefined;
   return (

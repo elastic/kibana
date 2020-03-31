@@ -184,7 +184,7 @@ describe('xy_expression', () => {
         Object {
           "max": 1546491600000,
           "min": 1546405200000,
-          "minInterval": 10000,
+          "minInterval": undefined,
         }
       `);
     });
