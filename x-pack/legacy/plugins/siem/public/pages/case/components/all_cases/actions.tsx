@@ -22,9 +22,9 @@ export const getActions = ({
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
   {
-    description: i18n.DELETE,
+    description: i18n.DELETE_CASE,
     icon: 'trash',
-    name: i18n.DELETE,
+    name: i18n.DELETE_CASE,
     onClick: deleteCaseOnClick,
     type: 'icon',
     'data-test-subj': 'action-delete',

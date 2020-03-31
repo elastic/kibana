@@ -21,13 +21,13 @@ import styled from 'styled-components';
 
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
 
+import { RuleType } from '../../../../../../common/detection_engine/types';
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
 import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
-import { RuleType } from '../../../../../containers/detection_engine/rules';
 import { assertUnreachable } from '../../../../../lib/helpers';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`

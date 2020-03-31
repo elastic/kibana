@@ -42,6 +42,10 @@ export class ServiceSettings {
       tileApiUrl: this.mapConfig.emsTileApiUrl,
       htmlSanitizer: _.escape,
       landingPageUrl: this.mapConfig.emsLandingPageUrl,
+      // Wrap to avoid errors passing window fetch
+      fetchFunction: function(...args) {
+        return fetch(...args);
+      },
     });
     this.getTMSOptions();
   }

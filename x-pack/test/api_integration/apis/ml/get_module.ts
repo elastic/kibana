@@ -37,12 +37,12 @@ const moduleIds = [
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
-  const mlSecurity = getService('mlSecurity');
+  const ml = getService('ml');
 
   async function executeGetModuleRequest(module: string, user: USER, rspCode: number) {
     const { body } = await supertest
       .get(`/api/ml/modules/get_module/${module}`)
-      .auth(user, mlSecurity.getPasswordForUser(user))
+      .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_HEADERS)
       .expect(rspCode);
 
