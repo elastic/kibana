@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertParams, OutputRuleAlertRest, RuleAlertAction } from '../types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
 import {
   AlertType,
@@ -157,5 +158,9 @@ export interface AlertAttributes {
   schedule: {
     interval: string;
   };
-  throttle: string | null;
+  throttle: string;
+}
+
+export interface RuleAlertAttributes extends AlertAttributes {
+  params: RuleAlertParams;
 }

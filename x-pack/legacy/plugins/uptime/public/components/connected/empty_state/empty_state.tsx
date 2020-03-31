@@ -11,7 +11,7 @@ import { indexStatusSelector } from '../../../state/selectors';
 import { EmptyStateComponent } from '../../functional/empty_state/empty_state';
 
 export const EmptyState: React.FC = ({ children }) => {
-  const { data, loading, errors } = useSelector(indexStatusSelector);
+  const { data, loading, error } = useSelector(indexStatusSelector);
 
   const dispatch = useDispatch();
 
@@ -23,7 +23,7 @@ export const EmptyState: React.FC = ({ children }) => {
     <EmptyStateComponent
       statesIndexStatus={data}
       loading={loading}
-      errors={errors}
+      errors={error ? [error] : undefined}
       children={children as React.ReactElement}
     />
   );

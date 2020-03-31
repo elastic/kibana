@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
+import {
+  Filter,
+  CustomLink
+} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 export async function saveCustomLink({
@@ -18,15 +22,16 @@ export async function saveCustomLink({
   id?: string;
   label: string;
   url: string;
-  filters?: { [key: string]: string };
+  filters: Filter[];
   toasts: NotificationsStart['toasts'];
 }) {
   try {
-    const customLink = {
+    const customLink: CustomLink = {
       label,
       url,
-      ...filters
+      filters: filters.filter(({ key, value }) => key && value)
     };
+
     if (id) {
       await callApmApi({
         pathname: '/api/apm/settings/custom_links/{id}',

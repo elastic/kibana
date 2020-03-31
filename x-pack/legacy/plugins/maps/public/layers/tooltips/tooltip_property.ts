@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { PhraseFilter } from '../../../../../../../src/plugins/data/public';
+import { TooltipFeature } from '../../../../../../plugins/maps/common/descriptor_types';
 
 export interface ITooltipProperty {
   getPropertyKey(): string;
@@ -16,10 +17,32 @@ export interface ITooltipProperty {
   getESFilters(): Promise<PhraseFilter[]>;
 }
 
+export interface LoadFeatureProps {
+  layerId: string;
+  featureId: number;
+}
+
+export interface FeatureGeometry {
+  coordinates: [number];
+  type: string;
+}
+
+export interface RenderTooltipContentParams {
+  addFilters(filter: object): void;
+  closeTooltip(): void;
+  features: TooltipFeature[];
+  isLocked: boolean;
+  getLayerName(layerId: string): Promise<string>;
+  loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<ITooltipProperty[]>;
+  loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): FeatureGeometry;
+}
+
+export type RenderToolTipContent = (params: RenderTooltipContentParams) => JSX.Element;
+
 export class TooltipProperty implements ITooltipProperty {
   private readonly _propertyKey: string;
-  private readonly _propertyName: string;
   private readonly _rawValue: string | undefined;
+  private readonly _propertyName: string;
 
   constructor(propertyKey: string, propertyName: string, rawValue: string | undefined) {
     this._propertyKey = propertyKey;

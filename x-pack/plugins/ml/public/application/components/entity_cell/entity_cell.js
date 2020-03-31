@@ -10,6 +10,8 @@ import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EMPTY_FIELD_VALUE_LABEL } from '../../timeseriesexplorer/components/entity_control/entity_control';
+import { MLCATEGORY } from '../../../../common/constants/field_types';
 
 function getAddFilter({ entityName, entityValue, filter }) {
   return (
@@ -22,7 +24,7 @@ function getAddFilter({ entityName, entityValue, filter }) {
       }
     >
       <EuiButtonIcon
-        size="xs"
+        size="s"
         className="filter-button"
         onClick={() => filter(entityName, entityValue, '+')}
         iconType="plusInCircle"
@@ -45,7 +47,7 @@ function getRemoveFilter({ entityName, entityValue, filter }) {
       }
     >
       <EuiButtonIcon
-        size="xs"
+        size="s"
         className="filter-button"
         onClick={() => filter(entityName, entityValue, '-')}
         iconType="minusInCircle"
@@ -68,7 +70,11 @@ export const EntityCell = function EntityCell({
   filter,
   wrapText = false,
 }) {
-  const valueText = entityName !== 'mlcategory' ? entityValue : `mlcategory ${entityValue}`;
+  let valueText = entityValue === '' ? <i>{EMPTY_FIELD_VALUE_LABEL}</i> : entityValue;
+  if (entityName === MLCATEGORY) {
+    valueText = `${MLCATEGORY} ${valueText}`;
+  }
+
   const textStyle = { maxWidth: '100%' };
   const textWrapperClass = wrapText ? 'field-value-long' : 'field-value-short';
   const shouldDisplayIcons =

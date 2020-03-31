@@ -58,7 +58,7 @@ export function NoServicesMessage({ historicalDataFound, status }: Props) {
           <p>
             {i18n.translate('xpack.apm.servicesTable.7xUpgradeServerMessage', {
               defaultMessage: `Upgrading from a pre-7.x version? Make sure you've also upgraded
-              your APM server instance(s) to at least 7.0.`
+              your APM Server instance(s) to at least 7.0.`
             })}
           </p>
           <p>

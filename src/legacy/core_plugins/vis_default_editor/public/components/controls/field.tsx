@@ -80,6 +80,8 @@ function FieldParamEditor({
   }
 
   const isValid = !!value && !errors.length && !isDirty;
+  // we show an error message right away if there is no compatible fields
+  const showErrorMessage = (showValidation || !indexedFields.length) && !isValid;
 
   useValidation(setValidity, isValid);
 
@@ -103,7 +105,7 @@ function FieldParamEditor({
   return (
     <EuiFormRow
       label={customLabel || label}
-      isInvalid={showValidation ? !isValid : false}
+      isInvalid={showErrorMessage}
       fullWidth={true}
       error={errors}
       compressed
@@ -118,7 +120,7 @@ function FieldParamEditor({
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         isClearable={false}
-        isInvalid={showValidation ? !isValid : false}
+        isInvalid={showErrorMessage}
         onChange={onChange}
         onBlur={setTouched}
         onSearchChange={onSearchChange}
