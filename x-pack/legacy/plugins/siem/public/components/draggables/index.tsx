@@ -119,7 +119,7 @@ DefaultDraggable.displayName = 'DefaultDraggable';
 
 export const Badge = styled(EuiBadge)`
   vertical-align: top;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 Badge.displayName = 'Badge';
 
