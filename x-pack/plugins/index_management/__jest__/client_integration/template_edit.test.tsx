@@ -167,6 +167,8 @@ describe('<TemplateEdit />', () => {
 
           // Step 4 (aliases)
           await actions.completeStepFour(JSON.stringify(ALIASES));
+          await nextTick(50);
+          component.update();
         });
       });
 
