@@ -55,7 +55,8 @@ export const CustomLinkOverview = () => {
       {isFlyoutOpen && (
         <CustomLinkFlyout
           onClose={onCloseFlyout}
-          customLinkSelected={customLinkSelected}
+          defaults={customLinkSelected}
+          customLinkId={customLinkSelected?.id}
           onSave={() => {
             onCloseFlyout();
             refetch();

@@ -97,7 +97,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     <>
       {isCustomLinkFlyoutOpen && (
         <CustomLinkFlyout
-          filters={filters}
+          defaults={{ filters }}
           onClose={toggleCustomLinkFlyout}
           onSave={() => {
             toggleCustomLinkFlyout();

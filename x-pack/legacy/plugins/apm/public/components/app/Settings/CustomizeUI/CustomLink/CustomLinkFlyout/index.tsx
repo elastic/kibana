@@ -14,10 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import {
-  CustomLink,
-  Filter
-} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { Filter } from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
@@ -28,28 +25,32 @@ import { Documentation } from './Documentation';
 
 interface Props {
   onClose: () => void;
-  customLinkSelected?: CustomLink;
   onSave: () => void;
   onDelete: () => void;
-  filters?: Filter[];
+  defaults?: {
+    url?: string;
+    label?: string;
+    filters?: Filter[];
+  };
+  customLinkId?: string;
 }
+
+const filtersEmptyState: Filter[] = [{ key: '', value: '' }];
 
 export const CustomLinkFlyout = ({
   onClose,
-  customLinkSelected,
   onSave,
   onDelete,
-  filters
+  defaults,
+  customLinkId
 }: Props) => {
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
-  const [label, setLabel] = useState(customLinkSelected?.label || '');
-  const [url, setUrl] = useState(customLinkSelected?.url || '');
-  const _filters = customLinkSelected?.filters || filters;
-  const filtersEmptyState: Filter[] = [{ key: '', value: '' }];
-  const [selectedFilters, setSelectedFilters] = useState(
-    _filters?.length ? _filters : filtersEmptyState
+  const [label, setLabel] = useState(defaults?.label || '');
+  const [url, setUrl] = useState(defaults?.url || '');
+  const [filters, setFilters] = useState(
+    defaults?.filters?.length ? defaults.filters : filtersEmptyState
   );
 
   const isFormValid = !!label && !!url;
@@ -62,10 +63,10 @@ export const CustomLinkFlyout = ({
     event.preventDefault();
     setIsSaving(true);
     await saveCustomLink({
-      id: customLinkSelected?.id,
+      id: customLinkId,
       label,
       url,
-      filters: selectedFilters,
+      filters,
       toasts
     });
     setIsSaving(false);
@@ -120,14 +121,11 @@ export const CustomLinkFlyout = ({
 
             <EuiSpacer size="l" />
 
-            <FiltersSection
-              filters={selectedFilters}
-              onChangeFilters={setSelectedFilters}
-            />
+            <FiltersSection filters={filters} onChangeFilters={setFilters} />
 
             <EuiSpacer size="l" />
 
-            <LinkPreview label={label} url={url} filters={selectedFilters} />
+            <LinkPreview label={label} url={url} filters={filters} />
           </EuiFlyoutBody>
 
           <FlyoutFooter
@@ -135,7 +133,7 @@ export const CustomLinkFlyout = ({
             onClose={onClose}
             isSaving={isSaving}
             onDelete={onDelete}
-            customLinkId={customLinkSelected?.id}
+            customLinkId={customLinkId}
           />
         </EuiFlyout>
       </form>
