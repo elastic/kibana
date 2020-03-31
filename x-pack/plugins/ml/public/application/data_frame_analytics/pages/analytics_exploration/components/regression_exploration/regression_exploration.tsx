@@ -18,6 +18,7 @@ import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
@@ -47,11 +48,11 @@ const jobCapsErrorTitle = i18n.translate(
 
 interface Props {
   jobId: string;
-  jobStatus: DATA_FRAME_TASK_STATE;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
+export const RegressionExploration: FC<Props> = ({ jobId }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
+  const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
@@ -65,6 +66,15 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
     setIsLoadingJobConfig(true);
     try {
       const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+      const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+      const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
+        ? analyticsStats.data_frame_analytics[0]
+        : undefined;
+
+      if (stats !== undefined && stats.state) {
+        setJobStatus(stats.state);
+      }
+
       if (
         Array.isArray(analyticsConfigs.data_frame_analytics) &&
         analyticsConfigs.data_frame_analytics.length > 0
