@@ -13,15 +13,26 @@ kibanaPipeline(timeoutMinutes: 180) {
 //        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
         listVcsEnvVars()
 
-//        withEnv([
-//          "",
-//          "",
-//          "",
-//
-//        ]) {
-//
-//        }
+        def CMD = "git log --pretty=format"
+        withEnv([
+          "VCS_BRANCH=${GIT_BRANCH}",
+          "VCS_SHA=${CMD}':%h' -1)",
+          "VCS_AUTHOR=${CMD}'%an' -1)",
+          "VCS_COMMIT_MSG=${CMD}'%an' -1)",
+        ]) {
+          kibanaPipeline.bash("""
+
+          echo "### VCS_BRANCH: ${VCS_BRANCH}"
+          echo "### VCS_SHA: ${VCS_SHA}"
+          echo "### VCS_AUTHOR: ${VCS_AUTHOR}"
+          echo "### VCS_COMMIT_MSG: ${VCS_COMMIT_MSG}"
+
+          """, "### Tre' Debugging")
+        }
+
       }
+
+    }
 
 //      parallel([
 //        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
@@ -93,8 +104,8 @@ kibanaPipeline(timeoutMinutes: 180) {
 //
 //      }
 
-    }
   }
+
 //    kibanaPipeline.sendMail()
 }
 
