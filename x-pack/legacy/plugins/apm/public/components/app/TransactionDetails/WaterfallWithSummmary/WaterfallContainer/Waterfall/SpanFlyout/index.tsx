@@ -74,7 +74,7 @@ function getSpanTypes(span: Span) {
 const SpanBadge = styled(EuiBadge)`
   display: inline-block;
   margin-right: ${px(units.quarter)};
-`;
+` as any;
 
 const HttpInfoContainer = styled('div')`
   margin-right: ${px(units.quarter)};

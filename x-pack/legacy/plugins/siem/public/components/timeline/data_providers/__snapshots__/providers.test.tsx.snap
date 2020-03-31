@@ -28,12 +28,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 1"
             index={0}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -76,12 +78,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 2"
             index={1}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -124,12 +128,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 3"
             index={2}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -172,12 +178,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 4"
             index={3}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -220,12 +228,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 5"
             index={4}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -268,12 +278,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 6"
             index={5}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -316,12 +328,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 7"
             index={6}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -364,12 +378,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 8"
             index={7}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -412,12 +428,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 9"
             index={8}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}
@@ -460,12 +478,14 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           className="provider-item-filter-container"
           grow={false}
         >
-          <PublicDraggable
+          <Connect(Draggable)
+            disableInteractiveElementBlocking={false}
             draggableId="draggableId.timeline.foo.dataProvider.id-Provider 10"
             index={9}
+            isDragDisabled={false}
           >
             <Component />
-          </PublicDraggable>
+          </Connect(Draggable)>
         </PanelProviderItemContainer>
         <EuiFlexItem
           grow={false}

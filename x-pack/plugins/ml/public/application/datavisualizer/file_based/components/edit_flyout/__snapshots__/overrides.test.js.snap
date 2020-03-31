@@ -70,6 +70,7 @@ exports[`Overrides render overrides 1`] = `
           "asPlainText": true,
         }
       }
+      sortMatchesBy="none"
     />
   </EuiFormRow>
   <EuiFormRow
@@ -322,6 +323,7 @@ exports[`Overrides render overrides 1`] = `
           "asPlainText": true,
         }
       }
+      sortMatchesBy="none"
     />
   </EuiFormRow>
   <EuiFormRow
@@ -358,6 +360,7 @@ exports[`Overrides render overrides 1`] = `
           "asPlainText": true,
         }
       }
+      sortMatchesBy="none"
     />
   </EuiFormRow>
 </EuiForm>

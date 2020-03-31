@@ -155,7 +155,7 @@ Pane1FlexContent.displayName = 'Pane1FlexContent';
 
 export const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 CountBadge.displayName = 'CountBadge';
 
@@ -167,7 +167,7 @@ Spacer.displayName = 'Spacer';
 
 export const Badge = styled(EuiBadge)`
   vertical-align: top;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 Badge.displayName = 'Badge';
 

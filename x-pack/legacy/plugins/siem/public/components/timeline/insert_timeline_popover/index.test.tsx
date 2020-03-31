@@ -12,9 +12,13 @@ import routeData from 'react-router';
 import { InsertTimelinePopoverComponent } from './';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => ({
-  useDispatch: () => mockDispatch,
-}));
+jest.mock('react-redux', () => {
+  const reactRedux = jest.requireActual('react-redux');
+  return {
+    ...reactRedux,
+    useDispatch: () => mockDispatch,
+  };
+});
 const mockLocation = {
   pathname: '/apath',
   hash: '',

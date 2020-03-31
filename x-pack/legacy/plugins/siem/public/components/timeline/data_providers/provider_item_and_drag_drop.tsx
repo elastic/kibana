@@ -56,7 +56,7 @@ DropAndTargetDataProviders.displayName = 'DropAndTargetDataProviders';
 
 const NumberProviderAndBadge = styled(EuiBadge)`
   margin: 0px 5px;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 NumberProviderAndBadge.displayName = 'NumberProviderAndBadge';
 

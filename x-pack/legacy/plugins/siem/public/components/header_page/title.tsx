@@ -19,7 +19,7 @@ StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
 
 const Badge = styled(EuiBadge)`
   letter-spacing: 0;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 Badge.displayName = 'Badge';
 
 interface Props {

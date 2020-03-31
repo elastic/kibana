@@ -26,7 +26,7 @@ const BadgeHighlighted = styled(EuiBadge)`
   margin: 0 5px 0 5px;
   maxwidth: 85px;
   minwidth: 85px;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 BadgeHighlighted.displayName = 'BadgeHighlighted';
 

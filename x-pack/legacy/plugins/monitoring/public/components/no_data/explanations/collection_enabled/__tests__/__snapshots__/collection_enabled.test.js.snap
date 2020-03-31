@@ -192,6 +192,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
               isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
+              whiteSpace="pre-wrap"
             >
               <Portal
                 containerInfo={
@@ -220,6 +221,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
               isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
+              whiteSpace="pre-wrap"
             >
               <Portal
                 containerInfo={

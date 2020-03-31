@@ -119,6 +119,7 @@ exports[`it renders without crashing 1`] = `
         placeholder="Add a user…"
         selectedOptions={Array []}
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>

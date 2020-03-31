@@ -129,7 +129,7 @@ export function FieldEditor({
           })}
           onClickAriaLabel={badgeDescription}
           title=""
-          onClick={e => {
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             if (e.shiftKey) {
               toggleDisabledState();
             } else {

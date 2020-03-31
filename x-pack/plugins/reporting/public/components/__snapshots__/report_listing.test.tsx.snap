@@ -389,11 +389,14 @@ Array [
                           <div
                             className="euiTableCellContent"
                           >
-                            <span
-                              className="euiTableCellContent__text"
-                            >
-                              Report
-                            </span>
+                            <EuiInnerText>
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Report"
+                              >
+                                Report
+                              </span>
+                            </EuiInnerText>
                           </div>
                         </th>
                       </EuiTableHeaderCell>
@@ -416,11 +419,14 @@ Array [
                           <div
                             className="euiTableCellContent"
                           >
-                            <span
-                              className="euiTableCellContent__text"
-                            >
-                              Created at
-                            </span>
+                            <EuiInnerText>
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Created at"
+                              >
+                                Created at
+                              </span>
+                            </EuiInnerText>
                           </div>
                         </th>
                       </EuiTableHeaderCell>
@@ -443,11 +449,14 @@ Array [
                           <div
                             className="euiTableCellContent"
                           >
-                            <span
-                              className="euiTableCellContent__text"
-                            >
-                              Status
-                            </span>
+                            <EuiInnerText>
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Status"
+                              >
+                                Status
+                              </span>
+                            </EuiInnerText>
                           </div>
                         </th>
                       </EuiTableHeaderCell>
@@ -468,11 +477,14 @@ Array [
                           <div
                             className="euiTableCellContent euiTableCellContent--alignRight"
                           >
-                            <span
-                              className="euiTableCellContent__text"
-                            >
-                              Actions
-                            </span>
+                            <EuiInnerText>
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Actions"
+                              >
+                                Actions
+                              </span>
+                            </EuiInnerText>
                           </div>
                         </th>
                       </EuiTableHeaderCell>
@@ -743,11 +755,14 @@ Array [
                       <div
                         className="euiTableCellContent"
                       >
-                        <span
-                          className="euiTableCellContent__text"
-                        >
-                          Report
-                        </span>
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Report"
+                          >
+                            Report
+                          </span>
+                        </EuiInnerText>
                       </div>
                     </th>
                   </EuiTableHeaderCell>
@@ -770,11 +785,14 @@ Array [
                       <div
                         className="euiTableCellContent"
                       >
-                        <span
-                          className="euiTableCellContent__text"
-                        >
-                          Created at
-                        </span>
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Created at"
+                          >
+                            Created at
+                          </span>
+                        </EuiInnerText>
                       </div>
                     </th>
                   </EuiTableHeaderCell>
@@ -797,11 +815,14 @@ Array [
                       <div
                         className="euiTableCellContent"
                       >
-                        <span
-                          className="euiTableCellContent__text"
-                        >
-                          Status
-                        </span>
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Status"
+                          >
+                            Status
+                          </span>
+                        </EuiInnerText>
                       </div>
                     </th>
                   </EuiTableHeaderCell>
@@ -822,11 +843,14 @@ Array [
                       <div
                         className="euiTableCellContent euiTableCellContent--alignRight"
                       >
-                        <span
-                          className="euiTableCellContent__text"
-                        >
-                          Actions
-                        </span>
+                        <EuiInnerText>
+                          <span
+                            className="euiTableCellContent__text"
+                            title="Actions"
+                          >
+                            Actions
+                          </span>
+                        </EuiInnerText>
                       </div>
                     </th>
                   </EuiTableHeaderCell>
@@ -1038,11 +1062,14 @@ Array [
                     <div
                       className="euiTableCellContent"
                     >
-                      <span
-                        className="euiTableCellContent__text"
-                      >
-                        Report
-                      </span>
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Report"
+                        >
+                          Report
+                        </span>
+                      </EuiInnerText>
                     </div>
                   </th>
                 </EuiTableHeaderCell>
@@ -1065,11 +1092,14 @@ Array [
                     <div
                       className="euiTableCellContent"
                     >
-                      <span
-                        className="euiTableCellContent__text"
-                      >
-                        Created at
-                      </span>
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Created at"
+                        >
+                          Created at
+                        </span>
+                      </EuiInnerText>
                     </div>
                   </th>
                 </EuiTableHeaderCell>
@@ -1092,11 +1122,14 @@ Array [
                     <div
                       className="euiTableCellContent"
                     >
-                      <span
-                        className="euiTableCellContent__text"
-                      >
-                        Status
-                      </span>
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Status"
+                        >
+                          Status
+                        </span>
+                      </EuiInnerText>
                     </div>
                   </th>
                 </EuiTableHeaderCell>
@@ -1117,11 +1150,14 @@ Array [
                     <div
                       className="euiTableCellContent euiTableCellContent--alignRight"
                     >
-                      <span
-                        className="euiTableCellContent__text"
-                      >
-                        Actions
-                      </span>
+                      <EuiInnerText>
+                        <span
+                          className="euiTableCellContent__text"
+                          title="Actions"
+                        >
+                          Actions
+                        </span>
+                      </EuiInnerText>
                     </div>
                   </th>
                 </EuiTableHeaderCell>

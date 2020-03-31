@@ -10,7 +10,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { ChartSwitch } from './chart_switch';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
-import { EuiKeyPadMenuItemButton } from '@elastic/eui';
+import { EuiKeyPadMenuItem } from '@elastic/eui';
 import { Action } from './state_management';
 
 describe('chart_switch', () => {
@@ -129,7 +129,7 @@ describe('chart_switch', () => {
   function getMenuItem(subType: string, component: ReactWrapper) {
     showFlyout(component);
     return component
-      .find(EuiKeyPadMenuItemButton)
+      .find(EuiKeyPadMenuItem)
       .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
       .first();
   }

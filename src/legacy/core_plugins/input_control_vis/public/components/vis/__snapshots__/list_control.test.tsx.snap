@@ -46,6 +46,7 @@ exports[`renders ListControl 1`] = `
     placeholder="Select..."
     selectedOptions={Array []}
     singleSelection={false}
+    sortMatchesBy="none"
   />
 </FormRow>
 `;

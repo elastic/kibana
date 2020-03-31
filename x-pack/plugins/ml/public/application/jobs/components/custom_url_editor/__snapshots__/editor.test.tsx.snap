@@ -150,6 +150,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
         placeholder="Select entities"
         selectedOptions={Array []}
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
     <EuiSpacer
@@ -356,6 +357,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
           ]
         }
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
     <EuiSpacer
@@ -594,6 +596,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
           ]
         }
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
     <EuiSpacer
@@ -826,6 +829,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         placeholder="Select entities"
         selectedOptions={Array []}
         singleSelection={false}
+        sortMatchesBy="none"
       />
     </EuiFormRow>
     <EuiSpacer

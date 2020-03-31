@@ -36,7 +36,7 @@ export const newTimelineToolTip = 'Create a new timeline';
 
 const NotesCountBadge = styled(EuiBadge)`
   margin-left: 5px;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
