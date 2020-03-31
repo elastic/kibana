@@ -59,6 +59,7 @@ export const Resolver = styled(
 
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
+    const hasError = useSelector(selectors.hasError);
 
     useLayoutEffect(() => {
       dispatch({
@@ -71,6 +72,10 @@ export const Resolver = styled(
         {isLoading ? (
           <div className="loading-container">
             <EuiLoadingSpinner size="xl" />
+          </div>
+        ) : hasError ? (
+          <div className="loading-container">
+            <div>error occured fetching data</div>
           </div>
         ) : (
           <StyledResolverContainer

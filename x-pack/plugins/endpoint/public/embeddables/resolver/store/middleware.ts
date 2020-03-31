@@ -39,28 +39,34 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
        */
       if (context?.services.http && action.payload.selectedEvent) {
         api.dispatch({ type: 'appRequestedResolverData' });
-        let lifecycle: ResolverEvent[];
-        let children: [];
-        if (event.isLegacyEvent(action.payload.selectedEvent)) {
-          const uniquePid = action.payload.selectedEvent?.endgame?.unique_pid;
-          const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
-          [{ lifecycle, children }] = await Promise.all([
-            context.services.http.get(`/api/endpoint/resolver/${uniquePid}`, {
-              query: { legacyEndpointID },
-            }),
-          ]);
-        } else {
-          const uniquePid = action.payload.selectedEvent.process.entity_id;
-          [{ lifecycle, children }] = await Promise.all([
-            context.services.http.get(`/api/endpoint/resolver/${uniquePid}`),
-          ]);
+        try {
+          let lifecycle: ResolverEvent[];
+          let children: [];
+          if (event.isLegacyEvent(action.payload.selectedEvent)) {
+            const uniquePid = action.payload.selectedEvent?.endgame?.unique_pid;
+            const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
+            [{ lifecycle, children }] = await Promise.all([
+              context.services.http.get(`/api/endpoint/resolver/${uniquePid}`, {
+                query: { legacyEndpointID },
+              }),
+            ]);
+          } else {
+            const uniquePid = action.payload.selectedEvent.process.entity_id;
+            [{ lifecycle, children }] = await Promise.all([
+              context.services.http.get(`/api/endpoint/resolver/${uniquePid}`),
+            ]);
+          }
+          const mappedChildren = extractChildren(children);
+          const response: ResolverEvent[] = [...lifecycle, ...mappedChildren];
+          api.dispatch({
+            type: 'serverReturnedResolverData',
+            payload: { data: { result: { search_results: response } } },
+          });
+        } catch (error) {
+          api.dispatch({
+            type: 'serverFailedToReturnResolverData',
+          });
         }
-        const mappedChildren = extractChildren(children);
-        const response: ResolverEvent[] = [...lifecycle, ...mappedChildren];
-        api.dispatch({
-          type: 'serverReturnedResolverData',
-          payload: { data: { result: { search_results: response } } },
-        });
       }
     }
   };

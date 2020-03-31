@@ -17,4 +17,8 @@ interface ServerReturnedResolverData {
   };
 }
 
-export type DataAction = ServerReturnedResolverData;
+interface ServerFailedToReturnResolverData {
+  readonly type: 'serverFailedToReturnResolverData';
+}
+
+export type DataAction = ServerReturnedResolverData | ServerFailedToReturnResolverData;

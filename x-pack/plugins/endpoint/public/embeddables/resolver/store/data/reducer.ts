@@ -11,6 +11,7 @@ function initialState(): DataState {
   return {
     results: [],
     isLoading: false,
+    hasError: false,
   };
 }
 
@@ -25,11 +26,18 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       results: search_results,
       isLoading: false,
+      hasError: false,
     };
   } else if (action.type === 'appRequestedResolverData') {
     return {
       ...state,
       isLoading: true,
+      hasError: false,
+    };
+  } else if (action.type === 'serverFailedToReturnResolverData') {
+    return {
+      ...state,
+      hasError: true,
     };
   } else {
     return state;

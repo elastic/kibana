@@ -34,6 +34,10 @@ export function isLoading(state: DataState) {
   return state.isLoading;
 }
 
+export function hasError(state: DataState) {
+  return state.hasError;
+}
+
 /**
  * An isometric projection is a method for representing three dimensional objects in 2 dimensions.
  * More information about isometric projections can be found here https://en.wikipedia.org/wiki/Isometric_projection.

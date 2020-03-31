@@ -132,6 +132,7 @@ export type CameraState = {
 export interface DataState {
   readonly results: readonly ResolverEvent[];
   isLoading: boolean;
+  hasError: boolean;
 }
 
 export type Vector2 = readonly [number, number];
