@@ -6303,7 +6303,6 @@
     "xpack.infra.logEntryActionsMenu.apmActionLabel": "APMで表示",
     "xpack.infra.logEntryActionsMenu.buttonLabel": "アクション",
     "xpack.infra.logEntryActionsMenu.uptimeActionLabel": "監視ステータスを表示",
-    "xpack.infra.logEntryItemView.viewDetailsToolTip": "詳細を表示",
     "xpack.infra.logFlyout.fieldColumnLabel": "フィールド",
     "xpack.infra.logFlyout.filterAriaLabel": "フィルター",
     "xpack.infra.logFlyout.flyoutTitle": "ログイベントドキュメントの詳細",
