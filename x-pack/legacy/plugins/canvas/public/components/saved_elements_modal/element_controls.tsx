@@ -30,7 +30,12 @@ export const ElementControls: FunctionComponent<Props> = ({ onDelete, onEdit }) 
   >
     <EuiFlexItem grow={false}>
       <EuiToolTip content={strings.getEditTooltip()}>
-        <EuiButtonIcon iconType="pencil" aria-label={strings.getEditAriaLabel()} onClick={onEdit} />
+        <EuiButtonIcon
+          iconType="pencil"
+          aria-label={strings.getEditAriaLabel()}
+          onClick={onEdit}
+          data-test-subj="canvasElementCard__editButton"
+        />
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -40,6 +45,7 @@ export const ElementControls: FunctionComponent<Props> = ({ onDelete, onEdit }) 
           iconType="trash"
           aria-label={strings.getDeleteAriaLabel()}
           onClick={onDelete}
+          data-test-subj="canvasElementCard__deleteButton"
         />
       </EuiToolTip>
     </EuiFlexItem>

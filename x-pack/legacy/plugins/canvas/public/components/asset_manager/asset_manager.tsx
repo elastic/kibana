@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  // @ts-ignore (elastic/eui#1557) EuiFilePicker is not exported yet
-  EuiFilePicker,
-  // @ts-ignore (elastic/eui#1557) EuiImage is not exported yet
-  EuiImage,
-} from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { Fragment, PureComponent } from 'react';
 

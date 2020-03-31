@@ -137,6 +137,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
         {
           name: strings.getMyElementsMenuItemLabel(),
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+          'data-test-subj': 'saved-elements-menu-option',
           icon: <EuiIcon type="empty" size="m" />,
           onClick: () => {
             showSavedElementsModal();
@@ -172,6 +173,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
       aria-label={strings.getElementMenuLabel()}
       onClick={togglePopover}
       className="canvasElementMenu__popoverButton"
+      data-test-subj="add-element-button"
     >
       {strings.getElementMenuButtonLabel()}
     </EuiButton>

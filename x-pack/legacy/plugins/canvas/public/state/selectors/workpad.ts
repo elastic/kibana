@@ -15,7 +15,7 @@ import {
   ExpressionContext,
   CanvasGroup,
   PositionedElement,
-  WorkpadBoundingBox,
+  CanvasWorkpadBoundingBox,
 } from '../../../types';
 import {
   ExpressionAstArgument,
@@ -96,7 +96,7 @@ export function getWorkpadWidth(state: State): number {
   return get(state, append(workpadRoot, 'width'));
 }
 
-export function getWorkpadBoundingBox(state: State): WorkpadBoundingBox {
+export function getWorkpadBoundingBox(state: State): CanvasWorkpadBoundingBox {
   return getPages(state).reduce(
     (boundingBox, page) => {
       page.elements.forEach(({ position }) => {

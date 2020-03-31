@@ -5,7 +5,6 @@
  */
 
 import { ElementSpec } from '../../types';
-import defaultHeader from './default_header.png';
 
 export class Element {
   /** The name of the Element. This must match the name of the function that is used to create the `type: render` object  */
@@ -14,8 +13,6 @@ export class Element {
   public displayName: string;
   /** The type of the Element */
   public type?: string;
-  /** An image to use in the Element type selector */
-  public image: string;
   /** The name of the EUI icon to display in the element menu */
   public icon: string;
   /** A sentence or few about what this Element does */
@@ -29,21 +26,9 @@ export class Element {
   public height?: number;
 
   constructor(config: ElementSpec) {
-    const {
-      name,
-      image,
-      icon,
-      displayName,
-      type,
-      expression,
-      filter,
-      help,
-      width,
-      height,
-    } = config;
+    const { name, icon, displayName, type, expression, filter, help, width, height } = config;
     this.name = name;
     this.displayName = displayName || name;
-    this.image = image || defaultHeader;
     this.icon = icon || 'empty';
     this.help = help || '';
 

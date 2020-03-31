@@ -34,6 +34,7 @@ storiesOf('components/Assets/AssetManager', module)
       onAssetAdd={action('onAssetAdd')}
       onAssetCopy={action('onAssetCopy')}
       onAssetDelete={action('onAssetDelete')}
+      onClose={action('onClose')}
     />
   ))
   .add('two assets', () => (
@@ -43,5 +44,6 @@ storiesOf('components/Assets/AssetManager', module)
       onAssetAdd={action('onAssetAdd')}
       onAssetCopy={action('onAssetCopy')}
       onAssetDelete={action('onAssetDelete')}
+      onClose={action('onClose')}
     />
   ));

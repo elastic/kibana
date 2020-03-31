@@ -540,6 +540,7 @@ export class SidebarHeader extends Component<Props, State> {
                     color="text"
                     iconType="indexOpen"
                     onClick={this._showModal}
+                    data-test-subj="canvasSidebarHeader__saveElementButton"
                     aria-label={strings.getSaveElementMenuItemLabel()}
                   />
                 </EuiToolTip>

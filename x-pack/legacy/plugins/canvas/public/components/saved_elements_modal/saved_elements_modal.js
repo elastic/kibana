@@ -137,7 +137,7 @@ export class SavedElementsModal extends Component {
         <ElementGrid
           elements={customElements}
           filterText={search}
-          handleClick={addCustomElement}
+          onClick={addCustomElement}
           onEdit={this._showEditModal}
           onDelete={this._showDeleteModal}
         />
@@ -170,7 +170,11 @@ export class SavedElementsModal extends Component {
               {customElementContent}
             </EuiModalBody>
             <EuiModalFooter>
-              <EuiButton size="s" onClick={onClose}>
+              <EuiButton
+                size="s"
+                onClick={onClose}
+                data-test-subj="saved-elements-modal-close-button"
+              >
                 {strings.getSavedElementsModalCloseButtonLabel()}
               </EuiButton>
             </EuiModalFooter>

@@ -7,8 +7,6 @@
 import { ElementFactory } from '../../types';
 import { getElementStrings } from './index';
 
-import { TagStrings } from '../../i18n';
-
 /**
  * This function takes a set of Canvas Element specification factories, runs them,
  * replaces relevant strings (if available) and returns a new factory.  We do this
