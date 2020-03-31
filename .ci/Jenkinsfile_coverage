@@ -96,21 +96,19 @@ def listVcsEnvVars() {
     predicate() {
       x=$1
       if [ -n "$x" ]; then
-        echo "### DEFINED"
+        echo ""
       else
         echo "### 1 or more variables that Code Coverage needs, are undefined"
         exit 1
       fi
     }
 
-
-    XS=(${BUILD_DISPLAY_NAME} ${BRANCH_NAME})
-
+    XS=("${BUILD_DISPLAY_NAME}" "${BRANCH_NAME}")
 
     for X in "${!XS[@]}"; do
     {
-      predicate "${X}"
-      echo "${XS[X]}"
+      predicate "${XS[X]}"
+      echo "$X is DEFINED"
     }
     done
 
