@@ -50,7 +50,7 @@ const defaultPanelWidth = 500;
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus: DATA_FRAME_TASK_STATE;
+  jobStatus?: DATA_FRAME_TASK_STATE;
   searchQuery: ResultsSearchQuery;
 }
 
@@ -318,9 +318,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 </span>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{getTaskStateBadge(jobStatus)}</span>
-            </EuiFlexItem>
+            {jobStatus !== undefined && (
+              <EuiFlexItem grow={false}>
+                <span>{getTaskStateBadge(jobStatus)}</span>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiSpacer />
             </EuiFlexItem>
