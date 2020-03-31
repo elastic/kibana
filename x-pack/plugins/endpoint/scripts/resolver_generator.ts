@@ -6,7 +6,7 @@
 import * as yargs from 'yargs';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { EndpointDocGenerator } from '../common/generate_data';
+import { EndpointDocGenerator, Event } from '../common/generate_data';
 import { default as mapping } from './mapping.json';
 
 main();
@@ -144,7 +144,7 @@ async function main() {
       body: generator.generateHostMetadata(),
     });
     for (let j = 0; j < argv.alertsPerHost; j++) {
-      const resolverDocs = generator.generateFullResolverTree(
+      const resolverDocGenerator = generator.fullResolverTreeGenerator(
         argv.ancestors,
         argv.generations,
         argv.children,
@@ -152,14 +152,23 @@ async function main() {
         argv.percentWithRelated,
         argv.percentTerminated
       );
-      const body = resolverDocs.reduce(
-        (array: Array<Record<string, any>>, doc) => (
-          array.push({ index: { _index: argv.eventIndex } }, doc), array
-        ),
-        []
-      );
-
-      await client.bulk({ body });
+      let result = resolverDocGenerator.next();
+      while (!result.done) {
+        let k = 0;
+        const resolverDocs: Event[] = [];
+        while (k < 1000 && !result.done) {
+          resolverDocs.push(result.value);
+          result = resolverDocGenerator.next();
+          k++;
+        }
+        const body = resolverDocs.reduce(
+          (array: Array<Record<string, any>>, doc) => (
+            array.push({ index: { _index: argv.eventIndex } }, doc), array
+          ),
+          []
+        );
+        await client.bulk({ body });
+      }
     }
     generator.randomizeHostData();
   }
