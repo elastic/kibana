@@ -416,7 +416,7 @@ export class DashboardAppController {
     const updateBreadcrumbs = () => {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+          text: i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
             defaultMessage: 'Dashboard',
           }),
           href: landingPageUrl(),
@@ -662,20 +662,20 @@ export class DashboardAppController {
 
       overlays
         .openConfirm(
-          i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
+          i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesDescription', {
             defaultMessage: `Once you discard your changes, there's no getting them back.`,
           }),
           {
             confirmButtonText: i18n.translate(
-              'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
+              'dashboard.changeViewModeConfirmModal.confirmButtonLabel',
               { defaultMessage: 'Discard changes' }
             ),
             cancelButtonText: i18n.translate(
-              'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
+              'dashboard.changeViewModeConfirmModal.cancelButtonLabel',
               { defaultMessage: 'Continue editing' }
             ),
             defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-            title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
+            title: i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {
               defaultMessage: 'Discard changes to dashboard?',
             }),
           }
@@ -704,7 +704,7 @@ export class DashboardAppController {
         .then(function(id) {
           if (id) {
             notifications.toasts.addSuccess({
-              title: i18n.translate('kbn.dashboard.dashboardWasSavedSuccessMessage', {
+              title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
                 defaultMessage: `Dashboard '{dashTitle}' was saved`,
                 values: { dashTitle: dash.title },
               }),
@@ -726,7 +726,7 @@ export class DashboardAppController {
         })
         .catch(error => {
           notifications.toasts.addDanger({
-            title: i18n.translate('kbn.dashboard.dashboardWasNotSavedDangerMessage', {
+            title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
               defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
               values: {
                 dashTitle: dash.title,

@@ -264,10 +264,10 @@ export class DashboardEmbeddableContainerPublicPlugin
 
     home.featureCatalogue.register({
       id: DashboardConstants.DASHBOARD_ID,
-      title: i18n.translate('kbn.dashboard.featureCatalogue.dashboardTitle', {
+      title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
         defaultMessage: 'Dashboard',
       }),
-      description: i18n.translate('kbn.dashboard.featureCatalogue.dashboardDescription', {
+      description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
         defaultMessage: 'Display and share a collection of visualizations and saved searches.',
       }),
       icon: 'dashboardApp',

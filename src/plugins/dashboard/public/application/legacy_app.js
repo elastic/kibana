@@ -55,7 +55,7 @@ export function initDashboardApp(app, deps) {
   });
 
   function createNewDashboardCtrl($scope) {
-    $scope.visitVisualizeAppLinkText = i18n.translate('kbn.dashboard.visitVisualizeAppLinkText', {
+    $scope.visitVisualizeAppLinkText = i18n.translate('dashboard.visitVisualizeAppLinkText', {
       defaultMessage: 'visit the Visualize app',
     });
     addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
@@ -79,10 +79,10 @@ export function initDashboardApp(app, deps) {
         }
 
         return {
-          text: i18n.translate('kbn.dashboard.badge.readOnly.text', {
+          text: i18n.translate('dashboard.badge.readOnly.text', {
             defaultMessage: 'Read only',
           }),
-          tooltip: i18n.translate('kbn.dashboard.badge.readOnly.tooltip', {
+          tooltip: i18n.translate('dashboard.badge.readOnly.tooltip', {
             defaultMessage: 'Unable to save dashboards',
           }),
           iconType: 'glasses',
@@ -124,7 +124,7 @@ export function initDashboardApp(app, deps) {
           $scope.initialFilter = parse(history.location.search).filter || EMPTY_FILTER;
           deps.chrome.setBreadcrumbs([
             {
-              text: i18n.translate('kbn.dashboard.dashboardBreadcrumbsTitle', {
+              text: i18n.translate('dashboard.dashboardBreadcrumbsTitle', {
                 defaultMessage: 'Dashboards',
               }),
             },
@@ -222,7 +222,7 @@ export function initDashboardApp(app, deps) {
                   });
 
                   deps.core.notifications.toasts.addWarning(
-                    i18n.translate('kbn.dashboard.urlWasRemovedInSixZeroWarningMessage', {
+                    i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
                       defaultMessage:
                         'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
                     })

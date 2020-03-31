@@ -25,7 +25,7 @@ export function addHelpMenuToAppChrome(
   docLinks: CoreStart['docLinks']
 ) {
   chrome.setHelpExtension({
-    appName: i18n.translate('kbn.dashboard.helpMenu.appName', {
+    appName: i18n.translate('dashboard.helpMenu.appName', {
       defaultMessage: 'Dashboards',
     }),
     links: [

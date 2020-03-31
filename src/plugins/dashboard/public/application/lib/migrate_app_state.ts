@@ -47,7 +47,7 @@ export function migrateAppState(
 ): DashboardAppState {
   if (!appState.panels) {
     throw new Error(
-      i18n.translate('kbn.dashboard.panel.invalidData', {
+      i18n.translate('dashboard.panel.invalidData', {
         defaultMessage: 'Invalid data in url',
       })
     );

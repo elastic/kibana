@@ -63,10 +63,10 @@ export function getTopNavConfig(
 function getFullScreenConfig(action: NavAction) {
   return {
     id: 'full-screen',
-    label: i18n.translate('kbn.dashboard.topNave.fullScreenButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.fullScreenButtonAriaLabel', {
       defaultMessage: 'full screen',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.fullScreenConfigDescription', {
+    description: i18n.translate('dashboard.topNave.fullScreenConfigDescription', {
       defaultMessage: 'Full Screen Mode',
     }),
     testId: 'dashboardFullScreenMode',
@@ -80,10 +80,10 @@ function getFullScreenConfig(action: NavAction) {
 function getEditConfig(action: NavAction) {
   return {
     id: 'edit',
-    label: i18n.translate('kbn.dashboard.topNave.editButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
       defaultMessage: 'edit',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.editConfigDescription', {
+    description: i18n.translate('dashboard.topNave.editConfigDescription', {
       defaultMessage: 'Switch to edit mode',
     }),
     testId: 'dashboardEditMode',
@@ -100,10 +100,10 @@ function getEditConfig(action: NavAction) {
 function getSaveConfig(action: NavAction) {
   return {
     id: 'save',
-    label: i18n.translate('kbn.dashboard.topNave.saveButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.saveButtonAriaLabel', {
       defaultMessage: 'save',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.saveConfigDescription', {
+    description: i18n.translate('dashboard.topNave.saveConfigDescription', {
       defaultMessage: 'Save your dashboard',
     }),
     testId: 'dashboardSaveMenuItem',
@@ -117,10 +117,10 @@ function getSaveConfig(action: NavAction) {
 function getViewConfig(action: NavAction) {
   return {
     id: 'cancel',
-    label: i18n.translate('kbn.dashboard.topNave.cancelButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
       defaultMessage: 'cancel',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.viewConfigDescription', {
+    description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Cancel editing and switch to view-only mode',
     }),
     testId: 'dashboardViewOnlyMode',
@@ -134,10 +134,10 @@ function getViewConfig(action: NavAction) {
 function getCloneConfig(action: NavAction) {
   return {
     id: 'clone',
-    label: i18n.translate('kbn.dashboard.topNave.cloneButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.cloneButtonAriaLabel', {
       defaultMessage: 'clone',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.cloneConfigDescription', {
+    description: i18n.translate('dashboard.topNave.cloneConfigDescription', {
       defaultMessage: 'Create a copy of your dashboard',
     }),
     testId: 'dashboardClone',
@@ -151,10 +151,10 @@ function getCloneConfig(action: NavAction) {
 function getAddConfig(action: NavAction) {
   return {
     id: 'add',
-    label: i18n.translate('kbn.dashboard.topNave.addButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
       defaultMessage: 'add',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.addConfigDescription', {
+    description: i18n.translate('dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add a panel to the dashboard',
     }),
     testId: 'dashboardAddPanelButton',
@@ -170,10 +170,10 @@ function getCreateNewConfig(action: NavAction) {
     emphasize: true,
     iconType: 'plusInCircle',
     id: 'addNew',
-    label: i18n.translate('kbn.dashboard.topNave.addNewButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.addNewButtonAriaLabel', {
       defaultMessage: 'Create new',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.addNewConfigDescription', {
+    description: i18n.translate('dashboard.topNave.addNewConfigDescription', {
       defaultMessage: 'Create a new panel on this dashboard',
     }),
     testId: 'dashboardAddNewPanelButton',
@@ -187,10 +187,10 @@ function getCreateNewConfig(action: NavAction) {
 function getShareConfig(action: NavAction) {
   return {
     id: 'share',
-    label: i18n.translate('kbn.dashboard.topNave.shareButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
       defaultMessage: 'share',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.shareConfigDescription', {
+    description: i18n.translate('dashboard.topNave.shareConfigDescription', {
       defaultMessage: 'Share Dashboard',
     }),
     testId: 'shareTopNavButton',
@@ -204,10 +204,10 @@ function getShareConfig(action: NavAction) {
 function getOptionsConfig(action: NavAction) {
   return {
     id: 'options',
-    label: i18n.translate('kbn.dashboard.topNave.optionsButtonAriaLabel', {
+    label: i18n.translate('dashboard.topNave.optionsButtonAriaLabel', {
       defaultMessage: 'options',
     }),
-    description: i18n.translate('kbn.dashboard.topNave.optionsConfigDescription', {
+    description: i18n.translate('dashboard.topNave.optionsConfigDescription', {
       defaultMessage: 'Options',
     }),
     testId: 'dashboardOptionsButton',

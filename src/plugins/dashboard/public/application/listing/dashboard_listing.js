@@ -51,13 +51,13 @@ export class DashboardListing extends React.Component {
           listingLimit={this.props.listingLimit}
           initialFilter={this.props.initialFilter}
           noItemsFragment={this.getNoItemsMessage()}
-          entityName={i18n.translate('kbn.dashboard.listing.table.entityName', {
+          entityName={i18n.translate('dashboard.listing.table.entityName', {
             defaultMessage: 'dashboard',
           })}
-          entityNamePlural={i18n.translate('kbn.dashboard.listing.table.entityNamePlural', {
+          entityNamePlural={i18n.translate('dashboard.listing.table.entityNamePlural', {
             defaultMessage: 'dashboards',
           })}
-          tableListTitle={i18n.translate('kbn.dashboard.listing.dashboardsTitle', {
+          tableListTitle={i18n.translate('dashboard.listing.dashboardsTitle', {
             defaultMessage: 'Dashboards',
           })}
           toastNotifications={this.props.core.notifications.toasts}
@@ -76,7 +76,7 @@ export class DashboardListing extends React.Component {
             title={
               <h1 id="dashboardListingHeading">
                 <FormattedMessage
-                  id="kbn.dashboard.listing.noItemsMessage"
+                  id="dashboard.listing.noItemsMessage"
                   defaultMessage="Looks like you don't have any dashboards."
                 />
               </h1>
@@ -93,7 +93,7 @@ export class DashboardListing extends React.Component {
           title={
             <h1 id="dashboardListingHeading">
               <FormattedMessage
-                id="kbn.dashboard.listing.createNewDashboard.title"
+                id="dashboard.listing.createNewDashboard.title"
                 defaultMessage="Create your first dashboard"
               />
             </h1>
@@ -102,19 +102,19 @@ export class DashboardListing extends React.Component {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  id="dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
                   defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
                   defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
                   values={{
                     sampleDataInstallLink: (
                       <EuiLink href="#/home/tutorial_directory/sampleData">
                         <FormattedMessage
-                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           defaultMessage="Install some sample data"
                         />
                       </EuiLink>
@@ -132,7 +132,7 @@ export class DashboardListing extends React.Component {
               data-test-subj="createDashboardPromptButton"
             >
               <FormattedMessage
-                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
+                id="dashboard.listing.createNewDashboard.createButtonLabel"
                 defaultMessage="Create new dashboard"
               />
             </EuiButton>
@@ -146,7 +146,7 @@ export class DashboardListing extends React.Component {
     const tableColumns = [
       {
         field: 'title',
-        name: i18n.translate('kbn.dashboard.listing.table.titleColumnName', {
+        name: i18n.translate('dashboard.listing.table.titleColumnName', {
           defaultMessage: 'Title',
         }),
         sortable: true,
@@ -161,7 +161,7 @@ export class DashboardListing extends React.Component {
       },
       {
         field: 'description',
-        name: i18n.translate('kbn.dashboard.listing.table.descriptionColumnName', {
+        name: i18n.translate('dashboard.listing.table.descriptionColumnName', {
           defaultMessage: 'Description',
         }),
         dataType: 'string',

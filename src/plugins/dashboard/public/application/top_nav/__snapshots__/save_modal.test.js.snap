@@ -16,7 +16,7 @@ exports[`renders DashboardSaveModal 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Description"
-            id="kbn.dashboard.topNav.saveModal.descriptionFormRowLabel"
+            id="dashboard.topNav.saveModal.descriptionFormRowLabel"
             values={Object {}}
           />
         }
@@ -37,7 +37,7 @@ exports[`renders DashboardSaveModal 1`] = `
         helpText={
           <FormattedMessage
             defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
-            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+            id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
             values={Object {}}
           />
         }
@@ -49,7 +49,7 @@ exports[`renders DashboardSaveModal 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Store time with dashboard"
-              id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+              id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
               values={Object {}}
             />
           }

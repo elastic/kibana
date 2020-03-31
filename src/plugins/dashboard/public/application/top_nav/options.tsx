@@ -61,12 +61,9 @@ export class OptionsMenu extends Component<Props, State> {
       <EuiForm data-test-subj="dashboardOptionsMenu">
         <EuiFormRow>
           <EuiSwitch
-            label={i18n.translate(
-              'kbn.dashboard.topNav.options.useMarginsBetweenPanelsSwitchLabel',
-              {
-                defaultMessage: 'Use margins between panels',
-              }
-            )}
+            label={i18n.translate('dashboard.topNav.options.useMarginsBetweenPanelsSwitchLabel', {
+              defaultMessage: 'Use margins between panels',
+            })}
             checked={this.state.useMargins}
             onChange={this.handleUseMarginsChange}
             data-test-subj="dashboardMarginsCheckbox"
@@ -75,7 +72,7 @@ export class OptionsMenu extends Component<Props, State> {
 
         <EuiFormRow>
           <EuiSwitch
-            label={i18n.translate('kbn.dashboard.topNav.options.hideAllPanelTitlesSwitchLabel', {
+            label={i18n.translate('dashboard.topNav.options.hideAllPanelTitlesSwitchLabel', {
               defaultMessage: 'Show panel titles',
             })}
             checked={!this.state.hidePanelTitles}

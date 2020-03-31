@@ -503,7 +503,7 @@ export class DashboardStateManager {
   public syncTimefilterWithDashboard(timeFilter: Timefilter) {
     if (!this.getIsTimeSavedWithDashboard()) {
       throw new Error(
-        i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
+        i18n.translate('dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
           defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
         })
       );

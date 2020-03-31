@@ -58,7 +58,7 @@ export function showCloneModal(
       <DashboardCloneModal
         onClone={onCloneConfirmed}
         onClose={closeModal}
-        title={i18n.translate('kbn.dashboard.topNav.showCloneModal.dashboardCopyTitle', {
+        title={i18n.translate('dashboard.topNav.showCloneModal.dashboardCopyTitle', {
           defaultMessage: '{title} Copy',
           values: { title },
         })}
