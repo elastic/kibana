@@ -88,12 +88,12 @@ async function attemptToCreateCommand(
           // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
           'use-fake-ui-for-media-stream',
         ];
-        if (process.platform === 'linux') {
-          // The /dev/shm partition is too small in certain VM environments, causing
-          // Chrome to fail or crash. Use this flag to work-around this issue
-          // (a temporary directory will always be used to create anonymous shared memory files).
-          chromeOptions.push('disable-dev-shm-usage');
-        }
+        // if (process.platform === 'linux') {
+        //   // The /dev/shm partition is too small in certain VM environments, causing
+        //   // Chrome to fail or crash. Use this flag to work-around this issue
+        //   // (a temporary directory will always be used to create anonymous shared memory files).
+        //   chromeOptions.push('disable-dev-shm-usage');
+        // }
         if (headlessBrowser === '1') {
           // Use --disable-gpu to avoid an error from a missing Mesa library, as per
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
