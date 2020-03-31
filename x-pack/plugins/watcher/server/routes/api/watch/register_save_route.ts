@@ -25,19 +25,6 @@ const bodySchema = schema.object(
   { unknowns: 'allow' }
 );
 
-function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
-  return dataClient.callAsCurrentUser('watcher.getWatch', {
-    id: watchId,
-  });
-}
-
-function saveWatch(dataClient: IScopedClusterClient, id: string, body: any) {
-  return dataClient.callAsCurrentUser('watcher.putWatch', {
-    id,
-    body,
-  });
-}
-
 export function registerSaveRoute(deps: RouteDependencies) {
   deps.router.put(
     {
@@ -49,12 +36,16 @@ export function registerSaveRoute(deps: RouteDependencies) {
     },
     licensePreRoutingFactory(deps, async (ctx, request, response) => {
       const { id } = request.params;
-      const { type, isNew, ...watchConfig } = request.body;
+      const { type, isNew, isActive, ...watchConfig } = request.body;
+
+      const dataClient = ctx.watcher!.client;
 
       // For new watches, verify watch with the same ID doesn't already exist
       if (isNew) {
         try {
-          const existingWatch = await fetchWatch(ctx.watcher!.client, id);
+          const existingWatch = await dataClient.callAsCurrentUser('watcher.getWatch', {
+            id,
+          });
           if (existingWatch.found) {
             return response.conflict({
               body: {
@@ -92,7 +83,11 @@ export function registerSaveRoute(deps: RouteDependencies) {
       try {
         // Create new watch
         return response.ok({
-          body: await saveWatch(ctx.watcher!.client, id, serializedWatch),
+          body: await dataClient.callAsCurrentUser('watcher.putWatch', {
+            id,
+            active: isActive ?? true,
+            body: serializedWatch,
+          }),
         });
       } catch (e) {
         // Case: Error from Elasticsearch JS client
