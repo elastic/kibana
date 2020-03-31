@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiToolTip,
 } from '@elastic/eui';
+import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 export interface Entity {
   fieldName: string;
@@ -29,14 +30,21 @@ interface EntityControlProps {
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
   forceSelection: boolean;
-  options: EuiComboBoxOptionOption[];
+  options: Array<EuiComboBoxOptionOption<string>>;
 }
 
 interface EntityControlState {
-  selectedOptions: EuiComboBoxOptionOption[] | undefined;
+  selectedOptions: Array<EuiComboBoxOptionOption<string>> | undefined;
   isLoading: boolean;
-  options: EuiComboBoxOptionOption[] | undefined;
+  options: Array<EuiComboBoxOptionOption<string>> | undefined;
 }
+
+export const EMPTY_FIELD_VALUE_LABEL = i18n.translate(
+  'xpack.ml.timeSeriesExplorer.emptyPartitionFieldLabel.',
+  {
+    defaultMessage: '"" (empty string)',
+  }
+);
 
 export class EntityControl extends Component<EntityControlProps, EntityControlState> {
   inputRef: any;
@@ -53,16 +61,18 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
     const { fieldValue } = entity;
 
-    let selectedOptionsUpdate: EuiComboBoxOptionOption[] | undefined = selectedOptions;
+    let selectedOptionsUpdate: Array<EuiComboBoxOptionOption<string>> | undefined = selectedOptions;
     if (
-      (selectedOptions === undefined && fieldValue.length > 0) ||
+      (selectedOptions === undefined && fieldValue !== null) ||
       (Array.isArray(selectedOptions) &&
         // @ts-ignore
-        selectedOptions[0].label !== fieldValue &&
-        fieldValue.length > 0)
+        selectedOptions[0].value !== fieldValue &&
+        fieldValue !== null)
     ) {
-      selectedOptionsUpdate = [{ label: fieldValue }];
-    } else if (Array.isArray(selectedOptions) && fieldValue.length === 0) {
+      selectedOptionsUpdate = [
+        { label: fieldValue === '' ? EMPTY_FIELD_VALUE_LABEL : fieldValue, value: fieldValue },
+      ];
+    } else if (Array.isArray(selectedOptions) && fieldValue === null) {
       selectedOptionsUpdate = undefined;
     }
 
@@ -84,14 +94,14 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     }
   }
 
-  onChange = (selectedOptions: EuiComboBoxOptionOption[]) => {
+  onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const options = selectedOptions.length > 0 ? selectedOptions : undefined;
     this.setState({
       selectedOptions: options,
     });
 
     const fieldValue =
-      Array.isArray(options) && options[0].label.length > 0 ? options[0].label : '';
+      Array.isArray(options) && options[0].value !== null ? options[0].value : null;
     this.props.entityFieldValueChanged(this.props.entity, fieldValue);
   };
 
@@ -101,6 +111,11 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
       options: [],
     });
     this.props.onSearchChange(this.props.entity, searchValue);
+  };
+
+  renderOption = (option: EuiSelectableOption) => {
+    const { label } = option;
+    return label === EMPTY_FIELD_VALUE_LABEL ? <i>{label}</i> : label;
   };
 
   render() {
@@ -126,6 +141,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
         onChange={this.onChange}
         onSearchChange={this.onSearchChange}
         isClearable={false}
+        renderOption={this.renderOption}
       />
     );
 
