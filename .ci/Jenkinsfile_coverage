@@ -93,11 +93,8 @@ def listVcsEnvVars() {
   kibanaPipeline.bash(
 
     '''
-    env
-    set
 
-    env |grep "GIT*"
-    set |grep "GIT*"
+    git branch
 
     ''', "### Tre Debugging"
 
