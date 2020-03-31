@@ -42,6 +42,7 @@ export const getActionsColumns = ({
         timelineId: savedObjectId ?? '',
       });
     },
+    type: 'icon',
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.OPEN_AS_DUPLICATE,
     'data-test-subj': 'open-duplicate',

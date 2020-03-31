@@ -34,10 +34,11 @@ import { CaseStatus } from '../case_status';
 import { navTabs } from '../../../home/home_navigations';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
-import { usePushToService } from './push_to_service';
+import { usePushToService } from '../use_push_to_service';
 
 interface Props {
   caseId: string;
+  userCanCrud: boolean;
 }
 
 const MyWrapper = styled(WrapperPage)`
@@ -55,15 +56,14 @@ const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
   }
 `;
 
-export interface CaseProps {
-  caseId: string;
+export interface CaseProps extends Props {
   fetchCase: () => void;
   caseData: Case;
   updateCase: (newCase: Case) => void;
 }
 
 export const CaseComponent = React.memo<CaseProps>(
-  ({ caseId, caseData, fetchCase, updateCase }) => {
+  ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
     const basePath = window.location.origin + useBasePath();
     const caseLink = `${basePath}/app/siem#/case/${caseId}`;
     const search = useGetUrlSearch(navTabs.case);
@@ -152,6 +152,7 @@ export const CaseComponent = React.memo<CaseProps>(
       caseStatus: caseData.status,
       isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
       updateCase: handleUpdateCase,
+      userCanCrud,
     });
 
     const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
@@ -219,6 +220,7 @@ export const CaseComponent = React.memo<CaseProps>(
             data-test-subj="case-view-title"
             titleNode={
               <EditableTitle
+                disabled={!userCanCrud}
                 isLoading={isLoading && updateKey === 'title'}
                 title={caseData.title}
                 onSubmit={onSubmitTitle}
@@ -228,6 +230,7 @@ export const CaseComponent = React.memo<CaseProps>(
           >
             <CaseStatus
               caseData={caseData}
+              disabled={!userCanCrud}
               isLoading={isLoading && updateKey === 'status'}
               onRefresh={handleRefresh}
               toggleStatusCase={toggleStatusCase}
@@ -253,6 +256,7 @@ export const CaseComponent = React.memo<CaseProps>(
                       lastIndexPushToService={lastIndexPushToService}
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
+                      userCanCrud={userCanCrud}
                     />
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
@@ -260,6 +264,7 @@ export const CaseComponent = React.memo<CaseProps>(
                         <EuiButtonToggle
                           data-test-subj={caseStatusData['data-test-subj']}
                           iconType={caseStatusData.icon}
+                          isDisabled={!userCanCrud}
                           isSelected={caseStatusData.isSelected}
                           isLoading={isLoading && updateKey === 'status'}
                           label={caseStatusData.buttonLabel}
@@ -287,6 +292,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 />
                 <TagList
                   data-test-subj="case-view-tag-list"
+                  disabled={!userCanCrud}
                   tags={caseData.tags}
                   onSubmit={onSubmitTags}
                   isLoading={isLoading && updateKey === 'tags'}
@@ -301,7 +307,7 @@ export const CaseComponent = React.memo<CaseProps>(
   }
 );
 
-export const CaseView = React.memo(({ caseId }: Props) => {
+export const CaseView = React.memo(({ caseId, userCanCrud }: Props) => {
   const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId);
   if (isError) {
     return null;
@@ -317,7 +323,13 @@ export const CaseView = React.memo(({ caseId }: Props) => {
   }
 
   return (
-    <CaseComponent caseId={caseId} fetchCase={fetchCase} caseData={data} updateCase={updateCase} />
+    <CaseComponent
+      caseId={caseId}
+      fetchCase={fetchCase}
+      caseData={data}
+      updateCase={updateCase}
+      userCanCrud={userCanCrud}
+    />
   );
 });
 
