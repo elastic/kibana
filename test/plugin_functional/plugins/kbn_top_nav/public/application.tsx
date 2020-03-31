@@ -17,15 +17,31 @@
  * under the License.
  */
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      app: {
-        title: 'Top Nav Menu test',
-        description: 'This is a sample plugin for the functional tests.',
-        main: 'plugins/kbn_tp_top_nav/app',
-      },
-      hacks: ['plugins/kbn_tp_top_nav/initialize'],
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { AppMountParameters } from 'kibana/public';
+import { AppPluginDependencies } from './types';
+
+export const renderApp = (
+  depsStart: AppPluginDependencies,
+  { appBasePath, element }: AppMountParameters
+) => {
+  const { TopNavMenu } = depsStart.navigation.ui;
+  const config = [
+    {
+      id: 'new',
+      label: 'New Button',
+      description: 'New Demo',
+      run() {},
+      testId: 'demoNewButton',
     },
-  });
-}
+  ];
+  render(
+    <TopNavMenu appName="demo-app" config={config}>
+      Hey
+    </TopNavMenu>,
+    element
+  );
+
+  return () => unmountComponentAtNode(element);
+};
