@@ -114,3 +114,8 @@ export interface ActionLicense {
   enabledInConfig: boolean;
   enabledInLicense: boolean;
 }
+
+export interface DeleteCase {
+  id: string;
+  title?: string;
+}

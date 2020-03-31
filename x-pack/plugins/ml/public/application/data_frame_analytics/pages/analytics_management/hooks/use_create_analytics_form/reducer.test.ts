@@ -16,9 +16,11 @@ type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
 
 const getMockState = ({
   index,
+  trainingPercent = 75,
   modelMemoryLimit = '100mb',
 }: {
   index: SourceIndex;
+  trainingPercent?: number;
   modelMemoryLimit?: string;
 }) =>
   merge(getInitialState(), {
@@ -31,7 +33,9 @@ const getMockState = ({
     jobConfig: {
       source: { index },
       dest: { index: 'the-destination-index' },
-      analysis: {},
+      analysis: {
+        classification: { dependent_variable: 'the-variable', training_percent: trainingPercent },
+      },
       model_memory_limit: modelMemoryLimit,
     },
   });
@@ -148,6 +152,24 @@ describe('useCreateAnalyticsForm', () => {
     expect(
       // @ts-ignore number is not assignable to type string - mml gets converted to string prior to creation
       validateAdvancedEditor(getMockState({ index: 'the-source-index', modelMemoryLimit: 100 }))
+        .isValid
+    ).toBe(false);
+  });
+
+  test('validateAdvancedEditor(): check training percent validation', () => {
+    // valid training_percent value
+    expect(
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', trainingPercent: 75 }))
+        .isValid
+    ).toBe(true);
+    // invalid training_percent numeric value
+    expect(
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', trainingPercent: 102 }))
+        .isValid
+    ).toBe(false);
+    // invalid training_percent numeric value if 0
+    expect(
+      validateAdvancedEditor(getMockState({ index: 'the-source-index', trainingPercent: 0 }))
         .isValid
     ).toBe(false);
   });
