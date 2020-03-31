@@ -27,14 +27,17 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart, ChromeBreadcrumb, Capabilities } from 'src/core/public';
 import { ManagementSetup } from '../../../management/public';
 import { DataPublicPluginStart } from '../../../data/public';
-import { StartDependencies } from '../plugin';
-import { ISavedObjectsManagementServiceRegistry } from '../services';
+import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
+import {
+  ISavedObjectsManagementServiceRegistry,
+  SavedObjectsManagementActionServiceStart,
+} from '../services';
 import { SavedObjectsTable } from './objects_table';
 import { SavedObjectEdition } from './object_view';
 import { getAllowedTypes } from './../lib';
 
 interface RegisterOptions {
-  core: CoreSetup<StartDependencies>;
+  core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
   sections: ManagementSetup['sections'];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
@@ -53,7 +56,7 @@ export const registerManagementSection = ({ core, sections, serviceRegistry }: R
     title,
     order: 10,
     mount: async ({ element, basePath, setBreadcrumbs }) => {
-      const [coreStart, { data }] = await core.getStartServices();
+      const [coreStart, { data }, pluginStart] = await core.getStartServices();
       const allowedTypes = await getAllowedTypes(coreStart.http);
       const capabilities = coreStart.application.capabilities;
 
@@ -76,6 +79,7 @@ export const registerManagementSection = ({ core, sections, serviceRegistry }: R
                     coreStart={coreStart}
                     dataStart={data}
                     serviceRegistry={serviceRegistry}
+                    actionRegistry={pluginStart.actions}
                     allowedTypes={allowedTypes}
                     setBreadcrumbs={setBreadcrumbs}
                   />
@@ -157,12 +161,14 @@ const SavedObjectsTablePage = ({
   dataStart,
   allowedTypes,
   serviceRegistry,
+  actionRegistry,
   setBreadcrumbs,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  actionRegistry: SavedObjectsManagementActionServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }) => {
   const capabilities = coreStart.application.capabilities;
@@ -183,6 +189,7 @@ const SavedObjectsTablePage = ({
     <SavedObjectsTable
       allowedTypes={allowedTypes}
       serviceRegistry={serviceRegistry}
+      actionRegistry={actionRegistry}
       savedObjectsClient={coreStart.savedObjects.client}
       indexPatterns={dataStart.indexPatterns}
       http={coreStart.http}

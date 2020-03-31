@@ -68,7 +68,10 @@ import {
   SavedObjectsExportResultDetails,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
-import { ISavedObjectsManagementServiceRegistry } from '../../services';
+import {
+  ISavedObjectsManagementServiceRegistry,
+  SavedObjectsManagementActionServiceStart,
+} from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
 
 interface ExportAllOption {
@@ -79,6 +82,7 @@ interface ExportAllOption {
 export interface SavedObjectsTableProps {
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  actionRegistry: SavedObjectsManagementActionServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   http: HttpStart;
@@ -725,6 +729,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         <Table
           basePath={http.basePath}
           itemId={'id'}
+          actionRegistry={this.props.actionRegistry}
           selectionConfig={selectionConfig}
           selectedSavedObjects={selectedSavedObjects}
           onQueryChange={this.onQueryChange}

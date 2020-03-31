@@ -24,10 +24,12 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import { keyCodes } from '@elastic/eui/lib/services';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
-import { Table } from './table';
+import { actionServiceMock } from '../../../services/action_service.mock';
+import { Table, TableProps } from './table';
 
-const defaultProps = {
+const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
+  actionRegistry: actionServiceMock.createStart(),
   selectedSavedObjects: [
     {
       id: '1',

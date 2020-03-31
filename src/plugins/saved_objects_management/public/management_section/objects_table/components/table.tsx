@@ -40,14 +40,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
+import {
+  SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementAction,
+} from '../../../services';
 
-interface TableProps {
+export interface TableProps {
   basePath: IBasePath;
+  actionRegistry: SavedObjectsManagementActionServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
-  filterOptions: any[]; // TODO
+  filterOptions: any[];
   canDelete: boolean;
   onDelete: () => void;
   onExport: (includeReferencesDeep: boolean) => void;
@@ -57,8 +62,8 @@ interface TableProps {
   items: SavedObjectWithMetadata[];
   itemId: string | (() => string);
   totalItemCount: number;
-  onQueryChange: (query: any) => void; // TODO
-  onTableChange: (table: any) => void; // TODO
+  onQueryChange: (query: any) => void;
+  onTableChange: (table: any) => void;
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
@@ -66,10 +71,10 @@ interface TableProps {
 
 interface TableState {
   isSearchTextValid: boolean;
-  parseErrorMessage: any; // TODO
+  parseErrorMessage: any;
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
-  activeAction: any; // TODO
+  activeAction?: SavedObjectsManagementAction;
 }
 
 export class Table extends PureComponent<TableProps, TableState> {
@@ -78,12 +83,11 @@ export class Table extends PureComponent<TableProps, TableState> {
     parseErrorMessage: null,
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
-    activeAction: null,
+    activeAction: undefined,
   };
 
   constructor(props: TableProps) {
     super(props);
-    // this.extraActions = npSetup.plugins.savedObjectsManagement.actionRegistry.getAll(); TODO
   }
 
   onChange = ({ query, error }: any) => {
@@ -141,6 +145,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       goInspectObject,
       onShowRelationships,
       basePath,
+      actionRegistry,
     } = this.props;
 
     const pagination = {
@@ -257,25 +262,27 @@ export class Table extends PureComponent<TableProps, TableState> {
             onClick: object => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
-          /* ...this.extraActions.map(action => {
+          ...actionRegistry.getAll().map(action => {
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
-              onClick: object => {
+              onClick: (object: SavedObjectWithMetadata) => {
                 this.setState({
                   activeAction: action,
                 });
 
                 action.registerOnFinishCallback(() => {
                   this.setState({
-                    activeAction: null,
+                    activeAction: undefined,
                   });
                 });
 
-                action.euiAction.onClick(object);
+                if (action.euiAction.onClick) {
+                  action.euiAction.onClick(object as any);
+                }
               },
             };
-          }), */
+          }),
         ],
       } as EuiTableActionsColumnType<SavedObjectWithMetadata>,
     ];

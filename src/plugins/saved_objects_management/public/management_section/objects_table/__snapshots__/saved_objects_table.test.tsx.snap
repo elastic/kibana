@@ -314,6 +314,12 @@ exports[`ObjectsTable should render normally 1`] = `
     size="xs"
   />
   <Table
+    actionRegistry={
+      Object {
+        "getAll": [MockFunction],
+        "has": [MockFunction],
+      }
+    }
     basePath={
       BasePath {
         "basePath": "",
