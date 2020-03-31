@@ -6,7 +6,7 @@
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
 import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { once } from 'lodash';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';

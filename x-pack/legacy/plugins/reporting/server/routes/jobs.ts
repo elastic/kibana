@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { ResponseObject } from 'hapi';
+import { ResponseObject } from '@hapi/hapi';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import {

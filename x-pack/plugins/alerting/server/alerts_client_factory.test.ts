@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { AlertsClientFactory, AlertsClientFactoryOpts } from './alerts_client_factory';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { taskManagerMock } from '../../../plugins/task_manager/server/task_manager.mock';

@@ -24,7 +24,7 @@ jest.mock('fs', () => ({
 }));
 
 import supertest from 'supertest';
-import { Request, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import Joi from 'joi';
 
 import { defaultValidationErrorHandler, HapiValidationError, getServerOptions } from './http_tools';

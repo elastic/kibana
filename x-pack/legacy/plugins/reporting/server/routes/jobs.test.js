@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { memoize } from 'lodash';
 import { createMockReportingCore } from '../../test_helpers';
 import { ExportTypesRegistry } from '../lib/export_types_registry';

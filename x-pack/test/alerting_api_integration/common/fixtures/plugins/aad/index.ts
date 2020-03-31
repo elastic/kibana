@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { Legacy } from 'kibana';
 import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../plugins/encrypted_saved_objects/server';

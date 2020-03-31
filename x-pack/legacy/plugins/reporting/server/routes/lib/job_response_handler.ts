@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import { ResponseToolkit } from 'hapi';
+import { ResponseToolkit } from '@hapi/hapi';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { ExportTypesRegistry, ServerFacade } from '../../../types';
 import { jobsQueryFactory } from '../../lib/jobs_query';

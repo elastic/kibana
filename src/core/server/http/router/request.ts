@@ -18,7 +18,7 @@
  */
 
 import { Url } from 'url';
-import { Request, ApplicationState } from 'hapi';
+import { Request, RequestApplicationState, RouteOptions } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 

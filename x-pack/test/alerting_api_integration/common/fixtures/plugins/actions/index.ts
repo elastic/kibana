@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../../../plugins/actions/server/plugin';
 import { ActionType } from '../../../../../../plugins/actions/server';
 

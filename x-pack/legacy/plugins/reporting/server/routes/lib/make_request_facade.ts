@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestQuery } from 'hapi';
+import { RequestQuery } from '@hapi/hapi';
 import { Legacy } from 'kibana';
 import {
   RequestFacade,

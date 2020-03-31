@@ -17,7 +17,7 @@
  * under the License.
  */
 import Boom from 'boom';
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { clusterClientMock } from './core_service.test.mocks';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';

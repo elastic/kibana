@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseToolkit } from 'hapi';
+import { ResponseToolkit } from '@hapi/hapi';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 import { isLeft } from 'fp-ts/lib/Either';

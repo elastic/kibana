@@ -5,7 +5,7 @@
  */
 
 import { merge } from 'lodash';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { SavedObjectsClient } from 'src/core/server';
 import { PromiseReturnType } from '../../../../typings/common';
 import {

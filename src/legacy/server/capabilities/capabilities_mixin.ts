@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import KbnServer from '../kbn_server';
 
 export async function capabilitiesMixin(kbnServer: KbnServer, server: Server) {

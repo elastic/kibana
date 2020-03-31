@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { CspConfig } from '../../../../../../core/server';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 

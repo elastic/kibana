@@ -23,7 +23,7 @@ import crypto from 'crypto';
 
 import Chance from 'chance';
 import expect from '@kbn/expect';
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import Inert from 'inert';
 import sinon from 'sinon';
 

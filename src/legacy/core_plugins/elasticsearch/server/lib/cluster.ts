@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { errors } from 'elasticsearch';
 import { CallAPIOptions, ClusterClient, FakeRequest } from 'kibana/server';
 

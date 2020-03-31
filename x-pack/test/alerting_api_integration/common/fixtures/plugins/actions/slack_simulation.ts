@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 
 interface SlackRequest extends Hapi.Request {
   payload: {

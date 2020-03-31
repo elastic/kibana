@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import {
   ElasticsearchServiceSetup,
   IUiSettingsClient,

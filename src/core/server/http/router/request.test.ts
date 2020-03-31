@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { RouteOptions } from 'hapi';
+import { RouteOptions } from '@hapi/hapi';
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';

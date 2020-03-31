@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { CspConfig } from '../csp';
 import { mockRouter } from './router/router.mock';
 import { configMock } from '../config/config.mock';

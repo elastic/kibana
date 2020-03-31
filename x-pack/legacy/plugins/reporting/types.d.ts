@@ -5,7 +5,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { ResponseObject } from 'hapi';
+import { ResponseObject } from '@hapi/hapi';
 import { Legacy } from 'kibana';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';

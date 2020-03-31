@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 
 interface WebhookRequest extends Hapi.Request {
   payload: string;

@@ -382,8 +382,8 @@
           '(\\b|_)hapi(\\b|_)',
         ],
         packageNames: [
-          'hapi',
-          '@types/hapi',
+          '@hapi/hapi',
+          '@types/hapi__hapi',
           'joi',
           '@types/joi',
           'boom',

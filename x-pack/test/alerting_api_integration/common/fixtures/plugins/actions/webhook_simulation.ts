@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import Joi from 'joi';
-import Hapi, { Util } from 'hapi';
+import Hapi, { Util } from '@hapi/hapi';
 import { fromNullable, map, filter, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { constant } from 'fp-ts/lib/function';

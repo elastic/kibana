@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'hapi';
+import '@hapi/hapi';
 
 import { XPackMainPlugin } from '../legacy/plugins/xpack_main/server/xpack_main';
 import { SecurityPlugin } from '../legacy/plugins/security';

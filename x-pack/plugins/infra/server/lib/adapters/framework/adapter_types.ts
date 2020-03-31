@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse, GenericParams } from 'elasticsearch';
-import { Lifecycle } from 'hapi';
+import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';

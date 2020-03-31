@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import { initPlugin as initNewsfeed } from './newsfeed_simulation';
 
 const NAME = 'newsfeed-FTS-external-service-simulators';

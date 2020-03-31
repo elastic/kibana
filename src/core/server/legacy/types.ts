@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { ChromeNavLink } from '../../public';
 import { KibanaRequest, LegacyRequest } from '../http';

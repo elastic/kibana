@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import { configMock } from '../config/config.mock';
 import { httpServiceMock } from '../http/http_service.mock';

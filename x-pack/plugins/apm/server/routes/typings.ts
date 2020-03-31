@@ -13,7 +13,7 @@ import {
 } from 'src/core/server';
 import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { FetchOptions } from '../../../../legacy/plugins/apm/public/services/rest/callApi';
 import { APMConfig } from '..';
 
