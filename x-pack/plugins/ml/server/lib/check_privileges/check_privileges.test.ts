@@ -7,7 +7,7 @@
 import { callWithRequestProvider } from './__mocks__/call_with_request';
 import { privilegesProvider } from './check_privileges';
 import { mlPrivileges } from './privileges';
-import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
+import { MlLicense } from '../../../common/license';
 
 const mlLicenseWithSecurity = {
   isSecurityEnabled: () => true,

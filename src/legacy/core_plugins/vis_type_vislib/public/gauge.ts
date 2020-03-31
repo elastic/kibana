@@ -19,8 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues } from '../../vis_default_editor/public';
-import { Schemas, AggGroupNames } from './legacy_imports';
+import { RangeValues, Schemas } from '../../vis_default_editor/public';
+import { AggGroupNames } from '../../../../plugins/data/public';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
 import { createVislibVisController } from './vis_controller';

@@ -26,7 +26,13 @@ import {
 } from './types';
 import { validateReferences } from './validate_references';
 
-export async function importSavedObjects({
+/**
+ * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
+ * detailed information.
+ *
+ * @public
+ */
+export async function importSavedObjectsFromStream({
   readStream,
   objectLimit,
   overwrite,

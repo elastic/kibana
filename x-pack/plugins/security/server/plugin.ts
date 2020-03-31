@@ -5,13 +5,13 @@
  */
 
 import { combineLatest } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
+import { TypeOf } from '@kbn/config-schema';
 import {
   ICustomClusterClient,
   CoreSetup,
   Logger,
   PluginInitializerContext,
-  RecursiveReadonly,
 } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { SpacesPluginSetup } from '../../spaces/server';
@@ -20,7 +20,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
-import { createConfig$ } from './config';
+import { ConfigSchema, createConfig } from './config';
 import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
@@ -65,11 +65,6 @@ export interface SecurityPluginSetup {
     registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     registerPrivilegesWithCluster: () => void;
     license: SecurityLicense;
-    config: RecursiveReadonly<{
-      secureCookies: boolean;
-      cookieName: string;
-      loginAssistanceMessage: string;
-    }>;
   };
 }
 
@@ -110,7 +105,13 @@ export class Plugin {
 
   public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
     const [config, legacyConfig] = await combineLatest([
-      createConfig$(this.initializerContext, core.http.isTlsEnabled),
+      this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
+        map(rawConfig =>
+          createConfig(rawConfig, this.initializerContext.logger.get('config'), {
+            isTLSEnabled: core.http.isTlsEnabled,
+          })
+        )
+      ),
       this.initializerContext.config.legacy.globalConfig$,
     ])
       .pipe(first())
@@ -161,6 +162,7 @@ export class Plugin {
       authc,
       authz,
       csp: core.http.csp,
+      license,
     });
 
     return deepFreeze<SecurityPluginSetup>({
@@ -186,14 +188,6 @@ export class Plugin {
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
 
         license,
-
-        // We should stop exposing this config as soon as only new platform plugin consumes it. The only
-        // exception may be `sessionTimeout` as other parts of the app may want to know it.
-        config: {
-          loginAssistanceMessage: config.loginAssistanceMessage,
-          secureCookies: config.secureCookies,
-          cookieName: config.cookieName,
-        },
       },
     });
   }

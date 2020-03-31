@@ -9,6 +9,10 @@ import { Observable, Subscription } from 'rxjs';
 import { assertNever } from '../../../../../src/core/utils';
 import { ILicense, LICENSE_CHECK_STATE } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
+import { ActionType } from '../types';
+import { ActionTypeDisabledError } from './errors';
+
+export type ILicenseState = PublicMethodsOf<LicenseState>;
 
 export interface ActionsLicenseInformation {
   showAppLink: boolean;
@@ -19,12 +23,14 @@ export interface ActionsLicenseInformation {
 export class LicenseState {
   private licenseInformation: ActionsLicenseInformation = this.checkLicense(undefined);
   private subscription: Subscription;
+  private license?: ILicense;
 
   constructor(license$: Observable<ILicense>) {
     this.subscription = license$.subscribe(this.updateInformation.bind(this));
   }
 
   private updateInformation(license: ILicense | undefined) {
+    this.license = license;
     this.licenseInformation = this.checkLicense(license);
   }
 
@@ -34,6 +40,71 @@ export class LicenseState {
 
   public getLicenseInformation() {
     return this.licenseInformation;
+  }
+
+  public isLicenseValidForActionType(
+    actionType: ActionType
+  ): { isValid: true } | { isValid: false; reason: 'unavailable' | 'expired' | 'invalid' } {
+    if (!this.license?.isAvailable) {
+      return { isValid: false, reason: 'unavailable' };
+    }
+
+    const check = this.license.check(actionType.id, actionType.minimumLicenseRequired);
+
+    switch (check.state) {
+      case LICENSE_CHECK_STATE.Expired:
+        return { isValid: false, reason: 'expired' };
+      case LICENSE_CHECK_STATE.Invalid:
+        return { isValid: false, reason: 'invalid' };
+      case LICENSE_CHECK_STATE.Unavailable:
+        return { isValid: false, reason: 'unavailable' };
+      case LICENSE_CHECK_STATE.Valid:
+        return { isValid: true };
+      default:
+        return assertNever(check.state);
+    }
+  }
+
+  public ensureLicenseForActionType(actionType: ActionType) {
+    const check = this.isLicenseValidForActionType(actionType);
+
+    if (check.isValid) {
+      return;
+    }
+
+    switch (check.reason) {
+      case 'unavailable':
+        throw new ActionTypeDisabledError(
+          i18n.translate('xpack.actions.serverSideErrors.unavailableLicenseErrorMessage', {
+            defaultMessage:
+              'Action type {actionTypeId} is disabled because license information is not available at this time.',
+            values: {
+              actionTypeId: actionType.id,
+            },
+          }),
+          'license_unavailable'
+        );
+      case 'expired':
+        throw new ActionTypeDisabledError(
+          i18n.translate('xpack.actions.serverSideErrors.expirerdLicenseErrorMessage', {
+            defaultMessage:
+              'Action type {actionTypeId} is disabled because your {licenseType} license has expired.',
+            values: { actionTypeId: actionType.id, licenseType: this.license!.type },
+          }),
+          'license_expired'
+        );
+      case 'invalid':
+        throw new ActionTypeDisabledError(
+          i18n.translate('xpack.actions.serverSideErrors.invalidLicenseErrorMessage', {
+            defaultMessage:
+              'Action type {actionTypeId} is disabled because your {licenseType} license does not support it. Please upgrade your license.',
+            values: { actionTypeId: actionType.id, licenseType: this.license!.type },
+          }),
+          'license_invalid'
+        );
+      default:
+        assertNever(check.reason);
+    }
   }
 
   public checkLicense(license: ILicense | undefined): ActionsLicenseInformation {

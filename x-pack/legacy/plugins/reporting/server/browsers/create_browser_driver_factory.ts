@@ -22,8 +22,6 @@ export async function createBrowserDriverFactory(
   const browserType = captureConfig.browser.type;
   const browserAutoDownload = captureConfig.browser.autoDownload;
   const browserConfig = captureConfig.browser[BROWSER_TYPE];
-  const networkPolicy = captureConfig.networkPolicy;
-  const reportingTimeout: number = config.get('xpack.reporting.queue.timeout');
 
   if (browserConfig.disableSandbox) {
     logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
@@ -34,13 +32,7 @@ export async function createBrowserDriverFactory(
 
   try {
     const { binaryPath } = await installBrowser(logger, chromium, dataDir);
-    return chromium.createDriverFactory(
-      binaryPath,
-      logger,
-      browserConfig,
-      reportingTimeout,
-      networkPolicy
-    );
+    return chromium.createDriverFactory(binaryPath, logger, browserConfig, captureConfig);
   } catch (error) {
     if (error.cause && ['EACCES', 'EEXIST'].includes(error.cause.code)) {
       logger.error(

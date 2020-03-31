@@ -10,8 +10,6 @@ export default function({ loadTestFile }) {
     // the uptime app and runs it against the live HTTP server,
     // verifying the pre-loaded documents are returned in a way that
     // matches the snapshots contained in './fixtures'
-    loadTestFile(require.resolve('./doc_count'));
-    loadTestFile(require.resolve('./monitor_charts'));
     loadTestFile(require.resolve('./monitor_states'));
     loadTestFile(require.resolve('./ping_list'));
   });

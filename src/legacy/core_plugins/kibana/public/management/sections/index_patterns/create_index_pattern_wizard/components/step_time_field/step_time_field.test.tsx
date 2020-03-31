@@ -21,7 +21,6 @@ import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
 import { IFieldType } from '../../../../../../../../../../plugins/data/public';
-import { dataPluginMock } from '../../../../../../../../../../plugins/data/public/mocks';
 
 import { StepTimeField } from '../step_time_field';
 
@@ -29,8 +28,9 @@ jest.mock('./components/header', () => ({ Header: 'Header' }));
 jest.mock('./components/time_field', () => ({ TimeField: 'TimeField' }));
 jest.mock('./components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
 jest.mock('./components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
-jest.mock('./../../lib/extract_time_fields', () => ({
-  extractTimeFields: (fields: IFieldType) => fields,
+jest.mock('./../../lib', () => ({
+  extractTimeFields: require.requireActual('./../../lib').extractTimeFields,
+  ensureMinimumTime: async (fields: IFieldType) => Promise.resolve(fields),
 }));
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
@@ -42,7 +42,19 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 });
 
 const noop = () => {};
-const indexPatternsService = dataPluginMock.createStartContract().indexPatterns;
+const fields = [
+  {
+    name: '@timestamp',
+    type: 'date',
+  },
+];
+const indexPatternsService = {
+  make: () => ({
+    fieldsFetcher: {
+      fetchForWildcard: jest.fn().mockReturnValue(Promise.resolve(fields)),
+    },
+  }),
+} as any;
 
 describe('StepTimeField', () => {
   it('should render normally', () => {
@@ -291,5 +303,31 @@ describe('StepTimeField', () => {
     expect(component.instance().state).toMatchObject({
       error: 'foobar',
     });
+  });
+
+  it('should call createIndexPattern with undefined time field when no time filter chosen', async () => {
+    const createIndexPattern = jest.fn();
+
+    const component = shallowWithI18nProvider(
+      <StepTimeField
+        indexPattern="ki*"
+        indexPatternsService={indexPatternsService}
+        goToPreviousStep={noop}
+        createIndexPattern={createIndexPattern}
+        indexPatternCreationType={mockIndexPatternCreationType}
+      />
+    );
+
+    await (component.instance() as StepTimeField).fetchTimeFields();
+
+    expect((component.state() as any).timeFields).toHaveLength(3);
+
+    (component.instance() as StepTimeField).onTimeFieldChanged(({
+      target: { value: undefined },
+    } as unknown) as React.ChangeEvent<HTMLSelectElement>);
+
+    await (component.instance() as StepTimeField).createIndexPattern();
+
+    expect(createIndexPattern).toHaveBeenCalledWith(undefined, '');
   });
 });

@@ -25,7 +25,7 @@ import {
   TopAggregateParamEditorProps,
 } from './top_aggregate';
 import { aggParamCommonPropsMock } from './test_utils';
-import { IAggConfig } from '../../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 
 describe('TopAggregateParamEditor', () => {
   let agg: IAggConfig;

@@ -40,7 +40,7 @@ export class SlowContactCardEmbeddableFactory extends EmbeddableFactory<
     }
   }
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAggConfig } from '../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 
 export enum AGGS_ACTION_KEYS {
   TOUCHED = 'aggsTouched',

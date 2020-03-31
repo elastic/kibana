@@ -19,7 +19,6 @@ export const createMockLayoutInstance = (__LEGACY: ServerFacade) => {
     itemsCountAttribute: 'itemsSelector',
     screenshot: 'screenshotSelector',
     timefilterDurationAttribute: 'timefilterDurationSelector',
-    toastHeader: 'toastHeaderSelector',
   };
   return mockLayout;
 };

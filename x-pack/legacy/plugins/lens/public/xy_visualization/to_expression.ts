@@ -9,6 +9,10 @@ import { ScaleType } from '@elastic/charts';
 import { State, LayerConfig } from './types';
 import { FramePublicAPI, OperationMetadata } from '../types';
 
+interface ValidLayer extends LayerConfig {
+  xAccessor: NonNullable<LayerConfig['xAccessor']>;
+}
+
 function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   const defaults = {
     xTitle: 'x',
@@ -22,8 +26,8 @@ function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   if (!datasource) {
     return defaults;
   }
-  const x = datasource.getOperationForColumnId(layer.xAccessor);
-  const y = datasource.getOperationForColumnId(layer.accessors[0]);
+  const x = layer.xAccessor ? datasource.getOperationForColumnId(layer.xAccessor) : null;
+  const y = layer.accessors[0] ? datasource.getOperationForColumnId(layer.accessors[0]) : null;
 
   return {
     xTitle: x ? x.label : defaults.xTitle,
@@ -35,26 +39,6 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
   if (!state || !state.layers.length) {
     return null;
   }
-
-  const stateWithValidAccessors = {
-    ...state,
-    layers: state.layers.map(layer => {
-      const datasource = frame.datasourceLayers[layer.layerId];
-
-      const newLayer = { ...layer };
-
-      if (!datasource.getOperationForColumnId(layer.splitAccessor)) {
-        delete newLayer.splitAccessor;
-      }
-
-      return {
-        ...newLayer,
-        accessors: layer.accessors.filter(accessor =>
-          Boolean(datasource.getOperationForColumnId(accessor))
-        ),
-      };
-    }),
-  };
 
   const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
   state.layers.forEach(layer => {
@@ -68,12 +52,7 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     });
   });
 
-  return buildExpression(
-    stateWithValidAccessors,
-    metadata,
-    frame,
-    xyTitles(state.layers[0], frame)
-  );
+  return buildExpression(state, metadata, frame, xyTitles(state.layers[0], frame));
 };
 
 export function toPreviewExpression(state: State, frame: FramePublicAPI) {
@@ -122,82 +101,94 @@ export const buildExpression = (
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   frame?: FramePublicAPI,
   { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
-): Ast => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'lens_xy_chart',
-      arguments: {
-        xTitle: [xTitle],
-        yTitle: [yTitle],
-        legend: [
-          {
-            type: 'expression',
-            chain: [
-              {
-                type: 'function',
-                function: 'lens_xy_legendConfig',
-                arguments: {
-                  isVisible: [state.legend.isVisible],
-                  position: [state.legend.position],
+): Ast | null => {
+  const validLayers = state.layers.filter((layer): layer is ValidLayer =>
+    Boolean(layer.xAccessor && layer.accessors.length)
+  );
+  if (!validLayers.length) {
+    return null;
+  }
+
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'lens_xy_chart',
+        arguments: {
+          xTitle: [xTitle],
+          yTitle: [yTitle],
+          legend: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_legendConfig',
+                  arguments: {
+                    isVisible: [state.legend.isVisible],
+                    position: [state.legend.position],
+                  },
                 },
-              },
-            ],
-          },
-        ],
-        layers: state.layers.map(layer => {
-          const columnToLabel: Record<string, string> = {};
+              ],
+            },
+          ],
+          layers: validLayers.map(layer => {
+            const columnToLabel: Record<string, string> = {};
 
-          if (frame) {
-            const datasource = frame.datasourceLayers[layer.layerId];
-            layer.accessors.concat([layer.splitAccessor]).forEach(accessor => {
-              const operation = datasource.getOperationForColumnId(accessor);
-              if (operation && operation.label) {
-                columnToLabel[accessor] = operation.label;
-              }
-            });
-          }
+            if (frame) {
+              const datasource = frame.datasourceLayers[layer.layerId];
+              layer.accessors
+                .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
+                .forEach(accessor => {
+                  const operation = datasource.getOperationForColumnId(accessor);
+                  if (operation && operation.label) {
+                    columnToLabel[accessor] = operation.label;
+                  }
+                });
+            }
 
-          const xAxisOperation =
-            frame && frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
+            const xAxisOperation =
+              frame &&
+              frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
 
-          const isHistogramDimension = Boolean(
-            xAxisOperation &&
-              xAxisOperation.isBucketed &&
-              xAxisOperation.scale &&
-              xAxisOperation.scale !== 'ordinal'
-          );
+            const isHistogramDimension = Boolean(
+              xAxisOperation &&
+                xAxisOperation.isBucketed &&
+                xAxisOperation.scale &&
+                xAxisOperation.scale !== 'ordinal'
+            );
 
-          return {
-            type: 'expression',
-            chain: [
-              {
-                type: 'function',
-                function: 'lens_xy_layer',
-                arguments: {
-                  layerId: [layer.layerId],
+            return {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_layer',
+                  arguments: {
+                    layerId: [layer.layerId],
 
-                  hide: [Boolean(layer.hide)],
+                    hide: [Boolean(layer.hide)],
 
-                  xAccessor: [layer.xAccessor],
-                  yScaleType: [
-                    getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
-                  ],
-                  xScaleType: [
-                    getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),
-                  ],
-                  isHistogram: [isHistogramDimension],
-                  splitAccessor: [layer.splitAccessor],
-                  seriesType: [layer.seriesType],
-                  accessors: layer.accessors,
-                  columnToLabel: [JSON.stringify(columnToLabel)],
+                    xAccessor: [layer.xAccessor],
+                    yScaleType: [
+                      getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
+                    ],
+                    xScaleType: [
+                      getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),
+                    ],
+                    isHistogram: [isHistogramDimension],
+                    splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+                    seriesType: [layer.seriesType],
+                    accessors: layer.accessors,
+                    columnToLabel: [JSON.stringify(columnToLabel)],
+                  },
                 },
-              },
-            ],
-          };
-        }),
+              ],
+            };
+          }),
+        },
       },
-    },
-  ],
-});
+    ],
+  };
+};

@@ -76,7 +76,7 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     this.isMounted = false;
   };
 
-  setTextInputRef = (ref: HTMLElement) => {
+  setTextInputRef = (ref: HTMLInputElement | null) => {
     this.textInput = ref;
   };
 

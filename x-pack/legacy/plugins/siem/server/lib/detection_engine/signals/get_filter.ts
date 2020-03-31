@@ -14,6 +14,7 @@ import {
   IIndexPattern,
 } from '../../../../../../../../src/plugins/data/server';
 import { PartialFilter, RuleAlertParams } from '../types';
+import { BadRequestError } from '../errors/bad_request_error';
 
 export const getQueryFilter = (
   query: string,
@@ -74,7 +75,7 @@ export const getFilter = async ({
       if (query != null && language != null && index != null) {
         return getQueryFilter(query, language, filters || [], index);
       } else {
-        throw new TypeError('query, filters, and index parameter should be defined');
+        throw new BadRequestError('query, filters, and index parameter should be defined');
       }
     }
     case 'saved_query': {
@@ -103,8 +104,13 @@ export const getFilter = async ({
           }
         }
       } else {
-        throw new TypeError('savedId parameter should be defined');
+        throw new BadRequestError('savedId parameter should be defined');
       }
+    }
+    case 'machine_learning': {
+      throw new BadRequestError(
+        'Unsupported Rule of type "machine_learning" supplied to getFilter'
+      );
     }
   }
   return assertUnreachable(type);

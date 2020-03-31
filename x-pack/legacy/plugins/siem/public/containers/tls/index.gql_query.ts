@@ -33,10 +33,9 @@ export const tlsQuery = gql`
         edges {
           node {
             _id
-            alternativeNames
-            commonNames
+            subjects
             ja3
-            issuerNames
+            issuers
             notAfter
           }
           cursor {

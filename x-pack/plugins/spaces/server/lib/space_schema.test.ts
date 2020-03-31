@@ -93,7 +93,7 @@ describe('#disabledFeatures', () => {
         disabledFeatures: 'foo',
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[disabledFeatures]: could not parse array value from [foo]"`
+      `"[disabledFeatures]: could not parse array value from json input"`
     );
   });
 

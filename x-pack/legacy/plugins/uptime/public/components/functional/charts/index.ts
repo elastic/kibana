@@ -5,6 +5,6 @@
  */
 
 export { DonutChart } from './donut_chart';
-export { DurationChart } from './duration_chart';
+export { DurationChartComponent } from './duration_chart';
 export { MonitorBarSeries } from './monitor_bar_series';
 export { PingHistogramComponent } from './ping_histogram';

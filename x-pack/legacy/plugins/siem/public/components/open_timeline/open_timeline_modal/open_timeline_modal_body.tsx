@@ -58,7 +58,6 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
           <HeaderContainer>
             <TitleRow
               data-test-subj="title-row"
-              onDeleteSelected={onDeleteSelected}
               onAddTimelinesToFavorites={onAddTimelinesToFavorites}
               selectedTimelinesCount={selectedItems.length}
               title={title}

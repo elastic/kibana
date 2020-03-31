@@ -7,6 +7,7 @@
 import React from 'react';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { debouncedComponent } from './debounced_component';
+import { act } from 'react-dom/test-utils';
 
 describe('debouncedComponent', () => {
   test('immediately renders', () => {
@@ -23,7 +24,9 @@ describe('debouncedComponent', () => {
     const component = mount(<TestComponent title="there" />);
     component.setProps({ title: 'yall' });
     expect(component.text()).toEqual('there');
-    await new Promise(r => setTimeout(r, 1));
+    await act(async () => {
+      await new Promise(r => setTimeout(r, 1));
+    });
     expect(component.text()).toEqual('yall');
   });
 });

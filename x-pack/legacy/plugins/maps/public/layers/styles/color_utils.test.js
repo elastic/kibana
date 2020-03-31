@@ -60,25 +60,29 @@ describe('getColorRampCenterColor', () => {
 });
 
 describe('getColorRampStops', () => {
-  it('Should create color stops for color ramp', () => {
-    expect(getOrdinalColorRampStops('Blues')).toEqual([
+  it('Should create color stops for custom range', () => {
+    expect(getOrdinalColorRampStops('Blues', 0, 1000)).toEqual([
       0,
       '#f7faff',
-      0.125,
+      125,
       '#ddeaf7',
-      0.25,
+      250,
       '#c5daee',
-      0.375,
+      375,
       '#9dc9e0',
-      0.5,
+      500,
       '#6aadd5',
-      0.625,
+      625,
       '#4191c5',
-      0.75,
+      750,
       '#2070b4',
-      0.875,
+      875,
       '#072f6b',
     ]);
+  });
+
+  it('Should snap to end of color stops for identical range', () => {
+    expect(getOrdinalColorRampStops('Blues', 23, 23)).toEqual([23, '#072f6b']);
   });
 });
 

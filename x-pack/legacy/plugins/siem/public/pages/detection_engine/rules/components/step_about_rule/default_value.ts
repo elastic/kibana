@@ -5,7 +5,6 @@
  */
 
 import { AboutStepRule } from '../../types';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/search_super_select/translations';
 
 export const threatDefault = [
   {
@@ -24,9 +23,6 @@ export const stepAboutDefaultValue: AboutStepRule = {
   references: [''],
   falsePositives: [''],
   tags: [],
-  timeline: {
-    id: null,
-    title: DEFAULT_TIMELINE_TITLE,
-  },
   threat: threatDefault,
+  note: '',
 };

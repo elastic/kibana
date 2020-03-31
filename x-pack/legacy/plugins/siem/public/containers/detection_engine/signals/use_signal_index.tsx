@@ -6,15 +6,14 @@
 
 import { useEffect, useState } from 'react';
 
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
-import { useStateToaster } from '../../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
-import { PostSignalError, SignalIndexError } from './types';
+import { isApiError } from '../../../utils/api';
 
 type Func = () => void;
 
-interface Return {
+export interface ReturnSignalIndex {
   loading: boolean;
   signalIndexExists: boolean | null;
   signalIndexName: string | null;
@@ -26,10 +25,10 @@ interface Return {
  *
  *
  */
-export const useSignalIndex = (): Return => {
+export const useSignalIndex = (): ReturnSignalIndex => {
   const [loading, setLoading] = useState(true);
   const [signalIndex, setSignalIndex] = useState<
-    Pick<Return, 'signalIndexExists' | 'signalIndexName' | 'createDeSignalIndex'>
+    Pick<ReturnSignalIndex, 'signalIndexExists' | 'signalIndexName' | 'createDeSignalIndex'>
   >({
     signalIndexExists: null,
     signalIndexName: null,
@@ -60,7 +59,7 @@ export const useSignalIndex = (): Return => {
             signalIndexName: null,
             createDeSignalIndex: createIndex,
           });
-          if (error instanceof SignalIndexError && error.status_code !== 404) {
+          if (isApiError(error) && error.body.status_code !== 404) {
             errorToToaster({ title: i18n.SIGNAL_GET_NAME_FAILURE, error, dispatchToaster });
           }
         }
@@ -82,7 +81,7 @@ export const useSignalIndex = (): Return => {
         }
       } catch (error) {
         if (isSubscribed) {
-          if (error instanceof PostSignalError && error.statusCode === 409) {
+          if (isApiError(error) && error.body.status_code === 409) {
             fetchData();
           } else {
             setSignalIndex({

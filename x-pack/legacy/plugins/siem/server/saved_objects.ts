@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { noteSavedObjectType, noteSavedObjectMappings } from './lib/note/saved_object_mappings';
 import {
   pinnedEventSavedObjectType,
@@ -17,22 +18,21 @@ import {
   ruleStatusSavedObjectType,
 } from './lib/detection_engine/rules/saved_object_mappings';
 import {
-  caseSavedObjectMappings,
-  caseCommentSavedObjectMappings,
-} from './lib/case/saved_object_mappings';
+  ruleActionsSavedObjectMappings,
+  ruleActionsSavedObjectType,
+} from './lib/detection_engine/rule_actions/saved_object_mappings';
 
 export {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
   ruleStatusSavedObjectType,
+  ruleActionsSavedObjectType,
   timelineSavedObjectType,
 };
 export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,
   ...pinnedEventSavedObjectMappings,
-  // TODO: Remove once while Saved Object Mappings API is programmed for the NP See: https://github.com/elastic/kibana/issues/50309
-  ...caseSavedObjectMappings,
-  ...caseCommentSavedObjectMappings,
   ...ruleStatusSavedObjectMappings,
+  ...ruleActionsSavedObjectMappings,
 };

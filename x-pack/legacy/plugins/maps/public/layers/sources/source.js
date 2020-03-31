@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { copyPersistentState } from '../../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers/util';
 
 export class AbstractSource {
   static isIndexingSource = false;

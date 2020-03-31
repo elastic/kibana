@@ -25,7 +25,7 @@ import {
 } from 'kibana/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
@@ -40,6 +40,8 @@ import {
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { setFormatService, setDataActions } from './services';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -55,14 +57,13 @@ export interface VisTypeVislibPluginSetupDependencies {
 
 /** @internal */
 export interface VisTypeVislibPluginStartDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
-  visualizations: VisualizationsStart;
+  data: DataPublicPluginStart;
 }
 
-type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies>;
+type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
+export class VisTypeVislibPlugin implements Plugin<void, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
@@ -97,18 +98,19 @@ export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
       // Register legacy vislib types that have been converted
       convertedFns.forEach(expressions.registerFunction);
       convertedTypes.forEach(vis =>
-        visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+        visualizations.createBaseVisualization(vis(visualizationDependencies))
       );
     }
 
     // Register non-converted types
     vislibFns.forEach(expressions.registerFunction);
     vislibTypes.forEach(vis =>
-      visualizations.types.createBaseVisualization(vis(visualizationDependencies))
+      visualizations.createBaseVisualization(vis(visualizationDependencies))
     );
   }
 
-  public start(core: CoreStart, deps: VisTypeVislibPluginStartDependencies) {
-    // nothing to do here
+  public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
+    setDataActions({ createFiltersFromEvent: data.actions.createFiltersFromEvent });
   }
 }

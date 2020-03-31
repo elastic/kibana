@@ -1,0 +1,101 @@
+{
+  "description": "Pipeline for normalizing Kubernetes coredns logs",
+  "processors": [
+    {
+      "pipeline": {
+          "if": "ctx.message.charAt(0) == (char)(\"{\")",
+          "name": "{<IngestPipeline 'pipeline-json' >}"
+      }
+    },
+    {
+      "pipeline": {
+          "if": "ctx.message.charAt(0) != (char)(\"{\")",
+          "name": "{<IngestPipeline 'pipeline-plaintext' >}"
+      }
+    },
+    {
+      "script": {
+        "lang": "painless",
+        "source": "ctx.event.created = ctx['@timestamp']; ctx['@timestamp'] = ctx['timestamp']; ctx.remove('timestamp');",
+        "ignore_failure" : true
+      }
+    },
+    {
+      "script": {
+        "lang": "painless",
+        "source": "ctx['source'] = new HashMap(); if (ctx.temp.source.charAt(0) == (char)(\"[\")) { def p = ctx.temp.source.indexOf (']'); def l = ctx.temp.source.length(); ctx.source.address = ctx.temp.source.substring(1, p); ctx.source.port = ctx.temp.source.substring(p+2, l);} else { def p = ctx.temp.source.indexOf (':'); def l = ctx.temp.source.length(); ctx.source.address = ctx.temp.source.substring(0, p); ctx.source.port = ctx.temp.source.substring(p+1, l);} ctx.remove('temp');",
+        "if": "ctx.temp?.source != null"
+      }
+    },
+    {
+      "set": {
+        "field": "source.ip",
+        "value": "{{source.address}}",
+        "if": "ctx.source?.address != null"
+      }
+    },
+    {
+      "convert" : {
+        "field" : "source.port",
+        "type": "integer"
+      }
+    },
+    {
+      "convert" : {
+        "field" : "coredns.duration",
+        "type": "double"
+      }
+    },
+    {
+      "convert" : {
+        "field" : "coredns.query.size",
+        "type": "long"
+      }
+    },
+    {
+      "convert" : {
+        "field" : "coredns.response.size",
+        "type": "long"
+      }
+    },
+    {
+      "convert" : {
+        "field" : "coredns.dnssec_ok",
+        "type": "boolean"
+      }
+    },
+    {
+      "uppercase": {
+        "field": "coredns.response.flags"
+      }
+    },
+    {
+      "split": {
+        "field": "coredns.response.flags",
+        "separator": ","
+      }
+    },
+    {
+      "script": {
+        "lang": "painless",
+        "source": "ctx.event.duration = Math.round(ctx.coredns.duration * params.scale)",
+        "params": {
+          "scale": 1000000000
+        },
+        "if": "ctx.coredns?.duration != null"
+      }
+    },
+    {
+      "remove": {
+        "field": "coredns.duration",
+        "ignore_missing": true
+      }
+    }
+  ],
+  "on_failure" : [{
+    "set" : {
+      "field" : "error.message",
+      "value" : "{{ _ingest.on_failure_message }}"
+    }
+  }]
+}

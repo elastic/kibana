@@ -18,8 +18,8 @@
  */
 
 import { createSavedQueryService } from './saved_query_service';
-import { SavedQueryAttributes } from '../..';
 import { FilterStateStore } from '../../../common';
+import { SavedQueryAttributes } from './types';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',

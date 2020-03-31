@@ -18,7 +18,7 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 
 import { createMetricsFn } from './metrics_fn';
 import { metricsVisDefinition } from './metrics_type';
@@ -57,7 +57,7 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
   ) {
     expressions.registerFunction(createMetricsFn);
     setUISettings(core.uiSettings);
-    visualizations.types.createReactVisualization(metricsVisDefinition);
+    visualizations.createReactVisualization(metricsVisDefinition);
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {

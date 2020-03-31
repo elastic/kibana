@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { NewDatasourceSchema } from '../models';
-import { ListWithKuerySchema } from './common';
+import { ListWithKuerySchema } from './index';
 
 export const GetDatasourcesRequestSchema = {
   query: ListWithKuerySchema,
@@ -31,8 +31,3 @@ export const DeleteDatasourcesRequestSchema = {
     datasourceIds: schema.arrayOf(schema.string()),
   }),
 };
-
-export type DeleteDatasourcesResponse = Array<{
-  id: string;
-  success: boolean;
-}>;

@@ -5,12 +5,12 @@
  */
 import { handleActions, Action } from 'redux-actions';
 import {
-  getSelectedMonitor,
-  getSelectedMonitorSuccess,
-  getSelectedMonitorFail,
-  getMonitorStatus,
-  getMonitorStatusSuccess,
-  getMonitorStatusFail,
+  getSelectedMonitorAction,
+  getSelectedMonitorActionSuccess,
+  getSelectedMonitorActionFail,
+  getMonitorStatusAction,
+  getMonitorStatusActionSuccess,
+  getMonitorStatusActionFail,
 } from '../actions';
 import { Ping } from '../../../common/graphql/types';
 import { QueryParams } from '../actions/types';
@@ -31,34 +31,34 @@ type MonitorStatusPayload = QueryParams & Ping;
 
 export const monitorStatusReducer = handleActions<MonitorStatusState, MonitorStatusPayload>(
   {
-    [String(getSelectedMonitor)]: (state, action: Action<QueryParams>) => ({
+    [String(getSelectedMonitorAction)]: (state, action: Action<QueryParams>) => ({
       ...state,
       loading: true,
     }),
 
-    [String(getSelectedMonitorSuccess)]: (state, action: Action<Ping>) => ({
+    [String(getSelectedMonitorActionSuccess)]: (state, action: Action<Ping>) => ({
       ...state,
       loading: false,
       monitor: { ...action.payload } as Ping,
     }),
 
-    [String(getSelectedMonitorFail)]: (state, action: Action<any>) => ({
+    [String(getSelectedMonitorActionFail)]: (state, action: Action<any>) => ({
       ...state,
       loading: false,
     }),
 
-    [String(getMonitorStatus)]: (state, action: Action<QueryParams>) => ({
+    [String(getMonitorStatusAction)]: (state, action: Action<QueryParams>) => ({
       ...state,
       loading: true,
     }),
 
-    [String(getMonitorStatusSuccess)]: (state, action: Action<Ping>) => ({
+    [String(getMonitorStatusActionSuccess)]: (state, action: Action<Ping>) => ({
       ...state,
       loading: false,
       status: { ...action.payload } as Ping,
     }),
 
-    [String(getMonitorStatusFail)]: (state, action: Action<any>) => ({
+    [String(getMonitorStatusActionFail)]: (state, action: Action<any>) => ({
       ...state,
       loading: false,
     }),

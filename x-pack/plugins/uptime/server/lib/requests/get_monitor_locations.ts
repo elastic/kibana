@@ -5,10 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  INDEX_NAMES,
-  UNNAMED_LOCATION,
-} from '../../../../../legacy/plugins/uptime/common/constants';
+import { UNNAMED_LOCATION } from '../../../../../legacy/plugins/uptime/common/constants';
 import {
   MonitorLocations,
   MonitorLocation,
@@ -29,9 +26,9 @@ export interface GetMonitorLocationsParams {
 export const getMonitorLocations: UMElasticsearchQueryFn<
   GetMonitorLocationsParams,
   MonitorLocations
-> = async ({ callES, monitorId, dateStart, dateEnd }) => {
+> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd }) => {
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 0,
       query: {

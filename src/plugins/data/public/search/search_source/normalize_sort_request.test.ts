@@ -21,8 +21,6 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
 import { IIndexPattern } from '../..';
 
-jest.mock('ui/new_platform');
-
 describe('SearchSource#normalizeSortRequest', function() {
   const scriptedField = {
     name: 'script string',

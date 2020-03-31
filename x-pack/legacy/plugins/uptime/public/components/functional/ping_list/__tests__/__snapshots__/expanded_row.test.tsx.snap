@@ -172,15 +172,8 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                 target="_blank"
               >
                 docs 
-                <svg
-                  aria-hidden="true"
-                  class="euiIcon euiIcon--small euiIcon-isLoading"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  data-euiicon-type="popout"
                 />
               </a>
                for more information on recording response bodies.

@@ -19,11 +19,13 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
 import { createTagCloudFn } from './tag_cloud_fn';
 import { createTagCloudVisTypeDefinition } from './tag_cloud_type';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { setFormatService } from './services';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
@@ -35,6 +37,11 @@ export interface TagCloudPluginSetupDependencies {
 /** @internal */
 export interface TagCloudVisDependencies {
   colors: ChartsPluginSetup['colors'];
+}
+
+/** @internal */
+export interface TagCloudVisPluginStartDependencies {
+  data: DataPublicPluginStart;
 }
 
 /** @internal */
@@ -53,12 +60,12 @@ export class TagCloudPlugin implements Plugin<void, void> {
       colors: charts.colors,
     };
     expressions.registerFunction(createTagCloudFn);
-    visualizations.types.createBaseVisualization(
+    visualizations.createBaseVisualization(
       createTagCloudVisTypeDefinition(visualizationDependencies)
     );
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, { data }: TagCloudVisPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
   }
 }

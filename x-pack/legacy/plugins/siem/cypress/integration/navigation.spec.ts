@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HOSTS, NETWORK, OVERVIEW, TIMELINES } from '../screens/siem_header';
+import { DETECTIONS, HOSTS, NETWORK, OVERVIEW, TIMELINES } from '../screens/siem_header';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { navigateFromHeaderTo } from '../tasks/siem_header';
@@ -27,6 +27,11 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   it('navigates to the Network page', () => {
     navigateFromHeaderTo(NETWORK);
     cy.url().should('include', '/siem#/network');
+  });
+
+  it('navigates to the Detections page', () => {
+    navigateFromHeaderTo(DETECTIONS);
+    cy.url().should('include', '/siem#/detections');
   });
 
   it('navigates to the Timelines page', () => {

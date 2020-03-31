@@ -82,7 +82,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
 
   const generatePdfObservable = generatePdfObservableFactory();
-  generatePdfObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
+  generatePdfObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
   const executeJob = await executeJobFactory(
     mockReporting,

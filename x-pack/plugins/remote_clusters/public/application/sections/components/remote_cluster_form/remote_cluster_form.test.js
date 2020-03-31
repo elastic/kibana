@@ -21,6 +21,16 @@ describe('RemoteClusterForm', () => {
     expect(component).toMatchSnapshot();
   });
 
+  describe('proxy mode', () => {
+    test('renders correct connection settings when user enables proxy mode', () => {
+      const component = mountWithIntl(<RemoteClusterForm save={() => {}} />);
+
+      findTestSubject(component, 'remoteClusterFormConnectionModeToggle').simulate('click');
+
+      expect(component).toMatchSnapshot();
+    });
+  });
+
   describe('validation', () => {
     test('renders invalid state and a global form error when the user tries to submit an invalid form', () => {
       const component = mountWithIntl(<RemoteClusterForm save={() => {}} />);

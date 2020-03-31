@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
-import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
+import { ActionByType, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { OpenModal, CommonlyUsedRange } from './types';
 
-const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
+export const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';
 const SEARCH_EMBEDDABLE_TYPE = 'search';
 
 export interface TimeRangeInput extends EmbeddableInput {
@@ -34,11 +34,11 @@ function isVisualizeEmbeddable(
   return embeddable.type === VISUALIZE_EMBEDDABLE_TYPE;
 }
 
-interface ActionContext {
+export interface TimeRangeActionContext {
   embeddable: Embeddable<TimeRangeInput>;
 }
 
-export class CustomTimeRangeAction implements Action<ActionContext> {
+export class CustomTimeRangeAction implements ActionByType<typeof CUSTOM_TIME_RANGE> {
   public readonly type = CUSTOM_TIME_RANGE;
   private openModal: OpenModal;
   private dateFormat?: string;
@@ -70,7 +70,7 @@ export class CustomTimeRangeAction implements Action<ActionContext> {
     return 'calendar';
   }
 
-  public async isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: TimeRangeActionContext) {
     const isInputControl =
       isVisualizeEmbeddable(embeddable) &&
       (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'input_control_vis';
@@ -89,7 +89,7 @@ export class CustomTimeRangeAction implements Action<ActionContext> {
     );
   }
 
-  public async execute({ embeddable }: ActionContext) {
+  public async execute({ embeddable }: TimeRangeActionContext) {
     const isCompatible = await this.isCompatible({ embeddable });
     if (!isCompatible) {
       throw new IncompatibleActionError();

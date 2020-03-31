@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Action } from 'redux-actions';
 import {
-  MonitorActionTypes,
   MonitorDetailsState,
-  FETCH_MONITOR_DETAILS,
-  FETCH_MONITOR_DETAILS_SUCCESS,
-  FETCH_MONITOR_DETAILS_FAIL,
-  FETCH_MONITOR_LOCATIONS,
-  FETCH_MONITOR_LOCATIONS_SUCCESS,
-  FETCH_MONITOR_LOCATIONS_FAIL,
+  getMonitorDetailsAction,
+  getMonitorLocationsAction,
+  getMonitorDetailsActionSuccess,
+  getMonitorDetailsActionFail,
+  getMonitorLocationsActionSuccess,
+  getMonitorLocationsActionFail,
 } from '../actions/monitor';
 import { MonitorLocations } from '../../../common/runtime_types';
 
@@ -32,14 +32,14 @@ const initialState: MonitorState = {
   errors: [],
 };
 
-export function monitorReducer(state = initialState, action: MonitorActionTypes): MonitorState {
+export function monitorReducer(state = initialState, action: Action<any>): MonitorState {
   switch (action.type) {
-    case FETCH_MONITOR_DETAILS:
+    case String(getMonitorDetailsAction):
       return {
         ...state,
         loading: true,
       };
-    case FETCH_MONITOR_DETAILS_SUCCESS:
+    case String(getMonitorDetailsActionSuccess):
       const { monitorId } = action.payload;
       return {
         ...state,
@@ -49,17 +49,17 @@ export function monitorReducer(state = initialState, action: MonitorActionTypes)
         },
         loading: false,
       };
-    case FETCH_MONITOR_DETAILS_FAIL:
+    case String(getMonitorDetailsActionFail):
       return {
         ...state,
         errors: [...state.errors, action.payload],
       };
-    case FETCH_MONITOR_LOCATIONS:
+    case String(getMonitorLocationsAction):
       return {
         ...state,
         loading: true,
       };
-    case FETCH_MONITOR_LOCATIONS_SUCCESS:
+    case String(getMonitorLocationsActionSuccess):
       const monLocations = state.monitorLocationsList;
       monLocations.set(action.payload.monitorId, action.payload);
       return {
@@ -67,7 +67,7 @@ export function monitorReducer(state = initialState, action: MonitorActionTypes)
         monitorLocationsList: monLocations,
         loading: false,
       };
-    case FETCH_MONITOR_LOCATIONS_FAIL:
+    case String(getMonitorLocationsActionFail):
       return {
         ...state,
         errors: [...state.errors, action.payload],

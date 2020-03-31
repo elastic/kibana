@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, uniqBy } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
@@ -137,10 +137,10 @@ class TimelineQueryComponent extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Timeline: {
                     ...fetchMoreResult.source.Timeline,
-                    edges: [
+                    edges: uniqBy('node._id', [
                       ...prev.source.Timeline.edges,
                       ...fetchMoreResult.source.Timeline.edges,
-                    ],
+                    ]),
                   },
                 },
               };

@@ -7,16 +7,17 @@
 jest.mock('../meta', () => {
   return {};
 });
-
-jest.mock('ui/chrome', () => {
-  return {};
-});
+jest.mock('../kibana_services');
 
 import { getInitialLayers } from './get_initial_layers';
 
 const layerListNotProvided = undefined;
 
 describe('Saved object has layer list', () => {
+  beforeEach(() => {
+    require('../kibana_services').getInjectedVarFunc = () => jest.fn();
+  });
+
   it('Should get initial layers from saved object', () => {
     const layerListFromSavedObject = [
       {
@@ -64,7 +65,7 @@ describe('EMS is enabled', () => {
     require('../meta').getKibanaTileMap = () => {
       return null;
     };
-    require('ui/chrome').getInjected = key => {
+    require('../kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'emsTileLayerId':
           return {
@@ -75,7 +76,7 @@ describe('EMS is enabled', () => {
         case 'isEmsEnabled':
           return true;
         default:
-          throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+          throw new Error(`Unexpected call to getInjectedVarFunc with key ${key}`);
       }
     };
   });
@@ -109,12 +110,12 @@ describe('EMS is not enabled', () => {
       return null;
     };
 
-    require('ui/chrome').getInjected = key => {
+    require('../kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'isEmsEnabled':
           return false;
         default:
-          throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+          throw new Error(`Unexpected call to getInjectedVarFunc with key ${key}`);
       }
     };
   });

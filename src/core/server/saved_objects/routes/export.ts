@@ -26,33 +26,22 @@ import {
 } from '../../../../legacy/utils/streams';
 import { IRouter } from '../../http';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { getSortedObjectsForExport } from '../export';
+import { exportSavedObjectsToStream } from '../export';
+import { validateTypes, validateObjects } from './utils';
 
-export const registerExportRoute = (
-  router: IRouter,
-  config: SavedObjectConfig,
-  supportedTypes: string[]
-) => {
+export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) => {
   const { maxImportExportSize } = config;
-
-  const typeSchema = schema.string({
-    validate: (type: string) => {
-      if (!supportedTypes.includes(type)) {
-        return `${type} is not exportable`;
-      }
-    },
-  });
 
   router.post(
     {
       path: '/_export',
       validate: {
         body: schema.object({
-          type: schema.maybe(schema.oneOf([typeSchema, schema.arrayOf(typeSchema)])),
+          type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           objects: schema.maybe(
             schema.arrayOf(
               schema.object({
-                type: typeSchema,
+                type: schema.string(),
                 id: schema.string(),
               }),
               { maxSize: maxImportExportSize }
@@ -67,9 +56,36 @@ export const registerExportRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const savedObjectsClient = context.core.savedObjects.client;
       const { type, objects, search, excludeExportDetails, includeReferencesDeep } = req.body;
-      const exportStream = await getSortedObjectsForExport({
+      const types = typeof type === 'string' ? [type] : type;
+
+      // need to access the registry for type validation, can't use the schema for this
+      const supportedTypes = context.core.savedObjects.typeRegistry
+        .getImportableAndExportableTypes()
+        .map(t => t.name);
+      if (types) {
+        const validationError = validateTypes(types, supportedTypes);
+        if (validationError) {
+          return res.badRequest({
+            body: {
+              message: validationError,
+            },
+          });
+        }
+      }
+      if (objects) {
+        const validationError = validateObjects(objects, supportedTypes);
+        if (validationError) {
+          return res.badRequest({
+            body: {
+              message: validationError,
+            },
+          });
+        }
+      }
+
+      const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,
-        types: typeof type === 'string' ? [type] : type,
+        types,
         search,
         objects,
         exportSizeLimit: maxImportExportSize,

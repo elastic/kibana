@@ -13,7 +13,7 @@ import {
 } from '../../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { Start as NewsfeedStart } from '../../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
@@ -21,17 +21,29 @@ import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collectio
 import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana';
 
+import { serviceNowActionType } from './lib/connectors';
+
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../../plugins/triggers_actions_ui/public';
+import { SecurityPluginSetup } from '../../../../plugins/security/public';
+
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
+  security: SecurityPluginSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 export interface StartPlugins {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
+  security: SecurityPluginSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
 }
 export type StartServices = CoreStart & StartPlugins;
@@ -52,6 +64,8 @@ export class Plugin implements IPlugin<Setup, Start> {
   public setup(core: CoreSetup, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, this.id);
 
+    const security = plugins.security;
+
     core.application.register({
       id: this.id,
       title: this.name,
@@ -59,7 +73,8 @@ export class Plugin implements IPlugin<Setup, Start> {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
 
-        return renderApp(coreStart, startPlugins as StartPlugins, params);
+        plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
+        return renderApp(coreStart, { ...startPlugins, security } as StartPlugins, params);
       },
     });
 

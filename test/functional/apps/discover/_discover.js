@@ -23,7 +23,6 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
@@ -188,8 +187,9 @@ export default function({ getService, getPageObjects }) {
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function() {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
-        await browser.refresh();
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
+        await queryBar.setQuery('');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug(
@@ -197,6 +197,23 @@ export default function({ getService, getPageObjects }) {
         );
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         expect(rowData.startsWith('Sep 22, 2015 @ 16:50:13.253')).to.be.ok();
+      });
+    });
+    describe('usage of discover:searchOnPageLoad', () => {
+      it('should fetch data from ES initially when discover:searchOnPageLoad is false', async function() {
+        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+
+        expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
+      });
+
+      it('should not fetch data from ES initially when discover:searchOnPageLoad is true', async function() {
+        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.header.awaitKibanaChrome();
+
+        expect(await PageObjects.discover.getNrOfFetches()).to.be(1);
       });
     });
   });

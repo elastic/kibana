@@ -7,18 +7,20 @@
 import { get, set } from 'lodash';
 import mockChartsData from './monitor_charts_mock.json';
 import { assertCloseTo } from '../../helper';
-import { getMonitorCharts } from '../get_monitor_charts';
+import { getMonitorDurationChart } from '../get_monitor_duration';
+import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
-    await getMonitorCharts({
+    await getMonitorDurationChart({
       callES: search,
+      dynamicSettings: defaultDynamicSettings,
       monitorId: 'fooID',
-      dateRangeStart: 'now-15m',
-      dateRangeEnd: 'now',
+      dateStart: 'now-15m',
+      dateEnd: 'now',
     });
     expect(searchMock).toHaveBeenCalledTimes(1);
     // protect against possible rounding errors polluting the snapshot comparison
@@ -45,16 +47,16 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect(searchMock.mock.calls[0]).toMatchSnapshot();
   });
 
-  it('getMonitorChartsData will provide expected filters when a location is specified', async () => {
+  it('getMonitorChartsData will provide expected filters', async () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
-    await getMonitorCharts({
+    await getMonitorDurationChart({
       callES: search,
+      dynamicSettings: defaultDynamicSettings,
       monitorId: 'fooID',
-      dateRangeStart: 'now-15m',
-      dateRangeEnd: 'now',
-      location: 'Philadelphia',
+      dateStart: 'now-15m',
+      dateEnd: 'now',
     });
     expect(searchMock).toHaveBeenCalledTimes(1);
     // protect against possible rounding errors polluting the snapshot comparison
@@ -86,11 +88,12 @@ describe('ElasticsearchMonitorsAdapter', () => {
     searchMock.mockReturnValue(mockChartsData);
     const search = searchMock.bind({});
     expect(
-      await getMonitorCharts({
+      await getMonitorDurationChart({
         callES: search,
+        dynamicSettings: defaultDynamicSettings,
         monitorId: 'id',
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
+        dateStart: 'now-15m',
+        dateEnd: 'now',
       })
     ).toMatchSnapshot();
   });

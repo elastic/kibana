@@ -5,10 +5,7 @@
  */
 
 import { CoreSetup, PluginsSetup } from './shim';
-import { functions } from '../canvas_plugin_src/functions/server';
 
 export class Plugin {
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
-    plugins.interpreter.register({ serverFunctions: functions });
-  }
+  public setup(core: CoreSetup, plugins: PluginsSetup) {}
 }

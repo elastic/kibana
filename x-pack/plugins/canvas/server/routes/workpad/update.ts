@@ -120,7 +120,7 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
         // ToDo: Currently the validation must be a schema.object
         // Because we don't know what keys the assets will have, we have to allow
         // unknowns and then validate in the handler
-        body: schema.object({}, { allowUnknowns: true }),
+        body: schema.object({}, { unknowns: 'allow' }),
       },
       options: {
         body: {

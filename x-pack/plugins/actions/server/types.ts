@@ -8,6 +8,7 @@ import { SavedObjectsClientContract, SavedObjectAttributes } from '../../../../s
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
+import { LicenseType } from '../../licensing/common/types';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -22,7 +23,7 @@ export interface Services {
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    actions: {
+    actions?: {
       getActionsClient: () => ActionsClient;
       listTypes: ActionTypeRegistry['list'];
     };
@@ -84,6 +85,7 @@ export interface ActionType {
   id: string;
   name: string;
   maxAttempts?: number;
+  minimumLicenseRequired: LicenseType;
   validate?: {
     params?: ValidatorType;
     config?: ValidatorType;

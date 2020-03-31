@@ -18,23 +18,8 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import {
-  AngularHttpError,
-  formatAngularHttpError,
-  isAngularHttpError,
-} from '../../../../plugins/kibana_legacy/public';
-
-export function addFatalErrorCallback(callback: () => void) {
-  npSetup.core.fatalErrors.get$().subscribe(() => {
-    callback();
-  });
-}
+import { AngularHttpError, addFatalError } from '../../../../plugins/kibana_legacy/public';
 
 export function fatalError(error: AngularHttpError | Error | string, location?: string) {
-  // add support for angular http errors to newPlatformFatalErrors
-  if (isAngularHttpError(error)) {
-    error = formatAngularHttpError(error);
-  }
-
-  npSetup.core.fatalErrors.add(error, location);
+  addFatalError(npSetup.core.fatalErrors, error, location);
 }

@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { IScope } from 'angular';
 
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { DashboardStart } from '../../../../plugins/dashboard/public';
+import { setSetupServices, setStartServices } from './set_services';
 import {
   LegacyCoreSetup,
   LegacyCoreStart,
@@ -37,7 +40,7 @@ import {
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
+import { HomePublicPluginSetup } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 import {
   AdvancedSettingsSetup,
@@ -52,12 +55,21 @@ import {
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
+import {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from '../../../../plugins/saved_objects_management/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../plugins/visualizations/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
   charts: ChartsPluginSetup;
   data: ReturnType<DataPlugin['setup']>;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
@@ -70,16 +82,18 @@ export interface PluginsSetup {
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
+  discover: DiscoverSetup;
+  visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {
   bfetch: BfetchPublicStart;
   charts: ChartsPluginStart;
   data: ReturnType<DataPlugin['start']>;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
-  home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;
@@ -88,7 +102,11 @@ export interface PluginsStart {
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
+  discover: DiscoverStart;
+  visualizations: VisualizationsStart;
   telemetry?: TelemetryPluginStart;
+  dashboard: DashboardStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export const npSetup = {
@@ -119,11 +137,19 @@ export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
 
   // Setup compatibility layer for AppService in legacy platform
   npSetup.core.application.register = legacyAppRegister;
+
+  // Services that need to be set in the legacy platform since the legacy data
+  // & vis plugins which previously provided them have been removed.
+  setSetupServices(npSetup);
 }
 
 export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
+
+  // Services that need to be set in the legacy platform since the legacy data
+  // & vis plugins which previously provided them have been removed.
+  setStartServices(npStart);
 }
 
 /** Flag used to ensure `legacyAppRegister` is only called once. */

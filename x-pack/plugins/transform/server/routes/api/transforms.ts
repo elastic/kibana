@@ -9,12 +9,12 @@ import { RequestHandler } from 'kibana/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
-import { TRANSFORM_STATE } from '../../../../../legacy/plugins/transform/public/app/common';
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
-} from '../../../../../legacy/plugins/transform/public/app/hooks/use_api_types';
-import { TransformId } from '../../../../../legacy/plugins/transform/public/app/common/transform';
+  TransformId,
+  TRANSFORM_STATE,
+} from '../../../common';
 
 import { RouteDependencies } from '../../types';
 
@@ -273,9 +273,7 @@ const previewTransformHandler: RequestHandler = async (ctx, req, res) => {
 };
 
 const startTransformsHandler: RequestHandler = async (ctx, req, res) => {
-  const { transformsInfo } = req.body as {
-    transformsInfo: TransformEndpointRequest[];
-  };
+  const transformsInfo = req.body as TransformEndpointRequest[];
 
   try {
     return res.ok({
@@ -313,9 +311,7 @@ async function startTransforms(
 }
 
 const stopTransformsHandler: RequestHandler = async (ctx, req, res) => {
-  const { transformsInfo } = req.body as {
-    transformsInfo: TransformEndpointRequest[];
-  };
+  const transformsInfo = req.body as TransformEndpointRequest[];
 
   try {
     return res.ok({

@@ -18,7 +18,7 @@
  */
 
 import { searchSourceMock } from '../../../../../../../plugins/data/public/mocks';
-import { SavedObjectDashboard } from '../../saved_dashboard/saved_dashboard';
+import { SavedObjectDashboard } from '../../../../../../../plugins/dashboard/public/';
 
 export function getSavedDashboardMock(
   config?: Partial<SavedObjectDashboard>

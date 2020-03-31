@@ -3,7 +3,7 @@
     "monitorStates": {
       "prevPagePagination": null,
       "nextPagePagination": null,
-      "totalSummaryCount": { "count": 147428, "__typename": "DocCount" },
+      "totalSummaryCount": 147428,
       "summaries": [
         {
           "monitor_id": "andrewvc-com",

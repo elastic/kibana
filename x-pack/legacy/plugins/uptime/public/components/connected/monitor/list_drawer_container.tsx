@@ -7,9 +7,9 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '../../../state';
-import { getMonitorDetails } from '../../../state/selectors';
+import { monitorDetailsSelector } from '../../../state/selectors';
 import { MonitorDetailsActionPayload } from '../../../state/actions/types';
-import { fetchMonitorDetails } from '../../../state/actions/monitor';
+import { getMonitorDetailsAction } from '../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from '../../functional/monitor_list/monitor_list_drawer/monitor_list_drawer';
 import { useUrlParams } from '../../../hooks';
 import { MonitorSummary } from '../../../../common/graphql/types';
@@ -18,7 +18,7 @@ import { MonitorDetails } from '../../../../common/runtime_types/monitor';
 interface ContainerProps {
   summary: MonitorSummary;
   monitorDetails: MonitorDetails;
-  loadMonitorDetails: typeof fetchMonitorDetails;
+  loadMonitorDetails: typeof getMonitorDetailsAction;
 }
 
 const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, monitorDetails }) => {
@@ -38,12 +38,12 @@ const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, moni
 };
 
 const mapStateToProps = (state: AppState, { summary }: any) => ({
-  monitorDetails: getMonitorDetails(state, summary),
+  monitorDetails: monitorDetailsSelector(state, summary),
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
   loadMonitorDetails: (actionPayload: MonitorDetailsActionPayload) =>
-    dispatch(fetchMonitorDetails(actionPayload)),
+    dispatch(getMonitorDetailsAction(actionPayload)),
 });
 
 export const MonitorListDrawer = connect(mapStateToProps, mapDispatchToProps)(Container);

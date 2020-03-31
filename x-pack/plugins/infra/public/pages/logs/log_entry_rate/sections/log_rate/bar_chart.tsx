@@ -85,6 +85,7 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
           tooltip={tooltipProps}
           theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
           showLegend
+          showLegendExtra
           legendPosition="right"
           xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
         />

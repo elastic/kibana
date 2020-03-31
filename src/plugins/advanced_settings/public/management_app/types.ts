@@ -17,17 +17,12 @@
  * under the License.
  */
 
-import {
-  UiSettingsType,
-  StringValidation,
-  ImageValidation,
-  SavedObjectAttribute,
-} from '../../../../core/public';
+import { UiSettingsType, StringValidation, ImageValidation } from '../../../../core/public';
 
 export interface FieldSetting {
   displayName: string;
   name: string;
-  value: SavedObjectAttribute;
+  value: unknown;
   description?: string;
   options?: string[];
   optionLabels?: Record<string, string>;
@@ -36,7 +31,7 @@ export interface FieldSetting {
   category: string[];
   ariaName: string;
   isOverridden: boolean;
-  defVal: SavedObjectAttribute;
+  defVal: unknown;
   isCustom: boolean;
   validation?: StringValidation | ImageValidation;
   readOnly?: boolean;
@@ -58,10 +53,4 @@ export interface FieldState {
   loading?: boolean;
   isInvalid?: boolean;
   error?: string | null;
-}
-
-export interface IQuery {
-  ast: any; // incomplete
-  text: string;
-  syntax: any; // incomplete
 }

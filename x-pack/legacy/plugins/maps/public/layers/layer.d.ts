@@ -3,19 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ILayerDescriptor } from '../../common/descriptor_types';
+import { LayerDescriptor } from '../../common/descriptor_types';
 import { ISource } from './sources/source';
+import { DataRequest } from './util/data_request';
+import { SyncContext } from '../actions/map_actions';
 
 export interface ILayer {
-  getDisplayName(): Promise<string>;
+  getDataRequest(id: string): DataRequest | undefined;
+  getDisplayName(source?: ISource): Promise<string>;
+  getId(): string;
+  getSourceDataRequest(): DataRequest | undefined;
+  getSource(): ISource;
+  getSourceForEditing(): ISource;
+  syncData(syncContext: SyncContext): Promise<void>;
 }
 
 export interface ILayerArguments {
-  layerDescriptor: ILayerDescriptor;
+  layerDescriptor: LayerDescriptor;
   source: ISource;
 }
 
 export class AbstractLayer implements ILayer {
   constructor(layerArguments: ILayerArguments);
-  getDisplayName(): Promise<string>;
+  getDataRequest(id: string): DataRequest | undefined;
+  getDisplayName(source?: ISource): Promise<string>;
+  getId(): string;
+  getSourceDataRequest(): DataRequest | undefined;
+  getSource(): ISource;
+  getSourceForEditing(): ISource;
+  syncData(syncContext: SyncContext): Promise<void>;
 }

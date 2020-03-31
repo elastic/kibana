@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CustomActionsOverview } from './CustomActionsOverview';
+import { CustomLinkOverview } from './CustomLink';
 
 export const CustomizeUI = () => {
   return (
@@ -20,7 +20,7 @@ export const CustomizeUI = () => {
         </h1>
       </EuiTitle>
       <EuiSpacer size="l" />
-      <CustomActionsOverview />
+      <CustomLinkOverview />
     </>
   );
 };

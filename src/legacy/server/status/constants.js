@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const KIBANA_STATS_TYPE = 'kibana_stats'; // kibana stats per 5s intervals
+export const KIBANA_STATS_TYPE = 'oss_kibana_stats'; // kibana stats per 5s intervals

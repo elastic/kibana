@@ -6,7 +6,7 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import { IRouter } from 'src/core/server';
+import { IRouter } from 'kibana/server';
 import { CloudSetup } from '../../cloud/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -25,7 +25,7 @@ export interface LicenseCheckResult {
 
 export interface SystemRouteDeps {
   cloud: CloudSetup;
-  spacesPlugin: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface PluginsSetup {
@@ -33,8 +33,8 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
-  security: SecurityPluginSetup;
-  spaces: SpacesPluginSetup;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 

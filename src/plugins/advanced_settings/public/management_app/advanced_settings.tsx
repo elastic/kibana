@@ -19,14 +19,7 @@
 
 import React, { Component } from 'react';
 import { Subscription } from 'rxjs';
-import {
-  Comparators,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  // @ts-ignore
-  Query,
-} from '@elastic/eui';
+import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { useParams } from 'react-router-dom';
 import { CallOuts } from './components/call_outs';
@@ -38,7 +31,7 @@ import { ComponentRegistry } from '../';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
-import { FieldSetting, IQuery, SettingsChanges } from './types';
+import { FieldSetting, SettingsChanges } from './types';
 
 interface AdvancedSettingsProps {
   enableSaving: boolean;
@@ -54,7 +47,7 @@ interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
-  query: IQuery;
+  query: Query;
   filteredSettings: Record<string, FieldSetting[]>;
 }
 
@@ -156,7 +149,7 @@ export class AdvancedSettingsComponent extends Component<
     }, {});
   }
 
-  onQueryChange = ({ query }: { query: IQuery }) => {
+  onQueryChange = ({ query }: { query: Query }) => {
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),

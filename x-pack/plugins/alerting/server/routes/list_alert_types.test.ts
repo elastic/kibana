@@ -70,7 +70,7 @@ describe('listAlertTypesRoute', () => {
       }
     `);
 
-    expect(context.alerting.listTypes).toHaveBeenCalledTimes(1);
+    expect(context.alerting!.listTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,

@@ -2,9 +2,6 @@
 
 exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
 <span>
-  <span>
-    some children
-  </span>
   <RowRendererContainer>
     <ZeekDetails
       browserFields={

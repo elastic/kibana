@@ -51,24 +51,6 @@ describe('ES search strategy', () => {
     expect(typeof esSearch.search).toBe('function');
   });
 
-  it('logs the response if `debug` is set to `true`', async () => {
-    const spy = jest.spyOn(console, 'log');
-    const esSearch = esSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-        config$: mockConfig$,
-      },
-      mockApiCaller,
-      mockSearch
-    );
-
-    expect(spy).not.toBeCalled();
-
-    await esSearch.search({ params: {}, debug: true });
-
-    expect(spy).toBeCalled();
-  });
-
   it('calls the API caller with the params with defaults', async () => {
     const params = { index: 'logstash-*' };
     const esSearch = esSearchStrategyProvider(

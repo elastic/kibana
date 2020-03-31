@@ -1,12 +1,11 @@
 {
-  "extends": "../../../apm.tsconfig.json",
   "include": [
-    "./**/*",
-    "../../../plugins/apm/**/*",
-    "../../../typings/**/*"
+    "./plugins/apm/**/*",
+    "./legacy/plugins/apm/**/*",
+    "./typings/**/*"
   ],
   "exclude": [
     "**/__fixtures__/**/*",
-    "./e2e/cypress/**/*"
+    "./legacy/plugins/apm/e2e/cypress/**/*"
   ]
 }

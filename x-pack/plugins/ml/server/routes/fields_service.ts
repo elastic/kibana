@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {

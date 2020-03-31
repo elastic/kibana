@@ -21,9 +21,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
-import { Schemas } from 'ui/agg_types';
 
-import { Status } from '../../visualizations/public';
+import { Schemas } from '../../vis_default_editor/public';
 import { createTileMapVisualization } from './tile_map_visualization';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
@@ -57,7 +56,6 @@ export function createTileMapTypeDefinition(dependencies) {
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
       },
     },
-    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
     requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     responseHandler: convertToGeoJson,
@@ -137,27 +135,26 @@ export function createTileMapTypeDefinition(dependencies) {
           title: i18n.translate('tileMap.vis.map.editorConfig.schemas.geoCoordinatesTitle', {
             defaultMessage: 'Geo coordinates',
           }),
-          aggFilter: 'geohash_grid',
+          aggFilter: ['geohash_grid'],
           min: 1,
           max: 1,
         },
       ]),
     },
-    setup: async savedVis => {
-      const vis = savedVis.vis;
+    setup: async vis => {
       let tmsLayers;
 
       try {
         tmsLayers = await serviceSettings.getTMSServices();
       } catch (e) {
-        return savedVis;
+        return vis;
       }
 
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
         vis.params.wms.selectedTmsLayer = tmsLayers[0];
       }
-      return savedVis;
+      return vis;
     },
   };
 }

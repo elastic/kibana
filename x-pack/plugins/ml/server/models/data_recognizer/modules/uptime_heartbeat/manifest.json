@@ -1,0 +1,26 @@
+{
+  "id": "uptime_heartbeat",
+  "title": "Uptime: Heartbeat",
+  "description": "Detect latency issues in heartbeat monitors.",
+  "type": "Heartbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "heartbeat-*",
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "agent.type": "heartbeat" } }]
+    }
+  },
+  "jobs": [
+    {
+      "id": "high_latency_by_geo",
+      "file": "high_latency_by_geo.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-high_latency_by_geo",
+      "file": "datafeed_high_latency_by_geo.json",
+      "job_id": "high_latency_by_geo"
+    }
+  ]
+}

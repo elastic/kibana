@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
 import { EndpointConfigType } from '../../../config';
+import { RequestHandlerContext } from '../../../../../../../src/core/server';
 
 /**
  * Abstract Pagination class for determining next/prev urls,

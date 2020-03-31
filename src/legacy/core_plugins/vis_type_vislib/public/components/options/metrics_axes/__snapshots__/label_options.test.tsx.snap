@@ -22,15 +22,15 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
   <SwitchOption
     label="Show labels"
     paramName="show"
-    setValue={[Function]}
+    setValue={[MockFunction]}
     value={true}
   />
   <SwitchOption
-    data-test-subj="xAxisFilterLabelsCheckbox-ValueAxis-1"
+    data-test-subj=""
     disabled={false}
     label="Filter labels"
     paramName="filter"
-    setValue={[Function]}
+    setValue={[MockFunction]}
     value={true}
   />
   <EuiSpacer
@@ -66,7 +66,7 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
     <EuiFlexItem>
       <TruncateLabelsOption
         disabled={false}
-        setValue={[Function]}
+        setValue={[MockFunction]}
         value={0}
       />
     </EuiFlexItem>

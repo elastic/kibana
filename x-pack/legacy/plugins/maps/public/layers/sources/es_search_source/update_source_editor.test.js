@@ -16,6 +16,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { UpdateSourceEditor } from './update_source_editor';
+import { SCALING_TYPES } from '../../../../common/constants';
 
 const defaultProps = {
   indexPatternId: 'indexPattern1',
@@ -23,7 +24,7 @@ const defaultProps = {
   filterByMapBounds: true,
   tooltipFields: [],
   sortOrder: 'DESC',
-  useTopHits: false,
+  scalingType: SCALING_TYPES.LIMIT,
   topHitsSplitField: 'trackId',
   topHitsSize: 1,
 };
@@ -36,12 +37,6 @@ test('should render update source editor', async () => {
 
 test('should enable sort order select when sort field provided', async () => {
   const component = shallow(<UpdateSourceEditor {...defaultProps} sortField="@timestamp" />);
-
-  expect(component).toMatchSnapshot();
-});
-
-test('should render top hits form when useTopHits is true', async () => {
-  const component = shallow(<UpdateSourceEditor {...defaultProps} useTopHits={true} />);
 
   expect(component).toMatchSnapshot();
 });

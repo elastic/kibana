@@ -5,7 +5,6 @@
  */
 
 import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
-import { throwIfNotOk } from '../../../hooks/api/api';
 import { KibanaServices } from '../../../lib/kibana';
 
 export interface Body {
@@ -22,17 +21,10 @@ export interface Body {
 }
 
 export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {
-  const response = await KibanaServices.get().http.fetch<Anomalies>(
-    '/api/ml/results/anomalies_table_data',
-    {
-      method: 'POST',
-      body: JSON.stringify(body),
-      asResponse: true,
-      asSystemRequest: true,
-      signal,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
+  return KibanaServices.get().http.fetch<Anomalies>('/api/ml/results/anomalies_table_data', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    asSystemRequest: true,
+    signal,
+  });
 };

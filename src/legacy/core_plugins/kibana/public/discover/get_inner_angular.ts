@@ -22,22 +22,12 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
-// @ts-ignore
-import { StateProvider } from 'ui/state_management/state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
-// @ts-ignore
-import { AppStateProvider } from 'ui/state_management/app_state';
-// @ts-ignore
-import { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
+import { CoreStart, LegacyCoreStart } from 'kibana/public';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
+import { createDocTableDirective } from './np_ready/angular/doc_table';
 import { createTableHeaderDirective } from './np_ready/angular/doc_table/components/table_header';
 import {
   createToolBarPagerButtonsDirective,
@@ -47,18 +37,8 @@ import { createTableRowDirective } from './np_ready/angular/doc_table/components
 import { createPagerFactory } from './np_ready/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './np_ready/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
-import { createFieldSearchDirective } from './np_ready/components/field_chooser/discover_field_search_directive';
-import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
-import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
-// @ts-ignore
-import { FieldNameDirectiveProvider } from './np_ready/angular/directives/field_name';
-// @ts-ignore
-import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
-// @ts-ignore
-import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
-import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
 // @ts-ignore
 import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
 // @ts-ignore
@@ -67,7 +47,6 @@ import { createRenderCompleteDirective } from './np_ready/angular/directives/ren
 import {
   initAngularBootstrap,
   configureAppAngularModule,
-  IPrivate,
   KbnAccessibleClickProvider,
   PrivateProvider,
   PromiseServiceCreator,
@@ -76,6 +55,7 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
+import { createDiscoverSidebarDirective } from './np_ready/components/sidebar';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -114,11 +94,7 @@ export function initializeInnerAngularModule(
     createLocalI18nModule();
     createLocalPrivateModule();
     createLocalPromiseModule();
-    createLocalConfigModule(core.uiSettings);
-    createLocalKbnUrlModule();
     createLocalTopNavModule(navigation);
-    createLocalGlobalStateModule();
-    createLocalAppStateModule();
     createLocalStorageModule();
     createElasticSearchModule(data);
     createPagerFactoryModule();
@@ -136,10 +112,10 @@ export function initializeInnerAngularModule(
         'discoverPrivate',
         'discoverDocTable',
         'discoverPagerFactory',
+        'discoverPromise',
       ])
       .config(watchMultiDecorator)
       .directive('icon', reactDirective => reactDirective(EuiIcon))
-      .directive('fieldName', FieldNameDirectiveProvider)
       .directive('renderComplete', createRenderCompleteDirective)
       .service('debounce', ['$timeout', DebounceProviderTimeout]);
   }
@@ -150,12 +126,10 @@ export function initializeInnerAngularModule(
       'ngRoute',
       'react',
       'ui.bootstrap',
-      'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
+      'discoverPromise',
       'discoverTopNav',
-      'discoverGlobalState',
-      'discoverAppState',
       'discoverLocalStorageProvider',
       'discoverEs',
       'discoverDocTable',
@@ -165,52 +139,11 @@ export function initializeInnerAngularModule(
     .run(registerListenEventListener)
     .directive('icon', reactDirective => reactDirective(EuiIcon))
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
-    .directive('fieldName', FieldNameDirectiveProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverFieldSearch', createFieldSearchDirective)
-    .directive('discoverIndexPatternSelect', createIndexPatternSelectDirective)
-    .directive('stringFieldProgressBar', createStringFieldProgressBarDirective)
-    .directive('discoverField', createDiscoverFieldDirective)
-    .directive('discFieldChooser', createFieldChooserDirective)
+    .directive('discoverSidebar', createDiscoverSidebarDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
-}
-
-export function createLocalGlobalStateModule() {
-  angular
-    .module('discoverGlobalState', [
-      'discoverPrivate',
-      'discoverConfig',
-      'discoverKbnUrl',
-      'discoverPromise',
-    ])
-    .service('globalState', function(Private: IPrivate) {
-      return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalKbnUrlModule() {
-  angular
-    .module('discoverKbnUrl', ['discoverPrivate', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
-}
-
-function createLocalConfigModule(uiSettings: IUiSettingsClient) {
-  angular
-    .module('discoverConfig', ['discoverPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: (value: string) => {
-            return uiSettings ? uiSettings.get(value) : undefined;
-          },
-        }),
-      };
-    });
 }
 
 function createLocalPromiseModule() {
@@ -236,26 +169,6 @@ function createLocalI18nModule() {
     .directive('i18nId', i18nDirective);
 }
 
-function createLocalAppStateModule() {
-  angular
-    .module('discoverAppState', [
-      'discoverGlobalState',
-      'discoverPrivate',
-      'discoverConfig',
-      'discoverKbnUrl',
-      'discoverPromise',
-    ])
-    .service('AppState', function(Private: IPrivate) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: any) {
-      return Private(AppStateProvider).getAppState;
-    })
-    .service('State', function(Private: any) {
-      return Private(StateProvider);
-    });
-}
-
 function createLocalStorageModule() {
   angular
     .module('discoverLocalStorageProvider', ['discoverPrivate'])
@@ -271,7 +184,7 @@ const createLocalStorageService = function(type: string) {
 
 function createElasticSearchModule(data: DataPublicPluginStart) {
   angular
-    .module('discoverEs', ['discoverConfig'])
+    .module('discoverEs', [])
     // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
     .service('es', () => {
       return data.search.__LEGACY.esClient;
@@ -284,13 +197,7 @@ function createPagerFactoryModule() {
 
 function createDocTableModule() {
   angular
-    .module('discoverDocTable', [
-      'discoverKbnUrl',
-      'discoverConfig',
-      'discoverAppState',
-      'discoverPagerFactory',
-      'react',
-    ])
+    .module('discoverDocTable', ['discoverPagerFactory', 'react'])
     .directive('docTable', createDocTableDirective)
     .directive('kbnTableHeader', createTableHeaderDirective)
     .directive('toolBarPagerText', createToolBarPagerTextDirective)

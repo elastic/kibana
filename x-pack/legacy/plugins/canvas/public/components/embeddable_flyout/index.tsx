@@ -21,10 +21,13 @@ const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
     return `savedMap id="${id}" | render`;
   },
-  // FIX: Only currently allow Map embeddables
-  /* [EmbeddableTypes.visualization]: (id: string) => {
-    return `filters | savedVisualization id="${id}" | render`;
+  [EmbeddableTypes.lens]: (id: string) => {
+    return `savedLens id="${id}" | render`;
   },
+  [EmbeddableTypes.visualization]: (id: string) => {
+    return `savedVisualization id="${id}" | render`;
+  },
+  /*
   [EmbeddableTypes.search]: (id: string) => {
     return `filters | savedSearch id="${id}" | render`;
   },*/

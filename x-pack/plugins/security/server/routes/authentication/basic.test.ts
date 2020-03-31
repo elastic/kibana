@@ -14,28 +14,22 @@ import {
 } from '../../../../../../src/core/server';
 import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
-import { ConfigType } from '../../config';
 import { defineBasicRoutes } from './basic';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { authenticationMock } from '../../authentication/index.mock';
-import { authorizationMock } from '../../authorization/index.mock';
+import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Basic authentication routes', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
   let mockContext: RequestHandlerContext;
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
+    const routeParamsMock = routeDefinitionParamsMock.create();
+    router = routeParamsMock.router;
 
-    authc = authenticationMock.create();
-    authc.isProviderEnabled.mockImplementation(provider => provider === 'basic');
+    authc = routeParamsMock.authc;
+    authc.isProviderTypeEnabled.mockImplementation(provider => provider === 'basic');
 
     mockContext = ({
       licensing: {
@@ -43,16 +37,7 @@ describe('Basic authentication routes', () => {
       },
     } as unknown) as RequestHandlerContext;
 
-    defineBasicRoutes({
-      router,
-      clusterClient: elasticsearchServiceMock.createClusterClient(),
-      basePath: httpServiceMock.createBasePath(),
-      logger: loggingServiceMock.create().get(),
-      config: { authc: { providers: ['saml'] } } as ConfigType,
-      authc,
-      authz: authorizationMock.create(),
-      csp: httpServiceMock.createSetupContract().csp,
-    });
+    defineBasicRoutes(routeParamsMock);
   });
 
   describe('login', () => {
@@ -100,17 +85,17 @@ describe('Basic authentication routes', () => {
       expect(() =>
         bodyValidator.validate({ username: '', password: '' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[username]: value is [] but it must have a minimum length of [1]."`
+        `"[username]: value has length [0] but it must have a minimum length of [1]."`
       );
       expect(() =>
         bodyValidator.validate({ username: 'user', password: '' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[password]: value is [] but it must have a minimum length of [1]."`
+        `"[password]: value has length [0] but it must have a minimum length of [1]."`
       );
       expect(() =>
         bodyValidator.validate({ username: '', password: 'password' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[username]: value is [] but it must have a minimum length of [1]."`
+        `"[username]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -123,7 +108,7 @@ describe('Basic authentication routes', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual(unhandledException);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { type: 'basic' },
         value: { username: 'user', password: 'password' },
       });
     });
@@ -137,7 +122,7 @@ describe('Basic authentication routes', () => {
       expect(response.status).toBe(401);
       expect(response.payload).toEqual(failureReason);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { type: 'basic' },
         value: { username: 'user', password: 'password' },
       });
     });
@@ -150,7 +135,7 @@ describe('Basic authentication routes', () => {
       expect(response.status).toBe(401);
       expect(response.payload).toEqual('Unauthorized');
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { type: 'basic' },
         value: { username: 'user', password: 'password' },
       });
     });
@@ -164,14 +149,14 @@ describe('Basic authentication routes', () => {
         expect(response.status).toBe(204);
         expect(response.payload).toBeUndefined();
         expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-          provider: 'basic',
+          provider: { type: 'basic' },
           value: { username: 'user', password: 'password' },
         });
       });
 
       it('prefers `token` authentication provider if it is enabled', async () => {
         authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
-        authc.isProviderEnabled.mockImplementation(
+        authc.isProviderTypeEnabled.mockImplementation(
           provider => provider === 'token' || provider === 'basic'
         );
 
@@ -180,7 +165,7 @@ describe('Basic authentication routes', () => {
         expect(response.status).toBe(204);
         expect(response.payload).toBeUndefined();
         expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-          provider: 'token',
+          provider: { type: 'token' },
           value: { username: 'user', password: 'password' },
         });
       });

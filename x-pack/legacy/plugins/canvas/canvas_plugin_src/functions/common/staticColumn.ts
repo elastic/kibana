@@ -6,7 +6,11 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/common';
+import {
+  ExpressionFunctionDefinition,
+  Datatable,
+  DatatableColumnType,
+} from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -42,7 +46,7 @@ export function staticColumn(): ExpressionFunctionDefinition<
     },
     fn: (input, args) => {
       const rows = input.rows.map(row => ({ ...row, [args.name]: args.value }));
-      const type = getType(args.value);
+      const type = getType(args.value) as DatatableColumnType;
       const columns = [...input.columns];
       const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
       const newColumn = { name: args.name, type };

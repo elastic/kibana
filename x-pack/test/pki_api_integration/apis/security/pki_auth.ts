@@ -9,7 +9,6 @@ import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-// @ts-ignore
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -290,7 +289,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out');
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {

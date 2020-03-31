@@ -29,7 +29,6 @@ export default function(kibana: any) {
         order: 1,
         main: 'plugins/kbn_tp_embeddable_explorer/np_ready/public/legacy',
       },
-      hacks: ['plugins/dashboard_embeddable_container/initialize'],
     },
     init(server: Legacy.Server) {
       server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>

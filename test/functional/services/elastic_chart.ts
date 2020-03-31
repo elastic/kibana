@@ -22,10 +22,19 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ElasticChartProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const retry = getService('retry');
   const log = getService('log');
 
   class ElasticChart {
+    public async getCanvas() {
+      return await find.byCssSelector('.echChart canvas:last-of-type');
+    }
+
+    public async canvasExists() {
+      return await find.existsByCssSelector('.echChart canvas:last-of-type');
+    }
+
     public async waitForRenderComplete(dataTestSubj: string) {
       const chart = await testSubjects.find(dataTestSubj);
       const rendered = await chart.findAllByCssSelector('.echChart[data-ech-render-complete=true]');
@@ -42,11 +51,11 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
       return Number(renderingCount);
     }
 
-    public async waitForRenderingCount(dataTestSubj: string, previousCount = 1) {
-      await retry.waitFor(`rendering count to be equal to [${previousCount + 1}]`, async () => {
+    public async waitForRenderingCount(dataTestSubj: string, minimumCount: number) {
+      await retry.waitFor(`rendering count to be equal to [${minimumCount}]`, async () => {
         const currentRenderingCount = await this.getVisualizationRenderingCount(dataTestSubj);
         log.debug(`-- currentRenderingCount=${currentRenderingCount}`);
-        return currentRenderingCount === previousCount + 1;
+        return currentRenderingCount >= minimumCount;
       });
     }
   }

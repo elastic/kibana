@@ -19,13 +19,12 @@
 import { get, has } from 'lodash';
 import React, { useEffect, useCallback, useState } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { IAggType, IndexPattern } from 'src/plugins/data/public';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
-import { IAggType } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 
@@ -104,7 +103,7 @@ function DefaultEditorAggSelect({
   const isValid = !!value && !errors.length && !isDirty;
 
   const onChange = useCallback(
-    (options: EuiComboBoxOptionProps[]) => {
+    (options: EuiComboBoxOptionOption[]) => {
       const selectedOption = get(options, '0.target');
       if (selectedOption) {
         setValue(selectedOption as IAggType);

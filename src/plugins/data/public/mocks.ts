@@ -19,7 +19,7 @@
 
 import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
 import { fieldFormatsMock } from '../common/field_formats/mocks';
-import { searchSetupMock } from './search/mocks';
+import { searchSetupMock, searchStartMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
@@ -33,48 +33,27 @@ const autocompleteMock: any = {
 
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
-  const setupContract = {
+  return {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
     fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
     query: querySetupMock,
-    __LEGACY: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
-    },
   };
-
-  return setupContract;
 };
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const startContract = {
-    autocomplete: autocompleteMock,
-    getSuggestions: jest.fn(),
-    search: {
-      search: jest.fn(),
-
-      __LEGACY: {
-        esClient: {
-          search: jest.fn(),
-          msearch: jest.fn(),
-        },
-      },
+  return {
+    actions: {
+      createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
     },
+    autocomplete: autocompleteMock,
+    search: searchStartMock,
     fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn(),
-    },
-    __LEGACY: {
-      esClient: {
-        search: jest.fn(),
-        msearch: jest.fn(),
-      },
     },
     indexPatterns: ({
       make: () => ({
@@ -85,10 +64,10 @@ const createStartContract = (): Start => {
       get: jest.fn().mockReturnValue(Promise.resolve({})),
     } as unknown) as IndexPatternsContract,
   };
-  return startContract;
 };
 
 export { searchSourceMock } from './search/mocks';
+export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {
   createSetupContract,

@@ -24,6 +24,7 @@ import {
   FrameworkRequest,
   internalFrameworkRequest,
 } from './types';
+import { buildSiemResponse } from '../detection_engine/routes/utils';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   private router: IRouter;
@@ -60,7 +61,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     this.router.post(
       {
         path: routePath,
-        validate: { body: configSchema.object({}, { allowUnknowns: true }) },
+        validate: { body: configSchema.object({}, { unknowns: 'allow' }) },
         options: {
           tags: ['access:siem'],
         },
@@ -121,7 +122,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
   private async getCurrentUserInfo(request: KibanaRequest): Promise<AuthenticatedUser | null> {
     try {
-      const user = await this.security.authc.getCurrentUser(request);
+      const user = (await this.security?.authc.getCurrentUser(request)) ?? null;
       return user;
     } catch {
       return null;
@@ -130,22 +131,19 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleError(error: any, response: KibanaResponseFactory) {
-    if (error.name !== 'HttpQueryError') {
-      return response.internalError({
+    const siemResponse = buildSiemResponse(response);
+
+    if (error.name === 'HttpQueryError') {
+      return siemResponse.error({
+        statusCode: error.statusCode,
+        headers: error.headers,
         body: error.message,
-        headers: {
-          'content-type': 'application/json',
-        },
       });
     }
 
-    return response.customError({
-      statusCode: error.statusCode,
+    return siemResponse.error({
+      statusCode: 500,
       body: error.message,
-      headers: {
-        'content-type': 'application/json',
-        ...error.headers,
-      },
     });
   }
 

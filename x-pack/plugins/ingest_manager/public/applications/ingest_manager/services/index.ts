@@ -4,4 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { agentConfigRouteService } from '../../../../common';
+export {
+  agentConfigRouteService,
+  datasourceRouteService,
+  fleetSetupRouteService,
+  agentRouteService,
+  enrollmentAPIKeyRouteService,
+  epmRouteService,
+  setupRouteService,
+  packageToConfigDatasourceInputs,
+  storedDatasourceToAgentDatasource,
+  AgentStatusKueryHelper,
+} from '../../../../common';

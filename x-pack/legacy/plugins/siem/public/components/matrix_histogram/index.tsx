@@ -17,7 +17,7 @@ import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
 import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
-import { getBarchartConfigs, getCustomChartData } from '../../components/matrix_histogram/utils';
+import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useQuery } from '../../containers/matrix_histogram';
 import {
   MatrixHistogramProps,

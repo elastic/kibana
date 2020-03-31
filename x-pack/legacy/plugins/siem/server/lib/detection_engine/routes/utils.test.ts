@@ -8,20 +8,32 @@ import Boom from 'boom';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
+import { BadRequestError } from '../errors/bad_request_error';
 import {
   transformError,
   transformBulkError,
   BulkError,
   createSuccessObject,
-  getIndex,
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
   convertToSnakeCase,
+  SiemResponseFactory,
+  validateLicenseForRuleType,
 } from './utils';
-import { createMockConfig } from './__mocks__';
+import { responseMock } from './__mocks__';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
+import { licensingMock } from '../../../../../../../plugins/licensing/server/mocks';
 
 describe('utils', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('transformError', () => {
     test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
       const boom = new Boom('some boom message');
@@ -70,8 +82,8 @@ describe('utils', () => {
       });
     });
 
-    test('it detects a TypeError and returns a status code of 400 from that particular error type', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a status code of 400 from that particular error type', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformError(error);
       expect(transformed).toEqual({
         message: 'I have a type error',
@@ -79,8 +91,8 @@ describe('utils', () => {
       });
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformError(error);
       expect(transformed).toEqual({
         message: 'I have a type error',
@@ -127,8 +139,8 @@ describe('utils', () => {
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
         rule_id: 'rule-1',
@@ -279,8 +291,8 @@ describe('utils', () => {
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformImportError('rule-1', error, {
         success_count: 1,
         success: false,
@@ -295,24 +307,6 @@ describe('utils', () => {
         ],
       };
       expect(transformed).toEqual(expected);
-    });
-  });
-
-  describe('getIndex', () => {
-    let mockConfig = createMockConfig();
-
-    beforeEach(() => {
-      mockConfig = () => ({
-        get: jest.fn(() => 'mockSignalsIndex'),
-        has: jest.fn(),
-      });
-    });
-
-    it('appends the space id to the configured index', () => {
-      const getSpaceId = jest.fn(() => 'myspace');
-      const index = getIndex(getSpaceId, mockConfig);
-
-      expect(index).toEqual('mockSignalsIndex-myspace');
     });
   });
 
@@ -338,6 +332,65 @@ describe('utils', () => {
       expect(
         convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
       ).toEqual(null);
+    });
+  });
+
+  describe('SiemResponseFactory', () => {
+    it('builds a custom response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      expect(response.custom).toHaveBeenCalled();
+    });
+
+    it('generates a status_code key on the response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      const [[{ statusCode, body }]] = response.custom.mock.calls;
+
+      expect(statusCode).toEqual(400);
+      expect(body).toBeInstanceOf(Buffer);
+      expect(JSON.parse(body!.toString())).toEqual(
+        expect.objectContaining({
+          message: 'Bad Request',
+          status_code: 400,
+        })
+      );
+    });
+  });
+
+  describe('validateLicenseForRuleType', () => {
+    let licenseMock: ReturnType<typeof licensingMock.createLicenseMock>;
+
+    beforeEach(() => {
+      licenseMock = licensingMock.createLicenseMock();
+    });
+
+    it('throws a BadRequestError if operating on an ML Rule with an insufficient license', () => {
+      licenseMock.hasAtLeast.mockReturnValue(false);
+
+      expect(() =>
+        validateLicenseForRuleType({ license: licenseMock, ruleType: 'machine_learning' })
+      ).toThrowError(BadRequestError);
+    });
+
+    it('does not throw if operating on an ML Rule with a sufficient license', () => {
+      licenseMock.hasAtLeast.mockReturnValue(true);
+
+      expect(() =>
+        validateLicenseForRuleType({ license: licenseMock, ruleType: 'machine_learning' })
+      ).not.toThrowError(BadRequestError);
+    });
+
+    it('does not throw if operating on a query rule', () => {
+      licenseMock.hasAtLeast.mockReturnValue(false);
+
+      expect(() =>
+        validateLicenseForRuleType({ license: licenseMock, ruleType: 'query' })
+      ).not.toThrowError(BadRequestError);
     });
   });
 });

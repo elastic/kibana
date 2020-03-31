@@ -17,9 +17,10 @@
  * under the License.
  */
 
-export const mockOpsCollector = {
-  collect: jest.fn(),
-};
+import { collectorMock } from './collectors/mocks';
+
+export const mockOpsCollector = collectorMock.create();
+
 jest.doMock('./ops_metrics_collector', () => ({
   OpsMetricsCollector: jest.fn().mockImplementation(() => mockOpsCollector),
 }));

@@ -14,8 +14,11 @@ import {
   IIndexPattern,
   TimefilterContract,
 } from 'src/plugins/data/public';
+
 import { Subscription } from 'rxjs';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
+
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
@@ -88,6 +91,18 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.reload.bind(this));
+  }
+
+  public supportedTriggers() {
+    switch (this.savedVis.visualizationType) {
+      case 'lnsXY':
+        // TODO: case 'lnsDatatable':
+        return [VIS_EVENT_TO_TRIGGER.filter];
+
+      case 'lnsMetric':
+      default:
+        return [];
+    }
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {

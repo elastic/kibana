@@ -5,12 +5,13 @@
  */
 
 import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 import { npStart } from '../../../../legacy_singletons';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { getJobIdPrefix } from '../../../../../common/log_analysis';
+
+import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../../common/log_analysis';
+import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
 
 export const callSetupMlModuleAPI = async (
   moduleId: string,
@@ -48,7 +49,10 @@ const setupMlModuleTimeParamsRT = rt.partial({
   end: rt.number,
 });
 
-const setupMlModuleJobOverridesRT = rt.object;
+const setupMlModuleJobOverridesRT = rt.type({
+  job_id: rt.string,
+  custom_settings: jobCustomSettingsRT,
+});
 
 export type SetupMlModuleJobOverrides = rt.TypeOf<typeof setupMlModuleJobOverridesRT>;
 

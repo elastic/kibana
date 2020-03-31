@@ -18,14 +18,13 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import { Action } from '../actions';
-import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
-import { ActionRegistry, TriggerRegistry, TriggerId } from '../types';
+import { Action, createAction } from '../actions';
+import { createHelloWorldAction } from '../tests/test_samples';
+import { ActionRegistry, TriggerRegistry, TriggerId, ActionType } from '../types';
 import { Trigger } from '../triggers';
 
-// I tried redeclaring the module in here to extend the `TriggerContextMapping` but
-// that seems to overwrite all other plugins extending it, I suspect because it's inside
-// the main plugin.
+// Casting to ActionType or TriggerId is a hack - in a real situation use
+// declare module and add this id to the appropriate context mapping.
 const FOO_TRIGGER: TriggerId = 'FOO_TRIGGER' as TriggerId;
 const BAR_TRIGGER: TriggerId = 'BAR_TRIGGER' as TriggerId;
 const MY_TRIGGER: TriggerId = 'MY_TRIGGER' as TriggerId;
@@ -33,7 +32,7 @@ const MY_TRIGGER: TriggerId = 'MY_TRIGGER' as TriggerId;
 const testAction1: Action = {
   id: 'action1',
   order: 1,
-  type: 'type1',
+  type: 'type1' as ActionType,
   execute: async () => {},
   getDisplayName: () => 'test1',
   getIconType: () => '',
@@ -43,7 +42,7 @@ const testAction1: Action = {
 const testAction2: Action = {
   id: 'action2',
   order: 2,
-  type: 'type2',
+  type: 'type2' as ActionType,
   execute: async () => {},
   getDisplayName: () => 'test2',
   getIconType: () => '',
@@ -100,7 +99,7 @@ describe('UiActionsService', () => {
         getDisplayName: () => 'test',
         getIconType: () => '',
         isCompatible: async () => true,
-        type: 'test',
+        type: 'test' as ActionType,
       });
     });
   });
@@ -109,7 +108,7 @@ describe('UiActionsService', () => {
     const action1: Action = {
       id: 'action1',
       order: 1,
-      type: 'type1',
+      type: 'type1' as ActionType,
       execute: async () => {},
       getDisplayName: () => 'test',
       getIconType: () => '',
@@ -118,7 +117,7 @@ describe('UiActionsService', () => {
     const action2: Action = {
       id: 'action2',
       order: 2,
-      type: 'type2',
+      type: 'type2' as ActionType,
       execute: async () => {},
       getDisplayName: () => 'test',
       getIconType: () => '',
@@ -140,13 +139,13 @@ describe('UiActionsService', () => {
 
       expect(list0).toHaveLength(0);
 
-      service.attachAction(FOO_TRIGGER, 'action1');
+      service.attachAction(FOO_TRIGGER, action1);
       const list1 = service.getTriggerActions(FOO_TRIGGER);
 
       expect(list1).toHaveLength(1);
       expect(list1).toEqual([action1]);
 
-      service.attachAction(FOO_TRIGGER, 'action2');
+      service.attachAction(FOO_TRIGGER, action2);
       const list2 = service.getTriggerActions(FOO_TRIGGER);
 
       expect(list2).toHaveLength(2);
@@ -179,7 +178,7 @@ describe('UiActionsService', () => {
         title: 'My trigger',
       };
       service.registerTrigger(testTrigger);
-      service.attachAction(MY_TRIGGER, helloWorldAction.id);
+      service.attachAction(MY_TRIGGER, helloWorldAction);
 
       const compatibleActions = await service.getTriggerCompatibleActions(MY_TRIGGER, {
         hi: 'there',
@@ -191,11 +190,13 @@ describe('UiActionsService', () => {
 
     test('filters out actions not applicable based on the context', async () => {
       const service = new UiActionsService();
-      const restrictedAction = createRestrictedAction<{ accept: boolean }>(context => {
-        return context.accept;
+      const action = createAction({
+        type: 'test' as ActionType,
+        isCompatible: ({ accept }: { accept: boolean }) => Promise.resolve(accept),
+        execute: () => Promise.resolve(),
       });
 
-      service.registerAction(restrictedAction);
+      service.registerAction(action);
 
       const testTrigger: Trigger = {
         id: MY_TRIGGER,
@@ -203,7 +204,7 @@ describe('UiActionsService', () => {
       };
 
       service.registerTrigger(testTrigger);
-      service.attachAction(testTrigger.id, restrictedAction.id);
+      service.attachAction(testTrigger.id, action);
 
       const compatibleActions1 = await service.getTriggerCompatibleActions(testTrigger.id, {
         accept: true,
@@ -287,7 +288,7 @@ describe('UiActionsService', () => {
         id: FOO_TRIGGER,
       });
       service1.registerAction(testAction1);
-      service1.attachAction(FOO_TRIGGER, testAction1.id);
+      service1.attachAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
@@ -308,14 +309,14 @@ describe('UiActionsService', () => {
       });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
-      service1.attachAction(FOO_TRIGGER, testAction1.id);
+      service1.attachAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
-      service2.attachAction(FOO_TRIGGER, testAction2.id);
+      service2.attachAction(FOO_TRIGGER, testAction2);
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
@@ -329,14 +330,14 @@ describe('UiActionsService', () => {
       });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
-      service1.attachAction(FOO_TRIGGER, testAction1.id);
+      service1.attachAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
-      service1.attachAction(FOO_TRIGGER, testAction2.id);
+      service1.attachAction(FOO_TRIGGER, testAction2);
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
@@ -344,7 +345,7 @@ describe('UiActionsService', () => {
   });
 
   describe('registries', () => {
-    const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
+    const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
     test('can register trigger', () => {
       const triggers: TriggerRegistry = new Map();
@@ -369,12 +370,12 @@ describe('UiActionsService', () => {
       const service = new UiActionsService({ actions });
 
       service.registerAction({
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 13,
       } as any);
 
-      expect(actions.get(HELLO_WORLD_ACTION_ID)).toMatchObject({
-        id: HELLO_WORLD_ACTION_ID,
+      expect(actions.get(ACTION_HELLO_WORLD)).toMatchObject({
+        id: ACTION_HELLO_WORLD,
         order: 13,
       });
     });
@@ -386,18 +387,17 @@ describe('UiActionsService', () => {
         id: MY_TRIGGER,
       };
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
       service.registerTrigger(trigger);
-      service.registerAction(action);
-      service.attachAction(MY_TRIGGER, HELLO_WORLD_ACTION_ID);
+      service.attachAction(MY_TRIGGER, action);
 
       const actions = service.getTriggerActions(trigger.id);
 
       expect(actions.length).toBe(1);
-      expect(actions[0].id).toBe(HELLO_WORLD_ACTION_ID);
+      expect(actions[0].id).toBe(ACTION_HELLO_WORLD);
     });
 
     test('can detach an action to a trigger', () => {
@@ -407,14 +407,14 @@ describe('UiActionsService', () => {
         id: MY_TRIGGER,
       };
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
       service.registerTrigger(trigger);
       service.registerAction(action);
-      service.attachAction(trigger.id, HELLO_WORLD_ACTION_ID);
-      service.detachAction(trigger.id, HELLO_WORLD_ACTION_ID);
+      service.attachAction(trigger.id, action);
+      service.detachAction(trigger.id, action.id);
 
       const actions2 = service.getTriggerActions(trigger.id);
       expect(actions2).toEqual([]);
@@ -424,15 +424,15 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
 
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
       service.registerAction(action);
       expect(() =>
-        service.detachAction('i do not exist' as TriggerId, HELLO_WORLD_ACTION_ID)
+        service.detachAction('i do not exist' as TriggerId, ACTION_HELLO_WORLD)
       ).toThrowError(
-        'No trigger [triggerId = i do not exist] exists, for detaching action [actionId = HELLO_WORLD_ACTION_ID].'
+        'No trigger [triggerId = i do not exist] exists, for detaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
 
@@ -440,15 +440,13 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
 
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
       service.registerAction(action);
-      expect(() =>
-        service.attachAction('i do not exist' as TriggerId, HELLO_WORLD_ACTION_ID)
-      ).toThrowError(
-        'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = HELLO_WORLD_ACTION_ID].'
+      expect(() => service.attachAction('i do not exist' as TriggerId, action)).toThrowError(
+        'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
 
@@ -456,13 +454,13 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
 
       const action = {
-        id: HELLO_WORLD_ACTION_ID,
+        id: ACTION_HELLO_WORLD,
         order: 25,
       } as any;
 
       service.registerAction(action);
       expect(() => service.registerAction(action)).toThrowError(
-        'Action [action.id = HELLO_WORLD_ACTION_ID] already registered.'
+        'Action [action.id = ACTION_HELLO_WORLD] already registered.'
       );
     });
 

@@ -5,8 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import _ from 'lodash';
-import { getComputedFieldName, getOtherCategoryLabel } from '../style_util';
+import { getOtherCategoryLabel, makeMbClampedNumberExpression } from '../style_util';
 import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
@@ -23,6 +22,7 @@ import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
+const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -70,6 +70,17 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'text-halo-color', color);
   }
 
+  supportsFieldMeta() {
+    if (!this.isComplete() || !this._field.supportsFieldMeta()) {
+      return false;
+    }
+
+    return (
+      (this.isCategorical() && !this._options.useCustomColorPalette) ||
+      (this.isOrdinal() && !this._options.useCustomColorRamp)
+    );
+  }
+
   isOrdinal() {
     return (
       typeof this._options.type === 'undefined' || this._options.type === COLOR_MAP_TYPE.ORDINAL
@@ -80,72 +91,78 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return this._options.type === COLOR_MAP_TYPE.CATEGORICAL;
   }
 
-  isCustomOrdinalColorRamp() {
-    return this._options.useCustomColorRamp;
-  }
-
-  supportsFeatureState() {
+  supportsMbFeatureState() {
     return true;
   }
 
-  isOrdinalScaled() {
-    return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
-  }
-
   isOrdinalRanged() {
-    return this.isOrdinal() && !this.isCustomOrdinalColorRamp();
+    return this.isOrdinal() && !this._options.useCustomColorRamp;
   }
 
   hasOrdinalBreaks() {
-    return (this.isOrdinal() && this.isCustomOrdinalColorRamp()) || this.isCategorical();
+    return (this.isOrdinal() && this._options.useCustomColorRamp) || this.isCategorical();
   }
 
   _getMbColor() {
-    const isDynamicConfigComplete =
-      _.has(this._options, 'field.name') && _.has(this._options, 'color');
-    if (!isDynamicConfigComplete) {
+    if (!this._field || !this._field.getName()) {
       return null;
     }
 
-    const targetName = getComputedFieldName(this._styleName, this._options.field.name);
-    if (this.isCategorical()) {
-      return this._getMbDataDrivenCategoricalColor({ targetName });
-    } else {
-      return this._getMbDataDrivenOrdinalColor({ targetName });
-    }
+    return this.isCategorical()
+      ? this._getCategoricalColorMbExpression()
+      : this._getOrdinalColorMbExpression();
   }
 
-  _getMbDataDrivenOrdinalColor({ targetName }) {
-    if (
-      this._options.useCustomColorRamp &&
-      (!this._options.customColorRamp || !this._options.customColorRamp.length)
-    ) {
-      return null;
-    }
-
-    const colorStops = this._getMbOrdinalColorStops();
-    if (!colorStops) {
-      return null;
-    }
-
+  _getOrdinalColorMbExpression() {
+    const targetName = this._field.getName();
     if (this._options.useCustomColorRamp) {
+      if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
+        // custom color ramp config is not complete
+        return null;
+      }
+
+      const colorStops = this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+        return [...accumulatedStops, nextStop.stop, nextStop.color];
+      }, []);
       const firstStopValue = colorStops[0];
-      const lessThenFirstStopValue = firstStopValue - 1;
+      const lessThanFirstStopValue = firstStopValue - 1;
       return [
         'step',
-        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
-        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
+        ['coalesce', ['feature-state', targetName], lessThanFirstStopValue],
+        RGBA_0000, // MB will assign the base value to any features that is below the first stop value
+        ...colorStops,
+      ];
+    } else {
+      const rangeFieldMeta = this.getRangeFieldMeta();
+      if (!rangeFieldMeta) {
+        return null;
+      }
+
+      const colorStops = getOrdinalColorRampStops(
+        this._options.color,
+        rangeFieldMeta.min,
+        rangeFieldMeta.max
+      );
+      if (!colorStops) {
+        return null;
+      }
+
+      const lessThanFirstStopValue = rangeFieldMeta.min - 1;
+      return [
+        'interpolate',
+        ['linear'],
+        makeMbClampedNumberExpression({
+          minValue: rangeFieldMeta.min,
+          maxValue: rangeFieldMeta.max,
+          lookupFunction: 'feature-state',
+          fallback: lessThanFirstStopValue,
+          fieldName: targetName,
+        }),
+        lessThanFirstStopValue,
+        RGBA_0000,
         ...colorStops,
       ];
     }
-    return [
-      'interpolate',
-      ['linear'],
-      ['coalesce', ['feature-state', targetName], -1],
-      -1,
-      'rgba(0,0,0,0)',
-      ...colorStops,
-    ];
   }
 
   _getColorPaletteStops() {
@@ -169,7 +186,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       };
     }
 
-    const fieldMeta = this.getFieldMeta();
+    const fieldMeta = this.getCategoryFieldMeta();
     if (!fieldMeta || !fieldMeta.categories) {
       return EMPTY_STOPS;
     }
@@ -194,7 +211,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     };
   }
 
-  _getMbDataDrivenCategoricalColor() {
+  _getCategoricalColorMbExpression() {
     if (
       this._options.useCustomColorPalette &&
       (!this._options.customColorPalette || !this._options.customColorPalette.length)
@@ -223,17 +240,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     mbStops.push(defaultColor); //last color is default color
-    return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
-  }
-
-  _getMbOrdinalColorStops() {
-    if (this._options.useCustomColorRamp) {
-      return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
-        return [...accumulatedStops, nextStop.stop, nextStop.color];
-      }, []);
-    } else {
-      return getOrdinalColorRampStops(this._options.color);
-    }
+    return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
   renderRangeLegendHeader() {

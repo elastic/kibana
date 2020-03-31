@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionOption } from '@elastic/eui';
 import classNames from 'classnames';
 import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
@@ -138,10 +138,10 @@ export function FieldSelect({
       placeholder={i18n.translate('xpack.lens.indexPattern.fieldPlaceholder', {
         defaultMessage: 'Field',
       })}
-      options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionProps[]}
+      options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
       isInvalid={Boolean(incompatibleSelectedOperationType && selectedColumnOperationType)}
       selectedOptions={
-        selectedColumnOperationType
+        ((selectedColumnOperationType
           ? selectedColumnSourceField
             ? [
                 {
@@ -150,7 +150,7 @@ export function FieldSelect({
                 },
               ]
             : [memoizedFieldOptions[0]]
-          : []
+          : []) as unknown) as EuiComboBoxOptionOption[]
       }
       singleSelection={{ asPlainText: true }}
       onChange={choices => {

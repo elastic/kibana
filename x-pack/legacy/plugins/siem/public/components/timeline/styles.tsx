@@ -12,12 +12,6 @@ import { EventType } from '../../store/timeline/model';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
 /**
- * OFFSET PIXEL VALUES
- */
-
-export const OFFSET_SCROLLBAR = 17;
-
-/**
  * TIMELINE BODY
  */
 
@@ -30,10 +24,11 @@ export const TimelineBodyGlobalStyle = createGlobalStyle`
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   className: `siemTimeline__body ${className}`,
-}))<{ bodyHeight: number }>`
-  height: ${({ bodyHeight }) => `${bodyHeight}px`};
+}))<{ bodyHeight?: number }>`
+  height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   overflow: auto;
   scrollbar-width: thin;
+  flex: 1;
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -57,10 +52,19 @@ TimelineBody.displayName = 'TimelineBody';
  * EVENTS TABLE
  */
 
-export const EventsTable = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable ${className}`,
-  role: 'table',
-}))``;
+interface EventsTableProps {
+  columnWidths: number;
+}
+
+export const EventsTable = styled.div.attrs<EventsTableProps>(
+  ({ className = '', columnWidths }) => ({
+    className: `siemEventsTable ${className}`,
+    role: 'table',
+    style: {
+      minWidth: `${columnWidths}px`,
+    },
+  })
+)<EventsTableProps>``;
 
 /* EVENTS HEAD */
 
@@ -177,6 +181,14 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
   display: flex;
 `;
 
+const TIMELINE_EVENT_DETAILS_OFFSET = 40;
+
+export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
+  style: {
+    width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
+  },
+}))<WidthProp>``;
+
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trSupplement ${className}`,
 }))<{ className: string }>`
@@ -200,11 +212,17 @@ export const EventsTdGroupData = styled.div.attrs(({ className = '' }) => ({
 }))`
   display: flex;
 `;
+interface WidthProp {
+  width?: number;
+}
 
-export const EventsTd = styled.div.attrs(({ className = '' }) => ({
+export const EventsTd = styled.div.attrs<WidthProp>(({ className = '', width }) => ({
   className: `siemEventsTable__td ${className}`,
   role: 'cell',
-}))`
+  style: {
+    flexBasis: width ? `${width}px` : 'auto',
+  },
+}))<WidthProp>`
   align-items: center;
   display: flex;
   flex-shrink: 0;

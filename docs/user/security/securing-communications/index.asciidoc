@@ -150,7 +150,7 @@ elasticsearch.ssl.certificateAuthorities: ["/path/to/elasticsearch-ca.pem"]
 +
 --
 WARNING: You should not use a PKCS#12 file that contains a private key. This is an unnecessary security risk. If you only have a PKCS#12
-file that contains a private key, a safer approach is to extract the CA certificate chain in PEM format as described above.
+file that contains a private key, a safer approach is to extract the CA certificate chain in PEM format.
 
 Specify your PKCS#12 file in `kibana.yml`:
 
@@ -188,5 +188,5 @@ verification. For more information about this setting, see <<settings,{kib} conf
 --
 
 If the Elastic {monitor-features} are enabled and you have set up a separate {es} monitoring cluster, you can also configure {kib} to
-connect to the monitoring cluster via HTTPS. The steps are the same as above, but each setting is prefixed by `xpack.monitoring.`. For
+connect to the monitoring cluster via HTTPS. The steps are the same, but each setting is prefixed by `xpack.monitoring.`. For
 example, `xpack.monitoring.elasticsearch.hosts`, `xpack.monitoring.elasticsearch.ssl.truststore.path`, etc.

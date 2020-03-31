@@ -1984,6 +1984,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2101,6 +2102,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": null,
         "updatedBy": "elastic",
       }
     `);
@@ -2186,6 +2188,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2254,6 +2257,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": "5m",
         "updatedBy": "elastic",
       }
     `);
@@ -2332,6 +2336,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2401,6 +2406,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": "5m",
         "updatedBy": "elastic",
       }
     `);
@@ -2441,6 +2447,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2509,6 +2516,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2613,6 +2621,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2742,6 +2751,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2772,6 +2782,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2808,6 +2819,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2843,6 +2855,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',

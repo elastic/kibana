@@ -25,11 +25,7 @@ export class DynamicTextProperty extends DynamicStyleProperty {
     return false;
   }
 
-  supportsFeatureState() {
-    return false;
-  }
-
-  isOrdinalScaled() {
+  supportsMbFeatureState() {
     return false;
   }
 }

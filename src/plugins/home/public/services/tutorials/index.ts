@@ -17,9 +17,4 @@
  * under the License.
  */
 
-export {
-  TutorialService,
-  TutorialVariables,
-  TutorialServiceSetup,
-  TutorialServiceStart,
-} from './tutorial_service';
+export { TutorialService, TutorialVariables, TutorialServiceSetup } from './tutorial_service';

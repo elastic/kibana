@@ -8,6 +8,7 @@ import * as t from 'io-ts';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
 import {
   dependentRulesSchema,
   RequiredRulesSchema,
@@ -35,12 +36,38 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
   }
 };
 
+export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'query' || typeAndTimelineOnly.type === 'saved_query') {
+    return [
+      t.exact(t.type({ query: dependentRulesSchema.props.query })),
+      t.exact(t.type({ language: dependentRulesSchema.props.language })),
+    ];
+  } else {
+    return [];
+  }
+};
+
+export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (isMlRule(typeAndTimelineOnly.type)) {
+    return [
+      t.exact(t.type({ anomaly_threshold: dependentRulesSchema.props.anomaly_threshold })),
+      t.exact(
+        t.type({ machine_learning_job_id: dependentRulesSchema.props.machine_learning_job_id })
+      ),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
     t.exact(partialRulesSchema),
     ...addSavedId(typeAndTimelineOnly),
     ...addTimelineTitle(typeAndTimelineOnly),
+    ...addQueryFields(typeAndTimelineOnly),
+    ...addMlFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

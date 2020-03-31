@@ -13,14 +13,14 @@
 // Discover styles
 @import 'discover/index';
 
-// Home styles
-@import './home/index';
-
 // Visualize styles
 @import './visualize/index';
 // Has to come after visualize because of some
 // bad cascading in the Editor layout
 @import 'src/legacy/ui/public/vis/index';
+
+// Home styles
+@import '../../../../plugins/home/public/application/index';
 
 // Management styles
 @import './management/index';

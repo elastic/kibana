@@ -6,7 +6,7 @@
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -378,14 +378,14 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private onIndexPatternsChange = (newPatterns: EuiComboBoxOptionProps[]) => {
+  private onIndexPatternsChange = (newPatterns: EuiComboBoxOptionOption[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       names: newPatterns.map(fromOption),
     });
   };
 
-  private onPrivilegeChange = (newPrivileges: EuiComboBoxOptionProps[]) => {
+  private onPrivilegeChange = (newPrivileges: EuiComboBoxOptionOption[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       privileges: newPrivileges.map(fromOption),
@@ -418,7 +418,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private onGrantedFieldsChange = (grantedFields: EuiComboBoxOptionProps[]) => {
+  private onGrantedFieldsChange = (grantedFields: EuiComboBoxOptionOption[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       field_security: {
@@ -447,7 +447,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 
-  private onDeniedFieldsChange = (deniedFields: EuiComboBoxOptionProps[]) => {
+  private onDeniedFieldsChange = (deniedFields: EuiComboBoxOptionOption[]) => {
     this.props.onChange({
       ...this.props.indexPrivilege,
       field_security: {

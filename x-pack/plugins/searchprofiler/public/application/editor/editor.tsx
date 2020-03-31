@@ -8,7 +8,7 @@ import React, { memo, useRef, useEffect, useState } from 'react';
 import { Editor as AceEditor } from 'brace';
 
 import { initializeEditor } from './init_editor';
-import { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
+import { useUIAceKeyboardMode } from '../../../../../../src/plugins/es_ui_shared/public';
 
 type EditorShim = ReturnType<typeof createEditorShim>;
 

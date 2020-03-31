@@ -8,23 +8,27 @@ import { EuiFormRow } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
-import { MarkdownEditor } from '.';
+import { CursorPosition, MarkdownEditor } from '.';
 
 interface IMarkdownEditorForm {
+  bottomRightContent?: React.ReactNode;
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
   isDisabled: boolean;
+  onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
   placeholder?: string;
-  footerContentRight?: React.ReactNode;
+  topRightContent?: React.ReactNode;
 }
 export const MarkdownEditorForm = ({
+  bottomRightContent,
   dataTestSubj,
   field,
   idAria,
   isDisabled = false,
+  onCursorPositionUpdate,
   placeholder,
-  footerContentRight,
+  topRightContent,
 }: IMarkdownEditorForm) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -37,21 +41,23 @@ export const MarkdownEditorForm = ({
 
   return (
     <EuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
-      helpText={field.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
-      fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
+      error={errorMessage}
+      fullWidth
+      helpText={field.helpText}
+      isInvalid={isInvalid}
+      label={field.label}
+      labelAppend={field.labelAppend}
     >
       <MarkdownEditor
-        initialContent={field.value as string}
+        bottomRightContent={bottomRightContent}
+        content={field.value as string}
         isDisabled={isDisabled}
-        footerContentRight={footerContentRight}
         onChange={handleContentChange}
+        onCursorPositionUpdate={onCursorPositionUpdate}
         placeholder={placeholder}
+        topRightContent={topRightContent}
       />
     </EuiFormRow>
   );

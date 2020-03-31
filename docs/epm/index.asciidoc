@@ -1,0 +1,144 @@
+[role="xpack"]
+[[epm]]
+== Elastic Package Manager
+
+These are the docs for the Elastic Package Manager (EPM).
+
+
+=== Configuration
+
+The Elastic Package Manager by default access `epr.elastic.co` to retrieve the package. The url can be configured with:
+
+```
+xpack.epm.registryUrl: 'http://localhost:8080'
+```
+
+=== API
+
+The Package Manager offers an API. Here an example on how they can be used.
+
+List installed packages:
+
+```
+curl localhost:5601/api/ingest_manager/epm/packages
+```
+
+Install a package:
+
+```
+curl -X POST localhost:5601/api/ingest_manager/epm/packages/iptables-1.0.4
+```
+
+Delete a package:
+
+```
+curl -X DELETE localhost:5601/api/ingest_manager/epm/packages/iptables-1.0.4
+```
+
+=== Definitions
+
+This section is to define terms used across ingest management.
+
+==== Elastic Agent
+A single, unified agent that users can deploy to hosts or containers. It controls which data is collected from the host or containers and where the data is sent. It will run Beats, Endpoint or other monitoring programs as needed. It can operate standalone or pull a configuration policy from Fleet.
+
+==== Namespace
+A user-specified string that will be used to part of the index name in Elasticsearch. It helps users identify logs coming from a specific environment (like prod or test), an application, or other identifiers.
+
+==== Package
+
+A package contains all the assets for the Elastic Stack. A more detailed definition of a package can be found under https://github.com/elastic/package-registry.
+
+
+== Indexing Strategy
+
+Ingest Management enforces an indexing strategy to allow the system to automatically detect indices and run queries on it. In short the indexing strategy looks as following:
+
+```
+{type}-{dataset}-{namespace}
+```
+
+The `{type}` can be `logs` or `metrics`. The `{namespace}` is the part where the user can use free form. The only two requirement are that it has only characters allowed in an Elasticsearch index name and does NOT contain a `-`. The `dataset` is defined by the data that is indexed. The same requirements as for the namespace apply. It is expected that the fields for type, namespace and dataset are part of each event and are constant keywords.
+
+Note: More `{type}`s might be added in the future like `apm` and `endpoint`.
+
+This indexing strategy has a few advantages:
+
+* Each index contains only the fields which are relevant for the dataset. This leads to more dense indices and better field completion.
+* ILM policies can be applied per namespace per dataset.
+* Rollups can be specified per namespace per dataset.
+* Having the namespace user configurable makes setting security permissions possible.
+* Having a global metrics and logs template, allows to create new indices on demand which still follow the convention. This is common in the case of k8s as an example.
+* Constant keywords allow to narrow down the indices we need to access for querying very efficiently. This is especially relevant in environments which a large number of indices or with indices on slower nodes.
+
+=== Ingest Pipeline
+
+The ingest pipelines for a specific dataset will have the following naming scheme:
+
+```
+{type}-{dataset}-{package.version}
+```
+
+As an example, the ingest pipeline for the Nginx access logs is called `logs-nginx.access-3.4.1`. The same ingest pipeline is used for all namespaces. It is possible that a dataset has multiple ingest pipelines in which case a suffix is added to the name.
+
+The version is included in each pipeline to allow upgrades. The pipeline itself is listed in the index template and is automatically applied at ingest time.
+
+=== Templates & ILM Policies
+
+To make the above strategy possible, alias templates are required. For each type there is a basic alias template with a default ILM policy. These default templates apply to all indices which follow the indexing strategy and do not have a more specific dataset alias template.
+
+The `metrics` and `logs` alias template contain all the basic fields from ECS.
+
+Each type template contains an ILM policy. Modifying this default ILM policy will affect all data covered by the default templates.
+
+The templates for a dataset are called as following:
+
+```
+{type}-{dataset}
+```
+
+The pattern used inside the index template is `{type}-{dataset}-*` to match all namespaces.
+
+=== Defaults
+
+If the Elastic Agent is used to ingest data and only the type is specified, `default` for the namespace is used and `generic` for the dataset.
+
+=== Data filtering
+
+Filtering for data in queries for example in visualizations or dashboards should always be done on the constant keyword fields. Visualizations needing data for the nginx.access dataset should query on `type:logs AND dataset:nginx.access`. As these are constant keywords the prefiltering is very efficient.
+
+=== Security permissions
+
+Security permissions can be set on different levels. To set special permissions for the access on the prod namespace, use the following index pattern:
+
+```
+/(logs|metrics)-[^-]+-prod-$/
+```
+
+To set specific permissions on the logs index, the following can be used:
+
+```
+/^(logs|metrics)-.*/
+```
+
+Todo: The above queries need to be tested.
+
+
+
+== Package Manager
+
+=== Package Upgrades
+
+When upgrading a package between a bugfix or a minor version, no breaking changes should happen. Upgrading a package has the following effect:
+
+* Removal of existing dashboards
+* Installation of new dashboards
+* Write new ingest pipelines with the version
+* Write new Elasticsearch alias templates
+* Trigger a rollover for all the affected indices
+
+The new ingest pipeline is expected to still work with the data coming from older configurations. In most cases this means some of the fields can be missing. For this to work, each event must contain the version of config / package it is coming from to make such a decision.
+
+In case of a breaking change in the data structure, the new ingest pipeline is also expected to deal with this change. In case there are breaking changes which cannot be dealt with in an ingest pipeline, a new package has to be created.
+
+Each package lists its minimal required agent version. In case there are agents enrolled with an older version, the user is notified to upgrade these agents as otherwise the new configs cannot be rolled out.

@@ -21,14 +21,12 @@ import React, { useMemo, useCallback } from 'react';
 import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import {
-  IAggConfig,
   AggGroupNames,
-  ISchemas,
-  parentPipelineType,
+  IAggConfig,
   IMetricAggType,
-} from '../../legacy_imports';
+  search,
+} from '../../../../../../plugins/data/public';
 import { DefaultEditorAggGroup } from '../agg_group';
 import {
   EditorAction,
@@ -40,6 +38,9 @@ import {
   toggleEnabledAgg,
 } from './state';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
+import { ISchemas } from '../../schemas';
+import { TimeRange } from '../../../../../../plugins/data/public';
+import { EditorVisState } from './state/reducers';
 
 export interface DefaultEditorDataTabProps {
   dispatch: React.Dispatch<EditorAction>;
@@ -47,10 +48,11 @@ export interface DefaultEditorDataTabProps {
   isTabSelected: boolean;
   metricAggs: IAggConfig[];
   schemas: ISchemas;
-  state: VisState;
+  state: EditorVisState;
   setTouched(isTouched: boolean): void;
   setValidity(modelName: string, value: boolean): void;
   setStateValue: DefaultEditorAggCommonProps['setStateParamValue'];
+  timeRange: TimeRange;
 }
 
 function DefaultEditorDataTab({
@@ -62,12 +64,13 @@ function DefaultEditorDataTab({
   setTouched,
   setValidity,
   setStateValue,
+  timeRange,
 }: DefaultEditorDataTabProps) {
   const lastParentPipelineAgg = useMemo(
     () =>
       findLast(
         metricAggs,
-        ({ type }: { type: IMetricAggType }) => type.subtype === parentPipelineType
+        ({ type }: { type: IMetricAggType }) => type.subtype === search.aggs.parentPipelineType
       ),
     [metricAggs]
   );
@@ -76,8 +79,8 @@ function DefaultEditorDataTab({
   const addSchema: AddSchema = useCallback(schema => dispatch(addNewAgg(schema)), [dispatch]);
 
   const onAggRemove: DefaultEditorAggCommonProps['removeAgg'] = useCallback(
-    aggId => dispatch(removeAgg(aggId)),
-    [dispatch]
+    aggId => dispatch(removeAgg(aggId, schemas.all || [])),
+    [dispatch, schemas]
   );
 
   const onReorderAggs: ReorderAggs = useCallback((...props) => dispatch(reorderAggs(...props)), [
@@ -128,6 +131,7 @@ function DefaultEditorDataTab({
       <DefaultEditorAggGroup
         groupName={AggGroupNames.Buckets}
         schemas={schemas.buckets}
+        timeRange={timeRange}
         {...commonProps}
       />
     </>

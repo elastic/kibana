@@ -1,7 +1,0 @@
-{
-  "id": "visualizations",
-  "version": "kibana",
-  "server": false,
-  "ui": true,
-  "requiredPlugins": ["data", "search", "expressions", "uiActions"]
-}

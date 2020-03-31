@@ -22,91 +22,8 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
-import { threeTermBuckets } from 'fixtures/fake_hierarchical_data';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-
-import { start as visualizationsStart } from '../../../../../visualizations/public/np_ready/public/legacy';
 import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
-import { tabifyAggResponse } from '../../../legacy_imports';
-import { vislibSlicesResponseHandler } from '../../response_handler';
-
-const rowAgg = [
-  { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', rows: true } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-];
-
-const rowAggDimensions = {
-  splitRow: [
-    {
-      accessor: 0,
-    },
-  ],
-  buckets: [
-    {
-      accessor: 2,
-    },
-    {
-      accessor: 4,
-    },
-  ],
-  metric: {
-    accessor: 5,
-  },
-};
-
-const colAgg = [
-  { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'split', params: { field: 'extension', row: false } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-];
-
-const colAggDimensions = {
-  splitColumn: [
-    {
-      accessor: 0,
-    },
-  ],
-  buckets: [
-    {
-      accessor: 2,
-    },
-    {
-      accessor: 4,
-    },
-  ],
-  metric: {
-    accessor: 5,
-  },
-};
-
-const sliceAgg = [
-  { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-  { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-  { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-];
-
-const sliceAggDimensions = {
-  buckets: [
-    {
-      accessor: 0,
-    },
-    {
-      accessor: 2,
-    },
-  ],
-  metric: {
-    accessor: 3,
-  },
-};
-
-const aggArray = [
-  [rowAgg, rowAggDimensions],
-  [colAgg, colAggDimensions],
-  [sliceAgg, sliceAggDimensions],
-];
+import { pieChartMockData } from './pie_chart_mock_data';
 
 const names = ['rows', 'columns', 'slices'];
 
@@ -121,38 +38,14 @@ describe('No global chart settings', function() {
   };
   let chart1;
   let mockUiState;
-  let indexPattern;
-  let responseHandler;
-  let data1;
-  let stubVis1;
 
   beforeEach(() => {
     chart1 = getVis(visLibParams1);
     mockUiState = getMockUiState();
-    indexPattern = new FixturesStubbedLogstashIndexPatternProvider();
-    responseHandler = vislibSlicesResponseHandler;
-
-    let id1 = 1;
-    stubVis1 = new visualizationsStart.Vis(indexPattern, {
-      type: 'pie',
-      aggs: rowAgg,
-    });
-
-    stubVis1.isHierarchical = () => true;
-
-    // We need to set the aggs to a known value.
-    _.each(stubVis1.aggs.aggs, function(agg) {
-      agg.id = 'agg_' + id1++;
-    });
   });
 
   beforeEach(async () => {
-    const table1 = tabifyAggResponse(stubVis1.aggs, threeTermBuckets, {
-      metricsAtAllLevels: true,
-    });
-    data1 = await responseHandler(table1, rowAggDimensions);
-
-    chart1.render(data1, mockUiState);
+    chart1.render(pieChartMockData.rowData, mockUiState);
   });
 
   afterEach(function() {
@@ -200,46 +93,21 @@ describe('No global chart settings', function() {
 });
 
 describe('Vislib PieChart Class Test Suite', function() {
-  aggArray.forEach(function(aggItem, i) {
-    const [dataAgg, dataDimensions] = aggItem;
+  ['rowData', 'columnData', 'sliceData'].forEach(function(aggItem, i) {
     describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function() {
+      const mockPieData = pieChartMockData[aggItem];
+
       const visLibParams = {
         type: 'pie',
         addLegend: true,
         addTooltip: true,
       };
       let vis;
-      let mockUiState;
-      let indexPattern;
-      let data;
-      let stubVis;
-      let responseHandler;
-
-      beforeEach(() => {
-        vis = getVis(visLibParams);
-        mockUiState = getMockUiState();
-        indexPattern = new FixturesStubbedLogstashIndexPatternProvider();
-        responseHandler = vislibSlicesResponseHandler;
-
-        let id = 1;
-        stubVis = new visualizationsStart.Vis(indexPattern, {
-          type: 'pie',
-          aggs: dataAgg,
-        });
-
-        // We need to set the aggs to a known value.
-        _.each(stubVis.aggs.aggs, function(agg) {
-          agg.id = 'agg_' + id++;
-        });
-      });
 
       beforeEach(async () => {
-        const table = tabifyAggResponse(stubVis.aggs, threeTermBuckets, {
-          metricsAtAllLevels: true,
-        });
-        data = await responseHandler(table, dataDimensions);
-
-        vis.render(data, mockUiState);
+        vis = getVis(visLibParams);
+        const mockUiState = getMockUiState();
+        vis.render(mockPieData, mockUiState);
       });
 
       afterEach(function() {

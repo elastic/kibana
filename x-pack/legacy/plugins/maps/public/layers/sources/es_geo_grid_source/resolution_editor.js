@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { GRID_RESOLUTION } from '../../grid_resolution';
+import { GRID_RESOLUTION } from '../../../../common/constants';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

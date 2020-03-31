@@ -109,6 +109,7 @@ export interface BarchartConfigs {
     legendPosition: Position;
     onBrushEnd: UpdateDateRange;
     showLegend: boolean;
+    showLegendExtra: boolean;
     theme: {
       scales: {
         barsPadding: number;

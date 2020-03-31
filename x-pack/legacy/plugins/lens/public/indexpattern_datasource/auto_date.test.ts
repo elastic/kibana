@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { autoDate } from './auto_date';
-
-jest.mock('ui/new_platform');
-jest.mock('ui/chrome');
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { getAutoDate } from './auto_date';
 
 describe('auto_date', () => {
+  let autoDate: ReturnType<typeof getAutoDate>;
+
+  beforeEach(() => {
+    autoDate = getAutoDate({ data: dataPluginMock.createSetupContract() });
+  });
+
   it('should do nothing if no time range is provided', () => {
     const result = autoDate.fn(
       {

@@ -8,14 +8,11 @@ import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
 
 import { fieldsServiceProvider } from '../fields_service';
-import { renderTemplate } from '../../../../../legacy/plugins/ml/common/util/string_utils';
+import { renderTemplate } from '../../../common/util/string_utils';
 import { getMessages } from './messages';
-import { VALIDATION_STATUS } from '../../../../../legacy/plugins/ml/common/constants/validation';
+import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
-import {
-  basicJobValidation,
-  uniqWithIsEqual,
-} from '../../../../../legacy/plugins/ml/common/util/job_utils';
+import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';

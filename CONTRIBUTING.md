@@ -171,6 +171,8 @@ Bootstrap Kibana and install all the dependencies
 yarn kbn bootstrap
 ```
 
+> Node.js native modules could be in use and node-gyp is the tool used to build them. There are tools you need to install per platform and python versions you need to be using. Please see https://github.com/nodejs/node-gyp#installation and follow the guide according your platform.
+
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
 When switching branches which use different versions of npm packages you may need to run;
@@ -391,9 +393,9 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
 
 All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
 
-In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be an `I18nContext`:
+In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be the `Context` component from the `i18n` core service:
 ```jsx
-import { I18nContext } from 'ui/i18n';
+const I18nContext = coreStart.i18n.Context;
 
 ReactDOM.render(
   <I18nContext>

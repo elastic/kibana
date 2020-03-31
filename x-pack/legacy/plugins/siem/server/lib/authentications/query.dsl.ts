@@ -70,7 +70,7 @@ export const buildQuery = ({
             failures: {
               filter: {
                 term: {
-                  'event.type': 'authentication_failure',
+                  'event.outcome': 'failure',
                 },
               },
               aggs: {
@@ -86,7 +86,7 @@ export const buildQuery = ({
             successes: {
               filter: {
                 term: {
-                  'event.type': 'authentication_success',
+                  'event.outcome': 'success',
                 },
               },
               aggs: {

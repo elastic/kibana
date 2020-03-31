@@ -19,14 +19,81 @@
 
 import { get, find } from 'lodash';
 import React, { useEffect } from 'react';
-import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { isValidInterval, AggParamOption } from '../../legacy_imports';
+import { search, AggParamOption } from '../../../../../../plugins/data/public';
 import { AggParamEditorProps } from '../agg_param_props';
+const { parseEsInterval, InvalidEsCalendarIntervalError } = search.aggs;
 
-interface ComboBoxOption extends EuiComboBoxOptionProps {
+// we check if Elasticsearch interval is valid to show a user appropriate error message
+// e.g. there is the case when a user inputs '14d' but it's '2w' in expression equivalent and the request will fail
+// we don't check it for 0ms because the overall time range has not yet been set
+function isValidCalendarInterval(interval: string) {
+  if (interval === '0ms') {
+    return { isValidCalendarValue: true };
+  }
+
+  try {
+    parseEsInterval(interval);
+    return { isValidCalendarValue: true };
+  } catch (e) {
+    if (e instanceof InvalidEsCalendarIntervalError) {
+      return { isValidCalendarValue: false, error: e.message };
+    }
+
+    return { isValidCalendarValue: true };
+  }
+}
+
+const errorMessage = i18n.translate(
+  'visDefaultEditor.controls.timeInterval.invalidFormatErrorMessage',
+  {
+    defaultMessage: 'Invalid interval format.',
+  }
+);
+
+function validateInterval(
+  agg: any,
+  value?: string,
+  definedOption?: ComboBoxOption,
+  timeBase?: string
+) {
+  if (definedOption) {
+    return { isValid: true, interval: agg.buckets?.getInterval() };
+  }
+
+  if (!value) {
+    return { isValid: false };
+  }
+
+  if (!timeBase) {
+    // we check if Elasticsearch interval is valid ES interval to show a user appropriate error message
+    // we don't check if there is timeBase
+    const { isValidCalendarValue, error } = isValidCalendarInterval(value);
+    if (!isValidCalendarValue) {
+      return { isValid: false, error };
+    }
+  }
+
+  const isValid = search.aggs.isValidInterval(value, timeBase);
+
+  if (!isValid) {
+    return { isValid: false, error: errorMessage };
+  }
+
+  const interval = agg.buckets?.getInterval();
+
+  const { isValidCalendarValue, error } = isValidCalendarInterval(interval.expression);
+  if (!isValidCalendarValue) {
+    return { isValid: false, error };
+  }
+
+  return { isValid, interval };
+}
+
+interface ComboBoxOption extends EuiComboBoxOptionOption {
   key: string;
 }
 
@@ -55,17 +122,16 @@ function TimeIntervalParamEditor({
 
   let selectedOptions: ComboBoxOption[] = [];
   let definedOption: ComboBoxOption | undefined;
-  let isValid = false;
   if (value) {
     definedOption = find(options, { key: value });
     selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
-    isValid = !!(definedOption || isValidInterval(value, timeBase));
   }
 
-  const interval = get(agg, 'buckets.getInterval') && (agg as any).buckets.getInterval();
+  const { isValid, error, interval } = validateInterval(agg, value, definedOption, timeBase);
+
   const scaledHelpText =
-    interval && interval.scaled && isValid ? (
-      <strong className="eui-displayBlock">
+    interval && interval.scaled ? (
+      <strong data-test-subj="currentlyScaledText" className="eui-displayBlock">
         <FormattedMessage
           id="visDefaultEditor.controls.timeInterval.scaledHelpText"
           defaultMessage="Currently scaled to {bucketDescription}"
@@ -86,32 +152,11 @@ function TimeIntervalParamEditor({
     </>
   );
 
-  const errors = [];
+  const onCustomInterval = (customValue: string) => setValue(customValue.trim());
 
-  if (!isValid && value) {
-    errors.push(
-      i18n.translate('visDefaultEditor.controls.timeInterval.invalidFormatErrorMessage', {
-        defaultMessage: 'Invalid interval format.',
-      })
-    );
-  }
-
-  const onCustomInterval = (customValue: string) => {
-    const normalizedCustomValue = customValue.trim();
-    setValue(normalizedCustomValue);
-
-    if (normalizedCustomValue && isValidInterval(normalizedCustomValue, timeBase)) {
-      agg.write();
-    }
-  };
-
-  const onChange = (opts: EuiComboBoxOptionProps[]) => {
+  const onChange = (opts: EuiComboBoxOptionOption[]) => {
     const selectedOpt: ComboBoxOption = get(opts, '0');
     setValue(selectedOpt ? selectedOpt.key : '');
-
-    if (selectedOpt) {
-      agg.write();
-    }
   };
 
   useEffect(() => {
@@ -121,10 +166,10 @@ function TimeIntervalParamEditor({
   return (
     <EuiFormRow
       compressed
-      error={errors}
+      error={error}
       fullWidth={true}
       helpText={helpText}
-      isInvalid={showValidation ? !isValid : false}
+      isInvalid={showValidation && !isValid}
       label={i18n.translate('visDefaultEditor.controls.timeInterval.minimumIntervalLabel', {
         defaultMessage: 'Minimum interval',
       })}
@@ -133,7 +178,7 @@ function TimeIntervalParamEditor({
         compressed
         fullWidth={true}
         data-test-subj="visEditorInterval"
-        isInvalid={showValidation ? !isValid : false}
+        isInvalid={showValidation && !isValid}
         noSuggestions={!!timeBase}
         onChange={onChange}
         onCreateOption={onCustomInterval}

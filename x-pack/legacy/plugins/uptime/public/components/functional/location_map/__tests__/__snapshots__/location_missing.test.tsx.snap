@@ -27,15 +27,10 @@ exports[`LocationMissingWarning component renders correctly against snapshot 1`]
           <span
             class="euiButton__content"
           >
-            <svg
+            <div
               aria-hidden="true"
-              class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-              focusable="false"
-              height="16"
-              role="img"
-              viewBox="0 0 16 16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
+              class="euiButton__icon"
+              data-euiicon-type="alert"
             />
             <span
               class="euiButton__text"

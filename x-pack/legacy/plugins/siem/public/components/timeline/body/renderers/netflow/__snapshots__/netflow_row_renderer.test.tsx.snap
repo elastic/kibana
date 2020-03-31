@@ -2,9 +2,6 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <span>
-    some children
-  </span>
   <RowRendererContainer>
     <Details>
       <Netflow

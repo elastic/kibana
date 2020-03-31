@@ -65,10 +65,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '0018-up',
         '0019-up',
       ]);
-      await retry.tryForTime(12000, async () => {
-        // there should now be pagination data in the URL
-        await pageObjects.uptime.pageUrlContains('pagination');
-      });
+      // there should now be pagination data in the URL
+      await pageObjects.uptime.pageUrlContains('pagination');
       await pageObjects.uptime.setStatusFilter('up');
       await pageObjects.uptime.pageHasExpectedIds([
         '0000-intermittent',
@@ -82,10 +80,86 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '0008-up',
         '0009-up',
       ]);
-      await retry.tryForTime(12000, async () => {
-        // ensure that pagination is removed from the URL
-        await pageObjects.uptime.pageUrlContains('pagination', false);
-      });
+      // ensure that pagination is removed from the URL
+      await pageObjects.uptime.pageUrlContains('pagination', false);
+    });
+
+    it('clears pagination parameters when size changes', async () => {
+      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await pageObjects.uptime.changePage('next');
+      await pageObjects.uptime.pageUrlContains('pagination');
+      await pageObjects.uptime.setMonitorListPageSize(50);
+      // the pagination parameter should be cleared after a size change
+      await pageObjects.uptime.pageUrlContains('pagination', false);
+    });
+
+    it('pagination size updates to reflect current selection', async () => {
+      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await pageObjects.uptime.pageHasExpectedIds([
+        '0000-intermittent',
+        '0001-up',
+        '0002-up',
+        '0003-up',
+        '0004-up',
+        '0005-up',
+        '0006-up',
+        '0007-up',
+        '0008-up',
+        '0009-up',
+      ]);
+      await pageObjects.uptime.setMonitorListPageSize(50);
+      await pageObjects.uptime.pageHasExpectedIds([
+        '0000-intermittent',
+        '0001-up',
+        '0002-up',
+        '0003-up',
+        '0004-up',
+        '0005-up',
+        '0006-up',
+        '0007-up',
+        '0008-up',
+        '0009-up',
+        '0010-down',
+        '0011-up',
+        '0012-up',
+        '0013-up',
+        '0014-up',
+        '0015-intermittent',
+        '0016-up',
+        '0017-up',
+        '0018-up',
+        '0019-up',
+        '0020-down',
+        '0021-up',
+        '0022-up',
+        '0023-up',
+        '0024-up',
+        '0025-up',
+        '0026-up',
+        '0027-up',
+        '0028-up',
+        '0029-up',
+        '0030-intermittent',
+        '0031-up',
+        '0032-up',
+        '0033-up',
+        '0034-up',
+        '0035-up',
+        '0036-up',
+        '0037-up',
+        '0038-up',
+        '0039-up',
+        '0040-down',
+        '0041-up',
+        '0042-up',
+        '0043-up',
+        '0044-up',
+        '0045-intermittent',
+        '0046-up',
+        '0047-up',
+        '0048-up',
+        '0049-up',
+      ]);
     });
 
     describe('snapshot counts', () => {

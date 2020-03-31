@@ -215,26 +215,28 @@ export async function syncExistingFields({
   dateRange,
   fetchJson,
   setState,
+  dslQuery,
 }: {
   dateRange: DateRange;
   indexPatterns: Array<{ id: string; timeFieldName?: string | null }>;
-  fetchJson: HttpSetup['get'];
+  fetchJson: HttpSetup['post'];
   setState: SetState;
+  dslQuery: object;
 }) {
   const emptinessInfo = await Promise.all(
     indexPatterns.map(pattern => {
-      const query: Record<string, string> = {
+      const body: Record<string, string | object> = {
+        dslQuery,
         fromDate: dateRange.fromDate,
         toDate: dateRange.toDate,
       };
 
       if (pattern.timeFieldName) {
-        query.timeFieldName = pattern.timeFieldName;
+        body.timeFieldName = pattern.timeFieldName;
       }
 
-      return fetchJson({
-        path: `${BASE_API_URL}/existing_fields/${pattern.id}`,
-        query,
+      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
+        body: JSON.stringify(body),
       }) as Promise<ExistingFields>;
     })
   );

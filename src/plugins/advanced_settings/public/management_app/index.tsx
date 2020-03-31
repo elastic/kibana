@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementSetup } from '../../../management/public';
-import { CoreSetup } from '../../../../core/public';
+import { StartServicesAccessor } from '../../../../core/public';
 import { ComponentRegistry } from '../types';
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
@@ -48,7 +48,7 @@ export async function registerAdvSettingsMgmntApp({
   componentRegistry,
 }: {
   management: ManagementSetup;
-  getStartServices: CoreSetup['getStartServices'];
+  getStartServices: StartServicesAccessor;
   componentRegistry: ComponentRegistry['start'];
 }) {
   const kibanaSection = management.sections.getSection('kibana');

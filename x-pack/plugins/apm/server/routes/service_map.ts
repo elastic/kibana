@@ -14,16 +14,17 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { rangeRt } from './default_api_types';
 
 export const serviceMapRoute = createRoute(() => ({
   path: '/api/apm/service-map',
   params: {
     query: t.intersection([
-      t.partial({ environment: t.string, serviceName: t.string }),
-      uiFiltersRt,
-      rangeRt,
-      t.partial({ after: t.string })
+      t.partial({
+        environment: t.string,
+        serviceName: t.string
+      }),
+      rangeRt
     ])
   },
   handler: async ({ context, request }) => {
@@ -36,9 +37,9 @@ export const serviceMapRoute = createRoute(() => ({
 
     const setup = await setupRequest(context, request);
     const {
-      query: { serviceName, environment, after }
+      query: { serviceName, environment }
     } = context.params;
-    return getServiceMap({ setup, serviceName, environment, after });
+    return getServiceMap({ setup, serviceName, environment });
   }
 }));
 

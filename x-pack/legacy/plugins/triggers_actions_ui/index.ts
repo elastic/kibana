@@ -23,19 +23,12 @@ export function triggersActionsUI(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(false),
-          createAlertUiEnabled: Joi.boolean().default(false),
+          enabled: Joi.boolean().default(true),
         })
         .default();
     },
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      injectDefaultVars(server: Legacy.Server) {
-        const serverConfig = server.config();
-        return {
-          createAlertUiEnabled: serverConfig.get('xpack.triggers_actions_ui.createAlertUiEnabled'),
-        };
-      },
     },
   });
 }

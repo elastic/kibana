@@ -57,4 +57,6 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
 
     return metrics;
   }
+
+  public reset() {}
 }

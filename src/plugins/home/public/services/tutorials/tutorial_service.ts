@@ -37,17 +37,9 @@ export class TutorialService {
     };
   }
 
-  public start() {
-    return {
-      /**
-       * Retrieve the variables for substitution in tutorials. This API is only intended for internal
-       * use and is only exposed during a transition period of migrating the home app to the new platform.
-       * @deprecated
-       */
-      get: (): TutorialVariables => this.tutorialVariables,
-    };
+  public getVariables() {
+    return this.tutorialVariables;
   }
 }
 
 export type TutorialServiceSetup = ReturnType<TutorialService['setup']>;
-export type TutorialServiceStart = ReturnType<TutorialService['start']>;

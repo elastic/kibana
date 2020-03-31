@@ -4,94 +4,83 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { useReducer, useCallback } from 'react';
+
+import { CommentRequest } from '../../../../../../plugins/case/common/api';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
+
+import { postComment } from './api';
 import * as i18n from './translations';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, POST_NEW_COMMENT } from './constants';
-import { Comment, NewComment } from './types';
-import { createComment } from './api';
-import { getTypedPayload } from './utils';
+import { Case } from './types';
 
 interface NewCommentState {
-  data: NewComment;
-  newComment?: Comment;
   isLoading: boolean;
   isError: boolean;
-  caseId: string;
 }
-interface Action {
-  type: string;
-  payload?: NewComment | Comment;
-}
+type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
-        ...state,
         isLoading: true,
         isError: false,
       };
-    case POST_NEW_COMMENT:
+    case 'FETCH_SUCCESS':
       return {
-        ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload<NewComment>(action.payload),
       };
-    case FETCH_SUCCESS:
+    case 'FETCH_FAILURE':
       return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        newComment: getTypedPayload<Comment>(action.payload),
-      };
-    case FETCH_FAILURE:
-      return {
-        ...state,
         isLoading: false,
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
-const initialData: NewComment = {
-  comment: '',
-};
 
-export const usePostComment = (
-  caseId: string
-): [NewCommentState, Dispatch<SetStateAction<NewComment>>] => {
+interface UsePostComment extends NewCommentState {
+  postComment: (data: CommentRequest, updateCase: (newCase: Case) => void) => void;
+}
+
+export const usePostComment = (caseId: string): UsePostComment => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
-    caseId,
-    data: initialData,
   });
-  const [formData, setFormData] = useState(initialData);
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
-    dispatch({ type: POST_NEW_COMMENT, payload: formData });
-  }, [formData]);
+  const postMyComment = useCallback(
+    async (data: CommentRequest, updateCase: (newCase: Case) => void) => {
+      let cancel = false;
+      const abortCtrl = new AbortController();
 
-  useEffect(() => {
-    const postComment = async () => {
-      dispatch({ type: FETCH_INIT });
       try {
-        const { isNew, ...dataWithoutIsNew } = state.data;
-        const response = await createComment(dataWithoutIsNew, state.caseId);
-        dispatch({ type: FETCH_SUCCESS, payload: response });
+        dispatch({ type: 'FETCH_INIT' });
+        const response = await postComment(data, caseId, abortCtrl.signal);
+        if (!cancel) {
+          dispatch({ type: 'FETCH_SUCCESS' });
+          updateCase(response);
+        }
       } catch (error) {
-        errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-        dispatch({ type: FETCH_FAILURE });
+        if (!cancel) {
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+          dispatch({ type: 'FETCH_FAILURE' });
+        }
       }
-    };
-    if (state.data.isNew) {
-      postComment();
-    }
-  }, [state.data.isNew]);
-  return [state, setFormData];
+      return () => {
+        abortCtrl.abort();
+        cancel = true;
+      };
+    },
+    [caseId]
+  );
+
+  return { ...state, postComment: postMyComment };
 };

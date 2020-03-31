@@ -49,4 +49,10 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
       ...server,
     };
   }
+
+  public reset() {
+    this.processCollector.reset();
+    this.osCollector.reset();
+    this.serverCollector.reset();
+  }
 }

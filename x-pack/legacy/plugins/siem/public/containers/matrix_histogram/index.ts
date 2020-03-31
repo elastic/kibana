@@ -6,8 +6,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { useUiSetting$ } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { useApolloClient } from '../../utils/apollo_context';

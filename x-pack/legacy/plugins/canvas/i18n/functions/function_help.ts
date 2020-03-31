@@ -62,6 +62,7 @@ import { help as replace } from './dict/replace';
 import { help as revealImage } from './dict/reveal_image';
 import { help as rounddate } from './dict/rounddate';
 import { help as rowCount } from './dict/row_count';
+import { help as savedLens } from './dict/saved_lens';
 import { help as savedMap } from './dict/saved_map';
 import { help as savedSearch } from './dict/saved_search';
 import { help as savedVisualization } from './dict/saved_visualization';
@@ -216,6 +217,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   revealImage,
   rounddate,
   rowCount,
+  savedLens,
   savedMap,
   savedSearch,
   savedVisualization,

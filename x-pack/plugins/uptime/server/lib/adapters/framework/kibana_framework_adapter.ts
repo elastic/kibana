@@ -46,7 +46,7 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
           }),
         },
         options: {
-          tags: ['access:uptime'],
+          tags: ['access:uptime-read'],
         },
       },
       async (context, request, resp): Promise<any> => {
@@ -60,13 +60,17 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
         const options = {
           graphQLOptions: (_req: any) => {
             return {
-              context: { ...context, APICaller: callAsCurrentUser },
+              context: {
+                ...context,
+                APICaller: callAsCurrentUser,
+                savedObjectsClient: context.core.savedObjects.client,
+              },
               schema,
             };
           },
           path: routePath,
           route: {
-            tags: ['access:uptime'],
+            tags: ['access:uptime-read'],
           },
         };
         try {

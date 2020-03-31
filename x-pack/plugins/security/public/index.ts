@@ -5,13 +5,23 @@
  */
 
 import './index.scss';
-import { PluginInitializer } from 'src/core/public';
-import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
+import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+import {
+  SecurityPlugin,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies,
+} from './plugin';
 
 export { SecurityPluginSetup, SecurityPluginStart };
 export { SessionInfo } from './types';
 export { AuthenticatedUser } from '../common/model';
 export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
 
-export const plugin: PluginInitializer<SecurityPluginSetup, SecurityPluginStart> = () =>
-  new SecurityPlugin();
+export const plugin: PluginInitializer<
+  SecurityPluginSetup,
+  SecurityPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);

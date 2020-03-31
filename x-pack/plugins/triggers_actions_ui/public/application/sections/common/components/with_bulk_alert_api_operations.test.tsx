@@ -125,8 +125,8 @@ describe('with_bulk_alert_api_operations', () => {
     const component = mount(<ExtendedComponent alert={alert} />);
     component.find('button').simulate('click');
 
-    expect(alertApi.deleteAlert).toHaveBeenCalledTimes(1);
-    expect(alertApi.deleteAlert).toHaveBeenCalledWith({ id: alert.id, http });
+    expect(alertApi.deleteAlerts).toHaveBeenCalledTimes(1);
+    expect(alertApi.deleteAlerts).toHaveBeenCalledWith({ ids: [alert.id], http });
   });
 
   // bulk alerts

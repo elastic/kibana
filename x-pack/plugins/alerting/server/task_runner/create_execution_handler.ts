@@ -12,7 +12,9 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../../../p
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
-  executeAction: ActionsPluginStartContract['execute'];
+  alertName: string;
+  tags?: string[];
+  actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
   spaceId: string;
   apiKey: string | null;
@@ -30,7 +32,9 @@ interface ExecutionHandlerOptions {
 export function createExecutionHandler({
   logger,
   alertId,
-  executeAction,
+  alertName,
+  tags,
+  actionsPlugin,
   actions: alertActions,
   spaceId,
   apiKey,
@@ -49,20 +53,29 @@ export function createExecutionHandler({
           ...action,
           params: transformActionParams({
             alertId,
+            alertName,
+            spaceId,
+            tags,
             alertInstanceId,
             context,
-            params: action.params,
+            actionParams: action.params,
             state,
           }),
         };
       });
     for (const action of actions) {
-      await executeAction({
-        id: action.id,
-        params: action.params,
-        spaceId,
-        apiKey,
-      });
+      if (actionsPlugin.isActionTypeEnabled(action.actionTypeId)) {
+        await actionsPlugin.execute({
+          id: action.id,
+          params: action.params,
+          spaceId,
+          apiKey,
+        });
+      } else {
+        logger.warn(
+          `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
+        );
+      }
     }
   };
 }

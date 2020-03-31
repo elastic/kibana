@@ -73,7 +73,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
+        to="/?logPosition=(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)&sourceId=default&logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
       />
     `);
   });
@@ -89,7 +89,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)"
+        to="/?logPosition=(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)&sourceId=default&logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)"
       />
     `);
   });

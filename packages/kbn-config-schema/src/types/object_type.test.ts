@@ -49,7 +49,7 @@ test('fails if string input cannot be parsed', () => {
     name: schema.string(),
   });
   expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from [invalidjson]"`
+    `"could not parse object value from json input"`
   );
 });
 
@@ -181,7 +181,7 @@ test('called with wrong type', () => {
   const type = schema.object({});
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from [foo]"`
+    `"could not parse object value from json input"`
   );
   expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
     `"expected a plain object value, but found [number] instead."`
@@ -276,10 +276,10 @@ test('individual keys can validated', () => {
   );
 });
 
-test('allow unknown keys when allowUnknowns = true', () => {
+test('allow unknown keys when unknowns = `allow`', () => {
   const type = schema.object(
     { foo: schema.string({ defaultValue: 'test' }) },
-    { allowUnknowns: true }
+    { unknowns: 'allow' }
   );
 
   expect(
@@ -292,10 +292,10 @@ test('allow unknown keys when allowUnknowns = true', () => {
   });
 });
 
-test('allowUnknowns = true affects only own keys', () => {
+test('unknowns = `allow` affects only own keys', () => {
   const type = schema.object(
     { foo: schema.object({ bar: schema.string() }) },
-    { allowUnknowns: true }
+    { unknowns: 'allow' }
   );
 
   expect(() =>
@@ -308,14 +308,45 @@ test('allowUnknowns = true affects only own keys', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
 });
 
-test('does not allow unknown keys when allowUnknowns = false', () => {
+test('does not allow unknown keys when unknowns = `forbid`', () => {
   const type = schema.object(
     { foo: schema.string({ defaultValue: 'test' }) },
-    { allowUnknowns: false }
+    { unknowns: 'forbid' }
   );
   expect(() =>
     type.validate({
       bar: 'baz',
     })
   ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+});
+
+test('allow and remove unknown keys when unknowns = `ignore`', () => {
+  const type = schema.object(
+    { foo: schema.string({ defaultValue: 'test' }) },
+    { unknowns: 'ignore' }
+  );
+
+  expect(
+    type.validate({
+      bar: 'baz',
+    })
+  ).toEqual({
+    foo: 'test',
+  });
+});
+
+test('unknowns = `ignore` affects only own keys', () => {
+  const type = schema.object(
+    { foo: schema.object({ bar: schema.string() }) },
+    { unknowns: 'ignore' }
+  );
+
+  expect(() =>
+    type.validate({
+      foo: {
+        bar: 'bar',
+        baz: 'baz',
+      },
+    })
+  ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
 });

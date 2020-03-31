@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TutorialService, TutorialServiceSetup, TutorialServiceStart } from './tutorial_service';
+import { TutorialService, TutorialServiceSetup } from './tutorial_service';
 
 const createSetupMock = (): jest.Mocked<TutorialServiceSetup> => {
   const setup = {
@@ -26,25 +26,16 @@ const createSetupMock = (): jest.Mocked<TutorialServiceSetup> => {
   return setup;
 };
 
-const createStartMock = (): jest.Mocked<TutorialServiceStart> => {
-  const start = {
-    get: jest.fn(),
-  };
-  return start;
-};
-
 const createMock = (): jest.Mocked<PublicMethodsOf<TutorialService>> => {
   const service = {
     setup: jest.fn(),
-    start: jest.fn(),
+    getVariables: jest.fn(() => ({})),
   };
   service.setup.mockImplementation(createSetupMock);
-  service.start.mockImplementation(createStartMock);
   return service;
 };
 
 export const tutorialServiceMock = {
   createSetup: createSetupMock,
-  createStart: createStartMock,
   create: createMock,
 };

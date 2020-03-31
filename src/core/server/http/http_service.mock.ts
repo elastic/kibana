@@ -72,6 +72,7 @@ const createSetupContractMock = () => {
     registerRouteHandlerContext: jest.fn(),
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
+    registerStaticDir: jest.fn(),
     basePath: createBasePathMock(),
     csp: CspConfig.DEFAULT,
     auth: createAuthMock(),
@@ -115,6 +116,8 @@ const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
 
 const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
   authenticated: jest.fn(),
+  notHandled: jest.fn(),
+  redirected: jest.fn(),
 });
 
 const createOnPreResponseToolkitMock = (): jest.Mocked<OnPreResponseToolkit> => ({

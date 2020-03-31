@@ -21,7 +21,6 @@ import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';
-import { SavedObjectsManagementDefinition } from './management';
 
 export {
   SavedObjectsImportResponse,
@@ -36,66 +35,16 @@ export {
 import { LegacyConfig } from '../legacy';
 import { SavedObjectUnsanitizedDoc } from './serialization';
 import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
+import { SavedObject } from '../../types';
+
 export {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
 } from '../../types';
-
-/**
- * Information about the migrations that have been applied to this SavedObject.
- * When Kibana starts up, KibanaMigrator detects outdated documents and
- * migrates them based on this value. For each migration that has been applied,
- * the plugin's name is used as a key and the latest migration version as the
- * value.
- *
- * @example
- * migrationVersion: {
- *   dashboard: '7.1.1',
- *   space: '6.6.6',
- * }
- *
- * @public
- */
-export interface SavedObjectsMigrationVersion {
-  [pluginName: string]: string;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObject<T = unknown> {
-  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
-  id: string;
-  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
-  type: string;
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
-  version?: string;
-  /** Timestamp of the last time this document had been updated.  */
-  updated_at?: string;
-  error?: {
-    message: string;
-    statusCode: number;
-  };
-  /** {@inheritdoc SavedObjectAttributes} */
-  attributes: T;
-  /** {@inheritdoc SavedObjectReference} */
-  references: SavedObjectReference[];
-  /** {@inheritdoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
-}
-
-/**
- * A reference to another saved object.
- *
- * @public
- */
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
-}
 
 /**
  *
@@ -247,6 +196,50 @@ export interface SavedObjectsType {
    * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
    */
   migrations?: SavedObjectMigrationMap;
+  /**
+   * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
+   */
+  management?: SavedObjectsTypeManagementDefinition;
+}
+
+/**
+ * Configuration options for the {@link SavedObjectsType | type}'s management section.
+ *
+ * @public
+ */
+export interface SavedObjectsTypeManagementDefinition {
+  /**
+   * Is the type importable or exportable. Defaults to `false`.
+   */
+  importableAndExportable?: boolean;
+  /**
+   * The default search field to use for this type. Defaults to `id`.
+   */
+  defaultSearchField?: string;
+  /**
+   * The eui icon name to display in the management table.
+   * If not defined, the default icon will be used.
+   */
+  icon?: string;
+  /**
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
+   */
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to the editing page of this object.
+   * If not defined, editing will not be allowed.
+   */
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to this object from the management section.
+   * If not defined, redirecting to the object will not be allowed.
+   *
+   * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
+   *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
+   *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
+   */
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }
 
 /**
@@ -258,7 +251,7 @@ export interface SavedObjectsLegacyUiExports {
   savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
   savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
   savedObjectValidations: PropertyValidators;
-  savedObjectsManagement: SavedObjectsManagementDefinition;
+  savedObjectsManagement: SavedObjectsLegacyManagementDefinition;
 }
 
 /**
@@ -268,6 +261,28 @@ export interface SavedObjectsLegacyUiExports {
 export interface SavedObjectsLegacyMapping {
   pluginId: string;
   properties: SavedObjectsTypeMappingDefinitions;
+}
+
+/**
+ * @internal
+ * @deprecated Use {@link SavedObjectsTypeManagementDefinition | management definition} when registering
+ *             from new platform plugins
+ */
+export interface SavedObjectsLegacyManagementDefinition {
+  [key: string]: SavedObjectsLegacyManagementTypeDefinition;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyManagementTypeDefinition {
+  isImportableAndExportable?: boolean;
+  defaultSearchField?: string;
+  icon?: string;
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }
 
 /**

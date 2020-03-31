@@ -2,7 +2,12 @@
   "action": {
     "properties": {
       "name": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       },
       "actionTypeId": {
         "type": "keyword"

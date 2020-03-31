@@ -141,6 +141,8 @@ export class Note {
       }
 
       // Update new note
+
+      const existingNote = await this.getSavedNote(request, noteId);
       return {
         code: 200,
         message: 'success',
@@ -150,7 +152,7 @@ export class Note {
             noteId,
             pickSavedNote(noteId, note, request.user),
             {
-              version: version || undefined,
+              version: existingNote.version || undefined,
             }
           )
         ),
@@ -194,7 +196,7 @@ export class Note {
   }
 }
 
-const convertSavedObjectToSavedNote = (
+export const convertSavedObjectToSavedNote = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): NoteSavedObject =>

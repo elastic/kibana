@@ -18,9 +18,13 @@ import {
 } from '../../types';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { ReportingSetupDeps, ReportingCore } from '../types';
-import { jobResponseHandlerFactory } from './lib/job_response_handler';
+import {
+  deleteJobResponseHandlerFactory,
+  downloadJobResponseHandlerFactory,
+} from './lib/job_response_handler';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
+  getRouteConfigFactoryDeletePre,
   getRouteConfigFactoryDownloadPre,
   getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
@@ -40,7 +44,6 @@ export function registerJobInfoRoutes(
   const { elasticsearch } = plugins;
   const jobsQuery = jobsQueryFactory(server, elasticsearch);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
-  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, plugins, logger);
 
   // list jobs in the queue, paginated
   server.route({
@@ -138,7 +141,8 @@ export function registerJobInfoRoutes(
 
   // trigger a download of the output from a job
   const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const jobResponseHandler = jobResponseHandlerFactory(server, elasticsearch, exportTypesRegistry);
+  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, plugins, logger);
+  const downloadResponseHandler = downloadJobResponseHandlerFactory(server, elasticsearch, exportTypesRegistry); // prettier-ignore
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
@@ -147,7 +151,47 @@ export function registerJobInfoRoutes(
       const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
-      let response = await jobResponseHandler(
+      let response = await downloadResponseHandler(
+        request.pre.management.jobTypes,
+        request.pre.user,
+        h,
+        { docId }
+      );
+
+      if (isResponse(response)) {
+        const { statusCode } = response;
+
+        if (statusCode !== 200) {
+          if (statusCode === 500) {
+            logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
+          } else {
+            logger.debug(
+              `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
+                response.source
+              )}]`
+            );
+          }
+        }
+
+        response = response.header('accept-ranges', 'none');
+      }
+
+      return response;
+    },
+  });
+
+  // allow a report to be deleted
+  const getRouteConfigDelete = getRouteConfigFactoryDeletePre(server, plugins, logger);
+  const deleteResponseHandler = deleteJobResponseHandlerFactory(server, elasticsearch);
+  server.route({
+    path: `${MAIN_ENTRY}/delete/{docId}`,
+    method: 'DELETE',
+    options: getRouteConfigDelete(),
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
+      const { docId } = request.params;
+
+      let response = await deleteResponseHandler(
         request.pre.management.jobTypes,
         request.pre.user,
         h,

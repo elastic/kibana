@@ -212,4 +212,45 @@ describe('SavedObjectTypeRegistry', () => {
       expect(registry.getIndex('unknownType')).toBeUndefined();
     });
   });
+
+  describe('#isImportableAndExportable', () => {
+    it('returns correct value for the type', () => {
+      registry.registerType(
+        createType({ name: 'typeA', management: { importableAndExportable: true } })
+      );
+      registry.registerType(
+        createType({ name: 'typeB', management: { importableAndExportable: false } })
+      );
+
+      expect(registry.isImportableAndExportable('typeA')).toBe(true);
+      expect(registry.isImportableAndExportable('typeB')).toBe(false);
+    });
+    it('returns false when the type is not registered', () => {
+      registry.registerType(createType({ name: 'typeA', management: {} }));
+      registry.registerType(createType({ name: 'typeB', management: {} }));
+
+      expect(registry.isImportableAndExportable('typeA')).toBe(false);
+    });
+    it('returns false when management is not defined for the type', () => {
+      registry.registerType(createType({ name: 'typeA' }));
+      expect(registry.isImportableAndExportable('unknownType')).toBe(false);
+    });
+  });
+
+  describe('#getImportableAndExportableTypes', () => {
+    it('returns all registered types that are importable/exportable', () => {
+      const typeA = createType({ name: 'typeA', management: { importableAndExportable: true } });
+      const typeB = createType({ name: 'typeB' });
+      const typeC = createType({ name: 'typeC', management: { importableAndExportable: false } });
+      const typeD = createType({ name: 'typeD', management: { importableAndExportable: true } });
+      registry.registerType(typeA);
+      registry.registerType(typeB);
+      registry.registerType(typeC);
+      registry.registerType(typeD);
+
+      const types = registry.getImportableAndExportableTypes();
+      expect(types.length).toEqual(2);
+      expect(types.map(t => t.name)).toEqual(['typeA', 'typeD']);
+    });
+  });
 });

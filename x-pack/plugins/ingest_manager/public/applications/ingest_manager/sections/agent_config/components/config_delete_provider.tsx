@@ -119,10 +119,10 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
     }
     setIsLoadingAgentsCount(true);
     const { data } = await sendRequest<{ total: number }>({
-      path: `/api/fleet/agents`,
+      path: `/api/ingest_manager/fleet/agents`,
       method: 'get',
       query: {
-        kuery: `agents.policy_id : (${agentConfigsToCheck.join(' or ')})`,
+        kuery: `agents.config_id : (${agentConfigsToCheck.join(' or ')})`,
       },
     });
     setAgentsCount(data?.total || 0);

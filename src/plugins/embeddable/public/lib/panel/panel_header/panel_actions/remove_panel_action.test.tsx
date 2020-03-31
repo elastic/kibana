@@ -20,6 +20,7 @@
 import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
 import { EmbeddableFactory } from '../../../embeddables';
+import { EmbeddableStart } from '../../../../plugin';
 import {
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
@@ -27,13 +28,13 @@ import {
 } from '../../../test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
-import { GetEmbeddableFactory, ViewMode } from '../../../types';
+import { ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { esFilters, Filter } from '../../../../../../../plugins/data/public';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+const getFactory = (id: string) => embeddableFactories.get(id);
 
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
@@ -46,7 +47,7 @@ beforeEach(async () => {
   };
   container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter], viewMode: ViewMode.EDIT },
-    getFactory
+    getFactory as EmbeddableStart['getEmbeddableFactory']
   );
 
   const filterableEmbeddable = await container.addNewEmbeddable<

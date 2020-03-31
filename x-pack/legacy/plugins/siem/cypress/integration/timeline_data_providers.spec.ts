@@ -49,7 +49,7 @@ describe('timeline data providers', () => {
           .first()
           .invoke('text')
           .should(hostname => {
-            expect(dataProviderText).to.eq(`host.name: "${hostname}"`);
+            expect(dataProviderText).to.eq(hostname);
           });
       });
   });
