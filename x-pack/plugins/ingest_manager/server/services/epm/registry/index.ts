@@ -58,7 +58,8 @@ export async function fetchFindLatestPackage(
 
 export async function fetchInfo(pkgkey: string): Promise<RegistryPackage> {
   const registryUrl = appContextService.getConfig()?.epm.registryUrl;
-  return fetchUrl(`${registryUrl}/package/${pkgkey}`).then(JSON.parse);
+  // change pkg-version to pkg/version
+  return fetchUrl(`${registryUrl}/package/${pkgkey.replace('-', '/')}`).then(JSON.parse);
 }
 
 export async function fetchFile(filePath: string): Promise<Response> {
