@@ -28,7 +28,10 @@ export const deleteListsRoute = (router: IRouter): void => {
       try {
         const { id } = request.query;
         const clusterClient = context.core.elasticsearch.dataClient;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
         const { listsIndex, listsItemsIndex } = siemClient;
         const deleted = await deleteList({ id, clusterClient, listsIndex, listsItemsIndex });
         if (deleted == null) {

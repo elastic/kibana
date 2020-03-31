@@ -30,7 +30,10 @@ export const readListsItemsRoute = (router: IRouter): void => {
         // TODO: Make getting list_items by their id possible and not just their value
         const { list_id: listId, ip } = request.query;
         const clusterClient = context.core.elasticsearch.dataClient;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
         const { listsItemsIndex } = siemClient;
         const listItem = await getListItemByValue({ listId, ip, clusterClient, listsItemsIndex });
         if (listItem == null) {

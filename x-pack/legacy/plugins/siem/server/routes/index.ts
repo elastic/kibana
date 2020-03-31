@@ -92,7 +92,7 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
 
   if (hasListsFeature()) {
     // Detection Engine list routes that have the REST endpoints of /api/detection_engine/lists
@@ -114,5 +114,4 @@ export const initRoutes = (
     importListsItemsRoute(router);
     exportListsItemsRoute(router);
   }
-  readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
 };

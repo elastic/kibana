@@ -32,7 +32,11 @@ export const createListsIndexRoute = (router: IRouter) => {
 
       try {
         const clusterClient = context.core.elasticsearch.dataClient;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
         const callCluster = clusterClient.callAsCurrentUser;
 
         const { listsIndex, listsItemsIndex } = siemClient;

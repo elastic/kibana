@@ -35,7 +35,10 @@ export const exportListsItemsRoute = (router: IRouter): void => {
         // TODO: Make an overwrite flag and set its default to false and implement overwrite
         const { list_id: listId } = request.query;
         const clusterClient = context.core.elasticsearch.dataClient;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
         const { listsIndex, listsItemsIndex } = siemClient;
         const list = await getList({ id: listId, clusterClient, listsIndex });
         if (list == null) {

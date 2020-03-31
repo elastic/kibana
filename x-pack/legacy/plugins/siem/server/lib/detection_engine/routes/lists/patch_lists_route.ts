@@ -28,7 +28,10 @@ export const patchListsRoute = (router: IRouter): void => {
       try {
         const { name, description, id } = request.body;
         const clusterClient = context.core.elasticsearch.dataClient;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
         const listsIndex = siemClient.listsIndex;
         const list = await updateList({ id, name, description, listsIndex, clusterClient });
         if (list == null) {
