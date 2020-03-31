@@ -5,10 +5,14 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Filter, Query } from 'src/plugins/data/public';
+import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { AnyAction } from 'redux';
 import { LAYER_TYPE } from '../../common/constants';
 import { DataMeta, MapFilters } from '../../common/descriptor_types';
+import {
+  MapCenterAndZoom,
+  MapRefreshConfig,
+} from '../../../../../plugins/maps/common/descriptor_types';
 
 export type SyncContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
@@ -27,31 +31,20 @@ export function updateSourceProp(
   newLayerType?: LAYER_TYPE
 ): void;
 
-export interface MapCenter {
-  lat: number;
-  lon: number;
-  zoom: number;
-}
-
-export function setGotoWithCenter(config: MapCenter): AnyAction;
+export function setGotoWithCenter(config: MapCenterAndZoom): AnyAction;
 
 export function replaceLayerList(layerList: unknown[]): AnyAction;
 
-export interface QueryGroup {
+export type QueryGroup = {
   filters: Filter[];
   query?: Query;
-  timeFilters: unknown;
-  refresh: unknown;
-}
+  timeFilters?: TimeRange;
+  refresh?: boolean;
+};
 
 export function setQuery(query: QueryGroup): AnyAction;
 
-export interface RefreshConfig {
-  isPaused: boolean;
-  interval: number;
-}
-
-export function setRefreshConfig(config: RefreshConfig): AnyAction;
+export function setRefreshConfig(config: MapRefreshConfig): AnyAction;
 
 export function disableScrollZoom(): AnyAction;
 

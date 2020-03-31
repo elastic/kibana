@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from '../../../common/descriptor_types';
+import { MapQuery } from '../../../common/descriptor_types';
 
 // Refresh only query is query where timestamps are different but query is the same.
 // Triggered by clicking "Refresh" button in QueryBar
 export function isRefreshOnlyQuery(
-  prevQuery: Query | undefined,
-  newQuery: Query | undefined
+  prevQuery: MapQuery | undefined,
+  newQuery: MapQuery | undefined
 ): boolean {
   if (!prevQuery || !newQuery) {
     return false;

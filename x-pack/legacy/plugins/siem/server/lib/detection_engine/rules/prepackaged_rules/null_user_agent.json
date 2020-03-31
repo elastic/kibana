@@ -25,9 +25,8 @@
     "apm-*-transaction*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Web Application Suspicious Activity: No User Agent",
-  "query": "url.path: *",
+  "query": "url.path:*",
   "references": [
     "https://en.wikipedia.org/wiki/User_agent"
   ],
@@ -35,8 +34,8 @@
   "rule_id": "43303fd4-4839-4e48-b2b2-803ab060758d",
   "severity": "medium",
   "tags": [
-    "Elastic",
-    "APM"
+    "APM",
+    "Elastic"
   ],
   "type": "query",
   "version": 1

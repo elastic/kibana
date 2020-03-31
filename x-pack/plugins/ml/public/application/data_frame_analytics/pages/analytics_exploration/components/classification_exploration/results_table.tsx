@@ -28,6 +28,8 @@ import {
 
 import { Query as QueryType } from '../../../analytics_management/components/analytics_list/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import { mlFieldFormatService } from '../../../../../services/field_format_service';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   ColumnType,
@@ -61,7 +63,6 @@ import {
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-
 import { useExploreData, TableItem } from './use_explore_data';
 import { ExplorationTitle } from './classification_exploration';
 
@@ -85,13 +86,14 @@ const showingFirstDocs = i18n.translate(
 );
 
 interface Props {
+  indexPattern: IndexPattern;
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus: DATA_FRAME_TASK_STATE;
+  jobStatus?: DATA_FRAME_TASK_STATE;
   setEvaluateSearchQuery: React.Dispatch<React.SetStateAction<object>>;
 }
 
 export const ResultsTable: FC<Props> = React.memo(
-  ({ jobConfig, jobStatus, setEvaluateSearchQuery }) => {
+  ({ indexPattern, jobConfig, jobStatus, setEvaluateSearchQuery }) => {
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(25);
     const [selectedFields, setSelectedFields] = useState([] as Field[]);
@@ -126,6 +128,8 @@ export const ResultsTable: FC<Props> = React.memo(
       }
     }
 
+    const needsDestIndexFields = indexPattern && indexPattern.title === jobConfig.source.index[0];
+
     const {
       errorMessage,
       loadExploreData,
@@ -133,12 +137,24 @@ export const ResultsTable: FC<Props> = React.memo(
       sortDirection,
       status,
       tableItems,
-    } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields, setDepVarType);
+    } = useExploreData(
+      jobConfig,
+      needsDestIndexFields,
+      selectedFields,
+      setSelectedFields,
+      setDocFields,
+      setDepVarType
+    );
 
     const columns: Array<ColumnType<TableItem>> = selectedFields
       .sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig))
       .map(field => {
         const { type } = field;
+        let format: any;
+
+        if (indexPattern !== undefined) {
+          format = mlFieldFormatService.getFieldFormatFromIndexPattern(indexPattern, field.id, '');
+        }
         const isNumber =
           type !== undefined &&
           (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
@@ -151,6 +167,11 @@ export const ResultsTable: FC<Props> = React.memo(
         };
 
         const render = (d: any, fullItem: EsDoc) => {
+          if (format !== undefined) {
+            d = format.convert(d, 'text');
+            return d;
+          }
+
           if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
             // If the cells data is an array of strings, return as a comma separated list.
             // The list will get limited to 5 items with `…` at the end if there's more in the original array.
@@ -193,12 +214,16 @@ export const ResultsTable: FC<Props> = React.memo(
               break;
             case ES_FIELD_TYPES.DATE:
               column.align = 'right';
-              column.render = (d: any) => {
-                if (d !== undefined) {
-                  return formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-                }
-                return d;
-              };
+              if (format !== undefined) {
+                column.render = render;
+              } else {
+                column.render = (d: any) => {
+                  if (d !== undefined) {
+                    return formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+                  }
+                  return d;
+                };
+              }
               break;
             default:
               column.render = render;
@@ -381,9 +406,11 @@ export const ResultsTable: FC<Props> = React.memo(
             <EuiFlexItem grow={false}>
               <ExplorationTitle jobId={jobConfig.id} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{getTaskStateBadge(jobStatus)}</span>
-            </EuiFlexItem>
+            {jobStatus !== undefined && (
+              <EuiFlexItem grow={false}>
+                <span>{getTaskStateBadge(jobStatus)}</span>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiCallOut
             title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.indexError', {
@@ -415,9 +442,11 @@ export const ResultsTable: FC<Props> = React.memo(
               <EuiFlexItem grow={false}>
                 <ExplorationTitle jobId={jobConfig.id} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span>{getTaskStateBadge(jobStatus)}</span>
-              </EuiFlexItem>
+              {jobStatus !== undefined && (
+                <EuiFlexItem grow={false}>
+                  <span>{getTaskStateBadge(jobStatus)}</span>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>

@@ -19,6 +19,7 @@ exports[`EditableTitle it renders 1`] = `
       aria-label="You can edit Test title by clicking"
       data-test-subj="editable-title-edit-icon"
       iconType="pencil"
+      isDisabled={false}
       onClick={[Function]}
     />
   </EuiFlexItem>
