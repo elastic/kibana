@@ -47,7 +47,7 @@ const renderUsers = (
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
-            <MyAvatar name={fullName ? fullName : username} />
+            <MyAvatar name={fullName ? fullName : username ?? ''} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiToolTip position="top" content={<p>{fullName ?? username}</p>}>
@@ -81,7 +81,7 @@ export const UserList = React.memo(({ email, headline, loading, users }: UserLis
     },
     [email.subject]
   );
-  return (
+  return users.filter(({ username }) => username != null && username !== '').length > 0 ? (
     <EuiText>
       <h4>{headline}</h4>
       <EuiHorizontalRule margin="xs" />
@@ -92,9 +92,12 @@ export const UserList = React.memo(({ email, headline, loading, users }: UserLis
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {renderUsers(users, handleSendEmail)}
+      {renderUsers(
+        users.filter(({ username }) => username != null && username !== ''),
+        handleSendEmail
+      )}
     </EuiText>
-  );
+  ) : null;
 });
 
 UserList.displayName = 'UserList';
