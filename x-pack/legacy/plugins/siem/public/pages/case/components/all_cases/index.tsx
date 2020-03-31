@@ -264,7 +264,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   );
 
   const memoizedGetCasesColumns = useMemo(
-    () => getCasesColumns(userCanCrud ? actions : [], filterOptions.status, userCanCrud),
+    () => getCasesColumns(userCanCrud ? actions : [], filterOptions.status),
     [actions, filterOptions.status, userCanCrud]
   );
   const memoizedPagination = useMemo(

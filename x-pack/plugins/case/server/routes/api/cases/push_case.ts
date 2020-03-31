@@ -109,8 +109,6 @@ export function initPushCaseUserActionApi({
                 updatedAttributes: {
                   pushed_at: pushedDate,
                   pushed_by: { username, full_name, email },
-                  updated_at: pushedDate,
-                  updated_by: { username, full_name, email },
                 },
                 version: comment.version,
               })),

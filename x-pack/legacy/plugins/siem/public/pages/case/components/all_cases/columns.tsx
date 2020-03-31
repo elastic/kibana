@@ -39,8 +39,7 @@ const renderStringField = (field: string, dataTestSubj: string) =>
 
 export const getCasesColumns = (
   actions: Array<DefaultItemIconButtonAction<Case>>,
-  filterStatus: string,
-  userCanCrud: boolean
+  filterStatus: string
 ): CasesColumns[] => [
   {
     name: i18n.NAME,
