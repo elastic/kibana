@@ -62,6 +62,13 @@ describe('read_privileges route', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
     });
+
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getPrivilegeRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
   });
 
   describe('when security plugin is disabled', () => {

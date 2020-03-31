@@ -491,6 +491,7 @@ module.exports = {
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',
       ],
+      excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
         'prefer-object-spread/prefer-object-spread': 'off',
