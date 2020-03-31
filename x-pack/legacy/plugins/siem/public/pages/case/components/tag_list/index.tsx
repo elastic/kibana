@@ -66,7 +66,7 @@ export const TagList = React.memo(
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 isDisabled={disabled}
-                aria-label={'tags'}
+                aria-label={i18n.EDIT_TAGS_ARIA}
                 iconType={'pencil'}
                 onClick={setIsEditTags.bind(null, true)}
               />
