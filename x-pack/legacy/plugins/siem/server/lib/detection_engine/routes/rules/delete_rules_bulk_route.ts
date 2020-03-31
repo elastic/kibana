@@ -18,6 +18,7 @@ import {
 import { deleteRules } from '../../rules/delete_rules';
 import { deleteNotifications } from '../../notifications/delete_notifications';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
 
 type Config = RouteConfig<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
 type Handler = RequestHandler<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
@@ -35,11 +36,8 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
   const handler: Handler = async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
 
-    if (!context.alerting || !context.actions) {
-      return siemResponse.error({ statusCode: 404 });
-    }
-    const alertsClient = context.alerting.getAlertsClient();
-    const actionsClient = context.actions.getActionsClient();
+    const alertsClient = context.alerting?.getAlertsClient();
+    const actionsClient = context.actions?.getActionsClient();
     const savedObjectsClient = context.core.savedObjects.client;
 
     if (!actionsClient || !alertsClient) {
@@ -59,6 +57,10 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
           });
           if (rule != null) {
             await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
+            await deleteRuleActionsSavedObject({
+              ruleAlertId: rule.id,
+              savedObjectsClient,
+            });
             const ruleStatuses = await savedObjectsClient.find<
               IRuleSavedAttributesSavedObjectAttributes
             >({
@@ -70,7 +72,7 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
             ruleStatuses.saved_objects.forEach(async obj =>
               savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
             );
-            return transformValidateBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
+            return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
           } else {
             return getIdBulkError({ id, ruleId });
           }

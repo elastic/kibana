@@ -30,7 +30,7 @@ interface SingleBulkCreateParams {
   interval: string;
   enabled: boolean;
   tags: string[];
-  throttle: string | null;
+  throttle: string;
 }
 
 /**
