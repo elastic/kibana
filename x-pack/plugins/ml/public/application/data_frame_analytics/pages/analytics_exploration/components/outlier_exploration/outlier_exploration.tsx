@@ -203,6 +203,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
             <ExplorationDataGrid
               colorRange={colorRange}
               columns={columns}
+              indexPattern={indexPattern}
               pagination={pagination}
               resultsField={jobConfig.dest.results_field}
               rowCount={rowCount}

@@ -4,9 +4,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Windows Script Executing PowerShell",
-  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:(\"wscript.exe\" or \"cscript.exe\") and process.name:\"powershell.exe\"",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:(cscript.exe or wscript.exe) and process.name:powershell.exe",
   "risk_score": 21,
   "rule_id": "f545ff26-3c94-4fd0-bd33-3c7f95a3a0fc",
   "severity": "low",

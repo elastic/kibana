@@ -1,0 +1,41 @@
+{
+  "description": "An instance of MSBuild, the Microsoft Build Engine, started a PowerShell script or the Visual C# Command Line Compiler. This technique is sometimes used to deploy a malicious payload using the Build Engine.",
+  "false_positives": [
+    "The Build Engine is commonly used by Windows developers but use by non-engineers is unusual. If a build system triggers this rule it can be exempted by process, user or host name."
+  ],
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Microsoft Build Engine Started an Unusual Process",
+  "query": "process.parent.name:MSBuild.exe and process.name:(csc.exe or iexplore.exe or powershell.exe)",
+  "references": [
+    "https://blog.talosintelligence.com/2020/02/building-bypass-with-msbuild.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae6",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1500",
+          "name": "Compile After Delivery",
+          "reference": "https://attack.mitre.org/techniques/T1500/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}
