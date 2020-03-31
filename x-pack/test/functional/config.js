@@ -197,9 +197,6 @@ export default async function({ readConfigFile }) {
         pathname: '/app/kibana/',
         hash: '/management/elasticsearch/transform',
       },
-      endpoint: {
-        pathname: '/app/endpoint',
-      },
     },
 
     // choose where esArchiver should load archives from
