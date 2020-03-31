@@ -290,10 +290,7 @@ describe('xy_expression', () => {
         const data: LensMultiTable = {
           type: 'lens_multitable',
           tables: {
-            first: createSampleDatatableWithRows([
-              { a: 1, b: 2, c: 'I', d: 'Foo' },
-              { a: 8, b: 5, c: 'K', d: 'Buzz' },
-            ]),
+            first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
             second: createSampleDatatableWithRows([
               { a: 10, b: 5, c: 'J', d: 'Bar' },
               { a: 8, b: 5, c: 'K', d: 'Buzz' },
