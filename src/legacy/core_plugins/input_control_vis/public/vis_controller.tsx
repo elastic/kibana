@@ -31,7 +31,7 @@ import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
 import { FilterManager, Filter } from '../../../../plugins/data/public';
-import { VisParams, Vis } from '../../visualizations/public';
+import { VisParams, Vis } from '../../../../plugins/visualizations/public';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
@@ -54,7 +54,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         .subscribe(this.queryBarUpdateHandler);
     }
 
-    async render(visData: any, visParams: VisParams, status: any) {
+    async render(visData: any, visParams: VisParams) {
       this.visParams = visParams;
       this.controls = [];
       this.controls = await this.initControls();

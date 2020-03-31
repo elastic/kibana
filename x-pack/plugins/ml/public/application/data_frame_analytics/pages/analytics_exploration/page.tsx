@@ -22,22 +22,20 @@ import {
 
 import { NavigationMenu } from '../../../components/navigation_menu';
 
-import { Exploration } from './components/exploration';
+import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
 
 import { ANALYSIS_CONFIG_TYPE } from '../../common/analytics';
-import { DATA_FRAME_TASK_STATE } from '../analytics_management/components/analytics_list/common';
 
 export const Page: FC<{
   jobId: string;
   analysisType: ANALYSIS_CONFIG_TYPE;
-  jobStatus: DATA_FRAME_TASK_STATE;
-}> = ({ jobId, analysisType, jobStatus }) => (
+}> = ({ jobId, analysisType }) => (
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />
     <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
-      <EuiPageBody>
+      <EuiPageBody style={{ maxWidth: 'calc(100% - 0px)' }}>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
@@ -65,16 +63,16 @@ export const Page: FC<{
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiPageContentBody>
+        <EuiPageContentBody style={{ maxWidth: 'calc(100% - 0px)' }}>
           <EuiSpacer size="l" />
           {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
-            <Exploration jobId={jobId} jobStatus={jobStatus} />
+            <OutlierExploration jobId={jobId} />
           )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionExploration jobId={jobId} jobStatus={jobStatus} />
+            <RegressionExploration jobId={jobId} />
           )}
           {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-            <ClassificationExploration jobId={jobId} jobStatus={jobStatus} />
+            <ClassificationExploration jobId={jobId} />
           )}
         </EuiPageContentBody>
       </EuiPageBody>

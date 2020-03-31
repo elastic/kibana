@@ -5,7 +5,8 @@
  */
 
 import { pickBy } from 'lodash/fp';
-import { RuleTypeParams, OutputRuleAlertRest, RuleAlertAction } from '../types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { RuleTypeParams, OutputRuleAlertRest } from '../types';
 
 interface BuildRuleParams {
   ruleParams: RuleTypeParams;
@@ -19,7 +20,7 @@ interface BuildRuleParams {
   updatedBy: string;
   interval: string;
   tags: string[];
-  throttle: string | null;
+  throttle: string;
 }
 
 export const buildRule = ({

@@ -9,11 +9,11 @@ import React, {
   createContext,
   CSSProperties,
   ReactNode,
-  useCallback,
   useEffect,
   useRef,
   useState
 } from 'react';
+import { debounce } from 'lodash';
 import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
 import { AGENT_NAME } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import {
@@ -21,6 +21,7 @@ import {
   cytoscapeOptions,
   nodeHeight
 } from './cytoscapeOptions';
+import { useUiTracker } from '../../../../../../../plugins/observability/public';
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
   undefined
@@ -109,23 +110,28 @@ export function Cytoscape({
   serviceName,
   style
 }: CytoscapeProps) {
-  const initialElements = elements.map(element => ({
-    ...element,
-    // prevents flash of unstyled elements
-    classes: [element.classes, 'invisible'].join(' ').trim()
-  }));
-
   const [ref, cy] = useCytoscape({
     ...cytoscapeOptions,
-    elements: initialElements
+    elements
   });
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
   const divStyle = { ...style, height };
 
-  const resetConnectedEdgeStyle = useCallback(
-    (node?: cytoscape.NodeSingular) => {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+
+  // Trigger a custom "data" event when data changes
+  useEffect(() => {
+    if (cy && elements.length > 0) {
+      cy.add(elements);
+      cy.trigger('data');
+    }
+  }, [cy, elements]);
+
+  // Set up cytoscape event handlers
+  useEffect(() => {
+    const resetConnectedEdgeStyle = (node?: cytoscape.NodeSingular) => {
       if (cy) {
         cy.edges().removeClass('highlight');
 
@@ -133,12 +139,9 @@ export function Cytoscape({
           node.connectedEdges().addClass('highlight');
         }
       }
-    },
-    [cy]
-  );
+    };
 
-  const dataHandler = useCallback<cytoscape.EventHandler>(
-    event => {
+    const dataHandler: cytoscape.EventHandler = event => {
       if (cy) {
         if (serviceName) {
           resetConnectedEdgeStyle(cy.getElementById(serviceName));
@@ -150,37 +153,32 @@ export function Cytoscape({
         } else {
           resetConnectedEdgeStyle();
         }
-        if (event.cy.elements().length > 0) {
-          const selectedRoots = selectRoots(event.cy);
-          const layout = cy.layout(
-            getLayoutOptions(selectedRoots, height, width)
-          );
-          layout.one('layoutstop', () => {
-            if (serviceName) {
-              const focusedNode = cy.getElementById(serviceName);
-              cy.center(focusedNode);
-            }
-            // show elements after layout is applied
-            cy.elements().removeClass('invisible');
-          });
-          layout.run();
-        }
+
+        const selectedRoots = selectRoots(event.cy);
+        const layout = cy.layout(
+          getLayoutOptions(selectedRoots, height, width)
+        );
+
+        layout.run();
       }
-    },
-    [cy, resetConnectedEdgeStyle, serviceName, height, width]
-  );
-
-  // Trigger a custom "data" event when data changes
-  useEffect(() => {
-    if (cy) {
-      cy.add(elements);
-      cy.trigger('data');
-    }
-  }, [cy, elements]);
-
-  // Set up cytoscape event handlers
-  useEffect(() => {
+    };
+    const layoutstopHandler: cytoscape.EventHandler = event => {
+      event.cy.animate({
+        ...animationOptions,
+        center: {
+          eles: serviceName
+            ? event.cy.getElementById(serviceName)
+            : event.cy.collection()
+        }
+      });
+    };
+    // debounce hover tracking so it doesn't spam telemetry with redundant events
+    const trackNodeEdgeHover = debounce(
+      () => trackApmEvent({ metric: 'service_map_node_or_edge_hover' }),
+      1000
+    );
     const mouseoverHandler: cytoscape.EventHandler = event => {
+      trackNodeEdgeHover();
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };
@@ -189,15 +187,24 @@ export function Cytoscape({
       event.target.connectedEdges().removeClass('nodeHover');
     };
     const selectHandler: cytoscape.EventHandler = event => {
+      trackApmEvent({ metric: 'service_map_node_select' });
       resetConnectedEdgeStyle(event.target);
     };
     const unselectHandler: cytoscape.EventHandler = event => {
       resetConnectedEdgeStyle();
     };
+    const debugHandler: cytoscape.EventHandler = event => {
+      const debugEnabled = sessionStorage.getItem('apm_debug') === 'true';
+      if (debugEnabled) {
+        // eslint-disable-next-line no-console
+        console.debug('cytoscape:', event);
+      }
+    };
 
     if (cy) {
+      cy.on('data layoutstop select unselect', debugHandler);
       cy.on('data', dataHandler);
-      cy.ready(dataHandler);
+      cy.on('layoutstop', layoutstopHandler);
       cy.on('mouseover', 'edge, node', mouseoverHandler);
       cy.on('mouseout', 'edge, node', mouseoutHandler);
       cy.on('select', 'node', selectHandler);
@@ -207,15 +214,19 @@ export function Cytoscape({
     return () => {
       if (cy) {
         cy.removeListener(
-          'data',
+          'data layoutstop select unselect',
           undefined,
-          dataHandler as cytoscape.EventHandler
+          debugHandler
         );
+        cy.removeListener('data', undefined, dataHandler);
+        cy.removeListener('layoutstop', undefined, layoutstopHandler);
         cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
+        cy.removeListener('select', 'node', selectHandler);
+        cy.removeListener('unselect', 'node', unselectHandler);
       }
     };
-  }, [cy, dataHandler, resetConnectedEdgeStyle, serviceName]);
+  }, [cy, height, serviceName, trackApmEvent, width]);
 
   return (
     <CytoscapeContext.Provider value={cy}>
