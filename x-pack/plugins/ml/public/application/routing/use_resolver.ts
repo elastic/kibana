@@ -70,7 +70,7 @@ export const useResolver = (
           // an unexpected error has occurred. This could be caused by an incorrect index pattern or saved search ID
           notifications.toasts.addError(new Error(error), {
             title: i18n.translate('xpack.ml.useResolver.errorTitle', {
-              defaultMessage: 'An error has ocurred',
+              defaultMessage: 'An error has occurred',
             }),
           });
           window.location.href = '#/';
