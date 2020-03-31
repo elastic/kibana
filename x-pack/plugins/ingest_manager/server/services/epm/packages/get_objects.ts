@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsBulkCreateObject } from 'src/core/server';
 import { AssetType } from '../../../types';
 import * as Registry from '../registry';
 
-type ArchiveAsset = Pick<SavedObject, 'attributes' | 'migrationVersion' | 'references'>;
+type ArchiveAsset = Pick<SavedObject, 'attributes' | 'migrationVersion' | 'references' | 'id'>;
 type SavedObjectToBe = Required<SavedObjectsBulkCreateObject> & { type: AssetType };
 
 export async function getObjects(
@@ -59,10 +59,10 @@ export async function getObject(key: string) {
   // convert that to an object
   const asset: ArchiveAsset = JSON.parse(json);
 
-  const { type, file } = Registry.pathParts(key);
+  const { type } = Registry.pathParts(key);
   const savedObject: SavedObjectToBe = {
     type,
-    id: file.replace('.json', ''),
+    id: asset.id,
     attributes: asset.attributes,
     references: asset.references || [],
     migrationVersion: asset.migrationVersion || {},
