@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as yargs from 'yargs';
+import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, Event } from '../common/generate_data';
@@ -137,8 +138,9 @@ async function main() {
     // eslint-disable-next-line no-console
     console.log('No seed supplied, using random seed: ' + seed);
   }
-  const generator = new EndpointDocGenerator(seed);
+  const random = seedrandom(seed);
   for (let i = 0; i < argv.numHosts; i++) {
+    const generator = new EndpointDocGenerator(random);
     await client.index({
       index: argv.metadataIndex,
       body: generator.generateHostMetadata(),
@@ -170,6 +172,5 @@ async function main() {
         await client.bulk({ body });
       }
     }
-    generator.randomizeHostData();
   }
 }
