@@ -236,12 +236,7 @@ export class KibanaRequest<
       return true;
     }
 
-    if (authOptions === false) return false;
-    throw new Error(
-      `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
-        this.url.href
-      }`
-    );
+    return false;
   }
 }
 
