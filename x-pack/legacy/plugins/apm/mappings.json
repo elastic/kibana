@@ -33,7 +33,15 @@
                   },
                   "language": {
                     "properties": {
+                      "composite": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
                       "name": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "version": {
                         "type": "keyword",
                         "ignore_above": 1024
                       }
