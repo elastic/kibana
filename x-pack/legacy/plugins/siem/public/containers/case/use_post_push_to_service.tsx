@@ -87,7 +87,7 @@ export const usePostPushToService = (): UsePostPushToService => {
       const abortCtrl = new AbortController();
       try {
         dispatch({ type: 'FETCH_INIT' });
-        const casePushData = await getCase(caseId);
+        const casePushData = await getCase(caseId, true, abortCtrl.signal);
         const responseService = await pushToService(
           connectorId,
           formatServiceRequestData(casePushData),
@@ -148,7 +148,7 @@ const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
     createdAt,
     createdBy: {
       fullName: createdBy.fullName ?? null,
-      username: createdBy?.username,
+      username: createdBy?.username ?? '',
     },
     comments: comments
       .filter(c => {
@@ -168,14 +168,14 @@ const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
         createdAt: c.createdAt,
         createdBy: {
           fullName: c.createdBy.fullName ?? null,
-          username: c.createdBy.username,
+          username: c.createdBy.username ?? '',
         },
         updatedAt: c.updatedAt,
         updatedBy:
           c.updatedBy != null
             ? {
                 fullName: c.updatedBy.fullName ?? null,
-                username: c.updatedBy.username,
+                username: c.updatedBy.username ?? '',
               }
             : null,
       })),
@@ -187,7 +187,7 @@ const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
       updatedBy != null
         ? {
             fullName: updatedBy.fullName ?? null,
-            username: updatedBy.username,
+            username: updatedBy.username ?? '',
           }
         : null,
   };
