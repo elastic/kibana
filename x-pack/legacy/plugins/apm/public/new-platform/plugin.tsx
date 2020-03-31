@@ -10,8 +10,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../../../../plugins/apm/common/alert_types';
 import {
   CoreSetup,
   CoreStart,
