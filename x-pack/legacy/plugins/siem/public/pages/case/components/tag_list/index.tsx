@@ -17,12 +17,13 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import * as i18n from '../../translations';
+import * as i18n from './translations';
 import { Form, useForm } from '../../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
 
 interface TagListProps {
+  disabled?: boolean;
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
   tags: string[];
@@ -37,89 +38,98 @@ const MyFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
-export const TagList = React.memo(({ isLoading, onSubmit, tags }: TagListProps) => {
-  const { form } = useForm({
-    defaultValue: { tags },
-    options: { stripEmptyFields: false },
-    schema,
-  });
-  const [isEditTags, setIsEditTags] = useState(false);
+export const TagList = React.memo(
+  ({ disabled = false, isLoading, onSubmit, tags }: TagListProps) => {
+    const { form } = useForm({
+      defaultValue: { tags },
+      options: { stripEmptyFields: false },
+      schema,
+    });
+    const [isEditTags, setIsEditTags] = useState(false);
 
-  const onSubmitTags = useCallback(async () => {
-    const { isValid, data: newData } = await form.submit();
-    if (isValid && newData.tags) {
-      onSubmit(newData.tags);
-      setIsEditTags(false);
-    }
-  }, [form, onSubmit]);
+    const onSubmitTags = useCallback(async () => {
+      const { isValid, data: newData } = await form.submit();
+      if (isValid && newData.tags) {
+        onSubmit(newData.tags);
+        setIsEditTags(false);
+      }
+    }, [form, onSubmit]);
 
-  return (
-    <EuiText>
-      <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <h4>{i18n.TAGS}</h4>
-        </EuiFlexItem>
-        {isLoading && <EuiLoadingSpinner />}
-        {!isLoading && (
+    return (
+      <EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={'tags'}
-              iconType={'pencil'}
-              onClick={setIsEditTags.bind(null, true)}
-            />
+            <h4>{i18n.TAGS}</h4>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
-      <MyFlexGroup gutterSize="xs">
-        {tags.length === 0 && !isEditTags && <p>{i18n.NO_TAGS}</p>}
-        {tags.length > 0 &&
-          !isEditTags &&
-          tags.map((tag, key) => (
-            <EuiFlexItem grow={false} key={`${tag}${key}`}>
-              <EuiBadge color="hollow">{tag}</EuiBadge>
+          {isLoading && <EuiLoadingSpinner />}
+          {!isLoading && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                isDisabled={disabled}
+                aria-label={i18n.EDIT_TAGS_ARIA}
+                iconType={'pencil'}
+                onClick={setIsEditTags.bind(null, true)}
+              />
             </EuiFlexItem>
-          ))}
-        {isEditTags && (
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <Form form={form}>
-                <CommonUseField
-                  path="tags"
-                  componentProps={{
-                    idAria: 'caseTags',
-                    'data-test-subj': 'caseTags',
-                    euiFieldProps: {
-                      fullWidth: true,
-                      placeholder: '',
-                    },
-                  }}
-                />
-              </Form>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButton color="secondary" fill iconType="save" onClick={onSubmitTags} size="s">
-                    {i18n.SAVE}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="cross"
-                    onClick={setIsEditTags.bind(null, false)}
-                    size="s"
-                  >
-                    {i18n.CANCEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </MyFlexGroup>
-    </EuiText>
-  );
-});
+          )}
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="xs" />
+        <MyFlexGroup gutterSize="xs">
+          {tags.length === 0 && !isEditTags && <p>{i18n.NO_TAGS}</p>}
+          {tags.length > 0 &&
+            !isEditTags &&
+            tags.map((tag, key) => (
+              <EuiFlexItem grow={false} key={`${tag}${key}`}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          {isEditTags && (
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <Form form={form}>
+                  <CommonUseField
+                    path="tags"
+                    componentProps={{
+                      idAria: 'caseTags',
+                      'data-test-subj': 'caseTags',
+                      euiFieldProps: {
+                        fullWidth: true,
+                        placeholder: '',
+                      },
+                    }}
+                  />
+                </Form>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="secondary"
+                      fill
+                      iconType="save"
+                      onClick={onSubmitTags}
+                      size="s"
+                    >
+                      {i18n.SAVE}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="cross"
+                      onClick={setIsEditTags.bind(null, false)}
+                      size="s"
+                    >
+                      {i18n.CANCEL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </MyFlexGroup>
+      </EuiText>
+    );
+  }
+);
 
 TagList.displayName = 'TagList';

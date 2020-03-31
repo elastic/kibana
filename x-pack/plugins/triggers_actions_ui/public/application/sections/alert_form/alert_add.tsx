@@ -24,6 +24,8 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
+import { AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
+import { PLUGIN } from '../../constants/plugin';
 
 interface AlertAddProps {
   consumer: string;
@@ -64,17 +66,13 @@ export const AlertAdd = ({
     toastNotifications,
     alertTypeRegistry,
     actionTypeRegistry,
+    docLinks,
   } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
     setAddFlyoutVisibility(false);
     setAlert(initialAlert);
-    setServerError(null);
   }, [initialAlert, setAddFlyoutVisibility]);
-
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
 
   if (!addFlyoutVisible) {
     return null;
@@ -87,43 +85,38 @@ export const AlertAdd = ({
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  const actionsErrors = alert.actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
-      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-      if (!actionType) {
-        return { ...acc };
-      }
-      const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [alertAction.id]: actionValidationErrors };
-    },
-    {}
-  ) as Record<string, { errors: IErrorObject }>;
+  const actionsErrors: Array<{
+    errors: IErrorObject;
+  }> = alert.actions.map((alertAction: AlertAction) =>
+    actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+  );
 
-  const hasActionErrors = !!Object.entries(actionsErrors)
-    .map(([, actionErrors]) => actionErrors)
-    .find((actionErrors: { errors: IErrorObject }) => {
-      return !!Object.keys(actionErrors.errors).find(
-        errorKey => actionErrors.errors[errorKey].length >= 1
-      );
-    });
+  const hasActionErrors =
+    actionsErrors.find(
+      (errorObj: { errors: IErrorObject }) =>
+        errorObj &&
+        !!Object.keys(errorObj.errors).find(errorKey => errorObj.errors[errorKey].length >= 1)
+    ) !== undefined;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await createAlert({ http, alert });
-      if (toastNotifications) {
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-            defaultMessage: "Saved '{alertName}'",
-            values: {
-              alertName: newAlert.name,
-            },
-          })
-        );
-      }
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
+          defaultMessage: "Saved '{alertName}'",
+          values: {
+            alertName: newAlert.name,
+          },
+        })
+      );
       return newAlert;
     } catch (errorRes) {
-      setServerError(errorRes);
-      return undefined;
+      toastNotifications.addDanger(
+        errorRes.body?.message ??
+          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
+            defaultMessage: 'Cannot create alert.',
+          })
+      );
     }
   }
 
@@ -140,7 +133,7 @@ export const AlertAdd = ({
           <EuiTitle size="s" data-test-subj="addAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create Alert"
+                defaultMessage="Create alert"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
               &emsp;
@@ -149,19 +142,32 @@ export const AlertAdd = ({
                 tooltipContent={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
                   {
-                    defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                    defaultMessage:
+                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                    values: {
+                      pluginName: PLUGIN.getI18nName(i18n),
+                    },
                   }
                 )}
               />
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
+        <AlertActionSecurityCallOut
+          docLinks={docLinks}
+          action={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertAdd.securityCalloutAction',
+            {
+              defaultMessage: 'creation',
+            }
+          )}
+          http={http}
+        />
         <EuiFlyoutBody>
           <AlertForm
             alert={alert}
             dispatch={dispatch}
             errors={errors}
-            serverError={serverError}
             canChangeTrigger={canChangeTrigger}
           />
         </EuiFlyoutBody>

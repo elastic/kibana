@@ -49,6 +49,11 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
+const allMochaRulesOff = {};
+Object.keys(require('eslint-plugin-mocha').rules).forEach(k => {
+  allMochaRulesOff['mocha/' + k] = 'off';
+});
+
 module.exports = {
   root: true,
 
@@ -62,12 +67,6 @@ module.exports = {
       files: ['packages/kbn-ui-framework/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/no-onchange': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
       },
     },
     {
@@ -137,7 +136,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/ml/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
@@ -317,6 +316,7 @@ module.exports = {
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/legacy/plugins/apm/**/*.js',
         'test/*/config.ts',
+        'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
         'test/visual_regression/tests/**/*',
         'x-pack/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -491,6 +491,7 @@ module.exports = {
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',
       ],
+      excludedFiles: ['**/integration_tests/**/*'],
       rules: {
         'import/no-commonjs': 'off',
         'prefer-object-spread/prefer-object-spread': 'off',
@@ -519,9 +520,7 @@ module.exports = {
      */
     {
       files: ['test/harden/*.js'],
-      rules: {
-        'mocha/handle-done-callback': 'off', // TODO: Find a way to disable all mocha rules
-      },
+      rules: allMochaRulesOff,
     },
 
     /**

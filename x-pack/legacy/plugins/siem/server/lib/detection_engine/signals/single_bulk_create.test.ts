@@ -144,13 +144,14 @@ describe('singleBulkCreate', () => {
         },
       ],
     });
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleDocSearchResultsNoSortId(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
+      actions: [],
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
@@ -159,8 +160,9 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('create successful bulk create with docs with no versioning', async () => {
@@ -174,7 +176,7 @@ describe('singleBulkCreate', () => {
         },
       ],
     });
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleDocSearchResultsNoSortIdNoVersion(),
       ruleParams: sampleParams,
       services: mockService,
@@ -182,6 +184,7 @@ describe('singleBulkCreate', () => {
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -189,14 +192,15 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('create unsuccessful bulk create due to empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValue(false);
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
@@ -204,6 +208,7 @@ describe('singleBulkCreate', () => {
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -211,15 +216,16 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('create successful bulk create when bulk create has duplicate errors', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
@@ -227,6 +233,7 @@ describe('singleBulkCreate', () => {
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -234,17 +241,18 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
 
     expect(mockLogger.error).not.toHaveBeenCalled();
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('create successful bulk create when bulk create has multiple error statuses', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockReturnValue(sampleBulkCreateErrorResult);
-    const successfulsingleBulkCreate = await singleBulkCreate({
+    const { success } = await singleBulkCreate({
       someResult: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
@@ -252,6 +260,7 @@ describe('singleBulkCreate', () => {
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -259,10 +268,11 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
 
     expect(mockLogger.error).toHaveBeenCalled();
-    expect(successfulsingleBulkCreate).toEqual(true);
+    expect(success).toEqual(true);
   });
 
   test('filter duplicate rules will return an empty array given an empty array', () => {

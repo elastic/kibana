@@ -133,7 +133,7 @@ const runApiExtractor = (
         // ConsoleMessageId.ApiReportNotCopied
         log.warning(`You have changed the signature of the ${folder} Core API`);
         log.warning(
-          'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
+          'To accept these changes run `node scripts/check_published_api_changes.js --accept` and then:\n' +
             "\t 1. Commit the updated documentation and API review file '" +
             config.reportFilePath +
             "' \n" +
@@ -225,20 +225,20 @@ async function run(
   if (opts.help) {
     process.stdout.write(
       dedent(chalk`
-        {dim usage:} node scripts/check_core_api_changes [...options]
+        {dim usage:} node scripts/check_published_api_changes [...options]
 
         Checks for any changes to the Kibana Core API
 
         Examples:
 
           {dim # Checks for any changes to the Kibana Core API}
-          {dim $} node scripts/check_core_api_changes
+          {dim $} node scripts/check_published_api_changes
 
           {dim # Checks for any changes to the Kibana Core API and updates the documentation}
-          {dim $} node scripts/check_core_api_changes --docs
+          {dim $} node scripts/check_published_api_changes --docs
 
           {dim # Checks for and automatically accepts and updates documentation for any changes to the Kibana Core API}
-          {dim $} node scripts/check_core_api_changes --accept
+          {dim $} node scripts/check_published_api_changes --accept
 
         Options:
           --accept    {dim Accepts all changes by updating the API Review files and documentation}

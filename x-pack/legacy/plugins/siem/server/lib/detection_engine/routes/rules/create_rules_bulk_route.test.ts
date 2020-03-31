@@ -13,13 +13,23 @@ import {
   getFindResultWithSingleHit,
   getEmptyFindResult,
   getResult,
+  createBulkMlRuleRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('create_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -32,7 +42,7 @@ describe('create_rules_bulk', () => {
     createRulesBulkRoute(server.router);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
+  describe('status codes', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(getReadBulkRequest(), context);
       expect(response.status).toEqual(200);
@@ -44,9 +54,32 @@ describe('create_rules_bulk', () => {
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
+
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getReadBulkRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
   });
 
   describe('unhappy paths', () => {
+    it('returns an error object if creating an ML rule with an insufficient license', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+
+      const response = await server.inject(createBulkMlRuleRequest(), context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
     it('returns an error object if the index does not exist', async () => {
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(getReadBulkRequest(), context);
@@ -137,7 +170,7 @@ describe('create_rules_bulk', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query]]]'
+        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
       );
     });
   });

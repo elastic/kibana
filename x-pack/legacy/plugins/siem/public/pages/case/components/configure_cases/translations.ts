@@ -104,7 +104,7 @@ export const FIELD_MAPPING_FIRST_COL = i18n.translate(
 export const FIELD_MAPPING_SECOND_COL = i18n.translate(
   'xpack.siem.case.configureCases.fieldMappingSecondCol',
   {
-    defaultMessage: 'Third-party incident field',
+    defaultMessage: 'External incident field',
   }
 );
 
@@ -135,3 +135,65 @@ export const FIELD_MAPPING_EDIT_APPEND = i18n.translate(
     defaultMessage: 'Append',
   }
 );
+
+export const CANCEL = i18n.translate('xpack.siem.case.configureCases.cancelButton', {
+  defaultMessage: 'Cancel',
+});
+
+export const SAVE_CHANGES = i18n.translate('xpack.siem.case.configureCases.saveChangesButton', {
+  defaultMessage: 'Save Changes',
+});
+
+export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
+  'xpack.siem.case.configureCases.warningTitle',
+  {
+    defaultMessage: 'Warning',
+  }
+);
+
+export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
+  'xpack.siem.case.configureCases.warningMessage',
+  {
+    defaultMessage:
+      'The selected connector has been deleted. Either select a different connector or create a new one.',
+  }
+);
+
+export const FIELD_MAPPING_FIELD_NOT_MAPPED = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFieldNotMapped',
+  {
+    defaultMessage: 'Not mapped',
+  }
+);
+
+export const FIELD_MAPPING_FIELD_SHORT_DESC = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFieldShortDescription',
+  {
+    defaultMessage: 'Short Description',
+  }
+);
+
+export const FIELD_MAPPING_FIELD_DESC = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFieldDescription',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const FIELD_MAPPING_FIELD_COMMENTS = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFieldComments',
+  {
+    defaultMessage: 'Comments',
+  }
+);
+
+export const UPDATE_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.updateConnector', {
+  defaultMessage: 'Update connector',
+});
+
+export const UNSAVED_CHANGES = (unsavedChanges: number): string => {
+  return i18n.translate('xpack.siem.case.configureCases.unsavedChanges', {
+    values: { unsavedChanges },
+    defaultMessage: '{unsavedChanges} unsaved changes',
+  });
+};

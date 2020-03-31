@@ -27,6 +27,7 @@ export class Typeahead extends Component {
     index: null,
     value: '',
     inputIsPristine: true,
+    lastSubmitted: '',
   };
 
   static getDerivedStateFromProps(props, state) {
@@ -151,15 +152,19 @@ export class Typeahead extends Component {
   };
 
   onSubmit = () => {
-    this.props.onSubmit(this.state.value);
+    if (this.state.lastSubmitted !== this.state.value) {
+      this.props.onSubmit(this.state.value);
+      this.setState({ lastSubmitted: this.state.value });
+    }
     this.setState({ isSuggestionsVisible: false });
   };
 
   render() {
     return (
       <ClickOutside onClickOutside={this.onClickOutside} style={{ position: 'relative' }}>
-        <div data-test-subj="xpack.uptime.filterBar" style={{ position: 'relative' }}>
+        <div data-test-subj={this.props['data-test-subj']} style={{ position: 'relative' }}>
           <EuiFieldSearch
+            aria-label={this.props['aria-label']}
             fullWidth
             style={{
               backgroundImage: 'none',
@@ -176,6 +181,7 @@ export class Typeahead extends Component {
             value={this.state.value}
             onKeyDown={this.onKeyDown}
             onKeyUp={this.onKeyUp}
+            onBlur={this.onSubmit}
             onChange={this.onChangeInputValue}
             onClick={this.onClickInput}
             autoComplete="off"

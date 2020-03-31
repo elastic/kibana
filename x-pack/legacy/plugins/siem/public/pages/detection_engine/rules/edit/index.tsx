@@ -31,10 +31,17 @@ import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
+import { StepRuleActions } from '../components/step_rule_actions';
 import { formatRule } from '../create/helpers';
-import { getStepsData, redirectToDetections } from '../helpers';
+import { getStepsData, redirectToDetections, getActionMessageParams } from '../helpers';
 import * as ruleI18n from '../translations';
-import { RuleStep, DefineStepRule, AboutStepRule, ScheduleStepRule } from '../types';
+import {
+  RuleStep,
+  DefineStepRule,
+  AboutStepRule,
+  ScheduleStepRule,
+  ActionsStepRule,
+} from '../types';
 import * as i18n from './translations';
 
 interface StepRuleForm {
@@ -48,6 +55,10 @@ interface DefineStepRuleForm extends StepRuleForm {
 }
 interface ScheduleStepRuleForm extends StepRuleForm {
   data: ScheduleStepRule | null;
+}
+
+interface ActionsStepRuleForm extends StepRuleForm {
+  data: ActionsStepRule | null;
 }
 
 const EditRulePageComponent: FC = () => {
@@ -79,14 +90,20 @@ const EditRulePageComponent: FC = () => {
     data: null,
     isValid: false,
   });
+  const [myActionsRuleForm, setMyActionsRuleForm] = useState<ActionsStepRuleForm>({
+    data: null,
+    isValid: false,
+  });
   const [selectedTab, setSelectedTab] = useState<EuiTabbedContentTab>();
   const stepsForm = useRef<Record<RuleStep, FormHook<FormData> | null>>({
     [RuleStep.defineRule]: null,
     [RuleStep.aboutRule]: null,
     [RuleStep.scheduleRule]: null,
+    [RuleStep.ruleActions]: null,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
+  const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule]);
   const setStepsForm = useCallback(
     (step: RuleStep, form: FormHook<FormData>) => {
       stepsForm.current[step] = form;
@@ -102,6 +119,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -123,6 +141,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -144,6 +163,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -162,16 +182,41 @@ const EditRulePageComponent: FC = () => {
           </>
         ),
       },
+      {
+        id: RuleStep.ruleActions,
+        name: ruleI18n.ACTIONS,
+        content: (
+          <>
+            <EuiSpacer />
+            <StepPanel loading={loading || initLoading} title={ruleI18n.ACTIONS}>
+              {myActionsRuleForm.data != null && (
+                <StepRuleActions
+                  isReadOnlyView={false}
+                  isLoading={isLoading}
+                  isUpdateView
+                  defaultValues={myActionsRuleForm.data}
+                  setForm={setStepsForm}
+                  actionMessageParams={actionMessageParams}
+                />
+              )}
+              <EuiSpacer />
+            </StepPanel>
+          </>
+        ),
+      },
     ],
     [
+      rule,
       loading,
       initLoading,
       isLoading,
       myAboutRuleForm,
       myDefineRuleForm,
       myScheduleRuleForm,
+      myActionsRuleForm,
       setStepsForm,
       stepsForm,
+      actionMessageParams,
     ]
   );
 
@@ -179,14 +224,18 @@ const EditRulePageComponent: FC = () => {
     const activeFormId = selectedTab?.id as RuleStep;
     const activeForm = await stepsForm.current[activeFormId]?.submit();
 
-    const invalidForms = [RuleStep.aboutRule, RuleStep.defineRule, RuleStep.scheduleRule].reduce<
-      RuleStep[]
-    >((acc, step) => {
+    const invalidForms = [
+      RuleStep.aboutRule,
+      RuleStep.defineRule,
+      RuleStep.scheduleRule,
+      RuleStep.ruleActions,
+    ].reduce<RuleStep[]>((acc, step) => {
       if (
         (step === activeFormId && activeForm != null && !activeForm?.isValid) ||
         (step === RuleStep.aboutRule && !myAboutRuleForm.isValid) ||
         (step === RuleStep.defineRule && !myDefineRuleForm.isValid) ||
-        (step === RuleStep.scheduleRule && !myScheduleRuleForm.isValid)
+        (step === RuleStep.scheduleRule && !myScheduleRuleForm.isValid) ||
+        (step === RuleStep.ruleActions && !myActionsRuleForm.isValid)
       ) {
         return [...acc, step];
       }
@@ -195,8 +244,8 @@ const EditRulePageComponent: FC = () => {
 
     if (invalidForms.length === 0 && activeForm != null) {
       setTabHasError([]);
-      setRule(
-        formatRule(
+      setRule({
+        ...formatRule(
           (activeFormId === RuleStep.defineRule
             ? activeForm.data
             : myDefineRuleForm.data) as DefineStepRule,
@@ -206,20 +255,34 @@ const EditRulePageComponent: FC = () => {
           (activeFormId === RuleStep.scheduleRule
             ? activeForm.data
             : myScheduleRuleForm.data) as ScheduleStepRule,
-          ruleId
-        )
-      );
+          (activeFormId === RuleStep.ruleActions
+            ? activeForm.data
+            : myActionsRuleForm.data) as ActionsStepRule
+        ),
+        ...(ruleId ? { id: ruleId } : {}),
+      });
     } else {
       setTabHasError(invalidForms);
     }
-  }, [stepsForm, myAboutRuleForm, myDefineRuleForm, myScheduleRuleForm, selectedTab, ruleId]);
+  }, [
+    stepsForm,
+    myAboutRuleForm,
+    myDefineRuleForm,
+    myScheduleRuleForm,
+    myActionsRuleForm,
+    selectedTab,
+    ruleId,
+  ]);
 
   useEffect(() => {
     if (rule != null) {
-      const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({ rule });
+      const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
+        rule,
+      });
       setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
       setMyDefineRuleForm({ data: defineRuleData, isValid: true });
       setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
+      setMyActionsRuleForm({ data: ruleActionsData, isValid: true });
     }
   }, [rule]);
 
@@ -228,6 +291,7 @@ const EditRulePageComponent: FC = () => {
       if (selectedTab != null) {
         const ruleStep = selectedTab.id as RuleStep;
         const respForm = await stepsForm.current[ruleStep]?.submit();
+
         if (respForm != null) {
           if (ruleStep === RuleStep.aboutRule) {
             setMyAboutRuleForm({
@@ -244,6 +308,11 @@ const EditRulePageComponent: FC = () => {
               data: respForm.data as ScheduleStepRule,
               isValid: respForm.isValid,
             });
+          } else if (ruleStep === RuleStep.ruleActions) {
+            setMyActionsRuleForm({
+              data: respForm.data as ActionsStepRule,
+              isValid: respForm.isValid,
+            });
           }
         }
       }
@@ -255,18 +324,22 @@ const EditRulePageComponent: FC = () => {
 
   useEffect(() => {
     if (rule != null) {
-      const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({ rule });
+      const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
+        rule,
+      });
       setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
       setMyDefineRuleForm({ data: defineRuleData, isValid: true });
       setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
+      setMyActionsRuleForm({ data: ruleActionsData, isValid: true });
     }
   }, [rule]);
 
   useEffect(() => {
-    setSelectedTab(tabs[0]);
-  }, []);
+    const tabIndex = rule?.immutable ? 3 : 0;
+    setSelectedTab(tabs[tabIndex]);
+  }, [rule]);
 
-  if (isSaved || (rule != null && rule.immutable)) {
+  if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
@@ -303,6 +376,8 @@ const EditRulePageComponent: FC = () => {
                       return ruleI18n.DEFINITION;
                     } else if (t === RuleStep.scheduleRule) {
                       return ruleI18n.SCHEDULE;
+                    } else if (t === RuleStep.ruleActions) {
+                      return ruleI18n.RULE_ACTIONS;
                     }
                     return t;
                   })

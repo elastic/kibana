@@ -15,8 +15,17 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('set signal status', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -38,6 +47,13 @@ describe('set signal status', () => {
     test('returns 200 when setting a status on a signal by query', async () => {
       const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
       expect(response.status).toEqual(200);
+    });
+
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(getSetSignalStatusByQueryRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catches error if callAsCurrentUser throws error', async () => {

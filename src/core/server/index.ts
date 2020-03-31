@@ -43,6 +43,7 @@ import {
   ElasticsearchServiceSetup,
   IScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
+  ElasticsearchServiceStart,
 } from './elasticsearch';
 
 import { HttpServiceSetup } from './http';
@@ -93,6 +94,7 @@ export {
   ElasticsearchError,
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   APICaller,
   FakeRequest,
   ScopeableRequest,
@@ -248,6 +250,7 @@ export {
 export {
   IUiSettingsClient,
   UiSettingsParams,
+  PublicUiSettingsParams,
   UiSettingsType,
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
@@ -330,9 +333,13 @@ export interface RequestHandlerContext {
 /**
  * Context passed to the plugins `setup` method.
  *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  * @public
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
@@ -349,14 +356,22 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   uuid: UuidServiceSetup;
   /** {@link MetricsServiceSetup} */
   metrics: MetricsServiceSetup;
-  /**
-   * Allows plugins to get access to APIs available in start inside async handlers.
-   * Promise will not resolve until Core and plugin dependencies have completed `start`.
-   * This should only be used inside handlers registered during `setup` that will only be executed
-   * after `start` lifecycle.
-   */
-  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async handlers.
+ * Promise will not resolve until Core and plugin dependencies have completed `start`.
+ * This should only be used inside handlers registered during `setup` that will only be executed
+ * after `start` lifecycle.
+ *
+ * @public
+ */
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Context passed to the plugins `start` method.
@@ -366,6 +381,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
 export interface CoreStart {
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
+  /** {@link ElasticsearchServiceStart} */
+  elasticsearch: ElasticsearchServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */

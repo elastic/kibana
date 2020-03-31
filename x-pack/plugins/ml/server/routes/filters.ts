@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -47,7 +47,7 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Filters
    *
-   * @api {get} /api/ml/filters Gets filters
+   * @api {get} /api/ml/filters Gets filters - size limit has been explicitly set to 1000
    * @apiName GetFilters
    * @apiDescription Retrieves the list of filters which are used for custom rules in anomaly detection.
    *

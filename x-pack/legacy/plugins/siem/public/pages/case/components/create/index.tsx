@@ -15,10 +15,12 @@ import {
 import styled, { css } from 'styled-components';
 import { Redirect } from 'react-router-dom';
 
-import { CaseRequest } from '../../../../../../../../plugins/case/common/api';
+import { CasePostRequest } from '../../../../../../../../plugins/case/common/api';
 import { Field, Form, getUseField, useForm, UseField } from '../../../../shared_imports';
 import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
+import { InsertTimelinePopover } from '../../../../components/timeline/insert_timeline_popover';
+import { useInsertTimeline } from '../../../../components/timeline/insert_timeline_popover/use_insert_timeline';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
@@ -43,9 +45,8 @@ const MySpinner = styled(EuiLoadingSpinner)`
   z-index: 99;
 `;
 
-const initialCaseValue: CaseRequest = {
+const initialCaseValue: CasePostRequest = {
   description: '',
-  state: 'open',
   tags: [],
   title: '',
 };
@@ -53,11 +54,15 @@ const initialCaseValue: CaseRequest = {
 export const Create = React.memo(() => {
   const { caseData, isLoading, postCase } = usePostCase();
   const [isCancel, setIsCancel] = useState(false);
-  const { form } = useForm<CaseRequest>({
+  const { form } = useForm<CasePostRequest>({
     defaultValue: initialCaseValue,
     options: { stripEmptyFields: false },
     schema,
   });
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CasePostRequest>(
+    form,
+    'description'
+  );
 
   const onSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
@@ -65,6 +70,10 @@ export const Create = React.memo(() => {
       await postCase(data);
     }
   }, [form]);
+
+  const handleSetIsCancel = useCallback(() => {
+    setIsCancel(true);
+  }, [isCancel]);
 
   if (caseData != null && caseData.id) {
     return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
@@ -108,9 +117,17 @@ export const Create = React.memo(() => {
             path="description"
             component={MarkdownEditorForm}
             componentProps={{
-              idAria: 'caseDescription',
               dataTestSubj: 'caseDescription',
+              idAria: 'caseDescription',
               isDisabled: isLoading,
+              onCursorPositionUpdate: handleCursorChange,
+              topRightContent: (
+                <InsertTimelinePopover
+                  hideUntitled={true}
+                  isDisabled={isLoading}
+                  onTimelineChange={handleOnTimelineChange}
+                />
+              ),
             }}
           />
         </ContainerBig>
@@ -123,7 +140,12 @@ export const Create = React.memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={() => setIsCancel(true)} iconType="cross">
+            <EuiButtonEmpty
+              data-test-subj="create-case-cancel"
+              size="s"
+              onClick={handleSetIsCancel}
+              iconType="cross"
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>

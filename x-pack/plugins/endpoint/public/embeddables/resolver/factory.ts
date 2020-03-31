@@ -15,7 +15,7 @@ import { ResolverEmbeddable } from './embeddable';
 export class ResolverEmbeddableFactory extends EmbeddableFactory {
   public readonly type = 'resolver';
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

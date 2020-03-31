@@ -29,8 +29,7 @@ import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import * as SharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, WorkerConfig } from '../common';
-import { parseDirPath } from './parse_path';
+import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
@@ -77,7 +76,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       ...SharedDeps.externals,
     },
 
-    plugins: [new CleanWebpackPlugin()],
+    plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
@@ -131,12 +130,21 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                   loader: 'resolve-url-loader',
                   options: {
                     join: (_: string, __: any) => (uri: string, base?: string) => {
-                      if (!base) {
+                      // apply only to legacy platform styles
+                      if (!base || !parseDirPath(base).dirs.includes('legacy')) {
                         return null;
                       }
 
+                      if (uri.startsWith('ui/assets')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/core/server/core_app/',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
                       // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/') && parseDirPath(base).dirs.includes('legacy')) {
+                      if (uri.startsWith('ui/')) {
                         return Path.resolve(
                           worker.repoRoot,
                           'src/legacy/ui/public',

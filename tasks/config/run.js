@@ -58,6 +58,7 @@ module.exports = function(grunt) {
     '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
+    '--optimize.validateSyntaxOfNodeModules=false',
     '--server.port=5610',
     '--migrations.skip=true',
   ];
@@ -117,7 +118,7 @@ module.exports = function(grunt) {
     }),
 
     // used by the test tasks
-    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
+    //    runs the check_published_api_changes script to ensure API changes are explictily accepted
     checkDocApiChanges: scriptWithGithubChecks({
       title: 'Check core API changes',
       cmd: NODE,

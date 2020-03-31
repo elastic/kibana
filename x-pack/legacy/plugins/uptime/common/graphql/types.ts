@@ -8,7 +8,6 @@
 // Scalars
 // ====================================================
 
-
 export type UnsignedInteger = any;
 
 // ====================================================
@@ -21,8 +20,6 @@ export interface Query {
 
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
-  /** Fetches details about the uptime index. */
-  getStatesIndexStatus: StatesIndexStatus;
 }
 
 export interface PingResults {
@@ -369,7 +366,6 @@ export interface DocCount {
   count: UnsignedInteger;
 }
 
-
 export interface Snapshot {
   counts: SnapshotCount;
 }
@@ -382,7 +378,6 @@ export interface SnapshotCount {
   total: number;
 }
 
-
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
   /** Used to go to the next page of results */
@@ -392,7 +387,7 @@ export interface MonitorSummaryResult {
   /** The objects representing the state of a series of heartbeat monitors. */
   summaries?: MonitorSummary[] | null;
   /** The number of summaries. */
-  totalSummaryCount: DocCount;
+  totalSummaryCount: number;
 }
 /** Represents the current state and associated data for an Uptime monitor. */
 export interface MonitorSummary {
@@ -525,13 +520,6 @@ export interface SummaryHistogramPoint {
   /** The number of _down_ documents. */
   down: number;
 }
-/** Represents the current status of the uptime index. */
-export interface StatesIndexStatus {
-  /** Flag denoting whether the index exists. */
-  indexExists: boolean;
-  /** The number of documents in the index. */
-  docCount?: DocCount | null;
-}
 
 export interface AllPingsQueryArgs {
   /** Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'. */
@@ -548,6 +536,7 @@ export interface AllPingsQueryArgs {
   dateRangeEnd: string;
   /** Optional: agent location to filter by. */
   location?: string | null;
+  page?: number;
 }
 
 export interface GetMonitorStatesQueryArgs {
@@ -560,6 +549,8 @@ export interface GetMonitorStatesQueryArgs {
   filters?: string | null;
 
   statusFilter?: string | null;
+
+  pageSize: number;
 }
 
 // ====================================================

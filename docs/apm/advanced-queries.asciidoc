@@ -5,7 +5,7 @@ When querying in the APM app, you're simply searching and selecting data from fi
 Queries entered into the query bar are also added as parameters to the URL,
 so it's easy to share a specific query or view with others.
 
-In the screenshot below, you can begin to see some of the transaction fields available for filtering on:
+You can begin to see some of the transaction fields available for filtering:
 
 [role="screenshot"]
 image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM app in Kibana]

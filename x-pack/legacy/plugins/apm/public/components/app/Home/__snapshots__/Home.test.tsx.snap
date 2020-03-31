@@ -6,7 +6,7 @@ exports[`Home component should render services 1`] = `
     Object {
       "config": Object {
         "indexPatternTitle": "apm-*",
-        "serviceMapEnabled": false,
+        "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,
         },
@@ -14,6 +14,10 @@ exports[`Home component should render services 1`] = `
       "core": Object {
         "chrome": Object {
           "setBreadcrumbs": [Function],
+        },
+        "docLinks": Object {
+          "DOC_LINK_VERSION": "0",
+          "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
         },
         "http": Object {
           "basePath": Object {
@@ -26,9 +30,6 @@ exports[`Home component should render services 1`] = `
             "addWarning": [Function],
           },
         },
-      },
-      "packageInfo": Object {
-        "version": "0",
       },
       "plugins": Object {},
     }
@@ -46,7 +47,7 @@ exports[`Home component should render traces 1`] = `
     Object {
       "config": Object {
         "indexPatternTitle": "apm-*",
-        "serviceMapEnabled": false,
+        "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,
         },
@@ -54,6 +55,10 @@ exports[`Home component should render traces 1`] = `
       "core": Object {
         "chrome": Object {
           "setBreadcrumbs": [Function],
+        },
+        "docLinks": Object {
+          "DOC_LINK_VERSION": "0",
+          "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
         },
         "http": Object {
           "basePath": Object {
@@ -66,9 +71,6 @@ exports[`Home component should render traces 1`] = `
             "addWarning": [Function],
           },
         },
-      },
-      "packageInfo": Object {
-        "version": "0",
       },
       "plugins": Object {},
     }

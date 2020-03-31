@@ -51,14 +51,14 @@ import {
   DashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
-} from '../../../../dashboard_embeddable_container/public/np_ready/public';
+} from '../../../../../../plugins/dashboard/public';
 import {
   EmbeddableFactoryNotFoundError,
   ErrorEmbeddable,
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
-} from '../../../../embeddable_api/public/np_ready/public';
+} from '../../../../../../plugins/embeddable/public';
 import { NavAction, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -78,7 +78,11 @@ import {
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
-import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
+import {
+  addFatalError,
+  AngularHttpError,
+  KibanaLegacyStart,
+} from '../../../../../../plugins/kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -115,6 +119,7 @@ export class DashboardAppController {
       overlays,
       chrome,
       injectedMetadata,
+      fatalErrors,
       uiSettings,
       savedObjects,
       http,
@@ -592,21 +597,31 @@ export class DashboardAppController {
     $scope.timefilterSubscriptions$ = new Subscription();
 
     $scope.timefilterSubscriptions$.add(
-      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-        next: () => {
-          updateState();
-          refreshDashboardContainer();
+      subscribeWithScope(
+        $scope,
+        timefilter.getRefreshIntervalUpdate$(),
+        {
+          next: () => {
+            updateState();
+            refreshDashboardContainer();
+          },
         },
-      })
+        (error: AngularHttpError | Error | string) => addFatalError(fatalErrors, error)
+      )
     );
 
     $scope.timefilterSubscriptions$.add(
-      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-        next: () => {
-          updateState();
-          refreshDashboardContainer();
+      subscribeWithScope(
+        $scope,
+        timefilter.getTimeUpdate$(),
+        {
+          next: () => {
+            updateState();
+            refreshDashboardContainer();
+          },
         },
-      })
+        (error: AngularHttpError | Error | string) => addFatalError(fatalErrors, error)
+      )
     );
 
     function updateViewMode(newMode: ViewMode) {
@@ -739,7 +754,7 @@ export class DashboardAppController {
        * When de-angularizing this code, please call the underlaying action function
        * directly and not via the top nav object.
        **/
-      navActions[TopNavIds.ADD]();
+      navActions[TopNavIds.ADD_EXISTING]();
     };
     $scope.enterEditMode = () => {
       dashboardStateManager.setFullScreenMode(false);
@@ -832,7 +847,8 @@ export class DashboardAppController {
 
       showCloneModal(onClone, currentTitle);
     };
-    navActions[TopNavIds.ADD] = () => {
+
+    navActions[TopNavIds.ADD_EXISTING] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
@@ -874,7 +890,8 @@ export class DashboardAppController {
       share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
-        allowShortUrl: !dashboardConfig.getHideWriteControls(),
+        allowShortUrl:
+          !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
         shareableUrl: unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',

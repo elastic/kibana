@@ -151,16 +151,44 @@ export {
  * Search
  */
 
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+} from '../common';
+
+export { ParsedInterval } from '../common';
+
 export {
   ISearch,
-  ICancel,
+  ISearchCancel,
   ISearchOptions,
   IRequestTypesMap,
   IResponseTypesMap,
   ISearchContext,
   TSearchStrategyProvider,
   getDefaultSearchParams,
+  getTotalLoaded,
 } from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    dateHistogramInterval,
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
+    isValidEsInterval,
+    isValidInterval,
+    parseEsInterval,
+    parseInterval,
+    toAbsoluteDates,
+  },
+};
 
 /**
  * Types to be shared externally

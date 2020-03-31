@@ -14,6 +14,7 @@ import {
 import { requestContextMock, serverMock } from '../__mocks__';
 import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
 import { PrepackagedRules } from '../../types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -44,6 +45,14 @@ describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
@@ -54,7 +63,7 @@ describe('add_prepackaged_rules_route', () => {
     addPrepackedRulesRoute(server.router);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
+  describe('status codes', () => {
     test('returns 200 when creating with a valid actionClient and alertClient', async () => {
       const request = addPrepackagedRulesRequest();
       const response = await server.inject(request, context);
@@ -86,6 +95,13 @@ describe('add_prepackaged_rules_route', () => {
           'Pre-packaged rules cannot be installed until the signals index is created'
         ),
       });
+    });
+
+    it('returns 404 if siem client is unavailable', async () => {
+      const { siem, ...contextWithoutSiem } = context;
+      const response = await server.inject(addPrepackagedRulesRequest(), contextWithoutSiem);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 

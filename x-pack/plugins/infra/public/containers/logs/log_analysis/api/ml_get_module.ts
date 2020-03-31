@@ -5,12 +5,13 @@
  */
 
 import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 import { npStart } from '../../../../legacy_singletons';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { jobCustomSettingsRT } from './ml_api_types';
+
+import { jobCustomSettingsRT } from '../../../../../common/log_analysis';
+import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
 
 export const callGetMlModuleAPI = async (moduleId: string) => {
   const response = await npStart.http.fetch(`/api/ml/modules/get_module/${moduleId}`, {

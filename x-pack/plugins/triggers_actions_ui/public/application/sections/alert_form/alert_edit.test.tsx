@@ -13,22 +13,31 @@ import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import { AlertEdit } from './alert_edit';
+import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
 describe('alert_edit', () => {
   let deps: any;
   let wrapper: ReactWrapper<any>;
+  let mockedCoreSetup: ReturnType<typeof coreMock.createSetup>;
+
+  beforeEach(() => {
+    mockedCoreSetup = coreMock.createSetup();
+  });
 
   async function setup() {
-    const mockes = coreMock.createSetup();
     deps = {
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
+      toastNotifications: mockedCoreSetup.notifications.toasts,
+      http: mockedCoreSetup.http,
+      uiSettings: mockedCoreSetup.uiSettings,
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
+
+    mockedCoreSetup.http.get.mockResolvedValue({ isSufficientlySecure: true });
+
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
@@ -98,24 +107,27 @@ describe('alert_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AlertsContextProvider
-        value={{
-          reloadAlerts: () => {
-            return new Promise<void>(() => {});
-          },
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          alertTypeRegistry: deps!.alertTypeRegistry,
-          toastNotifications: deps!.toastNotifications,
-          uiSettings: deps!.uiSettings,
-        }}
-      >
-        <AlertEdit
-          editFlyoutVisible={true}
-          setEditFlyoutVisibility={() => {}}
-          initialAlert={alert}
-        />
-      </AlertsContextProvider>
+      <AppContextProvider appDeps={deps}>
+        <AlertsContextProvider
+          value={{
+            reloadAlerts: () => {
+              return new Promise<void>(() => {});
+            },
+            http: deps!.http,
+            actionTypeRegistry: deps!.actionTypeRegistry,
+            alertTypeRegistry: deps!.alertTypeRegistry,
+            toastNotifications: deps!.toastNotifications,
+            uiSettings: deps!.uiSettings,
+            docLinks: deps.docLinks,
+          }}
+        >
+          <AlertEdit
+            editFlyoutVisible={true}
+            setEditFlyoutVisibility={() => {}}
+            initialAlert={alert}
+          />
+        </AlertsContextProvider>
+      </AppContextProvider>
     );
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -128,5 +140,21 @@ describe('alert_edit', () => {
     await setup();
     expect(wrapper.find('[data-test-subj="editAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveEditedAlertButton"]').exists()).toBeTruthy();
+  });
+
+  it('displays a toast message on save for server errors', async () => {
+    mockedCoreSetup.http.get.mockResolvedValue([]);
+    await setup();
+    const err = new Error() as any;
+    err.body = {};
+    err.body.message = 'Fail message';
+    mockedCoreSetup.http.put.mockRejectedValue(err);
+    await act(async () => {
+      wrapper
+        .find('[data-test-subj="saveEditedAlertButton"]')
+        .first()
+        .simulate('click');
+    });
+    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
   });
 });

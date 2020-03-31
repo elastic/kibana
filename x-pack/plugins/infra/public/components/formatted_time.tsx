@@ -17,8 +17,10 @@ const getFormattedTime = (
   return userFormat ? moment(time).format(userFormat) : moment(time).format(fallbackFormat);
 };
 
+export type TimeFormat = 'dateTime' | 'time';
+
 interface UseFormattedTimeOptions {
-  format?: 'dateTime' | 'time';
+  format?: TimeFormat;
   fallbackFormat?: string;
 }
 

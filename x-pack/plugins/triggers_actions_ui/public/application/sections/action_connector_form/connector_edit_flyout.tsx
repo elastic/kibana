@@ -25,6 +25,7 @@ import { connectorReducer } from './connector_reducer';
 import { updateActionConnector } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { PLUGIN } from '../../constants/plugin';
 
 export interface ConnectorEditProps {
   initialConnector: ActionConnectorTableItem;
@@ -51,9 +52,6 @@ export const ConnectorEditFlyout = ({
     connector: { ...initialConnector, secrets: {} },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
 
   if (!editFlyoutVisible) {
     return null;
@@ -69,23 +67,27 @@ export const ConnectorEditFlyout = ({
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
       .then(savedConnector => {
-        if (toastNotifications) {
-          toastNotifications.addSuccess(
-            i18n.translate(
-              'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
-              {
-                defaultMessage: "Updated '{connectorName}'",
-                values: {
-                  connectorName: savedConnector.name,
-                },
-              }
-            )
-          );
-        }
+        toastNotifications.addSuccess(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
+            {
+              defaultMessage: "Updated '{connectorName}'",
+              values: {
+                connectorName: savedConnector.name,
+              },
+            }
+          )
+        );
         return savedConnector;
       })
       .catch(errorRes => {
-        setServerError(errorRes);
+        toastNotifications.addDanger(
+          errorRes.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
+              { defaultMessage: 'Cannot update a connector.' }
+            )
+        );
         return undefined;
       });
 
@@ -112,7 +114,10 @@ export const ConnectorEditFlyout = ({
                     'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
                     {
                       defaultMessage:
-                        'This module is not GA. Please help us by reporting any bugs.',
+                        '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                      values: {
+                        pluginName: PLUGIN.getI18nName(i18n),
+                      },
                     }
                   )}
                 />
@@ -124,11 +129,11 @@ export const ConnectorEditFlyout = ({
       <EuiFlyoutBody>
         <ActionConnectorForm
           connector={connector}
-          serverError={serverError}
           errors={errors}
           actionTypeName={connector.actionType}
           dispatch={dispatch}
           actionTypeRegistry={actionTypeRegistry}
+          http={http}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

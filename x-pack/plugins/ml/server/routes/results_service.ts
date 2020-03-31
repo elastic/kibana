@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -18,7 +18,7 @@ import {
 import { resultsServiceProvider } from '../models/results_service';
 
 function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context);
+  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
   const {
     jobIds,
     criteriaFields,
@@ -48,24 +48,24 @@ function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
 }
 
 function getCategoryDefinition(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context);
+  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
   return rs.getCategoryDefinition(payload.jobId, payload.categoryId);
 }
 
 function getCategoryExamples(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context);
+  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
   const { jobId, categoryIds, maxExamples } = payload;
   return rs.getCategoryExamples(jobId, categoryIds, maxExamples);
 }
 
 function getMaxAnomalyScore(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context);
+  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
   const { jobIds, earliestMs, latestMs } = payload;
   return rs.getMaxAnomalyScore(jobIds, earliestMs, latestMs);
 }
 
 function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context);
+  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
   const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
 }

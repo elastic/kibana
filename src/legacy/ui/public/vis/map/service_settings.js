@@ -47,11 +47,16 @@ uiModules
         this._showZoomMessage = true;
         this._emsClient = new EMSClient({
           language: i18n.getLocale(),
-          kbnVersion: kbnVersion,
+          appVersion: kbnVersion,
+          appName: 'kibana',
           fileApiUrl: mapConfig.emsFileApiUrl,
           tileApiUrl: mapConfig.emsTileApiUrl,
           htmlSanitizer: $sanitize,
           landingPageUrl: mapConfig.emsLandingPageUrl,
+          // Wrap to avoid errors passing window fetch
+          fetchFunction: function(...args) {
+            return fetch(...args);
+          },
         });
       }
 

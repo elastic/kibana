@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
 
@@ -21,14 +21,27 @@ import { FormData, FormHook } from '../../../../shared_imports';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
+import { StepRuleActions } from '../components/step_rule_actions';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
-import { redirectToDetections } from '../helpers';
-import { AboutStepRule, DefineStepRule, RuleStep, RuleStepData, ScheduleStepRule } from '../types';
+import { redirectToDetections, getActionMessageParams } from '../helpers';
+import {
+  AboutStepRule,
+  DefineStepRule,
+  RuleStep,
+  RuleStepData,
+  ScheduleStepRule,
+  ActionsStepRule,
+} from '../types';
 import { formatRule } from './helpers';
 import * as i18n from './translations';
 
-const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
+const stepsRuleOrder = [
+  RuleStep.defineRule,
+  RuleStep.aboutRule,
+  RuleStep.scheduleRule,
+  RuleStep.ruleActions,
+];
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -79,32 +92,40 @@ const CreateRulePageComponent: React.FC = () => {
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
+  const ruleActionsRef = useRef<EuiAccordion | null>(null);
   const stepsForm = useRef<Record<RuleStep, FormHook<FormData> | null>>({
     [RuleStep.defineRule]: null,
     [RuleStep.aboutRule]: null,
     [RuleStep.scheduleRule]: null,
+    [RuleStep.ruleActions]: null,
   });
   const stepsData = useRef<Record<RuleStep, RuleStepData>>({
     [RuleStep.defineRule]: { isValid: false, data: {} },
     [RuleStep.aboutRule]: { isValid: false, data: {} },
     [RuleStep.scheduleRule]: { isValid: false, data: {} },
+    [RuleStep.ruleActions]: { isValid: false, data: {} },
   });
   const [isStepRuleInReadOnlyView, setIsStepRuleInEditView] = useState<Record<RuleStep, boolean>>({
     [RuleStep.defineRule]: false,
     [RuleStep.aboutRule]: false,
     [RuleStep.scheduleRule]: false,
+    [RuleStep.ruleActions]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const actionMessageParams = useMemo(
+    () =>
+      getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule).ruleType),
+    [stepsData.current['define-rule'].data]
+  );
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
       if (isValid) {
         const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
-        if ([0, 1].includes(stepRuleIdx)) {
+        if ([0, 1, 2].includes(stepRuleIdx)) {
           if (isStepRuleInReadOnlyView[stepsRuleOrder[stepRuleIdx + 1]]) {
             setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
             setIsStepRuleInEditView({
@@ -121,15 +142,17 @@ const CreateRulePageComponent: React.FC = () => {
             setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
           }
         } else if (
-          stepRuleIdx === 2 &&
+          stepRuleIdx === 3 &&
           stepsData.current[RuleStep.defineRule].isValid &&
-          stepsData.current[RuleStep.aboutRule].isValid
+          stepsData.current[RuleStep.aboutRule].isValid &&
+          stepsData.current[RuleStep.scheduleRule].isValid
         ) {
           setRule(
             formatRule(
               stepsData.current[RuleStep.defineRule].data as DefineStepRule,
               stepsData.current[RuleStep.aboutRule].data as AboutStepRule,
-              stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule
+              stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule,
+              stepsData.current[RuleStep.ruleActions].data as ActionsStepRule
             )
           );
         }
@@ -138,12 +161,10 @@ const CreateRulePageComponent: React.FC = () => {
     [isStepRuleInReadOnlyView, openAccordionId, stepsData.current, setRule]
   );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepsForm = useCallback((step: RuleStep, form: FormHook<FormData>) => {
     stepsForm.current[step] = form;
   }, []);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const getAccordionType = useCallback(
     (accordionId: RuleStep) => {
       if (accordionId === openAccordionId) {
@@ -180,6 +201,14 @@ const CreateRulePageComponent: React.FC = () => {
     />
   );
 
+  const ruleActionsButton = (
+    <AccordionTitle
+      name="4"
+      title={RuleI18n.RULE_ACTIONS}
+      type={getAccordionType(RuleStep.ruleActions)}
+    />
+  );
+
   const openCloseAccordion = (accordionId: RuleStep | null) => {
     if (accordionId != null) {
       if (accordionId === RuleStep.defineRule && defineRuleRef.current != null) {
@@ -188,6 +217,8 @@ const CreateRulePageComponent: React.FC = () => {
         aboutRuleRef.current.onToggle();
       } else if (accordionId === RuleStep.scheduleRule && scheduleRuleRef.current != null) {
         scheduleRuleRef.current.onToggle();
+      } else if (accordionId === RuleStep.ruleActions && ruleActionsRef.current != null) {
+        ruleActionsRef.current.onToggle();
       }
     }
   };
@@ -256,7 +287,7 @@ const CreateRulePageComponent: React.FC = () => {
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
         />
-        <MyEuiPanel zindex={3}>
+        <MyEuiPanel zindex={4}>
           <StepDefineRuleAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
@@ -286,12 +317,12 @@ const CreateRulePageComponent: React.FC = () => {
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
             />
           </StepDefineRuleAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
-        <MyEuiPanel zindex={2}>
+        <MyEuiPanel zindex={3}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.aboutRule}
@@ -315,7 +346,7 @@ const CreateRulePageComponent: React.FC = () => {
             <StepAboutRule
               addPadding={true}
               defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -324,7 +355,7 @@ const CreateRulePageComponent: React.FC = () => {
           </EuiAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
-        <MyEuiPanel zindex={1}>
+        <MyEuiPanel zindex={2}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.scheduleRule}
@@ -350,11 +381,43 @@ const CreateRulePageComponent: React.FC = () => {
               defaultValues={
                 (stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule) ?? null
               }
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
+            />
+          </EuiAccordion>
+        </MyEuiPanel>
+        <EuiSpacer size="l" />
+        <MyEuiPanel zindex={1}>
+          <EuiAccordion
+            initialIsOpen={false}
+            id={RuleStep.ruleActions}
+            buttonContent={ruleActionsButton}
+            paddingSize="xs"
+            ref={ruleActionsRef}
+            onToggle={manageAccordions.bind(null, RuleStep.ruleActions)}
+            extraAction={
+              stepsData.current[RuleStep.ruleActions].isValid && (
+                <EuiButtonEmpty
+                  iconType="pencil"
+                  size="xs"
+                  onClick={manageIsEditable.bind(null, RuleStep.ruleActions)}
+                >
+                  {i18n.EDIT_RULE}
+                </EuiButtonEmpty>
+              )
+            }
+          >
+            <EuiHorizontalRule margin="m" />
+            <StepRuleActions
+              addPadding={true}
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.ruleActions]}
+              isLoading={isLoading || loading}
+              setForm={setStepsForm}
+              setStepData={setStepData}
+              actionMessageParams={actionMessageParams}
             />
           </EuiAccordion>
         </MyEuiPanel>

@@ -36,14 +36,14 @@ import {
   DataPublicPluginSetup,
   esFilters,
 } from '../../../../../plugins/data/public';
-import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import {
   KibanaLegacySetup,
   AngularRenderedAppUpdater,
 } from '../../../../../plugins/kibana_legacy/public';
-import { VisualizationsStart } from '../../../visualizations/public';
+import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
 import { VisualizeConstants } from './np_ready/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
@@ -55,7 +55,7 @@ import { DefaultEditorController } from '../../../vis_default_editor/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
   visualizations: VisualizationsStart;
@@ -71,7 +71,7 @@ export interface VisualizePluginSetupDependencies {
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     data: DataPublicPluginStart;
-    embeddable: IEmbeddableStart;
+    embeddable: EmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
     share: SharePluginStart;
@@ -140,7 +140,6 @@ export class VisualizePlugin implements Plugin {
           chrome: coreStart.chrome,
           data: dataStart,
           embeddable,
-          getBasePath: core.http.basePath.get,
           indexPatterns: dataStart.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,

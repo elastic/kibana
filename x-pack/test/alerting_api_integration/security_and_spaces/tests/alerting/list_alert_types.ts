@@ -44,6 +44,10 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
                 defaultActionGroupId: 'default',
                 id: 'test.noop',
                 name: 'Test: Noop',
+                actionVariables: {
+                  state: [],
+                  context: [],
+                },
               });
               break;
             default:
