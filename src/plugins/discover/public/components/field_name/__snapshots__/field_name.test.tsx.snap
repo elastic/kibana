@@ -2,7 +2,7 @@
 
 exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscFieldName dscFieldName--noResults"
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
 >
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -33,7 +33,7 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
 
 exports[`FieldName renders a number field by providing a field record, useShortDots is set to false 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscFieldName"
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
 >
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -64,7 +64,7 @@ exports[`FieldName renders a number field by providing a field record, useShortD
 
 exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow dscFieldName"
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
 >
   <div
     class="euiFlexItem euiFlexItem--flexGrowZero"

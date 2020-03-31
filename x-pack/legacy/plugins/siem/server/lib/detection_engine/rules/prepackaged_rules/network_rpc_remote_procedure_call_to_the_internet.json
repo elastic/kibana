@@ -1,12 +1,11 @@
 {
-  "description": "This rule detects network events that may indicate the use of RPC traffic\nto the Internet. RPC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
+  "description": "This rule detects network events that may indicate the use of RPC traffic to the Internet. RPC is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector.",
   "index": [
     "filebeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "RPC (Remote Procedure Call) to the Internet",
-  "query": "network.transport: tcp and destination.port: 135 and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
+  "query": "network.transport:tcp and destination.port:135 and source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and not destination.ip:(10.0.0.0/8 or 127.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"::1\")",
   "risk_score": 73,
   "rule_id": "32923416-763a-4531-bb35-f33b9232ecdb",
   "severity": "high",
@@ -32,5 +31,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

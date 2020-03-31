@@ -84,7 +84,11 @@ const actionTypes: ActionType[] = [
   },
 ];
 
-const ConfigureCasesComponent: React.FC = () => {
+interface ConfigureCasesComponentProps {
+  userCanCrud: boolean;
+}
+
+const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
   const search = useGetUrlSearch(navTabs.case);
   const { http, triggers_actions_ui, notifications, application } = useKibana().services;
 
@@ -255,7 +259,7 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <Connectors
           connectors={connectors ?? []}
-          disabled={persistLoading || isLoadingConnectors}
+          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           isLoading={isLoadingConnectors}
           onChangeConnector={setConnectorId}
           handleShowAddFlyout={onClickAddConnector}
@@ -265,14 +269,14 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <ClosureOptions
           closureTypeSelected={closureType}
-          disabled={persistLoading || isLoadingConnectors || connectorId === 'none'}
+          disabled={persistLoading || isLoadingConnectors || connectorId === 'none' || !userCanCrud}
           onChangeClosureType={setClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
         <Mapping
           disabled
-          updateConnectorDisabled={updateConnectorDisabled}
+          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           mapping={mapping}
           onChangeMapping={setMapping}
           setEditFlyoutVisibility={onClickUpdateConnector}
@@ -294,7 +298,7 @@ const ConfigureCasesComponent: React.FC = () => {
                     iconType="cross"
                     isDisabled={isLoadingAny}
                     isLoading={persistLoading}
-                    aria-label="Cancel"
+                    aria-label={i18n.CANCEL}
                     href={getCaseUrl(search)}
                   >
                     {i18n.CANCEL}
@@ -305,7 +309,7 @@ const ConfigureCasesComponent: React.FC = () => {
                     fill
                     color="secondary"
                     iconType="save"
-                    aria-label="Save"
+                    aria-label={i18n.SAVE_CHANGES}
                     isDisabled={isLoadingAny}
                     isLoading={persistLoading}
                     onClick={handleSubmit}
