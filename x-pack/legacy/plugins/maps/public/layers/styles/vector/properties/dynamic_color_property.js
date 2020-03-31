@@ -252,7 +252,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
-  renderRangeLegend() {
+  renderRangeLegendHeader() {
     if (this._options.color) {
       return <ColorGradient colorRampName={this._options.color} />;
     } else {

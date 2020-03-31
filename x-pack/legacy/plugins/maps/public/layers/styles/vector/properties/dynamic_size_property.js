@@ -167,7 +167,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     return <OrdinalLegend style={this} />;
   }
 
-  renderRangeLegend() {
+  renderRangeLegendHeader() {
     let icons;
     if (this.getStyleName() === VECTOR_STYLES.LINE_WIDTH) {
       icons = getLineWidthIcons();

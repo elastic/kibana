@@ -7,7 +7,7 @@ import { IStyleProperty } from './properties/style_property';
 import { IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { IVectorLayer } from '../../vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
-import { VectorStyleDescriptor } from '../../../../common/descriptor_types';
+import { VectorStyleDescriptor } from '../../../../common/dex`scriptor_types';
 import { StyleMeta } from './style_meta';
 
 export interface IVectorStyle {
