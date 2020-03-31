@@ -56,10 +56,24 @@ interface UserFocusedOnResolverNode {
   };
 }
 
+/**
+ * When the user "selects" a node in the Resolver
+ */
+interface UserSelectedResolverNode {
+  readonly type: 'userSelectedResolverNode';
+  readonly payload: {
+    /**
+     * Used to identify the process node that the user selected
+     */
+    readonly nodeId: string;
+  };
+}
+
 export type ResolverAction =
   | CameraAction
   | DataAction
   | UserBroughtProcessIntoView
   | UserChangedSelectedEvent
   | AppRequestedResolverData
-  | UserFocusedOnResolverNode;
+  | UserFocusedOnResolverNode
+  | UserSelectedResolverNode;

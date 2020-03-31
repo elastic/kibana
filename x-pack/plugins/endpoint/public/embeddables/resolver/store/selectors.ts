@@ -6,6 +6,7 @@
 
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
+import * as uiSelectors from './ui/selectors';
 import { ResolverState } from '../types';
 
 /**
@@ -59,9 +60,21 @@ export const processAdjacencies = composeSelectors(
   dataSelectors.processAdjacencies
 );
 
-export const uiActiveDescendantId = composeSelectors(uiStateSelector, uiState => {
-  return uiState.activeDescendentId;
-});
+/**
+ * Returns the id of the "current" tree node (fake-focused)
+ */
+export const uiActiveDescendantId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.activeDescendantId
+);
+
+/**
+ * Returns the id of the "selected" tree node (fake-focused)
+ */
+export const uiSelectedDescendantId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantId
+);
 
 /**
  * Returns the camera state from within ResolverState

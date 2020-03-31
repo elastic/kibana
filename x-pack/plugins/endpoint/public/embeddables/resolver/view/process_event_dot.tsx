@@ -96,6 +96,7 @@ export const ProcessEventDot = styled(
       const selfId = adjacentNodeMap?.self;
 
       const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+      const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
 
       const nodeViewportStyle = useMemo(
         () => ({
@@ -147,6 +148,10 @@ export const ProcessEventDot = styled(
         return nodeId === activeDescendantId;
       }, [activeDescendantId, nodeId]);
 
+      const isSelectedDescendant = useMemo(() => {
+        return nodeId === selectedDescendantId;
+      }, [selectedDescendantId, nodeId]);
+
       const dispatch = useResolverDispatch();
 
       const handleFocus = useCallback(
@@ -157,7 +162,6 @@ export const ProcessEventDot = styled(
               nodeId,
             },
           });
-          focusEvent.currentTarget.setAttribute('aria-current', 'true');
         },
         [dispatch, nodeId]
       );
@@ -167,8 +171,14 @@ export const ProcessEventDot = styled(
           if (clickTargetRef.current !== null) {
             (clickTargetRef.current as any).beginElement();
           }
+          dispatch({
+            type: 'userSelectedResolverNode',
+            payload: {
+              nodeId,
+            },
+          });
         },
-        [clickTargetRef]
+        [clickTargetRef, dispatch, nodeId]
       );
 
       return (
@@ -184,7 +194,8 @@ export const ProcessEventDot = styled(
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
-            aria-selected={isActiveDescendant ? 'true' : undefined}
+            aria-current={isActiveDescendant ? 'true' : undefined}
+            aria-selected={isSelectedDescendant ? 'true' : undefined}
             style={nodeViewportStyle}
             id={nodeId}
             onClick={handleClick}
@@ -271,6 +282,13 @@ export const ProcessEventDot = styled(
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;
+
+  &[aria-current] {
+    outline: 1px solid red;
+  }
+  &[aria-selected] {
+    background: gray;
+  }
 `;
 
 const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = {
