@@ -103,7 +103,14 @@ def listVcsEnvVars() {
       fi
     }
 
-    XS=("${BUILD_DISPLAY_NAME}" "${BRANCH_NAME}" "${GIT_COMMIT}" "${GIT_BRANCH}" "${GIT_COMMITTER_NAME}" "${GIT_COMMITTER_EMAIL}" "${GIT_AUTHOR_NAME}" "${GIT_AUTHOR_EMAIL}")
+    XS=("${BUILD_DISPLAY_NAME}" \
+        "${BRANCH_NAME}" \
+        "${GIT_COMMIT}" \
+        "${GIT_BRANCH}" \
+        "${GIT_COMMITTER_NAME}" \
+        "${GIT_COMMITTER_EMAIL}" \
+        "${GIT_AUTHOR_NAME}" \
+        "${GIT_AUTHOR_EMAIL}")
 
     for X in "${!XS[@]}"; do
     {
