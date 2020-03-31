@@ -15,6 +15,10 @@ exports[`Home component should render services 1`] = `
         "chrome": Object {
           "setBreadcrumbs": [Function],
         },
+        "docLinks": Object {
+          "DOC_LINK_VERSION": "0",
+          "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+        },
         "http": Object {
           "basePath": Object {
             "prepend": [Function],
@@ -26,9 +30,6 @@ exports[`Home component should render services 1`] = `
             "addWarning": [Function],
           },
         },
-      },
-      "packageInfo": Object {
-        "version": "0",
       },
       "plugins": Object {},
     }
@@ -55,6 +56,10 @@ exports[`Home component should render traces 1`] = `
         "chrome": Object {
           "setBreadcrumbs": [Function],
         },
+        "docLinks": Object {
+          "DOC_LINK_VERSION": "0",
+          "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+        },
         "http": Object {
           "basePath": Object {
             "prepend": [Function],
@@ -66,9 +71,6 @@ exports[`Home component should render traces 1`] = `
             "addWarning": [Function],
           },
         },
-      },
-      "packageInfo": Object {
-        "version": "0",
       },
       "plugins": Object {},
     }

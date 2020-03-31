@@ -22,6 +22,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
+
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
@@ -97,13 +99,14 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
       let schema;
 
       switch (field?.type) {
-        case 'date':
+        case KBN_FIELD_TYPES.DATE:
           schema = 'datetime';
           break;
-        case 'geo_point':
+        case KBN_FIELD_TYPES.GEO_POINT:
+        case KBN_FIELD_TYPES.GEO_SHAPE:
           schema = 'json';
           break;
-        case 'number':
+        case KBN_FIELD_TYPES.NUMBER:
           schema = 'numeric';
           break;
       }
@@ -177,7 +180,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
       }
 
       const field = indexPattern.fields.getByName(columnId);
-      if (field?.type === 'date') {
+      if (field?.type === KBN_FIELD_TYPES.DATE) {
         return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
       }
 
