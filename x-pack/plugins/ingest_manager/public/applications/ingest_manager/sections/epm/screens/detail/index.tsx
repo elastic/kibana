@@ -12,8 +12,7 @@ import { PackageInfo } from '../../../../types';
 import { useSetPackageInstallStatus } from '../../hooks';
 import { Content } from './content';
 import { Header } from './header';
-import { usePackageIconType } from '../../../../components/package_icon';
-import { sendGetPackageInfoByKey } from '../../../../hooks';
+import { sendGetPackageInfoByKey, usePackageIconType } from '../../../../hooks';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
