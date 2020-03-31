@@ -31,7 +31,6 @@ export async function importFile(http: HttpStart, file: File, overwriteAll: bool
   return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {
-      // TODO: this was for kfetch. is this also needed here?
       // Important to be undefined, it forces proper headers to be set for FormData
       'Content-Type': undefined,
     },
