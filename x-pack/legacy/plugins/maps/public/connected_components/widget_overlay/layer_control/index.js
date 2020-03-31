@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { LayerControl } from './view';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FLYOUT_STATE } from '../../../../../../../plugins/maps/public/reducers/ui.js';
+import { FLYOUT_STATE } from '../../../../../../../plugins/maps/public/reducers/ui';
 import { updateFlyout, setIsLayerTOCOpen } from '../../../actions/ui_actions';
 import { setSelectedLayer } from '../../../actions/map_actions';
 import {
