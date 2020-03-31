@@ -164,7 +164,11 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   renderLegendDetailRow() {
-    return <OrdinalLegend style={this} />;
+    const header = this.renderRangeLegendHeader();
+    if (!header) {
+      return null;
+    }
+    return <OrdinalLegend style={this} header={header} />;
   }
 
   renderRangeLegendHeader() {

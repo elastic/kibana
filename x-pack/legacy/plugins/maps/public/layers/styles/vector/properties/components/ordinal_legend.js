@@ -46,11 +46,6 @@ export class OrdinalLegend extends React.Component {
     this._loadParams();
   }
   render() {
-    const header = this.props.style.renderRangeLegendHeader();
-    if (!header) {
-      return null;
-    }
-
     const fieldMeta = this.props.style.getRangeFieldMeta();
 
     let minLabel = EMPTY_VALUE;
@@ -72,7 +67,7 @@ export class OrdinalLegend extends React.Component {
 
     return (
       <RangedStyleLegendRow
-        header={header}
+        header={this.props.header}
         minLabel={minLabel}
         maxLabel={maxLabel}
         propertyLabel={this.props.style.getDisplayStyleName()}

@@ -242,10 +242,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     for (let i = 0; i < stops.length; i++) {
       const stop = stops[i];
       const branch = `${stop.stop}`;
-      if (typeof branch === 'string') {
-        mbStops.push(branch);
-        mbStops.push(stop.color);
-      }
+      mbStops.push(branch);
+      mbStops.push(stop.color);
     }
 
     mbStops.push(defaultColor); //last color is default color
@@ -344,10 +342,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return (
       <div>
         <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {categories}
-        </EuiFlexGroup>
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
               <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
@@ -357,6 +352,9 @@ export class DynamicColorProperty extends DynamicStyleProperty {
               </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {categories}
         </EuiFlexGroup>
       </div>
     );
