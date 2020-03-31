@@ -18,14 +18,13 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, EuiToolTip } from '@elastic/eui';
-import { wrapInI18nContext } from '../../../kibana_services';
 
 interface Props {
   percent: number;
   count: number;
 }
 
-function StringFieldProgressBar(props: Props) {
+export function StringFieldProgressBar(props: Props) {
   return (
     <EuiToolTip
       anchorClassName="dscProgressBarTooltip__anchor"
@@ -33,13 +32,13 @@ function StringFieldProgressBar(props: Props) {
       delay="regular"
       position="right"
     >
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiProgress
             value={props.percent}
             max={100}
             color="secondary"
-            aria-labelledby="CanvasAssetManagerLabel"
+            aria-hidden={true}
             size="l"
           />
         </EuiFlexItem>
@@ -49,8 +48,4 @@ function StringFieldProgressBar(props: Props) {
       </EuiFlexGroup>
     </EuiToolTip>
   );
-}
-
-export function createStringFieldProgressBarDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(StringFieldProgressBar));
 }
