@@ -199,8 +199,16 @@ export class KibanaRequest<
 
     const options = ({
       authRequired: this.getAuthRequired(request),
-      // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
-      xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
+      // TypeScript note: Casting to `RouterOptions` to fix the following error:
+      //
+      //     Property 'app' does not exist on type 'RouteSettings'
+      //
+      // In @types/hapi__hapi v18, `request.route.settings` is of type
+      // `RouteSettings`, which doesn't have an `app` property. I think this is
+      // a mistake. In v19, the `RouteSettings` interface does have an `app`
+      // property.
+      xsrfRequired:
+        ((request.route.settings as RouteOptions).app as KibanaRouteState)?.xsrfRequired ?? true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       tags: request.route.settings.tags || [],
       body: isSafeMethod(method)
         ? undefined

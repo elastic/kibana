@@ -103,7 +103,15 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
               branch: env.packageInfo.branch,
               buildNum: env.packageInfo.buildNum,
               buildSha: env.packageInfo.buildSha,
-              serverName: http.server.name,
+              // TypeScript note: Fixing the following error:
+              //
+              //     Property 'name' does not exist on type 'Server'.
+              //
+              // `http.server` is supposed to be a function, so TypeScript
+              // should understand that it has a `name` property from
+              // `lib.es2015.core.d.ts`. Howerver, with the upgrade to
+              // `@types/hapi__hapi` it will for some reason not accept this.
+              serverName: ((http.server as unknown) as Function).name,
               devMode: env.mode.dev,
               basePath,
               uiSettings: settings,
