@@ -69,7 +69,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   };
 
   const result = await callES('search', params);
-  const ping: any = result.aggregations.by_id.buckets?.[0]?.latest.hits?.hits?.[0] ?? {};
+  const ping: any = result.aggregations?.by_id.buckets?.[0]?.latest.hits?.hits?.[0] ?? {};
 
   return {
     ...ping?._source,

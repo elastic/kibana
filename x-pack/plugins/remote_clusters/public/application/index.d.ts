@@ -8,5 +8,8 @@ import { RegisterManagementAppArgs, I18nStart } from '../types';
 
 export declare const renderApp: (
   elem: HTMLElement | null,
-  I18nContext: I18nStart['Context']
+  I18nContext: I18nStart['Context'],
+  appDependencies: {
+    isCloudEnabled?: boolean;
+  }
 ) => ReturnType<RegisterManagementAppArgs['mount']>;

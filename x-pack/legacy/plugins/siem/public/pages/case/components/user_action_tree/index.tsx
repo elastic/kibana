@@ -29,6 +29,7 @@ export interface UserActionTreeProps {
   lastIndexPushToService: number;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
   updateCase: (newCase: Case) => void;
+  userCanCrud: boolean;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -49,6 +50,7 @@ export const UserActionTree = React.memo(
     lastIndexPushToService,
     onUpdateField,
     updateCase,
+    userCanCrud,
   }: UserActionTreeProps) => {
     const { commentId } = useParams();
     const handlerTimeoutId = useRef(0);
@@ -71,14 +73,14 @@ export const UserActionTree = React.memo(
     );
 
     const handleSaveComment = useCallback(
-      (id: string, content: string) => {
+      ({ id, version }: { id: string; version: string }, content: string) => {
         handleManageMarkdownEditId(id);
         patchComment({
           caseId: caseData.id,
           commentId: id,
           commentUpdate: content,
           fetchUserActions,
-          version: caseData.version,
+          version,
           updateCase,
         });
       },
@@ -146,13 +148,14 @@ export const UserActionTree = React.memo(
       () => (
         <AddComment
           caseId={caseData.id}
+          disabled={!userCanCrud}
           insertQuote={insertQuote}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
         />
       ),
-      [caseData.id, handleUpdate, insertQuote]
+      [caseData.id, handleUpdate, insertQuote, userCanCrud]
     );
 
     useEffect(() => {
@@ -168,17 +171,18 @@ export const UserActionTree = React.memo(
       <>
         <UserActionItem
           createdAt={caseData.createdAt}
+          disabled={!userCanCrud}
           id={DESCRIPTION_ID}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
           isLoading={isLoadingDescription}
           labelEditAction={i18n.EDIT_DESCRIPTION}
           labelQuoteAction={i18n.QUOTE}
           labelTitle={<>{i18n.ADDED_DESCRIPTION}</>}
-          fullName={caseData.createdBy.fullName ?? caseData.createdBy.username}
+          fullName={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''}
           markdown={MarkdownDescription}
           onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
           onQuote={handleManageQuote.bind(null, caseData.description)}
-          userName={caseData.createdBy.username}
+          username={caseData.createdBy.username ?? 'Unknown'}
         />
 
         {caseUserActions.map((action, index) => {
@@ -189,6 +193,7 @@ export const UserActionTree = React.memo(
                 <UserActionItem
                   key={action.actionId}
                   createdAt={comment.createdAt}
+                  disabled={!userCanCrud}
                   id={comment.id}
                   idToOutline={selectedOutlineCommentId}
                   isEditable={manageMarkdownEditIds.includes(comment.id)}
@@ -196,20 +201,23 @@ export const UserActionTree = React.memo(
                   labelEditAction={i18n.EDIT_COMMENT}
                   labelQuoteAction={i18n.QUOTE}
                   labelTitle={<>{i18n.ADDED_COMMENT}</>}
-                  fullName={comment.createdBy.fullName ?? comment.createdBy.username}
+                  fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
                   markdown={
                     <UserActionMarkdown
                       id={comment.id}
                       content={comment.comment}
                       isEditable={manageMarkdownEditIds.includes(comment.id)}
                       onChangeEditable={handleManageMarkdownEditId}
-                      onSaveContent={handleSaveComment.bind(null, comment.id)}
+                      onSaveContent={handleSaveComment.bind(null, {
+                        id: comment.id,
+                        version: comment.version,
+                      })}
                     />
                   }
                   onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
                   onQuote={handleManageQuote.bind(null, comment.comment)}
                   outlineComment={handleOutlineComment}
-                  userName={comment.createdBy.username}
+                  username={comment.createdBy.username ?? ''}
                   updatedAt={comment.updatedAt}
                 />
               );
@@ -228,6 +236,7 @@ export const UserActionTree = React.memo(
               <UserActionItem
                 key={action.actionId}
                 createdAt={action.actionAt}
+                disabled={!userCanCrud}
                 id={action.actionId}
                 isEditable={false}
                 isLoading={false}
@@ -235,7 +244,7 @@ export const UserActionTree = React.memo(
                 linkId={
                   action.action === 'update' && action.commentId != null ? action.commentId : null
                 }
-                fullName={action.actionBy.fullName ?? action.actionBy.username}
+                fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
                 outlineComment={handleOutlineComment}
                 showTopFooter={
                   action.action === 'push-to-service' && index === lastIndexPushToService
@@ -245,7 +254,7 @@ export const UserActionTree = React.memo(
                   index === lastIndexPushToService &&
                   index < caseUserActions.length - 1
                 }
-                userName={action.actionBy.username}
+                username={action.actionBy.username ?? ''}
               />
             );
           }
@@ -260,12 +269,13 @@ export const UserActionTree = React.memo(
         )}
         <UserActionItem
           createdAt={new Date().toISOString()}
+          disabled={!userCanCrud}
           id={NEW_ID}
           isEditable={true}
           isLoading={isLoadingIds.includes(NEW_ID)}
-          fullName={currentUser != null ? currentUser.fullName : ''}
+          fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
           markdown={MarkdownNewComment}
-          userName={currentUser != null ? currentUser.username : ''}
+          username={currentUser != null ? currentUser.username ?? '' : ''}
         />
       </>
     );

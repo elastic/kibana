@@ -461,12 +461,12 @@ describe('description_step', () => {
       test('returns default "note" description', () => {
         const result: ListItems[] = getDescriptionItem(
           'note',
-          'Investigation notes',
+          'Investigation guide',
           mockAboutStep,
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual('Investigation notes');
+        expect(result[0].title).toEqual('Investigation guide');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });

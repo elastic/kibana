@@ -25,5 +25,5 @@ export const SEARCH_BOX_TIMELINE_PLACEHOLDER = i18n.translate(
 );
 
 export const INSERT_TIMELINE = i18n.translate('xpack.siem.insert.timeline.insertTimelineButton', {
-  defaultMessage: 'Insert Timeline…',
+  defaultMessage: 'Insert timeline link',
 });

@@ -49,7 +49,7 @@ export type UpdateNotificationParams = Omit<NotificationAlertParams, 'interval' 
   actions: RuleAlertAction[];
   id?: string;
   tags?: string[];
-  interval: string | null;
+  interval: string | null | undefined;
   ruleAlertId: string;
 } & Clients;
 
