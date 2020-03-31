@@ -128,7 +128,7 @@ function getChartDetails(
     obj.results.functionLabel = functionLabel;
 
     const blankEntityFields = _.filter(entityFields, entity => {
-      return entity.fieldValue.length === 0;
+      return entity.fieldValue === null;
     });
 
     // Look to see if any of the entity fields have defined values

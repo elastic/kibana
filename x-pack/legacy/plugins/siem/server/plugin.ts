@@ -18,6 +18,7 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
+import { MlPluginSetup as MlSetup } from '../../../../plugins/ml/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../../../plugins/spaces/server';
 import { PluginStartContract as ActionsStart } from '../../../../plugins/actions/server';
@@ -35,6 +36,7 @@ import {
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
+  ruleActionsSavedObjectType,
 } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
@@ -46,8 +48,9 @@ export interface SetupPlugins {
   encryptedSavedObjects: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   licensing: LicensingPluginSetup;
-  security: SecuritySetup;
+  security?: SecuritySetup;
   spaces?: SpacesSetup;
+  ml?: MlSetup;
 }
 
 export interface StartPlugins {
@@ -91,7 +94,8 @@ export class Plugin {
     initRoutes(
       router,
       __legacy.config,
-      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false
+      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false,
+      plugins.security
     );
 
     plugins.features.registerFeature({
@@ -118,6 +122,11 @@ export class Plugin {
               pinnedEventSavedObjectType,
               timelineSavedObjectType,
               ruleStatusSavedObjectType,
+              ruleActionsSavedObjectType,
+              'cases',
+              'cases-comments',
+              'cases-configure',
+              'cases-user-actions',
             ],
             read: ['config'],
           },
@@ -144,6 +153,11 @@ export class Plugin {
               pinnedEventSavedObjectType,
               timelineSavedObjectType,
               ruleStatusSavedObjectType,
+              ruleActionsSavedObjectType,
+              'cases',
+              'cases-comments',
+              'cases-configure',
+              'cases-user-actions',
             ],
           },
           ui: [
@@ -163,6 +177,7 @@ export class Plugin {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
+        ml: plugins.ml,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,

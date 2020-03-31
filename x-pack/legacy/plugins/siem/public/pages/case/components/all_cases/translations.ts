@@ -59,6 +59,26 @@ export const CLOSED_CASES = i18n.translate('xpack.siem.case.caseTable.closedCase
 export const CLOSED = i18n.translate('xpack.siem.case.caseTable.closed', {
   defaultMessage: 'Closed',
 });
+
 export const DELETE = i18n.translate('xpack.siem.case.caseTable.delete', {
   defaultMessage: 'Delete',
+});
+
+export const REQUIRES_UPDATE = i18n.translate('xpack.siem.case.caseTable.requiresUpdate', {
+  defaultMessage: ' requires update',
+});
+
+export const UP_TO_DATE = i18n.translate('xpack.siem.case.caseTable.upToDate', {
+  defaultMessage: ' is up to date',
+});
+export const NOT_PUSHED = i18n.translate('xpack.siem.case.caseTable.notPushed', {
+  defaultMessage: 'Not pushed',
+});
+
+export const REFRESH = i18n.translate('xpack.siem.case.caseTable.refreshTitle', {
+  defaultMessage: 'Refresh',
+});
+
+export const SERVICENOW_LINK_ARIA = i18n.translate('xpack.siem.case.caseTable.serviceNowLinkAria', {
+  defaultMessage: 'click to view the incident on servicenow',
 });

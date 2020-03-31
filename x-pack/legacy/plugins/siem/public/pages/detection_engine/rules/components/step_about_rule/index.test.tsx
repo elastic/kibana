@@ -15,6 +15,17 @@ import { stepAboutDefaultValue } from './default_value';
 
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
+/* eslint-disable no-console */
+// Silence until enzyme fixed to use ReactTestUtils.act()
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+});
+/* eslint-enable no-console */
+
 describe('StepAboutRuleComponent', () => {
   test('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
     const wrapper = shallow(

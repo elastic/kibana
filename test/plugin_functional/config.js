@@ -32,7 +32,6 @@ export default async function({ readConfigFile }) {
 
   return {
     testFiles: [
-      require.resolve('./test_suites/app_plugins'),
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/embeddable_explorer'),
