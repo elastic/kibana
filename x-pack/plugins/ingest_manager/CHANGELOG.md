@@ -1,5 +1,5 @@
 # Changelog
-Signifcant or breaking changes to the Ingest Manager API will be documented in this file
+Significant or breaking changes to the Ingest Manager API will be documented in this file
 
 ## 2020-03-30
 
