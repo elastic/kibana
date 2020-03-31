@@ -57,7 +57,7 @@ const fullyMatchingIds = async (
   const mostRecentQueryResult = await mostRecentCheckGroups(queryContext, potentialMatchMonitorIDs);
 
   const matching = new Map<string, MonitorLocCheckGroup[]>();
-  MonitorLoop: for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
+  for (const monBucket of mostRecentQueryResult.aggregations.monitor.buckets) {
     const monitorId: string = monBucket.key;
     const groups: MonitorLocCheckGroup[] = [];
 
@@ -66,11 +66,6 @@ const fullyMatchingIds = async (
       const topSource = locBucket.top.hits.hits[0]._source;
       const checkGroup = topSource.monitor.check_group;
       const status = topSource.summary.down > 0 ? 'down' : 'up';
-
-      // This monitor doesn't match, so just skip ahead and don't add it to the output
-      if (queryContext.statusFilter && queryContext.statusFilter !== status) {
-        continue MonitorLoop;
-      }
 
       groups.push({
         monitorId,
