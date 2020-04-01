@@ -20,11 +20,9 @@
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-jest.mock('../../../../plugins/saved_objects/public', () => ({
+jest.mock('../../../../saved_objects/public', () => ({
   SavedObjectSaveModal: () => null,
 }));
-
-jest.mock('ui/new_platform');
 
 import { DashboardSaveModal } from './save_modal';
 

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import '../../np_core.test.mocks';
-
 import { SavedDashboardPanel } from '../../types';
 import { migrateAppState } from './migrate_app_state';
 

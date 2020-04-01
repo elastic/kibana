@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import '../np_core.test.mocks';
 import { createBrowserHistory } from 'history';
 import { DashboardStateManager } from './dashboard_state_manager';
-import { getSavedDashboardMock } from './test_utils';
+import { getSavedDashboardMock } from './test_helpers';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';

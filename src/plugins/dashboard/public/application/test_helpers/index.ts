@@ -18,3 +18,4 @@
  */
 
 export { getSampleDashboardInput, getSampleDashboardPanel } from './get_sample_dashboard_input';
+export { getSavedDashboardMock } from './get_saved_dashboard_mock';
