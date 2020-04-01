@@ -7,10 +7,12 @@
 import { URL } from 'url';
 import { Type } from '@kbn/config-schema';
 import {
-  RequestHandler,
-  RouteConfig,
-  kibanaResponseFactory,
+  HttpResources,
+  HttpResourcesRequestHandler,
   IRouter,
+  RequestHandler,
+  kibanaResponseFactory,
+  RouteConfig,
 } from '../../../../../../src/core/server';
 import { SecurityLicense } from '../../../common/licensing';
 import { LoginState } from '../../../common/login_state';
@@ -25,12 +27,14 @@ import {
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {
+  let httpResources: jest.Mocked<HttpResources>;
   let router: jest.Mocked<IRouter>;
   let license: jest.Mocked<SecurityLicense>;
   let config: ConfigType;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
+    httpResources = routeParamsMock.httpResources;
     license = routeParamsMock.license;
     config = routeParamsMock.config;
 
@@ -38,10 +42,10 @@ describe('Login view routes', () => {
   });
 
   describe('View route', () => {
-    let routeHandler: RequestHandler<any, any, any, 'get'>;
+    let routeHandler: HttpResourcesRequestHandler<any, any, any>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
-      const [loginRouteConfig, loginRouteHandler] = router.get.mock.calls.find(
+      const [loginRouteConfig, loginRouteHandler] = httpResources.register.mock.calls.find(
         ([{ path }]) => path === '/login'
       )!;
 
@@ -100,9 +104,11 @@ describe('Login view routes', () => {
           'https://kibana.co'
         );
         license.getFeatures.mockReturnValue({ showLogin: true } as any);
-        await expect(routeHandler({} as any, request, kibanaResponseFactory)).resolves.toEqual({
-          options: { headers: { location: `${expectedLocation}` } },
-          status: 302,
+        const responseFactory = httpResourcesMock.createResponseFactory();
+
+        await routeHandler({} as any, request, responseFactory);
+        expect(responseFactory.redirected).toHaveBeenCalledWith({
+          headers: { location: `${expectedLocation}` },
         });
 
         // Redirect if `showLogin` is `false` even if user is not authenticated.
@@ -112,9 +118,12 @@ describe('Login view routes', () => {
           'https://kibana.co'
         );
         license.getFeatures.mockReturnValue({ showLogin: false } as any);
-        await expect(routeHandler({} as any, request, kibanaResponseFactory)).resolves.toEqual({
-          options: { headers: { location: `${expectedLocation}` } },
-          status: 302,
+        responseFactory.redirected.mockClear();
+
+        await routeHandler({} as any, request, responseFactory);
+
+        expect(responseFactory.redirected).toHaveBeenCalledWith({
+          headers: { location: `${expectedLocation}` },
         });
       }
     });
@@ -126,19 +135,8 @@ describe('Login view routes', () => {
       const contextMock = coreMock.createRequestHandlerContext();
 
       const responseFactory = httpResourcesMock.createResponseFactory();
-      await expect(
-        routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
-      ).resolves.toEqual({
-        options: {
-          headers: {
-            'content-security-policy':
-              "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-          },
-        },
-        status: 200,
-      });
-
-      expect(responseFactory.renderCoreApp).toHaveBeenCalledWith({ includeUserSettings: false });
+      await routeHandler({ core: contextMock } as any, request, responseFactory);
+      expect(responseFactory.renderAnonymousCoreApp).toHaveBeenCalledWith();
     });
   });
 

@@ -4,24 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  RequestHandler,
-  RouteConfig,
-  kibanaResponseFactory,
-} from '../../../../../../src/core/server';
+import { HttpResourcesRequestHandler, RouteConfig } from '../../../../../../src/core/server';
 import { Authentication } from '../../authentication';
 import { defineLoggedOutRoutes } from './logged_out';
 
-import {
-  coreMock,
-  httpServerMock,
-  httpResourcesMock,
-} from '../../../../../../src/core/server/mocks';
+import { httpServerMock, httpResourcesMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('LoggedOut view routes', () => {
   let authc: jest.Mocked<Authentication>;
-  let routeHandler: RequestHandler<any, any, any, 'get'>;
+  let routeHandler: HttpResourcesRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, 'get'>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
@@ -32,7 +24,7 @@ describe('LoggedOut view routes', () => {
     const [
       loggedOutRouteConfig,
       loggedOutRouteHandler,
-    ] = routeParamsMock.router.get.mock.calls.find(
+    ] = routeParamsMock.httpResources.register.mock.calls.find(
       ([{ path }]) => path === '/security/logged_out'
     )!;
 
@@ -55,9 +47,11 @@ describe('LoggedOut view routes', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    await expect(routeHandler({} as any, request, kibanaResponseFactory)).resolves.toEqual({
-      options: { headers: { location: '/mock-server-basepath/' } },
-      status: 302,
+    const responseFactory = httpResourcesMock.createResponseFactory();
+    await routeHandler({} as any, request, responseFactory);
+
+    expect(responseFactory.redirected).toHaveBeenCalledWith({
+      headers: { location: '/mock-server-basepath/' },
     });
 
     expect(authc.getSessionInfo).toHaveBeenCalledWith(request);
@@ -67,22 +61,10 @@ describe('LoggedOut view routes', () => {
     authc.getSessionInfo.mockResolvedValue(null);
 
     const request = httpServerMock.createKibanaRequest();
-    const contextMock = coreMock.createRequestHandlerContext();
-
     const responseFactory = httpResourcesMock.createResponseFactory();
-    await expect(
-      routeHandler({ core: contextMock } as any, request, responseFactory)
-    ).resolves.toEqual({
-      options: {
-        headers: {
-          'content-security-policy':
-            "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-        },
-      },
-      status: 200,
-    });
+    await routeHandler({} as any, request, responseFactory);
 
     expect(authc.getSessionInfo).toHaveBeenCalledWith(request);
-    expect(responseFactory.renderCoreApp).toHaveBeenCalledWith({ includeUserSettings: false });
+    expect(responseFactory.renderAnonymousCoreApp).toHaveBeenCalledWith();
   });
 });

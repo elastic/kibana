@@ -174,6 +174,14 @@ export {
   DestructiveRouteMethod,
   SafeRouteMethod,
 } from './http';
+
+export {
+  HttpResourcesRenderOptions,
+  HttpResourcesResponseOptions,
+  HttpResourcesServiceToolkit,
+  HttpResourcesRequestHandler,
+} from './http_resources';
+
 export { IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
