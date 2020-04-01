@@ -125,7 +125,7 @@ export class ReportingAPIClient {
   };
 
   /*
-   * Return a string to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
+   * Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
    */
   public getReportingJobPath = (exportType: string, jobParams: JobParams) => {
     const params = stringify({ jobParams: rison.encode(jobParams) });
@@ -154,5 +154,8 @@ export class ReportingAPIClient {
   public getDownloadLink = (jobId: JobId) =>
     this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
 
-  public getBasePath = () => this.http.basePath.serverBasePath; // server basePath as configured, not including namespace suffix
+  /*
+   * provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
+   */
+  public getServerBasePath = () => this.http.basePath.serverBasePath;
 }
