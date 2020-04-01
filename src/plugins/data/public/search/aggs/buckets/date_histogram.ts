@@ -44,9 +44,11 @@ const updateTimeBuckets = (
   timefilter: TimefilterContract,
   customBuckets?: IBucketDateHistogramAggConfig['buckets']
 ) => {
-  const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
+  const bounds = agg.params.timeRange
+    ? timefilter.calculateBounds(agg.params.timeRange)
+    : undefined;
   const buckets = customBuckets || agg.buckets;
-  buckets.setBounds(agg.fieldIsTimeField() ? bounds : null);
+  buckets.setBounds(agg.fieldIsTimeField() ? bounds : undefined);
   buckets.setInterval(agg.params.interval);
 };
 

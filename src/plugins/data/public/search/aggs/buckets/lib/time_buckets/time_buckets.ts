@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { parseInterval } from '../../../../../../common';
@@ -194,7 +194,7 @@ export class TimeBuckets {
    *
    * @returns {undefined}
    */
-  setBounds(input?: null | TimeRangeBounds | TimeRangeBounds[]) {
+  setBounds(input?: TimeRangeBounds | TimeRangeBounds[]) {
     if (!input) return this.clearBounds();
 
     let bounds;
@@ -205,11 +205,9 @@ export class TimeBuckets {
       bounds = Array.isArray(input) ? input : [];
     }
 
-    const moments = _(bounds)
-      .map(_.ary(moment, 1))
-      .sortBy(Number);
+    const moments: Moment[] = _.sortBy(bounds, Number);
 
-    const valid = moments.size() === 2 && moments.every(isValidMoment);
+    const valid = moments.length === 2 && moments.every(isValidMoment);
     if (!valid) {
       this.clearBounds();
       throw new Error('invalid bounds set: ' + input);
