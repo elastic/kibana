@@ -56,7 +56,7 @@ interface MapsPluginStartDependencies {
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { injectedMetadata, http } = core;
+  const { injectedMetadata } = core;
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
 };
