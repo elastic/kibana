@@ -27,7 +27,7 @@ import { CoreStart, LegacyCoreStart } from 'kibana/public';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
+import { createDocTableDirective } from './np_ready/angular/doc_table';
 import { createTableHeaderDirective } from './np_ready/angular/doc_table/components/table_header';
 import {
   createToolBarPagerButtonsDirective,
@@ -37,18 +37,8 @@ import { createTableRowDirective } from './np_ready/angular/doc_table/components
 import { createPagerFactory } from './np_ready/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './np_ready/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
-import { createFieldSearchDirective } from './np_ready/components/field_chooser/discover_field_search_directive';
-import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
-import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
-// @ts-ignore
-import { FieldNameDirectiveProvider } from './np_ready/angular/directives/field_name';
-// @ts-ignore
-import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
-// @ts-ignore
-import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
-import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
 // @ts-ignore
 import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
 // @ts-ignore
@@ -65,6 +55,7 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
+import { createDiscoverSidebarDirective } from './np_ready/components/sidebar';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -125,7 +116,6 @@ export function initializeInnerAngularModule(
       ])
       .config(watchMultiDecorator)
       .directive('icon', reactDirective => reactDirective(EuiIcon))
-      .directive('fieldName', FieldNameDirectiveProvider)
       .directive('renderComplete', createRenderCompleteDirective)
       .service('debounce', ['$timeout', DebounceProviderTimeout]);
   }
@@ -149,16 +139,10 @@ export function initializeInnerAngularModule(
     .run(registerListenEventListener)
     .directive('icon', reactDirective => reactDirective(EuiIcon))
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
-    .directive('fieldName', FieldNameDirectiveProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverFieldSearch', createFieldSearchDirective)
-    .directive('discoverIndexPatternSelect', createIndexPatternSelectDirective)
-    .directive('stringFieldProgressBar', createStringFieldProgressBarDirective)
-    .directive('discoverField', createDiscoverFieldDirective)
-    .directive('discFieldChooser', createFieldChooserDirective)
+    .directive('discoverSidebar', createDiscoverSidebarDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
 
