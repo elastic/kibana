@@ -158,7 +158,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
         plugin.opaqueId
       ),
       createRouter: () => router,
-      resources: deps.http.resources.create(router),
+      resources: deps.httpResources.createRegistrar(router),
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
