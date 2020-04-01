@@ -8,7 +8,11 @@ import styled from 'styled-components';
 import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import { SiemJob } from '../types';
-import { isJobLoading, isJobStarted, isJobFailed } from '../../ml/helpers';
+import {
+  isJobLoading,
+  isJobFailed,
+  isJobStarted,
+} from '../../../../common/detection_engine/ml_helpers';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
