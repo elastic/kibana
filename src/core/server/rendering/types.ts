@@ -23,7 +23,7 @@ import { Env } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
 import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
-import { PluginsServiceSetup, DiscoveredPlugin } from '../plugins';
+import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 
 /** @internal */
@@ -75,7 +75,7 @@ export interface RenderingMetadata {
 export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   legacyPlugins: LegacyServiceDiscoverPlugins;
-  plugins: PluginsServiceSetup;
+  uiPlugins: UiPlugins;
 }
 
 /** @public */
@@ -126,7 +126,7 @@ export interface IScopedRenderingClient {
 }
 
 /** @internal */
-export interface RenderingServiceSetup {
+export interface InternalRenderingServiceSetup {
   /**
    * Generate a `KibanaResponse` which renders an HTML page bootstrapped
    * with the `core` bundle or the ID of another specified legacy bundle.

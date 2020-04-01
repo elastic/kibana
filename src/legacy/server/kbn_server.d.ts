@@ -41,11 +41,12 @@ import {
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/server/legacy';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { UiPlugins } from '../../core/server/plugins';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import { Capabilities } from '../../core/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 import { HomeServerPluginSetup } from '../../plugins/home/server';
 
@@ -113,7 +114,7 @@ export interface KibanaCore {
     kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
     legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
-    uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+    uiPlugins: UiPlugins;
     uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
     savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
   };

@@ -23,6 +23,7 @@ import { take } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 
+import { UiPlugins } from '../plugins';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
@@ -40,14 +41,8 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
   public async setup({
     http,
     legacyPlugins,
-    plugins,
+    uiPlugins,
   }: RenderingSetupDeps): Promise<RenderingServiceSetup> {
-    async function getUiConfig(pluginId: string) {
-      const browserConfig = plugins.uiPlugins.browserConfigs.get(pluginId);
-
-      return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
-    }
-
     return {
       render: async (
         request,
@@ -89,10 +84,10 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
             vars,
             uiPlugins: await Promise.all(
-              [...plugins.uiPlugins.public].map(async ([id, plugin]) => ({
+              [...uiPlugins.public].map(async ([id, plugin]) => ({
                 id,
                 plugin,
-                config: await getUiConfig(id),
+                config: await this.getUiConfig(uiPlugins, id),
               }))
             ),
             legacyMetadata: {
@@ -119,4 +114,10 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
   public async start() {}
 
   public async stop() {}
+
+  private async getUiConfig(uiPlugins: UiPlugins, pluginId: string) {
+    const browserConfig = uiPlugins.browserConfigs.get(pluginId);
+
+    return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
+  }
 }

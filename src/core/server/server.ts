@@ -29,6 +29,7 @@ import {
 import { CoreApp } from './core_app';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
+import { HttpResourcesService } from './http_resources';
 import { RenderingService, RenderingServiceSetup } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
@@ -70,6 +71,7 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
   private readonly metrics: MetricsService;
+  private readonly httpResources: HttpResourcesService;
   private readonly coreApp: CoreApp;
 
   private pluginsInitialized?: boolean;
@@ -96,6 +98,7 @@ export class Server {
     this.uuid = new UuidService(core);
     this.metrics = new MetricsService(core);
     this.coreApp = new CoreApp(core);
+    this.httpResources = new HttpResourcesService(core);
   }
 
   public async setup() {
@@ -103,6 +106,7 @@ export class Server {
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
+    const uiPlugins = this.plugins.getUiPlugins();
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
@@ -145,6 +149,17 @@ export class Server {
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
+    const renderingSetup = await this.rendering.setup({
+      http: httpSetup,
+      legacyPlugins,
+      uiPlugins,
+    });
+
+    const httpResourcesSetup = this.httpResources.setup({
+      http: httpSetup,
+      rendering: renderingSetup,
+    });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -154,20 +169,17 @@ export class Server {
       savedObjects: savedObjectsSetup,
       uuid: uuidSetup,
       metrics: metricsSetup,
+      rendering: renderingSetup,
+      httpResources: httpResourcesSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.pluginsInitialized = pluginsSetup.initialized;
 
-    const renderingSetup = await this.rendering.setup({
-      http: httpSetup,
-      legacyPlugins,
-      plugins: pluginsSetup,
-    });
-
     await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
       plugins: mapToObject(pluginsSetup.contracts),
+      uiPlugins,
     });
 
     this.registerCoreContext(coreSetup, renderingSetup);
@@ -231,13 +243,6 @@ export class Server {
         const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
 
         return {
-          rendering: {
-            render: async (options = {}) =>
-              rendering.render(req, uiSettingsClient, {
-                ...options,
-                vars: await this.legacy.legacyInternals!.getVars('core', req),
-              }),
-          },
           savedObjects: {
             client: savedObjectsClient,
             typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
