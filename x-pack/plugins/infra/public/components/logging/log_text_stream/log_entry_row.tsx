@@ -5,6 +5,7 @@
  */
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
+import { isEmpty } from 'lodash';
 
 import { euiStyled } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
@@ -62,6 +63,12 @@ export const LogEntryRow = memo(
       openFlyoutWithItem,
       logEntry.id,
     ]);
+
+    const openViewInContext = useCallback(() => {
+      window.alert('Not yet implemented');
+    }, []);
+
+    const hasContext = useMemo(() => !isEmpty(logEntry.context), [logEntry]);
 
     const logEntryColumnsById = useMemo(
       () =>
@@ -175,6 +182,7 @@ export const LogEntryRow = memo(
             onOpenMenu={openMenu}
             onCloseMenu={closeMenu}
             onViewDetails={openFlyout}
+            onViewInContext={hasContext ? openViewInContext : undefined}
           />
         </LogEntryColumn>
       </LogEntryRowWrapper>
