@@ -202,6 +202,7 @@ describe('<WatchEdit />', () => {
             timeWindowSize,
             timeWindowUnit,
             hasTermsAgg: false,
+            isActive: true,
             threshold: threshold && threshold[0],
           })
         );
