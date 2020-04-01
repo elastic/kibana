@@ -44,8 +44,10 @@ export interface Schema {
   aggSettings?: any;
 }
 
-export class Schemas {
+export class Schemas implements ISchemas {
   all: Schema[] = [];
+  [AggGroupNames.Buckets]: Schema[] = [];
+  [AggGroupNames.Metrics]: Schema[] = [];
 
   constructor(
     schemas: Array<
@@ -86,7 +88,7 @@ export class Schemas {
       .groupBy('group')
       .forOwn((group, groupName) => {
         // @ts-ignore
-        this[groupName as IAggGroupNames] = group;
+        this[groupName] = group;
       })
       .commit();
   }

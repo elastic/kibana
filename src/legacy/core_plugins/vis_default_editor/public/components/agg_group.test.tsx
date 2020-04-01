@@ -24,7 +24,7 @@ import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { ISchemas, Schema, Schemas } from '../schemas';
+import { ISchemas, Schemas } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('@elastic/eui', () => ({
@@ -61,13 +61,13 @@ describe('DefaultEditorAgg component', () => {
         name: 'metrics',
         group: 'metrics',
         max: 1,
-      } as Schema,
+      },
       {
         name: 'buckets',
         group: 'buckets',
         max: 1,
-      } as Schema,
-    ]) as ISchemas;
+      },
+    ]);
 
     aggs = {
       aggs: [
