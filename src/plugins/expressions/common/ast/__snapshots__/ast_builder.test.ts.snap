@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ast builder correctly builds the AST 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "arg1": Array [
+          true,
+        ],
+        "arg2": Array [
+          "test",
+        ],
+        "arg3": Array [
+          4,
+        ],
+        "arg4": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "arg1": Array [
+                    true,
+                  ],
+                },
+                "function": "subexpr_funct",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+      },
+      "function": "test1",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "arg1": Array [
+          true,
+        ],
+        "arg2": Array [
+          "test",
+        ],
+      },
+      "function": "test2",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "arg1": Array [
+          true,
+        ],
+      },
+      "function": "test3",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

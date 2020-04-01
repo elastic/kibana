@@ -116,4 +116,5 @@ export {
   TypeToString,
   UnmappedTypeStrings,
   ExpressionValueRender as Render,
+  astBuilder,
 } from '../common';

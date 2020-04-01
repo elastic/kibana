@@ -17,8 +17,30 @@
  * under the License.
  */
 
-export * from './types';
-export * from './parse';
-export * from './parse_expression';
-export * from './format';
-export * from './ast_builder';
+import { astBuilder } from './ast_builder';
+
+describe('ast builder', () => {
+  test('correctly builds the AST', () => {
+    const exprAST = astBuilder.createExpression([
+      astBuilder.createFunction('test1', {
+        arg1: true,
+        arg2: 'test',
+        arg3: 4,
+        arg4: astBuilder.createExpression([
+          astBuilder.createFunction('subexpr_funct', {
+            arg1: true,
+          }),
+        ]),
+      }),
+      astBuilder.createFunction('test2', {
+        arg1: true,
+        arg2: 'test',
+      }),
+      astBuilder.createFunction('test3', {
+        arg1: true,
+      }),
+    ]);
+
+    expect(exprAST).toMatchSnapshot();
+  });
+});
