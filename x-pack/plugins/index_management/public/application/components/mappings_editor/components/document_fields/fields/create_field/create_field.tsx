@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { useForm, Form, FormDataProvider, UseField, TextField } from '../../../../shared_imports';
+import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
 
 import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
 

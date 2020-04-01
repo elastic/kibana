@@ -789,7 +789,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Other',
     }),
     value: 'other',
-    documentation: null,
     description: () => (
       <p>
         <FormattedMessage

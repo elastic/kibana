@@ -296,7 +296,7 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
       const { name, type, customTypeName, customTypeJson, ...restNormalizedField } = source;
       const field: Omit<Field, 'name'> =
         type === 'other' && customTypeName && customTypeJson
-          ? { type: customTypeName, ...customTypeJson, ...restNormalizedField }
+          ? { type: customTypeName as DataType, ...customTypeJson, ...restNormalizedField }
           : { type, ...restNormalizedField };
 
       to[name] = field;

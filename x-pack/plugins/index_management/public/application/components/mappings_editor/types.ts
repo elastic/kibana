@@ -142,7 +142,12 @@ export type ParameterName =
   | 'dims'
   | 'depth_limit'
   | 'relations'
-  | 'max_shingle_size';
+  | 'max_shingle_size'
+  /**
+   * These parameters are internal to mappings editor
+   */
+  | 'customTypeName'
+  | 'customTypeJson';
 
 export interface Parameter {
   fieldConfig: FieldConfig;

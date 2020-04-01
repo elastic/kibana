@@ -224,7 +224,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
           ),
         },
         {
-          validator: ({ value }) => {
+          validator: ({ value }: ValidationFuncArg<any, any>) => {
             try {
               const json = JSON.parse(value);
               if (json.type) {
