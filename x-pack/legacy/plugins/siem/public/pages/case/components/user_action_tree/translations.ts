@@ -11,7 +11,7 @@ export * from '../case_view/translations';
 export const ALREADY_PUSHED_TO_SERVICE = i18n.translate(
   'xpack.siem.case.caseView.alreadyPushedToService',
   {
-    defaultMessage: 'Already pushed to Service Now incident',
+    defaultMessage: 'Already pushed to ServiceNow incident',
   }
 );
 
