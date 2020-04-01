@@ -94,6 +94,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   useEffect(() => {
     let autoSetTimeRange = false;
 
+    const { from, to } = getTimeFilterRange();
+    jobCreator.setTimeRange(from, to);
+    setIsWizardReady(true);
+
     if (mlJobService.tempJobCloningObjects.job !== undefined) {
       // cloning a job
       const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
@@ -183,8 +187,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
         });
       }
     } else {
-      const { from, to } = getTimeFilterRange();
-      jobCreator.setTimeRange(from, to);
       setIsWizardReady(true);
     }
   }, []);
