@@ -14,21 +14,15 @@ import {
   ProcessWithWidthMetadata,
   Matrix3,
   AdjacentProcessMap,
-  ResolverProcessEntityID,
 } from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
-import {
-  isGraphableProcess,
-  uniquePidForProcess,
-  uniqueParentPidForProcess,
-} from '../../models/process_event';
+import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
 import {
   factory as indexedProcessTreeFactory,
   children as indexedProcessTreeChildren,
-  childrenEntityIDs as indexedProcessTreeChildrenEntityIDs,
-  parentForEntityID,
+  parent as indexedProcessTreeParent,
   size,
   levelOrder,
 } from '../../models/indexed_process_tree';
@@ -123,20 +117,16 @@ export const graphableProcesses = createSelector(
  *
  */
 function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
-  const widths = new Map<ResolverProcessEntityID, number>();
+  const widths = new Map<ResolverEvent, number>();
 
   if (size(indexedProcessTree) === 0) {
     return widths;
   }
 
-  const processesInReverseLevelOrder: ResolverProcessEntityID[] = [
-    ...levelOrder(indexedProcessTree),
-  ].reverse();
+  const processesInReverseLevelOrder = [...levelOrder(indexedProcessTree)].reverse();
 
-  for (const processEntityID of processesInReverseLevelOrder) {
-    const children: ResolverProcessEntityID[] = [
-      ...indexedProcessTreeChildrenEntityIDs(indexedProcessTree, processEntityID),
-    ];
+  for (const process of processesInReverseLevelOrder) {
+    const children = indexedProcessTreeChildren(indexedProcessTree, process);
 
     const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
       return children.reduce(function sum(currentValue, child) {
@@ -151,7 +141,7 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
     };
 
     const width = sumOfWidthOfChildren() + Math.max(0, children.length - 1) * distanceBetweenNodes;
-    widths.set(processEntityID, width);
+    widths.set(process, width);
   }
 
   return widths;
@@ -167,12 +157,12 @@ function processEdgeLineSegments(
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
-    const parentEntityID = parentForEntityID(indexedProcessTree, metadata.process);
-    if (parentEntityID === undefined) {
+    if (metadata.parent === null) {
       continue;
     }
-    const position = positions.get(metadata.process);
-    const parentPosition = positions.get(parentEntityID);
+    const { process, parent, parentWidth } = metadata;
+    const position = positions.get(process);
+    const parentPosition = positions.get(parent);
 
     if (position === undefined || parentPosition === undefined) {
       /**
@@ -198,8 +188,8 @@ function processEdgeLineSegments(
      */
     const lineFromProcessToMidwayLine: EdgeLineSegment = [[position[0], midwayY], position];
 
-    const siblings = indexedProcessTreeChildrenEntityIDs(indexedProcessTree, parentEntityID);
-    const isFirstChild = metadata.process === siblings[0];
+    const siblings = indexedProcessTreeChildren(indexedProcessTree, parent);
+    const isFirstChild = process === siblings[0];
 
     if (metadata.isOnlyChild) {
       // add a single line segment directly from parent to child. We don't do the 'pitchfork' in this case.
@@ -217,20 +207,16 @@ function processEdgeLineSegments(
        *     |
        *     B         C
        */
+      const { firstChildWidth, lastChildWidth } = metadata;
+
       const lineFromParentToMidwayLine: EdgeLineSegment = [
         parentPosition,
         [parentPosition[0], midwayY],
       ];
 
-      if (metadata.parentWidth === null) {
-        // If this is the first child, the metadata should have info
-        throw new Error();
-      }
+      const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
 
-      const widthOfMidline =
-        metadata.parentWidth - metadata.firstChildWidth / 2 - metadata.lastChildWidth / 2;
-
-      const minX = metadata.parentWidth / -2 + metadata.firstChildWidth / 2;
+      const minX = parentWidth / -2 + firstChildWidth / 2;
       const maxX = minX + widthOfMidline;
 
       const midwayLine: EdgeLineSegment = [
@@ -265,18 +251,9 @@ function* levelOrderWithWidths(
   tree: IndexedProcessTree,
   widths: ProcessWidths
 ): Iterable<ProcessWithWidthMetadata> {
-  // TODO, build graph once and use it.
-  // for now, levelOrder is for __process events__ but there isn't a 1:1 relationship between processes and __process_events__
-  const visited: Set<ResolverProcessEntityID> = new Set();
-  for (const entityID of levelOrder(tree)) {
-    // TODO, remove, instead iterate the graph
-    if (visited.has(entityID)) {
-      continue;
-    } else {
-      visited.add(entityID);
-    }
-    const parentEntityID = parentForEntityID(tree, entityID);
-    const width = widths.get(entityID);
+  for (const process of levelOrder(tree)) {
+    const parent = indexedProcessTreeParent(tree, process);
+    const width = widths.get(process);
 
     if (width === undefined) {
       /**
@@ -286,17 +263,18 @@ function* levelOrderWithWidths(
     }
 
     /** If the parent is undefined, we are processing the root. */
-    if (parentEntityID === undefined) {
+    if (parent === undefined) {
       yield {
-        process: entityID,
+        process,
         width,
+        parent: null,
         parentWidth: null,
         isOnlyChild: null,
         firstChildWidth: null,
         lastChildWidth: null,
       };
     } else {
-      const parentWidth = widths.get(parentEntityID);
+      const parentWidth = widths.get(parent);
 
       if (parentWidth === undefined) {
         /**
@@ -306,12 +284,13 @@ function* levelOrderWithWidths(
       }
 
       const metadata: Partial<ProcessWithWidthMetadata> = {
-        process: entityID,
+        process,
         width,
+        parent,
         parentWidth,
       };
 
-      const siblings = indexedProcessTreeChildrenEntityIDs(tree, parentEntityID);
+      const siblings = indexedProcessTreeChildren(tree, parent);
       if (siblings.length === 1) {
         metadata.isOnlyChild = true;
         metadata.lastChildWidth = width;
@@ -339,13 +318,13 @@ function processPositions(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths
 ): ProcessPositions {
-  const positions: ProcessPositions = new Map();
+  const positions = new Map<ResolverEvent, Vector2>();
   /**
    * This algorithm iterates the tree in level order. It keeps counters that are reset for each parent.
    * By keeping track of the last parent node, we can know when we are dealing with a new set of siblings and
    * reset the counters.
    */
-  let lastProcessedParentNode: ResolverProcessEntityID | undefined;
+  let lastProcessedParentNode: ResolverEvent | undefined;
   /**
    * Nodes are positioned relative to their siblings. We walk this in level order, so we handle
    * children left -> right.
@@ -358,27 +337,26 @@ function processPositions(
   let runningWidthOfPrecedingSiblings = 0;
 
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-    const parentEntityID = parentForEntityID(indexedProcessTree, metadata.process);
     // Handle root node
-    if (parentForEntityID(indexedProcessTree, metadata.process) === undefined) {
+    if (metadata.parent === null) {
       const { process } = metadata;
       /**
        * Place the root node at (0, 0) for now.
        */
       positions.set(process, [0, 0]);
     } else {
-      const { process, width, parentWidth } = metadata;
+      const { process, parent, width, parentWidth } = metadata;
 
       // Reinit counters when parent changes
-      if (lastProcessedParentNode !== parentEntityID) {
+      if (lastProcessedParentNode !== parent) {
         numberOfPrecedingSiblings = 0;
         runningWidthOfPrecedingSiblings = 0;
 
         // keep track of this so we know when to reinitialize
-        lastProcessedParentNode = parentEntityID;
+        lastProcessedParentNode = parent;
       }
 
-      const parentPosition = positions.get(parentEntityID);
+      const parentPosition = positions.get(parent);
 
       if (parentPosition === undefined) {
         /**
@@ -424,9 +402,7 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
   graphableProcesses
   /* eslint-enable no-shadow */
 ) {
-  const t = indexedProcessTreeFactory(graphableProcesses);
-  console.log('indexed process tree', t);
-  return t; // indexedProcessTreeFactory(graphableProcesses);
+  return indexedProcessTreeFactory(graphableProcesses);
 });
 
 export const processAdjacencies = createSelector(

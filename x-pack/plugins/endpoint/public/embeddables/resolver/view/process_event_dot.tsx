@@ -270,7 +270,6 @@ export const ProcessEventDot = styled(
                 fill={labelFill}
               />
               {/** The process name */}
-              {/** TODO, the font-size here needs to change with the scale of the graph. As it is, the entire SVG is being scaled, and the font looks fuzzy when scaled out. */}
               <text
                 x={labelX}
                 y={labelY}
@@ -284,8 +283,7 @@ export const ProcessEventDot = styled(
                 style={{ letterSpacing: '-0.02px' }}
                 id={labelId}
               >
-                {event.process.entity_id}
-                {/* eventModel.eventName(event)*/}
+                {eventModel.eventName(event)}
               </text>
               {/** 'TERMINATED PROCESS' */}
               <text
@@ -317,7 +315,7 @@ export const ProcessEventDot = styled(
   border-radius: 10%;
   white-space: nowrap;
   will-change: left, top, width, height;
-  //contain: strict;
+  contain: strict;
 `;
 
 const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = {

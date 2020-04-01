@@ -219,9 +219,9 @@ export interface IndexedProcessTree {
    */
   idToChildren: Map<string | undefined, ResolverEvent[]>;
   /**
-   * Map of ID to process events
+   * Map of ID to process
    */
-  idToProcess: Map<string, ResolverEvent[]>;
+  idToProcess: Map<string, ResolverEvent>;
   /**
    * Map of ID to adjacent processes
    */
@@ -231,12 +231,11 @@ export interface IndexedProcessTree {
 /**
  * A map of ProcessEvents (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
-export type ProcessWidths = Map<ResolverProcessEntityID, number>;
+export type ProcessWidths = Map<ResolverEvent, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
-// TODO, this should be based on ResolverProcessEntityID
-export type ProcessPositions = Map<ResolverProcessEntityID, Vector2>;
+export type ProcessPositions = Map<ResolverEvent, Vector2>;
 /**
  * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
  */
@@ -246,17 +245,18 @@ export type EdgeLineSegment = Vector2[];
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  // TODO, rename
-  process: ResolverProcessEntityID;
+  process: ResolverEvent;
   width: number;
 } & (
   | {
+      parent: ResolverEvent;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
       lastChildWidth: number;
     }
   | {
+      parent: null;
       /* Without a parent, there is no parent width */
       parentWidth: null;
       /* Without a parent, we can't be an only child */
@@ -324,5 +324,3 @@ export type ResolverProcessType =
   | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
-
-export type ResolverProcessEntityID = string;

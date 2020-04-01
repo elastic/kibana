@@ -5,7 +5,7 @@
  */
 
 import { uniquePidForProcess, uniqueParentPidForProcess } from './process_event';
-import { IndexedProcessTree, AdjacentProcessMap, ResolverProcessEntityID } from '../types';
+import { IndexedProcessTree, AdjacentProcessMap } from '../types';
 import { ResolverEvent } from '../../../../common/types';
 import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
 
@@ -14,7 +14,7 @@ import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
  */
 export function factory(processes: ResolverEvent[]): IndexedProcessTree {
   const idToChildren = new Map<string | undefined, ResolverEvent[]>();
-  const idToValue = new Map<string, ResolverEvent[]>();
+  const idToValue = new Map<string, ResolverEvent>();
   const idToAdjacent = new Map<string, AdjacentProcessMap>();
 
   function emptyAdjacencyMap(id: string): AdjacentProcessMap {
@@ -32,12 +32,7 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
 
   for (const process of processes) {
     const uniqueProcessPid = uniquePidForProcess(process);
-    const existingValue = idToValue.get(uniqueProcessPid);
-    if (existingValue) {
-      existingValue.push(process);
-    } else {
-      idToValue.set(uniqueProcessPid, [process]);
-    }
+    idToValue.set(uniqueProcessPid, process);
 
     const currentProcessAdjacencyMap: AdjacentProcessMap =
       idToAdjacent.get(uniqueProcessPid) || emptyAdjacencyMap(uniqueProcessPid);
@@ -109,45 +104,24 @@ export function factory(processes: ResolverEvent[]): IndexedProcessTree {
 /**
  * Returns an array with any children `ProcessEvent`s of the passed in `process`
  */
-export function children(
-  tree: IndexedProcessTree,
-  entityID: ResolverProcessEntityID
-): ResolverEvent[] {
-  const currentProcessSiblings = tree.idToChildren.get(entityID);
+export function children(tree: IndexedProcessTree, process: ResolverEvent): ResolverEvent[] {
+  const id = uniquePidForProcess(process);
+  const currentProcessSiblings = tree.idToChildren.get(id);
   return currentProcessSiblings === undefined ? [] : currentProcessSiblings;
-}
-
-// TODO, this order is important. when we do this, the adjaceny map will be incorrect i think
-export function childrenEntityIDs(
-  tree: IndexedProcessTree,
-  entityID: ResolverProcessEntityID
-): ResolverProcessEntityID[] {
-  const seen: Set<ResolverProcessEntityID> = new Set();
-  const childrenIDs: ResolverProcessEntityID[] = [];
-  for (const childProcess of children(tree, entityID)) {
-    const childEntityID = uniquePidForProcess(childProcess);
-    if (seen.has(childEntityID)) {
-      continue;
-    } else {
-      seen.add(childEntityID);
-    }
-    childrenIDs.push(childEntityID);
-  }
-  return childrenIDs;
 }
 
 /**
  * Returns the parent ProcessEvent, if any, for the passed in `childProcess`
  */
-export function parentEvents(
+export function parent(
   tree: IndexedProcessTree,
   childProcess: ResolverEvent
-): ResolverEvent[] {
+): ResolverEvent | undefined {
   const uniqueParentPid = uniqueParentPidForProcess(childProcess);
   if (uniqueParentPid === undefined) {
-    return [];
+    return undefined;
   } else {
-    return tree.idToProcess.get(uniqueParentPid) ?? [];
+    return tree.idToProcess.get(uniqueParentPid);
   }
 }
 
@@ -161,34 +135,23 @@ export function size(tree: IndexedProcessTree) {
 /**
  * Return the root process
  */
-function root(tree: IndexedProcessTree): ResolverProcessEntityID | null {
+export function root(tree: IndexedProcessTree) {
   if (size(tree) === 0) {
     return null;
   }
   let current: ResolverEvent = tree.idToProcess.values().next().value;
-  while (parentEvents(tree, current) !== undefined) {
-    current = parentEvents(tree, current)[0]!;
+  while (parent(tree, current) !== undefined) {
+    current = parent(tree, current)!;
   }
-  return uniquePidForProcess(current);
+  return current;
 }
 
 /**
  * Yield processes in level order
  */
-export function* levelOrder(tree: IndexedProcessTree): Iterable<ResolverProcessEntityID> {
-  const rootNode: ResolverProcessEntityID | null = root(tree);
+export function* levelOrder(tree: IndexedProcessTree) {
+  const rootNode = root(tree);
   if (rootNode !== null) {
-    yield* baseLevelOrder(rootNode, parentEntityID => [...childrenEntityIDs(tree, parentEntityID)]);
+    yield* baseLevelOrder(rootNode, children.bind(null, tree));
   }
-}
-
-export function parentForEntityID(
-  tree: IndexedProcessTree,
-  entityID: ResolverProcessEntityID
-): ResolverProcessEntityID | undefined {
-  const process = tree.idToProcess.get(entityID);
-  if (process === undefined || process.length === 0) {
-    return undefined;
-  }
-  return uniqueParentPidForProcess(process[0]);
 }

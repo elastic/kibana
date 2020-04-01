@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO, don't reference types from outside resolver
 import { ResolverEvent } from '../../../../common/types';
 import * as event from '../../../../common/models/event';
 import { ResolverProcessType } from '../types';
@@ -70,7 +69,6 @@ export function eventType(passedEvent: ResolverEvent): ResolverProcessType {
 
 /**
  * Returns the process event's pid
- * TODO, rename to `entityID`
  */
 export function uniquePidForProcess(passedEvent: ResolverEvent): string {
   if (event.isLegacyEvent(passedEvent)) {
@@ -82,7 +80,6 @@ export function uniquePidForProcess(passedEvent: ResolverEvent): string {
 
 /**
  * Returns the process event's parent pid
- * TODO rename to `parentEntityID`
  */
 export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
   if (event.isLegacyEvent(passedEvent)) {
