@@ -45,7 +45,6 @@ export interface VisualizeKibanaServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
   localStorage: Storage;
   navigation: NavigationStart;
