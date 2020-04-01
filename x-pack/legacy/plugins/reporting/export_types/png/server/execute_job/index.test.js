@@ -14,7 +14,6 @@ import { LevelLogger } from '../../../../server/lib';
 jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 
 let mockReporting;
-let mockReportingConfig;
 
 const cancellationToken = {
   on: jest.fn(),
@@ -36,8 +35,6 @@ const encryptHeaders = async headers => {
 };
 
 beforeEach(async () => {
-  mockReporting = await createMockReportingCore();
-
   const kbnConfig = {
     'server.basePath': '/sbp',
   };
@@ -47,14 +44,12 @@ beforeEach(async () => {
     'kibanaServer.port': 5601,
     'kibanaServer.protocol': 'http',
   };
-
-  const mockGetConfig = jest.fn();
-  mockReportingConfig = {
+  const mockReportingConfig = {
     get: (...keys) => reportingConfig[keys.join('.')],
     kbnConfig: { get: (...keys) => kbnConfig[keys.join('.')] },
   };
-  mockGetConfig.mockImplementation(() => Promise.resolve(mockReportingConfig));
-  mockReporting.getConfig = mockGetConfig;
+
+  mockReporting = await createMockReportingCore(mockReportingConfig);
 
   const mockElasticsearch = {
     dataClient: {

@@ -54,13 +54,16 @@ function getPluginsMock(
   };
 }
 
+const getMockReportingConfig = () => ({
+  get: () => {},
+  kbnConfig: { get: () => '' },
+});
 const getResponseMock = (customization = {}) => customization;
 
 describe('license checks', () => {
   let mockConfig;
   beforeAll(async () => {
-    const mockReporting = await createMockReportingCore();
-    mockConfig = mockReporting.getConfig();
+    mockConfig = getMockReportingConfig();
   });
 
   describe('with a basic license', () => {
@@ -150,8 +153,7 @@ describe('license checks', () => {
 
 describe('data modeling', () => {
   test('with normal looking usage data', async () => {
-    const mockReporting = await createMockReportingCore();
-    const mockConfig = mockReporting.getConfig();
+    const mockConfig = getMockReportingConfig();
     const plugins = getPluginsMock();
     const { fetch } = getReportingUsageCollector(mockConfig, plugins, exportTypesRegistry);
     const callClusterMock = jest.fn(() =>
@@ -372,15 +374,15 @@ describe('data modeling', () => {
 
 describe('Ready for collection observable', () => {
   test('converts observable to promise', async () => {
-    const mockReporting = await createMockReportingCore();
-    const mockConfig = mockReporting.getConfig();
+    const mockConfig = getMockReportingConfig();
+    const mockReporting = await createMockReportingCore(mockConfig);
 
     const usageCollection = getMockUsageCollection();
     const makeCollectorSpy = sinon.spy();
     usageCollection.makeUsageCollector = makeCollectorSpy;
 
     const plugins = getPluginsMock({ usageCollection });
-    registerReportingUsageCollector(mockReporting, mockConfig, plugins);
+    registerReportingUsageCollector(mockReporting, plugins);
 
     const [args] = makeCollectorSpy.firstCall.args;
     expect(args).toMatchInlineSnapshot(`

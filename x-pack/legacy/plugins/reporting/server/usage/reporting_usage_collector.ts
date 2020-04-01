@@ -51,11 +51,11 @@ export function getReportingUsageCollector(
 
 export function registerReportingUsageCollector(
   reporting: ReportingCore,
-  config: ReportingConfig,
   plugins: ReportingSetupDeps
 ) {
   const exportTypesRegistry = reporting.getExportTypesRegistry();
   const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
+  const config = reporting.getConfig();
 
   const collector = getReportingUsageCollector(
     config,

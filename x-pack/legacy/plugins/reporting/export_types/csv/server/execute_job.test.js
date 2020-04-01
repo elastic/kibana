@@ -11,8 +11,8 @@ import { CancellationToken } from '../../../common/cancellation_token';
 import { fieldFormats } from '../../../../../../../src/plugins/data/server';
 import { createMockReportingCore } from '../../../test_helpers';
 import { LevelLogger } from '../../../server/lib/level_logger';
-import { executeJobFactory } from './execute_job';
 import { setFieldFormats } from '../../../server/services';
+import { executeJobFactory } from './execute_job';
 
 const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
 
@@ -58,15 +58,13 @@ describe('CSV Execute Job', function() {
   });
 
   beforeEach(async function() {
-    mockReportingPlugin = await createMockReportingCore();
-
     configGetStub = sinon.stub();
     configGetStub.withArgs('encryptionKey').returns(encryptionKey);
     configGetStub.withArgs('csv', 'maxSizeBytes').returns(1024 * 1000); // 1mB
     configGetStub.withArgs('csv', 'scroll').returns({});
     mockReportingConfig = { get: configGetStub, kbnConfig: { get: configGetStub } };
 
-    mockReportingPlugin.getConfig = () => Promise.resolve(mockReportingConfig);
+    mockReportingPlugin = await createMockReportingCore(mockReportingConfig);
     mockReportingPlugin.getUiSettingsServiceFactory = () => Promise.resolve(mockUiSettingsClient);
     mockReportingPlugin.getElasticsearchService = () => Promise.resolve(mockElasticsearch);
 

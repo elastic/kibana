@@ -38,7 +38,7 @@ export class ReportingPlugin
     this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY, plugins);
 
     // Register a function with server to manage the collection of usage stats
-    registerReportingUsageCollector(this.reportingCore, config, plugins);
+    registerReportingUsageCollector(this.reportingCore, plugins);
 
     // regsister setup internals
     this.reportingCore.pluginSetup({ browserDriverFactory, elasticsearch });
