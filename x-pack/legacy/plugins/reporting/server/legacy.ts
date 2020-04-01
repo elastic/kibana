@@ -15,16 +15,14 @@ import { LegacySetup, ReportingConfig, ReportingConfigType, ReportingStartDeps }
 const buildLegacyDependencies = (
   server: Legacy.Server,
   reportingPlugin: ReportingPluginSpecOptions
-): LegacySetup => {
-  return {
-    route: server.route.bind(server),
-    config: server.config,
-    plugins: {
-      xpack_main: server.plugins.xpack_main,
-      reporting: reportingPlugin,
-    },
-  };
-};
+): LegacySetup => ({
+  route: server.route.bind(server),
+  config: server.config,
+  plugins: {
+    xpack_main: server.plugins.xpack_main,
+    reporting: reportingPlugin,
+  },
+});
 
 const addConfigDefaults = (core: CoreSetup, baseConfig: ReportingConfigType) => {
   // encryption key
