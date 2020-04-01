@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { parseInterval } from '../../../../../../common';
@@ -29,9 +29,9 @@ import {
   EsInterval,
 } from './calc_es_interval';
 
-interface Bounds {
-  min: Date | number | null;
-  max: Date | number | null;
+export interface Bounds {
+  min: Moment | Date | number | null;
+  max: Moment | Date | number | null;
 }
 
 interface TimeBucketsInterval extends moment.Duration {
@@ -40,8 +40,7 @@ interface TimeBucketsInterval extends moment.Duration {
   esValue: EsInterval['value'];
   esUnit: EsInterval['unit'];
   expression: EsInterval['expression'];
-  overflow: moment.Duration | boolean;
-  preScaled?: moment.Duration;
+  preScaled?: TimeBucketsInterval;
   scale?: number;
   scaled?: boolean;
 }
@@ -70,8 +69,6 @@ interface TimeBucketsConfig {
  * @param {[type]} display [description]
  */
 export class TimeBuckets {
-  private getConfig: (key: string) => any;
-
   private _lb: Bounds['min'] = null;
   private _ub: Bounds['max'] = null;
   private _originalInterval: string | null = null;
@@ -170,7 +167,7 @@ export class TimeBuckets {
   }
 
   constructor({ uiSettings }: TimeBucketsConfig) {
-    this.getConfig = (key: string) => uiSettings.get(key);
+    this.uiSettings = uiSettings;
     return TimeBuckets.__cached__(this);
   }
 
@@ -278,11 +275,10 @@ export class TimeBuckets {
    *  - Any object from src/legacy/ui/agg_types.js
    *  - "auto"
    *  - Pass a valid moment unit
-   *  - a moment.duration object.
    *
    * @param {object|string|moment.duration} input - see desc
    */
-  setInterval(input: null | string | Record<string, any> | moment.Duration) {
+  setInterval(input: null | string | Record<string, any>) {
     let interval = input;
 
     // selection object -> val
@@ -351,7 +347,7 @@ export class TimeBuckets {
     const readInterval = () => {
       const interval = this._i;
       if (moment.isDuration(interval)) return interval;
-      return calcAutoIntervalNear(this.getConfig('histogram:barTarget'), Number(duration));
+      return calcAutoIntervalNear(this.uiSettings.get('histogram:barTarget'), Number(duration));
     };
 
     const parsedInterval = readInterval();
@@ -362,7 +358,7 @@ export class TimeBuckets {
         return interval;
       }
 
-      const maxLength: number = this.getConfig('histogram:maxBars');
+      const maxLength: number = this.uiSettings.get('histogram:maxBars');
       const approxLen = Number(duration) / Number(interval);
 
       let scaled;
@@ -396,10 +392,6 @@ export class TimeBuckets {
         esValue: esInterval.value,
         esUnit: esInterval.unit,
         expression: esInterval.expression,
-        overflow:
-          Number(duration) > Number(interval)
-            ? moment.duration(Number(interval) - Number(duration))
-            : false,
       });
     };
 
@@ -423,7 +415,7 @@ export class TimeBuckets {
    */
   getScaledDateFormat() {
     const interval = this.getInterval();
-    const rules = this.getConfig('dateFormat:scaled');
+    const rules = this.uiSettings.get('dateFormat:scaled');
 
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
@@ -432,6 +424,6 @@ export class TimeBuckets {
       }
     }
 
-    return this.getConfig('dateFormat');
+    return this.uiSettings.get('dateFormat');
   }
 }

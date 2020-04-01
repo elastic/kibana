@@ -22,7 +22,7 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'src/core/public';
 
-import { TimeBuckets } from './lib/time_buckets';
+import { TimeBuckets, Bounds } from './lib/time_buckets';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
@@ -46,17 +46,13 @@ const updateTimeBuckets = (
 ) => {
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
   const buckets = customBuckets || agg.buckets;
-  buckets.setBounds(agg.fieldIsTimeField() && bounds);
+  if (agg.fieldIsTimeField()) {
+    buckets.setBounds(bounds as Bounds);
+  } else {
+    buckets.setBounds();
+  }
   buckets.setInterval(agg.params.interval);
 };
-
-// TODO: Need to incorporate these properly into TimeBuckets
-interface ITimeBuckets {
-  setBounds: Function;
-  getScaledDateFormat: TimeBuckets['getScaledDateFormat'];
-  setInterval: Function;
-  getInterval: Function;
-}
 
 export interface DateHistogramBucketAggDependencies {
   uiSettings: IUiSettingsClient;
@@ -64,7 +60,7 @@ export interface DateHistogramBucketAggDependencies {
 }
 
 export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
-  buckets: ITimeBuckets;
+  buckets: TimeBuckets;
 }
 
 export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHistogramAggConfig {
@@ -202,7 +198,8 @@ export const getDateHistogramBucketAgg = ({
             ...dateHistogramInterval(interval.expression),
           };
 
-          const scaleMetrics = scaleMetricValues && interval.scaled && interval.scale < 1;
+          const scaleMetrics =
+            scaleMetricValues && interval.scaled && interval.scale && interval.scale < 1;
           if (scaleMetrics && aggs) {
             const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
             const all = every(metrics, (a: IBucketAggConfig) => {
@@ -214,7 +211,7 @@ export const getDateHistogramBucketAgg = ({
             });
             if (all) {
               output.metricScale = interval.scale;
-              output.metricScaleText = interval.preScaled.description;
+              output.metricScaleText = interval.preScaled ? interval.preScaled.description : '';
             }
           }
         },

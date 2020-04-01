@@ -370,6 +370,7 @@ export {
   EsQuerySortValue,
   SortDirection,
   FetchOptions,
+  Bounds,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,

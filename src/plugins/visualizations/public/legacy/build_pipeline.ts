@@ -25,6 +25,7 @@ import {
   fieldFormats,
   search,
   TimefilterContract,
+  Bounds,
 } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
 const { isDateHistogramBucketAggConfig } = search.aggs;
@@ -95,7 +96,7 @@ const getSchemas = (
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
       const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
-      agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
+      agg.buckets.setBounds(agg.fieldIsTimeField() ? (bounds as Bounds) : undefined);
       agg.buckets.setInterval(agg.params.interval);
     }
 

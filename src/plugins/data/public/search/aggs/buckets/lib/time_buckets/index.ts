@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { TimeBuckets } from './time_buckets';
+export { TimeBuckets, Bounds } from './time_buckets';
