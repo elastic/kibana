@@ -21,6 +21,7 @@ import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { ArgumentType } from './arguments';
 import { TypeToString } from '../types/common';
 import { ExecutionContext } from '../execution/types';
+import { ExpressionFunctionKibanaContext } from '../expression_functions/specs';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -94,3 +95,30 @@ export interface ExpressionFunctionDefinition<
  * Type to capture every possible expression function definition.
  */
 export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<any, any, any, any>;
+
+/**
+ * Anybody registering an expression function can add a property to this
+ * interface so that any module importing ExpressionFunctionDefinitions can
+ * have the interfaces of all expression functions available to them.
+ *
+ *  declare module '../../plugins/expressions/public' {
+ *    interface ExpressionFunctionDefinitions {
+ *      myExprFunctionName?: MyExpressionFunctionDefinition;
+ *    }
+ *  }
+ *
+ *  declare module '../../plugins/expressions/server' {
+ *    interface ExpressionFunctionDefinitions {
+ *      myExprFunctionName?: MyExpressionFunctionDefinition;
+ *    }
+ *  }
+ *
+ * @public
+ */
+export interface ExpressionFunctionDefinitions {
+  // The property name should match the name of your function.
+  kibana_context: ExpressionFunctionKibanaContext;
+
+  // Fallback for if a property cannot be found.
+  [key: string]: AnyExpressionFunctionDefinition;
+}

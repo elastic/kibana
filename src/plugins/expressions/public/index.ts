@@ -61,6 +61,7 @@ export {
   ExpressionAstNode,
   ExpressionFunction,
   ExpressionFunctionDefinition,
+  ExpressionFunctionDefinitions,
   ExpressionFunctionKibana,
   ExpressionFunctionParameter,
   ExpressionImage,
