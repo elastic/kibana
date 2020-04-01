@@ -30,7 +30,7 @@ it is behind a firewall and falls back to `'browser'` to send it from users' bro
 when they are navigating through {kib}.
 
 `telemetry.optIn`:: *Default: true*.
-Set to `true` to auto opt-in the cluster into reporting statistics. You can also opt out through the
+Set to `true` to automatically opt into reporting cluster statistics. You can also opt out through
 *Advanced Settings* in {kib}.
 
 `telemetry.allowChangingOptInStatus`:: *Default: true*.
