@@ -33,12 +33,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('displays ping data as expected', async () => {
-      await pageObjects.uptime.loadDataAndGoToMonitorPage(
+      await uptime.loadDataAndGoToMonitorPage(
         'Sep 10, 2019 @ 12:40:08.078',
         'Sep 11, 2019 @ 19:40:08.078',
         '0000-intermittent'
       );
-      await pageObjects.uptime.checkPingListInteractions(
+      await uptime.checkPingListInteractions(
         [
           '2019-09-11T03:40:34.371Z',
           '2019-09-11T03:40:04.370Z',

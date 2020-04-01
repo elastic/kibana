@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
-  const { common: commonService, navigation, alerts } = getService('uptime');
+  const { alerts, common: commonService, monitor, navigation } = getService('uptime');
   const retry = getService('retry');
 
   return new (class UptimePage {
@@ -143,12 +143,12 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       status?: string
     ): Promise<void> {
       if (location) {
-        await uptimeService.setPingListLocation(location);
+        await monitor.setPingListLocation(location);
       }
       if (status) {
-        await uptimeService.setPingListStatus(status);
+        await monitor.setPingListStatus(status);
       }
-      return uptimeService.checkForPingListTimestamps(timestamps);
+      return monitor.checkForPingListTimestamps(timestamps);
     }
   })();
 }
