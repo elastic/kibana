@@ -20,5 +20,15 @@ export function getAlertType(): AlertTypeModel {
     iconClass: 'bell',
     alertParamsExpression: Expressions,
     validate: validateMetricThreshold,
+    defaultActionMessage: i18n.translate(
+      'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\}
+
+\\{\\{context.metricOf.condition0\\}\\} has crossed a threshold of \\{\\{context.thresholdOf.condition0\\}\\}
+Current value is \\{\\{context.valueOf.condition0\\}\\}
+`,
+      }
+    ),
   };
 }
