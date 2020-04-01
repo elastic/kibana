@@ -25,6 +25,7 @@ interface LogEntryActionsColumnProps {
   onOpenMenu: () => void;
   onCloseMenu: () => void;
   onViewDetails: () => void;
+  onViewInContext?: () => void;
 }
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
@@ -35,17 +36,33 @@ const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetail
   defaultMessage: 'View details',
 });
 
+const LOG_VIEW_IN_CONTEXT_LABEL = i18n.translate(
+  'xpack.infra.lobs.logEntryActionsViewInContextButton',
+  {
+    defaultMessage: 'View in context',
+  }
+);
+
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   isHovered,
   isMenuOpen,
   onOpenMenu,
   onCloseMenu,
   onViewDetails,
+  onViewInContext,
 }) => {
   const handleClickViewDetails = useCallback(() => {
     onCloseMenu();
     onViewDetails();
   }, [onCloseMenu, onViewDetails]);
+
+  const handleClickViewInContext = useCallback(() => {
+    onCloseMenu();
+
+    // Function might be `undefined` and the linter doesn't like that.
+    // eslint-disable-next-line no-unused-expressions
+    onViewInContext?.();
+  }, [onCloseMenu, onViewInContext]);
 
   const button = (
     <ButtonWrapper>
@@ -72,6 +89,12 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
               </SectionTitle>
               <SectionLinks>
                 <SectionLink label={LOG_DETAILS_LABEL} onClick={handleClickViewDetails} />
+                {onViewInContext !== undefined ? (
+                  <SectionLink
+                    label={LOG_VIEW_IN_CONTEXT_LABEL}
+                    onClick={handleClickViewInContext}
+                  />
+                ) : null}
               </SectionLinks>
             </Section>
           </ActionMenu>
