@@ -359,9 +359,11 @@ export class EndpointDocGenerator {
         maxChildren: this.randomN(maxChildrenPerNode + 1),
       });
       yield child;
+      let processDuration: number = 6 * 3600;
       if (this.randomN(100) < percentChildrenTerminated) {
+        processDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
         yield this.generateEvent({
-          timestamp: timestamp + this.randomN(1000000) * 1000, // This lets termination events be up to 1 million seconds after the creation event (~11 days)
+          timestamp: timestamp + processDuration * 1000,
           entityID: child.process.entity_id,
           parentEntityID: child.process.parent?.entity_id,
           eventCategory: 'process',
@@ -369,16 +371,20 @@ export class EndpointDocGenerator {
         });
       }
       if (this.randomN(100) < percentNodesWithRelated) {
-        yield* this.relatedEventsGenerator(child, relatedEventsPerNode);
+        yield* this.relatedEventsGenerator(child, relatedEventsPerNode, processDuration);
       }
     }
   }
-
-  public *relatedEventsGenerator(node: Event, numRelatedEvents = 10) {
-    // Related events have timestamps within 6 hours of the spawning event
-    const ts = node['@timestamp'] + this.randomN(3600 * 6) * 1000;
+  // Related events have timestamps within 6 hours of the spawning event by default
+  public *relatedEventsGenerator(
+    node: Event,
+    numRelatedEvents = 10,
+    processDuration: number = 6 * 3600
+  ) {
     for (let i = 0; i < numRelatedEvents; i++) {
       const eventInfo = this.randomChoice(OTHER_EVENT_CATEGORIES);
+
+      const ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
       yield this.generateEvent({
         timestamp: ts,
         entityID: node.process.entity_id,
