@@ -67,5 +67,5 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     return <AlertMonitorStatus {...params} autocomplete={autocomplete} />;
   },
   validate,
-  defaultActionMessage: '{{context.message}}\n{{context.completeIdList}}',
+  defaultActionMessage: `{{context.message}}\nLast triggered at: {{state.lastTriggeredAt}}\n{{context.downMonitorsWithGeo}}`,
 });
