@@ -10,7 +10,6 @@ export const pingsSchema = gql`
   schema {
     query: Query
   }
-
   type PingResults {
     "Total number of matching pings"
     total: UnsignedInteger!
@@ -19,7 +18,6 @@ export const pingsSchema = gql`
     "List of pings "
     pings: [Ping!]!
   }
-
   type Query {
     "Get a list of all recorded pings for all monitors"
     allPings(
@@ -37,33 +35,27 @@ export const pingsSchema = gql`
       dateRangeEnd: String!
       "Optional: agent location to filter by."
       location: String
+      "Optional: current page."
+      page: Int
     ): PingResults!
-
-    "Gets the number of documents in the target index"
-    getDocCount: DocCount!
   }
-
   type ContainerImage {
     name: String
     tag: String
   }
-
   type Container {
     id: String
     image: ContainerImage
     name: String
     runtime: String
   }
-
   type DocCount {
     count: UnsignedInteger!
   }
-
   "The monitor's status for a ping"
   type Duration {
     us: UnsignedInteger
   }
-
   "An agent for recording a beat"
   type Beat {
     hostname: String
@@ -71,23 +63,19 @@ export const pingsSchema = gql`
     timezone: String
     type: String
   }
-
   type Docker {
     id: String
     image: String
     name: String
   }
-
   type ECS {
     version: String
   }
-
   type Error {
     code: Int
     message: String
     type: String
   }
-
   type OS {
     family: String
     kernel: String
@@ -96,7 +84,6 @@ export const pingsSchema = gql`
     name: String
     build: String
   }
-
   "Geolocation data added via processors to enrich events."
   type Geo {
     "Name of the city in which the agent is running."
@@ -116,7 +103,6 @@ export const pingsSchema = gql`
     "Name of the region hosting the agent."
     region_name: String
   }
-
   type Host {
     architecture: String
     id: String
@@ -126,7 +112,6 @@ export const pingsSchema = gql`
     name: String
     os: OS
   }
-
   type HttpRTT {
     content: Duration
     response_header: Duration
@@ -135,7 +120,6 @@ export const pingsSchema = gql`
     validate_body: Duration
     write_request: Duration
   }
-
   type HTTPBody {
     "Size of HTTP response body in bytes"
     bytes: UnsignedInteger
@@ -146,44 +130,36 @@ export const pingsSchema = gql`
     "Byte length of the content string, taking into account multibyte chars."
     content_bytes: UnsignedInteger
   }
-
   type HTTPResponse {
     status_code: UnsignedInteger
     body: HTTPBody
   }
-
   type HTTP {
     response: HTTPResponse
     rtt: HttpRTT
     url: String
   }
-
   type ICMP {
     requests: Int
     rtt: Int
   }
-
   type KubernetesContainer {
     image: String
     name: String
   }
-
   type KubernetesNode {
     name: String
   }
-
   type KubernetesPod {
     name: String
     uid: String
   }
-
   type Kubernetes {
     container: KubernetesContainer
     namespace: String
     node: KubernetesNode
     pod: KubernetesPod
   }
-
   type MetaCloud {
     availability_zone: String
     instance_id: String
@@ -193,11 +169,9 @@ export const pingsSchema = gql`
     provider: String
     region: String
   }
-
   type Meta {
     cloud: MetaCloud
   }
-
   type Monitor {
     duration: Duration
     host: String
@@ -215,34 +189,28 @@ export const pingsSchema = gql`
     type: String
     check_group: String
   }
-
   "Metadata added by a proccessor, which is specified in its configuration."
   type Observer {
     "Geolocation data for the agent."
     geo: Geo
   }
-
   type Resolve {
     host: String
     ip: String
     rtt: Duration
   }
-
   type RTT {
     connect: Duration
     handshake: Duration
     validate: Duration
   }
-
   type Socks5 {
     rtt: RTT
   }
-
   type TCP {
     port: Int
     rtt: RTT
   }
-
   "Contains monitor transmission encryption information."
   type PingTLS {
     "The date and time after which the certificate is invalid."
@@ -251,7 +219,6 @@ export const pingsSchema = gql`
     certificates: String
     rtt: RTT
   }
-
   type URL {
     full: String
     scheme: String
@@ -260,7 +227,6 @@ export const pingsSchema = gql`
     path: String
     query: String
   }
-
   "A request sent from a monitor to a host"
   type Ping {
     "unique ID for this ping"

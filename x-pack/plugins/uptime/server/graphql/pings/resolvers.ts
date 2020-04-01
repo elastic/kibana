@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AllPingsQueryArgs, DocCount, PingResults, UMResolver } from '../../../common';
+import { UMResolver } from '../../../../../legacy/plugins/uptime/common/graphql/resolver_types';
+import {
+  AllPingsQueryArgs,
+  PingResults,
+} from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';
+import { savedObjectsAdapter } from '../../lib/saved_objects';
 
 export type UMAllPingsResolver = UMResolver<
   PingResults | Promise<PingResults>,
@@ -16,11 +21,8 @@ export type UMAllPingsResolver = UMResolver<
   UMContext
 >;
 
-export type UMGetDocCountResolver = UMResolver<DocCount | Promise<DocCount>, any, never, UMContext>;
-
 export interface UMPingResolver {
   allPings: () => PingResults;
-  getDocCount: () => number;
 }
 
 export const createPingsResolvers: CreateUMGraphQLResolvers = (
@@ -28,17 +30,21 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
 ): {
   Query: {
     allPings: UMAllPingsResolver;
-    getDocCount: UMGetDocCountResolver;
   };
 } => ({
   Query: {
     async allPings(
       _resolver,
-      { monitorId, sort, size, status, dateRangeStart, dateRangeEnd, location },
-      { APICaller }
+      { monitorId, sort, size, status, dateRangeStart, dateRangeEnd, location, page },
+      { APICaller, savedObjectsClient }
     ): Promise<PingResults> {
-      return await libs.pings.getAll({
+      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+        savedObjectsClient
+      );
+
+      return await libs.requests.getPings({
         callES: APICaller,
+        dynamicSettings,
         dateRangeStart,
         dateRangeEnd,
         monitorId,
@@ -46,10 +52,8 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
         sort,
         size,
         location,
+        page,
       });
-    },
-    async getDocCount(_resolver, _args, { APICaller }): Promise<DocCount> {
-      return libs.pings.getDocCount({ callES: APICaller });
     },
   },
 });
