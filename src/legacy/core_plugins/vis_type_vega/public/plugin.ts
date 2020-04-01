@@ -48,7 +48,7 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   data: ReturnType<DataPublicPlugin['setup']>;
   visTypeVega: VisTypeVegaSetup;
-  maps_legacy: any;
+  mapsLegacy: any;
 }
 
 /** @internal */
@@ -66,7 +66,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, expressions, visualizations, visTypeVega, maps_legacy }: VegaPluginSetupDependencies
+    { data, expressions, visualizations, visTypeVega, mapsLegacy }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: visTypeVega.config.enableExternalUrls,
@@ -80,7 +80,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       plugins: {
         data,
       },
-      serviceSettings: maps_legacy.serviceSettings,
+      serviceSettings: mapsLegacy.serviceSettings,
     };
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));

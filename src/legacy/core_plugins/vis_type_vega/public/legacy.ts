@@ -25,7 +25,7 @@ import { plugin } from '.';
 const setupPlugins: Readonly<VegaPluginSetupDependencies> = {
   ...npSetup.plugins,
   visualizations: npSetup.plugins.visualizations,
-  maps_legacy: npSetup.plugins.maps_legacy,
+  mapsLegacy: npSetup.plugins.mapsLegacy,
 };
 
 const startPlugins: Readonly<VegaPluginStartDependencies> = {

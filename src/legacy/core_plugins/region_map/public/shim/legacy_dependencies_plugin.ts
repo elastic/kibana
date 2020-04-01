@@ -19,13 +19,11 @@
 
 import chrome from 'ui/chrome';
 import { CoreStart, Plugin } from 'kibana/public';
-import { RegionMapsConfig } from '../plugin';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
   $injector: any;
   serviceSettings: any;
-  regionmapsConfig: RegionMapsConfig;
 }
 
 export class LegacyDependenciesPlugin

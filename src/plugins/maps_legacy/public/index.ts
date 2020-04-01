@@ -56,3 +56,6 @@ export {
   FileLayer,
   TmsLayer,
 };
+
+export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
+export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;

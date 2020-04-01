@@ -46,7 +46,7 @@ export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
-  maps_legacy: any;
+  mapsLegacy: any;
 }
 
 /** @internal */
@@ -65,12 +65,14 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, maps_legacy, __LEGACY }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy, __LEGACY }: RegionMapPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
-      regionmapsConfig: core.injectedMetadata.getInjectedVar('regionmapsConfig'),
-      serviceSettings: maps_legacy.serviceSettings,
+      regionmapsConfig: core.injectedMetadata.getInjectedVar(
+        'regionmapsConfig'
+      ) as RegionMapsConfig,
+      serviceSettings: mapsLegacy.serviceSettings,
       ...(await __LEGACY.setup()),
     };
 

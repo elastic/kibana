@@ -64,6 +64,7 @@ import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../plugins/visualizations/public';
+import { MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -86,6 +87,7 @@ export interface PluginsSetup {
   visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
   savedObjectsManagement: SavedObjectsManagementPluginSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 export interface PluginsStart {

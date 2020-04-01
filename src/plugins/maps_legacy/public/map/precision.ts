@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 import { getUiSettings } from '../kibana_services';
 import { geohashColumns } from './decode_geo_hash';
 

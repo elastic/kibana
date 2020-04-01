@@ -25,6 +25,7 @@ import { setToasts, setUiSettings, setInjectedVarFunc } from './kibana_services'
 import { ServiceSettings } from './map/service_settings';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
+import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -36,9 +37,6 @@ import { getPrecision, getZoomPrecision } from './map/precision';
 export interface MapsLegacySetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacyStartDependencies {}
-
-export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
-export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
   constructor() {}

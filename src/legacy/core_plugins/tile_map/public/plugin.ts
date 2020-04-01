@@ -46,7 +46,7 @@ interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup
 export interface TileMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  maps_legacy: any;
+  mapsLegacy: any;
   __LEGACY: LegacyDependenciesPlugin;
 }
 
@@ -60,12 +60,7 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    {
-      expressions,
-      visualizations,
-      maps_legacy: mapsLegacy,
-      __LEGACY,
-    }: TileMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy, __LEGACY }: TileMapPluginSetupDependencies
   ) {
     const { getZoomPrecision, getPrecision, serviceSettings } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
