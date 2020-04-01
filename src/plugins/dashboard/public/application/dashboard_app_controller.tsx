@@ -29,6 +29,7 @@ import { map } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
+import { TimeRange } from 'src/plugins/data/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -253,12 +254,16 @@ export class DashboardAppController {
         showSaveQuery: $scope.showSaveQuery,
         query: $scope.model.query,
         savedQuery: $scope.savedQuery,
-        onQuerySubmit: $scope.updateQueryAndFetch,
+        onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
+          if (!payload.query) {
+            $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
+          } else {
+            $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
+          }
+        },
         screenTitle: $scope.screenTitle,
         indexPatterns: $scope.indexPatterns,
         filters: $scope.model.filters,
-        dateRangeFrom: $scope.model.timeRange.from,
-        dateRangeTo: $scope.model.timeRange.to,
         onFiltersUpdated: $scope.onFiltersUpdated,
         isRefreshPaused: $scope.model.refreshInterval.pause,
         refreshInterval: $scope.model.refreshInterval.value,
@@ -567,7 +572,10 @@ export class DashboardAppController {
 
     $scope.onSavedQueryUpdated = savedQuery => {
       $scope.savedQuery = { ...savedQuery };
-      queryFilter.setFilters(savedQuery.attributes.filters);
+      const filters = savedQuery.attributes.filters;
+      if (filters) {
+        queryFilter.setFilters(filters);
+      }
       updateNavBar();
     };
 
@@ -589,8 +597,7 @@ export class DashboardAppController {
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
       const savedQueryFilters = savedQuery.attributes.filters || [];
       const globalFilters = queryFilter.getGlobalFilters();
-      const allFilters = [...globalFilters, ...savedQueryFilters];
-
+      const allFilters = [...globalFilters, ...savedQueryFilters, ...queryFilter.getAppFilters()];
       dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
       if (savedQuery.attributes.timefilter) {
         timefilter.setTime({
