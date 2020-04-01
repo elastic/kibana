@@ -30,6 +30,9 @@ export const AlertDetailsOverview = styled(
       return null;
     }
 
+    /**
+     * TODO, Resolver tab is closing when the page is hard refreshed.
+     */
     const tabs: EuiTabbedContentTab[] = useMemo(() => {
       return [
         {

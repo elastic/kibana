@@ -37,7 +37,7 @@ const StyledGraphControls = styled(GraphControls)`
 const StyledResolverContainer = styled.div`
   display: flex;
   flex-grow: 1;
-  contain: layout;
+  //contain: layout;
 `;
 
 const bgColor = NamedColors.resolverBackground;
@@ -140,6 +140,6 @@ export const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
-  contain: strict;
+  //contain: strict;
   background-color: ${bgColor};
 `;

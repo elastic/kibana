@@ -58,6 +58,15 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           }
           const mappedChildren = extractChildren(children);
           const response: ResolverEvent[] = [...lifecycle, ...mappedChildren];
+          const debug = response.map(
+            ({
+              process: {
+                entity_id: entityID,
+                parent: { entity_id: parentEntityID },
+              },
+            }) => [entityID, parentEntityID]
+          );
+          console.log('response (fake) debug', debug);
           api.dispatch({
             type: 'serverReturnedResolverData',
             payload: { data: { result: { search_results: response } } },
