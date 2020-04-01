@@ -39,6 +39,7 @@ export {
   LifecycleResponseFactory,
   RedirectResponseOptions,
   RequestHandler,
+  RequestHandlerWrapper,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,

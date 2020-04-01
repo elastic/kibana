@@ -60,9 +60,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
               return response.ok({
                 body,
-                headers: Object.assign({}, options.headers, {
-                  'content-security-policy': cspHeader,
-                }),
+                headers: { ...options.headers, 'content-security-policy': cspHeader },
               });
             });
           },
@@ -78,9 +76,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
               return response.ok({
                 body,
-                headers: Object.assign({}, options.headers, {
-                  'content-security-policy': cspHeader,
-                }),
+                headers: { ...options.headers, 'content-security-policy': cspHeader },
               });
             });
           },
@@ -99,9 +95,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
                   return response.ok({
                     body,
-                    headers: Object.assign({}, options.headers, {
-                      'content-security-policy': cspHeader,
-                    }),
+                    headers: { ...options.headers, 'content-security-policy': cspHeader },
                   });
                 },
                 async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
@@ -113,35 +107,27 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
                   return response.ok({
                     body,
-                    headers: Object.assign({}, options.headers, {
-                      'content-security-policy': cspHeader,
-                    }),
+                    headers: { ...options.headers, 'content-security-policy': cspHeader },
                   });
                 },
                 renderHtml(options: HttpResourcesResponseOptions) {
                   return response.ok({
                     body: options.body,
-                    headers: Object.assign(
-                      { 'cache-control': 'private, no-cache, no-store' },
-                      options.headers,
-                      {
-                        'content-type': 'text/html',
-                        'content-security-policy': cspHeader,
-                      }
-                    ),
+                    headers: {
+                      ...options.headers,
+                      'content-type': 'text/html',
+                      'content-security-policy': cspHeader,
+                    },
                   });
                 },
                 renderJs(options: HttpResourcesResponseOptions) {
                   return response.ok({
                     body: options.body,
-                    headers: Object.assign(
-                      { 'cache-control': 'private, no-cache, no-store' },
-                      options.headers,
-                      {
-                        'content-type': 'text/javascript',
-                        'content-security-policy': cspHeader,
-                      }
-                    ),
+                    headers: {
+                      ...options.headers,
+                      'content-type': 'text/javascript',
+                      'content-security-policy': cspHeader,
+                    },
                   });
                 },
               };

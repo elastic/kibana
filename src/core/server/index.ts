@@ -145,6 +145,7 @@ export {
   OnPreResponseInfo,
   RedirectResponseOptions,
   RequestHandler,
+  RequestHandlerWrapper,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   ResponseError,

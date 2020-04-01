@@ -49,11 +49,14 @@ export function defineOIDCRoutes({
         }
         return response.renderHtml({
           body: `
-          <!DOCTYPE html>
-          <title>Kibana OpenID Connect Login</title>
-          <link rel="icon" href="data:,">
-          <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
-        `,
+            <!DOCTYPE html>
+            <title>Kibana OpenID Connect Login</title>
+            <link rel="icon" href="data:,">
+            <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
+          `,
+          headers: {
+            'cache-control': 'private, no-cache, no-store',
+          },
         });
       }
     );
@@ -74,10 +77,13 @@ export function defineOIDCRoutes({
       const serverBasePath = basePath.serverBasePath;
       return response.renderJs({
         body: `
-        window.location.replace(
-          '${serverBasePath}/api/security/oidc/callback?authenticationResponseURI=' + encodeURIComponent(window.location.href)
-        );
-      `,
+          window.location.replace(
+            '${serverBasePath}/api/security/oidc/callback?authenticationResponseURI=' + encodeURIComponent(window.location.href)
+          );
+        `,
+        headers: {
+          'cache-control': 'private, no-cache, no-store',
+        },
       });
     }
   );

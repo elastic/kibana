@@ -322,6 +322,19 @@ export type RequestHandler<
   response: ResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
+/**
+ * Type-safe wrapper for {@link RequestHandler} function.
+ * @public
+ * @example
+ * ```typescript
+ * export const wrapper: RequestHandlerWrapper = handler => {
+ *   return async (context, request, response) => {
+ *     // do some logic
+ *     ...
+ *   };
+ * }
+ * ```
+ */
 export type RequestHandlerWrapper = <
   P,
   Q,
