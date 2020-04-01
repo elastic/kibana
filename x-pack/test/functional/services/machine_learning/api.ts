@@ -277,6 +277,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
     },
 
+    async waitForAnomalyDetectionJobToExist(jobId: string) {
+      await retry.waitForWithTimeout(`'${jobId}' to exist`, 5 * 1000, async () => {
+        if (await this.getAnomalyDetectionJob(jobId)) {
+          return true;
+        } else {
+          throw new Error(`expected anomaly detection job '${jobId}' to exist`);
+        }
+      });
+    },
+
     async createAnomalyDetectionJob(jobConfig: Job) {
       const jobId = jobConfig.job_id;
       log.debug(`Creating anomaly detection job with id '${jobId}'...`);
@@ -285,17 +295,21 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send(jobConfig)
         .expect(200);
 
-      await retry.waitForWithTimeout(`'${jobId}' to be created`, 5 * 1000, async () => {
-        if (await this.getAnomalyDetectionJob(jobId)) {
-          return true;
-        } else {
-          throw new Error(`expected anomaly detection job '${jobId}' to be created`);
-        }
-      });
+      await this.waitForAnomalyDetectionJobToExist(jobId);
     },
 
     async getDatafeed(datafeedId: string) {
       return await esSupertest.get(`/_ml/datafeeds/${datafeedId}`).expect(200);
+    },
+
+    async waitForDatafeedToExist(datafeedId: string) {
+      await retry.waitForWithTimeout(`'${datafeedId}' to exist`, 5 * 1000, async () => {
+        if (await this.getDatafeed(datafeedId)) {
+          return true;
+        } else {
+          throw new Error(`expected datafeed '${datafeedId}' to exist`);
+        }
+      });
     },
 
     async createDatafeed(datafeedConfig: Datafeed) {
@@ -306,13 +320,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .send(datafeedConfig)
         .expect(200);
 
-      await retry.waitForWithTimeout(`'${datafeedId}' to be created`, 5 * 1000, async () => {
-        if (await this.getDatafeed(datafeedId)) {
-          return true;
-        } else {
-          throw new Error(`expected datafeed '${datafeedId}' to be created`);
-        }
-      });
+      await this.waitForDatafeedToExist(datafeedId);
     },
 
     async openAnomalyDetectionJob(jobId: string) {
