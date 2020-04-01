@@ -14,6 +14,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('./apps/login_page')],
+    testFiles: [require.resolve('./apps/grok_debugger')],
     pageObjects,
     services,
 
