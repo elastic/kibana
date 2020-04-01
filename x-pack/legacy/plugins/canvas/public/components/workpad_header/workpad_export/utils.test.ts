@@ -22,7 +22,7 @@ test('getPdfUrl returns the correct url', () => {
   const url = getPdfUrl(workpad, { pageCount: 2 }, basePath);
 
   expect(url).toMatchInlineSnapshot(
-    `"basepath//api/reporting/generate/printablePdf?jobParams=(browserTimezone:America%2FPhoenix,layout:(dimensions:(height:0,width:0),id:preserve_layout),objectType:'canvas%20workpad',relativeUrls:!(%2Fapp%2Fcanvas%23%2Fexport%2Fworkpad%2Fpdf%2Fbase-workpad%2Fpage%2F1,%2Fapp%2Fcanvas%23%2Fexport%2Fworkpad%2Fpdf%2Fbase-workpad%2Fpage%2F2),title:'base%20workpad')"`
+    `"basepath/s/spacey//api/reporting/generate/printablePdf?jobParams=(browserTimezone:America%2FPhoenix,layout:(dimensions:(height:0,width:0),id:preserve_layout),objectType:'canvas%20workpad',relativeUrls:!(%2Fs%2Fspacey%2Fapp%2Fcanvas%23%2Fexport%2Fworkpad%2Fpdf%2Fbase-workpad%2Fpage%2F1,%2Fs%2Fspacey%2Fapp%2Fcanvas%23%2Fexport%2Fworkpad%2Fpdf%2Fbase-workpad%2Fpage%2F2),title:'base%20workpad')"`
   );
 });
 
@@ -33,10 +33,10 @@ test('createPdf posts to create the pdf', () => {
 
   const args = (fetch.post as jest.MockedFunction<typeof fetch.post>).mock.calls[0];
 
-  expect(args[0]).toMatchInlineSnapshot(`"basepath//api/reporting/generate/printablePdf"`);
+  expect(args[0]).toMatchInlineSnapshot(`"basepath/s/spacey//api/reporting/generate/printablePdf"`);
   expect(args[1]).toMatchInlineSnapshot(`
     Object {
-      "jobParams": "(browserTimezone:America/Phoenix,layout:(dimensions:(height:0,width:0),id:preserve_layout),objectType:'canvas workpad',relativeUrls:!(/app/canvas#/export/workpad/pdf/base-workpad/page/1,/app/canvas#/export/workpad/pdf/base-workpad/page/2),title:'base workpad')",
+      "jobParams": "(browserTimezone:America/Phoenix,layout:(dimensions:(height:0,width:0),id:preserve_layout),objectType:'canvas workpad',relativeUrls:!(/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/1,/s/spacey/app/canvas#/export/workpad/pdf/base-workpad/page/2),title:'base workpad')",
     }
   `);
 });
