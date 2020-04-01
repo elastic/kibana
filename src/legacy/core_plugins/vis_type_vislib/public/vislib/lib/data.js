@@ -31,16 +31,19 @@ import { getFormatService } from '../../services';
 // and thus all map to the same value.
 // This little helper overwrites the toString method of an object and keeps it the
 // same otherwise - allowing d3 to correctly work with the values.
-const D3MappableObject = function(data) {
-  for (const key in data) {
-    if (data.hasOwnProperty(key)) {
-      this[key] = data[key];
+class D3MappableObject {
+  constructor(data) {
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        this[key] = data[key];
+      }
     }
   }
-};
-D3MappableObject.prototype.toString = function() {
-  return JSON.stringify(this);
-};
+
+  toString() {
+    return JSON.stringify(this);
+  }
+}
 
 /**
  * Provides an API for pulling values off the data
