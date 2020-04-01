@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { fromEventPattern, of } from 'rxjs';
-import { concatMap, delay, map } from 'rxjs/operators';
+import { fromEventPattern, of, fromEvent } from 'rxjs';
+import { concatMap, delay, map, takeUntil } from 'rxjs/operators';
 import jsonStream from './json_stream';
-import { pipe, noop, green } from './utils';
+import { pipe, noop, green, always } from './utils';
 import { ingest } from './ingest';
 import {
   staticSite,
@@ -31,8 +31,11 @@ import {
   buildId,
   coveredFilePath,
   ciRunUrl,
+  itemizeVcs,
 } from './transforms';
 import { resolve } from 'path';
+import { createReadStream } from 'fs';
+import readline from 'readline';
 
 const KIBANA_ROOT_PATH = '../../../..';
 const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
@@ -43,25 +46,44 @@ const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
 const prokStatsTimeStampBuildId = pipe(statsAndstaticSiteUrl, buildId, addPrePopulatedTimeStamp);
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
-export default ({ jsonSummaryPath }, log) => {
-  log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
-  log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
-  log.debug(`### Ingesting from summary json: \n\t[${green(jsonSummaryPath)}]`);
-
-  validateRoot(KIBANA_ROOT, log);
-
+const execute = jsonSummaryPath => log => vcsInfo => {
   const objStream = jsonStream(jsonSummaryPath).on('done', noop);
+  const itemizeVcsInfo = itemizeVcs(vcsInfo);
 
   fromEventPattern(_ => objStream.on('node', '!.*', _))
     .pipe(
       map(prokStatsTimeStampBuildId),
       map(coveredFilePath),
+      map(itemizeVcsInfo),
       map(ciRunUrl),
       map(addJsonSummaryPath(jsonSummaryPath)),
       map(addTestRunnerAndStaticSiteUrl),
       concatMap(x => of(x).pipe(delay(ms)))
     )
     .subscribe(ingest(log));
+};
+
+export default ({ jsonSummaryPath, vcsInfoFilePath }, log) => {
+  log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
+  log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
+  log.debug(`### Ingesting from summary json: \n\t[${green(jsonSummaryPath)}]`);
+
+  validateRoot(KIBANA_ROOT, log);
+
+  const vcsInfo = [];
+  const vcsInfoLines$ = vcsInfoFilePath => {
+    const rl = readline.createInterface({ input: createReadStream(vcsInfoFilePath) });
+    return fromEvent(rl, 'line').pipe(takeUntil(fromEvent(rl, 'close')));
+  };
+
+  const executeWithPath = execute(jsonSummaryPath)(log);
+  const mutate = x => vcsInfo.push(x.trimStart().trimEnd());
+
+  vcsInfoLines$(vcsInfoFilePath).subscribe(
+    mutate,
+    err => console.log('Error: %s', err),
+    always(executeWithPath(vcsInfo))
+  );
 };
 
 function validateRoot(x, log) {
