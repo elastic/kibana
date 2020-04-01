@@ -69,7 +69,7 @@ export const uiActiveDescendantId = composeSelectors(
 );
 
 /**
- * Returns the id of the "selected" tree node (fake-focused)
+ * Returns the id of the "selected" tree node (the node that is currently "pressed" and possibly controlling other popups / components)
  */
 export const uiSelectedDescendantId = composeSelectors(
   uiStateSelector,
