@@ -52,7 +52,7 @@ import { hasListsFeature } from '../../feature_flags';
  *  - immutable is forbidden but defaults to true instead of to false and it can only ever be true
  *  - enabled defaults to false instead of true
  *  - version is a required field that must exist
- *  - index is a required field that must exist
+ *  - index is a required field that must exist if type !== machine_learning
  */
 export const addPrepackagedRulesSchema = Joi.object({
   actions: actions.default([]),
@@ -71,7 +71,11 @@ export const addPrepackagedRulesSchema = Joi.object({
     .forbidden()
     .default(true)
     .valid(true),
-  index: index.required(),
+  index: index.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: Joi.required(),
+  }),
   interval: interval.default('5m'),
   query: query.when('type', {
     is: 'machine_learning',

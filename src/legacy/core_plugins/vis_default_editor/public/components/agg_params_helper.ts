@@ -174,4 +174,17 @@ function isInvalidParamsTouched(
   return invalidParams.every(param => param.touched);
 }
 
-export { getAggParamsToRender, getAggTypeOptions, isInvalidParamsTouched };
+function buildAggDescription(agg: IAggConfig) {
+  let description = '';
+  if (agg.type && agg.type.makeLabel) {
+    try {
+      description = agg.type.makeLabel(agg);
+    } catch (e) {
+      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including interval's 'write',
+      // which throws an error when interval is undefined.
+    }
+  }
+  return description;
+}
+
+export { getAggParamsToRender, getAggTypeOptions, isInvalidParamsTouched, buildAggDescription };

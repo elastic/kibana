@@ -243,7 +243,8 @@ export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFi
 
 export const getDefaultFieldsFromJobCaps = (
   fields: Field[],
-  jobConfig: DataFrameAnalyticsConfig
+  jobConfig: DataFrameAnalyticsConfig,
+  needsDestIndexFields: boolean
 ): { selectedFields: Field[]; docFields: Field[]; depVarType?: ES_FIELD_TYPES } => {
   const fieldsObj = { selectedFields: [], docFields: [] };
   if (fields.length === 0) {
@@ -260,16 +261,22 @@ export const getDefaultFieldsFromJobCaps = (
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
+  // Only need to add these first two fields if we didn't use dest index pattern to get the fields
+  const allFields: any =
+    needsDestIndexFields === true
+      ? [
+          {
+            id: `${resultsField}.is_training`,
+            name: `${resultsField}.is_training`,
+            type: ES_FIELD_TYPES.BOOLEAN,
+          },
+          { id: predictedField, name: predictedField, type },
+        ]
+      : [];
 
-  const allFields: any = [
-    {
-      id: `${resultsField}.is_training`,
-      name: `${resultsField}.is_training`,
-      type: ES_FIELD_TYPES.BOOLEAN,
-    },
-    { id: predictedField, name: predictedField, type },
-    ...fields,
-  ].sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
+  allFields.push(...fields);
+  // @ts-ignore
+  allFields.sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
 
   let selectedFields = allFields
     .slice(0, DEFAULT_REGRESSION_COLUMNS * 2)
