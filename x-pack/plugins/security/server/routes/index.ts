@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, IClusterClient, IRouter, Logger } from '../../../../../src/core/server';
+import {
+  CoreSetup,
+  HttpResources,
+  IClusterClient,
+  IRouter,
+  Logger,
+} from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { Authentication } from '../authentication';
 import { Authorization } from '../authorization';
@@ -24,7 +30,7 @@ import { defineViewRoutes } from './views';
 export interface RouteDefinitionParams {
   router: IRouter;
   basePath: CoreSetup['http']['basePath'];
-  csp: CoreSetup['http']['csp'];
+  httpResources: HttpResources;
   logger: Logger;
   clusterClient: IClusterClient;
   config: ConfigType;

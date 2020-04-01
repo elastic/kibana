@@ -12,7 +12,11 @@ import {
 import { Authentication } from '../../authentication';
 import { defineLoggedOutRoutes } from './logged_out';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  httpResourcesMock,
+} from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('LoggedOut view routes', () => {
@@ -65,8 +69,9 @@ describe('LoggedOut view routes', () => {
     const request = httpServerMock.createKibanaRequest();
     const contextMock = coreMock.createRequestHandlerContext();
 
+    const responseFactory = httpResourcesMock.createResponseFactory();
     await expect(
-      routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
+      routeHandler({ core: contextMock } as any, request, responseFactory)
     ).resolves.toEqual({
       options: {
         headers: {
@@ -78,6 +83,6 @@ describe('LoggedOut view routes', () => {
     });
 
     expect(authc.getSessionInfo).toHaveBeenCalledWith(request);
-    expect(contextMock.rendering.render).toHaveBeenCalledWith({ includeUserSettings: false });
+    expect(responseFactory.renderCoreApp).toHaveBeenCalledWith({ includeUserSettings: false });
   });
 });

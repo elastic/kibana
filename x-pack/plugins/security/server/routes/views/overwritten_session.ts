@@ -9,14 +9,6 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for the Overwritten Session view.
  */
-export function defineOverwrittenSessionRoutes({ router, csp }: RouteDefinitionParams) {
-  router.get(
-    { path: '/security/overwritten_session', validate: false },
-    async (context, request, response) => {
-      return response.ok({
-        body: await context.core.rendering.render({ includeUserSettings: true }),
-        headers: { 'content-security-policy': csp.header },
-      });
-    }
-  );
+export function defineOverwrittenSessionRoutes({ httpResources }: RouteDefinitionParams) {
+  httpResources.registerCoreApp({ path: '/security/overwritten_session', validate: false });
 }

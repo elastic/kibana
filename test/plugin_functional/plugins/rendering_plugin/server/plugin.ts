@@ -23,9 +23,7 @@ import { schema } from '@kbn/config-schema';
 
 export class RenderingPlugin implements Plugin {
   public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-
-    router.get(
+    core.http.resources.register(
       {
         path: '/render/{id}',
         validate: {
@@ -45,14 +43,11 @@ export class RenderingPlugin implements Plugin {
         const { includeUserSettings } = req.query;
         const app = { getId: () => id! };
         const options: Partial<IRenderOptions> = { app, includeUserSettings };
-        const body = await context.core.rendering.render(options);
 
-        return res.ok({
-          body,
-          headers: {
-            'content-security-policy': core.http.csp.header,
-          },
-        });
+        if (includeUserSettings) {
+          return res.renderCoreApp(options as any);
+        }
+        return res.renderAnonymousCoreApp(options as any);
       }
     );
   }

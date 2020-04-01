@@ -17,7 +17,11 @@ import { LoginState } from '../../../common/login_state';
 import { ConfigType } from '../../config';
 import { defineLoginRoutes } from './login';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  httpResourcesMock,
+} from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {
@@ -121,6 +125,7 @@ describe('Login view routes', () => {
       const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated: false } });
       const contextMock = coreMock.createRequestHandlerContext();
 
+      const responseFactory = httpResourcesMock.createResponseFactory();
       await expect(
         routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
       ).resolves.toEqual({
@@ -133,7 +138,7 @@ describe('Login view routes', () => {
         status: 200,
       });
 
-      expect(contextMock.rendering.render).toHaveBeenCalledWith({ includeUserSettings: false });
+      expect(responseFactory.renderCoreApp).toHaveBeenCalledWith({ includeUserSettings: false });
     });
   });
 

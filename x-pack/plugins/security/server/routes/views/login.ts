@@ -16,11 +16,11 @@ export function defineLoginRoutes({
   config,
   router,
   logger,
-  csp,
+  httpResources,
   basePath,
   license,
 }: RouteDefinitionParams) {
-  router.get(
+  httpResources.register(
     {
       path: '/login',
       validate: {
@@ -45,10 +45,7 @@ export function defineLoginRoutes({
         });
       }
 
-      return response.ok({
-        body: await context.core.rendering.render({ includeUserSettings: false }),
-        headers: { 'content-security-policy': csp.header },
-      });
+      return response.renderAnonymousCoreApp();
     }
   );
 

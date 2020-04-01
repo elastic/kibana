@@ -47,7 +47,7 @@ import {
 } from './elasticsearch';
 
 import { HttpServiceSetup } from './http';
-import { HttpResources } from './http/http_resources';
+import { HttpResources } from './http_resources';
 
 import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -317,7 +317,6 @@ export {
  */
 export interface RequestHandlerContext {
   core: {
-    rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
@@ -397,6 +396,7 @@ export {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  HttpResources,
   IScopedRenderingClient,
   PluginsServiceSetup,
   PluginsServiceStart,
