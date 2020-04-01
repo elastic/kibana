@@ -7,9 +7,9 @@
 import { Observable } from 'rxjs';
 import { ClusterClient, SavedObjectsClientContract } from 'src/core/server';
 
+import { schema, TypeOf } from '@kbn/config-schema';
 import { EsContext } from './es';
 import { IEventLogClient, IEvent } from './types';
-import { GetEventsOptions } from './es/cluster_client_adapter';
 export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -17,6 +17,12 @@ interface EventLogServiceCtorParams {
   esContext: EsContext;
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+export const findOptionsSchema = schema.object({
+  per_page: schema.number({ defaultValue: 10, min: 0 }),
+  page: schema.number({ defaultValue: 1, min: 1 }),
+});
+export type FindOptionsType = TypeOf<typeof findOptionsSchema>;
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClient implements IEventLogClient {
@@ -28,13 +34,18 @@ export class EventLogClient implements IEventLogClient {
     this.savedObjectsClient = savedObjectsClient;
   }
 
-  async getEventsBySavedObject(type: string, id: string, options: Partial<GetEventsOptions> = {}) {
+  async findEventsBySavedObject(
+    type: string,
+    id: string,
+    options: Partial<FindOptionsType> = {}
+  ): Promise<IEvent[]> {
+    const { per_page: size, page } = findOptionsSchema.validate(options);
     await this.savedObjectsClient.get(type, id);
     return (await this.esContext.esAdapter.queryEventsBySavedObject(
       this.esContext.esNames.alias,
       type,
       id,
-      options
+      { size, from: (page - 1) * size }
     )) as IEvent[];
   }
 }

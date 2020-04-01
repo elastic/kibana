@@ -10,7 +10,7 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { merge } from 'lodash';
 
 describe('EventLogStart', () => {
-  describe('getEventsBySavedObject', () => {
+  describe('findEventsBySavedObject', () => {
     test('verifies that the user can to access the specified saved object', async () => {
       const esContext = contextMock.create();
       const savedObjectsClient = savedObjectsClientMock.create();
@@ -26,7 +26,7 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      await eventLogClient.getEventsBySavedObject('saved-object-type', 'saved-object-id');
+      await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id');
 
       expect(savedObjectsClient.get).toHaveBeenCalledWith('saved-object-type', 'saved-object-id');
     });
@@ -42,7 +42,7 @@ describe('EventLogStart', () => {
       savedObjectsClient.get.mockRejectedValue(new Error('Fail'));
 
       expect(
-        eventLogClient.getEventsBySavedObject('saved-object-type', 'saved-object-id')
+        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id')
       ).rejects.toMatchInlineSnapshot(`[Error: Fail]`);
     });
 
@@ -95,7 +95,7 @@ describe('EventLogStart', () => {
       esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(expectedEvents);
 
       expect(
-        await eventLogClient.getEventsBySavedObject('saved-object-type', 'saved-object-id')
+        await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id')
       ).toEqual(expectedEvents);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(

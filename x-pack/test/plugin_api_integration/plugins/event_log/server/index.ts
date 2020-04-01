@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function() {
-  describe('Event Log public API', () => {
-    it('should allow querying for events by Saved Object', async () => {});
-  });
-}
+import { PluginInitializerContext } from 'kibana/server';
+import { EventLogFixturePlugin } from './plugin';
+
+export const plugin = (initContext: PluginInitializerContext) =>
+  new EventLogFixturePlugin(initContext);

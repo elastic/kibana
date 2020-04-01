@@ -6,9 +6,10 @@
 
 import path from 'path';
 import fs from 'fs';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export default async function({ readConfigFile }) {
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
@@ -37,6 +38,9 @@ export default async function({ readConfigFile }) {
       ...integrationConfig.get('kbnTestServer'),
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.eventLog.enabled=true',
+        '--xpack.eventLog.logEntries=true',
+        '--xpack.eventLog.indexEntries=true',
         ...plugins.map(
           pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

@@ -14,6 +14,8 @@ import {
   PluginInitializerContext,
   ClusterClient,
   SharedGlobalConfig,
+  IContextProvider,
+  RequestHandler,
 } from 'src/core/server';
 
 import {
@@ -23,6 +25,7 @@ import {
   IEventLogConfig$,
   IEventLogClientService,
 } from './types';
+import { findRoute } from './routes';
 import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_client_service';
@@ -43,6 +46,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
   private globalConfig$: Observable<SharedGlobalConfig>;
+  private eventLogClientService?: EventLogClientService;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
@@ -78,6 +82,13 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { provider: PROVIDER },
     });
 
+    core.http.registerRouteHandlerContext('eventLog', this.createRouteHandlerContext());
+
+    // Routes
+    const router = core.http.createRouter();
+    // Register routes
+    findRoute(router);
+
     return this.eventLogService;
   }
 
@@ -99,11 +110,24 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       message: 'eventLog starting',
     });
 
-    return new EventLogClientService({
+    this.eventLogClientService = new EventLogClientService({
       esContext: this.esContext,
       savedObjectsService: core.savedObjects,
     });
+    return this.eventLogClientService;
   }
+
+  private createRouteHandlerContext = (): IContextProvider<
+    RequestHandler<any, any, any>,
+    'eventLog'
+  > => {
+    return async (context, request) => {
+      return {
+        getEventLogClient: () =>
+          this.eventLogClientService!.getClient(request, context.core.savedObjects.client),
+      };
+    };
+  };
 
   stop() {
     this.systemLogger.debug('stopping plugin');

@@ -5,6 +5,7 @@
  */
 
 import { Logger, ClusterClient } from '../../../../../src/core/server';
+import { IEvent } from '../types';
 
 export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
@@ -14,7 +15,7 @@ export interface ConstructorOpts {
   clusterClient: EsClusterClient;
 }
 
-export interface GetEventsOptions {
+export interface QueryEventsOptions {
   from: number;
   size: number;
 }
@@ -116,7 +117,7 @@ export class ClusterClientAdapter {
     index: string,
     type: string,
     id: string,
-    options: Partial<GetEventsOptions> = {}
+    options: Partial<QueryEventsOptions> = {}
   ): Promise<any[]> {
     try {
       const {
@@ -139,10 +140,10 @@ export class ClusterClientAdapter {
           },
         },
       });
-      return hits as any[];
+      return hits.map((hit: any) => hit._source) as IEvent[];
     } catch (err) {
       throw new Error(
-        `querying for Event Log by ${JSON.stringify({ index, type, id })} failed by: ${err.message}`
+        `querying for Event Log by for type "${type}" and id "${id}" failed with: ${err.message}`
       );
     }
   }

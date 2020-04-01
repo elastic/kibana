@@ -6,7 +6,12 @@
 
 import _ from 'lodash';
 import { Observable } from 'rxjs';
-import { ClusterClient, KibanaRequest, SavedObjectsServiceStart } from 'src/core/server';
+import {
+  ClusterClient,
+  KibanaRequest,
+  SavedObjectsServiceStart,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 
 import { EsContext } from './es';
 import { IEventLogClientService } from './types';
@@ -29,10 +34,15 @@ export class EventLogClientService implements IEventLogClientService {
     this.savedObjectsService = savedObjectsService;
   }
 
-  getClient(request: KibanaRequest) {
+  getClient(
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract = this.savedObjectsService.getScopedClient(
+      request
+    )
+  ) {
     return new EventLogClient({
       esContext: this.esContext,
-      savedObjectsClient: this.savedObjectsService.getScopedClient(request),
+      savedObjectsClient,
     });
   }
 }

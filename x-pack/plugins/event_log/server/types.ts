@@ -10,6 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
 import { KibanaRequest } from 'kibana/server';
 import { IEvent } from '../generated/schemas';
+import { FindOptionsType } from './event_log_client';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -19,6 +20,14 @@ export const ConfigSchema = schema.object({
 
 export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
 export type IEventLogConfig$ = Observable<Readonly<IEventLogConfig>>;
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    eventLog?: {
+      getEventLogClient: () => IEventLogClient;
+    };
+  }
+}
 
 // the object exposed by plugin.setup()
 export interface IEventLogService {
@@ -37,7 +46,11 @@ export interface IEventLogClientService {
 }
 
 export interface IEventLogClient {
-  getEventsBySavedObject(type: string, id: string): void;
+  findEventsBySavedObject(
+    type: string,
+    id: string,
+    options?: Partial<FindOptionsType>
+  ): Promise<IEvent[]>;
 }
 
 export interface IEventLogger {
