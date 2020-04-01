@@ -6,14 +6,14 @@
 import Joi from 'joi';
 
 const allowEmptyString = Joi.string().allow([null, '']);
-const columnHeaderType = Joi.string();
+const columnHeaderType = allowEmptyString;
 export const created = Joi.number().allow(null);
-export const createdBy = Joi.string();
+export const createdBy = allowEmptyString;
 
 export const description = allowEmptyString;
 export const end = Joi.number();
 export const eventId = allowEmptyString;
-export const eventType = Joi.string();
+export const eventType = allowEmptyString;
 
 export const filters = Joi.array()
   .items(
@@ -24,19 +24,11 @@ export const filters = Joi.array()
         disabled: Joi.boolean().allow(null),
         field: allowEmptyString,
         formattedValue: allowEmptyString,
-        index: {
-          type: 'keyword',
-        },
-        key: {
-          type: 'keyword',
-        },
-        negate: {
-          type: 'boolean',
-        },
+        index: allowEmptyString,
+        key: allowEmptyString,
+        negate: Joi.boolean().allow(null),
         params: allowEmptyString,
-        type: {
-          type: 'keyword',
-        },
+        type: allowEmptyString,
         value: allowEmptyString,
       }),
       exists: allowEmptyString,
@@ -68,22 +60,22 @@ export const version = allowEmptyString;
 export const columns = Joi.array().items(
   Joi.object({
     aggregatable: Joi.boolean().allow(null),
-    category: Joi.string(),
+    category: allowEmptyString,
     columnHeaderType,
     description,
     example: allowEmptyString,
     indexes: allowEmptyString,
-    id: Joi.string(),
+    id: allowEmptyString,
     name,
     placeholder: allowEmptyString,
     searchable: Joi.boolean().allow(null),
-    type: Joi.string(),
+    type: allowEmptyString,
   }).required()
 );
 export const dataProviders = Joi.array()
   .items(
     Joi.object({
-      id: Joi.string(),
+      id: allowEmptyString,
       name: allowEmptyString,
       enabled: Joi.boolean().allow(null),
       excluded: Joi.boolean().allow(null),
@@ -98,7 +90,7 @@ export const dataProviders = Joi.array()
       and: Joi.array()
         .items(
           Joi.object({
-            id: Joi.string(),
+            id: allowEmptyString,
             name,
             enabled: Joi.boolean().allow(null),
             excluded: Joi.boolean().allow(null),
@@ -122,9 +114,9 @@ export const dateRange = Joi.object({
 });
 export const favorite = Joi.array().items(
   Joi.object({
-    keySearch: Joi.string(),
-    fullName: Joi.string(),
-    userName: Joi.string(),
+    keySearch: allowEmptyString,
+    fullName: allowEmptyString,
+    userName: allowEmptyString,
     favoriteDate: Joi.number(),
   }).allow(null)
 );
@@ -141,26 +133,26 @@ const noteItem = Joi.object({
 });
 export const eventNotes = Joi.array().items(noteItem);
 export const globalNotes = Joi.array().items(noteItem);
-export const kqlMode = Joi.string();
+export const kqlMode = allowEmptyString;
 export const kqlQuery = Joi.object({
   filterQuery: Joi.object({
     kuery: Joi.object({
-      kind: Joi.string(),
+      kind: allowEmptyString,
       expression: allowEmptyString,
     }),
     serializedQuery: allowEmptyString,
   }),
 });
 export const pinnedEventIds = Joi.array()
-  .items(Joi.string())
+  .items(allowEmptyString)
   .allow(null);
 export const sort = Joi.object({
-  columnId: Joi.string(),
-  sortDirection: Joi.string(),
+  columnId: allowEmptyString,
+  sortDirection: allowEmptyString,
 });
 /* eslint-disable @typescript-eslint/camelcase */
 
-export const ids = Joi.array().items(Joi.string());
+export const ids = Joi.array().items(allowEmptyString);
 
 export const exclude_export_details = Joi.boolean();
 export const file_name = allowEmptyString;

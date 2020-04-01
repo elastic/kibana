@@ -25,7 +25,6 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export {
   configureAppAngularModule,
   migrateLegacyQuery,

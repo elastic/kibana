@@ -83,6 +83,7 @@ export interface State {
   indexNames: EsIndexName[];
   indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
+  isAdvancedEditorValidJson: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
   isModalButtonDisabled: boolean;
@@ -142,6 +143,7 @@ export const getInitialState = (): State => ({
   indexNames: [],
   indexPatternsMap: {},
   isAdvancedEditorEnabled: false,
+  isAdvancedEditorValidJson: true,
   isJobCreated: false,
   isJobStarted: false,
   isModalVisible: false,
