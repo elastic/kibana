@@ -17,27 +17,32 @@
  * under the License.
  */
 import { schema } from '@kbn/config-schema';
-import * as kbnTestServer from '../../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
 describe('http resources service', () => {
   describe('register', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
+    const defaultCspRules = "script-src 'self'";
     beforeEach(async () => {
-      // TODO add CSP
-      root = kbnTestServer.createRoot({ migrations: { skip: true } });
+      root = kbnTestServer.createRoot({
+        csp: {
+          rules: [defaultCspRules],
+        },
+      });
     }, 30000);
 
     afterEach(async () => {
       await root.shutdown();
     });
+
     describe('renderCoreApp', () => {
       it('renders core API', async () => {
-        const { http } = await root.setup();
+        const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
-        const httpResources = http.resources.create(router);
-        httpResources.register({ path: '/render-core', validate: false }, (context, req, res) =>
-          res.renderCoreApp({ includeUserSettings: false })
+        const resources = httpResources.createRegistrar(router);
+        resources.register({ path: '/render-core', validate: false }, (context, req, res) =>
+          res.renderAnonymousCoreApp()
         );
 
         await root.start();
@@ -47,31 +52,28 @@ describe('http resources service', () => {
       });
 
       it('attaches CSP header', async () => {
-        const { http } = await root.setup();
+        const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
-        const httpResources = http.resources.create(router);
-        httpResources.register({ path: '/render-core', validate: false }, (context, req, res) =>
-          res.renderCoreApp({ includeUserSettings: false })
+        const resources = httpResources.createRegistrar(router);
+        resources.register({ path: '/render-core', validate: false }, (context, req, res) =>
+          res.renderAnonymousCoreApp()
         );
 
         await root.start();
         const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.header).toHaveProperty('content-security-policy');
-        expect(response.header['content-security-policy']).toBe(
-          "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"
-        );
+        expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
 
       it('can attach headers, except the CSP header', async () => {
-        const { http } = await root.setup();
+        const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
-        const httpResources = http.resources.create(router);
-        httpResources.register({ path: '/render-core', validate: false }, (context, req, res) =>
-          res.renderCoreApp({
-            includeUserSettings: false,
+        const resources = httpResources.createRegistrar(router);
+        resources.register({ path: '/render-core', validate: false }, (context, req, res) =>
+          res.renderAnonymousCoreApp({
             headers: {
               'content-security-policy': "script-src 'unsafe-eval'",
               'x-kibana': '42',
@@ -83,19 +85,17 @@ describe('http resources service', () => {
         const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.header).toHaveProperty('content-security-policy');
-        expect(response.header['content-security-policy']).toBe(
-          "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"
-        );
+        expect(response.header['content-security-policy']).toBe(defaultCspRules);
         expect(response.header['x-kibana']).toBe('42');
       });
     });
 
     describe('render', () => {
       it('renders html', async () => {
-        const { http } = await root.setup();
+        const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
-        const httpResources = http.resources.create(router);
+        const resources = httpResources.createRegistrar(router);
         const htmlBody = `
           <!DOCTYPE html>
           <html>
@@ -104,7 +104,7 @@ describe('http resources service', () => {
             </body>
           </html>
         `;
-        httpResources.register({ path: '/render-html', validate: false }, (context, req, res) =>
+        resources.register({ path: '/render-html', validate: false }, (context, req, res) =>
           res.renderHtml({ body: htmlBody })
         );
 
@@ -117,12 +117,12 @@ describe('http resources service', () => {
       });
 
       it('renders javascript', async () => {
-        const { http } = await root.setup();
+        const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
-        const httpResources = http.resources.create(router);
+        const resources = httpResources.createRegistrar(router);
         const jsBody = 'window.alert("from js body");';
-        httpResources.register({ path: '/render-js', validate: false }, (context, req, res) =>
+        resources.register({ path: '/render-js', validate: false }, (context, req, res) =>
           res.renderJs({ body: jsBody })
         );
 
@@ -135,10 +135,10 @@ describe('http resources service', () => {
       });
 
       it('attaches CSP header', async () => {
-        const { http } = await root.setup();
+        const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
-        const httpResources = http.resources.create(router);
+        const resources = httpResources.createRegistrar(router);
         const htmlBody = `
           <!DOCTYPE html>
           <html>
@@ -147,7 +147,7 @@ describe('http resources service', () => {
             </body>
           </html>
         `;
-        httpResources.register({ path: '/render-html', validate: false }, (context, req, res) =>
+        resources.register({ path: '/render-html', validate: false }, (context, req, res) =>
           res.renderHtml({ body: htmlBody })
         );
 
@@ -155,17 +155,15 @@ describe('http resources service', () => {
         const response = await kbnTestServer.request.get(root, '/render-html').expect(200);
 
         expect(response.header).toHaveProperty('content-security-policy');
-        expect(response.header['content-security-policy']).toBe(
-          "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"
-        );
+        expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
 
       it('can attach headers, except the CSP & "content-type" headers', async () => {
-        const { http } = await root.setup();
+        const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
-        const httpResources = http.resources.create(router);
-        httpResources.register({ path: '/render-core', validate: false }, (context, req, res) =>
+        const resources = httpResources.createRegistrar(router);
+        resources.register({ path: '/render-core', validate: false }, (context, req, res) =>
           res.renderHtml({
             body: '<html><p>Hi</p></html>',
             headers: {
@@ -180,26 +178,23 @@ describe('http resources service', () => {
         const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
 
         expect(response.header).toHaveProperty('content-security-policy');
-        expect(response.header['content-security-policy']).toBe(
-          "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'"
-        );
+        expect(response.header['content-security-policy']).toBe(defaultCspRules);
         expect(response.header['x-kibana']).toBe('42');
       });
 
       it('can adjust route config', async () => {
-        const { http } = await root.setup();
+        const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
-        const httpResources = http.resources.create(router);
+        const resources = httpResources.createRegistrar(router);
         const validate = {
           params: schema.object({
             id: schema.string(),
           }),
         };
 
-        httpResources.register(
-          { path: '/render-js-with-param/{id}', validate },
-          (context, req, res) => res.renderJs({ body: `window.alert(${req.params.id});` })
+        resources.register({ path: '/render-js-with-param/{id}', validate }, (context, req, res) =>
+          res.renderJs({ body: `window.alert(${req.params.id});` })
         );
 
         await root.start();

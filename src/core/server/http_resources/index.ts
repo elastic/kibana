@@ -17,12 +17,13 @@
  * under the License.
  */
 
+export { HttpResourcesService } from './http_resources_service';
+
 export {
   HttpResourcesRenderOptions,
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
-  HttpResourcesService,
   HttpResources,
-  HttpResourcesSetup,
-} from './http_resources_service';
+  InternalHttpResourcesSetup,
+} from './types';

@@ -16,31 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { HttpResources, HttpResourcesServiceToolkit } from './http_resources_service';
+import { httpServerMock } from '../http/http_server.mocks';
+import { HttpResources, HttpResourcesServiceToolkit } from './types';
 
 const createHttpResourcesMock = (): jest.Mocked<HttpResources> => ({
   registerCoreApp: jest.fn(),
+  registerAnonymousCoreApp: jest.fn(),
   register: jest.fn(),
 });
 
-function createHttpResourcesSetup() {
+function createInternalHttpResourcesSetup() {
   return {
-    create: createHttpResourcesMock,
+    createRegistrar: createHttpResourcesMock,
   };
 }
 
-function createHttpResourcesResponseToolkit() {
+function createHttpResourcesResponseFactory() {
   const mocked: jest.Mocked<HttpResourcesServiceToolkit> = {
     renderCoreApp: jest.fn(),
+    renderAnonymousCoreApp: jest.fn(),
     renderHtml: jest.fn(),
     renderJs: jest.fn(),
   };
 
-  return mocked;
+  return {
+    ...httpServerMock.createResponseFactory(),
+    ...mocked,
+  };
 }
 
 export const httpResourcesMock = {
-  create: createHttpResourcesMock,
-  createSetup: createHttpResourcesSetup,
-  createToolkit: createHttpResourcesResponseToolkit,
+  createRegistrar: createHttpResourcesMock,
+  createSetupContract: createInternalHttpResourcesSetup,
+  createResponseFactory: createHttpResourcesResponseFactory,
 };
