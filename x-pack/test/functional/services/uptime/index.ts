@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module '*.png';
-
-declare module '*.svg' {
-  const content: string;
-  export = content;
-}
+export { UptimeProvider } from './uptime';

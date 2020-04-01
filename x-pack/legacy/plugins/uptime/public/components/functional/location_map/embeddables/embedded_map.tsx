@@ -107,7 +107,11 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
   return (
     <EmbeddedPanel>
-      <div className="embPanel__content" ref={embeddableRoot} />
+      <div
+        data-test-subj="xpack.uptime.locationMap.embeddedPanel"
+        className="embPanel__content"
+        ref={embeddableRoot}
+      />
     </EmbeddedPanel>
   );
 });
