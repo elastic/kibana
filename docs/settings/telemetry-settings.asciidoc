@@ -4,7 +4,7 @@
 <titleabbrev>Telemetry settings</titleabbrev>
 ++++
 
-By default, the Usage Collection (also known as Telemetry) is enabled. This
+By default, Usage Collection (also known as Telemetry) is enabled. This
 help us to learn about the {kib} features our users are more interested in, so we
 can focus our efforts on making them even better.
 
