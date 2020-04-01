@@ -28,11 +28,11 @@ interface LogEntryActionsColumnProps {
 }
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
-  defaultMessage: 'View Details',
+  defaultMessage: 'View actions for line',
 });
 
 const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetailsButton', {
-  defaultMessage: 'View actions for line',
+  defaultMessage: 'View details',
 });
 
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
