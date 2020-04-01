@@ -6,6 +6,7 @@
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const defaultIndexPattern = [
+  'apm-*-transaction*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',

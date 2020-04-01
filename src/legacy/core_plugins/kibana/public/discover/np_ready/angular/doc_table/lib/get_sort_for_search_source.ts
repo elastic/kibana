@@ -16,19 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../../../kibana_services';
+import { EsQuerySortValue, IndexPattern } from '../../../../kibana_services';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
+import { getDefaultSort } from './get_default_sort';
 
 /**
- * prepares sort for search source, that's sending the request to ES
- * handles the special case when there's sorting by date_nanos typed fields
- * the addon of the numeric_type guarantees the right sort order
- * when there are indices with date and indices with date_nanos field
+ * Prepares sort for search source, that's sending the request to ES
+ * - Adds default sort if necessary
+ * - Handles the special case when there's sorting by date_nanos typed fields
+ *   the addon of the numeric_type guarantees the right sort order
+ *   when there are indices with date and indices with date_nanos field
  */
-export function getSortForSearchSource(sort?: SortOrder[], indexPattern?: IndexPattern) {
+export function getSortForSearchSource(
+  sort?: SortOrder[],
+  indexPattern?: IndexPattern,
+  defaultDirection: string = 'desc'
+): EsQuerySortValue[] {
   if (!sort || !indexPattern) {
     return [];
+  } else if (Array.isArray(sort) && sort.length === 0) {
+    sort = getDefaultSort(indexPattern, defaultDirection);
   }
   const { timeFieldName } = indexPattern;
   return getSort(sort, indexPattern).map((sortPair: Record<string, string>) => {
@@ -38,8 +46,8 @@ export function getSortForSearchSource(sort?: SortOrder[], indexPattern?: IndexP
           order: sortPair[timeFieldName],
           numeric_type: 'date_nanos',
         },
-      };
+      } as EsQuerySortValue;
     }
-    return sortPair;
+    return sortPair as EsQuerySortValue;
   });
 }

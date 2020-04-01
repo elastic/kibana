@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CreateJobFactory,
-  ServerFacade,
-  RequestFacade,
-  ESQueueCreateJobFn,
-  ConditionalHeaders,
-} from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
+import { ReportingCore } from '../../../../server';
 import { cryptoFactory } from '../../../../server/lib/crypto';
+import {
+  ConditionalHeaders,
+  CreateJobFactory,
+  ESQueueCreateJobFn,
+  RequestFacade,
+  ServerFacade,
+} from '../../../../types';
 import { JobParamsPNG } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPNG
->> = function createJobFactoryFn(server: ServerFacade) {
+>> = function createJobFactoryFn(reporting: ReportingCore, server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(

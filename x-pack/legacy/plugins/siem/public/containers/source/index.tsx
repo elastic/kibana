@@ -10,6 +10,7 @@ import { Query } from 'react-apollo';
 import React, { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
+
 import { useUiSetting$ } from '../../lib/kibana';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -89,7 +90,8 @@ export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, s
       return [...configIndex, ...indexToAdd];
     }
     return configIndex;
-  }, [configIndex, DEFAULT_INDEX_KEY, indexToAdd]);
+  }, [configIndex, indexToAdd]);
+
   return (
     <Query<SourceQuery.Query, SourceQuery.Variables>
       query={sourceQuery}

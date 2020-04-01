@@ -18,7 +18,7 @@
  */
 
 import { SavedObjectAttributes } from 'src/core/public';
-import { SavedObjectMetaData } from '../types';
+import { SavedObjectMetaData } from '../../../../saved_objects/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
@@ -40,7 +40,7 @@ export interface OutputSpec {
   [key: string]: PropertySpec;
 }
 
-export interface EmbeddableFactoryOptions<T> {
+export interface EmbeddableFactoryOptions<T extends SavedObjectAttributes> {
   savedObjectMetaData?: SavedObjectMetaData<T>;
 }
 
@@ -74,13 +74,11 @@ export abstract class EmbeddableFactory<
     this.savedObjectMetaData = savedObjectMetaData;
   }
 
-  // TODO: Can this be a property? If this "...should be based of capabilities service...",
-  // TODO: maybe then it should be *async*?
   /**
    * Returns whether the current user should be allowed to edit this type of
-   * embeddable. Most of the time this should be based off the capabilities service.
+   * embeddable. Most of the time this should be based off the capabilities service, hence it's async.
    */
-  public abstract isEditable(): boolean;
+  public abstract async isEditable(): Promise<boolean>;
 
   /**
    * Returns a display name for this type of embeddable. Used in "Create new... " options

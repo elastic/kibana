@@ -16,3 +16,24 @@ export const RULE_ADD_FAILURE = i18n.translate(
     defaultMessage: 'Failed to add Rule',
   }
 );
+
+export const RULE_PREPACKAGED_FAILURE = i18n.translate(
+  'xpack.siem.containers.detectionEngine.createPrePackagedRuleFailDescription',
+  {
+    defaultMessage: 'Failed to installed pre-packaged rules from elastic',
+  }
+);
+
+export const RULE_PREPACKAGED_SUCCESS = i18n.translate(
+  'xpack.siem.containers.detectionEngine.createPrePackagedRuleSuccesDescription',
+  {
+    defaultMessage: 'Installed pre-packaged rules from elastic',
+  }
+);
+
+export const TAG_FETCH_FAILURE = i18n.translate(
+  'xpack.siem.containers.detectionEngine.tagFetchFailDescription',
+  {
+    defaultMessage: 'Failed to fetch Tags',
+  }
+);

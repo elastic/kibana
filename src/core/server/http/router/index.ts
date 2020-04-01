@@ -21,18 +21,23 @@ export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers
 export { Router, RequestHandler, IRouter, RouteRegistrar } from './router';
 export {
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
+  KibanaRouteState,
   isRealRequest,
   LegacyRequest,
   ensureRawRequest,
 } from './request';
 export {
+  DestructiveRouteMethod,
+  isSafeMethod,
   RouteMethod,
   RouteConfig,
   RouteConfigOptions,
   RouteContentType,
   RouteConfigOptionsBody,
+  SafeRouteMethod,
   validBodyOutput,
 } from './route';
 export { HapiResponseAdapter } from './response_adapter';

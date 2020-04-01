@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants';
+import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants_static';
 
 export const CANVAS_TYPE = 'canvas-workpad';
 export const CUSTOM_ELEMENT_TYPE = 'canvas-element';
@@ -39,3 +39,4 @@ export const API_ROUTE_SHAREABLE_BASE = '/public/canvas';
 export const API_ROUTE_SHAREABLE_ZIP = '/public/canvas/zip';
 export const API_ROUTE_SHAREABLE_RUNTIME = '/public/canvas/runtime';
 export const API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD = `/public/canvas/${SHAREABLE_RUNTIME_NAME}.js`;
+export const CANVAS_EMBEDDABLE_CLASSNAME = `canvasEmbeddable`;

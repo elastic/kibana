@@ -19,6 +19,7 @@
 
 import uiRoutes from 'ui/routes';
 import { npStart } from 'ui/new_platform';
+
 import { TimefilterContract, TimeHistoryContract } from '../../../../plugins/data/public';
 import { registerTimefilterWithGlobalState } from './setup_router';
 

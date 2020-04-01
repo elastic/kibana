@@ -13,8 +13,11 @@ export const PLUGIN = {
     description: 'The description text that will be shown to users in Kibana',
   }),
   ID: 'uptime',
-  ROUTER_BASE_NAME: '/app/uptime#',
   LOCAL_STORAGE_KEY: 'xpack.uptime',
+  NAME: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
+    defaultMessage: 'Uptime',
+  }),
+  ROUTER_BASE_NAME: '/app/uptime#',
   TITLE: i18n.translate('xpack.uptime.uptimeFeatureCatalogueTitle', {
     defaultMessage: 'Uptime',
   }),

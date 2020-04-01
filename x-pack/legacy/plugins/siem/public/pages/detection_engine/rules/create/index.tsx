@@ -5,96 +5,129 @@
  */
 
 import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { StyledComponent } from 'styled-components';
 
-import { HeaderPage } from '../../../../components/header_page';
+import { usePersistRule } from '../../../../containers/detection_engine/rules';
+
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { WrapperPage } from '../../../../components/wrapper_page';
-import { usePersistRule } from '../../../../containers/detection_engine/rules';
+import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
 import { AccordionTitle } from '../components/accordion_title';
-import { FormData, FormHook } from '../components/shared_imports';
+import { FormData, FormHook } from '../../../../shared_imports';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
+import { StepRuleActions } from '../components/step_rule_actions';
+import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
-import { AboutStepRule, DefineStepRule, RuleStep, RuleStepData, ScheduleStepRule } from '../types';
+import { redirectToDetections, getActionMessageParams } from '../helpers';
+import {
+  AboutStepRule,
+  DefineStepRule,
+  RuleStep,
+  RuleStepData,
+  ScheduleStepRule,
+  ActionsStepRule,
+} from '../types';
 import { formatRule } from './helpers';
 import * as i18n from './translations';
 
-const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
+const stepsRuleOrder = [
+  RuleStep.defineRule,
+  RuleStep.aboutRule,
+  RuleStep.scheduleRule,
+  RuleStep.ruleActions,
+];
 
 const MyEuiPanel = styled(EuiPanel)<{
-  zIndex?: number;
+  zindex?: number;
 }>`
   position: relative;
-  z-index: ${props => props.zIndex}; /* ugly fix to allow searchBar to overflow the EuiPanel */
+  z-index: ${props => props.zindex}; /* ugly fix to allow searchBar to overflow the EuiPanel */
 
-  .euiAccordion__iconWrapper {
-    display: none;
-  }
-  .euiAccordion__childWrapper {
-    overflow: visible;
-  }
-  .euiAccordion__button {
-    cursor: default !important;
-    &:hover {
-      text-decoration: none !important;
+  > .euiAccordion > .euiAccordion__triggerWrapper {
+    .euiAccordion__button {
+      cursor: default !important;
+      &:hover {
+        text-decoration: none !important;
+      }
+    }
+
+    .euiAccordion__iconWrapper {
+      display: none;
     }
   }
 `;
 
-export const CreateRuleComponent = React.memo(() => {
+MyEuiPanel.displayName = 'MyEuiPanel';
+
+const StepDefineRuleAccordion: StyledComponent<
+  typeof EuiAccordion,
+  any, // eslint-disable-line
+  { ref: React.MutableRefObject<EuiAccordion | null> },
+  never
+> = styled(EuiAccordion)`
+  .euiAccordion__childWrapper {
+    overflow: visible;
+  }
+`;
+
+StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
+
+const CreateRulePageComponent: React.FC = () => {
   const {
     loading,
     isSignalIndexExists,
     isAuthenticated,
+    hasEncryptionKey,
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
+  const [, dispatchToaster] = useStateToaster();
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
+  const ruleActionsRef = useRef<EuiAccordion | null>(null);
   const stepsForm = useRef<Record<RuleStep, FormHook<FormData> | null>>({
     [RuleStep.defineRule]: null,
     [RuleStep.aboutRule]: null,
     [RuleStep.scheduleRule]: null,
+    [RuleStep.ruleActions]: null,
   });
   const stepsData = useRef<Record<RuleStep, RuleStepData>>({
     [RuleStep.defineRule]: { isValid: false, data: {} },
     [RuleStep.aboutRule]: { isValid: false, data: {} },
     [RuleStep.scheduleRule]: { isValid: false, data: {} },
+    [RuleStep.ruleActions]: { isValid: false, data: {} },
   });
   const [isStepRuleInReadOnlyView, setIsStepRuleInEditView] = useState<Record<RuleStep, boolean>>({
     [RuleStep.defineRule]: false,
     [RuleStep.aboutRule]: false,
     [RuleStep.scheduleRule]: false,
+    [RuleStep.ruleActions]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const actionMessageParams = useMemo(
+    () =>
+      getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule).ruleType),
+    [stepsData.current['define-rule'].data]
+  );
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (userHasNoPermissions) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
-  }
 
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
       if (isValid) {
         const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
-        if ([0, 1].includes(stepRuleIdx)) {
+        if ([0, 1, 2].includes(stepRuleIdx)) {
           if (isStepRuleInReadOnlyView[stepsRuleOrder[stepRuleIdx + 1]]) {
+            setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
             setIsStepRuleInEditView({
               ...isStepRuleInReadOnlyView,
               [step]: true,
@@ -109,15 +142,17 @@ export const CreateRuleComponent = React.memo(() => {
             setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
           }
         } else if (
-          stepRuleIdx === 2 &&
+          stepRuleIdx === 3 &&
           stepsData.current[RuleStep.defineRule].isValid &&
-          stepsData.current[RuleStep.aboutRule].isValid
+          stepsData.current[RuleStep.aboutRule].isValid &&
+          stepsData.current[RuleStep.scheduleRule].isValid
         ) {
           setRule(
             formatRule(
               stepsData.current[RuleStep.defineRule].data as DefineStepRule,
               stepsData.current[RuleStep.aboutRule].data as AboutStepRule,
-              stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule
+              stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule,
+              stepsData.current[RuleStep.ruleActions].data as ActionsStepRule
             )
           );
         }
@@ -166,6 +201,14 @@ export const CreateRuleComponent = React.memo(() => {
     />
   );
 
+  const ruleActionsButton = (
+    <AccordionTitle
+      name="4"
+      title={RuleI18n.RULE_ACTIONS}
+      type={getAccordionType(RuleStep.ruleActions)}
+    />
+  );
+
   const openCloseAccordion = (accordionId: RuleStep | null) => {
     if (accordionId != null) {
       if (accordionId === RuleStep.defineRule && defineRuleRef.current != null) {
@@ -174,10 +217,13 @@ export const CreateRuleComponent = React.memo(() => {
         aboutRuleRef.current.onToggle();
       } else if (accordionId === RuleStep.scheduleRule && scheduleRuleRef.current != null) {
         scheduleRuleRef.current.onToggle();
+      } else if (accordionId === RuleStep.ruleActions && ruleActionsRef.current != null) {
+        ruleActionsRef.current.onToggle();
       }
     }
   };
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const manageAccordions = useCallback(
     (id: RuleStep, isOpen: boolean) => {
       const activeRuleIdx = stepsRuleOrder.findIndex(step => step === openAccordionId);
@@ -199,16 +245,20 @@ export const CreateRuleComponent = React.memo(() => {
     [isStepRuleInReadOnlyView, openAccordionId, stepsData]
   );
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const manageIsEditable = useCallback(
     async (id: RuleStep) => {
       const activeForm = await stepsForm.current[openAccordionId]?.submit();
       if (activeForm != null && activeForm?.isValid) {
+        stepsData.current[openAccordionId] = {
+          ...stepsData.current[openAccordionId],
+          data: activeForm.data,
+          isValid: activeForm.isValid,
+        };
         setOpenAccordionId(id);
-        openCloseAccordion(openAccordionId);
-
         setIsStepRuleInEditView({
           ...isStepRuleInReadOnlyView,
-          [openAccordionId]: openAccordionId === RuleStep.scheduleRule ? false : true,
+          [openAccordionId]: true,
           [id]: false,
         });
       }
@@ -217,20 +267,28 @@ export const CreateRuleComponent = React.memo(() => {
   );
 
   if (isSaved) {
+    const ruleName = (stepsData.current[RuleStep.aboutRule].data as AboutStepRule).name;
+    displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
+  }
+
+  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
   return (
     <>
       <WrapperPage restrictWidth>
-        <HeaderPage
-          backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
+        <DetectionEngineHeaderPage
+          backOptions={{ href: '#detections/rules', text: i18n.BACK_TO_RULES }}
           border
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
         />
-        <MyEuiPanel zIndex={3}>
-          <EuiAccordion
+        <MyEuiPanel zindex={4}>
+          <StepDefineRuleAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
             buttonContent={defineRuleButton}
@@ -252,16 +310,19 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepDefineRule
               addPadding={true}
+              defaultValues={
+                (stepsData.current[RuleStep.defineRule].data as DefineStepRule) ?? null
+              }
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
             />
-          </EuiAccordion>
+          </StepDefineRuleAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
-        <MyEuiPanel zIndex={2}>
+        <MyEuiPanel zindex={3}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.aboutRule}
@@ -284,7 +345,8 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepAboutRule
               addPadding={true}
-              descriptionDirection="row"
+              defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -293,7 +355,7 @@ export const CreateRuleComponent = React.memo(() => {
           </EuiAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
-        <MyEuiPanel zIndex={1}>
+        <MyEuiPanel zindex={2}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.scheduleRule}
@@ -316,11 +378,46 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepScheduleRule
               addPadding={true}
-              descriptionDirection="row"
+              defaultValues={
+                (stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule) ?? null
+              }
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
+            />
+          </EuiAccordion>
+        </MyEuiPanel>
+        <EuiSpacer size="l" />
+        <MyEuiPanel zindex={1}>
+          <EuiAccordion
+            initialIsOpen={false}
+            id={RuleStep.ruleActions}
+            buttonContent={ruleActionsButton}
+            paddingSize="xs"
+            ref={ruleActionsRef}
+            onToggle={manageAccordions.bind(null, RuleStep.ruleActions)}
+            extraAction={
+              stepsData.current[RuleStep.ruleActions].isValid && (
+                <EuiButtonEmpty
+                  iconType="pencil"
+                  size="xs"
+                  onClick={manageIsEditable.bind(null, RuleStep.ruleActions)}
+                >
+                  {i18n.EDIT_RULE}
+                </EuiButtonEmpty>
+              )
+            }
+          >
+            <EuiHorizontalRule margin="m" />
+            <StepRuleActions
+              addPadding={true}
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.ruleActions]}
+              isLoading={isLoading || loading}
+              setForm={setStepsForm}
+              setStepData={setStepData}
+              actionMessageParams={actionMessageParams}
             />
           </EuiAccordion>
         </MyEuiPanel>
@@ -329,5 +426,6 @@ export const CreateRuleComponent = React.memo(() => {
       <SpyRoute />
     </>
   );
-});
-CreateRuleComponent.displayName = 'CreateRuleComponent';
+};
+
+export const CreateRulePage = React.memo(CreateRulePageComponent);

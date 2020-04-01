@@ -39,7 +39,7 @@ const DiscoverFetchError = ({ fetchError }: Props) => {
 
   if (fetchError.lang === 'painless') {
     const { chrome } = getServices();
-    const mangagementUrlObj = chrome.navLinks.get('kibana:management');
+    const mangagementUrlObj = chrome.navLinks.get('kibana:stack_management');
     const managementUrl = mangagementUrlObj ? mangagementUrlObj.url : '';
     const url = `${managementUrl}/kibana/index_patterns`;
 

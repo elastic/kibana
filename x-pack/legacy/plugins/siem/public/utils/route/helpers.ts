@@ -15,6 +15,7 @@ export const initRouteSpy: RouteSpyState = {
   tabName: undefined,
   search: '',
   pathName: '/',
+  state: undefined,
 };
 
 export const RouterSpyStateContext = createContext<[RouteSpyState, Dispatch<RouteSpyAction>]>([

@@ -4,42 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
-import Boom from 'boom';
 import uuid from 'uuid';
+
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
-import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
-import { createRulesSchema } from '../schemas/create_rules_schema';
-import { ServerFacade } from '../../../../types';
+import { IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
+import { RuleAlertParamsRest } from '../../types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { transformOrError } from './utils';
+import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
-import { callWithRequestFactory, getIndex, transformError } from '../utils';
+import { createRulesSchema } from '../schemas/create_rules_schema';
+import {
+  buildRouteValidation,
+  transformError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
-export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: DETECTION_ENGINE_RULES_URL,
-    options: {
-      tags: ['access:siem'],
+export const createRulesRoute = (router: IRouter): void => {
+  router.post(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: createRulesSchema,
+        body: buildRouteValidation<RuleAlertParamsRest>(createRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: RulesRequest, headers) {
+    async (context, request, response) => {
       const {
-        created_at: createdAt,
+        actions,
+        anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
         from,
-        immutable,
         query,
         language,
         output_index: outputIndex,
@@ -47,6 +50,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         timeline_id: timelineId,
         timeline_title: timelineTitle,
         meta,
+        machine_learning_job_id: machineLearningJobId,
         filters,
         rule_id: ruleId,
         index,
@@ -56,50 +60,54 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         name,
         severity,
         tags,
-        threats,
+        threat,
+        throttle,
         to,
         type,
-        updated_at: updatedAt,
         references,
-      } = request.payload;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !actionsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
+        note,
+        lists,
+      } = request.body;
+      const siemResponse = buildSiemResponse(response);
 
       try {
-        const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request, server);
-        const indexExists = await getIndexExists(callWithRequest, finalIndex);
+        validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.siem?.getSiemClient();
+
+        if (!siemClient || !actionsClient || !alertsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const finalIndex = outputIndex ?? siemClient.signalsIndex;
+        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
         if (!indexExists) {
-          return new Boom(
-            `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-            {
-              statusCode: 400,
-            }
-          );
+          return siemResponse.error({
+            statusCode: 400,
+            body: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+          });
         }
         if (ruleId != null) {
           const rule = await readRules({ alertsClient, ruleId });
           if (rule != null) {
-            return new Boom(`rule_id: "${ruleId}" already exists`, { statusCode: 409 });
+            return siemResponse.error({
+              statusCode: 409,
+              body: `rule_id: "${ruleId}" already exists`,
+            });
           }
         }
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
-          createdAt,
+          anomalyThreshold,
           description,
           enabled,
           falsePositives,
           from,
-          immutable,
+          immutable: false,
           query,
           language,
           outputIndex: finalIndex,
@@ -107,8 +115,9 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           timelineId,
           timelineTitle,
           meta,
+          machineLearningJobId,
           filters,
-          ruleId: ruleId != null ? ruleId : uuid.v4(),
+          ruleId: ruleId ?? uuid.v4(),
           index,
           interval,
           maxSignals,
@@ -118,11 +127,23 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           tags,
           to,
           type,
-          threats,
-          updatedAt,
+          threat,
           references,
+          note,
           version: 1,
+          lists,
         });
+
+        const ruleActions = await updateRulesNotifications({
+          ruleAlertId: createdRule.id,
+          alertsClient,
+          savedObjectsClient,
+          enabled,
+          actions,
+          throttle,
+          name,
+        });
+
         const ruleStatuses = await savedObjectsClient.find<
           IRuleSavedAttributesSavedObjectAttributes
         >({
@@ -133,14 +154,23 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        return transformOrError(createdRule, ruleStatuses.saved_objects[0]);
+        const [validated, errors] = transformValidate(
+          createdRule,
+          ruleActions,
+          ruleStatuses.saved_objects[0]
+        );
+        if (errors != null) {
+          return siemResponse.error({ statusCode: 500, body: errors });
+        } else {
+          return response.ok({ body: validated ?? {} });
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const createRulesRoute = (server: ServerFacade): void => {
-  server.route(createCreateRulesRoute(server));
+    }
+  );
 };

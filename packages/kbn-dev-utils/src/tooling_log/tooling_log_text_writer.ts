@@ -82,20 +82,28 @@ export class ToolingLogTextWriter implements Writer {
     }
   }
 
-  write({ type, indent, args }: Message) {
-    if (!shouldWriteType(this.level, type)) {
+  write(msg: Message) {
+    if (!shouldWriteType(this.level, msg.type)) {
       return false;
     }
 
-    const txt = type === 'error' ? stringifyError(args[0]) : format(args[0], ...args.slice(1));
-    const prefix = has(MSG_PREFIXES, type) ? MSG_PREFIXES[type] : '';
+    const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
+    ToolingLogTextWriter.write(this.writeTo, prefix, msg);
+    return true;
+  }
+
+  static write(writeTo: ToolingLogTextWriter['writeTo'], prefix: string, msg: Message) {
+    const txt =
+      msg.type === 'error'
+        ? stringifyError(msg.args[0])
+        : format(msg.args[0], ...msg.args.slice(1));
 
     (prefix + txt).split('\n').forEach((line, i) => {
       let lineIndent = '';
 
-      if (indent > 0) {
+      if (msg.indent > 0) {
         // if we are indenting write some spaces followed by a symbol
-        lineIndent += ' '.repeat(indent - 1);
+        lineIndent += ' '.repeat(msg.indent - 1);
         lineIndent += line.startsWith('-') ? '└' : '│';
       }
 
@@ -105,9 +113,7 @@ export class ToolingLogTextWriter implements Writer {
         lineIndent += PREFIX_INDENT;
       }
 
-      this.writeTo.write(`${lineIndent}${line}\n`);
+      writeTo.write(`${lineIndent}${line}\n`);
     });
-
-    return true;
   }
 }

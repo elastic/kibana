@@ -18,7 +18,7 @@
  */
 
 import { defaultState, pureTransitions, TodoActions, TodoState } from '../state_containers/todomvc';
-import { BaseState, BaseStateContainer, createStateContainer } from '../../public/state_containers';
+import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
 import {
   createKbnUrlStateStorage,
   syncState,

@@ -29,7 +29,7 @@ export const createNDJSONStream = <Payload, Response>(
   logger: Logger
 ): Stream => {
   const stream = new PassThrough();
-  const results = handler.onRequest(payload);
+  const results = handler.getResponseStream(payload);
 
   results.subscribe({
     next: (message: Response) => {

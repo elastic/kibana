@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../plugins/apm/typings/elasticsearch';
 import {
   TRANSACTION_TYPE,
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   TRANSACTION_NAME,
   SERVICE_NAME
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 
 export function getBoolFilter(urlParams: IUrlParams) {

@@ -15,65 +15,33 @@ import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const startDate = new Date(2001).valueOf();
 const endDate = new Date(3000).valueOf();
-const interval = 'days';
-const narrowDateRange = jest.fn();
 
 describe('get_anomalies_network_table_columns', () => {
   const mount = useMountAppended();
 
   test('on network page, we expect to get all columns', () => {
     expect(
-      getAnomaliesNetworkTableColumnsCurated(
-        NetworkType.page,
-        startDate,
-        endDate,
-        interval,
-        narrowDateRange
-      ).length
+      getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate).length
     ).toEqual(6);
   });
 
   test('on network details page, we expect to remove one columns', () => {
-    const columns = getAnomaliesNetworkTableColumnsCurated(
-      NetworkType.details,
-      startDate,
-      endDate,
-      interval,
-      narrowDateRange
-    );
+    const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.details, startDate, endDate);
     expect(columns.length).toEqual(5);
   });
 
   test('on network page, we should have Network Name', () => {
-    const columns = getAnomaliesNetworkTableColumnsCurated(
-      NetworkType.page,
-      startDate,
-      endDate,
-      interval,
-      narrowDateRange
-    );
+    const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate);
     expect(columns.some(col => col.name === i18n.NETWORK_NAME)).toEqual(true);
   });
 
   test('on network details page, we should not have Network Name', () => {
-    const columns = getAnomaliesNetworkTableColumnsCurated(
-      NetworkType.details,
-      startDate,
-      endDate,
-      interval,
-      narrowDateRange
-    );
+    const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.details, startDate, endDate);
     expect(columns.some(col => col.name === i18n.NETWORK_NAME)).toEqual(false);
   });
 
   test('on network page, we should escape the draggable id', () => {
-    const columns = getAnomaliesNetworkTableColumnsCurated(
-      NetworkType.page,
-      startDate,
-      endDate,
-      interval,
-      narrowDateRange
-    );
+    const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate);
     const column = columns.find(col => col.name === i18n.SCORE) as Columns<
       string,
       AnomaliesByNetwork
@@ -129,13 +97,7 @@ describe('get_anomalies_network_table_columns', () => {
   });
 
   test('on network page, undefined influencers should turn into an empty column string', () => {
-    const columns = getAnomaliesNetworkTableColumnsCurated(
-      NetworkType.page,
-      startDate,
-      endDate,
-      interval,
-      narrowDateRange
-    );
+    const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate);
     const column = columns.find(col => col.name === i18n.INFLUENCED_BY) as Columns<
       Anomaly['influencers'],
       AnomaliesByNetwork

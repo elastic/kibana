@@ -42,7 +42,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('logs landing page without data', () => {
         it(`shows 'Change source configuration' button`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'logs', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
             basePath: '/s/custom_space',
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
@@ -79,13 +79,22 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.not.contain('Logs');
       });
 
-      it('logs landing page renders not found page', async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'logs', {
+      it(`logs app is inaccessible and Application Not Found message is rendered`, async () => {
+        await PageObjects.common.navigateToApp('infraLogs', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
-          shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('~infraNotFoundPage');
+        await testSubjects.existOrFail('~appNotFoundPageContent');
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
+          'infraLogs',
+          '/stream',
+          undefined,
+          {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

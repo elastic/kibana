@@ -31,7 +31,7 @@ import {
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 import { ElementCard } from '../element_card';
-import { ComponentStrings } from '../../../i18n';
+import { ComponentStrings } from '../../../i18n/components';
 
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
@@ -100,8 +100,9 @@ export class CustomElementModal extends PureComponent<Props, State> {
     this.setState({ [type]: value });
   };
 
-  private _handleUpload = (files: File[]) => {
-    const [file] = files;
+  private _handleUpload = (files: FileList | null) => {
+    if (files == null) return;
+    const file = files[0];
     const [type, subtype] = get(file, 'type', '').split('/');
     if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
       encode(file).then((dataurl: string) => this._handleChange('image', dataurl));

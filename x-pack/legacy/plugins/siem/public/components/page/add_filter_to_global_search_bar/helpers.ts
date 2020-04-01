@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const createFilter = (key: string, value: string | null | undefined) =>
-  value != null
+import { Filter } from '../../../../../../../../src/plugins/data/public';
+
+export const createFilter = (key: string, value: string[] | string | null | undefined): Filter => {
+  const queryValue = value != null ? (Array.isArray(value) ? value[0] : value) : null;
+  return queryValue != null
     ? {
         meta: {
           alias: null,
@@ -13,21 +16,21 @@ export const createFilter = (key: string, value: string | null | undefined) =>
           disabled: false,
           type: 'phrase',
           key,
-          value,
+          value: queryValue,
           params: {
-            query: value,
+            query: queryValue,
           },
         },
         query: {
           match: {
             [key]: {
-              query: value,
+              query: queryValue,
               type: 'phrase',
             },
           },
         },
       }
-    : {
+    : ({
         exists: {
           field: key,
         },
@@ -39,4 +42,5 @@ export const createFilter = (key: string, value: string | null | undefined) =>
           type: 'exists',
           value: 'exists',
         },
-      };
+      } as Filter);
+};

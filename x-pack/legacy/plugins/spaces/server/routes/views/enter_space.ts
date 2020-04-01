@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { ENTER_SPACE_PATH } from '../../../common/constants';
+import { ENTER_SPACE_PATH } from '../../../../../../plugins/spaces/common/constants';
 import { wrapError } from '../../lib/errors';
 
 export function initEnterSpaceView(server: Legacy.Server) {
@@ -14,7 +14,13 @@ export function initEnterSpaceView(server: Legacy.Server) {
     path: ENTER_SPACE_PATH,
     async handler(request, h) {
       try {
-        return h.redirect(await request.getDefaultRoute());
+        const uiSettings = request.getUiSettingsService();
+        const defaultRoute = await uiSettings.get<string>('defaultRoute');
+
+        const basePath = server.newPlatform.setup.core.http.basePath.get(request);
+        const url = `${basePath}${defaultRoute}`;
+
+        return h.redirect(url);
       } catch (e) {
         server.log(['spaces', 'error'], `Error navigating to space: ${e}`);
         return wrapError(e);

@@ -27,26 +27,41 @@ import { inspectorPluginMock } from '../../../../../plugins/inspector/public/moc
 import { uiActionsPluginMock } from '../../../../../plugins/ui_actions/public/mocks';
 import { managementPluginMock } from '../../../../../plugins/management/public/mocks';
 import { usageCollectionPluginMock } from '../../../../../plugins/usage_collection/public/mocks';
+import { kibanaLegacyPluginMock } from '../../../../../plugins/kibana_legacy/public/mocks';
+import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
+import { advancedSettingsMock } from '../../../../../plugins/advanced_settings/public/mocks';
+import { savedObjectsManagementPluginMock } from '../../../../../plugins/saved_objects_management/public/mocks';
+import { visualizationsPluginMock } from '../../../../../plugins/visualizations/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
   createSetup: () => ({
     data: dataPluginMock.createSetupContract(),
+    charts: chartPluginMock.createSetupContract(),
     navigation: navigationPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     uiActions: uiActionsPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
+    advancedSettings: advancedSettingsMock.createSetupContract(),
+    visualizations: visualizationsPluginMock.createSetupContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
+    charts: chartPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     inspector: inspectorPluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
     uiActions: uiActionsPluginMock.createStartContract(),
     management: managementPluginMock.createStartContract(),
+    advancedSettings: advancedSettingsMock.createStartContract(),
+    visualizations: visualizationsPluginMock.createStartContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createStartContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
   }),
 };
 

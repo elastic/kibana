@@ -21,14 +21,14 @@ import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { ColorFormatEditor } from './color';
-import { DEFAULT_CONVERTER_COLOR } from '../../../../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../../../../plugins/data/public';
 
 const fieldType = 'string';
 const format = {
   getConverterFor: jest.fn(),
 };
 const formatParams = {
-  colors: [{ ...DEFAULT_CONVERTER_COLOR }],
+  colors: [{ ...fieldFormats.DEFAULT_CONVERTER_COLOR }],
 };
 const onChange = jest.fn();
 const onError = jest.fn();

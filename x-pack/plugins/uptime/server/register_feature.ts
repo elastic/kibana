@@ -7,33 +7,62 @@
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '../../features/server';
 import { PLUGIN } from '../common';
+import { umDynamicSettings } from './lib/saved_objects';
 
 export const registerFeature = (features: PluginSetupContract) => {
   features.registerFeature({
     id: PLUGIN.ID,
-    name: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
-      defaultMessage: 'Uptime',
-    }),
+    name: PLUGIN.NAME,
+    order: 1000,
     navLinkId: PLUGIN.ID,
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     privileges: {
       all: {
-        api: ['uptime'],
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
+        api: [
+          'uptime-read',
+          'uptime-write',
+          'actions-read',
+          'actions-all',
+          'alerting-read',
+          'alerting-all',
+        ],
         savedObject: {
-          all: [],
+          all: [umDynamicSettings.name, 'alert', 'action', 'action_task_params'],
           read: [],
         },
-        ui: ['save'],
+        ui: [
+          'save',
+          'configureSettings',
+          'show',
+          'alerting:show',
+          'actions:show',
+          'alerting:save',
+          'actions:save',
+          'alerting:delete',
+          'actions:delete',
+        ],
       },
       read: {
-        api: ['uptime'],
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
+        api: ['uptime-read', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
         savedObject: {
-          all: [],
-          read: [],
+          all: ['alert', 'action', 'action_task_params'],
+          read: [umDynamicSettings.name],
         },
-        ui: [],
+        ui: [
+          'show',
+          'alerting:show',
+          'actions:show',
+          'alerting:save',
+          'actions:save',
+          'alerting:delete',
+          'actions:delete',
+        ],
       },
     },
   });

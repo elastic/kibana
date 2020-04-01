@@ -42,4 +42,6 @@ export function initChromeControlsApi(chrome: { [key: string]: any }) {
    * might be incorrect in the moments just before the UI is updated.
    */
   chrome.getVisible = () => visible$.getValue();
+
+  chrome.visible$ = visible$.asObservable();
 }

@@ -24,8 +24,7 @@ export const mockOptionsNetwork: RequestBasicOptions = {
 };
 
 export const mockRequestNetwork = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetOverviewNetworkQuery',
     variables: {
       sourceId: 'default',
@@ -35,7 +34,6 @@ export const mockRequestNetwork = {
     query:
       'query GetOverviewNetworkQuery(\n    $sourceId: ID!\n    $timerange: TimerangeInput!\n    $filterQuery: String\n  ) {\n    source(id: $sourceId) {\n      id\n      OverviewNetwork(timerange: $timerange, filterQuery: $filterQuery) {\n        packetbeatFlow\n        packetbeatDNS\n        filebeatSuricata\n        filebeatZeek\n        auditbeatSocket\n      }\n    }\n  }',
   },
-  query: {},
 };
 
 export const mockResponseNetwork = {
@@ -97,8 +95,7 @@ export const mockOptionsHost: RequestBasicOptions = {
 };
 
 export const mockRequestHost = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetOverviewHostQuery',
     variables: {
       sourceId: 'default',
@@ -108,7 +105,6 @@ export const mockRequestHost = {
     query:
       'query GetOverviewHostQuery(\n    $sourceId: ID!\n    $timerange: TimerangeInput!\n    $filterQuery: String\n  ) {\n    source(id: $sourceId) {\n      id\n      OverviewHost(timerange: $timerange, filterQuery: $filterQuery) {\n        auditbeatAuditd\n        auditbeatFIM\n        auditbeatLogin\n        auditbeatPackage\n        auditbeatProcess\n        auditbeatUser\n      }\n    }\n  }',
   },
-  query: {},
 };
 
 export const mockResponseHost = {
@@ -137,7 +133,14 @@ export const mockResponseHost = {
       user_count: { doc_count: 1979 },
       filebeat_count: { doc_count: 225 },
     },
-    winlog_count: { doc_count: 737 },
+    winlog_module: {
+      security_event_count: {
+        doc_count: 523,
+      },
+      mwsysmon_operational_event_count: {
+        doc_count: 214,
+      },
+    },
   },
 };
 
@@ -160,5 +163,6 @@ export const mockResultHost = {
   endgameRegistry: 896,
   endgameSecurity: 897,
   filebeatSystemModule: 225,
-  winlogbeat: 737,
+  winlogbeatSecurity: 523,
+  winlogbeatMWSysmonOperational: 214,
 };

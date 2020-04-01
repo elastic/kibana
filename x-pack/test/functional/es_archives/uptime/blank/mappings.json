@@ -6,7 +6,7 @@
         "is_write_index": true
       }
     },
-    "index": "heartbeat-8-test",
+    "index": "heartbeat-8-generated-test",
     "mappings": {
       "_meta": {
         "beat": "heartbeat",

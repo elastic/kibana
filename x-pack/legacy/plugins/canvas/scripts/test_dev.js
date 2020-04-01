@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('./_helpers').runGulpTask('canvas:test:dev');
+require('./_helpers').runGulpTask('canvas:karma:debug');

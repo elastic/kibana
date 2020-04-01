@@ -20,31 +20,19 @@
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
 import {
-  ContentType,
-  FIELD_FORMAT_IDS,
+  FieldFormatsGetConfigFn,
+  FieldFormatsContentType,
+  IFieldFormatType,
   FieldFormatConvert,
   FieldFormatConvertFunction,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
+  IFieldFormatMetaParams,
 } from './types';
-import {
-  htmlContentTypeSetup,
-  textContentTypeSetup,
-  TEXT_CONTEXT_TYPE,
-  HTML_CONTEXT_TYPE,
-} from './content_types';
+import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
 import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
-
-export interface IFieldFormatMetaParams {
-  [key: string]: any;
-  parsedUrl?: {
-    origin: string;
-    pathname?: string;
-    basePath?: string;
-  };
-}
 
 export abstract class FieldFormat {
   /**
@@ -97,9 +85,9 @@ export abstract class FieldFormat {
   public type: any = this.constructor;
 
   protected readonly _params: any;
-  protected getConfig: Function | undefined;
+  protected getConfig: FieldFormatsGetConfigFn | undefined;
 
-  constructor(_params: IFieldFormatMetaParams = {}, getConfig?: Function) {
+  constructor(_params: IFieldFormatMetaParams = {}, getConfig?: FieldFormatsGetConfigFn) {
     this._params = _params;
 
     if (getConfig) {
@@ -119,7 +107,7 @@ export abstract class FieldFormat {
    */
   convert(
     value: any,
-    contentType: ContentType = DEFAULT_CONTEXT_TYPE,
+    contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE,
     options?: HtmlContextTypeOptions | TextContextTypeOptions
   ): string {
     const converter = this.getConverterFor(contentType);
@@ -138,7 +126,7 @@ export abstract class FieldFormat {
    * @public
    */
   getConverterFor(
-    contentType: ContentType = DEFAULT_CONTEXT_TYPE
+    contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE
   ): FieldFormatConvertFunction | null {
     if (!this.convertObject) {
       this.convertObject = this.setupContentType();
@@ -217,8 +205,8 @@ export abstract class FieldFormat {
 
   setupContentType(): FieldFormatConvert {
     return {
-      [TEXT_CONTEXT_TYPE]: textContentTypeSetup(this, this.textConvert),
-      [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
+      text: textContentTypeSetup(this, this.textConvert),
+      html: htmlContentTypeSetup(this, this.htmlConvert),
     };
   }
 
@@ -226,13 +214,3 @@ export abstract class FieldFormat {
     return Boolean(fieldFormat && fieldFormat.convert);
   }
 }
-
-export type IFieldFormat = PublicMethodsOf<FieldFormat>;
-/**
- * @string id type is needed for creating custom converters.
- */
-export type IFieldFormatId = FIELD_FORMAT_IDS | string;
-export type IFieldFormatType = (new (params?: any, getConfig?: Function) => FieldFormat) & {
-  id: IFieldFormatId;
-  fieldType: string | string[];
-};

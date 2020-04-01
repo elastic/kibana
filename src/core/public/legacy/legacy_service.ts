@@ -57,7 +57,7 @@ export class LegacyPlatformService {
   public readonly legacyId = Symbol();
   private bootstrapModule?: BootstrapModule;
   private targetDomElement?: HTMLElement;
-  private readonly startDependencies$ = new Subject<[LegacyCoreStart, object]>();
+  private readonly startDependencies$ = new Subject<[LegacyCoreStart, object, {}]>();
   private readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
 
   constructor(private readonly params: LegacyPlatformParams) {}
@@ -74,6 +74,8 @@ export class LegacyPlatformService {
         appUrl: navLink.url,
         subUrlBase: navLink.subUrlBase,
         linkToLastSubUrl: navLink.linkToLastSubUrl,
+        category: navLink.category,
+        disableSubUrlTracking: navLink.disableSubUrlTracking,
       })
     );
 
@@ -119,6 +121,7 @@ export class LegacyPlatformService {
     const legacyCore: LegacyCoreStart = {
       ...core,
       application: {
+        currentAppId$: core.application.currentAppId$,
         capabilities: core.application.capabilities,
         getUrlForApp: core.application.getUrlForApp,
         navigateToApp: core.application.navigateToApp,
@@ -126,7 +129,7 @@ export class LegacyPlatformService {
       },
     };
 
-    this.startDependencies$.next([legacyCore, plugins]);
+    this.startDependencies$.next([legacyCore, plugins, {}]);
 
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts

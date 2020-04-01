@@ -20,11 +20,12 @@ import { SavedObject } from '../types';
 import { SavedObjectsImportError } from './types';
 
 export function extractErrors(
-  savedObjectResults: SavedObject[],
-  savedObjectsToImport: SavedObject[]
+  // TODO: define saved object type
+  savedObjectResults: Array<SavedObject<any>>,
+  savedObjectsToImport: Array<SavedObject<any>>
 ) {
   const errors: SavedObjectsImportError[] = [];
-  const originalSavedObjectsMap = new Map<string, SavedObject>();
+  const originalSavedObjectsMap = new Map<string, SavedObject<{ title: string }>>();
   for (const savedObject of savedObjectsToImport) {
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
   }

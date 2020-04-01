@@ -6,7 +6,7 @@
 
 import { uniq } from 'lodash';
 import { CSV_JOB_TYPE, PDF_JOB_TYPE, PNG_JOB_TYPE } from '../../common/constants';
-import { AvailableTotal, FeatureAvailabilityMap, RangeStats, ExportType } from './types.d';
+import { AvailableTotal, FeatureAvailabilityMap, RangeStats, ExportType } from './types';
 
 function getForFeature(
   range: Partial<RangeStats>,

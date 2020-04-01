@@ -19,11 +19,11 @@
 
 import handlebars from 'handlebars/dist/handlebars';
 import { isNumber } from 'lodash';
-import { npStart } from 'ui/new_platform';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
+import { getFieldFormats } from '../../services';
 
 export const createTickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
-  const fieldFormats = npStart.plugins.data.fieldFormats;
+  const fieldFormats = getFieldFormats();
 
   if (!template) template = '{{value}}';
   const render = handlebars.compile(template, { knownHelpersOnly: true });

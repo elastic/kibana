@@ -5,7 +5,7 @@
  */
 
 import { capitalize } from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import { formatNumber, formatMetric } from 'plugins/monitoring/lib/format_number';
 import { extractIp } from 'plugins/monitoring/lib/extract_ip';
 

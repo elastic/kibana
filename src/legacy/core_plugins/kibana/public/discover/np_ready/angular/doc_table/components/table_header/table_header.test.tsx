@@ -25,6 +25,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
 import { IndexPattern, IFieldType } from '../../../../../kibana_services';
 
+jest.mock('ui/new_platform');
+
 function getMockIndexPattern() {
   return ({
     id: 'test',
@@ -59,6 +61,7 @@ function getMockProps(props = {}) {
     indexPattern: getMockIndexPattern(),
     hideTimeColumn: false,
     columns: ['first', 'middle', 'last'],
+    defaultSortOrder: 'desc',
     sortOrder: [['time', 'asc']] as SortOrder[],
     isShortDots: true,
     onRemoveColumn: jest.fn(),

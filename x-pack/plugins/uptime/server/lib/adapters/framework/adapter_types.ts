@@ -7,48 +7,38 @@
 import { GraphQLSchema } from 'graphql';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
-  RequestHandler,
   IRouter,
   CallAPIOptions,
   SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from 'src/core/server';
-import { ObjectType } from '@kbn/config-schema';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
+import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
-export interface UMFrameworkRouteOptions<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> {
-  path: string;
-  method: string;
-  handler: RequestHandler<P, Q, B>;
-  config?: any;
-  validate: any;
-}
-
-type APICaller = (
+export type APICaller = (
   endpoint: string,
   clientParams: Record<string, any>,
   options?: CallAPIOptions
 ) => Promise<any>;
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: APICaller } & P
+  params: { callES: APICaller; dynamicSettings: DynamicSettings } & P
 ) => Promise<R> | R;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
-  client: SavedObjectsClientContract,
-  params: P
+  client: SavedObjectsClientContract | ISavedObjectsRepository,
+  params?: P
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
-  router: IRouter;
+  route: IRouter;
 }
 
 export interface UptimeCorePlugins {
   features: PluginSetupContract;
+  alerting: any;
+  elasticsearch: any;
   usageCollection: UsageCollectionSetup;
 }
 

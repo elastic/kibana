@@ -1,0 +1,15 @@
+{
+  "id": "indexManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "management"
+  ],
+  "optionalPlugins": [
+    "usageCollection"
+  ],
+  "configPath": ["xpack", "index_management"]
+}

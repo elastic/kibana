@@ -198,6 +198,12 @@ export function useForm<T extends FormData = FormData>(
     });
 
     formData$.current.next(currentFormData as T);
+
+    /**
+     * After removing a field, the form validity might have changed
+     * (an invalid field might have been removed and now the form is valid)
+     */
+    updateFormValidity();
   };
 
   const setFieldValue: FormHook<T>['setFieldValue'] = (fieldName, value) => {

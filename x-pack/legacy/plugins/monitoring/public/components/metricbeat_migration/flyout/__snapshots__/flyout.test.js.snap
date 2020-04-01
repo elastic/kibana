@@ -1174,7 +1174,7 @@ exports[`Flyout kibana part two should show instructions to disable internal col
               isCopyable={true}
               language="bash"
             >
-              xpack.monitoring.kibana.collection.enabled: false
+              monitoring.kibana.collection.enabled: false
             </EuiCodeBlock>
             <EuiSpacer
               size="s"
@@ -1187,7 +1187,7 @@ exports[`Flyout kibana part two should show instructions to disable internal col
                   values={
                     Object {
                       "config": <Monospace>
-                        xpack.monitoring.enabled
+                        monitoring.enabled
                       </Monospace>,
                       "defaultValue": <Monospace>
                         true
@@ -2091,7 +2091,7 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
               isCopyable={true}
               language="bash"
             >
-              xpack.monitoring.kibana.collection.enabled: false
+              monitoring.kibana.collection.enabled: false
             </EuiCodeBlock>
             <EuiSpacer
               size="s"
@@ -2104,7 +2104,7 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
                   values={
                     Object {
                       "config": <Monospace>
-                        xpack.monitoring.enabled
+                        monitoring.enabled
                       </Monospace>,
                       "defaultValue": <Monospace>
                         true

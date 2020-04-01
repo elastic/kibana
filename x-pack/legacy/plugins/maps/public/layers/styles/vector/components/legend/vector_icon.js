@@ -37,10 +37,10 @@ export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, 
 
   return (
     <SymbolIcon
+      key={`${symbolId}${fillColor}${strokeColor}`}
       symbolId={symbolId}
-      fill={style.fill}
-      stroke={style.stroke}
-      strokeWidth={style.strokeWidth}
+      fill={fillColor}
+      stroke={strokeColor}
     />
   );
 }
@@ -49,6 +49,6 @@ VectorIcon.propTypes = {
   fillColor: PropTypes.string,
   isPointsOnly: PropTypes.bool.isRequired,
   isLinesOnly: PropTypes.bool.isRequired,
-  strokeColor: PropTypes.string.isRequired,
+  strokeColor: PropTypes.string,
   symbolId: PropTypes.string,
 };

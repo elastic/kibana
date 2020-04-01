@@ -62,7 +62,7 @@ test('`loadPluginBundles` creates a script tag and loads initializer', async () 
   const fakeScriptTag = createdScriptTags[0];
   expect(fakeScriptTag.setAttribute).toHaveBeenCalledWith(
     'src',
-    '/bundles/plugin/plugin-a.bundle.js'
+    '/bundles/plugin/plugin-a/plugin-a.plugin.js'
   );
   expect(fakeScriptTag.setAttribute).toHaveBeenCalledWith('id', 'kbn-plugin-plugin-a');
   expect(fakeScriptTag.onload).toBeInstanceOf(Function);
@@ -85,7 +85,7 @@ test('`loadPluginBundles` includes the basePath', async () => {
   const fakeScriptTag = createdScriptTags[0];
   expect(fakeScriptTag.setAttribute).toHaveBeenCalledWith(
     'src',
-    '/mybasepath/bundles/plugin/plugin-a.bundle.js'
+    '/mybasepath/bundles/plugin/plugin-a/plugin-a.plugin.js'
   );
 });
 
@@ -96,7 +96,7 @@ test('`loadPluginBundles` rejects if script.onerror is called', async () => {
   fakeScriptTag1.onerror(new Error('Whoa there!'));
 
   await expect(loadPromise).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Failed to load \\"plugin-a\\" bundle (/bundles/plugin/plugin-a.bundle.js)"`
+    `"Failed to load \\"plugin-a\\" bundle (/bundles/plugin/plugin-a/plugin-a.plugin.js)"`
   );
 });
 
@@ -105,7 +105,7 @@ test('`loadPluginBundles` rejects if timeout is reached', async () => {
     // Override the timeout to 1 ms for testi.
     loadPluginBundle(addBasePath, 'plugin-a', { timeoutMs: 1 })
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Timeout reached when loading \\"plugin-a\\" bundle (/bundles/plugin/plugin-a.bundle.js)"`
+    `"Timeout reached when loading \\"plugin-a\\" bundle (/bundles/plugin/plugin-a/plugin-a.plugin.js)"`
   );
 });
 
@@ -120,6 +120,6 @@ test('`loadPluginBundles` rejects if bundle does attach an initializer to window
   fakeScriptTag1.onload();
 
   await expect(loadPromise).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Definition of plugin \\"plugin-a\\" should be a function (/bundles/plugin/plugin-a.bundle.js)."`
+    `"Definition of plugin \\"plugin-a\\" should be a function (/bundles/plugin/plugin-a/plugin-a.plugin.js)."`
   );
 });

@@ -7,13 +7,16 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
+import { npStart } from 'ui/new_platform';
 
-import { start } from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import * as i18n from './translations';
+import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../plugins/maps/public';
+import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { Location } from '../../../../../common/runtime_types';
 
-import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
 import { UptimeThemeContext } from '../../../../contexts';
 
@@ -22,10 +25,7 @@ export interface EmbeddedMapProps {
   downPoints: LocationPoint[];
 }
 
-export interface LocationPoint {
-  lat: string;
-  lon: string;
-}
+export type LocationPoint = Required<Location>;
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -45,25 +45,21 @@ const EmbeddedPanel = styled.div`
   }
 `;
 
-export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
+export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
   const { colors } = useContext(UptimeThemeContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
-  const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory = npStart.plugins.embeddable.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
-  const input = {
+  const input: MapEmbeddableInput = {
     id: uuid.v4(),
     filters: [],
     hidePanelTitles: true,
-    query: {
-      query: '',
-      language: 'kuery',
-    },
     refreshConfig: {
       value: 0,
       pause: false,
     },
-    viewMode: 'view',
+    viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,
     hideFilterActions: true,
     // Zoom Lat/Lon values are set to make sure map is in center in the panel
@@ -113,9 +109,13 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
 
   return (
     <EmbeddedPanel>
-      <div className="embPanel__content" ref={embeddableRoot} />
+      <div
+        data-test-subj="xpack.uptime.locationMap.embeddedPanel"
+        className="embPanel__content"
+        ref={embeddableRoot}
+      />
     </EmbeddedPanel>
   );
-};
+});
 
 EmbeddedMap.displayName = 'EmbeddedMap';

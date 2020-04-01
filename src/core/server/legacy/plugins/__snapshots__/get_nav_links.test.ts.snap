@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[` 1`] = `
+Array [
+  Object {
+    "category": undefined,
+    "disableSubUrlTracking": undefined,
+    "disabled": false,
+    "euiIconType": undefined,
+    "hidden": false,
+    "icon": undefined,
+    "id": "link-a",
+    "linkToLastSubUrl": true,
+    "order": 0,
+    "subUrlBase": "/some-custom-url",
+    "title": "AppA",
+    "tooltip": "",
+    "url": "/some-custom-url",
+  },
+  Object {
+    "category": undefined,
+    "disableSubUrlTracking": true,
+    "disabled": false,
+    "euiIconType": undefined,
+    "hidden": false,
+    "icon": undefined,
+    "id": "link-b",
+    "linkToLastSubUrl": true,
+    "order": 0,
+    "subUrlBase": "/url-b",
+    "title": "AppB",
+    "tooltip": "",
+    "url": "/url-b",
+  },
+  Object {
+    "category": undefined,
+    "euiIconType": undefined,
+    "icon": undefined,
+    "id": "app-a",
+    "linkToLastSubUrl": true,
+    "order": 0,
+    "title": "AppA",
+    "url": "/app/app-a",
+  },
+  Object {
+    "category": undefined,
+    "euiIconType": undefined,
+    "icon": undefined,
+    "id": "app-b",
+    "linkToLastSubUrl": true,
+    "order": 0,
+    "title": "AppB",
+    "url": "/app/app-b",
+  },
+]
+`;

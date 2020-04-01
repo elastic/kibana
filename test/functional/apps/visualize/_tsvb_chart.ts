@@ -25,11 +25,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
+  const security = getService('security');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
   describe('visual builder', function describeIndexTests() {
     this.tags('smoke');
     beforeEach(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -111,13 +113,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       });
       after(async () => {
+        await security.testUser.restoreDefaults();
         await esArchiver.unload('kibana_sample_data_flights');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/43150
-      it.skip('should be able to switch between index patterns', async () => {
+      it('should be able to switch between index patterns', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('156');
         await PageObjects.visualBuilder.clickPanelOptions('metric');

@@ -22,6 +22,7 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock } from '../config/raw_config_service.mock';
@@ -47,6 +48,8 @@ let mockPluginSystem: jest.Mocked<PluginsSystem>;
 
 const setupDeps = coreMock.createInternalSetup();
 const logger = loggingServiceMock.create();
+
+expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 ['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach(path => {
   jest.doMock(join(path, 'server'), () => ({}), {
@@ -513,40 +516,61 @@ describe('PluginsService', () => {
   });
 
   describe('#setup()', () => {
+    beforeEach(() => {
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([
+          createPlugin('plugin-1', {
+            path: 'path-1',
+            version: 'some-version',
+            configPath: 'plugin1',
+          }),
+          createPlugin('plugin-2', {
+            path: 'path-2',
+            version: 'some-version',
+            configPath: 'plugin2',
+          }),
+        ]),
+      });
+
+      mockPluginSystem.uiPlugins.mockReturnValue(new Map());
+    });
+
     describe('uiPlugins.internal', () => {
       it('includes disabled plugins', async () => {
-        mockDiscover.mockReturnValue({
-          error$: from([]),
-          plugin$: from([
-            createPlugin('plugin-1', {
-              path: 'path-1',
-              version: 'some-version',
-              configPath: 'plugin1',
-            }),
-            createPlugin('plugin-2', {
-              path: 'path-2',
-              version: 'some-version',
-              configPath: 'plugin2',
-            }),
-          ]),
-        });
-
-        mockPluginSystem.uiPlugins.mockReturnValue(new Map());
-
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
-
         await pluginsService.discover();
-        const { uiPlugins } = await pluginsService.setup({} as any);
+        const { uiPlugins } = await pluginsService.setup(setupDeps);
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
           Map {
             "plugin-1" => Object {
-              "entryPointPath": "path-1/public",
+              "publicAssetsDir": <absolute path>/path-1/public/assets,
+              "publicTargetDir": <absolute path>/path-1/target/public,
             },
             "plugin-2" => Object {
-              "entryPointPath": "path-2/public",
+              "publicAssetsDir": <absolute path>/path-2/public/assets,
+              "publicTargetDir": <absolute path>/path-2/target/public,
             },
           }
         `);
+      });
+    });
+
+    describe('plugin initialization', () => {
+      it('does initialize if plugins.initialize is true', async () => {
+        config$.next({ plugins: { initialize: true } });
+        await pluginsService.discover();
+        const { initialized } = await pluginsService.setup(setupDeps);
+        expect(mockPluginSystem.setupPlugins).toHaveBeenCalled();
+        expect(initialized).toBe(true);
+      });
+
+      it('does not initialize if plugins.initialize is false', async () => {
+        config$.next({ plugins: { initialize: false } });
+        await pluginsService.discover();
+        const { initialized } = await pluginsService.setup(setupDeps);
+        expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
+        expect(initialized).toBe(false);
       });
     });
   });

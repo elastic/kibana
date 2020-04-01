@@ -7,15 +7,24 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import { SavedObject, SavedObjectAttributes, SavedObjectsFindResponse } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+} from 'kibana/server';
+import { AlertsClient, PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
-import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
-import { RequestFacade } from '../../../types';
-import { Alert } from '../../../../../alerting/server/types';
 
-export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
+export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
+  id: string | undefined;
+  rule_id: RuleAlertParams['ruleId'] | undefined;
+};
+
+export type UpdateRuleAlertParamsRest = RuleAlertParamsRest & {
   id: string | undefined;
   rule_id: RuleAlertParams['ruleId'] | undefined;
 };
@@ -29,26 +38,30 @@ export interface FindParamsRest {
   filter: string;
 }
 
-export interface UpdateRulesRequest extends RequestFacade {
-  payload: UpdateRuleAlertParamsRest;
-}
-
-export interface BulkUpdateRulesRequest extends RequestFacade {
-  payload: UpdateRuleAlertParamsRest[];
-}
-
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
 
-export interface IRuleStatusAttributes {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface IRuleStatusAttributes extends Record<string, any> {
   alertId: string; // created alert id.
   statusDate: string;
   lastFailureAt: string | null | undefined;
   lastFailureMessage: string | null | undefined;
   lastSuccessAt: string | null | undefined;
   lastSuccessMessage: string | null | undefined;
-  status: RuleStatusString;
+  status: RuleStatusString | null | undefined;
+  lastLookBackDate: string | null | undefined;
+  gap: string | null | undefined;
+  bulkCreateTimeDurations: string[] | null | undefined;
+  searchAfterTimeDurations: string[] | null | undefined;
+}
+
+export interface RuleStatusResponse {
+  [key: string]: {
+    current_status: IRuleStatusAttributes | null | undefined;
+    failures: IRuleStatusAttributes[] | null | undefined;
+  };
 }
 
 export interface IRuleSavedAttributesSavedObjectAttributes
@@ -71,41 +84,34 @@ export interface IRuleStatusFindType {
   saved_objects: IRuleStatusSavedObject[];
 }
 
-export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
-
-export interface RulesRequest extends RequestFacade {
-  payload: RuleAlertParamsRest;
-}
-
-export interface BulkRulesRequest extends RequestFacade {
-  payload: RuleAlertParamsRest[];
-}
+export type RuleStatusString = 'succeeded' | 'failed' | 'going to run';
 
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
   };
 }
-export interface ImportRulesRequest extends Omit<RequestFacade, 'query'> {
+export interface ImportRulesRequestParams {
   query: { overwrite: boolean };
-  payload: { file: HapiReadableStream };
+  body: { file: HapiReadableStream };
 }
 
-export interface ExportRulesRequest extends Omit<RequestFacade, 'query'> {
-  payload: { objects: Array<{ rule_id: string }> | null | undefined };
+export interface ExportRulesRequestParams {
+  body: { objects: Array<{ rule_id: string }> | null | undefined };
   query: {
     file_name: string;
     exclude_export_details: boolean;
   };
 }
 
-export type QueryRequest = Omit<RequestFacade, 'query'> & {
-  query: { id: string | undefined; rule_id: string | undefined };
-};
-
-export interface QueryBulkRequest extends RequestFacade {
-  payload: Array<QueryRequest['query']>;
+export interface RuleRequestParams {
+  id: string | undefined;
+  rule_id: string | undefined;
 }
+
+export type ReadRuleRequestParams = RuleRequestParams;
+export type DeleteRuleRequestParams = RuleRequestParams;
+export type DeleteRulesRequestParams = RuleRequestParams[];
 
 export interface FindRuleParams {
   alertsClient: AlertsClient;
@@ -117,22 +123,18 @@ export interface FindRuleParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface FindRulesRequest extends Omit<RequestFacade, 'query'> {
-  query: {
-    per_page: number;
-    page: number;
-    search?: string;
-    sort_field?: string;
-    filter?: string;
-    fields?: string[];
-    sort_order?: 'asc' | 'desc';
-  };
+export interface FindRulesRequestParams {
+  per_page: number;
+  page: number;
+  search?: string;
+  sort_field?: string;
+  filter?: string;
+  fields?: string[];
+  sort_order?: 'asc' | 'desc';
 }
 
-export interface FindRulesStatusesRequest extends Omit<RequestFacade, 'query'> {
-  query: {
-    ids: string[];
-  };
+export interface FindRulesStatusesRequestParams {
+  ids: string[];
 }
 
 export interface Clients {
@@ -140,8 +142,14 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export type UpdateRuleParams = Partial<RuleAlertParams> & {
+export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'actions' | 'throttle'>> & {
   id: string | undefined | null;
+  savedObjectsClient: SavedObjectsClientContract;
+} & Clients;
+
+export type UpdateRuleParams = Omit<RuleAlertParams, 'immutable' | 'actions' | 'throttle'> & {
+  id: string | undefined | null;
+  savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
 export type DeleteRuleParams = Clients & {
@@ -149,7 +157,9 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type RuleParams = RuleAlertParams & Clients;
+export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId' | 'actions' | 'throttle'> & {
+  ruleId: string;
+} & Clients;
 
 export interface ReadRuleParams {
   alertsClient: AlertsClient;
@@ -157,16 +167,12 @@ export interface ReadRuleParams {
   ruleId?: string | undefined | null;
 }
 
-export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
-  return obj.every(rule => isAlertType(rule));
+export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
+  return partialAlert.every(rule => isAlertType(rule));
 };
 
-export const isAlertType = (obj: unknown): obj is RuleAlertType => {
-  return get('alertTypeId', obj) === SIGNALS_ID;
-};
-
-export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttributes => {
-  return get('lastSuccessMessage', obj) != null;
+export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAlertType => {
+  return partialAlert.alertTypeId === SIGNALS_ID;
 };
 
 export const isRuleStatusSavedObjectType = (

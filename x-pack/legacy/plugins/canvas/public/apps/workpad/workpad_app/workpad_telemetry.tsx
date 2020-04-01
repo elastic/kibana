@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 // @ts-ignore: Local Untyped
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 // @ts-ignore: Local Untyped
@@ -22,18 +22,6 @@ const mapStateToProps = (state: any) => ({
   telemetryElementCounts: getElementCounts(state),
   telemetryResolvedArgs: getArgs(state),
 });
-
-/**
-  Counts of the loading states of workpad elements
-*/
-interface ElementCounts {
-  /** Count of elements in error state */
-  error: number;
-  /** Count of elements in pending state */
-  pending: number;
-  /** Count of elements in ready state */
-  ready: number;
-}
 
 // TODO: Build out full workpad types
 /**
@@ -61,10 +49,8 @@ interface ResolvedArgs {
   [keys: string]: any;
 }
 
-interface ElementsLoadedTelemetryProps {
-  telemetryElementCounts: ElementCounts;
+interface ElementsLoadedTelemetryProps extends PropsFromRedux {
   workpad: Workpad;
-  telemetryResolvedArgs: {};
 }
 
 function areAllElementsInResolvedArgs(workpad: Workpad, resolvedArgs: ResolvedArgs): boolean {
@@ -77,13 +63,11 @@ function areAllElementsInResolvedArgs(workpad: Workpad, resolvedArgs: ResolvedAr
   return workpadElements.every(element => resolvedArgsElements.includes(element));
 }
 
-export const withUnconnectedElementsLoadedTelemetry = function<P extends object>(
+export const withUnconnectedElementsLoadedTelemetry = <P extends {}>(
   Component: React.ComponentType<P>,
   trackMetric = trackCanvasUiMetric
-): React.FC<P & ElementsLoadedTelemetryProps> {
-  return function ElementsLoadedTelemetry(
-    props: P & ElementsLoadedTelemetryProps
-  ): React.FunctionComponentElement<P> {
+) =>
+  function ElementsLoadedTelemetry(props: ElementsLoadedTelemetryProps) {
     const { telemetryElementCounts, workpad, telemetryResolvedArgs, ...other } = props;
 
     const [currentWorkpadId, setWorkpadId] = useState<string | undefined>(undefined);
@@ -127,11 +111,12 @@ export const withUnconnectedElementsLoadedTelemetry = function<P extends object>
 
     return <Component {...(other as P)} workpad={workpad} />;
   };
-};
 
-export const withElementsLoadedTelemetry = <P extends object>(
-  Component: React.ComponentType<P>
-) => {
+const connector = connect(mapStateToProps, {});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const withElementsLoadedTelemetry = <P extends {}>(Component: React.ComponentType<P>) => {
   const telemetry = withUnconnectedElementsLoadedTelemetry(Component);
-  return connect(mapStateToProps)(telemetry);
+  return connector(telemetry);
 };

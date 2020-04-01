@@ -8,6 +8,7 @@ import ApolloClient from 'apollo-client';
 
 import { Ecs } from '../../../../graphql/types';
 import { TimelineModel } from '../../../../store/timeline/model';
+import { inputsModel } from '../../../../store';
 
 export interface SetEventsLoadingProps {
   eventIds: string[];
@@ -24,6 +25,10 @@ export interface UpdateSignalsStatusProps {
   status: 'open' | 'closed';
 }
 
+export type UpdateSignalsStatusCallback = (
+  refetchQuery: inputsModel.Refetch,
+  { signalIds, status }: UpdateSignalsStatusProps
+) => void;
 export type UpdateSignalsStatus = ({ signalIds, status }: UpdateSignalsStatusProps) => void;
 
 export interface UpdateSignalStatusActionProps {
@@ -40,13 +45,16 @@ export interface SendSignalToTimelineActionProps {
   apolloClient?: ApolloClient<{}>;
   createTimeline: CreateTimeline;
   ecsData: Ecs;
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
+  updateTimelineIsLoading: UpdateTimelineLoading;
 }
+
+export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 
 export interface CreateTimelineProps {
   from: number;
   timeline: TimelineModel;
   to: number;
+  ruleNote?: string;
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;

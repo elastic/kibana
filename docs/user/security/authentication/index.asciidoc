@@ -1,6 +1,6 @@
 [role="xpack"]
 [[kibana-authentication]]
-=== Authentication in Kibana
+=== Authentication in {kib}
 ++++
 <titleabbrev>Authentication</titleabbrev>
 ++++
@@ -12,13 +12,14 @@
 - <<pki-authentication>>
 - <<saml>>
 - <<oidc>>
+- <<kerberos>>
 
 [[basic-authentication]]
 ==== Basic authentication
 
-Basic authentication requires a username and password to successfully log in to {kib}. It is enabled by default and based on the Native security realm provided by {es}. The basic authentication provider uses a Kibana provided login form, and supports authentication using the `Authorization` request header's `Basic` scheme.
+To successfully log in to {kib}, basic authentication requires a username and password. Basic authentication is enabled by default, and is based on the Native security realm or LDAP security realm that is provided by {es}. The basic authentication provider uses a {kib} provided login form, and supports authentication using the `Authorization` request header `Basic` scheme.
 
-The session cookies that are issued by the basic authentication provider are stateless. Therefore, logging out of Kibana when using the basic authentication provider clears the session cookies from the browser but does not invalidate the session cookie for reuse.
+The session cookies that are issued by the basic authentication provider are stateless. Therefore, logging out of {kib} when using the basic authentication provider clears the session cookies from the browser, but does not invalidate the session cookie for reuse.
 
 For more information about basic authentication and built-in users, see
 {ref}/setting-up-authentication.html[User authentication].
@@ -26,13 +27,13 @@ For more information about basic authentication and built-in users, see
 [[token-authentication]]
 ==== Token authentication
 
-Token authentication allows users to login using the same Kibana provided login form as basic authentication. The token authentication provider is built on {es}'s token APIs. The bearer tokens returned by {es}'s {ref}/security-api-get-token.html[get token API] can be used directly with Kibana using the `Authorization` request header with the `Bearer` scheme.
+Token authentication allows users to login using the same {kib} provided login form as basic authentication, and is based on the Native security realm or LDAP security realm that is provided by {es}. The token authentication provider is built on {es} token APIs. The bearer tokens returned by {es}'s {ref}/security-api-get-token.html[get token API] can be used directly with {kib} using the `Authorization` request header with the `Bearer` scheme.
 
-The session cookies that are issued by the token authentication provider are stateful, and logging out of Kibana invalidates the session cookies for reuse.
+The session cookies that are issued by the token authentication provider are stateful, and logging out of {kib} invalidates the session cookies for reuse.
 
-Prior to configuring Kibana, ensure token support is enabled in Elasticsearch. See the {ref}/security-api-get-token.html[Elasticsearch token API] documentation for more information.
+Prior to configuring {kib}, ensure token support is enabled in {es}. See the {ref}/security-api-get-token.html[{es} token API] documentation for more information.
 
-To enable the token authentication provider in Kibana, set the following value in your `kibana.yml`:
+To enable the token authentication provider in {kib}, set the following value in your `kibana.yml`:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -67,7 +68,7 @@ server.ssl.clientAuthentication: required
 xpack.security.authc.providers: [pki]
 --------------------------------------------------------------------------------
 
-NOTE: Trusted CAs can also be specified in a PKCS #12 keystore bundled with your Kibana server certificate/key using
+NOTE: Trusted CAs can also be specified in a PKCS #12 keystore bundled with your {kib} server certificate/key using
 `server.ssl.keystore.path` or in a separate trust store using `server.ssl.truststore.path`.
 
 PKI support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both PKI and Basic authentication for the same {kib} instance:
@@ -128,7 +129,7 @@ Basic authentication is supported _only_ if `basic` authentication provider is e
 
 At the beginning of the SAML handshake, {kib} stores the initial URL in the session cookie, so it can redirect the user back to that URL after successful SAML authentication.
 If the URL is long, the session cookie might exceed the maximum size supported by the browser--typically 4KB for all cookies per domain. When this happens, the session cookie is truncated,
-or dropped completely, and you might experience sporadic failures during SAML authentication. 
+or dropped completely, and you might experience sporadic failures during SAML authentication.
 
 To remedy this issue, you can decrease the maximum
 size of the URL that {kib} is allowed to store during the SAML handshake. The default value is 2KB.
@@ -185,7 +186,7 @@ Users will be able to access the login page and use Basic authentication by navi
 [float]
 ==== Single sign-on provider details
 
-The following sections apply both to <<saml>> and <<oidc>> 
+The following sections apply both to <<saml>> and <<oidc>>
 
 [float]
 ===== Access and refresh tokens
@@ -214,3 +215,26 @@ leaked, it can't be re-used after logout. This is known as "local" logout.
 {kib} can also initiate a "global" logout or _Single Logout_ if it's supported by the external authentication provider and not
 explicitly disabled by {es}. In this case, the user is redirected to the external authentication provider for log out of
 all applications associated with the active provider session.
+
+[[kerberos]]
+==== Kerberos single sign-on
+
+As with the previous SSOs, make sure that you have configured {es} first accordingly. See {ref}/kerberos-realm.html[Kerberos authentication].
+
+Next, to enable Kerberos in {kib}, you will need to enable the Kerberos authentication provider in the `kibana.yml` configuration file, as follows:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers: [kerberos]
+-----------------------------------------------
+
+You may want to be able to authenticate with the basic authentication provider as a secondary mechanism or while you are setting up Kerberos for the stack:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers: [kerberos, basic]
+-----------------------------------------------
+
+As a reminder, the order is important as it determines the order in which each authentication provider is attempted.
+
+Kibana uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. At the end of the Kerberos handshake, Kibana will forward the service ticket to Elasticsearch. Elasticsearch will unpack it and it will respond with an access and refresh token which are then used for subsequent authentication.

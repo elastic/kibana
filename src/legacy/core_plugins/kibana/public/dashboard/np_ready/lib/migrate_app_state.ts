@@ -28,6 +28,7 @@ import {
   SavedDashboardPanel630,
   SavedDashboardPanel640To720,
   SavedDashboardPanel620,
+  SavedDashboardPanel,
 } from '../types';
 import { migratePanelsTo730 } from '../../migrations/migrate_to_730_panels';
 
@@ -37,9 +38,9 @@ import { migratePanelsTo730 } from '../../migrations/migrate_to_730_panels';
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: unknown } | DashboardAppState,
+  appState: { [key: string]: unknown } & DashboardAppState,
   kibanaVersion: string
-) {
+): DashboardAppState {
   if (!appState.panels) {
     throw new Error(
       i18n.translate('kbn.dashboard.panel.invalidData', {
@@ -76,11 +77,11 @@ export function migrateAppState(
         | SavedDashboardPanel640To720
       >,
       kibanaVersion,
-      appState.useMargins,
-      appState.uiState
-    );
+      appState.useMargins as boolean,
+      appState.uiState as Record<string, Record<string, unknown>>
+    ) as SavedDashboardPanel[];
     delete appState.uiState;
-
-    appState.save();
   }
+
+  return appState;
 }

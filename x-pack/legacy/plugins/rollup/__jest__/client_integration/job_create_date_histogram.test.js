@@ -6,7 +6,8 @@
 
 import moment from 'moment-timezone';
 
-import { setupEnvironment, pageHelpers } from './helpers';
+import { setHttp } from '../../public/crud_app/services';
+import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
 
@@ -15,28 +16,29 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 2: Date histogram', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let find;
   let exists;
   let actions;
   let goToStep;
   let form;
   let getEuiStepsHorizontalActive;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
-
-  afterAll(() => {
-    server.restore();
-  });
-
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+    mockHttpRequest(npStart.core.http);
 
     ({ find, exists, actions, form, getEuiStepsHorizontalActive, goToStep } = setup());
+  });
+
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
+    npStart.core.http.post.mockClear();
+    npStart.core.http.put.mockClear();
   });
 
   describe('layout', () => {
@@ -71,7 +73,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
   describe('Date field select', () => {
     it('should set the options value from the index pattern', async () => {
       const dateFields = ['field1', 'field2', 'field3'];
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields });
+      mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { dateFields } });
 
       await goToStep(2);
 
@@ -83,7 +85,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
     it('should sort the options in ascending order', async () => {
       const dateFields = ['field3', 'field2', 'field1'];
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields });
+      mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { dateFields } });
 
       await goToStep(2);
 

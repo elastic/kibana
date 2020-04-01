@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import { FilterManager } from './filter_manager';
 import { coreMock } from '../../../../../../core/public/mocks';
 import {
-  esFilters,
+  Filter,
   IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
@@ -31,7 +31,7 @@ const setupMock = coreMock.createSetup();
 
 class FilterManagerTest extends FilterManager {
   createFilter() {
-    return {} as esFilters.Filter;
+    return {} as Filter;
   }
 
   getValueFromFilterBar() {
@@ -44,7 +44,7 @@ describe('FilterManager', function() {
 
   describe('findFilters', function() {
     const indexPatternMock = {} as IndexPattern;
-    let kbnFilters: esFilters.Filter[];
+    let kbnFilters: Filter[];
     const queryFilterMock = new QueryFilterManager(setupMock.uiSettings);
     queryFilterMock.getAppFilters = () => kbnFilters;
     queryFilterMock.getGlobalFilters = () => [];
@@ -56,7 +56,7 @@ describe('FilterManager', function() {
     });
 
     test('should not find filters that are not controlled by any visualization', function() {
-      kbnFilters.push({} as esFilters.Filter);
+      kbnFilters.push({} as Filter);
       const foundFilters = filterManager.findFilters();
       expect(foundFilters.length).to.be(0);
     });
@@ -66,7 +66,7 @@ describe('FilterManager', function() {
         meta: {
           controlledBy: 'anotherControl',
         },
-      } as esFilters.Filter);
+      } as Filter);
       const foundFilters = filterManager.findFilters();
       expect(foundFilters.length).to.be(0);
     });
@@ -76,7 +76,7 @@ describe('FilterManager', function() {
         meta: {
           controlledBy: controlId,
         },
-      } as esFilters.Filter);
+      } as Filter);
       const foundFilters = filterManager.findFilters();
       expect(foundFilters.length).to.be(1);
     });

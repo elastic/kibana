@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
+import { getUISettings } from '../../services';
 
 export function getDefaultQueryLanguage() {
-  return chrome.getUiSettingsClient().get('search:queryLanguage');
+  return getUISettings().get('search:queryLanguage');
 }

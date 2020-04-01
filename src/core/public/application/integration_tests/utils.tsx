@@ -23,7 +23,7 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { App, LegacyApp, AppMountParameters } from '../types';
-import { MockedMounter, MockedMounterTuple } from '../test_types';
+import { EitherApp, MockedMounter, MockedMounterTuple, Mountable } from '../test_types';
 
 type Dom = ReturnType<typeof mount> | null;
 type Renderer = () => Dom | Promise<Dom>;
@@ -40,11 +40,17 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
     });
 };
 
-export const createAppMounter = (
-  appId: string,
-  html: string,
-  appRoute = `/app/${appId}`
-): MockedMounterTuple<App> => {
+export const createAppMounter = ({
+  appId,
+  html = `<div>App ${appId}</div>`,
+  appRoute = `/app/${appId}`,
+  extraMountHook,
+}: {
+  appId: string;
+  html?: string;
+  appRoute?: string;
+  extraMountHook?: (params: AppMountParameters) => void;
+}): MockedMounterTuple<App> => {
   const unmount = jest.fn();
   return [
     appId,
@@ -52,11 +58,15 @@ export const createAppMounter = (
       mounter: {
         appRoute,
         appBasePath: appRoute,
-        mount: jest.fn(async ({ appBasePath: basename, element }: AppMountParameters) => {
+        mount: jest.fn(async (params: AppMountParameters) => {
+          const { appBasePath: basename, element } = params;
           Object.assign(element, {
             innerHTML: `<div>\nbasename: ${basename}\nhtml: ${html}\n</div>`,
           });
           unmount.mockImplementation(() => Object.assign(element, { innerHTML: '' }));
+          if (extraMountHook) {
+            extraMountHook(params);
+          }
           return unmount;
         }),
       },
@@ -80,3 +90,7 @@ export const createLegacyAppMounter = (
     unmount: jest.fn(),
   },
 ];
+
+export function getUnmounter(app: Mountable<EitherApp>) {
+  return app.mounter.mount.mock.results[0].value;
+}

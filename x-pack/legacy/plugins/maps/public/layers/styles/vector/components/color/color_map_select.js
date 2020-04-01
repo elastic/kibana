@@ -6,17 +6,16 @@
 
 import React, { Component, Fragment } from 'react';
 
-import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiSelect, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { ColorStopsCategorical } from './color_stops_categorical';
+import { i18n } from '@kbn/i18n';
 
 const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 
 export class ColorMapSelect extends Component {
-  state = {
-    selected: '',
-  };
+  state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.customColorMap === prevState.prevPropsCustomColorMap) {
@@ -27,6 +26,43 @@ export class ColorMapSelect extends Component {
       prevPropsCustomColorMap: nextProps.customColorMap, // reset tracker to latest value
       customColorMap: nextProps.customColorMap, // reset customColorMap to latest value
     };
+  }
+
+  _renderColorMapToggle() {
+    const options = [
+      {
+        value: COLOR_MAP_TYPE.ORDINAL,
+        text: i18n.translate('xpack.maps.styles.dynamicColorSelect.quantitativeLabel', {
+          defaultMessage: 'As number',
+        }),
+      },
+      {
+        value: COLOR_MAP_TYPE.CATEGORICAL,
+        text: i18n.translate('xpack.maps.styles.dynamicColorSelect.qualitativeLabel', {
+          defaultMessage: 'As category',
+        }),
+      },
+    ];
+
+    const selectedValue = this.props.styleProperty.isOrdinal()
+      ? COLOR_MAP_TYPE.ORDINAL
+      : COLOR_MAP_TYPE.CATEGORICAL;
+
+    return (
+      <EuiSelect
+        options={options}
+        value={selectedValue}
+        onChange={this.props.onColorMapTypeChange}
+        aria-label={i18n.translate(
+          'xpack.maps.styles.dynamicColorSelect.qualitativeOrQuantitativeAriaLabel',
+          {
+            defaultMessage:
+              'Choose `As number` to map by number in a color range, or `As category`to categorize by color palette.',
+          }
+        )}
+        compressed
+      />
+    );
   }
 
   _onColorMapSelect = selectedValue => {
@@ -41,10 +77,7 @@ export class ColorMapSelect extends Component {
   _onCustomColorMapChange = ({ colorStops, isInvalid }) => {
     // Manage invalid custom color map in local state
     if (isInvalid) {
-      const newState = {
-        customColorMap: colorStops,
-      };
-      this.setState(newState);
+      this.setState({ customColorMap: colorStops });
       return;
     }
 
@@ -56,39 +89,41 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
-    let colorStopsInput;
-    if (this.props.useCustomColorMap) {
-      if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-        colorStopsInput = (
-          <Fragment>
-            <EuiSpacer size="s" />
-            <ColorStopsOrdinal
-              colorStops={this.state.customColorMap}
-              onChange={this._onCustomColorMapChange}
-            />
-          </Fragment>
-        );
-      } else if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
-        colorStopsInput = (
-          <Fragment>
-            <EuiSpacer size="s" />
-            <ColorStopsCategorical
-              colorStops={this.state.customColorMap}
-              onChange={this._onCustomColorMapChange}
-            />
-          </Fragment>
-        );
-      }
+    if (!this.props.useCustomColorMap) {
+      return null;
     }
-    return colorStopsInput;
+
+    let colorStopEditor;
+    if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
+      colorStopEditor = (
+        <ColorStopsOrdinal
+          colorStops={this.state.customColorMap}
+          onChange={this._onCustomColorMapChange}
+        />
+      );
+    } else
+      colorStopEditor = (
+        <ColorStopsCategorical
+          colorStops={this.state.customColorMap}
+          field={this.props.styleProperty.getField()}
+          getValueSuggestions={this.props.styleProperty.getValueSuggestions}
+          onChange={this._onCustomColorMapChange}
+        />
+      );
+
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>{colorStopEditor}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
-  render() {
-    const colorStopsInput = this._renderColorStopsInput();
+  _renderColorMapSelections() {
     const colorMapOptionsWithCustom = [
       {
         value: CUSTOM_COLOR_MAP,
         inputDisplay: this.props.customOptionLabel,
+        'data-test-subj': `colorMapSelectOption_${CUSTOM_COLOR_MAP}`,
       },
       ...this.props.colorMapOptions,
     ];
@@ -102,15 +137,33 @@ export class ColorMapSelect extends Component {
         : '';
     }
 
+    const toggle = this.props.showColorMapTypeToggle ? (
+      <EuiFlexItem grow={false}>{this._renderColorMapToggle()}</EuiFlexItem>
+    ) : null;
+
+    return (
+      <EuiFlexGroup gutterSize={'none'}>
+        {toggle}
+        <EuiFlexItem>
+          <EuiSuperSelect
+            compressed
+            options={colorMapOptionsWithCustom}
+            onChange={this._onColorMapSelect}
+            valueOfSelected={valueOfSelected}
+            hasDividers={true}
+            data-test-subj={`colorMapSelect_${this.props.styleProperty.getStyleName()}`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  render() {
     return (
       <Fragment>
-        <EuiSuperSelect
-          options={colorMapOptionsWithCustom}
-          onChange={this._onColorMapSelect}
-          valueOfSelected={valueOfSelected}
-          hasDividers={true}
-        />
-        {colorStopsInput}
+        {this._renderColorMapSelections()}
+        <EuiSpacer size="s" />
+        {this._renderColorStopsInput()}
       </Fragment>
     );
   }

@@ -41,9 +41,24 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('add new visualization link', () => {
-      it('adds a new visualization', async () => {
+      it('adds new visualiztion via the top nav link', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await PageObjects.dashboard.switchToEditMode();
+        await dashboardAddPanel.clickCreateNewLink();
+        await PageObjects.visualize.clickAreaChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'visualization from top nav add new panel'
+        );
+        await retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(originalPanelCount + 1);
+        });
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      it('adds a new visualization', async () => {
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await dashboardAddPanel.ensureAddPanelIsShowing();
         await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
         await PageObjects.visualize.clickAreaChart();
@@ -83,7 +98,7 @@ export default function({ getService, getPageObjects }) {
 
       describe('is false', () => {
         before(async () => {
-          await PageObjects.header.clickManagement();
+          await PageObjects.header.clickStackManagement();
           await PageObjects.settings.clickKibanaSettings();
           await PageObjects.settings.toggleAdvancedSettingCheckbox('visualize:enableLabs');
         });
@@ -98,7 +113,7 @@ export default function({ getService, getPageObjects }) {
         });
 
         after(async () => {
-          await PageObjects.header.clickManagement();
+          await PageObjects.header.clickStackManagement();
           await PageObjects.settings.clickKibanaSettings();
           await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');
           await PageObjects.header.clickDashboard();

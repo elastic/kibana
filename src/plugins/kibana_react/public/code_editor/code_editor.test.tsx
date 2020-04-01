@@ -19,13 +19,13 @@
 
 import React from 'react';
 import { CodeEditor } from './code_editor';
-import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
 import { shallow } from 'enzyme';
 
 import 'monaco-editor/esm/vs/basic-languages/html/html.contribution.js';
 
 // A sample language definition with a few example tokens
-const simpleLogLang: monacoEditor.languages.IMonarchLanguage = {
+const simpleLogLang: monaco.languages.IMonarchLanguage = {
   tokenizer: {
     root: [
       [/\[error.*/, 'constant'],
@@ -36,8 +36,8 @@ const simpleLogLang: monacoEditor.languages.IMonarchLanguage = {
   },
 };
 
-monacoEditor.languages.register({ id: 'loglang' });
-monacoEditor.languages.setMonarchTokensProvider('loglang', simpleLogLang);
+monaco.languages.register({ id: 'loglang' });
+monaco.languages.setMonarchTokensProvider('loglang', simpleLogLang);
 
 const logs = `
 [Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
@@ -55,23 +55,22 @@ test('is rendered', () => {
 
 test('editor mount setup', () => {
   const suggestionProvider = {
-    provideCompletionItems: (
-      model: monacoEditor.editor.ITextModel,
-      position: monacoEditor.Position
-    ) => ({ suggestions: [] }),
+    provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
+      suggestions: [],
+    }),
   };
   const signatureProvider = {
     provideSignatureHelp: () => ({ signatures: [], activeParameter: 0, activeSignature: 0 }),
   };
   const hoverProvider = {
-    provideHover: (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => ({
+    provideHover: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
       contents: [],
     }),
   };
 
   const editorWillMount = jest.fn();
 
-  monacoEditor.languages.onLanguage = jest.fn((languageId, func) => {
+  monaco.languages.onLanguage = jest.fn((languageId, func) => {
     expect(languageId).toBe('loglang');
 
     // Call the function immediately so we can see our providers
@@ -79,11 +78,11 @@ test('editor mount setup', () => {
     func();
   }) as any;
 
-  monacoEditor.languages.registerCompletionItemProvider = jest.fn();
-  monacoEditor.languages.registerSignatureHelpProvider = jest.fn();
-  monacoEditor.languages.registerHoverProvider = jest.fn();
+  monaco.languages.registerCompletionItemProvider = jest.fn();
+  monaco.languages.registerSignatureHelpProvider = jest.fn();
+  monaco.languages.registerHoverProvider = jest.fn();
 
-  monacoEditor.editor.defineTheme = jest.fn();
+  monaco.editor.defineTheme = jest.fn();
 
   const wrapper = shallow(
     <CodeEditor
@@ -98,21 +97,17 @@ test('editor mount setup', () => {
   );
 
   const instance = wrapper.instance() as CodeEditor;
-  instance._editorWillMount(monacoEditor);
+  instance._editorWillMount(monaco);
 
   // Verify our mount callback will be called
   expect(editorWillMount.mock.calls.length).toBe(1);
 
   // Verify our theme will be setup
-  expect((monacoEditor.editor.defineTheme as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(1);
 
   // Verify our language features have been registered
-  expect((monacoEditor.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
-  expect(
-    (monacoEditor.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length
-  ).toBe(1);
-  expect(
-    (monacoEditor.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length
-  ).toBe(1);
-  expect((monacoEditor.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
 });

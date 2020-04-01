@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -29,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../../../plugins/data/public';
 
-import { getEnableExternalUrls } from '../helpers/vega_config_provider';
+import { getEnableExternalUrls } from '../services';
 
 vega.scheme('elastic', VISUALIZATION_COLORS);
 
@@ -133,7 +132,8 @@ export class VegaBaseView {
 
   createViewConfig() {
     const config = {
-      logLevel: vega.Warn,
+      // eslint-disable-next-line import/namespace
+      logLevel: vega.Warn, // note: eslint has a false positive here
       renderer: this._parser.renderer,
     };
 
@@ -279,20 +279,21 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async removeFilterHandler(query, index) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
     const indexId = await this._findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
 
-    // This is a workaround for the https://github.com/elastic/kibana/issues/18863
-    // Once fixed, replace with a direct call (no await is needed because its not async)
-    //  this._queryfilter.removeFilter(filter);
-    $injector.get('$rootScope').$evalAsync(() => {
-      try {
-        this._filterManager.removeFilter(filter);
-      } catch (err) {
-        this.onError(err);
-      }
-    });
+    const currentFilters = this._filterManager.getFilters();
+    const existingFilter = currentFilters.find(filter =>
+      esFilters.compareFilters(filter, filterToRemove)
+    );
+
+    if (!existingFilter) return;
+
+    try {
+      this._filterManager.removeFilter(existingFilter);
+    } catch (err) {
+      this.onError(err);
+    }
   }
 
   removeAllFiltersHandler() {

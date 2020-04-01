@@ -117,7 +117,16 @@ export class ElasticsearchOverviewAdapter implements OverviewAdapter {
         'aggregations.system_module.filebeat_count.doc_count',
         response
       ),
-      winlogbeat: getOr(null, 'aggregations.winlog_count.doc_count', response),
+      winlogbeatSecurity: getOr(
+        null,
+        'aggregations.winlog_module.security_event_count.doc_count',
+        response
+      ),
+      winlogbeatMWSysmonOperational: getOr(
+        null,
+        'aggregations.winlog_module.mwsysmon_operational_event_count.doc_count',
+        response
+      ),
     };
   }
 }

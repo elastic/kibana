@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import chrome from 'plugins/monitoring/np_imports/ui/chrome';
 
 const licenseManagement = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`;
 

@@ -19,8 +19,7 @@
 
 import { rangeControlFactory } from './range_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
-import { getSearchSourceMock } from '../components/editor/__tests__/get_search_service_mock';
-import { getDepsMock } from '../components/editor/__tests__/get_deps_mock';
+import { getDepsMock, getSearchSourceMock } from '../test_utils';
 
 const deps = getDepsMock();
 

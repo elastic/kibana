@@ -10,7 +10,7 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
-} from '../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 

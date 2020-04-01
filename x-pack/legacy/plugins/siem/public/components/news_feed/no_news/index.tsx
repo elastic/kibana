@@ -12,7 +12,7 @@ import * as i18n from '../translations';
 export const NoNews = React.memo(() => (
   <>
     <EuiText color="subdued" size="s">
-      {i18n.NO_NEWS_MESSAGE}
+      {i18n.NO_NEWS_MESSAGE}{' '}
       <EuiLink href={'/app/kibana#/management/kibana/settings'}>
         {i18n.ADVANCED_SETTINGS_LINK_TITLE}
       </EuiLink>

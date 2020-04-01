@@ -5,16 +5,14 @@
  */
 
 import React from 'react';
-import chrome from 'ui/chrome';
 
 import * as i18nCommon from '../../common/translations';
 import { EmptyPage } from '../../../components/empty_page';
 import { useKibana } from '../../../lib/kibana';
 
-const basePath = chrome.getBasePath();
-
-export const OverviewEmpty = React.memo(() => {
-  const docLinks = useKibana().services.docLinks;
+const OverviewEmptyComponent: React.FC = () => {
+  const { http, docLinks } = useKibana().services;
+  const basePath = http.basePath.get();
 
   return (
     <EmptyPage
@@ -30,6 +28,8 @@ export const OverviewEmpty = React.memo(() => {
       title={i18nCommon.EMPTY_TITLE}
     />
   );
-});
+};
 
-OverviewEmpty.displayName = 'OverviewEmpty';
+OverviewEmptyComponent.displayName = 'OverviewEmptyComponent';
+
+export const OverviewEmpty = React.memo(OverviewEmptyComponent);

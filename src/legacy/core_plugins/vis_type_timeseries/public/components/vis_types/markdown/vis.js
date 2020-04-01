@@ -21,12 +21,12 @@ import React from 'react';
 import classNames from 'classnames';
 import uuid from 'uuid';
 import { get } from 'lodash';
-import { Markdown } from '../../../../../kibana_react/public';
+import { Markdown } from '../../../../../../../plugins/kibana_react/public';
 
 import { ErrorComponent } from '../../error';
 import { replaceVars } from '../../lib/replace_vars';
 import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
-import { isBackgroundInverted } from '../../../../common/set_is_reversed';
+import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 const getMarkdownId = id => `markdown-${id}`;
 

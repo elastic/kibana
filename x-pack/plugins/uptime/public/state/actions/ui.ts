@@ -12,6 +12,8 @@ export interface PopoverState {
 
 export type UiPayload = PopoverState & string & number & Map<string, string[]>;
 
+export const setAlertFlyoutVisible = createAction<boolean>('TOGGLE ALERT FLYOUT');
+
 export const setBasePath = createAction<string>('SET BASE PATH');
 
 export const triggerAppRefresh = createAction<number>('REFRESH APP');

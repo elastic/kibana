@@ -58,11 +58,11 @@ export default function({ getService, getPageObjects }) {
         fullname: 'dls EAST',
         email: 'dlstest@elastic.com',
         save: true,
-        roles: ['kibana_user', 'myroleEast'],
+        roles: ['kibana_admin', 'myroleEast'],
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.userEast.roles).to.eql(['kibana_user', 'myroleEast']);
+      expect(users.userEast.roles).to.eql(['kibana_admin', 'myroleEast']);
       expect(users.userEast.reserved).to.be(false);
     });
 

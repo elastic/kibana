@@ -29,7 +29,7 @@
  * simply delete this shim file.
  *
  * We are also calling `setup/start` here and exporting our public contract so that
- * other legacy plugins are able to import from '../core_plugins/visualizations/legacy'
+ * other legacy plugins are able to import from '../core_plugins/management/legacy'
  * and receive the response value of the `setup/start` contract, mimicking the
  * data that will eventually be injected by the new platform.
  */
@@ -41,5 +41,5 @@ import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, {});
+export const setup = pluginInstance.setup(npSetup.core, { home: npSetup.plugins.home });
 export const start = pluginInstance.start(npStart.core, {});

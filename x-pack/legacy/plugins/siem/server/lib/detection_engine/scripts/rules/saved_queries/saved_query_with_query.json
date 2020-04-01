@@ -4,8 +4,6 @@
   "risk_score": 1,
   "severity": "high",
   "type": "saved_query",
-  "from": "now-6m",
-  "to": "now",
   "query": "user.name: root or user.name: admin",
   "saved_id": "test-saved-id"
 }

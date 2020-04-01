@@ -8,7 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { LibraryStacktrace } from './LibraryStacktrace';
 import { Stackframe } from './Stackframe';

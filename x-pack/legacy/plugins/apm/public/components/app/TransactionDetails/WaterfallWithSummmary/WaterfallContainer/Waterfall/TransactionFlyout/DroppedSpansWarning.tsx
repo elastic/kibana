@@ -7,7 +7,7 @@
 import { EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { ElasticDocsLink } from '../../../../../../shared/Links/ElasticDocsLink';
 
 export function DroppedSpansWarning({

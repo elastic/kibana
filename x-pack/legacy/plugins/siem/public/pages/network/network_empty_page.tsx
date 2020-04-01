@@ -5,16 +5,14 @@
  */
 
 import React from 'react';
-import chrome from 'ui/chrome';
 
 import { useKibana } from '../../lib/kibana';
 import { EmptyPage } from '../../components/empty_page';
 import * as i18n from '../common/translations';
 
-const basePath = chrome.getBasePath();
-
 export const NetworkEmptyPage = React.memo(() => {
-  const docLinks = useKibana().services.docLinks;
+  const { http, docLinks } = useKibana().services;
+  const basePath = http.basePath.get();
 
   return (
     <EmptyPage

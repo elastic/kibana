@@ -39,6 +39,7 @@ export interface RenderingMetadata {
     buildNumber: number;
     branch: string;
     basePath: string;
+    serverBasePath: string;
     env: Env;
     legacyMode: boolean;
     i18n: {
@@ -84,21 +85,19 @@ export interface IRenderOptions {
    * `true` by default.
    */
   includeUserSettings?: boolean;
-}
 
-/**
- * @internal
- * @deprecated for legacy use only, remove with ui_render_mixin
- */
-export interface LegacyRenderOptions extends IRenderOptions {
   /**
    * Render the bootstrapped HTML content for an optional legacy application.
    * Defaults to `core`.
+   * @deprecated for legacy use only, remove with ui_render_mixin
+   * @internal
    */
   app?: { getId(): string };
 
   /**
    * Inject custom vars into the page metadata.
+   * @deprecated for legacy use only, remove with ui_render_mixin
+   * @internal
    */
   vars?: Record<string, any>;
 }
@@ -123,7 +122,7 @@ export interface IScopedRenderingClient {
    * );
    * ```
    */
-  render(options?: IRenderOptions): Promise<string>;
+  render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
 }
 
 /** @internal */
@@ -140,6 +139,6 @@ export interface RenderingServiceSetup {
   render<R extends KibanaRequest | LegacyRequest>(
     request: R,
     uiSettings: IUiSettingsClient,
-    options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions
+    options?: IRenderOptions
   ): Promise<string>;
 }

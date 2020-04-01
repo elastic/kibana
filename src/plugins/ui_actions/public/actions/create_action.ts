@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { IAction } from './i_action';
+import { ActionByType } from './action';
+import { ActionType } from '../types';
+import { ActionDefinition } from './action_definition';
 
-export function createAction<ActionContext extends {} = {}>(
-  action: { type: string; execute: IAction<ActionContext>['execute'] } & Partial<
-    IAction<ActionContext>
-  >
-): IAction<ActionContext> {
+export function createAction<T extends ActionType>(action: ActionDefinition<T>): ActionByType<T> {
   return {
     getIconType: () => undefined,
     order: 0,

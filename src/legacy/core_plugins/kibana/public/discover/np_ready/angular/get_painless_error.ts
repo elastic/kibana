@@ -23,8 +23,9 @@ import { get } from 'lodash';
 export function getPainlessError(error: Error) {
   const rootCause: Array<{ lang: string; script: string }> | undefined = get(
     error,
-    'resp.error.root_cause'
+    'body.attributes.error.root_cause'
   );
+  const message: string = get(error, 'body.message');
 
   if (!rootCause) {
     return;
@@ -43,6 +44,6 @@ export function getPainlessError(error: Error) {
       defaultMessage: "Error with Painless scripted field '{script}'.",
       values: { script },
     }),
-    error: error.message,
+    error: message,
   };
 }

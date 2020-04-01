@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Readable, Transform } from 'stream';
+import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
 import { ImportRuleAlertRest } from '../types';
 import {
@@ -13,6 +13,7 @@ import {
   createConcatStream,
 } from '../../../../../../../../src/legacy/utils/streams';
 import { importRulesSchema } from '../routes/schemas/import_rules_schema';
+import { BadRequestError } from '../errors/bad_request_error';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */
@@ -42,7 +43,7 @@ export const validateRules = (): Transform => {
     if (!(obj instanceof Error)) {
       const validated = importRulesSchema.validate(obj);
       if (validated.error != null) {
-        return new TypeError(validated.error.message);
+        return new BadRequestError(validated.error.message);
       } else {
         return validated.value;
       }
@@ -74,15 +75,13 @@ export const createLimitStream = (limit: number): Transform => {
  * Inspiration and the pattern of code followed is from:
  * saved_objects/lib/create_saved_objects_stream_from_ndjson.ts
  */
-export const createRulesStreamFromNdJson = (
-  ndJsonStream: Readable,
-  ruleLimit: number
-): Transform => {
-  return ndJsonStream
-    .pipe(createSplitStream('\n'))
-    .pipe(parseNdjsonStrings())
-    .pipe(filterExportedCounts())
-    .pipe(validateRules())
-    .pipe(createLimitStream(ruleLimit))
-    .pipe(createConcatStream([]));
+export const createRulesStreamFromNdJson = (ruleLimit: number) => {
+  return [
+    createSplitStream('\n'),
+    parseNdjsonStrings(),
+    filterExportedCounts(),
+    validateRules(),
+    createLimitStream(ruleLimit),
+    createConcatStream([]),
+  ];
 };

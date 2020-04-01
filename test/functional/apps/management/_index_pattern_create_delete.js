@@ -71,8 +71,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should have index pattern in page header', async function() {
-        const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-        const patternName = await indexPageHeading.getVisibleText();
+        const patternName = await PageObjects.settings.getIndexPageHeading();
         expect(patternName).to.be('logstash-*');
       });
 
@@ -94,7 +93,6 @@ export default function({ getService, getPageObjects }) {
             'Searchable',
             'Aggregatable',
             'Excluded',
-            '',
           ];
 
           expect(headers.length).to.be(expectedHeaders.length);

@@ -15,3 +15,16 @@ export { UptimePlugin } from './plugin';
 //   { opaqueId: Symbol('uptime'), env: {} as any, config: { get: () => ({} as any) } },
 //   chrome
 // ).start(npStart);
+
+// ---------------------------------
+
+// import { npSetup } from 'ui/new_platform';
+// import { Plugin } from './plugin';
+// import 'uiExports/embeddableFactories';
+
+// const plugin = new Plugin({
+//   opaqueId: Symbol('uptime'),
+//   env: {} as any,
+//   config: { get: () => ({} as any) },
+// });
+// plugin.setup(npSetup);

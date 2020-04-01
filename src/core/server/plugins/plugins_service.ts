@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Path from 'path';
 import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
@@ -32,8 +33,11 @@ import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
 import { pick } from '../../utils';
 
-/** @public */
+/** @internal */
 export interface PluginsServiceSetup {
+  /** Indicates whether or not plugins were initialized. */
+  initialized: boolean;
+  /** Setup contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
   uiPlugins: {
     /**
@@ -54,8 +58,9 @@ export interface PluginsServiceSetup {
   };
 }
 
-/** @public */
+/** @internal */
 export interface PluginsServiceStart {
+  /** Start contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
 }
 
@@ -102,14 +107,17 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const config = await this.config$.pipe(first()).toPromise();
 
     let contracts = new Map<PluginName, unknown>();
-    if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
-      this.log.info('Plugin initialization disabled.');
-    } else {
+    const initialize = config.initialize && !this.coreContext.env.isDevClusterMaster;
+    if (initialize) {
       contracts = await this.pluginsSystem.setupPlugins(deps);
+      this.registerPluginStaticDirs(deps);
+    } else {
+      this.log.info('Plugin initialization disabled.');
     }
 
     const uiPlugins = this.pluginsSystem.uiPlugins();
     return {
+      initialized: initialize,
       contracts,
       uiPlugins: {
         internal: this.uiPluginInternalInfo,
@@ -214,7 +222,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           }
 
           if (plugin.includesUiPlugin) {
-            this.uiPluginInternalInfo.set(plugin.name, { entryPointPath: `${plugin.path}/public` });
+            this.uiPluginInternalInfo.set(plugin.name, {
+              publicTargetDir: Path.resolve(plugin.path, 'target/public'),
+              publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
+            });
           }
 
           pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
@@ -252,5 +263,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
         )
     );
+  }
+
+  private registerPluginStaticDirs(deps: PluginsServiceSetupDeps) {
+    for (const [pluginName, pluginInfo] of this.uiPluginInternalInfo) {
+      deps.http.registerStaticDir(
+        `/plugins/${pluginName}/assets/{path*}`,
+        pluginInfo.publicAssetsDir
+      );
+    }
   }
 }

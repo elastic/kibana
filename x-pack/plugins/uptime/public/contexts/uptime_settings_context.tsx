@@ -5,13 +5,15 @@
  */
 
 import React, { createContext, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { UptimeAppProps } from '../uptime_app';
-import { CONTEXT_DEFAULTS } from '../../common/constants';
+import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/functional/uptime_date_picker';
+import { useUrlParams } from '../hooks';
+import { ILicense } from '../../../../../plugins/licensing/common/types';
 
 export interface UptimeSettingsContextValues {
   basePath: string;
+  license?: ILicense | null;
   dateRangeStart: string;
   dateRangeEnd: string;
   isApmAvailable: boolean;
@@ -20,7 +22,9 @@ export interface UptimeSettingsContextValues {
   commonlyUsedRanges?: CommonlyUsedRange[];
 }
 
-const { BASE_PATH, DATE_RANGE_START, DATE_RANGE_END } = CONTEXT_DEFAULTS;
+const { BASE_PATH } = CONTEXT_DEFAULTS;
+
+const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
 
 /**
  * These are default values for the context. These defaults are typically
@@ -37,20 +41,47 @@ const defaultContext: UptimeSettingsContextValues = {
 export const UptimeSettingsContext = createContext(defaultContext);
 
 export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ children, ...props }) => {
-  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable } = props;
+  const {
+    basePath,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+    commonlyUsedRanges,
+    plugins,
+  } = props;
 
-  const { dateRangeStart, dateRangeEnd } = useParams();
+  const [getUrlParams] = useUrlParams();
+
+  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+
+  let license: ILicense | null = null;
+
+  // @ts-ignore
+  plugins.licensing.license$.subscribe((licenseItem: ILicense) => {
+    license = licenseItem;
+  });
 
   const value = useMemo(() => {
     return {
+      license,
       basePath,
       isApmAvailable,
       isInfraAvailable,
       isLogsAvailable,
+      commonlyUsedRanges,
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
     };
-  }, [basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, dateRangeStart, dateRangeEnd]);
+  }, [
+    license,
+    basePath,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+    dateRangeStart,
+    dateRangeEnd,
+    commonlyUsedRanges,
+  ]);
 
   return <UptimeSettingsContext.Provider value={value} children={children} />;
 };

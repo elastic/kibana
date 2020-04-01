@@ -28,16 +28,11 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="arrowLeft"
+          size="m"
         />
       </button>
     </div>
@@ -82,16 +77,11 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="arrowRight"
+          size="m"
         />
       </button>
     </div>
@@ -132,16 +122,11 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="arrowLeft"
+          size="m"
         />
       </button>
     </div>
@@ -186,16 +171,11 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="arrowRight"
+          size="m"
         />
       </button>
     </div>
@@ -236,16 +216,11 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="arrowLeft"
+          size="m"
         />
       </button>
     </div>
@@ -290,16 +265,11 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="arrowRight"
+          size="m"
         />
       </button>
     </div>

@@ -11,7 +11,7 @@ import { Router } from 'react-router-dom';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
-import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders, mockGlobalState, apolloClientObservable } from '../../mock';
 import { State, createStore } from '../../store';
@@ -116,7 +116,7 @@ describe('rendering - rendering', () => {
   });
 
   test('it should add the new filters after init', async () => {
-    const newFilters: esFilters.Filter[] = [
+    const newFilters: Filter[] = [
       {
         query: {
           bool: {

@@ -24,10 +24,11 @@ import {
   DashboardDoc730ToLatest,
   RawSavedDashboardPanel730ToLatest,
   DashboardDocPre700,
-} from './types';
+} from '../../../../../../plugins/dashboard/public';
 
 const mockLogger = {
   warning: () => {},
+  warn: () => {},
   debug: () => {},
   info: () => {},
 };

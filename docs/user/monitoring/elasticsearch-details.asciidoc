@@ -14,7 +14,7 @@ the <<cluster-overview-page, Overview>>, <<nodes-page, Nodes>>,
 [role="screenshot"]
 image::user/monitoring/images/monitoring-elasticsearch.jpg["Monitoring clusters"]
 
-See also {ref}/es-monitoring.html[Monitoring {es}].
+See also {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
 [float]
 [[cluster-overview-page]]

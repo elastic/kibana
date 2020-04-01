@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
 import {
@@ -15,11 +16,11 @@ import {
   ServerFacade,
   RequestFacade,
   Logger,
-  ExportTypesRegistry,
   CaptureConfig,
   QueueConfig,
   ConditionalHeaders,
 } from '../../types';
+import { ReportingCore } from '../core';
 
 interface ConfirmedJob {
   id: string;
@@ -28,15 +29,13 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-interface EnqueueJobFactoryOpts {
-  exportTypesRegistry: ExportTypesRegistry;
-  esqueue: any;
-}
-
 export function enqueueJobFactory(
+  reporting: ReportingCore,
   server: ServerFacade,
-  { exportTypesRegistry, esqueue }: EnqueueJobFactoryOpts
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
 ): EnqueueJobFn {
+  const logger = parentLogger.clone(['queue-job']);
   const config = server.config();
   const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
   const browserType = captureConfig.browser.type;
@@ -44,7 +43,6 @@ export function enqueueJobFactory(
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
 
   return async function enqueueJob<JobParamsType>(
-    parentLogger: Logger,
     exportTypeId: string,
     jobParams: JobParamsType,
     user: string,
@@ -53,15 +51,20 @@ export function enqueueJobFactory(
   ): Promise<Job> {
     type CreateJobFn = ESQueueCreateJobFn<JobParamsType> | ImmediateCreateJobFn<JobParamsType>;
 
-    const logger = parentLogger.clone(['queue-job']);
-    const exportType = exportTypesRegistry.getById(exportTypeId);
+    const esqueue = await reporting.getEsqueue();
+    const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
     // TODO: the createJobFn should be unwrapped in the register method of the export types registry
-    const createJob = exportType.createJobFactory(server) as CreateJobFn;
+    const createJob = exportType.createJobFactory(
+      reporting,
+      server,
+      elasticsearch,
+      logger
+    ) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 
     const options = {

@@ -53,6 +53,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -66,6 +67,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: { trace: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -81,6 +83,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -94,6 +97,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: { debug: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -109,6 +113,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -122,6 +127,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-2',
       meta: { info: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -137,6 +143,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -151,6 +158,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-2',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -164,6 +172,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-3',
       meta: { warn: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -179,6 +188,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -193,6 +203,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -206,6 +217,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-3',
       meta: { error: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -221,6 +233,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -235,6 +248,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -248,6 +262,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-3',
       meta: { fatal: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -258,6 +273,7 @@ test('`log()` just passes the record to all appenders.', () => {
     level: LogLevel.Info,
     message: 'message-1',
     timestamp,
+    pid: 5355,
   };
 
   logger.log(record);
@@ -307,6 +323,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Trace,
       message: 'trace-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -318,6 +335,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Debug,
       message: 'debug-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -329,6 +347,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Info,
       message: 'info-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -340,6 +359,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Warn,
       message: 'warn-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -351,6 +371,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Error,
       message: 'error-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -362,6 +383,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Fatal,
       message: 'fatal-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -385,6 +407,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Warn,
       message: 'warn-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -396,6 +419,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Error,
       message: 'error-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -407,6 +431,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Fatal,
       message: 'fatal-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });

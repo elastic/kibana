@@ -32,10 +32,6 @@ export function getBasePath(state: State): State['app']['basePath'] {
   return state.app.basePath;
 }
 
-export function getReportingBrowserType(state: State): State['app']['reportingBrowserType'] {
-  return state.app.reportingBrowserType;
-}
-
 // return true only when the required parameters are in the state
 export function isAppReady(state: State): boolean {
   const appReady = getAppReady(state);

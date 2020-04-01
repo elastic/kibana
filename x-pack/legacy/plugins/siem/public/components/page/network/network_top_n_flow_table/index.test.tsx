@@ -11,12 +11,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTargetSourceDest } from '../../../../graphql/types';
-import {
-  apolloClientObservable,
-  mockGlobalState,
-  mockIndexPattern,
-  TestProviders,
-} from '../../../../mock';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
 import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, networkModel, State } from '../../../../store';
 
@@ -43,7 +38,6 @@ describe('NetworkTopNFlow Table Component', () => {
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
             flowTargeted={FlowTargetSourceDest.source}
             id="topNFlowSource"
-            indexPattern={mockIndexPattern}
             isInspect={false}
             loading={false}
             loadPage={loadPage}
@@ -58,7 +52,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
     });
 
     test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
@@ -69,7 +63,6 @@ describe('NetworkTopNFlow Table Component', () => {
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
             flowTargeted={FlowTargetSourceDest.source}
             id="topNFlowSource"
-            indexPattern={mockIndexPattern}
             isInspect={false}
             loading={false}
             loadPage={loadPage}
@@ -84,7 +77,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
     });
   });
 
@@ -99,7 +92,6 @@ describe('NetworkTopNFlow Table Component', () => {
               flowTargeted={FlowTargetSourceDest.source}
               id="topNFlowSource"
               isInspect={false}
-              indexPattern={mockIndexPattern}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(

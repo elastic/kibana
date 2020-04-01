@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FilterGroup } from './filter_group';
+export { FilterGroupComponent } from './filter_group';

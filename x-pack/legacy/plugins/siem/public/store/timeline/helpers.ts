@@ -6,9 +6,8 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
-import { getColumnWidthFromType } from '../../components/timeline/body/helpers';
+import { Filter } from '../../../../../../../src/plugins/data/public';
+import { getColumnWidthFromType } from '../../components/timeline/body/column_headers/helpers';
 import { Sort } from '../../components/timeline/body/sort';
 import {
   DataProvider,
@@ -17,7 +16,8 @@ import {
 } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { KqlMode, timelineDefaults, TimelineModel, EventType } from './model';
+import { timelineDefaults } from './defaults';
+import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
 import { TimelineById, TimelineState } from './types';
 import { TimelineNonEcsData } from '../../graphql/types';
 
@@ -129,13 +129,13 @@ export const addTimelineToStore = ({
 });
 
 interface AddNewTimelineParams {
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
   dateRange?: {
     start: number;
     end: number;
   };
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   id: string;
   itemsPerPage?: number;
   kqlQuery?: {
@@ -353,7 +353,7 @@ const addProviderToTimeline = (
 };
 
 interface AddTimelineColumnParams {
-  column: ColumnHeader;
+  column: ColumnHeaderOptions;
   id: string;
   index: number;
   timelineById: TimelineById;
@@ -566,7 +566,7 @@ export const updateKqlFilterQueryDraft = ({
 
 interface UpdateTimelineColumnsParams {
   id: string;
-  columns: ColumnHeader[];
+  columns: ColumnHeaderOptions[];
   timelineById: TimelineById;
 }
 
@@ -1161,11 +1161,22 @@ export const setDeletedTimelineEvents = ({
     ? union(timeline.deletedEventIds, eventIds)
     : timeline.deletedEventIds.filter(currentEventId => !eventIds.includes(currentEventId));
 
+  const selectedEventIds = Object.fromEntries(
+    Object.entries(timeline.selectedEventIds).filter(
+      ([selectedEventId]) => !deletedEventIds.includes(selectedEventId)
+    )
+  );
+
+  const isSelectAllChecked =
+    Object.keys(selectedEventIds).length > 0 ? timeline.isSelectAllChecked : false;
+
   return {
     ...timelineById,
     [id]: {
       ...timeline,
       deletedEventIds,
+      selectedEventIds,
+      isSelectAllChecked,
     },
   };
 };
@@ -1296,7 +1307,7 @@ export const updateSavedQuery = ({
 
 interface UpdateFiltersParams {
   id: string;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   timelineById: TimelineById;
 }
 

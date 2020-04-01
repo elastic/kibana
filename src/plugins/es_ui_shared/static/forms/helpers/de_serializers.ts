@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { EuiSelectableOption } from '@elastic/eui';
 import { SerializerFunc } from '../hook_form_lib';
 
-type FuncType = (selectOptions: Option[]) => SerializerFunc;
+type FuncType = (selectOptions: EuiSelectableOption[]) => SerializerFunc;
 
 export const multiSelectComponent: Record<string, FuncType> = {
   // This deSerializer takes the previously selected options and map them
@@ -31,7 +31,7 @@ export const multiSelectComponent: Record<string, FuncType> = {
         return selectOptions;
       }
 
-      return (selectOptions as Option[]).map(option => ({
+      return (selectOptions as EuiSelectableOption[]).map(option => ({
         ...option,
         checked: (defaultFormValue as string[]).includes(option.label) ? 'on' : undefined,
       }));

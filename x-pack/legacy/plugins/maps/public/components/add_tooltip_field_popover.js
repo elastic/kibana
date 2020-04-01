@@ -39,7 +39,10 @@ function getOptions(fields, selectedFields) {
     .map(field => {
       return {
         value: field.name,
-        prepend: 'type' in field ? <FieldIcon type={field.type} size="m" useColor /> : null,
+        prepend:
+          'type' in field ? (
+            <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />
+          ) : null,
         label: 'label' in field ? field.label : field.name,
       };
     })
@@ -127,7 +130,12 @@ export class AddTooltipFieldPopover extends Component {
 
     return (
       <Fragment>
-        <EuiSelectable searchable options={this.state.options} onChange={this._onSelect}>
+        <EuiSelectable
+          searchable
+          searchProps={{ compressed: true }}
+          options={this.state.options}
+          onChange={this._onSelect}
+        >
           {(list, search) => (
             <div style={{ width: '300px' }}>
               <EuiPopoverTitle>{search}</EuiPopoverTitle>
@@ -161,6 +169,7 @@ export class AddTooltipFieldPopover extends Component {
         button={this._renderAddButton()}
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
+        panelPaddingSize="none"
         ownFocus
       >
         {this._renderContent()}

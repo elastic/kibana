@@ -9,13 +9,12 @@ import { createThunk } from 'redux-thunks';
 import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
-import { interpretAst } from 'plugins/interpreter/interpreter';
 import { getPages, getNodeById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
 import { notify } from '../../lib/notify';
-import { runInterpreter } from '../../lib/run_interpreter';
+import { runInterpreter, interpretAst } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
@@ -254,9 +253,9 @@ export const removeElements = createThunk(
 
 export const setFilter = createThunk(
   'setFilter',
-  ({ dispatch }, filter, elementId, pageId, doRender = true) => {
+  ({ dispatch }, filter, elementId, doRender = true) => {
     const _setFilter = createAction('setFilter');
-    dispatch(_setFilter({ filter, elementId, pageId }));
+    dispatch(_setFilter({ filter, elementId }));
 
     if (doRender === true) {
       dispatch(fetchAllRenderables());

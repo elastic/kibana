@@ -53,7 +53,6 @@ describe('getKpiHosts', () => {
   let data: KpiHostsData;
   const mockCallWithRequest = jest.fn();
   const mockFramework: FrameworkAdapter = {
-    version: 'mock',
     callWithRequest: mockCallWithRequest,
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),
@@ -167,7 +166,6 @@ describe('getKpiHostDetails', () => {
   let data: KpiHostDetailsData;
   const mockCallWithRequest = jest.fn();
   const mockFramework: FrameworkAdapter = {
-    version: 'mock',
     callWithRequest: mockCallWithRequest,
     registerGraphQLEndpoint: jest.fn(),
     getIndexPatternsService: jest.fn(),

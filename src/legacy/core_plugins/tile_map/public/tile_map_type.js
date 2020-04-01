@@ -20,15 +20,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
+import { Schemas } from '../../vis_default_editor/public';
 import { createTileMapVisualization } from './tile_map_visualization';
-import { Status } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
 import { supportsCssFilters } from './css_filters';
+import { truncatedColorSchemas } from '../../../../plugins/charts/public';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -57,13 +56,12 @@ export function createTileMapTypeDefinition(dependencies) {
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
       },
     },
-    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
     requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     responseHandler: convertToGeoJson,
     editorConfig: {
       collections: {
-        colorSchemas,
+        colorSchemas: truncatedColorSchemas,
         legendPositions: [
           {
             value: 'bottomleft',
@@ -137,27 +135,26 @@ export function createTileMapTypeDefinition(dependencies) {
           title: i18n.translate('tileMap.vis.map.editorConfig.schemas.geoCoordinatesTitle', {
             defaultMessage: 'Geo coordinates',
           }),
-          aggFilter: 'geohash_grid',
+          aggFilter: ['geohash_grid'],
           min: 1,
           max: 1,
         },
       ]),
     },
-    setup: async savedVis => {
-      const vis = savedVis.vis;
+    setup: async vis => {
       let tmsLayers;
 
       try {
         tmsLayers = await serviceSettings.getTMSServices();
       } catch (e) {
-        return savedVis;
+        return vis;
       }
 
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
         vis.params.wms.selectedTmsLayer = tmsLayers[0];
       }
-      return savedVis;
+      return vis;
     },
   };
 }

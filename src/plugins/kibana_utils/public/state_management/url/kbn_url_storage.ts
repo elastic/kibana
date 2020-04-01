@@ -18,11 +18,12 @@
  */
 
 import { format as formatUrl } from 'url';
+import { stringify } from 'query-string';
 import { createBrowserHistory, History } from 'history';
 import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
-import { stringifyQueryString } from './stringify_query_string';
 import { replaceUrlHashQuery } from './format';
+import { url as urlUtils } from '../../../common';
 
 /**
  * Parses a kibana url and retrieves all the states encoded into url,
@@ -107,25 +108,34 @@ export interface IKbnUrlControls {
   listen: (cb: () => void) => () => void;
 
   /**
-   * Updates url synchronously
+   * Updates url synchronously, if needed
+   * skips the update and returns undefined in case when trying to update to current url
+   * otherwise returns new url
+   *
    * @param url - url to update to
    * @param replace - use replace instead of push
    */
-  update: (url: string, replace: boolean) => string;
+  update: (url: string, replace: boolean) => string | undefined;
 
   /**
    * Schedules url update to next microtask,
    * Useful to batch sync changes to url to cause only one browser history update
    * @param updater - fn which receives current url and should return next url to update to
    * @param replace - use replace instead of push
+   *
    */
-  updateAsync: (updater: UrlUpdaterFnType, replace?: boolean) => Promise<string>;
+  updateAsync: (updater: UrlUpdaterFnType, replace?: boolean) => Promise<string | undefined>;
 
   /**
-   * Synchronously flushes scheduled url updates
+   * If there is a pending url update - returns url that is scheduled for update
+   */
+  getPendingUrl: () => string | undefined;
+
+  /**
+   * Synchronously flushes scheduled url updates. Returns new flushed url, if there was an update. Otherwise - undefined.
    * @param replace - if replace passed in, then uses it instead of push. Otherwise push or replace is picked depending on updateQueue
    */
-  flush: (replace?: boolean) => string;
+  flush: (replace?: boolean) => string | undefined;
 
   /**
    * Cancels any pending url updates
@@ -143,9 +153,9 @@ export const createKbnUrlControls = (
   // if any call in a queue asked to push, then we should push
   let shouldReplace = true;
 
-  function updateUrl(newUrl: string, replace = false): string {
+  function updateUrl(newUrl: string, replace = false): string | undefined {
     const currentUrl = getCurrentUrl();
-    if (newUrl === currentUrl) return currentUrl; // skip update
+    if (newUrl === currentUrl) return undefined; // skip update
 
     const historyPath = getRelativeToHistoryPath(newUrl, history);
 
@@ -166,13 +176,20 @@ export const createKbnUrlControls = (
 
   // runs scheduled url updates
   function flush(replace = shouldReplace) {
-    if (updateQueue.length === 0) return getCurrentUrl();
-    const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
+    const nextUrl = getPendingUrl();
+
+    if (!nextUrl) return;
 
     cleanUp();
-
-    const newUrl = updateUrl(resultUrl, replace);
+    const newUrl = updateUrl(nextUrl, replace);
     return newUrl;
+  }
+
+  function getPendingUrl() {
+    if (updateQueue.length === 0) return undefined;
+    const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
+
+    return resultUrl;
   }
 
   return {
@@ -199,6 +216,9 @@ export const createKbnUrlControls = (
     cancel: () => {
       cleanUp();
     },
+    getPendingUrl: () => {
+      return getPendingUrl();
+    },
   };
 };
 
@@ -224,11 +244,11 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
 
   return formatUrl({
     pathname: stripBasename(parsedUrl.pathname),
-    search: stringifyQueryString(parsedUrl.query),
+    search: stringify(urlUtils.encodeQuery(parsedUrl.query), { sort: false, encode: false }),
     hash: parsedHash
       ? formatUrl({
           pathname: parsedHash.pathname,
-          search: stringifyQueryString(parsedHash.query),
+          search: stringify(urlUtils.encodeQuery(parsedHash.query), { sort: false, encode: false }),
         })
       : parsedUrl.hash,
   });

@@ -5,7 +5,6 @@ exports[`renders DashboardCloneModal 1`] = `
   <EuiModal
     className="dshCloneModal"
     data-test-subj="dashboardCloneModal"
-    maxWidth={true}
     onClose={[Function]}
   >
     <EuiModalHeader>
@@ -29,6 +28,7 @@ exports[`renders DashboardCloneModal 1`] = `
       </EuiText>
       <EuiSpacer />
       <EuiFieldText
+        aria-label="Cloned Dashboard Title"
         autoFocus={true}
         data-test-subj="clonedDashboardTitle"
         isInvalid={false}

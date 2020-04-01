@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Filter Lists Table renders with filter lists and selection supplied 1`] = `
+<Fragment>
+  <EuiInMemoryTable
+    className="ml-filter-lists-table"
+    columns={
+      Array [
+        Object {
+          "field": "filter_id",
+          "name": "ID",
+          "render": [Function],
+          "scope": "row",
+          "sortable": true,
+        },
+        Object {
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+        Object {
+          "field": "item_count",
+          "name": "Item count",
+          "sortable": true,
+        },
+        Object {
+          "field": "used_by",
+          "name": "In use",
+          "render": [Function],
+          "sortable": true,
+        },
+      ]
+    }
+    data-test-subj="mlFilterListsTable"
+    isSelectable={true}
+    itemId="filter_id"
+    items={
+      Array [
+        Object {
+          "description": "List of known safe domains",
+          "filter_id": "safe_domains",
+          "item_count": 500,
+          "used_by": Object {
+            "jobs": Array [
+              "dns_exfiltration",
+            ],
+          },
+        },
+        Object {
+          "description": "US East AWS instances",
+          "filter_id": "us_east_instances",
+          "item_count": 20,
+          "used_by": Object {
+            "jobs": Array [],
+          },
+        },
+      ]
+    }
+    pagination={true}
+    responsive={true}
+    search={
+      Object {
+        "box": Object {
+          "incremental": true,
+        },
+        "filters": Array [],
+        "toolsRight": Array [
+          <NewFilterButton
+            canCreateFilter={true}
+          />,
+          <DeleteFilterListModal
+            canDeleteFilter={true}
+            refreshFilterLists={[MockFunction]}
+            selectedFilterLists={
+              Array [
+                Object {
+                  "description": "List of known safe domains",
+                  "filter_id": "safe_domains",
+                  "item_count": 500,
+                  "used_by": Object {
+                    "jobs": Array [
+                      "dns_exfiltration",
+                    ],
+                  },
+                },
+              ]
+            }
+          />,
+        ],
+      }
+    }
+    selection={
+      Object {
+        "onSelectionChange": [Function],
+        "selectable": [Function],
+        "selectableMessage": [Function],
+      }
+    }
+    sorting={
+      Object {
+        "sort": Object {
+          "direction": "asc",
+          "field": "filter_id",
+        },
+      }
+    }
+    tableLayout="fixed"
+  />
+</Fragment>
+`;
+
+exports[`Filter Lists Table renders with filter lists supplied 1`] = `
+<Fragment>
+  <EuiInMemoryTable
+    className="ml-filter-lists-table"
+    columns={
+      Array [
+        Object {
+          "field": "filter_id",
+          "name": "ID",
+          "render": [Function],
+          "scope": "row",
+          "sortable": true,
+        },
+        Object {
+          "field": "description",
+          "name": "Description",
+          "sortable": true,
+        },
+        Object {
+          "field": "item_count",
+          "name": "Item count",
+          "sortable": true,
+        },
+        Object {
+          "field": "used_by",
+          "name": "In use",
+          "render": [Function],
+          "sortable": true,
+        },
+      ]
+    }
+    data-test-subj="mlFilterListsTable"
+    isSelectable={true}
+    itemId="filter_id"
+    items={
+      Array [
+        Object {
+          "description": "List of known safe domains",
+          "filter_id": "safe_domains",
+          "item_count": 500,
+          "used_by": Object {
+            "jobs": Array [
+              "dns_exfiltration",
+            ],
+          },
+        },
+        Object {
+          "description": "US East AWS instances",
+          "filter_id": "us_east_instances",
+          "item_count": 20,
+          "used_by": Object {
+            "jobs": Array [],
+          },
+        },
+      ]
+    }
+    pagination={true}
+    responsive={true}
+    search={
+      Object {
+        "box": Object {
+          "incremental": true,
+        },
+        "filters": Array [],
+        "toolsRight": Array [
+          <NewFilterButton
+            canCreateFilter={true}
+          />,
+          <DeleteFilterListModal
+            canDeleteFilter={true}
+            refreshFilterLists={[MockFunction]}
+          />,
+        ],
+      }
+    }
+    selection={
+      Object {
+        "onSelectionChange": [Function],
+        "selectable": [Function],
+        "selectableMessage": [Function],
+      }
+    }
+    sorting={
+      Object {
+        "sort": Object {
+          "direction": "asc",
+          "field": "filter_id",
+        },
+      }
+    }
+    tableLayout="fixed"
+  />
+</Fragment>
+`;

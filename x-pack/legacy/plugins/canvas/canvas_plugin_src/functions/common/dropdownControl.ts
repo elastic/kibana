@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { Datatable, Render, ExpressionFunction } from '../../../types';
+import { Datatable, Render, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -19,7 +19,7 @@ interface Return {
   choices: any;
 }
 
-export function dropdownControl(): ExpressionFunction<
+export function dropdownControl(): ExpressionFunctionDefinition<
   'dropdownControl',
   Datatable,
   Arguments,
@@ -31,9 +31,7 @@ export function dropdownControl(): ExpressionFunction<
     name: 'dropdownControl',
     aliases: [],
     type: 'render',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     help,
     args: {
       filterColumn: {
@@ -51,11 +49,11 @@ export function dropdownControl(): ExpressionFunction<
         help: argHelp.filterGroup,
       },
     },
-    fn: (context, { valueColumn, filterColumn, filterGroup }) => {
+    fn: (input, { valueColumn, filterColumn, filterGroup }) => {
       let choices = [];
 
-      if (context.rows[0][valueColumn]) {
-        choices = uniq(context.rows.map(row => row[valueColumn])).sort();
+      if (input.rows[0][valueColumn]) {
+        choices = uniq(input.rows.map(row => row[valueColumn])).sort();
       }
 
       const column = filterColumn || valueColumn;

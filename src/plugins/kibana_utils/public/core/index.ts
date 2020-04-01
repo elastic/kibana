@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './create_getter_setter';
 export * from './create_kibana_utils_core';

@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 import {
-  esFilters,
+  Filter,
   IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
@@ -88,7 +88,7 @@ describe('PhraseFilterManager', function() {
 
   describe('getValueFromFilterBar', function() {
     class MockFindFiltersPhraseFilterManager extends PhraseFilterManager {
-      mockFilters: esFilters.Filter[];
+      mockFilters: Filter[];
 
       constructor(
         id: string,
@@ -104,7 +104,7 @@ describe('PhraseFilterManager', function() {
         return this.mockFilters;
       }
 
-      setMockFilters(mockFilters: esFilters.Filter[]) {
+      setMockFilters(mockFilters: Filter[]) {
         this.mockFilters = mockFilters;
       }
     }
@@ -133,7 +133,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ] as esFilters.Filter[]);
+      ] as Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios']);
     });
 
@@ -159,7 +159,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ] as esFilters.Filter[]);
+      ] as Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
@@ -183,7 +183,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ] as esFilters.Filter[]);
+      ] as Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
@@ -199,7 +199,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ] as esFilters.Filter[]);
+      ] as Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
     });
   });

@@ -19,6 +19,7 @@
 
 import testSubjSelector from '@kbn/test-subj-selector';
 import { map as mapAsync } from 'bluebird';
+import { ProvidedType } from '@kbn/test/types/ftr';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -32,6 +33,7 @@ interface SetValueOptions {
   typeCharByChar?: boolean;
 }
 
+export type TestSubjects = ProvidedType<typeof TestSubjectsProvider>;
 export function TestSubjectsProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
@@ -169,10 +171,14 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async getAttribute(selector: string, attribute: string): Promise<string> {
+    public async getAttribute(
+      selector: string,
+      attribute: string,
+      timeout?: number
+    ): Promise<string> {
       return await retry.try(async () => {
         log.debug(`TestSubjects.getAttribute(${selector}, ${attribute})`);
-        const element = await this.find(selector);
+        const element = await this.find(selector, timeout);
         return await element.getAttribute(attribute);
       });
     }

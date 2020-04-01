@@ -9,6 +9,8 @@ type GenericCallback = (callback: () => void) => void;
 export interface RendererHandlers {
   /** Handler to invoke when an element has finished rendering */
   done: () => void;
+  /** Get the id of the element being rendered.  Can be used as a unique ID in a render function */
+  getElementId: () => string;
   /** Handler to invoke when an element is deleted or changes to a different render type */
   onDestroy: GenericCallback;
   /** Handler to invoke when an element's dimensions have changed*/

@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -80,7 +81,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizeLandingPage', {
+          timeout: config.get('timeouts.waitFor'),
+        });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -93,7 +96,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizationLoader', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizationLoader', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('can save existing Visualization', async () => {
@@ -101,7 +106,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('visualizeSaveButton', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizeSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
 
       it('Embed code shows create short-url button', async () => {
@@ -116,14 +123,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allow saving via the saved query management component popover with no saved query loaded', async () => {
+      // Flaky: https://github.com/elastic/kibana/issues/50018
+      it.skip('allow saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       });
 
-      it('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
+      // Depends on skipped test above
+      it.skip('allow saving a currently loaded saved query as a new query via the saved query management component ', async () => {
         await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
           'foo2',
           'bar2',
@@ -134,7 +143,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       });
 
-      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+      // Depends on skipped test above
+      it.skip('allow saving changes to a currently loaded query via the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('foo2');
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
@@ -144,7 +154,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(queryString).to.eql('response:404');
       });
 
-      it('allows deleting saved queries in the saved query management component ', async () => {
+      // Depends on skipped test above
+      it.skip('allows deleting saved queries in the saved query management component ', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('foo2');
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
       });
@@ -194,6 +205,121 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        await testSubjects.existOrFail('visualizeLandingPage', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+        await testSubjects.existOrFail('newItemButton');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
+      });
+
+      it(`can view existing Visualization`, async () => {
+        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('visualizationLoader', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+      });
+
+      it(`can't save existing Visualization`, async () => {
+        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('shareTopNavButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+        await testSubjects.missingOrFail('visualizeSaveButton', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+      });
+
+      it(`Embed Code doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Embedcode');
+        await PageObjects.share.createShortUrlMissingOrFail();
+      });
+
+      it(`Permalinks doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlMissingOrFail();
+        // close the menu
+        await PageObjects.share.clickShareTopNavButton();
+      });
+
+      it('allows loading a saved query via the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:200');
+      });
+
+      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+      });
+
+      it('does not allow saving changes to saved query from the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
+      });
+
+      it('does not allow deleting a saved query from the saved query management component', async () => {
+        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
+      });
+
+      it('allows clearing the currently loaded saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+      });
+    });
+
+    describe('global visualize read-only with url_create privileges', () => {
+      before(async () => {
+        await security.role.create('global_visualize_read_url_create_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                visualize: ['read', 'url_create'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_visualize_read_url_create_user', {
+          password: 'global_visualize_read_url_create_user-password',
+          roles: ['global_visualize_read_url_create_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'global_visualize_read_url_create_user',
+          'global_visualize_read_url_create_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+      });
+
+      after(async () => {
+        await PageObjects.security.forceLogout();
+        await security.role.delete('global_visualize_read_url_create_role');
+        await security.user.delete('global_visualize_read_url_create_user');
+      });
+
+      it('shows visualize navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Visualize', 'Management']);
+      });
+
+      it(`landing page shows "Create new Visualization" button`, async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
         await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
@@ -219,15 +345,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 
-      it(`Embed Code doesn't show create short-url button`, async () => {
+      it('Embed code shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlMissingOrFail();
+        await PageObjects.share.createShortUrlExistOrFail();
       });
 
-      it(`Permalinks doesn't show create short-url button`, async () => {
+      it('Permalinks shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlMissingOrFail();
-        // close the menu
+        await PageObjects.share.createShortUrlExistOrFail();
+        // close menu
         await PageObjects.share.clickShareTopNavButton();
       });
 
@@ -300,7 +426,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
 
       it(`edit page redirects to home page`, async () => {
@@ -308,7 +434,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: 10000 });
+        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });

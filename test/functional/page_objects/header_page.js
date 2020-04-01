@@ -59,7 +59,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async clickManagement() {
+    async clickStackManagement() {
       await appsMenu.clickLink('Management');
       await this.awaitGlobalLoadingIndicatorHidden();
     }

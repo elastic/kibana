@@ -6,14 +6,15 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { RENDER_AS } from './render_as';
+import { RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isMetricCountable } from '../../util/is_metric_countable';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -32,7 +33,7 @@ export class UpdateSourceEditor extends Component {
   async _loadFields() {
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({
@@ -51,7 +52,9 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
-    this.setState({ fields: indexPattern.fields });
+    this.setState({
+      fields: indexPattern.fields.filter(field => !indexPatterns.isNestedField(field)),
+    });
   }
 
   _onMetricsChange = metrics => {

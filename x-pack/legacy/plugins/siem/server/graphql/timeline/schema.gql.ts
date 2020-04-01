@@ -150,7 +150,7 @@ export const timelineSchema = gql`
     updated
     created
   }
-  
+
   input SortTimeline {
     sortField: SortFieldTimeline!
     sortOrder: Direction!

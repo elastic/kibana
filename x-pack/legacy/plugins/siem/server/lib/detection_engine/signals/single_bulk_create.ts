@@ -6,10 +6,11 @@
 
 import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerting/server/types';
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
-import { generateId } from './utils';
+import { generateId, makeFloatString } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
 
@@ -20,12 +21,43 @@ interface SingleBulkCreateParams {
   logger: Logger;
   id: string;
   signalsIndex: string;
+  actions: RuleAlertAction[];
   name: string;
+  createdAt: string;
   createdBy: string;
+  updatedAt: string;
   updatedBy: string;
   interval: string;
   enabled: boolean;
   tags: string[];
+  throttle: string;
+}
+
+/**
+ * This is for signals on signals to work correctly. If given a rule id this will check if
+ * that rule id already exists in the ancestor tree of each signal search response and remove
+ * those documents so they cannot be created as a signal since we do not want a rule id to
+ * ever be capable of re-writing the same signal continuously if both the _input_ and _output_
+ * of the signals index happens to be the same index.
+ * @param ruleId The rule id
+ * @param signalSearchResponse The search response that has all the documents
+ */
+export const filterDuplicateRules = (
+  ruleId: string,
+  signalSearchResponse: SignalSearchResponse
+) => {
+  return signalSearchResponse.hits.hits.filter(doc => {
+    if (doc._source.signal == null) {
+      return true;
+    } else {
+      return !doc._source.signal.ancestors.some(ancestor => ancestor.rule === ruleId);
+    }
+  });
+};
+
+export interface SingleBulkCreateResponse {
+  success: boolean;
+  bulkCreateDuration?: string;
 }
 
 // Bulk Index documents.
@@ -36,15 +68,20 @@ export const singleBulkCreate = async ({
   logger,
   id,
   signalsIndex,
+  actions,
   name,
+  createdAt,
   createdBy,
+  updatedAt,
   updatedBy,
   interval,
   enabled,
   tags,
-}: SingleBulkCreateParams): Promise<boolean> => {
+  throttle,
+}: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
+  someResult.hits.hits = filterDuplicateRules(id, someResult);
   if (someResult.hits.hits.length === 0) {
-    return true;
+    return { success: true };
   }
   // index documents after creating an ID based on the
   // source documents' originating index, and the original
@@ -67,7 +104,21 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled, tags }),
+    buildBulkBody({
+      doc,
+      ruleParams,
+      id,
+      actions,
+      name,
+      createdAt,
+      createdBy,
+      updatedAt,
+      updatedBy,
+      interval,
+      enabled,
+      tags,
+      throttle,
+    }),
   ]);
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {
@@ -76,7 +127,7 @@ export const singleBulkCreate = async ({
     body: bulkBody,
   });
   const end = performance.now();
-  logger.debug(`individual bulk process time took: ${Number(end - start).toFixed(2)} milliseconds`);
+  logger.debug(`individual bulk process time took: ${makeFloatString(end - start)} milliseconds`);
   logger.debug(`took property says bulk took: ${response.took} milliseconds`);
 
   if (response.errors) {
@@ -94,5 +145,5 @@ export const singleBulkCreate = async ({
       );
     }
   }
-  return true;
+  return { success: true, bulkCreateDuration: makeFloatString(end - start) };
 };

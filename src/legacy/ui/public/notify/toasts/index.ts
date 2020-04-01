@@ -16,6 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+export { ToastNotifications } from './toast_notifications';
 export { toastNotifications } from './toasts';
-export { Toast, ToastInput } from './toast_notifications';

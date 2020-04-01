@@ -5,51 +5,34 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
+import { useDispatch } from 'react-redux';
 
 import { inputsModel } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
-
-interface TimelineRefetchDispatch {
-  setTimelineQuery: ActionCreator<{
-    id: string;
-    inputId: InputsModelId;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch | inputsModel.RefetchKql | null;
-  }>;
-}
 
 export interface TimelineRefetchProps {
   id: string;
   inputId: InputsModelId;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
-  refetch: inputsModel.Refetch | null;
+  refetch: inputsModel.Refetch;
 }
 
-type OwnProps = TimelineRefetchProps & TimelineRefetchDispatch;
-
-const TimelineRefetchComponent: React.FC<OwnProps> = ({
+const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
   id,
   inputId,
   inspect,
   loading,
   refetch,
-  setTimelineQuery,
 }) => {
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    setTimelineQuery({ id, inputId, inspect, loading, refetch });
-  }, [id, inputId, loading, refetch, inspect]);
+    dispatch(inputsActions.setQuery({ id, inputId, inspect, loading, refetch }));
+  }, [dispatch, id, inputId, loading, refetch, inspect]);
 
   return null;
 };
 
-export const TimelineRefetch = compose<React.ComponentClass<TimelineRefetchProps>>(
-  connect(null, {
-    setTimelineQuery: inputsActions.setQuery,
-  })
-)(React.memo(TimelineRefetchComponent));
+export const TimelineRefetch = React.memo(TimelineRefetchComponent);

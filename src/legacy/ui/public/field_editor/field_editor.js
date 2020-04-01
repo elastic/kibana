@@ -66,7 +66,7 @@ import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
-import { copyField, getDefaultFormat, executeScript, isScriptValid } from './lib';
+import { copyField, executeScript, isScriptValid } from './lib';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -75,6 +75,25 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/groovy';
 
 const getFieldFormats = () => npStart.plugins.data.fieldFormats;
+
+const getFieldTypeFormatsList = (field, defaultFieldFormat) => {
+  const fieldFormats = getFieldFormats();
+  const formatsByType = fieldFormats.getByFieldType(field.type).map(({ id, title }) => ({
+    id,
+    title,
+  }));
+
+  return [
+    {
+      id: '',
+      defaultFieldFormat,
+      title: i18n.translate('common.ui.fieldEditor.defaultFormatDropDown', {
+        defaultMessage: '- Default -',
+      }),
+    },
+    ...formatsByType,
+  ];
+};
 
 export class FieldEditor extends PureComponent {
   static propTypes = {
@@ -137,11 +156,7 @@ export class FieldEditor extends PureComponent {
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
     const fieldFormats = getFieldFormats();
-
-    const fieldTypeFormats = [
-      getDefaultFormat(fieldFormats.getDefaultType(field.type, field.esTypes)),
-      ...fieldFormats.getByFieldType(field.type),
-    ];
+    const DefaultFieldFormat = fieldFormats.getDefaultType(field.type, field.esTypes);
 
     this.setState({
       isReady: true,
@@ -150,14 +165,14 @@ export class FieldEditor extends PureComponent {
       errors: [],
       scriptingLangs,
       fieldTypes,
-      fieldTypeFormats,
+      fieldTypeFormats: getFieldTypeFormatsList(field, DefaultFieldFormat),
       fieldFormatId: get(indexPattern, ['fieldFormatMap', field.name, 'type', 'id']),
       fieldFormatParams: field.format.params(),
     });
   }
 
   onFieldChange = (fieldName, value) => {
-    const field = this.state.field;
+    const { field } = this.state;
     field[fieldName] = value;
     this.forceUpdate();
   };
@@ -169,18 +184,11 @@ export class FieldEditor extends PureComponent {
     const DefaultFieldFormat = fieldFormats.getDefaultType(type);
 
     field.type = type;
-
-    const fieldTypeFormats = [
-      getDefaultFormat(DefaultFieldFormat),
-      ...getFieldFormats().getByFieldType(field.type),
-    ];
-
-    const FieldFormat = fieldTypeFormats[0];
-    field.format = new FieldFormat(null, getConfig);
+    field.format = new DefaultFieldFormat(null, getConfig);
 
     this.setState({
-      fieldTypeFormats,
-      fieldFormatId: FieldFormat.id,
+      fieldTypeFormats: getFieldTypeFormatsList(field, DefaultFieldFormat),
+      fieldFormatId: DefaultFieldFormat.id,
       fieldFormatParams: field.format.params(),
     });
   };
@@ -197,12 +205,13 @@ export class FieldEditor extends PureComponent {
   };
 
   onFormatChange = (formatId, params) => {
-    const { getConfig } = this.props.helpers;
+    const fieldFormats = getFieldFormats();
     const { field, fieldTypeFormats } = this.state;
-    const FieldFormat =
-      fieldTypeFormats.find(format => format.id === formatId) || fieldTypeFormats[0];
+    const FieldFormat = fieldFormats.getType(
+      formatId || fieldTypeFormats[0]?.defaultFieldFormat.id
+    );
 
-    field.format = new FieldFormat(params, getConfig);
+    field.format = new FieldFormat(params, this.props.helpers.getConfig);
 
     this.setState({
       fieldFormatId: FieldFormat.id,
@@ -416,7 +425,8 @@ export class FieldEditor extends PureComponent {
   renderFormat() {
     const { field, fieldTypeFormats, fieldFormatId, fieldFormatParams } = this.state;
     const { fieldFormatEditors } = this.props.helpers;
-    const defaultFormat = fieldTypeFormats[0] && fieldTypeFormats[0].resolvedTitle;
+    const defaultFormat = fieldTypeFormats[0]?.defaultFieldFormat.title;
+
     const label = defaultFormat ? (
       <FormattedMessage
         id="common.ui.fieldEditor.defaultFormatHeader"

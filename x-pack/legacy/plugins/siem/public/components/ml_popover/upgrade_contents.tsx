@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import chrome from 'ui/chrome';
 
 import styled from 'styled-components';
 import {
@@ -18,6 +17,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useBasePath } from '../../lib/kibana';
 import * as i18n from './translations';
 
 const PopoverContentsDiv = styled.div`
@@ -59,7 +59,7 @@ export const UpgradeContentsComponent = () => (
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          href={`${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`}
+          href={`${useBasePath()}/app/kibana#/management/elasticsearch/license_management`}
           iconType="gear"
           target="_blank"
         >

@@ -8,13 +8,13 @@ import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { defaultHeaders } from '../../../../../mock';
-import { ColumnHeader } from '../column_header';
 
 import { HeaderToolTipContent } from '.';
 
 describe('HeaderToolTipContent', () => {
-  let header: ColumnHeader;
+  let header: ColumnHeaderOptions;
   beforeEach(() => {
     header = cloneDeep(defaultHeaders[0]);
   });

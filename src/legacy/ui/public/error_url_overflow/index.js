@@ -18,4 +18,4 @@
  */
 
 import './error_url_overflow';
-export { UrlOverflowService } from './url_overflow_service';
+export { UrlOverflowService } from '../../../../plugins/kibana_legacy/public';

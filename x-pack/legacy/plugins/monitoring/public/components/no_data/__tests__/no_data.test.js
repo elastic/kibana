@@ -10,6 +10,12 @@ import { NoData } from '../';
 
 const enabler = {};
 
+jest.mock('../../../np_imports/ui/chrome', () => {
+  return {
+    getBasePath: () => '',
+  };
+});
+
 describe('NoData', () => {
   test('should show text next to the spinner while checking a setting', () => {
     const component = renderWithIntl(

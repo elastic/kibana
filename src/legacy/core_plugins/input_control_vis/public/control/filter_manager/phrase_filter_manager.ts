@@ -21,6 +21,7 @@ import _ from 'lodash';
 
 import { FilterManager } from './filter_manager';
 import {
+  PhraseFilter,
   esFilters,
   IndexPattern,
   FilterManager as QueryFilterManager,
@@ -36,8 +37,8 @@ export class PhraseFilterManager extends FilterManager {
     super(controlId, fieldName, indexPattern, queryFilter);
   }
 
-  createFilter(phrases: any): esFilters.PhraseFilter {
-    let newFilter: esFilters.PhraseFilter;
+  createFilter(phrases: any): PhraseFilter {
+    let newFilter: PhraseFilter;
     const value = this.indexPattern.fields.getByName(this.fieldName);
 
     if (!value) {
@@ -79,13 +80,13 @@ export class PhraseFilterManager extends FilterManager {
   /**
    * Extract filtering value from kibana filters
    *
-   * @param  {esFilters.PhraseFilter} kbnFilter
+   * @param  {PhraseFilter} kbnFilter
    * @return {Array.<string>} array of values pulled from filter
    */
-  private getValueFromFilter(kbnFilter: esFilters.PhraseFilter): any {
+  private getValueFromFilter(kbnFilter: PhraseFilter): any {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
-      return _.get<esFilters.PhraseFilter[]>(kbnFilter, 'query.bool.should')
+      return _.get<PhraseFilter[]>(kbnFilter, 'query.bool.should')
         .map(kbnQueryFilter => {
           return this.getValueFromFilter(kbnQueryFilter);
         })

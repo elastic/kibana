@@ -21,7 +21,7 @@ const FlexGroup = styled(EuiFlexGroup)`
   margin-right: 16px;
 `;
 
-const IconWithCount = React.memo<{ count: number; icon: string; tooltip: string }>(
+export const IconWithCount = React.memo<{ count: number; icon: string; tooltip: string }>(
   ({ count, icon, tooltip }) => (
     <EuiToolTip content={tooltip}>
       <FlexGroup alignItems="center" gutterSize="none">
@@ -45,14 +45,14 @@ export const RecentTimelineCounts = React.memo<{
   timeline: OpenTimelineResult;
 }>(({ timeline }) => {
   return (
-    <>
+    <div>
       <IconWithCount
         count={getPinnedEventCount(timeline)}
         icon="pinFilled"
         tooltip={i18n.PINNED_EVENTS}
       />
       <IconWithCount count={getNotesCount(timeline)} icon="editorComment" tooltip={i18n.NOTES} />
-    </>
+    </div>
   );
 });
 

@@ -17,20 +17,8 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggTypes, Dimensions } from '../types';
-
-function isAggConfigNumeric(
-  type: AggTypes,
-  { buckets, metrics }: Dimensions = { buckets: [], metrics: [] }
-) {
-  const dimension =
-    buckets.find(({ aggType }) => aggType === type) ||
-    metrics.find(({ aggType }) => aggType === type);
-  const formatType = get(dimension, 'format.id') || get(dimension, 'format.params.id');
-  return formatType === 'number';
-}
+import { AggTypes } from '../types';
 
 const totalAggregations = [
   {
@@ -65,4 +53,4 @@ const totalAggregations = [
   },
 ];
 
-export { isAggConfigNumeric, totalAggregations };
+export { totalAggregations };

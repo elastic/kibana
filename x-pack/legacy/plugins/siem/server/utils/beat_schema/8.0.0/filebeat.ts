@@ -3132,7 +3132,7 @@ export const filebeatSchema: Schema = [
               {
                 name: 'user.roles',
                 description: 'Roles to which the principal belongs',
-                example: ['kibana_user', 'beats_admin'],
+                example: ['kibana_admin', 'beats_admin'],
                 type: 'keyword',
               },
               {

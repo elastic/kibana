@@ -1,0 +1,24 @@
+{
+  "histogram": [
+    { "x": 1568172664000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172694000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172724000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172754000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172784000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172814000, "downCount": 8, "upCount": 92, "y": 1 },
+    { "x": 1568172844000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172874000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172904000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172934000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172964000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568172994000, "downCount": 8, "upCount": 92, "y": 1 },
+    { "x": 1568173024000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568173054000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568173084000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568173114000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568173144000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568173174000, "downCount": 8, "upCount": 92, "y": 1 },
+    { "x": 1568173204000, "downCount": 7, "upCount": 93, "y": 1 },
+    { "x": 1568173234000, "downCount": 7, "upCount": 93, "y": 1 }
+  ]
+}

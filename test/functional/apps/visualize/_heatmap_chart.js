@@ -96,6 +96,8 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickOptionsTab();
       await PageObjects.visEditor.changeHeatmapColorNumbers(6);
       await PageObjects.visEditor.clickGo();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+
       const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = [
         '0 - 267',
@@ -121,9 +123,9 @@ export default function({ getService, getPageObjects }) {
       log.debug('customize 2 last ranges');
       await PageObjects.visEditor.setCustomRangeByIndex(6, '650', '720');
       await PageObjects.visEditor.setCustomRangeByIndex(7, '800', '905');
+      await PageObjects.visEditor.clickGo();
 
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      await PageObjects.visEditor.clickGo();
       const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = [
         '0 - 100',

@@ -20,6 +20,7 @@
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { HttpConfig } from './http_config';
+import { isSafeMethod } from './router';
 import { Env } from '../config';
 import { LifecycleRegistrar } from './http_server';
 
@@ -31,15 +32,18 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
   const { whitelist, disableProtection } = config.xsrf;
 
   return (request, response, toolkit) => {
-    if (disableProtection || whitelist.includes(request.route.path)) {
+    if (
+      disableProtection ||
+      whitelist.includes(request.route.path) ||
+      request.route.options.xsrfRequired === false
+    ) {
       return toolkit.next();
     }
 
-    const isSafeMethod = request.route.method === 'get' || request.route.method === 'head';
     const hasVersionHeader = VERSION_HEADER in request.headers;
     const hasXsrfHeader = XSRF_HEADER in request.headers;
 
-    if (!isSafeMethod && !hasVersionHeader && !hasXsrfHeader) {
+    if (!isSafeMethod(request.route.method) && !hasVersionHeader && !hasXsrfHeader) {
       return response.badRequest({ body: `Request must contain a ${XSRF_HEADER} header.` });
     }
 

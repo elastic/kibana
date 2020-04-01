@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { Filter } from '../../../../../../../plugins/data/public';
 
 /**
  * @typedef {Object} QueryFilter
@@ -65,9 +65,9 @@ export class FilterUtils {
    * @param filters {Array.<Object>}
    * @returns {Array.<Object>}
    */
-  public static cleanFiltersForComparison(filters: esFilters.Filter[]) {
+  public static cleanFiltersForComparison(filters: Filter[]) {
     return _.map(filters, filter => {
-      const f: Partial<esFilters.Filter> = _.omit(filter, ['$$hashKey', '$state']);
+      const f: Partial<Filter> = _.omit(filter, ['$$hashKey', '$state']);
       if (f.meta) {
         // f.meta.value is the value displayed in the filter bar.
         // It may also be loaded differently and shouldn't be used in this comparison.

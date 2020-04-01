@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 // @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
 import { getFunctionHelp } from '../../../i18n';
@@ -15,23 +15,21 @@ interface Arguments {
   reverse: boolean;
 }
 
-interface Return {
+interface Output {
   type: 'palette';
   colors: string[];
   gradient: boolean;
 }
 
-export function palette(): ExpressionFunction<'palette', null, Arguments, Return> {
+export function palette(): ExpressionFunctionDefinition<'palette', null, Arguments, Output> {
   const { help, args: argHelp } = getFunctionHelp().palette;
 
   return {
     name: 'palette',
     aliases: [],
     type: 'palette',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       color: {
         aliases: ['_'],
@@ -52,7 +50,7 @@ export function palette(): ExpressionFunction<'palette', null, Arguments, Return
         options: [true, false],
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const { color, reverse, gradient } = args;
       const colors = ([] as string[]).concat(color || palettes.paul_tor_14.colors);
 

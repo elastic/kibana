@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { noteSavedObjectType, noteSavedObjectMappings } from './lib/note/saved_object_mappings';
 import {
   pinnedEventSavedObjectType,
@@ -12,12 +13,26 @@ import {
   timelineSavedObjectType,
   timelineSavedObjectMappings,
 } from './lib/timeline/saved_object_mappings';
-import { ruleStatusSavedObjectMappings } from './lib/detection_engine/rules/saved_object_mappings';
+import {
+  ruleStatusSavedObjectMappings,
+  ruleStatusSavedObjectType,
+} from './lib/detection_engine/rules/saved_object_mappings';
+import {
+  ruleActionsSavedObjectMappings,
+  ruleActionsSavedObjectType,
+} from './lib/detection_engine/rule_actions/saved_object_mappings';
 
-export { noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType };
+export {
+  noteSavedObjectType,
+  pinnedEventSavedObjectType,
+  ruleStatusSavedObjectType,
+  ruleActionsSavedObjectType,
+  timelineSavedObjectType,
+};
 export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,
   ...pinnedEventSavedObjectMappings,
   ...ruleStatusSavedObjectMappings,
+  ...ruleActionsSavedObjectMappings,
 };

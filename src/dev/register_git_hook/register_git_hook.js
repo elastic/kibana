@@ -65,7 +65,7 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   # The correct exit code on that situation
   # according the linux documentation project is 130
   # https://www.tldp.org/LDP/abs/html/exitcodes.html
-  trap "exit 130" SIGINT
+  trap "exit 130" INT
 
   has_node() {
     command -v node >/dev/null 2>&1

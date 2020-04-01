@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { checkRecognizer, getJobsSummary, getModules } from '../api';
 import { SiemJob } from '../types';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
-import { useStateToaster } from '../../toasters';
-import { errorToToaster } from '../../ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../toasters';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 
 import * as i18n from './translations';
 import { createSiemJobs } from './use_siem_jobs_helpers';
+import { useMlCapabilities } from './use_ml_capabilities';
 
 type Return = [boolean, SiemJob[]];
 
@@ -31,8 +30,8 @@ type Return = [boolean, SiemJob[]];
 export const useSiemJobs = (refetchData: boolean): Return => {
   const [siemJobs, setSiemJobs] = useState<SiemJob[]>([]);
   const [loading, setLoading] = useState(true);
-  const capabilities = useContext(MlCapabilitiesContext);
-  const userPermissions = hasMlUserPermissions(capabilities);
+  const mlCapabilities = useMlCapabilities();
+  const userPermissions = hasMlUserPermissions(mlCapabilities);
   const [siemDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [, dispatchToaster] = useStateToaster();
 

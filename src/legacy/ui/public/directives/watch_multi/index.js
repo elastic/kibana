@@ -17,4 +17,6 @@
  * under the License.
  */
 
-import './watch_multi';
+import { uiModules } from '../../modules';
+import { watchMultiDecorator } from '../../../../../plugins/kibana_legacy/public';
+uiModules.get('kibana').config(watchMultiDecorator);

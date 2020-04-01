@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Field } from '../../../../../../../../../plugins/data/public';
+import { IndexPatternField } from '../../../../../../../../../plugins/data/public';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
@@ -39,7 +39,7 @@ const renderFieldEditor = (
   $scope,
   indexPattern,
   field,
-  { Field, getConfig, $http, fieldFormatEditors, redirectAway }
+  { getConfig, $http, fieldFormatEditors, redirectAway }
 ) => {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_FIELD_EDITOR_ID);
@@ -53,7 +53,7 @@ const renderFieldEditor = (
           indexPattern={indexPattern}
           field={field}
           helpers={{
-            Field,
+            Field: IndexPatternField,
             getConfig,
             $http,
             fieldFormatEditors,
@@ -135,7 +135,7 @@ uiRoutes
           return;
         }
       } else if (this.mode === 'create') {
-        this.field = new Field(this.indexPattern, {
+        this.field = new IndexPatternField(this.indexPattern, {
           scripted: true,
           type: 'number',
         });
@@ -158,7 +158,6 @@ uiRoutes
       docTitle.change([fieldName, this.indexPattern.title]);
 
       renderFieldEditor($scope, this.indexPattern, this.field, {
-        Field,
         getConfig,
         $http,
         fieldFormatEditors,

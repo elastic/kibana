@@ -8,6 +8,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { MonitorSummaryResult } from '../../../../../common/graphql/types';
 import { MonitorListComponent } from '../monitor_list';
+import { renderWithRouter } from '../../../../lib';
 
 describe('MonitorList component', () => {
   let result: MonitorSummaryResult;
@@ -75,21 +76,19 @@ describe('MonitorList component', () => {
           },
         },
       ],
-      totalSummaryCount: {
-        count: 2,
-      },
+      totalSummaryCount: 2,
     };
   });
 
-  it('renders the monitor list', () => {
+  it('shallow renders the monitor list', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
-        absoluteStartDate={123}
-        absoluteEndDate={125}
         dangerColor="danger"
         data={{ monitorStates: result }}
         hasActiveFilters={false}
         loading={false}
+        pageSize={25}
+        setPageSize={jest.fn()}
         successColor="primary"
       />
     );
@@ -100,15 +99,31 @@ describe('MonitorList component', () => {
   it('renders a no items message when no data is provided', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
-        absoluteStartDate={123}
-        absoluteEndDate={125}
         dangerColor="danger"
         data={{}}
         hasActiveFilters={false}
         loading={false}
+        pageSize={25}
+        setPageSize={jest.fn()}
         successColor="primary"
       />
     );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders the monitor list', () => {
+    const component = renderWithRouter(
+      <MonitorListComponent
+        dangerColor="danger"
+        data={{ monitorStates: result }}
+        hasActiveFilters={false}
+        loading={false}
+        pageSize={25}
+        setPageSize={jest.fn()}
+        successColor="primary"
+      />
+    );
+
     expect(component).toMatchSnapshot();
   });
 });

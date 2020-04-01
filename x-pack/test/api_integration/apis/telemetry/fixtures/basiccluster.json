@@ -1,6 +1,7 @@
 [
   {
     "cluster_name": "docker-cluster",
+    "collectionSource": "monitoring",
     "cluster_stats": {
       "indices": {
         "completion": {
@@ -161,6 +162,12 @@
     },
     "cluster_uuid": "ooEYzl3fSL222Y6eVm7SAA",
     "license": {
+      "uid": "79dc3adb-e85e-4cef-a985-9b74eb6c07c1",
+      "issue_date_in_millis": 1532383643540,
+      "issued_to": "docker-cluster",
+      "issuer": "elasticsearch",
+      "max_nodes": 1000,
+      "start_date_in_millis": -1,
       "issue_date": "2018-07-23T22:07:23.540Z",
       "status": "active",
       "type": "basic"

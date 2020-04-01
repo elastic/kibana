@@ -39,10 +39,10 @@ import {
   TODO_EMBEDDABLE,
   TodoEmbeddableFactory,
 } from '../../../examples/embeddable_examples/public/todo';
-import { GetEmbeddableFactory, EmbeddableRoot } from '../../../src/plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableRoot } from '../../../src/plugins/embeddable/public';
 
 interface Props {
-  getEmbeddableFactory: GetEmbeddableFactory;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
 }
 
 interface State {

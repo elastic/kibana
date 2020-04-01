@@ -126,6 +126,17 @@ describe('Markdown', () => {
       ).toHaveProperty('href', 'https://google.com/');
     });
 
+    test('it does NOT render the href if links are disabled', () => {
+      const wrapper = mount(<Markdown disableLinks={true} raw={markdownWithLink} />);
+
+      expect(
+        wrapper
+          .find('[data-test-subj="markdown-link"]')
+          .first()
+          .getDOMNode()
+      ).not.toHaveProperty('href');
+    });
+
     test('it opens links in a new tab via target="_blank"', () => {
       const wrapper = mount(<Markdown raw={markdownWithLink} />);
 

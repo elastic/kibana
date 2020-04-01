@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { Clipboard } from '../../clipboard';
 
-import { ComponentStrings } from '../../../../i18n';
+import { ComponentStrings } from '../../../../i18n/components';
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 interface Props {

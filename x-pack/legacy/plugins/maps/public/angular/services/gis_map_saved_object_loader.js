@@ -6,7 +6,7 @@
 
 import { createSavedGisMapClass } from './saved_gis_map';
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
 import { npStart } from '../../../../../../../src/legacy/ui/public/new_platform';
 
 const module = uiModules.get('app/maps');

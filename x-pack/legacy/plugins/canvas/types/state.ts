@@ -8,14 +8,14 @@ import {
   Datatable,
   Filter,
   ExpressionImage,
+  ExpressionFunction,
   KibanaContext,
   KibanaDatatable,
   PointSeries,
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions/common';
-import { CanvasFunction } from './functions';
+} from 'src/plugins/expressions';
 import { AssetType } from './assets';
 import { CanvasWorkpad } from './canvas';
 
@@ -32,11 +32,8 @@ export interface AppState {
 }
 
 interface StoreAppState {
-  kbnVersion: string;
   basePath: string;
-  reportingBrowserType: string;
-  // TODO: These server functions are actually missing the fn because they are serialized from the server
-  serverFunctions: CanvasFunction[];
+  serverFunctions: ExpressionFunction[];
   ready: boolean;
 }
 

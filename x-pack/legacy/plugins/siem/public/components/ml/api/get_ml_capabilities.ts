@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
 import { InfluencerInput, MlCapabilities } from '../types';
-import { throwIfNotOk } from '../../../hooks/api/api';
+import { KibanaServices } from '../../../lib/kibana';
 
 export interface Body {
   jobIds: string[];
@@ -23,16 +21,9 @@ export interface Body {
 }
 
 export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabilities> => {
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/ml_capabilities`, {
+  return KibanaServices.get().http.fetch<MlCapabilities>('/api/ml/ml_capabilities', {
     method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-Type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
+    asSystemRequest: true,
     signal,
   });
-  await throwIfNotOk(response);
-  return response.json();
 };

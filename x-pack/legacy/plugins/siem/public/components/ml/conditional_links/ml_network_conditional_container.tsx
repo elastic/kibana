@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse, stringify } from 'query-string';
 import React from 'react';
 
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
-import { QueryString } from 'ui/utils/query_string';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
 import { SiemPageName } from '../../../pages/home/types';
+
+import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 interface QueryStringType {
   '?_g': string;
@@ -28,13 +30,19 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
       exact
       path={url}
       render={({ location }) => {
-        const queryStringDecoded: QueryStringType = QueryString.decode(
-          location.search.substring(1)
-        );
+        const queryStringDecoded = parse(location.search.substring(1), {
+          sort: false,
+        }) as Required<QueryStringType>;
+
         if (queryStringDecoded.query != null) {
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
-        const reEncoded = QueryString.encode(queryStringDecoded);
+
+        const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+          sort: false,
+          encode: false,
+        });
+
         return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
       }}
     />
@@ -46,14 +54,20 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
           params: { ip },
         },
       }) => {
-        const queryStringDecoded: QueryStringType = QueryString.decode(
-          location.search.substring(1)
-        );
+        const queryStringDecoded = parse(location.search.substring(1), {
+          sort: false,
+        }) as Required<QueryStringType>;
+
         if (queryStringDecoded.query != null) {
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
+
         if (emptyEntity(ip)) {
-          const reEncoded = QueryString.encode(queryStringDecoded);
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
+
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
           const ips: string[] = getMultipleEntities(ip);
@@ -62,10 +76,16 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             ips,
             queryStringDecoded.query || ''
           );
-          const reEncoded = QueryString.encode(queryStringDecoded);
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else {
-          const reEncoded = QueryString.encode(queryStringDecoded);
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
           return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
         }
       }}

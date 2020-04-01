@@ -4,44 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
-import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { connect } from 'react-redux';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
-import { OverviewFilters } from '../../../../common/runtime_types';
-import { fetchOverviewFilters, GetOverviewFiltersPayload } from '../../../state/actions';
-import { AppState } from '../../../state';
-import { useUrlParams } from '../../../hooks';
-import { parseFiltersMap } from './parse_filter_map';
+import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 
-interface OwnProps {
-  currentFilter: any;
-  onFilterUpdate: any;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  filters?: string;
-  statusFilter?: string;
-}
-
-interface StoreProps {
-  esKuery: string;
-  lastRefresh: number;
+interface PresentationalComponentProps {
   loading: boolean;
   overviewFilters: OverviewFilters;
+  currentFilter: string;
+  onFilterUpdate: (filtersKuery: string) => void;
 }
 
-interface DispatchProps {
-  loadFilterGroup: typeof fetchOverviewFilters;
-}
-
-type Props = OwnProps & StoreProps & DispatchProps;
-
-type PresentationalComponentProps = Pick<StoreProps, 'overviewFilters' | 'loading'> &
-  Pick<OwnProps, 'currentFilter' | 'onFilterUpdate'>;
-
-export const PresentationalComponent: React.FC<PresentationalComponentProps> = ({
+export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
   currentFilter,
   overviewFilters,
   loading,
@@ -151,60 +128,3 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
     </EuiFilterGroup>
   );
 };
-
-export const Container: React.FC<Props> = ({
-  currentFilter,
-  esKuery,
-  filters,
-  loading,
-  loadFilterGroup,
-  dateRangeStart,
-  dateRangeEnd,
-  overviewFilters,
-  statusFilter,
-  onFilterUpdate,
-}: Props) => {
-  const [getUrlParams] = useUrlParams();
-  const { filters: urlFilters } = getUrlParams();
-  useEffect(() => {
-    const filterSelections = parseFiltersMap(urlFilters);
-    loadFilterGroup({
-      dateRangeStart,
-      dateRangeEnd,
-      locations: filterSelections.locations ?? [],
-      ports: filterSelections.ports ?? [],
-      schemes: filterSelections.schemes ?? [],
-      search: esKuery,
-      statusFilter,
-      tags: filterSelections.tags ?? [],
-    });
-  }, [dateRangeStart, dateRangeEnd, esKuery, filters, statusFilter, urlFilters, loadFilterGroup]);
-  return (
-    <PresentationalComponent
-      currentFilter={currentFilter}
-      overviewFilters={overviewFilters}
-      loading={loading}
-      onFilterUpdate={onFilterUpdate}
-    />
-  );
-};
-
-const mapStateToProps = ({
-  overviewFilters: { loading, filters },
-  ui: { esKuery, lastRefresh },
-}: AppState): StoreProps => ({
-  esKuery,
-  overviewFilters: filters,
-  lastRefresh,
-  loading,
-});
-
-const mapDispatchToProps = (dispatch: any): DispatchProps => ({
-  loadFilterGroup: (payload: GetOverviewFiltersPayload) => dispatch(fetchOverviewFilters(payload)),
-});
-
-export const FilterGroup = connect<StoreProps, DispatchProps, OwnProps>(
-  // @ts-ignore connect is expecting null | undefined for some reason
-  mapStateToProps,
-  mapDispatchToProps
-)(Container);

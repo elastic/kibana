@@ -16,6 +16,7 @@ import {
   ObjectRemover,
   AlertUtils,
   ensureDatetimeIsWithinRange,
+  TaskManagerUtils,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -24,6 +25,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const es = getService('legacyEs');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   function getAlertingTaskById(taskId: string) {
     return supertestWithoutAuth
@@ -73,6 +75,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
     });
 
     it('should schedule task, run alert and schedule actions', async () => {
+      const testStart = new Date();
       const reference = alertUtils.generateReference();
       const response = await alertUtils.createAlwaysFiringAction({ reference });
       const alertId = response.body.id;
@@ -94,7 +97,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           spaceId: space.id,
           namespace: space.namespace,
           name: 'abc',
-          tags: [],
+          tags: ['tag-A', 'tag-B'],
           createdBy: null,
           updatedBy: null,
         },
@@ -116,11 +119,21 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
         params: {
           index: ES_TEST_INDEX_NAME,
           reference,
-          message: 'instanceContextValue: true, instanceStateValue: true',
+          message: `
+alertId: ${alertId},
+alertName: abc,
+spaceId: ${space.id},
+tags: tag-A,tag-B,
+alertInstanceId: 1,
+instanceContextValue: true,
+instanceStateValue: true
+`.trim(),
         },
         reference,
         source: 'action:test.index-record',
       });
+
+      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
     });
 
     it('should reschedule failing alerts using the alerting interval and not the Task Manager retry logic', async () => {

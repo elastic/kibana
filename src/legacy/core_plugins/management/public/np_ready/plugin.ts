@@ -17,21 +17,18 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { IndexPatternManagementService, IndexPatternManagementSetup } from './services';
-import {
-  SavedObjectsManagementService,
-  SavedObjectsManagementServiceSetup,
-} from './services/saved_objects_management';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ManagementPluginSetupDependencies {}
+export interface ManagementPluginSetupDependencies {
+  home: HomePublicPluginSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ManagementPluginStartDependencies {}
 
 export interface ManagementSetup {
   indexPattern: IndexPatternManagementSetup;
-  savedObjects: SavedObjectsManagementServiceSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -46,14 +43,12 @@ export class ManagementPlugin
       ManagementPluginStartDependencies
     > {
   private readonly indexPattern = new IndexPatternManagementService();
-  private readonly savedObjects = new SavedObjectsManagementService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, deps: ManagementPluginSetupDependencies) {
+  public setup(core: CoreSetup, { home }: ManagementPluginSetupDependencies) {
     return {
-      indexPattern: this.indexPattern.setup({ httpClient: core.http }),
-      savedObjects: this.savedObjects.setup(),
+      indexPattern: this.indexPattern.setup({ httpClient: core.http, home }),
     };
   }
 

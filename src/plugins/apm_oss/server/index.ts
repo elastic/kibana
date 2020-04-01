@@ -22,6 +22,7 @@ import { APMOSSPlugin } from './plugin';
 
 export const config = {
   schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     transactionIndices: schema.string({ defaultValue: 'apm-*' }),
     spanIndices: schema.string({ defaultValue: 'apm-*' }),
     errorIndices: schema.string({ defaultValue: 'apm-*' }),
@@ -38,4 +39,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export type APMOSSConfig = TypeOf<typeof config.schema>;
 
-export { APMOSSPlugin as Plugin };
+export { APMOSSPluginSetup } from './plugin';

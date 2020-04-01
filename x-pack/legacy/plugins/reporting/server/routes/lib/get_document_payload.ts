@@ -4,30 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as _ from 'lodash';
 // @ts-ignore
 import contentDisposition from 'content-disposition';
-import {
-  ServerFacade,
-  ExportTypesRegistry,
-  ExportTypeDefinition,
-  JobDocExecuted,
-  JobDocOutputExecuted,
-} from '../../../types';
+import * as _ from 'lodash';
 import { CSV_JOB_TYPE } from '../../../common/constants';
+import {
+  ExportTypeDefinition,
+  ExportTypesRegistry,
+  JobDocOutput,
+  JobSource,
+  ServerFacade,
+} from '../../../types';
 
 interface ICustomHeaders {
   [x: string]: any;
 }
 
-const DEFAULT_TITLE = 'report';
+type ExportTypeType = ExportTypeDefinition<unknown, unknown, unknown, unknown>;
 
-type ExportTypeType = ExportTypeDefinition<any, any, any, any>;
+interface Payload {
+  statusCode: number;
+  content: any;
+  contentType: string;
+  headers: Record<string, any>;
+}
+
+const DEFAULT_TITLE = 'report';
 
 const getTitle = (exportType: ExportTypeType, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
-const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTypeType) => {
+const getReportingHeaders = (output: JobDocOutput, exportType: ExportTypeType) => {
   const metaDataHeaders: ICustomHeaders = {};
 
   if (exportType.jobType === CSV_JOB_TYPE) {
@@ -54,7 +61,7 @@ export function getDocumentPayloadFactory(
     }
   }
 
-  function getCompleted(output: JobDocOutputExecuted, jobType: string, title: string) {
+  function getCompleted(output: JobDocOutput, jobType: string, title: string) {
     const exportType = exportTypesRegistry.get((item: ExportTypeType) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
@@ -70,7 +77,7 @@ export function getDocumentPayloadFactory(
     };
   }
 
-  function getFailure(output: JobDocOutputExecuted) {
+  function getFailure(output: JobDocOutput) {
     return {
       statusCode: 500,
       content: {
@@ -78,6 +85,7 @@ export function getDocumentPayloadFactory(
         reason: output.content,
       },
       contentType: 'application/json',
+      headers: {},
     };
   }
 
@@ -90,9 +98,7 @@ export function getDocumentPayloadFactory(
     };
   }
 
-  return function getDocumentPayload(doc: {
-    _source: JobDocExecuted<{ output: JobDocOutputExecuted }>;
-  }) {
+  return function getDocumentPayload(doc: JobSource<unknown>): Payload {
     const { status, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
     const { output } = doc._source;
 

@@ -31,6 +31,17 @@ export async function config(Joi: any) {
         .default(120000),
     }).default(),
     capture: Joi.object({
+      timeouts: Joi.object({
+        openUrl: Joi.number()
+          .integer()
+          .default(30000),
+        waitForElements: Joi.number()
+          .integer()
+          .default(30000),
+        renderComplete: Joi.number()
+          .integer()
+          .default(30000),
+      }).default(),
       networkPolicy: Joi.object({
         enabled: Joi.boolean().default(true),
         rules: Joi.array()

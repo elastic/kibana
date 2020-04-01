@@ -64,8 +64,11 @@ run(
       });
 
       compiler.hooks.watchRun.tap('report on start', () => {
-        process.stdout.cursorTo(0, 0);
-        process.stdout.clearScreenDown();
+        if (process.stdout.isTTY) {
+          process.stdout.cursorTo(0, 0);
+          process.stdout.clearScreenDown();
+        }
+
         log.info('Running webpack compilation...');
       });
 

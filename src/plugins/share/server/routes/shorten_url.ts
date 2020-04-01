@@ -22,6 +22,7 @@ import { schema } from '@kbn/config-schema';
 
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
+import { CREATE_PATH } from '../../common/short_url_routes';
 
 export const createShortenUrlRoute = ({
   shortUrlLookup,
@@ -32,7 +33,7 @@ export const createShortenUrlRoute = ({
 }) => {
   router.post(
     {
-      path: '/api/shorten_url',
+      path: CREATE_PATH,
       validate: {
         body: schema.object({ url: schema.string() }),
       },

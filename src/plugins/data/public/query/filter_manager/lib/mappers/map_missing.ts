@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../common';
+import { Filter, isMissingFilter, FILTERS } from '../../../../../common';
 
-export const mapMissing = (filter: esFilters.Filter) => {
-  if (esFilters.isMissingFilter(filter)) {
+export const mapMissing = (filter: Filter) => {
+  if (isMissingFilter(filter)) {
     return {
-      type: esFilters.FILTERS.MISSING,
-      value: esFilters.FILTERS.MISSING,
+      type: FILTERS.MISSING,
+      value: FILTERS.MISSING,
       key: filter.missing.field,
     };
   }

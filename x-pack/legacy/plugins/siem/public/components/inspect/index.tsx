@@ -5,13 +5,12 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 import styled, { css } from 'styled-components';
 
-import { inputsModel, inputsSelectors, State } from '../../store';
+import { inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
 
@@ -24,7 +23,12 @@ export const InspectButtonContainer = styled.div<{ show?: boolean }>`
   display: flex;
   flex-grow: 1;
 
+  > * {
+    max-width: 100%;
+  }
+
   .${BUTTON_CLASS} {
+    pointer-events: none;
     opacity: 0;
     transition: opacity ${props => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
   }
@@ -33,6 +37,7 @@ export const InspectButtonContainer = styled.div<{ show?: boolean }>`
     show &&
     css`
       &:hover .${BUTTON_CLASS} {
+        pointer-events: auto;
         opacity: 1;
       }
     `}
@@ -54,24 +59,7 @@ interface OwnProps {
   title: string | React.ReactElement | React.ReactNode;
 }
 
-interface InspectButtonReducer {
-  id: string;
-  isInspected: boolean;
-  loading: boolean;
-  inspect: inputsModel.InspectQuery | null;
-  selectedInspectIndex: number;
-}
-
-interface InspectButtonDispatch {
-  setIsInspected: ActionCreator<{
-    id: string;
-    inputId: InputsModelId;
-    isInspected: boolean;
-    selectedInspectIndex: number;
-  }>;
-}
-
-type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatch;
+type InspectButtonProps = OwnProps & PropsFromRedux;
 
 const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   compact = false,
@@ -156,7 +144,11 @@ const makeMapStateToProps = () => {
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const mapStateToProps = (state: State, { inputId = 'global', queryId }: OwnProps) => {
-    return inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId);
+    const props =
+      inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId);
+    // refetch caused unnecessary component rerender and it was even not used
+    const propsWithoutRefetch = omit('refetch', props);
+    return propsWithoutRefetch;
   };
   return mapStateToProps;
 };
@@ -165,7 +157,8 @@ const mapDispatchToProps = {
   setIsInspected: inputsActions.setInspectionParameter,
 };
 
-export const InspectButton = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(React.memo(InspectButtonComponent));
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const InspectButton = connector(React.memo(InspectButtonComponent));

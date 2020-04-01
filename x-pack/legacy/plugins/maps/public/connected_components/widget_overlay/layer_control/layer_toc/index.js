@@ -21,7 +21,7 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedLayerTOC = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(
+const connectedLayerTOC = connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(
   LayerTOC
 );
 export { connectedLayerTOC as LayerTOC };

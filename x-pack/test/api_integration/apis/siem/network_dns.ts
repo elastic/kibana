@@ -30,7 +30,6 @@ export default function({ getService }: FtrProviderContext) {
             query: networkDnsQuery,
             variables: {
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              isDNSHistogram: false,
               inspect: false,
               isPtrIncluded: false,
               pagination: {
@@ -66,7 +65,7 @@ export default function({ getService }: FtrProviderContext) {
             query: networkDnsQuery,
             variables: {
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              isDNSHistogram: false,
+              isDnsHistogram: false,
               inspect: false,
               isPtrIncluded: false,
               pagination: {

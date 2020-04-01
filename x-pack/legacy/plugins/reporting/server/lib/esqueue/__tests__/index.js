@@ -40,7 +40,7 @@ describe('Esqueue class', function() {
 
   describe('Queue construction', function() {
     it('should ping the ES server', function() {
-      const pingSpy = sinon.spy(client, 'callWithInternalUser').withArgs('ping');
+      const pingSpy = sinon.spy(client, 'callAsInternalUser').withArgs('ping');
       new Esqueue('esqueue', { client });
       sinon.assert.calledOnce(pingSpy);
     });

@@ -31,16 +31,11 @@ const ProgressBarContainer = styled.div`
 `;
 
 interface Props {
-  children: React.ReactNode;
   isLoading: boolean;
   percentageLoaded: number;
 }
 
-export const LoadingOverlay = ({
-  children,
-  isLoading,
-  percentageLoaded
-}: Props) => (
+export const LoadingOverlay = ({ isLoading, percentageLoaded }: Props) => (
   <Container>
     {isLoading && (
       <Overlay>
@@ -61,6 +56,5 @@ export const LoadingOverlay = ({
         </EuiText>
       </Overlay>
     )}
-    {children}
   </Container>
 );

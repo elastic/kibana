@@ -5,23 +5,24 @@
  */
 
 import React from 'react';
-import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
 
-const basePath = chrome.getBasePath();
-
-export const DetectionEngineNoIndex = React.memo(() => (
-  <EmptyPage
-    actionPrimaryIcon="documents"
-    actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
-    actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
-    actionPrimaryTarget="_blank"
-    message={i18n.NO_INDEX_MSG_BODY}
-    data-test-subj="no_index"
-    title={i18n.NO_INDEX_TITLE}
-  />
-));
+export const DetectionEngineNoIndex = React.memo(() => {
+  const docLinks = useKibana().services.docLinks;
+  return (
+    <EmptyPage
+      actionPrimaryIcon="documents"
+      actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
+      actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${docLinks.DOC_LINK_VERSION}/detection-engine-overview.html#detections-permissions`}
+      actionPrimaryTarget="_blank"
+      message={i18n.NO_INDEX_MSG_BODY}
+      data-test-subj="no_index"
+      title={i18n.NO_INDEX_TITLE}
+    />
+  );
+});
 
 DetectionEngineNoIndex.displayName = 'DetectionEngineNoIndex';

@@ -32,21 +32,12 @@ describe('styleSvg', () => {
     );
   });
 
-  it('Should add stroke style property to svg element', async () => {
+  it('Should add stroke and stroke-wdth style properties to svg element', async () => {
     const unstyledSvgString =
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
     const styledSvg = await styleSvg(unstyledSvgString, 'red', 'white');
     expect(styledSvg.split('\n')[1]).toBe(
-      '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;stroke:white;">'
-    );
-  });
-
-  it('Should add stroke-width style property to svg element', async () => {
-    const unstyledSvgString =
-      '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
-    const styledSvg = await styleSvg(unstyledSvgString, 'red', 'white', '2px');
-    expect(styledSvg.split('\n')[1]).toBe(
-      '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;stroke:white;stroke-width:2px;">'
+      '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;stroke:white;stroke-width:1;">'
     );
   });
 });

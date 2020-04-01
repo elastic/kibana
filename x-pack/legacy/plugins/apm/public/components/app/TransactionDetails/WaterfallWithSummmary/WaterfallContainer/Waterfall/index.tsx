@@ -13,8 +13,7 @@ import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 import { px } from '../../../../../../style/variables';
 import { history } from '../../../../../../utils/history';
-// @ts-ignore
-import Timeline from '../../../../../shared/charts/Timeline';
+import { Timeline } from '../../../../../shared/charts/Timeline';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
 import { getAgentMarks } from '../Marks/get_agent_marks';
 import { getErrorMarks } from '../Marks/get_error_marks';
@@ -80,13 +79,9 @@ export const Waterfall: React.FC<Props> = ({
   const { serviceColors, duration } = waterfall;
 
   const agentMarks = getAgentMarks(waterfall.entryTransaction);
-  const errorMarks = getErrorMarks(waterfall.items, serviceColors);
+  const errorMarks = getErrorMarks(waterfall.errorItems, serviceColors);
 
   const renderWaterfallItem = (item: IWaterfallItem) => {
-    if (item.docType === 'error') {
-      return null;
-    }
-
     const errorCount =
       item.docType === 'transaction'
         ? waterfall.errorsPerTransaction[item.doc.transaction.id]
@@ -122,7 +117,7 @@ export const Waterfall: React.FC<Props> = ({
       <StickyContainer>
         <Timeline
           marks={[...agentMarks, ...errorMarks]}
-          duration={duration}
+          xMax={duration}
           height={waterfallHeight}
           margins={TIMELINE_MARGINS}
         />

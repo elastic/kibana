@@ -18,12 +18,12 @@
  */
 
 import { first, skip, toArray } from 'rxjs/operators';
-import { fromExpression } from '@kbn/interpreter/common';
 import { loader, ExpressionLoader } from './loader';
-import { ExpressionDataHandler } from './execute';
-import { IInterpreterRenderHandlers } from './types';
 import { Observable } from 'rxjs';
-import { ExpressionAST } from '../common/types';
+import { ExpressionAstExpression, parseExpression, IInterpreterRenderHandlers } from '../common';
+
+// eslint-disable-next-line
+const { __getLastExecution } = require('./services');
 
 const element: HTMLElement = null as any;
 
@@ -35,10 +35,16 @@ jest.mock('./services', () => {
       },
     },
   };
-  return {
+
+  // eslint-disable-next-line
+  const service = new (require('../common/service/expressions_services').ExpressionsService as any)();
+
+  const moduleMock = {
+    __execution: undefined,
+    __getLastExecution: () => moduleMock.__execution,
     getInterpreter: () => {
       return {
-        interpretAst: async (expression: ExpressionAST) => {
+        interpretAst: async (expression: ExpressionAstExpression) => {
           return { type: 'render', as: 'test' };
         },
       };
@@ -53,17 +59,19 @@ jest.mock('./services', () => {
         },
       };
     }),
+    getExpressionsService: () => service,
   };
-});
 
-jest.mock('./execute', () => {
-  const actual = jest.requireActual('./execute');
-  return {
-    ExpressionDataHandler: jest
-      .fn()
-      .mockImplementation((...args) => new actual.ExpressionDataHandler(...args)),
-    execute: jest.fn().mockReturnValue(actual.execute),
+  const execute = service.execute;
+  service.execute = (...args: any) => {
+    const execution = execute(...args);
+    jest.spyOn(execution, 'getData');
+    jest.spyOn(execution, 'cancel');
+    moduleMock.__execution = execution;
+    return execution;
   };
+
+  return moduleMock;
 });
 
 describe('execute helper function', () => {
@@ -83,7 +91,7 @@ describe('ExpressionLoader', () => {
     });
 
     it('accepts expression AST', () => {
-      const expressionAST = fromExpression(expressionString) as ExpressionAST;
+      const expressionAST = parseExpression(expressionString);
       const expressionLoader = new ExpressionLoader(element, expressionAST, {});
       expect(expressionLoader.getExpression()).toEqual(expressionString);
       expect(expressionLoader.getAst()).toEqual(expressionAST);
@@ -99,9 +107,9 @@ describe('ExpressionLoader', () => {
   });
 
   it('emits on $data when data is available', async () => {
-    const expressionLoader = new ExpressionLoader(element, expressionString, {});
+    const expressionLoader = new ExpressionLoader(element, 'var foo', { variables: { foo: 123 } });
     const response = await expressionLoader.data$.pipe(first()).toPromise();
-    expect(response).toEqual({ type: 'render', as: 'test' });
+    expect(response).toBe(123);
   });
 
   it('emits on loading$ on initial load and on updates', async () => {
@@ -130,94 +138,13 @@ describe('ExpressionLoader', () => {
   });
 
   it('cancels the previous request when the expression is updated', () => {
-    const cancelMock = jest.fn();
+    const expressionLoader = new ExpressionLoader(element, 'var foo', {});
+    const execution = __getLastExecution();
+    jest.spyOn(execution, 'cancel');
 
-    (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
-      getData: () => true,
-      cancel: cancelMock,
-      isPending: () => true,
-      inspect: () => {},
-    }));
-
-    const expressionLoader = new ExpressionLoader(element, expressionString, {});
-    expressionLoader.update('new', {});
-
-    expect(cancelMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not send an observable message if a request was aborted', () => {
-    const cancelMock = jest.fn();
-
-    const getData = jest
-      .fn()
-      .mockResolvedValueOnce({
-        type: 'error',
-        error: {
-          name: 'AbortError',
-        },
-      })
-      .mockResolvedValueOnce({
-        type: 'real',
-      });
-
-    (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
-      getData,
-      cancel: cancelMock,
-      isPending: () => true,
-      inspect: () => {},
-    }));
-
-    (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
-      getData,
-      cancel: cancelMock,
-      isPending: () => true,
-      inspect: () => {},
-    }));
-
-    const expressionLoader = new ExpressionLoader(element, expressionString, {});
-
-    expect.assertions(2);
-    expressionLoader.data$.subscribe({
-      next(data) {
-        expect(data).toEqual({
-          type: 'real',
-        });
-      },
-      error() {
-        expect(false).toEqual('Should not be called');
-      },
-    });
-
-    expressionLoader.update('new expression', {});
-
-    expect(getData).toHaveBeenCalledTimes(2);
-  });
-
-  it('sends an observable error if the data fetching failed', () => {
-    const cancelMock = jest.fn();
-
-    const getData = jest.fn().mockResolvedValue('rejected');
-
-    (ExpressionDataHandler as jest.Mock).mockImplementationOnce(() => ({
-      getData,
-      cancel: cancelMock,
-      isPending: () => true,
-      inspect: () => {},
-    }));
-
-    const expressionLoader = new ExpressionLoader(element, expressionString, {});
-
-    expect.assertions(2);
-    expressionLoader.data$.subscribe({
-      next(data) {
-        expect(data).toEqual('Should not be called');
-      },
-      error(error) {
-        expect(error.message).toEqual('Could not fetch data');
-      },
-    });
-
-    expect(getData).toHaveBeenCalledTimes(1);
+    expect(execution.cancel).toHaveBeenCalledTimes(0);
+    expressionLoader.update('var bar', {});
+    expect(execution.cancel).toHaveBeenCalledTimes(1);
   });
 
   it('inspect() returns correct inspector adapters', () => {

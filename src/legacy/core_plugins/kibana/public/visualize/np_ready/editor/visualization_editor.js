@@ -18,32 +18,39 @@
  */
 
 export function initVisEditorDirective(app, deps) {
-  app.directive('visualizationEditor', function($timeout, getAppState) {
+  app.directive('visualizationEditor', function($timeout) {
     return {
       restrict: 'E',
       scope: {
-        savedObj: '=',
+        vis: '=',
         uiState: '=?',
         timeRange: '=',
         filters: '=',
         query: '=',
+        savedSearch: '=',
+        embeddableHandler: '=',
+        eventEmitter: '=',
       },
       link: function($scope, element) {
-        const editorType = $scope.savedObj.vis.type.editor;
-        const Editor =
-          typeof editorType === 'function'
-            ? editorType
-            : deps.editorTypes.find(editor => editor.key === editorType);
-
-        const editor = new Editor(element[0], $scope.savedObj);
+        const Editor = $scope.vis.type.editor || deps.DefaultVisualizationEditor;
+        const editor = new Editor(
+          element[0],
+          $scope.vis,
+          $scope.eventEmitter,
+          $scope.embeddableHandler
+        );
 
         $scope.renderFunction = () => {
           editor.render({
+            core: deps.core,
+            data: deps.data,
+            embeddable: deps.embeddable,
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,
             filters: $scope.filters,
             query: $scope.query,
-            appState: getAppState(),
+            linked: !!$scope.vis.data.savedSearchId,
+            savedSearch: $scope.savedSearch,
           });
         };
 

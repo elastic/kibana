@@ -134,6 +134,9 @@ export const timelineQuery = gql`
                 name
                 ip
               }
+              rule {
+                reference
+              }
               source {
                 bytes
                 ip
@@ -203,6 +206,7 @@ export const timelineQuery = gql`
                   query
                   to
                   filters
+                  note
                 }
               }
               suricata {

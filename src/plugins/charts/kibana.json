@@ -1,0 +1,6 @@
+{
+  "id": "charts",
+  "version": "kibana",
+  "server": false,
+  "ui": true
+}

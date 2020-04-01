@@ -5,6 +5,7 @@
  */
 
 import { MlError } from '../ml/types';
+import { AuditMessageBase } from '../../../../../../plugins/ml/common/types/audit_message';
 
 export interface Group {
   id: string;
@@ -101,6 +102,7 @@ export interface MlSetupArgs {
  * Representation of an ML Job as returned from the `ml/jobs/jobs_summary` API
  */
 export interface JobSummary {
+  auditMessage?: AuditMessageBase;
   datafeedId: string;
   datafeedIndices: string[];
   datafeedState: string;
@@ -191,16 +193,6 @@ export interface CloseJobsResponse {
   [key: string]: {
     closed: boolean;
   };
-}
-
-export interface IndexPatternSavedObject {
-  attributes: {
-    title: string;
-  };
-  id: string;
-  type: string;
-  updated_at: string;
-  version: string;
 }
 
 export interface JobsFilters {

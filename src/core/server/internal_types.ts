@@ -22,7 +22,7 @@ import { Type } from '@kbn/config-schema';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
-import { InternalElasticsearchServiceSetup } from './elasticsearch';
+import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './elasticsearch';
 import { InternalHttpServiceSetup } from './http';
 import {
   InternalSavedObjectsServiceSetup,
@@ -30,6 +30,7 @@ import {
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { UuidServiceSetup } from './uuid';
+import { InternalMetricsServiceSetup } from './metrics';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -40,6 +41,7 @@ export interface InternalCoreSetup {
   uiSettings: InternalUiSettingsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   uuid: UuidServiceSetup;
+  metrics: InternalMetricsServiceSetup;
 }
 
 /**
@@ -47,6 +49,7 @@ export interface InternalCoreSetup {
  */
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
+  elasticsearch: ElasticsearchServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
 }

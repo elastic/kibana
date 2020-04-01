@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces" renders a warning message instead of the privilege form 1`] = `
+<EuiCallOut
+  color="danger"
+  data-test-subj="userCannotManageSpacesCallout"
+  iconType="alert"
+  title={
+    <p>
+      <FormattedMessage
+        defaultMessage="Insufficient Privileges"
+        id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
+        values={Object {}}
+      />
+    </p>
+  }
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="You are not authorized to view all available spaces."
+      id="xpack.security.management.editRole.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription"
+      values={Object {}}
+    />
+  </p>
+  <p>
+    <FormattedMessage
+      defaultMessage="Please ensure your account has all privileges granted by the {kibanaAdmin} role, and try again."
+      id="xpack.security.management.editRole.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
+      values={
+        Object {
+          "kibanaAdmin": <strong>
+            <FormattedMessage
+              defaultMessage="kibana_admin"
+              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaAdminTitle"
+              values={Object {}}
+            />
+          </strong>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;

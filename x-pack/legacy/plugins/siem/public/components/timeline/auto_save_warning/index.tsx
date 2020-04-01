@@ -12,41 +12,17 @@ import {
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { State, timelineSelectors } from '../../../store';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../store/inputs/actions';
-import { TimelineModel } from '../../../store/timeline/model';
 
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
 import { AutoSavedWarningMsg } from '../../../store/timeline/types';
 import { useStateToaster } from '../../toasters';
 
-interface ReduxProps {
-  timelineId: string | null;
-  newTimelineModel: TimelineModel | null;
-}
-
-interface DispatchProps {
-  setTimelineRangeDatePicker: ActionCreator<{
-    from: number;
-    to: number;
-  }>;
-  updateAutoSaveMsg: ActionCreator<{
-    timelineId: string | null;
-    newTimelineModel: TimelineModel | null;
-  }>;
-  updateTimeline: ActionCreator<{
-    id: string;
-    timeline: TimelineModel;
-  }>;
-}
-
-type OwnProps = ReduxProps & DispatchProps;
-
-const AutoSaveWarningMsgComponent = React.memo<OwnProps>(
+const AutoSaveWarningMsgComponent = React.memo<PropsFromRedux>(
   ({
     newTimelineModel,
     setTimelineRangeDatePicker,
@@ -106,8 +82,14 @@ const mapStateToProps = (state: State) => {
   };
 };
 
-export const AutoSaveWarningMsg = connect(mapStateToProps, {
+const mapDispatchToProps = {
   setTimelineRangeDatePicker: dispatchSetTimelineRangeDatePicker,
   updateAutoSaveMsg: timelineActions.updateAutoSaveMsg,
   updateTimeline: timelineActions.updateTimeline,
-})(AutoSaveWarningMsgComponent);
+};
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const AutoSaveWarningMsg = connector(AutoSaveWarningMsgComponent);

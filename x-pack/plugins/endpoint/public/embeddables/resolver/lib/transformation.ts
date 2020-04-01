@@ -15,11 +15,32 @@ export function inverseOrthographicProjection(
   bottom: number,
   left: number
 ): Matrix3 {
-  const m11 = (right - left) / 2;
-  const m13 = (right + left) / (right - left);
+  let m11: number;
+  let m13: number;
+  let m22: number;
+  let m23: number;
 
-  const m22 = (top - bottom) / 2;
-  const m23 = (top + bottom) / (top - bottom);
+  /**
+   * If `right - left` is 0, the width is 0, so scale everything to 0
+   */
+  if (right - left === 0) {
+    m11 = 0;
+    m13 = 0;
+  } else {
+    m11 = (right - left) / 2;
+    m13 = (right + left) / (right - left);
+  }
+
+  /**
+   * If `top - bottom` is 0, the height is 0, so scale everything to 0
+   */
+  if (top - bottom === 0) {
+    m22 = 0;
+    m23 = 0;
+  } else {
+    m22 = (top - bottom) / 2;
+    m23 = (top + bottom) / (top - bottom);
+  }
 
   return [m11, 0, m13, 0, m22, m23, 0, 0, 0];
 }
@@ -37,11 +58,32 @@ export function orthographicProjection(
   bottom: number,
   left: number
 ): Matrix3 {
-  const m11 = 2 / (right - left); // adjust x scale to match ndc (-1, 1) bounds
-  const m13 = -((right + left) / (right - left));
+  let m11: number;
+  let m13: number;
+  let m22: number;
+  let m23: number;
 
-  const m22 = 2 / (top - bottom); // adjust y scale to match ndc (-1, 1) bounds
-  const m23 = -((top + bottom) / (top - bottom));
+  /**
+   * If `right - left` is 0, the width is 0, so scale everything to 0
+   */
+  if (right - left === 0) {
+    m11 = 0;
+    m13 = 0;
+  } else {
+    m11 = 2 / (right - left); // adjust x scale to match ndc (-1, 1) bounds
+    m13 = -((right + left) / (right - left));
+  }
+
+  /**
+   * If `top - bottom` is 0, the height is 0, so scale everything to 0
+   */
+  if (top - bottom === 0) {
+    m22 = 0;
+    m23 = 0;
+  } else {
+    m22 = top - bottom === 0 ? 0 : 2 / (top - bottom); // adjust y scale to match ndc (-1, 1) bounds
+    m23 = top - bottom === 0 ? 0 : -((top + bottom) / (top - bottom));
+  }
 
   return [m11, 0, m13, 0, m22, m23, 0, 0, 0];
 }
@@ -68,6 +110,6 @@ export function translationTransformation([x, y]: Vector2): Matrix3 {
   return [
     1, 0, x,
     0, 1, y,
-    0, 0, 1
+    0, 0, 0
   ]
 }

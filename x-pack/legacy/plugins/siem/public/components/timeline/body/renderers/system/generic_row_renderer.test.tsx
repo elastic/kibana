@@ -69,7 +69,6 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields,
         data: system,
-        children: <span>{'some children'}</span>,
         timelineId: 'test',
       });
 
@@ -99,7 +98,6 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: system,
-        children: <span>{'some children '}</span>,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -108,7 +106,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Evan@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
+        'Evan@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
       );
     });
   });
@@ -133,7 +131,6 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields,
         data: systemFile,
-        children: <span>{'some children'}</span>,
         timelineId: 'test',
       });
 
@@ -162,7 +159,6 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: systemFile,
-        children: <span>{'some children '}</span>,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -171,7 +167,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Braden@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
+        'Braden@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
       );
     });
   });
@@ -195,14 +191,13 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameCreationEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children Arun\\Anvi-Acer@HD-obe-8bf77f54started processMicrosoft.Photos.exe(441684)C:\\Program Files\\WindowsApps\\Microsoft.Windows.Photos_2018.18091.17210.0_x64__8wekyb3d8bbwe\\Microsoft.Photos.exe-ServerName:App.AppXzst44mncqdg84v7sv6p7yznqwssy6f7f.mcavia parent processsvchost.exe(8)d4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee12563599116157778a22600d2a163d8112aed84562d06d7235b37895b68de56687895743'
+        'Arun\\Anvi-Acer@HD-obe-8bf77f54started processMicrosoft.Photos.exe(441684)C:\\Program Files\\WindowsApps\\Microsoft.Windows.Photos_2018.18091.17210.0_x64__8wekyb3d8bbwe\\Microsoft.Photos.exe-ServerName:App.AppXzst44mncqdg84v7sv6p7yznqwssy6f7f.mcavia parent processsvchost.exe(8)d4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee12563599116157778a22600d2a163d8112aed84562d06d7235b37895b68de56687895743'
       );
     });
 
@@ -224,14 +219,13 @@ describe('GenericRowRenderer', () => {
             endgameProcessTerminationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameTerminationEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children Arun\\Anvi-Acer@HD-obe-8bf77f54terminated processRuntimeBroker.exe(442384)with exit code087976f3430cc99bc939e0694247c0759961a49832b87218f4313d6fc0bc3a776797255e72d5ed5c058d4785950eba7abaa057653bd4401441a21bf1abce6404f4231db4d'
+        'Arun\\Anvi-Acer@HD-obe-8bf77f54terminated processRuntimeBroker.exe(442384)with exit code087976f3430cc99bc939e0694247c0759961a49832b87218f4313d6fc0bc3a776797255e72d5ed5c058d4785950eba7abaa057653bd4401441a21bf1abce6404f4231db4d'
       );
     });
 
@@ -253,7 +247,6 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameCreationEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -284,7 +277,6 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameCreationEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -315,7 +307,6 @@ describe('GenericRowRenderer', () => {
             endgameProcessCreationEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameCreationEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -344,14 +335,13 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children Arun\\Anvi-Acer@HD-obe-8bf77f54created a fileinC:\\Users\\Arun\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\63d78c21-e593-4484-b7a9-db33cd522ddc.tmpviachrome.exe(11620)'
+        'Arun\\Anvi-Acer@HD-obe-8bf77f54created a fileinC:\\Users\\Arun\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\63d78c21-e593-4484-b7a9-db33cd522ddc.tmpviachrome.exe(11620)'
       );
     });
 
@@ -373,14 +363,13 @@ describe('GenericRowRenderer', () => {
             endgameFileDeleteEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameFileDeleteEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children SYSTEM\\NT AUTHORITY@HD-v1s-d2118419deleted a filetmp000002f6inC:\\Windows\\TEMP\\tmp00000404\\tmp000002f6viaAmSvc.exe(1084)'
+        'SYSTEM\\NT AUTHORITY@HD-v1s-d2118419deleted a filetmp000002f6inC:\\Windows\\TEMP\\tmp00000404\\tmp000002f6viaAmSvc.exe(1084)'
       );
     });
 
@@ -402,15 +391,12 @@ describe('GenericRowRenderer', () => {
             fileCreatedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: fimFileCreatedEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
-        'some children foohostcreated a filein/etc/subgidviaan unknown process'
-      );
+      expect(wrapper.text()).toEqual('foohostcreated a filein/etc/subgidviaan unknown process');
     });
 
     test('it renders a FIM (non-endgame) file deleted event', () => {
@@ -431,14 +417,13 @@ describe('GenericRowRenderer', () => {
             fileDeletedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: fimFileDeletedEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children foohostdeleted a filein/etc/gshadow.lockviaan unknown process'
+        'foohostdeleted a filein/etc/gshadow.lockviaan unknown process'
       );
     });
 
@@ -460,7 +445,6 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -491,7 +475,6 @@ describe('GenericRowRenderer', () => {
             endgameFileCreateEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -522,7 +505,6 @@ describe('GenericRowRenderer', () => {
             fileCreatedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: fimFileCreatedEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -551,14 +533,13 @@ describe('GenericRowRenderer', () => {
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv4ConnectionAcceptEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children SYSTEM\\NT AUTHORITY@HD-gqf-0af7b4feaccepted a connection viaAmSvc.exe(1084)tcp1:network-community_idSource127.0.0.1:49306Destination127.0.0.1:49305'
+        'SYSTEM\\NT AUTHORITY@HD-gqf-0af7b4feaccepted a connection viaAmSvc.exe(1084)tcp1:network-community_idSource127.0.0.1:49306Destination127.0.0.1:49305'
       );
     });
 
@@ -580,14 +561,13 @@ describe('GenericRowRenderer', () => {
             endgameIpv6ConnectionAcceptEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv6ConnectionAcceptEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66accepted a connection via(4)tcp1:network-community_idSource::1:51324Destination::1:5357'
+        'SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66accepted a connection via(4)tcp1:network-community_idSource::1:51324Destination::1:5357'
       );
     });
 
@@ -609,14 +589,13 @@ describe('GenericRowRenderer', () => {
             endgameIpv4DisconnectReceivedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv4DisconnectReceivedEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children Arun\\Anvi-Acer@HD-obe-8bf77f54disconnected viachrome.exe(11620)8.1KBtcp1:LxYHJJv98b2O0fNccXu6HheXmwk=Source192.168.0.6:59356(25.78%)2.1KB(74.22%)6KBDestination10.156.162.53:443'
+        'Arun\\Anvi-Acer@HD-obe-8bf77f54disconnected viachrome.exe(11620)8.1KBtcp1:LxYHJJv98b2O0fNccXu6HheXmwk=Source192.168.0.6:59356(25.78%)2.1KB(74.22%)6KBDestination10.156.162.53:443'
       );
     });
 
@@ -638,14 +617,13 @@ describe('GenericRowRenderer', () => {
             endgameIpv6DisconnectReceivedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv6DisconnectReceivedEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66disconnected via(4)7.9KBtcp1:ZylzQhsB1dcptA2t4DY8S6l9o8E=Source::1:51338(96.92%)7.7KB(3.08%)249BDestination::1:2869'
+        'SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66disconnected via(4)7.9KBtcp1:ZylzQhsB1dcptA2t4DY8S6l9o8E=Source::1:51338(96.92%)7.7KB(3.08%)249BDestination::1:2869'
       );
     });
 
@@ -667,14 +645,13 @@ describe('GenericRowRenderer', () => {
             socketOpenedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: socketOpenedEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children root@foohostopened a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59554 -> 10.1.2.3:80) Ooutboundtcp1:network-community_idSource10.4.20.1:59554Destination10.1.2.3:80'
+        'root@foohostopened a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59554 -> 10.1.2.3:80) Ooutboundtcp1:network-community_idSource10.4.20.1:59554Destination10.1.2.3:80'
       );
     });
 
@@ -696,14 +673,13 @@ describe('GenericRowRenderer', () => {
             socketClosedEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: socketClosedEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children root@foohostclosed a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59508 -> 10.1.2.3:80) Coutboundtcp1:network-community_idSource10.4.20.1:59508Destination10.1.2.3:80'
+        'root@foohostclosed a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59508 -> 10.1.2.3:80) Coutboundtcp1:network-community_idSource10.4.20.1:59508Destination10.1.2.3:80'
       );
     });
 
@@ -725,7 +701,6 @@ describe('GenericRowRenderer', () => {
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: ipv4ConnectionAcceptEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -750,14 +725,13 @@ describe('GenericRowRenderer', () => {
             userLogonEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: userLogonEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children SYSTEM\\NT AUTHORITY@HD-v1s-d2118419successfully logged inusing logon type5 - Service(target logon ID0x3e7)viaC:\\Windows\\System32\\services.exe(432)as requested by subjectWIN-Q3DOP1UKA81$(subject logon ID0x3e7)4624'
+        'SYSTEM\\NT AUTHORITY@HD-v1s-d2118419successfully logged inusing logon type5 - Service(target logon ID0x3e7)viaC:\\Windows\\System32\\services.exe(432)as requested by subjectWIN-Q3DOP1UKA81$(subject logon ID0x3e7)4624'
       );
     });
 
@@ -775,14 +749,13 @@ describe('GenericRowRenderer', () => {
             adminLogonEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: adminLogonEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children With special privileges,SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54successfully logged inviaC:\\Windows\\System32\\lsass.exe(964)as requested by subjectSYSTEM\\NT AUTHORITY4672'
+        'With special privileges,SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54successfully logged inviaC:\\Windows\\System32\\lsass.exe(964)as requested by subjectSYSTEM\\NT AUTHORITY4672'
       );
     });
 
@@ -800,14 +773,13 @@ describe('GenericRowRenderer', () => {
             explicitUserLogonEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: explicitUserLogonEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children A login was attempted using explicit credentialsArun\\Anvi-AcertoHD-55b-3ec87f66viaC:\\Windows\\System32\\svchost.exe(1736)as requested by subjectANVI-ACER$\\WORKGROUP(subject logon ID0x3e7)4648'
+        'A login was attempted using explicit credentialsArun\\Anvi-AcertoHD-55b-3ec87f66viaC:\\Windows\\System32\\svchost.exe(1736)as requested by subjectANVI-ACER$\\WORKGROUP(subject logon ID0x3e7)4648'
       );
     });
 
@@ -825,14 +797,13 @@ describe('GenericRowRenderer', () => {
             userLogoffEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: userLogoffEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children Arun\\Anvi-Acer@HD-55b-3ec87f66logged offusing logon type2 - Interactive(target logon ID0x16db41e)viaC:\\Windows\\System32\\lsass.exe(964)4634'
+        'Arun\\Anvi-Acer@HD-55b-3ec87f66logged offusing logon type2 - Interactive(target logon ID0x16db41e)viaC:\\Windows\\System32\\lsass.exe(964)4634'
       );
     });
 
@@ -850,7 +821,6 @@ describe('GenericRowRenderer', () => {
             userLogonEventRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: userLogonEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -874,14 +844,13 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: requestEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54asked forupdate.googleapis.comwith question typeA, which resolved to10.100.197.67viaGoogleUpdate.exe(443192)3008dns'
+        'SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54asked forupdate.googleapis.comwith question typeA, which resolved to10.100.197.67viaGoogleUpdate.exe(443192)3008dns'
       );
     });
 
@@ -898,14 +867,13 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: dnsEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
-        'some children iot.example.comasked forlookup.example.comwith question typeA, which resolved to10.1.2.3(response code:NOERROR)viaan unknown process6.937500msOct 8, 2019 @ 10:05:23.241Oct 8, 2019 @ 10:05:23.248outbounddns177Budp1:network-community_idSource10.9.9.9:58732(22.60%)40B(77.40%)137BDestination10.1.1.1:53OceaniaAustralia🇦🇺AU'
+        'iot.example.comasked forlookup.example.comwith question typeA, which resolved to10.1.2.3(response code:NOERROR)viaan unknown process6.937500msOct 8, 2019 @ 10:05:23.241Oct 8, 2019 @ 10:05:23.248outbounddns177Budp1:network-community_idSource10.9.9.9:58732(22.60%)40B(77.40%)137BDestination10.1.1.1:53OceaniaAustralia🇦🇺AU'
       );
     });
 
@@ -928,7 +896,6 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: requestEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>
@@ -956,7 +923,6 @@ describe('GenericRowRenderer', () => {
             dnsRowRenderer.renderRow({
               browserFields: mockBrowserFields,
               data: requestEvent,
-              children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
         </TestProviders>

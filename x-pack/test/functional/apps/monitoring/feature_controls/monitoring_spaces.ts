@@ -37,7 +37,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space');
       });
 
-      it('shows Stack Monitoring navlink', async () => {
+      it('shows Stack Monitoring navlink fail', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });

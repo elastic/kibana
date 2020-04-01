@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer } from 'kibana/public';
 
 import { DemoDataPlugin } from './plugin';
 
 export { DEMO_SEARCH_STRATEGY } from '../common';
 
-export const plugin: PluginInitializer<void, void> = (
-  initializerContext: PluginInitializerContext
-) => new DemoDataPlugin(initializerContext);
+export const plugin: PluginInitializer<void, void> = () => new DemoDataPlugin();

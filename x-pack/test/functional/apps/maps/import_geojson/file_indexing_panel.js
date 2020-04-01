@@ -45,7 +45,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     afterEach(async () => {
-      await PageObjects.maps.cancelLayerAdd();
+      await PageObjects.maps.closeOrCancelLayer();
       await PageObjects.maps.waitForLayerAddPanelClosed();
     });
 

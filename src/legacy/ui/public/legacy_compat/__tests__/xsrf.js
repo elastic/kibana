@@ -22,18 +22,11 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 
-import { $setupXsrfRequestInterceptor } from '../angular_config';
+import { $setupXsrfRequestInterceptor } from '../../../../../plugins/kibana_legacy/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { version } from '../../../../../core/server/utils/package_json';
 
 const xsrfHeader = 'kbn-version';
-const newPlatform = {
-  injectedMetadata: {
-    getLegacyMetadata() {
-      return { version };
-    },
-  },
-};
 
 describe('chrome xsrf apis', function() {
   const sandbox = sinon.createSandbox();
@@ -45,7 +38,7 @@ describe('chrome xsrf apis', function() {
   describe('jQuery support', function() {
     it('adds a global jQuery prefilter', function() {
       sandbox.stub($, 'ajaxPrefilter');
-      $setupXsrfRequestInterceptor(newPlatform);
+      $setupXsrfRequestInterceptor(version);
       expect($.ajaxPrefilter.callCount).to.be(1);
     });
 
@@ -54,7 +47,7 @@ describe('chrome xsrf apis', function() {
 
       beforeEach(function() {
         sandbox.stub($, 'ajaxPrefilter');
-        $setupXsrfRequestInterceptor(newPlatform);
+        $setupXsrfRequestInterceptor(version);
         prefilter = $.ajaxPrefilter.args[0][0];
       });
 
@@ -79,7 +72,7 @@ describe('chrome xsrf apis', function() {
 
       beforeEach(function() {
         sandbox.stub($, 'ajaxPrefilter');
-        ngMock.module($setupXsrfRequestInterceptor(newPlatform));
+        ngMock.module($setupXsrfRequestInterceptor(version));
       });
 
       beforeEach(

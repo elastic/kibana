@@ -6,23 +6,12 @@
 
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 
-export const addTags = (
-  tags: string[] | null | undefined,
-  ruleId: string | null | undefined,
-  immutable: boolean | null | undefined
-): string[] => {
-  const defaultedTags = tags != null ? tags : [];
-  if (ruleId != null && immutable != null) {
-    return [
-      ...defaultedTags,
+export const addTags = (tags: string[], ruleId: string, immutable: boolean): string[] => {
+  return Array.from(
+    new Set([
+      ...tags,
       `${INTERNAL_RULE_ID_KEY}:${ruleId}`,
       `${INTERNAL_IMMUTABLE_KEY}:${immutable}`,
-    ];
-  } else if (ruleId != null && immutable == null) {
-    return [...defaultedTags, `${INTERNAL_RULE_ID_KEY}:${ruleId}`];
-  } else if (ruleId == null && immutable != null) {
-    return [...defaultedTags, `${INTERNAL_IMMUTABLE_KEY}:${immutable}`];
-  } else {
-    return defaultedTags;
-  }
+    ])
+  );
 };

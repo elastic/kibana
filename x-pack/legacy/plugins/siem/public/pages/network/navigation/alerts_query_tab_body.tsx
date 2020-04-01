@@ -6,11 +6,11 @@
 
 import React from 'react';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { AlertsView } from '../../../components/alerts_viewer';
 import { NetworkComponentQueryProps } from './types';
 
-export const filterAlertsNetwork: esFilters.Filter[] = [
+export const filterNetworkData: Filter[] = [
   {
     query: {
       bool: {
@@ -62,7 +62,7 @@ export const filterAlertsNetwork: esFilters.Filter[] = [
 ];
 
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
-  <AlertsView {...alertsProps} pageFilters={filterAlertsNetwork} />
+  <AlertsView {...alertsProps} pageFilters={filterNetworkData} />
 ));
 
 NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

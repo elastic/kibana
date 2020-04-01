@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Type } from '@kbn/config-schema';
 import pkg from '../../../../package.json';
 
 export const createTestEntryTemplate = defaultUiSettings => bundle => `
@@ -78,12 +78,23 @@ const coreSystem = new CoreSystem({
     buildNumber: 1234,
     legacyMode: true,
     legacyMetadata: {
+      app: {
+        id: 'karma',
+        title: 'Karma',
+      },
       nav: [],
       version: '1.2.3',
       buildNum: 1234,
       devMode: true,
       uiSettings: {
-        defaults: ${JSON.stringify(defaultUiSettings, null, 2)
+        defaults: ${JSON.stringify(
+          defaultUiSettings,
+          (key, value) => {
+            if (value instanceof Type) return null;
+            return value;
+          },
+          2
+        )
           .split('\n')
           .join('\n    ')},
         user: {}

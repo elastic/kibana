@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UserAgent } from '../../../../typings/es_schemas/raw/fields/UserAgent';
+import { UserAgent } from '../../../../../../../plugins/apm/typings/es_schemas/raw/fields/user_agent';
 
 type UserAgentSummaryItemProps = UserAgent;
 

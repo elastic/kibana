@@ -45,6 +45,7 @@ jest.mock('moment-timezone', () => {
   // timezone in all tests.
   const moment = jest.requireActual('moment-timezone');
   moment.tz.guess = () => 'America/New_York';
+  moment.tz.setDefault('America/New_York');
   return moment;
 });
 

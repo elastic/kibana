@@ -34,5 +34,5 @@ export const serializeToJson: Serializer = (messages, formats = i18n.formats) =>
     }
   }
 
-  return JSON.stringify(resultJsonObject, undefined, 2);
+  return JSON.stringify(resultJsonObject, undefined, 2).concat('\n');
 };

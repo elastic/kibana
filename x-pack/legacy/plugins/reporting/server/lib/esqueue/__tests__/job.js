@@ -79,7 +79,7 @@ describe('Job Class', function() {
     beforeEach(function() {
       type = 'type1';
       payload = { id: '123' };
-      indexSpy = sinon.spy(client, 'callWithInternalUser').withArgs('index');
+      indexSpy = sinon.spy(client, 'callAsInternalUser').withArgs('index');
     });
 
     it('should create the target index', function() {
@@ -121,7 +121,7 @@ describe('Job Class', function() {
     });
 
     it('should refresh the index', function() {
-      const refreshSpy = client.callWithInternalUser.withArgs('indices.refresh');
+      const refreshSpy = client.callAsInternalUser.withArgs('indices.refresh');
 
       const job = new Job(mockQueue, index, type, payload);
       return job.ready.then(() => {
@@ -165,9 +165,9 @@ describe('Job Class', function() {
     it('should emit error on client index failure', function(done) {
       const errMsg = 'test document index failure';
 
-      client.callWithInternalUser.restore();
+      client.callAsInternalUser.restore();
       sinon
-        .stub(client, 'callWithInternalUser')
+        .stub(client, 'callAsInternalUser')
         .withArgs('index')
         .callsFake(() => Promise.reject(new Error(errMsg)));
       const job = new Job(mockQueue, index, type, payload);
@@ -215,7 +215,7 @@ describe('Job Class', function() {
     beforeEach(function() {
       type = 'type1';
       payload = { id: '123' };
-      indexSpy = sinon.spy(client, 'callWithInternalUser').withArgs('index');
+      indexSpy = sinon.spy(client, 'callAsInternalUser').withArgs('index');
     });
 
     it('should set attempt count to 0', function() {
@@ -281,7 +281,7 @@ describe('Job Class', function() {
           authorization: 'Basic cXdlcnR5',
         },
       };
-      indexSpy = sinon.spy(client, 'callWithInternalUser').withArgs('index');
+      indexSpy = sinon.spy(client, 'callAsInternalUser').withArgs('index');
     });
 
     it('should index the created_by value', function() {
@@ -367,10 +367,10 @@ describe('Job Class', function() {
       };
 
       const job = new Job(mockQueue, index, type, payload, optionals);
-      return Promise.resolve(client.callWithInternalUser('get', {}, optionals))
+      return Promise.resolve(client.callAsInternalUser('get', {}, optionals))
         .then(doc => {
           sinon
-            .stub(client, 'callWithInternalUser')
+            .stub(client, 'callAsInternalUser')
             .withArgs('get')
             .returns(Promise.resolve(doc));
         })

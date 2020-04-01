@@ -17,13 +17,8 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export {
-  ToolingLog,
-  ToolingLogTextWriter,
-  pickLevelFromFlags,
-  ToolingLogCollectingWriter,
-} from './tooling_log';
+export { withProcRunner, ProcRunner } from './proc_runner';
+export * from './tooling_log';
 export { createAbsolutePathSerializer } from './serializers';
 export {
   CA_CERT_PATH,

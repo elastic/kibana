@@ -11,7 +11,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle',
 });
 
 export const SIGNALS_TABLE_TITLE = i18n.translate('xpack.siem.detectionEngine.signals.tableTitle', {
-  defaultMessage: 'All signals',
+  defaultMessage: 'Signals',
 });
 
 export const SIGNALS_DOCUMENT_TYPE = i18n.translate(
@@ -53,6 +53,13 @@ export const SIGNALS_HEADERS_RULE = i18n.translate(
   }
 );
 
+export const SIGNALS_HEADERS_VERSION = i18n.translate(
+  'xpack.siem.eventsViewer.signals.defaultHeaders.versionTitle',
+  {
+    defaultMessage: 'Version',
+  }
+);
+
 export const SIGNALS_HEADERS_METHOD = i18n.translate(
   'xpack.siem.eventsViewer.signals.defaultHeaders.methodTitle',
   {
@@ -88,9 +95,9 @@ export const ACTION_CLOSE_SIGNAL = i18n.translate(
   }
 );
 
-export const ACTION_VIEW_IN_TIMELINE = i18n.translate(
-  'xpack.siem.detectionEngine.signals.actions.viewInTimelineTitle',
+export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.siem.detectionEngine.signals.actions.investigateInTimelineTitle',
   {
-    defaultMessage: 'View in timeline',
+    defaultMessage: 'Investigate in timeline',
   }
 );

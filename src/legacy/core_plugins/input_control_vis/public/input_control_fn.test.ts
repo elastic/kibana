@@ -20,12 +20,12 @@
 import { createInputControlVisFn } from './input_control_fn';
 
 // eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 
 jest.mock('./legacy_imports.ts');
 
 describe('interpreter/functions#input_control_vis', () => {
-  const fn = functionWrapper(createInputControlVisFn);
+  const fn = functionWrapper(createInputControlVisFn());
   const visConfig = {
     controls: [
       {

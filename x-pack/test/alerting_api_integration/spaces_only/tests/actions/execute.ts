@@ -66,7 +66,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.be.an('object');
       const searchResult = await esTestIndexTool.search('action:test.index-record', reference);
       expect(searchResult.hits.total.value).to.eql(1);
@@ -85,6 +85,38 @@ export default function({ getService }: FtrProviderContext) {
         },
         reference,
         source: 'action:test.index-record',
+      });
+    });
+
+    it('should handle failed executions', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'failing action',
+          actionTypeId: 'test.failing',
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+
+      const reference = `actions-failure-1:${Spaces.space1.id}`;
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action/${createdAction.id}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            reference,
+            index: ES_TEST_INDEX_NAME,
+          },
+        });
+
+      expect(response.status).to.eql(200);
+      expect(response.body).to.eql({
+        actionId: createdAction.id,
+        status: 'error',
+        message: 'an error occurred while running the action executor',
+        serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
+        retry: false,
       });
     });
 
@@ -148,7 +180,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       const searchResult = await esTestIndexTool.search('action:test.authorization', reference);
       expect(searchResult.hits.total.value).to.eql(1);
       const indexedRecord = searchResult.hits.hits[0];

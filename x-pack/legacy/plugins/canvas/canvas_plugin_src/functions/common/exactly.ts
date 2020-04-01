@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter, ExpressionFunction } from '../../../types';
+import { Filter, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -13,7 +13,7 @@ interface Arguments {
   filterGroup: string;
 }
 
-export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filter> {
+export function exactly(): ExpressionFunctionDefinition<'exactly', Filter, Arguments, Filter> {
   const { help, args: argHelp } = getFunctionHelp().exactly;
 
   return {
@@ -21,9 +21,7 @@ export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filt
     aliases: [],
     type: 'filter',
     help,
-    context: {
-      types: ['filter'],
-    },
+    inputTypes: ['filter'],
     args: {
       column: {
         types: ['string'],
@@ -42,7 +40,7 @@ export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filt
         help: argHelp.filterGroup,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { value, column } = args;
 
       const filter = {
@@ -52,7 +50,7 @@ export function exactly(): ExpressionFunction<'exactly', Filter, Arguments, Filt
         and: [],
       };
 
-      return { ...context, and: [...context.and, filter] };
+      return { ...input, and: [...input.and, filter] };
     },
   };
 }

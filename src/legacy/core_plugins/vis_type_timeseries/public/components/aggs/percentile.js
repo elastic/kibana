@@ -18,8 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import _ from 'lodash';
+import React, { useEffect } from 'react';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
@@ -39,82 +38,78 @@ import { Percentiles, newPercentile } from './percentile_ui';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 
-export class PercentileAgg extends Component {
-  // eslint-disable-line react/no-multi-comp
+const checkModel = model => Array.isArray(model.percentiles);
 
-  UNSAFE_componentWillMount() {
-    if (!this.props.model.percentiles) {
-      this.props.onChange(
-        _.assign({}, this.props.model, {
-          percentiles: [newPercentile({ value: 50 })],
-        })
-      );
+export function PercentileAgg(props) {
+  const { series, model, panel, fields } = props;
+  const htmlId = htmlIdGenerator();
+
+  const handleChange = createChangeHandler(props.onChange, model);
+  const handleSelectChange = createSelectHandler(handleChange);
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+
+  useEffect(() => {
+    if (!checkModel(model)) {
+      handleChange({
+        percentiles: [newPercentile({ value: 50 })],
+      });
     }
-  }
+  }, [handleChange, model]);
 
-  render() {
-    const { series, model, panel, fields } = this.props;
-
-    const handleChange = createChangeHandler(this.props.onChange, model);
-    const handleSelectChange = createSelectHandler(handleChange);
-    const indexPattern =
-      (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
-    const htmlId = htmlIdGenerator();
-
-    return (
-      <AggRow
-        disableDelete={this.props.disableDelete}
-        model={this.props.model}
-        onAdd={this.props.onAdd}
-        onDelete={this.props.onDelete}
-        siblings={this.props.siblings}
-        dragHandleProps={this.props.dragHandleProps}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiFormLabel htmlFor={htmlId('aggregation')}>
-              <FormattedMessage
-                id="visTypeTimeseries.percentile.aggregationLabel"
-                defaultMessage="Aggregation"
-              />
-            </EuiFormLabel>
-            <EuiSpacer size="xs" />
-            <AggSelect
-              id={htmlId('aggregation')}
-              panelType={this.props.panel.type}
-              siblings={this.props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
+  return (
+    <AggRow
+      disableDelete={props.disableDelete}
+      model={props.model}
+      onAdd={props.onAdd}
+      onDelete={props.onDelete}
+      siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
+    >
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="visTypeTimeseries.percentile.aggregationLabel"
+              defaultMessage="Aggregation"
             />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              id={htmlId('field')}
-              label={
-                <FormattedMessage
-                  id="visTypeTimeseries.percentile.fieldLabel"
-                  defaultMessage="Field"
-                />
-              }
-            >
-              <FieldSelect
-                fields={fields}
-                type={model.type}
-                restrict={RESTRICT_FIELDS}
-                indexPattern={indexPattern}
-                value={model.field}
-                onChange={handleSelectChange('field')}
+          </EuiFormLabel>
+          <EuiSpacer size="xs" />
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('field')}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.percentile.fieldLabel"
+                defaultMessage="Field"
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            }
+          >
+            <FieldSelect
+              fields={fields}
+              type={model.type}
+              restrict={RESTRICT_FIELDS}
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-        <Percentiles onChange={handleChange} name="percentiles" model={model} panel={panel} />
-      </AggRow>
-    );
-  }
+      <Percentiles onChange={handleChange} name="percentiles" model={model} panel={panel} />
+    </AggRow>
+  );
 }
 
 PercentileAgg.propTypes = {

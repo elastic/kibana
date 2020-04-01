@@ -22,5 +22,4 @@ export {
   FeatureCatalogueEntry,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
-  FeatureCatalogueRegistryStart,
 } from './feature_catalogue_registry';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createStateContainer, PureTransition } from '../../public/state_containers';
+import { createStateContainer, PureTransition } from '../../common/state_containers';
 
 export interface TodoItem {
   text: string;

@@ -43,7 +43,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
   }
   initialPageSize={25}
   initialSortDirection="desc"
-  initialSortField="latestOccurrenceAt"
+  initialSortField="occurrenceCount"
   items={Array []}
   noItemsMessage="No errors were found"
   sortItems={false}
@@ -91,16 +91,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                       <span
                         className="euiButtonEmpty__content"
                       >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
+                        <div
+                          aria-hidden="true"
+                          className="euiButtonEmpty__icon"
+                          data-euiicon-type="arrowDown"
+                          size="m"
                         />
                         <span
                           className="euiButtonEmpty__text"
@@ -120,10 +115,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         className="euiTable euiTable--responsive"
       >
         <caption
-          aria-live="polite"
-          aria-relevant="text"
           className="euiScreenReaderOnly euiTableCaption"
-          role="status"
         />
         <thead>
           <tr>
@@ -169,7 +161,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 </span>
               </div>
             </th>
-            <th
+            <td
               className="euiTableHeaderCell"
               data-test-subj="tableHeaderCell_handled_2"
               role="columnheader"
@@ -187,47 +179,12 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   className="euiTableCellContent__text"
                 />
               </div>
-            </th>
-            <th
-              aria-live="polite"
-              aria-sort="none"
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_occurrenceCount_3"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <button
-                className="euiTableHeaderButton"
-                data-test-subj="tableHeaderSortButton"
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiTableCellContent euiTableCellContent--alignRight"
-                >
-                  <span
-                    className="euiTableCellContent__text"
-                  >
-                    Occurrences
-                  </span>
-                  <span
-                    className="euiScreenReaderOnly"
-                  >
-                    Click to sort in ascending order
-                  </span>
-                </span>
-              </button>
-            </th>
+            </td>
             <th
               aria-live="polite"
               aria-sort="descending"
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+              data-test-subj="tableHeaderCell_occurrenceCount_3"
               role="columnheader"
               scope="col"
               style={
@@ -248,20 +205,49 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   <span
                     className="euiTableCellContent__text"
                   >
+                    Occurrences
+                  </span>
+                  <div
+                    aria-label="Sorted in descending order"
+                    className="euiTableSortIcon"
+                    data-euiicon-type="sortDown"
+                    size="m"
+                  />
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    Click to sort in ascending order
+                  </span>
+                </span>
+              </button>
+            </th>
+            <th
+              aria-live="polite"
+              aria-sort="none"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent euiTableCellContent--alignRight"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
                     Latest occurrence
                   </span>
-                  <svg
-                    aria-hidden={true}
-                    aria-label="Sorted in descending order"
-                    className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  />
                   <span
                     className="euiScreenReaderOnly"
                   >
@@ -305,7 +291,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
 
 exports[`ErrorGroupOverview -> List should render with data 1`] = `
 .c0 {
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
 }
 
 .c1 {
@@ -316,7 +302,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
 }
 
 .c2 {
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
   font-size: 16px;
   max-width: 100%;
   white-space: nowrap;
@@ -325,7 +311,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
 }
 
 .c3 {
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
 }
 
 <Memo(UnoptimizedManagedTable)
@@ -370,7 +356,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
   }
   initialPageSize={25}
   initialSortDirection="desc"
-  initialSortField="latestOccurrenceAt"
+  initialSortField="occurrenceCount"
   items={
     Array [
       Object {
@@ -449,16 +435,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                       <span
                         className="euiButtonEmpty__content"
                       >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
+                        <div
+                          aria-hidden="true"
+                          className="euiButtonEmpty__icon"
+                          data-euiicon-type="arrowDown"
+                          size="m"
                         />
                         <span
                           className="euiButtonEmpty__text"
@@ -478,10 +459,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         className="euiTable euiTable--responsive"
       >
         <caption
-          aria-live="polite"
-          aria-relevant="text"
           className="euiScreenReaderOnly euiTableCaption"
-          role="status"
         />
         <thead>
           <tr>
@@ -527,7 +505,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 </span>
               </div>
             </th>
-            <th
+            <td
               className="euiTableHeaderCell"
               data-test-subj="tableHeaderCell_handled_2"
               role="columnheader"
@@ -545,47 +523,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className="euiTableCellContent__text"
                 />
               </div>
-            </th>
-            <th
-              aria-live="polite"
-              aria-sort="none"
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_occurrenceCount_3"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <button
-                className="euiTableHeaderButton"
-                data-test-subj="tableHeaderSortButton"
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiTableCellContent euiTableCellContent--alignRight"
-                >
-                  <span
-                    className="euiTableCellContent__text"
-                  >
-                    Occurrences
-                  </span>
-                  <span
-                    className="euiScreenReaderOnly"
-                  >
-                    Click to sort in ascending order
-                  </span>
-                </span>
-              </button>
-            </th>
+            </td>
             <th
               aria-live="polite"
               aria-sort="descending"
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+              data-test-subj="tableHeaderCell_occurrenceCount_3"
               role="columnheader"
               scope="col"
               style={
@@ -606,20 +549,49 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <span
                     className="euiTableCellContent__text"
                   >
+                    Occurrences
+                  </span>
+                  <div
+                    aria-label="Sorted in descending order"
+                    className="euiTableSortIcon"
+                    data-euiicon-type="sortDown"
+                    size="m"
+                  />
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    Click to sort in ascending order
+                  </span>
+                </span>
+              </button>
+            </th>
+            <th
+              aria-live="polite"
+              aria-sort="none"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent euiTableCellContent--alignRight"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
                     Latest occurrence
                   </span>
-                  <svg
-                    aria-hidden={true}
-                    aria-label="Sorted in descending order"
-                    className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  />
                   <span
                     className="euiScreenReaderOnly"
                   >
@@ -1344,16 +1316,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  height={16}
-                  role="img"
-                  style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  data-euiicon-type="arrowLeft"
+                  size="m"
                 />
               </button>
               <button
@@ -1381,16 +1348,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                  focusable="false"
-                  height={16}
-                  role="img"
-                  style={null}
-                  viewBox="0 0 16 16"
-                  width={16}
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  data-euiicon-type="arrowRight"
+                  size="m"
                 />
               </button>
             </div>

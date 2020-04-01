@@ -5,14 +5,12 @@
  */
 
 import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
-import { Subject } from 'rxjs';
 
 export const taskManagerMock = {
   setup(overrides: Partial<jest.Mocked<TaskManagerSetupContract>> = {}) {
     const mocked: jest.Mocked<TaskManagerSetupContract> = {
       registerTaskDefinitions: jest.fn(),
       addMiddleware: jest.fn(),
-      config$: new Subject(),
       registerLegacyAPI: jest.fn(),
       ...overrides,
     };
@@ -23,6 +21,7 @@ export const taskManagerMock = {
       ensureScheduled: jest.fn(),
       schedule: jest.fn(),
       fetch: jest.fn(),
+      get: jest.fn(),
       runNow: jest.fn(),
       remove: jest.fn(),
       ...overrides,

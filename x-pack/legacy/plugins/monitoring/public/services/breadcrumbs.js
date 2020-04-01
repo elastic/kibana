@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
+import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import { breadcrumbsProvider } from './breadcrumbs_provider';
 const uiModule = uiModules.get('monitoring/breadcrumbs', []);
 uiModule.service('breadcrumbs', breadcrumbsProvider);

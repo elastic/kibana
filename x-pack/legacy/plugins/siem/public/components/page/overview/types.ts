@@ -28,7 +28,8 @@ export type OverviewStatId =
   | 'packetbeatDNS'
   | 'packetbeatFlow'
   | 'packetbeatTLS'
-  | 'winlogbeat';
+  | 'winlogbeatSecurity'
+  | 'winlogbeatMWSysmonOperational';
 
 export interface FormattedStat {
   count: number;

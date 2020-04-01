@@ -27,9 +27,12 @@ import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import { SavedObjectsErrorHelpers } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
-import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
-import { SavedObjectsSerializer, SanitizedSavedObjectDoc, RawDoc } from '../../serialization';
+import {
+  SavedObjectsSerializer,
+  SavedObjectSanitizedDoc,
+  SavedObjectsRawDoc,
+} from '../../serialization';
 import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -45,14 +48,13 @@ import {
 } from '../saved_objects_client';
 import {
   SavedObject,
-  SavedObjectAttributes,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
   MutatingOperationRefreshSetting,
 } from '../../types';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { LegacyConfig } from '../../../legacy';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -75,11 +77,9 @@ const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
-  /** @deprecated Will be removed once SavedObjectsSchema is exposed from Core */
-  config: LegacyConfig;
   mappings: IndexMapping;
   callCluster: APICaller;
-  schema: SavedObjectsSchema;
+  typeRegistry: SavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
   allowedTypes: string[];
@@ -118,9 +118,8 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
   private _index: string;
-  private _config: LegacyConfig;
   private _mappings: IndexMapping;
-  private _schema: SavedObjectsSchema;
+  private _registry: SavedObjectTypeRegistry;
   private _allowedTypes: string[];
   private _unwrappedCallCluster: APICaller;
   private _serializer: SavedObjectsSerializer;
@@ -135,8 +134,7 @@ export class SavedObjectsRepository {
    */
   public static createRepository(
     migrator: KibanaMigrator,
-    schema: SavedObjectsSchema,
-    config: LegacyConfig,
+    typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
     callCluster: APICaller,
     extraTypes: string[] = [],
@@ -144,8 +142,8 @@ export class SavedObjectsRepository {
   ): ISavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
     const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-    const serializer = new SavedObjectsSerializer(schema);
-    const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
+    const serializer = new SavedObjectsSerializer(typeRegistry);
+    const visibleTypes = allTypes.filter(type => !typeRegistry.isHidden(type));
 
     const missingTypeMappings = extraTypes.filter(type => !allTypes.includes(type));
     if (missingTypeMappings.length > 0) {
@@ -158,10 +156,9 @@ export class SavedObjectsRepository {
 
     return new injectedConstructor({
       index: indexName,
-      config,
       migrator,
       mappings,
-      schema,
+      typeRegistry,
       serializer,
       allowedTypes,
       callCluster: retryCallCluster(callCluster),
@@ -171,10 +168,9 @@ export class SavedObjectsRepository {
   private constructor(options: SavedObjectsRepositoryOptions) {
     const {
       index,
-      config,
       mappings,
       callCluster,
-      schema,
+      typeRegistry,
       serializer,
       migrator,
       allowedTypes = [],
@@ -189,9 +185,8 @@ export class SavedObjectsRepository {
     // to returning them.
     this._migrator = migrator;
     this._index = index;
-    this._config = config;
     this._mappings = mappings;
-    this._schema = schema;
+    this._registry = typeRegistry;
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
@@ -201,7 +196,6 @@ export class SavedObjectsRepository {
       await migrator.runMigrations();
       return callCluster(...args);
     };
-    this._schema = schema;
     this._serializer = serializer;
   }
 
@@ -218,7 +212,7 @@ export class SavedObjectsRepository {
    * @property {array} [options.references=[]] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
    */
-  public async create<T extends SavedObjectAttributes>(
+  public async create<T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -250,7 +244,7 @@ export class SavedObjectsRepository {
         references,
       });
 
-      const raw = this._serializer.savedObjectToRaw(migrated as SanitizedSavedObjectDoc);
+      const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
@@ -259,7 +253,7 @@ export class SavedObjectsRepository {
         body: raw._source,
       });
 
-      return this._rawToSavedObject({
+      return this._rawToSavedObject<T>({
         ...raw,
         ...response,
       });
@@ -282,7 +276,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
-  async bulkCreate<T extends SavedObjectAttributes = any>(
+  async bulkCreate<T = unknown>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -316,7 +310,7 @@ export class SavedObjectsRepository {
             namespace,
             updated_at: time,
             references: object.references || [],
-          }) as SanitizedSavedObjectDoc
+          }) as SavedObjectSanitizedDoc
         ),
       };
 
@@ -435,7 +429,7 @@ export class SavedObjectsRepository {
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
-    const typesToDelete = allTypes.filter(type => !this._schema.isNamespaceAgnostic(type));
+    const typesToDelete = allTypes.filter(type => !this._registry.isNamespaceAgnostic(type));
 
     const esOptions = {
       index: this.getIndicesForTypes(typesToDelete),
@@ -443,7 +437,7 @@ export class SavedObjectsRepository {
       refresh,
       body: {
         conflicts: 'proceed',
-        ...getSearchDsl(this._mappings, this._schema, {
+        ...getSearchDsl(this._mappings, this._registry, {
           namespace,
           type: typesToDelete,
         }),
@@ -469,7 +463,7 @@ export class SavedObjectsRepository {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find<T extends SavedObjectAttributes = any>({
+  async find<T = unknown>({
     search,
     defaultSearchOperator = 'OR',
     searchFields,
@@ -531,7 +525,7 @@ export class SavedObjectsRepository {
       rest_total_hits_as_int: true,
       body: {
         seq_no_primary_term: true,
-        ...getSearchDsl(this._mappings, this._schema, {
+        ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
           searchFields,
@@ -562,7 +556,9 @@ export class SavedObjectsRepository {
       page,
       per_page: perPage,
       total: response.hits.total,
-      saved_objects: response.hits.hits.map((hit: RawDoc) => this._rawToSavedObject(hit)),
+      saved_objects: response.hits.hits.map((hit: SavedObjectsRawDoc) =>
+        this._rawToSavedObject(hit)
+      ),
     };
   }
 
@@ -580,7 +576,7 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet<T extends SavedObjectAttributes = any>(
+  async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -651,7 +647,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get<T extends SavedObjectAttributes = any>(
+  async get<T = unknown>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -699,7 +695,7 @@ export class SavedObjectsRepository {
    * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise}
    */
-  async update<T extends SavedObjectAttributes = any>(
+  async update<T = unknown>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -756,7 +752,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
-  async bulkUpdate<T extends SavedObjectAttributes = any>(
+  async bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
@@ -890,7 +886,7 @@ export class SavedObjectsRepository {
       updated_at: time,
     });
 
-    const raw = this._serializer.savedObjectToRaw(migrated as SanitizedSavedObjectDoc);
+    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
@@ -952,7 +948,7 @@ export class SavedObjectsRepository {
    * @param type - the type
    */
   private getIndexForType(type: string) {
-    return this._schema.getIndexForType(this._config, type) || this._index;
+    return this._registry.getIndex(type) || this._index;
   }
 
   /**
@@ -964,7 +960,7 @@ export class SavedObjectsRepository {
    */
   private getIndicesForTypes(types: string[]) {
     const unique = (array: string[]) => [...new Set(array)];
-    return unique(types.map(t => this._schema.getIndexForType(this._config, t) || this._index));
+    return unique(types.map(t => this.getIndexForType(t)));
   }
 
   private _getCurrentTime() {
@@ -975,7 +971,7 @@ export class SavedObjectsRepository {
   // includes the namespace, and we use this for migrating documents. However, we don't
   // want the namespace to be returned from the repository, as the repository scopes each
   // method transparently to the specified namespace.
-  private _rawToSavedObject(raw: RawDoc): SavedObject {
+  private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
   }

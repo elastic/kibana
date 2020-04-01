@@ -6,22 +6,19 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { compose } from 'redux';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
 import { AlertsByCategory } from './alerts_by_category';
 import { FiltersGlobal } from '../../components/filters_global';
-import { HeaderPage } from '../../components/header_page';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
 import { GlobalTime } from '../../containers/global_time';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { EventsByDataset } from './events_by_dataset';
 import { EventCounts } from './event_counts';
-import { SetAbsoluteRangeDatePicker } from '../network/types';
 import { OverviewEmpty } from './overview_empty';
 import { StatefulSidebar } from './sidebar';
 import { SignalsByCategory } from './signals_by_category';
@@ -29,80 +26,38 @@ import { inputsSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
-import * as i18n from './translations';
-
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const NO_FILTERS: esFilters.Filter[] = [];
+const NO_FILTERS: Filter[] = [];
+
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
 `;
 
-interface OverviewComponentReduxProps {
-  query?: Query;
-  filters?: esFilters.Filter[];
-  setAbsoluteRangeDatePicker?: SetAbsoluteRangeDatePicker;
-}
+const OverviewComponent: React.FC<PropsFromRedux> = ({
+  filters = NO_FILTERS,
+  query = DEFAULT_QUERY,
+  setAbsoluteRangeDatePicker,
+}) => (
+  <>
+    <WithSource sourceId="default">
+      {({ indicesExist, indexPattern }) =>
+        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+          <StickyContainer>
+            <FiltersGlobal>
+              <SiemSearchBar id="global" indexPattern={indexPattern} />
+            </FiltersGlobal>
 
-const OverviewComponent = React.memo<OverviewComponentReduxProps>(
-  ({ filters = NO_FILTERS, query = DEFAULT_QUERY, setAbsoluteRangeDatePicker }) => (
-    <>
-      <WithSource sourceId="default">
-        {({ indicesExist, indexPattern }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <StickyContainer>
-              <FiltersGlobal>
-                <SiemSearchBar id="global" indexPattern={indexPattern} />
-              </FiltersGlobal>
+            <WrapperPage>
+              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                <SidebarFlexItem grow={false}>
+                  <StatefulSidebar />
+                </SidebarFlexItem>
 
-              <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
-
-                <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-                  <SidebarFlexItem grow={false}>
-                    <StatefulSidebar />
-                  </SidebarFlexItem>
-
-                  <EuiFlexItem grow={true}>
-                    <GlobalTime>
-                      {({ from, deleteQuery, setQuery, to }) => (
-                        <>
-                          <EventsByDataset
-                            deleteQuery={deleteQuery}
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-
-                          <EuiSpacer size="l" />
-
-                          <EventCounts
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-
-                          <EuiSpacer size="l" />
-
-                          <AlertsByCategory
-                            deleteQuery={deleteQuery}
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-
-                          <EuiSpacer size="l" />
-
+                <EuiFlexItem grow={true}>
+                  <GlobalTime>
+                    {({ from, deleteQuery, setQuery, to }) => (
+                      <EuiFlexGroup direction="column" gutterSize="none">
+                        <EuiFlexItem grow={false}>
                           <SignalsByCategory
                             filters={filters}
                             from={from}
@@ -112,31 +67,65 @@ const OverviewComponent = React.memo<OverviewComponentReduxProps>(
                             setQuery={setQuery}
                             to={to}
                           />
-                        </>
-                      )}
-                    </GlobalTime>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </WrapperPage>
-            </StickyContainer>
-          ) : (
-            <OverviewEmpty />
-          )
-        }
-      </WithSource>
+                          <EuiSpacer size="l" />
+                        </EuiFlexItem>
 
-      <SpyRoute />
-    </>
-  )
+                        <EuiFlexItem grow={false}>
+                          <AlertsByCategory
+                            deleteQuery={deleteQuery}
+                            filters={filters}
+                            from={from}
+                            indexPattern={indexPattern}
+                            query={query}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <EventsByDataset
+                            deleteQuery={deleteQuery}
+                            filters={filters}
+                            from={from}
+                            indexPattern={indexPattern}
+                            query={query}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <EventCounts
+                            filters={filters}
+                            from={from}
+                            indexPattern={indexPattern}
+                            query={query}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )}
+                  </GlobalTime>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </WrapperPage>
+          </StickyContainer>
+        ) : (
+          <OverviewEmpty />
+        )
+      }
+    </WithSource>
+
+    <SpyRoute />
+  </>
 );
-
-OverviewComponent.displayName = 'OverviewComponent';
 
 const makeMapStateToProps = () => {
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
 
-  const mapStateToProps = (state: State): OverviewComponentReduxProps => ({
+  const mapStateToProps = (state: State) => ({
     query: getGlobalQuerySelector(state),
     filters: getGlobalFiltersQuerySelector(state),
   });
@@ -144,6 +133,10 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulOverview = compose<React.ComponentClass<OverviewComponentReduxProps>>(
-  connect(makeMapStateToProps, { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker })
-)(OverviewComponent);
+const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker };
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulOverview = connector(React.memo(OverviewComponent));

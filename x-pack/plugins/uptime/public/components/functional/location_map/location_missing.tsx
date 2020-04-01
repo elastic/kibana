@@ -14,8 +14,14 @@ import {
   EuiText,
   EuiCode,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LocationLink } from '../monitor_list/monitor_list_drawer';
+
+const EuiPopoverRight = styled(EuiFlexItem)`
+  margin-left: auto;
+  margin-bottom: 3px;
+`;
 
 export const LocationMissingWarning = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -26,13 +32,20 @@ export const LocationMissingWarning = () => {
 
   const button = (
     <EuiButton iconType="alert" size="s" color="warning" onClick={togglePopover}>
-      Geo Information Missing
+      <FormattedMessage
+        id="xpack.uptime.locationMap.locations.missing.title"
+        defaultMessage="Geo Information Missing"
+      />
     </EuiButton>
   );
 
   return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={false} style={{ marginLeft: 'auto', marginRight: 20 }}>
+    <EuiFlexGroup
+      data-test-subj="xpack.uptime.locationMap.locationMissing"
+      gutterSize="none"
+      responsive={false}
+    >
+      <EuiPopoverRight grow={false}>
         <EuiPopover
           id="popover"
           button={button}
@@ -58,7 +71,7 @@ export const LocationMissingWarning = () => {
             <LocationLink />
           </EuiText>
         </EuiPopover>
-      </EuiFlexItem>
+      </EuiPopoverRight>
     </EuiFlexGroup>
   );
 };

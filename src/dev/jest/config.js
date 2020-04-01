@@ -49,15 +49,16 @@ export default {
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
     'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
-    'src/legacy/ui/public/{agg_types,vis}/**/*.{ts,tsx}',
-    '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
+    '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
+    '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^plugins/([^/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
+    '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
@@ -67,7 +68,10 @@ export default {
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
   ],
-  setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/mocks.js'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/dev/jest/setup/mocks.js',
+    '<rootDir>/src/dev/jest/setup/react_testing_library.js',
+  ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
   moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
@@ -84,9 +88,9 @@ export default {
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    // ignore all node_modules except @elastic/eui and monaco-editor which both require babel transforms to handle dynamic import()
+    // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
   snapshotSerializers: [

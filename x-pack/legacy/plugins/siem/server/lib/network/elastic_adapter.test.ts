@@ -35,7 +35,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
       getIndexPatternsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
@@ -61,7 +60,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
@@ -101,7 +99,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     ].buckets[0].location.top_geo.hits.hits = [];
     mockCallWithRequest.mockResolvedValue(mockNoGeoDataResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
       getIndexPatternsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
@@ -132,7 +129,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockNoPaginationResponse);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
@@ -155,7 +151,6 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockResponseIp);
     const mockFramework: FrameworkAdapter = {
-      version: 'mock',
       callWithRequest: mockCallWithRequest,
       getIndexPatternsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),

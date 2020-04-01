@@ -28,6 +28,7 @@ import * as UiSharedDeps from '@kbn/ui-shared-deps';
 function generateDLL(config) {
   const {
     dllAlias,
+    dllValidateSyntax,
     dllNoParseRules,
     dllContext,
     dllEntry,
@@ -44,10 +45,27 @@ function generateDLL(config) {
   const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
   const BABEL_EXCLUDE_RE = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
+  /**
+   * Wrap plugin loading in a function so that we can require
+   * `@kbn/optimizer` only when absolutely necessary since we
+   * don't ship this package in the distributable but this code
+   * is still shipped, though it's not used.
+   */
+  const getValidateSyntaxPlugins = () => {
+    if (!dllValidateSyntax) {
+      return [];
+    }
+
+    // only require @kbn/optimizer
+    const { DisallowedSyntaxPlugin } = require('@kbn/optimizer');
+    return [new DisallowedSyntaxPlugin()];
+  };
+
   return {
     entry: dllEntry,
     context: dllContext,
     output: {
+      futureEmitAssets: true, // TODO: remove on webpack 5
       filename: dllBundleFilename,
       path: dllOutputPath,
       publicPath: dllPublicPath,
@@ -139,6 +157,7 @@ function generateDLL(config) {
       new MiniCssExtractPlugin({
         filename: dllStyleFilename,
       }),
+      ...getValidateSyntaxPlugins(),
     ],
     // Single runtime for the dll bundles which assures that common transient dependencies won't be evaluated twice.
     // The module cache will be shared, even when module code may be duplicated across chunks.
@@ -162,6 +181,7 @@ function generateDLL(config) {
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
   const dllAlias = rawConfig.uiBundles.getAliases();
+  const dllValidateSyntax = rawConfig.uiBundles.shouldValidateSyntaxOfNodeModules();
   const dllNoParseRules = rawConfig.uiBundles.getWebpackNoParseRules();
   const dllDevMode = rawConfig.uiBundles.isDevMode();
   const dllContext = rawConfig.context;
@@ -194,6 +214,7 @@ function extendRawConfig(rawConfig) {
   // Export dll config map
   return {
     dllAlias,
+    dllValidateSyntax,
     dllNoParseRules,
     dllDevMode,
     dllContext,
@@ -213,50 +234,25 @@ function common(config) {
   return webpackMerge(generateDLL(config));
 }
 
-function optimized(config) {
+function optimized() {
   return webpackMerge({
     mode: 'production',
     optimization: {
       minimizer: [
         new TerserPlugin({
-          // Apply the same logic used to calculate the
-          // threadLoaderPool workers number to spawn
-          // the parallel processes on terser
-          parallel: config.threadLoaderPoolConfig.workers,
+          // NOTE: we should not enable that option for now
+          // Since 2.0.0 terser-webpack-plugin is using jest-worker
+          // to run tasks in a pool of workers. Currently it looks like
+          // is requiring too much memory and break on large entry points
+          // compilations (like this) one. Also the gain we have enabling
+          // that option was barely noticed.
+          // https://github.com/webpack-contrib/terser-webpack-plugin/issues/143
+          parallel: false,
           sourceMap: false,
           cache: false,
           extractComments: false,
           terserOptions: {
-            compress: {
-              // The following is required for dead-code the removal
-              // check in React DevTools
-              //
-              // default
-              unused: true,
-              dead_code: true,
-              conditionals: true,
-              evaluate: true,
-
-              // changed
-              keep_fnames: true,
-              keep_infinity: true,
-              comparisons: false,
-              sequences: false,
-              properties: false,
-              drop_debugger: false,
-              booleans: false,
-              loops: false,
-              toplevel: false,
-              top_retain: false,
-              hoist_funs: false,
-              if_return: false,
-              join_vars: false,
-              collapse_vars: false,
-              reduce_vars: false,
-              warnings: false,
-              negate_iife: false,
-              side_effects: false,
-            },
+            compress: false,
             mangle: false,
           },
         }),
@@ -278,5 +274,5 @@ export function configModel(rawConfig = {}) {
     return webpackMerge(common(config), unoptimized());
   }
 
-  return webpackMerge(common(config), optimized(config));
+  return webpackMerge(common(config), optimized());
 }

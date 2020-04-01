@@ -20,7 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCodeBlock } from '@elastic/eui';
-import { Request } from '../../../../adapters/request/types';
+import { Request } from '../../../../../common/adapters/request/types';
 import { RequestDetailsProps } from '../types';
 
 export class RequestDetailsRequest extends Component<RequestDetailsProps> {

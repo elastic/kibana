@@ -18,20 +18,30 @@
  */
 
 import { createIndexMap } from './build_index_map';
-import { ObjectToConfigAdapter } from '../../../config';
-import { SavedObjectsSchema } from '../../schema';
-import { LegacyConfig } from '../../../legacy';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsType } from '../../types';
 
-const config = (new ObjectToConfigAdapter({}) as unknown) as LegacyConfig;
+const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
+  const registry = new SavedObjectTypeRegistry();
+  types.forEach(type =>
+    registry.registerType({
+      name: 'unknown',
+      namespaceAgnostic: false,
+      hidden: false,
+      mappings: { properties: {} },
+      migrations: {},
+      ...type,
+    })
+  );
+  return registry;
+};
 
 test('mappings without index pattern goes to default index', () => {
   const result = createIndexMap({
-    config,
     kibanaIndexName: '.kibana',
-    schema: new SavedObjectsSchema({
-      type1: {
-        isNamespaceAgnostic: false,
-      },
+    registry: createRegistry({
+      name: 'type1',
+      namespaceAgnostic: false,
     }),
     indexMap: {
       type1: {
@@ -60,13 +70,11 @@ test('mappings without index pattern goes to default index', () => {
 
 test(`mappings with custom index pattern doesn't go to default index`, () => {
   const result = createIndexMap({
-    config,
     kibanaIndexName: '.kibana',
-    schema: new SavedObjectsSchema({
-      type1: {
-        isNamespaceAgnostic: false,
-        indexPattern: '.other_kibana',
-      },
+    registry: createRegistry({
+      name: 'type1',
+      namespaceAgnostic: false,
+      indexPattern: '.other_kibana',
     }),
     indexMap: {
       type1: {
@@ -95,14 +103,12 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
 
 test('creating a script gets added to the index pattern', () => {
   const result = createIndexMap({
-    config,
     kibanaIndexName: '.kibana',
-    schema: new SavedObjectsSchema({
-      type1: {
-        isNamespaceAgnostic: false,
-        indexPattern: '.other_kibana',
-        convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
-      },
+    registry: createRegistry({
+      name: 'type1',
+      namespaceAgnostic: false,
+      indexPattern: '.other_kibana',
+      convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     }),
     indexMap: {
       type1: {
@@ -132,16 +138,19 @@ test('creating a script gets added to the index pattern', () => {
 
 test('throws when two scripts are defined for an index pattern', () => {
   const defaultIndex = '.kibana';
-  const schema = new SavedObjectsSchema({
-    type1: {
-      isNamespaceAgnostic: false,
+  const registry = createRegistry(
+    {
+      name: 'type1',
+      namespaceAgnostic: false,
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     },
-    type2: {
-      isNamespaceAgnostic: false,
+    {
+      name: 'type2',
+      namespaceAgnostic: false,
       convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
-    },
-  });
+    }
+  );
+
   const indexMap = {
     type1: {
       properties: {
@@ -160,9 +169,8 @@ test('throws when two scripts are defined for an index pattern', () => {
   };
   expect(() =>
     createIndexMap({
-      config,
       kibanaIndexName: defaultIndex,
-      schema,
+      registry,
       indexMap,
     })
   ).toThrowErrorMatchingInlineSnapshot(

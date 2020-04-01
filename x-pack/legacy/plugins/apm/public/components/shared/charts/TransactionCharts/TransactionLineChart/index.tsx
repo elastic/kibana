@@ -8,7 +8,7 @@ import React, { useCallback } from 'react';
 import {
   Coordinate,
   RectCoordinate
-} from '../../../../../../typings/timeseries';
+} from '../../../../../../../../../plugins/apm/typings/timeseries';
 import { useChartsSync } from '../../../../../hooks/useChartsSync';
 // @ts-ignore
 import CustomPlot from '../../CustomPlot';

@@ -13,39 +13,16 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../components/detection_engine/utility_bar';
+} from '../../../../components/utility_bar';
 import { columns } from './columns';
-
-export interface RuleTypes {
-  href: string;
-  name: string;
-}
-
-export interface ColumnTypes {
-  id: number;
-  rule: RuleTypes;
-  ran: string;
-  lookedBackTo: string;
-  status: string;
-  response?: string | undefined;
-}
-
-export interface PageTypes {
-  index: number;
-  size: number;
-}
-
-export interface SortTypes {
-  field: keyof ColumnTypes;
-  direction: 'asc' | 'desc';
-}
+import { ColumnTypes, PageTypes, SortTypes } from './types';
 
 export const ActivityMonitor = React.memo(() => {
   const sampleTableData: ColumnTypes[] = [
     {
       id: 1,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -55,7 +32,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 2,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -65,7 +42,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 3,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -76,7 +53,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 4,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -87,7 +64,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 5,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -98,7 +75,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 6,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -109,7 +86,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 7,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -120,7 +97,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 8,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -131,7 +108,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 9,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -142,7 +119,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 10,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -153,7 +130,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 11,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -164,7 +141,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 12,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -175,7 +152,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 13,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -186,7 +163,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 14,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -197,7 +174,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 15,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -208,7 +185,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 16,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -219,7 +196,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 17,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -230,7 +207,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 18,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -241,7 +218,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 19,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -252,7 +229,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 20,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',
@@ -263,7 +240,7 @@ export const ActivityMonitor = React.memo(() => {
     {
       id: 21,
       rule: {
-        href: '#/detection-engine/rules/rule-details',
+        href: '#/detections/rules/rule-details',
         name: 'Automated exfiltration',
       },
       ran: '2019-12-28 00:00:00.000-05:00',

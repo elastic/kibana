@@ -11,10 +11,11 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('outlier detection creation', function() {
+  describe('regression creation', function() {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/egs_regression');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
@@ -27,9 +28,10 @@ export default function({ getService }: FtrProviderContext) {
         suiteTitle: 'electrical grid stability',
         jobType: 'regression',
         jobId: `egs_1_${Date.now()}`,
+        jobDescription: 'This is the job description',
         source: 'egs_regression',
         get destinationIndex(): string {
-          return `dest_${this.jobId}`;
+          return `user-${this.jobId}`;
         },
         dependentVariable: 'stab',
         trainingPercent: '20',
@@ -70,6 +72,11 @@ export default function({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setJobId(testData.jobId);
         });
 
+        it('inputs the job description', async () => {
+          await ml.dataFrameAnalyticsCreation.assertJobDescriptionInputExists();
+          await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
+        });
+
         it('selects the source index', async () => {
           await ml.dataFrameAnalyticsCreation.assertSourceIndexInputExists();
           await ml.dataFrameAnalyticsCreation.selectSourceIndex(testData.source);
@@ -104,7 +111,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('creates the analytics job', async () => {
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
-          await ml.dataFrameAnalyticsCreation.createAnalyticsJob();
+          await ml.dataFrameAnalyticsCreation.createAnalyticsJob(testData.jobId);
         });
 
         it('starts the analytics job', async () => {
@@ -143,6 +150,7 @@ export default function({ getService }: FtrProviderContext) {
         it('displays details for the created job in the analytics table', async () => {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
+            description: testData.jobDescription,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
@@ -154,6 +162,12 @@ export default function({ getService }: FtrProviderContext) {
         it('creates the destination index and writes results to it', async () => {
           await ml.api.assertIndicesExist(testData.destinationIndex);
           await ml.api.assertIndicesNotEmpty(testData.destinationIndex);
+        });
+
+        it('displays the results view for created job', async () => {
+          await ml.dataFrameAnalyticsTable.openResultsView();
+          await ml.dataFrameAnalytics.assertRegressionEvaluatePanelElementsExists();
+          await ml.dataFrameAnalytics.assertRegressionTablePanelExists();
         });
       });
     }

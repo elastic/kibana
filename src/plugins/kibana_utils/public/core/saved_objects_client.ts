@@ -18,7 +18,7 @@
  */
 
 import { CoreStart } from '../../../../core/public';
-import { Get } from './create_getter_setter';
+import { Get } from '../../common';
 
 type CoreSavedObjectClient = CoreStart['savedObjects']['client'];
 

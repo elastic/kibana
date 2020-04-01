@@ -305,9 +305,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const metricValue = (
-        await find.allByCssSelector(`.echLegendItem .echLegendItem__displayValue`)
-      )[nth];
+      const metricValue = (await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`))[
+        nth
+      ];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
@@ -414,6 +414,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    public async setIntervalValue(value: string) {
+      const el = await testSubjects.find('metricsIndexPatternInterval');
+      await el.clearValue();
+      await el.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    public async setDropLastBucket(value: boolean) {
+      const option = await testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
+      (await option.findByCssSelector('label')).click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     public async selectIndexPatternTimeField(timeField: string) {
       await retry.try(async () => {
         await comboBox.clearInputField('metricsIndexPatternFieldsSelect');
@@ -472,7 +485,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const labels = await testSubjects.findAll('aggRow');
       const label = labels[aggNth];
 
-      return (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
+      return (await label.findAllByTestSubject('comboBoxInput'))[1];
     }
 
     public async clickColorPicker(): Promise<void> {
@@ -520,7 +533,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      */
     public async getAggregationCount(nth: number = 0): Promise<number> {
       const series = await this.getSeries();
-      const aggregation = await series[nth].findAllByCssSelector('[data-test-subj="draggable"]');
+      const aggregation = await series[nth].findAllByTestSubject('draggable');
       return aggregation.length;
     }
 

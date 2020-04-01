@@ -1,0 +1,9 @@
+{
+  "id": "triggers_actions_ui",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "optionalPlugins": ["alerting", "alertingBuiltins"],
+  "requiredPlugins": ["management", "charts", "data"],
+  "configPath": ["xpack", "trigger_actions_ui"]
+}

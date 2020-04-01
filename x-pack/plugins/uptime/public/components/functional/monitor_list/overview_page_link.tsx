@@ -7,7 +7,12 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { useUrlParams } from '../../../hooks';
+
+const OverviewPageLinkButtonIcon = styled(EuiButtonIcon)`
+  padding-top: 12px;
+`;
 
 interface OverviewPageLinkProps {
   dataTestSubj: string;
@@ -38,8 +43,8 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   });
 
   return (
-    <EuiButtonIcon
-      color={'text'}
+    <OverviewPageLinkButtonIcon
+      color="text"
       onClick={() => {
         updateUrlParams({ pagination });
       }}

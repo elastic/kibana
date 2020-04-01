@@ -8,12 +8,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { shortenPipelineHash } from '../../../common/formatting';
-import 'ui/directives/kbn_href';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
+import { Subscription } from 'rxjs';
 
 const setOptions = controller => {
   if (
@@ -76,6 +76,24 @@ export class MonitoringMainController {
     this.inApm = false;
   }
 
+  addTimerangeObservers = () => {
+    this.subscriptions = new Subscription();
+
+    const refreshIntervalUpdated = () => {
+      const { value: refreshInterval, pause: isPaused } = timefilter.getRefreshInterval();
+      this.datePicker.onRefreshChange({ refreshInterval, isPaused }, true);
+    };
+
+    const timeUpdated = () => {
+      this.datePicker.onTimeUpdate({ dateRange: timefilter.getTime() }, true);
+    };
+
+    this.subscriptions.add(
+      timefilter.getRefreshIntervalUpdate$().subscribe(refreshIntervalUpdated)
+    );
+    this.subscriptions.add(timefilter.getTimeUpdate$().subscribe(timeUpdated));
+  };
+
   dropdownLoadedHandler() {
     this.pipelineDropdownElement = document.querySelector('#dropdown-elm');
     setOptions(this);
@@ -122,22 +140,25 @@ export class MonitoringMainController {
     this.datePicker = {
       timeRange: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
-      onRefreshChange: ({ isPaused, refreshInterval }) => {
+      onRefreshChange: ({ isPaused, refreshInterval }, skipSet = false) => {
         this.datePicker.refreshInterval = {
           pause: isPaused,
           value: refreshInterval,
         };
-
-        timefilter.setRefreshInterval({
-          pause: isPaused,
-          value: refreshInterval ? refreshInterval : this.datePicker.refreshInterval.value,
-        });
+        if (!skipSet) {
+          timefilter.setRefreshInterval({
+            pause: isPaused,
+            value: refreshInterval ? refreshInterval : this.datePicker.refreshInterval.value,
+          });
+        }
       },
-      onTimeUpdate: ({ dateRange }) => {
+      onTimeUpdate: ({ dateRange }, skipSet = false) => {
         this.datePicker.timeRange = {
           ...dateRange,
         };
-        timefilter.setTime(dateRange);
+        if (!skipSet) {
+          timefilter.setTime(dateRange);
+        }
         this._executorService.cancel();
         this._executorService.run();
       },
@@ -175,7 +196,7 @@ export class MonitoringMainController {
   }
 }
 
-const uiModule = uiModules.get('plugins/monitoring/directives', []);
+const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) => {
   const $executor = $injector.get('$executor');
 
@@ -187,6 +208,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
+      controller.addTimerangeObservers();
       initSetupModeState(scope, $injector, () => {
         controller.setup(getSetupObj());
       });
@@ -226,12 +248,11 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
       Object.keys(setupObj.attributes).forEach(key => {
         attributes.$observe(key, () => controller.setup(getSetupObj()));
       });
-      scope.$on(
-        '$destroy',
-        () =>
-          controller.pipelineDropdownElement &&
-          unmountComponentAtNode(controller.pipelineDropdownElement)
-      );
+      scope.$on('$destroy', () => {
+        controller.pipelineDropdownElement &&
+          unmountComponentAtNode(controller.pipelineDropdownElement);
+        controller.subscriptions && controller.subscriptions.unsubscribe();
+      });
       scope.$watch('pageData.versions', versions => {
         controller.pipelineVersions = versions;
         setOptions(controller);

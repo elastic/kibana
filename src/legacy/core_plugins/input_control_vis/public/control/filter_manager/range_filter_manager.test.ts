@@ -21,7 +21,8 @@ import expect from '@kbn/expect';
 
 import { RangeFilterManager } from './range_filter_manager';
 import {
-  esFilters,
+  RangeFilter,
+  RangeFilterMeta,
   IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
@@ -69,7 +70,7 @@ describe('RangeFilterManager', function() {
 
   describe('getValueFromFilterBar', function() {
     class MockFindFiltersRangeFilterManager extends RangeFilterManager {
-      mockFilters: esFilters.RangeFilter[];
+      mockFilters: RangeFilter[];
 
       constructor(
         id: string,
@@ -85,7 +86,7 @@ describe('RangeFilterManager', function() {
         return this.mockFilters;
       }
 
-      setMockFilters(mockFilters: esFilters.RangeFilter[]) {
+      setMockFilters(mockFilters: RangeFilter[]) {
         this.mockFilters = mockFilters;
       }
     }
@@ -111,9 +112,9 @@ describe('RangeFilterManager', function() {
               lt: 3,
             },
           },
-          meta: {} as esFilters.RangeFilterMeta,
+          meta: {} as RangeFilterMeta,
         },
-      ] as esFilters.RangeFilter[]);
+      ] as RangeFilter[]);
       const value = filterManager.getValueFromFilterBar();
       expect(value).to.be.a('object');
       expect(value).to.have.property('min');
@@ -131,9 +132,9 @@ describe('RangeFilterManager', function() {
               lte: 3,
             },
           },
-          meta: {} as esFilters.RangeFilterMeta,
+          meta: {} as RangeFilterMeta,
         },
-      ] as esFilters.RangeFilter[]);
+      ] as RangeFilter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
     });
   });

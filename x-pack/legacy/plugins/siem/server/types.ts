@@ -5,26 +5,20 @@
  */
 
 import { Legacy } from 'kibana';
+import { SiemClient } from './client';
 
-export interface ServerFacade {
+export interface LegacyServices {
   config: Legacy.Server['config'];
-  plugins: {
-    alerting?: Legacy.Server['plugins']['alerting'];
-    elasticsearch: Legacy.Server['plugins']['elasticsearch'];
-    spaces: Legacy.Server['plugins']['spaces'];
-    savedObjects: Legacy.Server['savedObjects']['SavedObjectsClient'];
-  };
-  route: Legacy.Server['route'];
 }
 
-export interface RequestFacade {
-  auth: Legacy.Request['auth'];
-  getAlertsClient?: Legacy.Request['getAlertsClient'];
-  getActionsClient?: Legacy.Request['getActionsClient'];
-  getSavedObjectsClient?: Legacy.Request['getSavedObjectsClient'];
-  headers: Legacy.Request['headers'];
-  method: Legacy.Request['method'];
-  params: Legacy.Request['params'];
-  payload: unknown;
-  query: Legacy.Request['query'];
+export { SiemClient };
+
+export interface SiemRequestContext {
+  getSiemClient: () => SiemClient;
+}
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    siem?: SiemRequestContext;
+  }
 }

@@ -15,7 +15,7 @@ import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
+import { HostDetailsLink, ReputationLink, WhoIsLink, ReputationLinkSetting } from '../links';
 import { Spacer } from '../page';
 import * as i18n from '../page/network/ip_overview/translations';
 
@@ -132,11 +132,7 @@ export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.
 export const whoisRenderer = (ip: string) => <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>;
 
 export const reputationRenderer = (ip: string): React.ReactElement => (
-  <>
-    <VirusTotalLink link={ip}>{i18n.VIEW_VIRUS_TOTAL}</VirusTotalLink>
-    {', '}
-    <ReputationLink domain={ip}>{i18n.VIEW_TALOS_INTELLIGENCE}</ReputationLink>
-  </>
+  <ReputationLink domain={ip} direction="column" />
 );
 
 interface DefaultFieldRendererProps {
@@ -148,73 +144,78 @@ interface DefaultFieldRendererProps {
   moreMaxHeight?: string;
 }
 
+type OverflowRenderer = (item: string | ReputationLinkSetting) => JSX.Element;
+
 // TODO: This causes breaks between elements until the ticket below is fixed
 // https://github.com/elastic/ingest-dev/issues/474
-export const DefaultFieldRenderer = React.memo<DefaultFieldRendererProps>(
-  ({
-    attrName,
-    displayCount = 1,
-    idPrefix,
-    moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
-    render,
-    rowItems,
-  }) => {
-    if (rowItems != null && rowItems.length > 0) {
-      const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-        const id = escapeDataProviderId(
-          `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
-        );
-        return (
-          <EuiFlexItem key={id} grow={false}>
-            {index !== 0 && (
-              <>
-                {','}
-                <Spacer />
-              </>
-            )}
+export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
+  attrName,
+  displayCount = 1,
+  idPrefix,
+  moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
+  render,
+  rowItems,
+}) => {
+  if (rowItems != null && rowItems.length > 0) {
+    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
+      const id = escapeDataProviderId(
+        `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
+      );
+      return (
+        <EuiFlexItem key={id} grow={false}>
+          {index !== 0 && (
+            <>
+              {','}
+              <Spacer />
+            </>
+          )}
+          {typeof rowItem === 'string' && (
             <DefaultDraggable id={id} field={attrName} value={rowItem}>
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
-          </EuiFlexItem>
-        );
-      });
-
-      return draggables.length > 0 ? (
-        <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
-          {draggables}{' '}
-          {
-            <DefaultFieldRendererOverflow
-              rowItems={rowItems}
-              idPrefix={idPrefix}
-              render={render}
-              overflowIndexStart={displayCount}
-              moreMaxHeight={moreMaxHeight}
-            />
-          }
-        </DraggableContainerFlexGroup>
-      ) : (
-        getEmptyTagValue()
+          )}
+        </EuiFlexItem>
       );
-    } else {
-      return getEmptyTagValue();
-    }
+    });
+
+    return draggables.length > 0 ? (
+      <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
+        <EuiFlexItem grow={false}>{draggables} </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DefaultFieldRendererOverflow
+            rowItems={rowItems}
+            idPrefix={idPrefix}
+            render={render as OverflowRenderer}
+            overflowIndexStart={displayCount}
+            moreMaxHeight={moreMaxHeight}
+          />
+        </EuiFlexItem>
+      </DraggableContainerFlexGroup>
+    ) : (
+      getEmptyTagValue()
+    );
+  } else {
+    return getEmptyTagValue();
   }
-);
+};
+
+export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
+type RowItemTypes = string | ReputationLinkSetting;
 interface DefaultFieldRendererOverflowProps {
-  rowItems: string[];
+  rowItems: string[] | ReputationLinkSetting[];
   idPrefix: string;
-  render?: (item: string) => React.ReactNode;
+  render?: (item: RowItemTypes) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
 }
 
 interface MoreContainerProps {
   idPrefix: string;
-  render?: (item: string) => React.ReactNode;
-  rowItems: string[];
+  render?: (item: RowItemTypes) => React.ReactNode;
+  rowItems: RowItemTypes[];
   moreMaxHeight: string;
   overflowIndexStart: number;
 }

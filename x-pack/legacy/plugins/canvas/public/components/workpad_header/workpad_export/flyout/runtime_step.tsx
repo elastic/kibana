@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import { EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
 
-import { ComponentStrings } from '../../../../../i18n';
+import { ComponentStrings } from '../../../../../i18n/components';
 
 import { OnDownloadFn } from './share_website_flyout';
 

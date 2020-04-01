@@ -22,8 +22,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
-import { RequestStatus } from '../../../adapters';
-import { Request } from '../../../adapters/request/types';
+import { RequestStatus } from '../../../../common/adapters';
+import { Request } from '../../../../common/adapters/request/types';
 import { InspectorViewProps } from '../../../types';
 
 import { RequestSelector } from './request_selector';

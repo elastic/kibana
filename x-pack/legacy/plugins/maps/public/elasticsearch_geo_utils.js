@@ -297,6 +297,7 @@ function createGeometryFilterWithMeta({
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
+    key: geoFieldName,
     alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
   };
 
@@ -341,6 +342,39 @@ function createGeometryFilterWithMeta({
   }
 
   return createGeoPolygonFilter(geometry.coordinates, geoFieldName, { meta });
+}
+
+export function createDistanceFilterWithMeta({
+  alias,
+  distanceKm,
+  geoFieldName,
+  indexPatternId,
+  point,
+}) {
+  const meta = {
+    type: SPATIAL_FILTER_TYPE,
+    negate: false,
+    index: indexPatternId,
+    key: geoFieldName,
+    alias: alias
+      ? alias
+      : i18n.translate('xpack.maps.es_geo_utils.distanceFilterAlias', {
+          defaultMessage: '{geoFieldName} within {distanceKm}km of {pointLabel}',
+          values: {
+            distanceKm,
+            geoFieldName,
+            pointLabel: point.join(','),
+          },
+        }),
+  };
+
+  return {
+    geo_distance: {
+      distance: `${distanceKm}km`,
+      [geoFieldName]: point,
+    },
+    meta,
+  };
 }
 
 export function roundCoordinates(coordinates) {
@@ -431,4 +465,22 @@ export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
   }
 
   return formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon });
+}
+
+export function clampToLatBounds(lat) {
+  return clamp(lat, -89, 89);
+}
+
+export function clampToLonBounds(lon) {
+  return clamp(lon, -180, 180);
+}
+
+export function clamp(val, min, max) {
+  if (val > max) {
+    return max;
+  } else if (val < min) {
+    return min;
+  } else {
+    return val;
+  }
 }

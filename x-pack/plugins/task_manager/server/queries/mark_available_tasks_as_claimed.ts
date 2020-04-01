@@ -3,24 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { defaultsDeep } from 'lodash';
 import {
-  BoolClause,
-  IDsClause,
   SortClause,
   ScriptClause,
-  ExistsBoolClause,
-  TermBoolClause,
-  RangeBoolClause,
+  ExistsFilter,
+  TermFilter,
+  RangeFilter,
+  mustBeAllOf,
+  MustCondition,
+  MustNotCondition,
 } from './query_clauses';
 
-export const TaskWithSchedule: ExistsBoolClause = {
+export const TaskWithSchedule: ExistsFilter = {
   exists: { field: 'task.schedule' },
 };
 export function taskWithLessThanMaxAttempts(
   type: string,
   maxAttempts: number
-): BoolClause<TermBoolClause | RangeBoolClause> {
+): MustCondition<TermFilter | RangeFilter> {
   return {
     bool: {
       must: [
@@ -37,34 +37,37 @@ export function taskWithLessThanMaxAttempts(
   };
 }
 
-export const IdleTaskWithExpiredRunAt: BoolClause<TermBoolClause | RangeBoolClause> = {
+export function tasksClaimedByOwner(taskManagerId: string) {
+  return mustBeAllOf(
+    {
+      term: {
+        'task.ownerId': taskManagerId,
+      },
+    },
+    { term: { 'task.status': 'claiming' } }
+  );
+}
+
+export const IdleTaskWithExpiredRunAt: MustCondition<TermFilter | RangeFilter> = {
   bool: {
     must: [{ term: { 'task.status': 'idle' } }, { range: { 'task.runAt': { lte: 'now' } } }],
   },
 };
 
-export const taskWithIDsAndRunnableStatus = (
-  claimTasksById: string[]
-): BoolClause<TermBoolClause | IDsClause> => ({
+export const InactiveTasks: MustNotCondition<TermFilter | RangeFilter> = {
   bool: {
-    must: [
+    must_not: [
       {
         bool: {
-          should: [{ term: { 'task.status': 'idle' } }, { term: { 'task.status': 'failed' } }],
+          should: [{ term: { 'task.status': 'running' } }, { term: { 'task.status': 'claiming' } }],
         },
       },
-      {
-        ids: {
-          values: claimTasksById,
-        },
-      },
+      { range: { 'task.retryAt': { gt: 'now' } } },
     ],
   },
-});
+};
 
-export const RunningOrClaimingTaskWithExpiredRetryAt: BoolClause<
-  TermBoolClause | RangeBoolClause
-> = {
+export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition<TermFilter | RangeFilter> = {
   bool: {
     must: [
       {
@@ -93,31 +96,6 @@ if (doc['task.runAt'].size()!=0) {
     `,
     },
   },
-};
-
-const SORT_VALUE_TO_BE_FIRST = 0;
-export const sortByIdsThenByScheduling = (claimTasksById: string[]): SortClause => {
-  const {
-    _script: {
-      script: { source },
-    },
-  } = SortByRunAtAndRetryAt;
-  return defaultsDeep(
-    {
-      _script: {
-        script: {
-          source: `
-if(params.ids.contains(doc['_id'].value)){
-  return ${SORT_VALUE_TO_BE_FIRST};
-}
-${source}
-`,
-          params: { ids: claimTasksById },
-        },
-      },
-    },
-    SortByRunAtAndRetryAt
-  );
 };
 
 export const updateFields = (fieldUpdates: {

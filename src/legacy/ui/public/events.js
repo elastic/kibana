@@ -20,19 +20,19 @@
 /**
  * @name Events
  *
- * @extends SimpleEmitter
+ * @extends EventEmitter
  */
 
 import _ from 'lodash';
+import { EventEmitter } from 'events';
 import { fatalError } from './notify';
-import { SimpleEmitter } from './utils/simple_emitter';
 import { createLegacyClass } from './utils/legacy_class';
 import { createDefer } from 'ui/promises';
 
 const location = 'EventEmitter';
 
 export function EventsProvider(Promise) {
-  createLegacyClass(Events).inherits(SimpleEmitter);
+  createLegacyClass(Events).inherits(EventEmitter);
   function Events() {
     Events.Super.call(this);
     this._listeners = {};
@@ -79,6 +79,7 @@ export function EventsProvider(Promise) {
    */
   Events.prototype.off = function(name, handler) {
     if (!name && !handler) {
+      this._listeners = {};
       return this.removeAllListeners();
     }
 

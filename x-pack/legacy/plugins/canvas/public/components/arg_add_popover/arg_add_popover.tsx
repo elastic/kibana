@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEvent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 // @ts-ignore untyped local
@@ -28,7 +28,7 @@ interface Props {
 }
 
 export const ArgAddPopover = ({ options }: Props) => {
-  const button = (handleClick: (ev: MouseEvent) => void) => (
+  const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
     <EuiButtonIcon
       iconType="plusInCircle"
       aria-label={strings.getAddAriaLabel()}

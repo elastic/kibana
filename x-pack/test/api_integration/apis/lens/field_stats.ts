@@ -47,6 +47,24 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(404);
       });
 
+      it('should also work without specifying a time field', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            field: {
+              name: 'bytes',
+              type: 'number',
+            },
+          })
+          .expect(200);
+
+        expect(body).to.have.property('totalDocuments', 4634);
+      });
+
       it('should return an auto histogram for numbers and top values', async () => {
         const { body } = await supertest
           .post('/api/lens/index_stats/logstash-2015.09.22/field')
@@ -64,9 +82,9 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          totalDocuments: 4633,
-          sampledDocuments: 4633,
-          sampledValues: 4633,
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
           histogram: {
             buckets: [
               {
@@ -78,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
                 key: 1999,
               },
               {
-                count: 885,
+                count: 886,
                 key: 3998,
               },
               {
@@ -123,6 +141,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
               {
                 count: 5,
+                key: 5846,
+              },
+              {
+                count: 5,
                 key: 6497,
               },
               {
@@ -140,10 +162,6 @@ export default ({ getService }: FtrProviderContext) => {
               {
                 count: 4,
                 key: 4669,
-              },
-              {
-                count: 4,
-                key: 5846,
               },
               {
                 count: 4,
@@ -175,11 +193,11 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          totalDocuments: 4633,
+          totalDocuments: 4634,
           histogram: {
             buckets: [
               {
-                count: 1161,
+                count: 1162,
                 key: 1442875680000,
               },
               {
@@ -212,8 +230,8 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          totalDocuments: 4633,
-          sampledDocuments: 4633,
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
           sampledValues: 4633,
           topValues: {
             buckets: [

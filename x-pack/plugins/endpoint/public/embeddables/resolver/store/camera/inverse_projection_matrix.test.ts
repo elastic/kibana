@@ -10,6 +10,7 @@ import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
 import { inverseProjectionMatrix } from './selectors';
 import { applyMatrix3 } from '../../lib/vector2';
+import { scaleToZoom } from './scale_to_zoom';
 
 describe('inverseProjectionMatrix', () => {
   let store: Store<CameraState, CameraAction>;
@@ -17,14 +18,27 @@ describe('inverseProjectionMatrix', () => {
   beforeEach(() => {
     store = createStore(cameraReducer, undefined);
     compare = (rasterPosition: [number, number], expectedWorldPosition: [number, number]) => {
+      // time isn't really relevant as we aren't testing animation
+      const time = 0;
       const [worldX, worldY] = applyMatrix3(
         rasterPosition,
-        inverseProjectionMatrix(store.getState())
+        inverseProjectionMatrix(store.getState())(time)
       );
       expect(worldX).toBeCloseTo(expectedWorldPosition[0]);
       expect(worldY).toBeCloseTo(expectedWorldPosition[1]);
     };
   });
+
+  describe('when the raster size is 0x0 pixels', () => {
+    beforeEach(() => {
+      const action: CameraAction = { type: 'userSetRasterSize', payload: [0, 0] };
+      store.dispatch(action);
+    });
+    it('should convert 0,0 in raster space to 0,0 (center) in world space', () => {
+      compare([10, 0], [0, 0]);
+    });
+  });
+
   describe('when the raster size is 300 x 200 pixels', () => {
     beforeEach(() => {
       const action: CameraAction = { type: 'userSetRasterSize', payload: [300, 200] };
@@ -59,7 +73,7 @@ describe('inverseProjectionMatrix', () => {
     });
     describe('when the user has zoomed to 0.5', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userScaled', payload: [0.5, 0.5] };
+        const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(0.5) };
         store.dispatch(action);
       });
       it('should convert 150, 100 (center) to 0, 0 (center) in world space', () => {
@@ -68,7 +82,7 @@ describe('inverseProjectionMatrix', () => {
     });
     describe('when the user has panned to the right and up by 50', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [-50, -50] };
+        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [50, 50] };
         store.dispatch(action);
       });
       it('should convert 100,150 in raster space to 0,0 (center) in world space', () => {
@@ -83,13 +97,13 @@ describe('inverseProjectionMatrix', () => {
     });
     describe('when the user has panned to the right by 350 and up by 250', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [-350, -250] };
+        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [350, 250] };
         store.dispatch(action);
       });
       describe('when the user has scaled to 2', () => {
         // the viewport will only cover half, or 150x100 instead of 300x200
         beforeEach(() => {
-          const action: CameraAction = { type: 'userScaled', payload: [2, 2] };
+          const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(2) };
           store.dispatch(action);
         });
         // we expect the viewport to be

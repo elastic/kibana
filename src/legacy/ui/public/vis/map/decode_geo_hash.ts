@@ -17,6 +17,11 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
+import _ from 'lodash';
+
+const config = chrome.getUiSettingsClient();
+
 interface DecodedGeoHash {
   latitude: number[];
   longitude: number[];
@@ -92,4 +97,96 @@ function geohashCells(precision: number, axis: number) {
  */
 export function geohashColumns(precision: number): number {
   return geohashCells(precision, 0);
+}
+
+const defaultPrecision = 2;
+const maxPrecision = parseInt(config.get('visualization:tileMap:maxPrecision'), 10) || 12;
+/**
+ * Map Leaflet zoom levels to geohash precision levels.
+ * The size of a geohash column-width on the map should be at least `minGeohashPixels` pixels wide.
+ */
+export const zoomPrecision: any = {};
+const minGeohashPixels = 16;
+
+for (let zoom = 0; zoom <= 21; zoom += 1) {
+  const worldPixels = 256 * Math.pow(2, zoom);
+  zoomPrecision[zoom] = 1;
+  for (let precision = 2; precision <= maxPrecision; precision += 1) {
+    const columns = geohashColumns(precision);
+    if (worldPixels / columns >= minGeohashPixels) {
+      zoomPrecision[zoom] = precision;
+    } else {
+      break;
+    }
+  }
+}
+
+export function getPrecision(val: string) {
+  let precision = parseInt(val, 10);
+
+  if (Number.isNaN(precision)) {
+    precision = defaultPrecision;
+  }
+
+  if (precision > maxPrecision) {
+    return maxPrecision;
+  }
+
+  return precision;
+}
+
+interface GeoBoundingBoxCoordinate {
+  lat: number;
+  lon: number;
+}
+
+interface GeoBoundingBox {
+  top_left: GeoBoundingBoxCoordinate;
+  bottom_right: GeoBoundingBoxCoordinate;
+}
+
+export function scaleBounds(bounds: GeoBoundingBox): GeoBoundingBox {
+  const scale = 0.5; // scale bounds by 50%
+
+  const topLeft = bounds.top_left;
+  const bottomRight = bounds.bottom_right;
+  let latDiff = _.round(Math.abs(topLeft.lat - bottomRight.lat), 5);
+  const lonDiff = _.round(Math.abs(bottomRight.lon - topLeft.lon), 5);
+  // map height can be zero when vis is first created
+  if (latDiff === 0) latDiff = lonDiff;
+
+  const latDelta = latDiff * scale;
+  let topLeftLat = _.round(topLeft.lat, 5) + latDelta;
+  if (topLeftLat > 90) topLeftLat = 90;
+  let bottomRightLat = _.round(bottomRight.lat, 5) - latDelta;
+  if (bottomRightLat < -90) bottomRightLat = -90;
+  const lonDelta = lonDiff * scale;
+  let topLeftLon = _.round(topLeft.lon, 5) - lonDelta;
+  if (topLeftLon < -180) topLeftLon = -180;
+  let bottomRightLon = _.round(bottomRight.lon, 5) + lonDelta;
+  if (bottomRightLon > 180) bottomRightLon = 180;
+
+  return {
+    top_left: { lat: topLeftLat, lon: topLeftLon },
+    bottom_right: { lat: bottomRightLat, lon: bottomRightLon },
+  };
+}
+
+export function geoContains(collar?: GeoBoundingBox, bounds?: GeoBoundingBox) {
+  if (!bounds || !collar) return false;
+  // test if bounds top_left is outside collar
+  if (bounds.top_left.lat > collar.top_left.lat || bounds.top_left.lon < collar.top_left.lon) {
+    return false;
+  }
+
+  // test if bounds bottom_right is outside collar
+  if (
+    bounds.bottom_right.lat < collar.bottom_right.lat ||
+    bounds.bottom_right.lon > collar.bottom_right.lon
+  ) {
+    return false;
+  }
+
+  // both corners are inside collar so collar contains bounds
+  return true;
 }

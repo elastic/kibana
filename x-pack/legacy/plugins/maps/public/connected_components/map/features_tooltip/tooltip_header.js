@@ -137,7 +137,7 @@ export class TooltipHeader extends Component {
     }
 
     // Page number readout
-    if (filteredFeatures.length > 1) {
+    if (!isLocked && filteredFeatures.length > 1) {
       headerItems.push(
         <EuiFlexItem grow={!isLayerSelectVisible} key="pageNumber">
           <EuiTextColor color="subdued">

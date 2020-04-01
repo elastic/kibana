@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiErrorBoundary, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
@@ -30,7 +30,7 @@ const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_REQUEST,
 ];
 
-export class StepReviewUi extends Component {
+export class StepReview extends Component {
   static propTypes = {
     job: PropTypes.object.isRequired,
   };
@@ -121,5 +121,3 @@ export class StepReviewUi extends Component {
     );
   }
 }
-
-export const StepReview = injectI18n(StepReviewUi);

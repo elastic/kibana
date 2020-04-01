@@ -6,10 +6,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
 
 import { RollupPrompt } from './components/rollup_prompt';
-import { setHttpClient, getRollupIndices } from '../services/api';
 import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';
 
 const rollupIndexPatternTypeName = i18n.translate(
@@ -54,12 +52,10 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       ...options,
     });
 
-    setHttpClient(this.httpClient);
     this.rollupIndex = null;
     this.rollupJobs = [];
     this.rollupIndicesCapabilities = {};
     this.rollupIndices = [];
-    this.settingUp = this.setRollupIndices();
   }
 
   async setRollupIndices() {
@@ -67,9 +63,10 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       // This is a hack intended to prevent the getRollupIndices() request from being sent if
       // we're on /logout. There is a race condition that can arise on that page, whereby this
       // request resolves after the logout request resolves, and un-clears the session ID.
-      const isAnonymous = npSetup.core.http.anonymousPaths.isAnonymous(window.location.pathname);
+      const isAnonymous = this.httpClient.anonymousPaths.isAnonymous(window.location.pathname);
       if (!isAnonymous) {
-        this.rollupIndicesCapabilities = await getRollupIndices();
+        const response = await this.httpClient.get('/api/rollup/indices');
+        this.rollupIndicesCapabilities = response || {};
       }
 
       this.rollupIndices = Object.keys(this.rollupIndicesCapabilities);
@@ -79,7 +76,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   }
 
   async getIndexPatternCreationOption(urlHandler) {
-    await this.settingUp;
+    await this.setRollupIndices();
     return this.rollupIndices && this.rollupIndices.length
       ? {
           text: rollupIndexPatternButtonText,

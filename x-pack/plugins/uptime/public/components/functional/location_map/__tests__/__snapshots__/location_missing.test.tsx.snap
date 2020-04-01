@@ -1,12 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LocationMissingWarning component renders correctly against snapshot 1`] = `
+.c0 {
+  margin-left: auto;
+  margin-bottom: 3px;
+}
+
 <div
-  class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+  class="euiFlexGroup euiFlexGroup--directionRow"
+  data-test-subj="xpack.uptime.locationMap.locationMissing"
 >
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
-    style="margin-left:auto;margin-right:20px"
+    class="euiFlexItem euiFlexItem--flexGrowZero c0"
   >
     <div
       class="euiPopover euiPopover--anchorDownCenter"
@@ -22,15 +27,10 @@ exports[`LocationMissingWarning component renders correctly against snapshot 1`]
           <span
             class="euiButton__content"
           >
-            <svg
+            <div
               aria-hidden="true"
-              class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-              focusable="false"
-              height="16"
-              role="img"
-              viewBox="0 0 16 16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
+              class="euiButton__icon"
+              data-euiicon-type="alert"
             />
             <span
               class="euiButton__text"
@@ -47,16 +47,12 @@ exports[`LocationMissingWarning component renders correctly against snapshot 1`]
 
 exports[`LocationMissingWarning component shallow render correctly against snapshot 1`] = `
 <EuiFlexGroup
+  data-test-subj="xpack.uptime.locationMap.locationMissing"
   gutterSize="none"
+  responsive={false}
 >
-  <EuiFlexItem
+  <Styled(EuiFlexItem)
     grow={false}
-    style={
-      Object {
-        "marginLeft": "auto",
-        "marginRight": 20,
-      }
-    }
   >
     <EuiPopover
       anchorPosition="downCenter"
@@ -67,7 +63,11 @@ exports[`LocationMissingWarning component shallow render correctly against snaps
           onClick={[Function]}
           size="s"
         >
-          Geo Information Missing
+          <FormattedMessage
+            defaultMessage="Geo Information Missing"
+            id="xpack.uptime.locationMap.locations.missing.title"
+            values={Object {}}
+          />
         </EuiButton>
       }
       closePopover={[Function]}
@@ -118,6 +118,6 @@ exports[`LocationMissingWarning component shallow render correctly against snaps
         <LocationLink />
       </EuiText>
     </EuiPopover>
-  </EuiFlexItem>
+  </Styled(EuiFlexItem)>
 </EuiFlexGroup>
 `;

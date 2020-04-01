@@ -53,7 +53,88 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             },
             schedule: { interval: '12s' },
             actions: [],
-            throttle: '2m',
+            throttle: '1m',
+          };
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(updatedData);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                ...updatedData,
+                id: createdAlert.id,
+                alertTypeId: 'test.noop',
+                consumer: 'bar',
+                createdBy: 'elastic',
+                enabled: true,
+                updatedBy: user.username,
+                apiKeyOwner: user.username,
+                muteAll: false,
+                mutedInstanceIds: [],
+                scheduledTaskId: createdAlert.scheduledTaskId,
+                createdAt: response.body.createdAt,
+                updatedAt: response.body.updatedAt,
+              });
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
+                Date.parse(response.body.createdAt)
+              );
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should still be able to update when AAD is broken', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert');
+
+          await supertest
+            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              attributes: {
+                name: 'bar',
+              },
+            })
+            .expect(200);
+
+          const updatedData = {
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
@@ -196,11 +277,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '"alertTypeId" is not allowed',
-                validation: {
-                  source: 'payload',
-                  keys: ['alertTypeId'],
-                },
+                message: '[request body.alertTypeId]: definition for this key is missing',
               });
               break;
             default:
@@ -232,12 +309,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "throttle" fails because ["throttle" is required]. child "name" fails because ["name" is required]. child "tags" fails because ["tags" is required]. child "schedule" fails because ["schedule" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'],
-                },
+                message: '[request body.name]: expected value of type [string] but got [undefined]',
               });
               break;
             default:
@@ -329,18 +401,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "schedule" fails because [child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]]. "alertTypeId" is not allowed',
-                validation: {
-                  source: 'payload',
-                  keys: [
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                    'alertTypeId',
-                  ],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 10x',
               });
               break;
             default:
@@ -375,7 +436,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             },
             schedule: { interval: '1m' },
             actions: [],
-            throttle: '2m',
+            throttle: '1m',
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)

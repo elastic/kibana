@@ -7,7 +7,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
-import { trackUiAction as track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/track_usage';
+import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
 import { TabNavigationProps, TabNavigationItemProps } from './types';
 
@@ -66,7 +66,9 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
     () =>
       Object.values(navTabs).map(tab => {
         const isSelected = selectedTabId === tab.id;
-        const hrefWithSearch = tab.href + getSearch(tab, props);
+        const { query, filters, savedQuery, timerange, timeline } = props;
+        const hrefWithSearch =
+          tab.href + getSearch(tab, { query, filters, savedQuery, timerange, timeline });
 
         return (
           <TabNavigationItem

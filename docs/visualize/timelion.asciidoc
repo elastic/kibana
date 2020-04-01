@@ -43,7 +43,7 @@ image::images/timelion-create01.png[]
 [[time-series-compare-data]]
 ==== Compare the data
 
-To compare the two data sets, add another series with data from the previous hour, separated by a comma:  
+To compare the two data sets, add another series with data from the previous hour, separated by a comma:
 
 [source,text]
 ----------------------------------
@@ -81,7 +81,7 @@ image::images/timelion-create03.png[]
 
 [float]
 [[time-series-title]]
-==== Add a title 
+==== Add a title
 
 Add a meaningful title:
 
@@ -169,7 +169,7 @@ Change the position and style of the legend:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF).legend(columns=2, position=nw) <1> 
+.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour').lines(fill=1,width=0.5).color(gray), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour').title('CPU usage over time').color(#1E90FF).legend(columns=2, position=nw) <1>
 ----------------------------------
 
 <1> `.legend()` sets the position and style of the legend. In this example, `.legend(columns=2, position=nw)` places the legend in the north west position of the visualization with two columns.
@@ -210,7 +210,7 @@ Change how the data is displayed so that you can easily monitor the inbound traf
 .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative() <1>
 ----------------------------------
 
-<1> `.derivative` plots the change in values over time. 
+<1> `.derivative` plots the change in values over time.
 
 [role="screenshot"]
 image::images/timelion-math02.png[]
@@ -240,7 +240,7 @@ To make the visualization easier to analyze, change the data metric from bytes t
 .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.in.bytes).derivative().divide(1048576), .es(index=metricbeat*, timefield=@timestamp, metric=max:system.network.out.bytes).derivative().multiply(-1).divide(1048576) <1>
 ----------------------------------
 
-<1> `.divide()` accepts the same input as `.multiply()`, then divides the data series by the defined divisor. 
+<1> `.divide()` accepts the same input as `.multiply()`, then divides the data series by the defined divisor.
 
 [role="screenshot"]
 image::images/timelion-math04.png[]
@@ -256,7 +256,7 @@ Customize and format the visualization using functions:
 ----------------------------------
 .es(index=metricbeat*,
     timefield=@timestamp,
-    metric=max:system.network.in.byte)
+    metric=max:system.network.in.bytes)
   .derivative()
   .divide(1048576)
   .lines(fill=2, width=1)
@@ -270,7 +270,7 @@ Customize and format the visualization using functions:
   .multiply(-1)
   .divide(1048576)
   .lines(fill=2, width=1)           <3>
-  .color(blue) <                    <4>
+  .color(blue)                      <4>
     .label("Outbound traffic")
     .legend(columns=2, position=nw) <5>
 ----------------------------------

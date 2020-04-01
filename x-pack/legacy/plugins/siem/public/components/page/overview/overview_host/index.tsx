@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { ESQuery } from '../../../../../common/typed_json';
@@ -22,6 +23,8 @@ import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats'
 import { manageQuery } from '../../../page/manage_query';
 import { inputsModel } from '../../../../store/inputs';
 import { InspectButtonContainer } from '../../../inspect';
+import { useGetUrlSearch } from '../../../navigation/use_get_url_search';
+import { navTabs } from '../../../../pages/home/home_navigations';
 
 export interface OwnProps {
   startDate: number;
@@ -41,36 +44,48 @@ export interface OwnProps {
 }
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
-type OverviewHostProps = OwnProps;
-export const OverviewHost = React.memo<OverviewHostProps>(
-  ({ endDate, filterQuery, startDate, setQuery }) => {
-    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+export type OverviewHostProps = OwnProps;
 
-    return (
-      <EuiFlexItem>
-        <InspectButtonContainer>
-          <EuiPanel>
-            <OverviewHostQuery
-              endDate={endDate}
-              filterQuery={filterQuery}
-              sourceId="default"
-              startDate={startDate}
-            >
-              {({ overviewHost, loading, id, inspect, refetch }) => {
-                const hostEventsCount = getOverviewHostStats(overviewHost).reduce(
-                  (total, stat) => total + stat.count,
-                  0
-                );
-                const formattedHostEventsCount = numeral(hostEventsCount).format(
-                  defaultNumberFormat
-                );
+const OverviewHostComponent: React.FC<OverviewHostProps> = ({
+  endDate,
+  filterQuery,
+  startDate,
+  setQuery,
+}) => {
+  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const urlSearch = useGetUrlSearch(navTabs.hosts);
+  const hostPageButton = useMemo(
+    () => (
+      <EuiButton href={getHostsUrl(urlSearch)}>
+        <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
+      </EuiButton>
+    ),
+    [urlSearch]
+  );
+  return (
+    <EuiFlexItem>
+      <InspectButtonContainer>
+        <EuiPanel>
+          <OverviewHostQuery
+            data-test-subj="overview-host-query"
+            endDate={endDate}
+            filterQuery={filterQuery}
+            sourceId="default"
+            startDate={startDate}
+          >
+            {({ overviewHost, loading, id, inspect, refetch }) => {
+              const hostEventsCount = getOverviewHostStats(overviewHost).reduce(
+                (total, stat) => total + stat.count,
+                0
+              );
+              const formattedHostEventsCount = numeral(hostEventsCount).format(defaultNumberFormat);
 
-                return (
-                  <>
-                    <HeaderSection
-                      border
-                      id={OverviewHostQueryId}
-                      subtitle={
+              return (
+                <>
+                  <HeaderSection
+                    id={OverviewHostQueryId}
+                    subtitle={
+                      !isEmpty(overviewHost) ? (
                         <FormattedMessage
                           defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
                           id="xpack.siem.overview.overviewHost.hostsSubtitle"
@@ -79,39 +94,36 @@ export const OverviewHost = React.memo<OverviewHostProps>(
                             hostEventsCount,
                           }}
                         />
-                      }
-                      title={
-                        <FormattedMessage
-                          id="xpack.siem.overview.hostsTitle"
-                          defaultMessage="Host events"
-                        />
-                      }
-                    >
-                      <EuiButton href={getHostsUrl()}>
-                        <FormattedMessage
-                          id="xpack.siem.overview.hostsAction"
-                          defaultMessage="View hosts"
-                        />
-                      </EuiButton>
-                    </HeaderSection>
+                      ) : (
+                        <>{''}</>
+                      )
+                    }
+                    title={
+                      <FormattedMessage
+                        id="xpack.siem.overview.hostsTitle"
+                        defaultMessage="Host events"
+                      />
+                    }
+                  >
+                    {hostPageButton}
+                  </HeaderSection>
 
-                    <OverviewHostStatsManage
-                      loading={loading}
-                      data={overviewHost}
-                      setQuery={setQuery}
-                      id={id}
-                      inspect={inspect}
-                      refetch={refetch}
-                    />
-                  </>
-                );
-              }}
-            </OverviewHostQuery>
-          </EuiPanel>
-        </InspectButtonContainer>
-      </EuiFlexItem>
-    );
-  }
-);
+                  <OverviewHostStatsManage
+                    loading={loading}
+                    data={overviewHost}
+                    setQuery={setQuery}
+                    id={id}
+                    inspect={inspect}
+                    refetch={refetch}
+                  />
+                </>
+              );
+            }}
+          </OverviewHostQuery>
+        </EuiPanel>
+      </InspectButtonContainer>
+    </EuiFlexItem>
+  );
+};
 
-OverviewHost.displayName = 'OverviewHost';
+export const OverviewHost = React.memo(OverviewHostComponent);

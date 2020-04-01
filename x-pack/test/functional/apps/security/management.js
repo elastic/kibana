@@ -11,7 +11,7 @@ import {
   ROLES_PATH,
   EDIT_ROLES_PATH,
   CLONE_ROLES_PATH,
-} from '../../../../legacy/plugins/security/public/views/management/management_urls';
+} from '../../../../plugins/security/public/management/management_urls';
 
 export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');

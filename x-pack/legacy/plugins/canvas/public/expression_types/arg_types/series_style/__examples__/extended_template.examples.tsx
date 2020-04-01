@@ -10,9 +10,9 @@ import { withKnobs, array, radios, boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { ExtendedTemplate } from '../extended_template';
-import { ExpressionAST } from '../../../../../types';
+import { ExpressionAstExpression } from '../../../../../types';
 
-const defaultExpression: ExpressionAST = {
+const defaultExpression: ExpressionAstExpression = {
   type: 'expression',
   chain: [
     {
@@ -27,7 +27,7 @@ const defaultValues = {
   argValue: defaultExpression,
 };
 
-class Interactive extends React.Component<{}, { argValue: ExpressionAST }> {
+class Interactive extends React.Component<{}, { argValue: ExpressionAstExpression }> {
   public state = defaultValues;
 
   public render() {

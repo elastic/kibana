@@ -8,26 +8,13 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { WorkpadExport } from '../workpad_export';
 
-storiesOf('components/Export/WorkpadExport', module)
-  .add('enabled', () => (
-    <WorkpadExport
-      enabled={true}
-      onCopy={action('onCopy')}
-      onExport={action('onExport')}
-      getExportUrl={(type: string) => {
-        action(`getExportUrl('${type}')`);
-        return type;
-      }}
-    />
-  ))
-  .add('disabled', () => (
-    <WorkpadExport
-      enabled={false}
-      onCopy={action('onCopy')}
-      onExport={action('onExport')}
-      getExportUrl={(type: string) => {
-        action(`getExportUrl('${type}')`);
-        return type;
-      }}
-    />
-  ));
+storiesOf('components/Export/WorkpadExport', module).add('enabled', () => (
+  <WorkpadExport
+    onCopy={action('onCopy')}
+    onExport={action('onExport')}
+    getExportUrl={(type: string) => {
+      action(`getExportUrl('${type}')`);
+      return type;
+    }}
+  />
+));

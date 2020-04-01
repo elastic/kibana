@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializer } from 'kibana/public';
-import { CoreAppStatusPlugin, CoreAppStatusPluginSetup, CoreAppStatusPluginStart } from './plugin';
+import { CoreAppStatusPlugin, CoreAppStatusPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<CoreAppStatusPluginSetup, CoreAppStatusPluginStart> = () =>
+export const plugin: PluginInitializer<{}, CoreAppStatusPluginStart> = () =>
   new CoreAppStatusPlugin();

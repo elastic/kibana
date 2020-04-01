@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BaseState, BaseStateContainer } from '../state_containers/types';
+import { BaseState, BaseStateContainer } from '../../common/state_containers/types';
 import { IStateStorage } from './state_sync_state_storage';
 
 export interface INullableBaseStateContainer<State extends BaseState>

@@ -13,8 +13,8 @@ export function initAPIAuthorization(
   logger: Logger
 ) {
   http.registerOnPostAuth(async (request, response, toolkit) => {
-    // if the api doesn't start with "/api/" or we aren't using RBAC for this request, just continue
-    if (!request.url.path!.startsWith('/api/') || !mode.useRbacForRequest(request)) {
+    // if we aren't using RBAC for this request, just continue
+    if (!mode.useRbacForRequest(request)) {
       return toolkit.next();
     }
 

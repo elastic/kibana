@@ -28,8 +28,6 @@ import 'ui/autoload/all';
 // Used to run esaggs queries
 import 'uiExports/fieldFormats';
 import 'uiExports/search';
-import 'uiExports/visRequestHandlers';
-import 'uiExports/visResponseHandlers';
 // Used for kibana_context function
 
 import 'uiExports/savedObjectTypes';

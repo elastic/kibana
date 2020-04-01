@@ -4,68 +4,63 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RENDER_AS } from './render_as';
+import _ from 'lodash';
+import { RENDER_AS } from '../../../../common/constants';
 import { getTileBoundingBox } from './geo_tile_utils';
-import { EMPTY_FEATURE_COLLECTION } from '../../../../common/constants';
+import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
+import { clamp } from '../../../elasticsearch_geo_utils';
 
-export function convertToGeoJson({ table, renderAs }) {
-  if (!table || !table.rows) {
-    return EMPTY_FEATURE_COLLECTION;
-  }
+const GRID_BUCKET_KEYS_TO_IGNORE = ['key', 'gridCentroid'];
 
-  const geoGridColumn = table.columns.find(
-    column => column.aggConfig.type.dslName === 'geotile_grid'
-  );
-  if (!geoGridColumn) {
-    return EMPTY_FEATURE_COLLECTION;
-  }
-
-  const metricColumns = table.columns.filter(column => {
-    return (
-      column.aggConfig.type.type === 'metrics' && column.aggConfig.type.dslName !== 'geo_centroid'
-    );
-  });
-  const geocentroidColumn = table.columns.find(
-    column => column.aggConfig.type.dslName === 'geo_centroid'
-  );
-  if (!geocentroidColumn) {
-    return EMPTY_FEATURE_COLLECTION;
-  }
-
-  const features = [];
-  table.rows.forEach(row => {
-    const gridKey = row[geoGridColumn.id];
-    if (!gridKey) {
-      return;
+export function convertCompositeRespToGeoJson(esResponse, renderAs) {
+  return convertToGeoJson(
+    esResponse,
+    renderAs,
+    esResponse => {
+      return _.get(esResponse, 'aggregations.compositeSplit.buckets', []);
+    },
+    gridBucket => {
+      return gridBucket.key.gridSplit;
     }
+  );
+}
 
-    const properties = {};
-    metricColumns.forEach(metricColumn => {
-      properties[metricColumn.aggConfig.id] = row[metricColumn.id];
-    });
+export function convertRegularRespToGeoJson(esResponse, renderAs) {
+  return convertToGeoJson(
+    esResponse,
+    renderAs,
+    esResponse => {
+      return _.get(esResponse, 'aggregations.gridSplit.buckets', []);
+    },
+    gridBucket => {
+      return gridBucket.key;
+    }
+  );
+}
 
+function convertToGeoJson(esResponse, renderAs, pluckGridBuckets, pluckGridKey) {
+  const features = [];
+
+  const gridBuckets = pluckGridBuckets(esResponse);
+  for (let i = 0; i < gridBuckets.length; i++) {
+    const gridBucket = gridBuckets[i];
+    const gridKey = pluckGridKey(gridBucket);
     features.push({
       type: 'Feature',
       geometry: rowToGeometry({
-        row,
         gridKey,
-        geocentroidColumn,
+        gridCentroid: gridBucket.gridCentroid,
         renderAs,
       }),
       id: gridKey,
-      properties,
+      properties: extractPropertiesFromBucket(gridBucket, GRID_BUCKET_KEYS_TO_IGNORE),
     });
-  });
+  }
 
-  return {
-    featureCollection: {
-      type: 'FeatureCollection',
-      features: features,
-    },
-  };
+  return features;
 }
 
-function rowToGeometry({ row, gridKey, geocentroidColumn, renderAs }) {
+function rowToGeometry({ gridKey, gridCentroid, renderAs }) {
   const { top, bottom, right, left } = getTileBoundingBox(gridKey);
 
   if (renderAs === RENDER_AS.GRID) {
@@ -83,20 +78,14 @@ function rowToGeometry({ row, gridKey, geocentroidColumn, renderAs }) {
     };
   }
 
-  // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
+  // see https://github.com/elastic/elasticsearch/issues/24694 for why clamp is used
   const pointCoordinates = [
-    clampGrid(row[geocentroidColumn.id].lon, left, right),
-    clampGrid(row[geocentroidColumn.id].lat, bottom, top),
+    clamp(gridCentroid.location.lon, left, right),
+    clamp(gridCentroid.location.lat, bottom, top),
   ];
 
   return {
     type: 'Point',
     coordinates: pointCoordinates,
   };
-}
-
-function clampGrid(val, min, max) {
-  if (val > max) val = max;
-  else if (val < min) val = min;
-  return val;
 }

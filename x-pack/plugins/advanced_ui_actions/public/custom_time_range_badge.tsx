@@ -7,13 +7,13 @@
 import React from 'react';
 import { prettyDuration, commonDurationRanges } from '@elastic/eui';
 import { IEmbeddable, Embeddable, EmbeddableInput } from 'src/plugins/embeddable/public';
-import { IAction, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
+import { ActionByType, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
 import { CustomizeTimeRangeModal } from './customize_time_range_modal';
 import { doesInheritTimeRange } from './does_inherit_time_range';
 import { OpenModal, CommonlyUsedRange } from './types';
 
-const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
+export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
 
 export interface TimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -25,11 +25,11 @@ function hasTimeRange(
   return (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange !== undefined;
 }
 
-interface ActionContext {
+export interface TimeBadgeActionContext {
   embeddable: Embeddable<TimeRangeInput>;
 }
 
-export class CustomTimeRangeBadge implements IAction<ActionContext> {
+export class CustomTimeRangeBadge implements ActionByType<typeof CUSTOM_TIME_RANGE_BADGE> {
   public readonly type = CUSTOM_TIME_RANGE_BADGE;
   public readonly id = CUSTOM_TIME_RANGE_BADGE;
   public order = 7;
@@ -51,7 +51,7 @@ export class CustomTimeRangeBadge implements IAction<ActionContext> {
     this.commonlyUsedRanges = commonlyUsedRanges;
   }
 
-  public getDisplayName({ embeddable }: ActionContext) {
+  public getDisplayName({ embeddable }: TimeBadgeActionContext) {
     return prettyDuration(
       embeddable.getInput().timeRange.from,
       embeddable.getInput().timeRange.to,
@@ -64,11 +64,11 @@ export class CustomTimeRangeBadge implements IAction<ActionContext> {
     return 'calendar';
   }
 
-  public async isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: TimeBadgeActionContext) {
     return Boolean(embeddable && hasTimeRange(embeddable) && !doesInheritTimeRange(embeddable));
   }
 
-  public async execute({ embeddable }: ActionContext) {
+  public async execute({ embeddable }: TimeBadgeActionContext) {
     const isCompatible = await this.isCompatible({ embeddable });
     if (!isCompatible) {
       throw new IncompatibleActionError();

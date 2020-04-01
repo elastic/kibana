@@ -23,6 +23,7 @@ import WatchServer from './watch_server';
 import WatchOptimizer, { STATUS } from './watch_optimizer';
 import { DllCompiler } from '../dynamic_dll_plugin';
 import { WatchCache } from './watch_cache';
+import { getNpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
   const logWithMetadata = (tags, message, metadata) =>
@@ -31,7 +32,6 @@ export default async (kbnServer, kibanaHapiServer, config) => {
   const watchOptimizer = new WatchOptimizer({
     logWithMetadata,
     uiBundles: kbnServer.uiBundles,
-    newPlatformPluginInfo: kbnServer.newPlatform.__internals.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
     workers: config.get('optimize.workers'),
@@ -48,7 +48,8 @@ export default async (kbnServer, kibanaHapiServer, config) => {
     config.get('optimize.watchHost'),
     config.get('optimize.watchPort'),
     config.get('server.basePath'),
-    watchOptimizer
+    watchOptimizer,
+    getNpUiPluginPublicDirs(kbnServer)
   );
 
   watchOptimizer.status$.subscribe({

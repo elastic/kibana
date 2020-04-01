@@ -261,6 +261,9 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   remove: (id: string) =>  {
     // ...
   },
+  get: (id: string) =>  {
+    // ...
+  },
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: any) => {
     // ...
   },

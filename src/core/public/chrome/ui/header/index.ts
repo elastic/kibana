@@ -18,7 +18,6 @@
  */
 
 export { Header, HeaderProps } from './header';
-export { HeaderWrapper } from './header_wrapper';
 export {
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
@@ -26,3 +25,4 @@ export {
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
 } from './header_help_menu';
+export type OnIsLockedUpdate = (isLocked: boolean) => void;

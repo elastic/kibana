@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers } from './helpers';
+import { setHttp } from '../../public/crud_app/services';
+import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
 
@@ -13,8 +14,6 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 5: Metrics', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let find;
   let exists;
   let actions;
@@ -22,20 +21,24 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   let goToStep;
   let table;
   let metrics;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+    mockHttpRequest(npStart.core.http);
 
     ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, metrics } = setup());
+  });
+
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
+    npStart.core.http.post.mockClear();
+    npStart.core.http.put.mockClear();
   });
 
   const numericFields = ['a-numericField', 'c-numericField'];
@@ -109,7 +112,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
     describe('table', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields, dateFields } });
         await goToStepAndOpenFieldChooser();
       });
 
@@ -166,7 +169,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
     describe('when fields are added', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields, dateFields } });
         await goToStepAndOpenFieldChooser();
       });
 
@@ -257,7 +260,8 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       let getFieldListTableRows;
 
       beforeEach(async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, dateFields });
+        mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields, dateFields } });
+
         await goToStep(5);
         await addFieldToList('numeric');
         await addFieldToList('date');

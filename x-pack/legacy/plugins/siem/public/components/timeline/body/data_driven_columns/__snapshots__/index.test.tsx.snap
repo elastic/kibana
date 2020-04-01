@@ -6,11 +6,7 @@ exports[`Columns it renders the expected columns 1`] = `
 >
   <styled.div
     key="message"
-    style={
-      Object {
-        "flexBasis": "180px",
-      }
-    }
+    width={180}
   >
     <styled.div
       data-test-subj="cell-container"
@@ -40,16 +36,12 @@ exports[`Columns it renders the expected columns 1`] = `
   </styled.div>
   <styled.div
     key="event.category"
-    style={
-      Object {
-        "flexBasis": "180px",
-      }
-    }
+    width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -63,16 +55,12 @@ exports[`Columns it renders the expected columns 1`] = `
   </styled.div>
   <styled.div
     key="event.action"
-    style={
-      Object {
-        "flexBasis": "180px",
-      }
-    }
+    width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -86,16 +74,12 @@ exports[`Columns it renders the expected columns 1`] = `
   </styled.div>
   <styled.div
     key="host.name"
-    style={
-      Object {
-        "flexBasis": "180px",
-      }
-    }
+    width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -109,16 +93,12 @@ exports[`Columns it renders the expected columns 1`] = `
   </styled.div>
   <styled.div
     key="source.ip"
-    style={
-      Object {
-        "flexBasis": "180px",
-      }
-    }
+    width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -132,16 +112,12 @@ exports[`Columns it renders the expected columns 1`] = `
   </styled.div>
   <styled.div
     key="destination.ip"
-    style={
-      Object {
-        "flexBasis": "180px",
-      }
-    }
+    width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -155,16 +131,12 @@ exports[`Columns it renders the expected columns 1`] = `
   </styled.div>
   <styled.div
     key="user.name"
-    style={
-      Object {
-        "flexBasis": "180px",
-      }
-    }
+    width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""

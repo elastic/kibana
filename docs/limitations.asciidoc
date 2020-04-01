@@ -1,22 +1,38 @@
+[chapter]
 [[limitations]]
 = Limitations
 
-[partintro]
---
-{kib} currently has the following limitations.
+Following are the known limitations in {kib}.
 
-* <<nested-objects>>
-* <<export-data>>
-* <<graph-limitations,Graph analytics>>
+[float]
+=== Exporting data
 
-These {stack} features also have limitations that affect {kib}:
+Exporting a data table or saved search from a dashboard or visualization report
+has known limitations. The PDF report only includes the data visible on the screen.
+
+[float]
+=== Nested objects
+
+Kibana cannot perform aggregations across fields that contain nested objects.
+It also cannot search on nested objects when Lucene Query Syntax is used in
+the query bar.
+
+[IMPORTANT]
+==============================================
+Using `include_in_parent` or `copy_to` as a workaround is not supported and may stop functioning in future releases.
+==============================================
+
+[float]
+=== Graph
+
+Graph has limited support for multiple indices.
+Go to <<graph-limitations, Graph limitations>> for details.
+
+[float]
+=== Other limitations
+
+These {stack} features have limitations that affect {kib}:
 
 * {ref}/watcher-limitations.html[Alerting]
 * {ml-docs}/ml-limitations.html[Machine learning]
 * {ref}/security-limitations.html[Security]
-
---
-
-include::limitations/nested-objects.asciidoc[]
-
-include::limitations/export-data.asciidoc[]

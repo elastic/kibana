@@ -153,7 +153,7 @@ export class DatasourceComponent extends PureComponent {
             flush="left"
             size="s"
           >
-            <EuiIcon type="database" className="canvasDataSource__triggerButtonIcon" />
+            <EuiIcon type={stateDatasource.image} className="canvasDataSource__triggerButtonIcon" />
             {stateDatasource.displayName}
           </EuiButtonEmpty>
           <EuiSpacer size="s" />

@@ -5,19 +5,19 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import { updateSignalStatus } from '../../../../containers/detection_engine/signals/api';
 import { SendSignalToTimelineActionProps, UpdateSignalStatusActionProps } from './types';
-import { TimelineNonEcsData, GetOneTimeline, TimelineResult } from '../../../../graphql/types';
+import { TimelineNonEcsData, GetOneTimeline, TimelineResult, Ecs } from '../../../../graphql/types';
 import { oneTimelineQuery } from '../../../../containers/timeline/one/index.gql_query';
 import {
   omitTypenameInTimeline,
   formatTimelineResultToModel,
 } from '../../../../components/open_timeline/helpers';
 import { convertKueryToElasticSearchQuery } from '../../../../lib/keury';
-import { timelineDefaults } from '../../../../store/timeline/model';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 import {
   replaceTemplateFieldFromQuery,
   replaceTemplateFieldFromMatchFilters,
@@ -72,15 +72,7 @@ export const updateSignalStatusAction = async ({
   }
 };
 
-export const sendSignalToTimelineAction = async ({
-  apolloClient,
-  createTimeline,
-  ecsData,
-  updateTimelineIsLoading,
-}: SendSignalToTimelineActionProps) => {
-  const timelineId =
-    ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
-
+export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
   const ellapsedTimeRule = moment.duration(
     moment().diff(
       dateMath.parse(ecsData.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
@@ -91,6 +83,21 @@ export const sendSignalToTimelineAction = async ({
     .subtract(ellapsedTimeRule)
     .valueOf();
   const to = moment(ecsData.timestamp ?? new Date()).valueOf();
+
+  return { to, from };
+};
+
+export const sendSignalToTimelineAction = async ({
+  apolloClient,
+  createTimeline,
+  ecsData,
+  updateTimelineIsLoading,
+}: SendSignalToTimelineActionProps) => {
+  let openSignalInBasicTimeline = true;
+  const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
+  const timelineId =
+    ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
+  const { to, from } = determineToAndFrom({ ecsData });
 
   if (timelineId !== '' && apolloClient != null) {
     try {
@@ -105,57 +112,77 @@ export const sendSignalToTimelineAction = async ({
           id: timelineId,
         },
       });
+      const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
 
-      const timelineTemplate: TimelineResult = omitTypenameInTimeline(
-        getOr({}, 'data.getOneTimeline', responseTimeline)
-      );
-      const { timeline } = formatTimelineResultToModel(timelineTemplate, true);
-      const query = replaceTemplateFieldFromQuery(
-        timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
-        ecsData
-      );
-      const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
-      const dataProviders = replaceTemplateFieldFromDataProviders(
-        timeline.dataProviders ?? [],
-        ecsData
-      );
-      createTimeline({
-        from,
-        timeline: {
-          ...timeline,
-          dataProviders,
-          eventType: 'all',
-          filters,
-          dateRange: {
-            start: from,
-            end: to,
-          },
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
+      if (!isEmpty(resultingTimeline)) {
+        const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
+        openSignalInBasicTimeline = false;
+        const { timeline } = formatTimelineResultToModel(timelineTemplate, true);
+        const query = replaceTemplateFieldFromQuery(
+          timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
+          ecsData
+        );
+        const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
+        const dataProviders = replaceTemplateFieldFromDataProviders(
+          timeline.dataProviders ?? [],
+          ecsData
+        );
+        createTimeline({
+          from,
+          timeline: {
+            ...timeline,
+            dataProviders,
+            eventType: 'all',
+            filters,
+            dateRange: {
+              start: from,
+              end: to,
+            },
+            kqlQuery: {
+              filterQuery: {
+                kuery: {
+                  kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
+                  expression: query,
+                },
+                serializedQuery: convertKueryToElasticSearchQuery(query),
+              },
+              filterQueryDraft: {
                 kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
                 expression: query,
               },
-              serializedQuery: convertKueryToElasticSearchQuery(query),
             },
-            filterQueryDraft: {
-              kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
-              expression: query,
-            },
+            show: true,
           },
-          show: true,
-        },
-        to,
-      });
+          to,
+          ruleNote: noteContent,
+        });
+      }
     } catch {
+      openSignalInBasicTimeline = true;
       updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
     }
-  } else {
-    const query = `_id: ${ecsData._id}`;
+  }
+
+  if (openSignalInBasicTimeline) {
     createTimeline({
       from,
       timeline: {
         ...timelineDefaults,
+        dataProviders: [
+          {
+            and: [],
+            id: `send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-${ecsData._id}`,
+            name: ecsData._id,
+            enabled: true,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: '_id',
+              value: ecsData._id,
+              operator: ':',
+            },
+          },
+        ],
         id: 'timeline-1',
         dateRange: {
           start: from,
@@ -166,17 +193,18 @@ export const sendSignalToTimelineAction = async ({
           filterQuery: {
             kuery: {
               kind: 'kuery',
-              expression: query,
+              expression: '',
             },
-            serializedQuery: convertKueryToElasticSearchQuery(query),
+            serializedQuery: '',
           },
           filterQueryDraft: {
             kind: 'kuery',
-            expression: query,
+            expression: '',
           },
         },
       },
       to,
+      ruleNote: noteContent,
     });
   }
 };

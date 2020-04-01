@@ -22,14 +22,13 @@ import React from 'react';
 import { last } from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
 import { SeriesDragHandler } from '../series_drag_handler';
+import { i18n } from '@kbn/i18n';
 
-function AggRowUi(props) {
+export function AggRow(props) {
   let iconType = 'eyeClosed';
   let iconColor = 'subdued';
   const lastSibling = last(props.siblings);
-  const { intl } = props;
 
   if (lastSibling.id === props.model.id) {
     iconType = 'eye';
@@ -57,12 +56,10 @@ function AggRowUi(props) {
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             testSubj="addMetric"
-            addTooltip={intl.formatMessage({
-              id: 'visTypeTimeseries.aggRow.addMetricButtonTooltip',
+            addTooltip={i18n.translate('visTypeTimeseries.aggRow.addMetricButtonTooltip', {
               defaultMessage: 'Add Metric',
             })}
-            deleteTooltip={intl.formatMessage({
-              id: 'visTypeTimeseries.aggRow.deleteMetricButtonTooltip',
+            deleteTooltip={i18n.translate('visTypeTimeseries.aggRow.deleteMetricButtonTooltip', {
               defaultMessage: 'Delete Metric',
             })}
             onAdd={props.onAdd}
@@ -75,7 +72,7 @@ function AggRowUi(props) {
   );
 }
 
-AggRowUi.propTypes = {
+AggRow.propTypes = {
   disableDelete: PropTypes.bool,
   model: PropTypes.object,
   onAdd: PropTypes.func,
@@ -83,5 +80,3 @@ AggRowUi.propTypes = {
   siblings: PropTypes.array,
   dragHandleProps: PropTypes.object,
 };
-
-export const AggRow = injectI18n(AggRowUi);

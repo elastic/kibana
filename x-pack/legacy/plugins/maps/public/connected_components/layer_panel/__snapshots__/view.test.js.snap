@@ -61,6 +61,7 @@ exports[`LayerPanel is rendered 1`] = `
         className="mapLayerPanel__sourceDetails"
       >
         <EuiAccordion
+          arrowDisplay="left"
           buttonContent="Source details"
           id="accordion1"
           initialIsOpen={false}
@@ -101,7 +102,10 @@ exports[`LayerPanel is rendered 1`] = `
           mockSourceSettings
         </div>
         <EuiPanel>
-          <JoinEditor />
+          <JoinEditor
+            layerDisplayName="layer 1"
+            leftJoinFields={Array []}
+          />
         </EuiPanel>
         <EuiSpacer
           size="s"

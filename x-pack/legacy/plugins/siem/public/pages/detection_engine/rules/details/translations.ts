@@ -13,7 +13,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.ruleDetails
 export const BACK_TO_RULES = i18n.translate(
   'xpack.siem.detectionEngine.ruleDetails.backToRulesDescription',
   {
-    defaultMessage: 'Back to rules',
+    defaultMessage: 'Back to signal detection rules',
   }
 );
 
@@ -34,24 +34,6 @@ export const ACTIVATE_RULE = i18n.translate(
 export const UNKNOWN = i18n.translate('xpack.siem.detectionEngine.ruleDetails.unknownDescription', {
   defaultMessage: 'Unknown',
 });
-
-export const STATUS = i18n.translate('xpack.siem.detectionEngine.ruleDetails.statusDescription', {
-  defaultMessage: 'Status',
-});
-
-export const STATUS_AT = i18n.translate(
-  'xpack.siem.detectionEngine.ruleDetails.statusAtDescription',
-  {
-    defaultMessage: 'at',
-  }
-);
-
-export const STATUS_DATE = i18n.translate(
-  'xpack.siem.detectionEngine.ruleDetails.statusDateDescription',
-  {
-    defaultMessage: 'Status date',
-  }
-);
 
 export const ERROR_CALLOUT_TITLE = i18n.translate(
   'xpack.siem.detectionEngine.ruleDetails.errorCalloutTitle',

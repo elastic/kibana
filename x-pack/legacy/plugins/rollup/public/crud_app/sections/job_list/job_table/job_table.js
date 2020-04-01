@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiCheckbox,
@@ -120,7 +120,7 @@ const COLUMNS = [
   },
 ];
 
-export class JobTableUi extends Component {
+export class JobTable extends Component {
   static propTypes = {
     jobs: PropTypes.array,
     pager: PropTypes.object.isRequired,
@@ -333,7 +333,7 @@ export class JobTableUi extends Component {
   }
 
   render() {
-    const { filterChanged, filter, jobs, intl, closeDetailPanel } = this.props;
+    const { filterChanged, filter, jobs, closeDetailPanel } = this.props;
 
     const { idToSelectedJobMap } = this.state;
 
@@ -360,8 +360,7 @@ export class JobTableUi extends Component {
                 filterChanged(event.target.value);
               }}
               data-test-subj="jobTableFilterInput"
-              placeholder={intl.formatMessage({
-                id: 'xpack.rollupJobs.jobTable.searchInputPlaceholder',
+              placeholder={i18n.translate('xpack.rollupJobs.jobTable.searchInputPlaceholder', {
                 defaultMessage: 'Search',
               })}
               aria-label="Search jobs"
@@ -405,5 +404,3 @@ export class JobTableUi extends Component {
     );
   }
 }
-
-export const JobTable = injectI18n(JobTableUi);

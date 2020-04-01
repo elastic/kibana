@@ -36,7 +36,16 @@ export const ENABLE_NEWS_FEED_SETTING = 'siem:enableNewsFeed';
 export const NEWS_FEED_URL_SETTING = 'siem:newsFeedUrl';
 
 /** The default value for News feed widget */
-export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/kibana'; // TODO: replace this with the real feed URL
+export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/security-solution';
+
+/** This Kibana Advanced Setting specifies the URLs of `IP Reputation Links`*/
+export const IP_REPUTATION_LINKS_SETTING = 'siem:ipReputationLinks';
+
+/** The default value for `IP Reputation Links` */
+export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
+  { "name": "virustotal.com", "url_template": "https://www.virustotal.com/gui/search/{{ip}}" },
+  { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
+]`;
 
 /**
  * Id for the signals alerting type
@@ -44,12 +53,20 @@ export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/kibana'; 
 export const SIGNALS_ID = `${APP_ID}.signals`;
 
 /**
+ * Id for the notifications alerting type
+ */
+export const NOTIFICATIONS_ID = `${APP_ID}.notifications`;
+
+/**
  * Special internal structure for tags for signals. This is used
  * to filter out tags that have internal structures within them.
  */
 export const INTERNAL_IDENTIFIER = '__internal';
 export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id`;
+export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`;
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
+export const INTERNAL_NOTIFICATION_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_id`;
+export const INTERNAL_NOTIFICATION_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_notification_rule_id`;
 
 /**
  * Detection engine routes
@@ -60,7 +77,12 @@ export const DETECTION_ENGINE_PREPACKAGED_URL = `${DETECTION_ENGINE_RULES_URL}/p
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges`;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
-export const DETECTION_ENGINE_RULES_STATUS = `${DETECTION_ENGINE_URL}/rules/_find_statuses`;
+export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
+export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
+
+export const TIMELINE_URL = '/api/timeline';
+export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
+export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -74,3 +96,20 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
  * Common naming convention for an unauthenticated user
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
+
+/*
+  Licensing requirements
+ */
+export const MINIMUM_ML_LICENSE = 'platinum';
+
+/*
+  Rule notifications options
+*/
+export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
+  '.email',
+  '.slack',
+  '.pagerduty',
+  '.webhook',
+];
+export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
+export const NOTIFICATION_THROTTLE_RULE = 'rule';

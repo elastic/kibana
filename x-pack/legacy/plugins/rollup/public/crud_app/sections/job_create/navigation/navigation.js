@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -18,7 +18,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-const NavigationUi = ({
+export const Navigation = ({
   isSaving,
   hasNextStep,
   hasPreviousStep,
@@ -120,7 +120,7 @@ const NavigationUi = ({
   );
 };
 
-NavigationUi.propTypes = {
+Navigation.propTypes = {
   hasNextStep: PropTypes.bool.isRequired,
   hasPreviousStep: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,
@@ -129,5 +129,3 @@ NavigationUi.propTypes = {
   save: PropTypes.func.isRequired,
   canGoToNextStep: PropTypes.bool.isRequired,
 };
-
-export const Navigation = injectI18n(NavigationUi);

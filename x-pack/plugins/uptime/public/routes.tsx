@@ -6,26 +6,31 @@
 
 import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { AutocompleteProviderRegister } from 'src/plugins/data/public';
-import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
-import { UMUpdateBreadcrumbs } from './lib/lib';
-
-export const MONITOR_ROUTE = '/monitor/:monitorId/:location?';
-export const OVERVIEW_ROUTE = '/';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { MONITOR_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../common/constants';
+import { OverviewPage } from './components/connected/pages/overview_container';
+import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
 
 interface RouterProps {
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
-  basePath: string;
-  setBreadcrumbs: UMUpdateBreadcrumbs;
+  autocomplete: DataPublicPluginSetup['autocomplete'];
 }
 
-export const PageRouter: FC<RouterProps> = ({ autocomplete, basePath, setBreadcrumbs }) => (
+export const PageRouter: FC<RouterProps> = ({ autocomplete }) => (
   <Switch>
     <Route path={MONITOR_ROUTE}>
-      <MonitorPage setBreadcrumbs={setBreadcrumbs} />
+      <div data-test-subj="uptimeMonitorPage">
+        <MonitorPage />
+      </div>
+    </Route>
+    <Route path={SETTINGS_ROUTE}>
+      <div data-test-subj="uptimeSettingsPage">
+        <SettingsPage />
+      </div>
     </Route>
     <Route path={OVERVIEW_ROUTE}>
-      <OverviewPage autocomplete={autocomplete} setBreadcrumbs={setBreadcrumbs} />
+      <div data-test-subj="uptimeOverviewPage">
+        <OverviewPage autocomplete={autocomplete} />
+      </div>
     </Route>
     <Route component={NotFoundPage} />
   </Switch>

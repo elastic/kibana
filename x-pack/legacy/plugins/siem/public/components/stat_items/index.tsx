@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ScaleType,
-  niceTimeFormatter,
-  Rotation,
-  BrushEndListener,
-  ElementClickListener,
-} from '@elastic/charts';
+import { ScaleType, Rotation, BrushEndListener, ElementClickListener } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,6 +22,7 @@ import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
 import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
+import { histogramDateTimeFormatter } from '../utils';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton, InspectButtonContainer } from '../inspect';
@@ -274,7 +269,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                   <AreaChart
                     areaChart={areaChart}
                     configs={areachartConfigs({
-                      xTickFormatter: niceTimeFormatter([from, to]),
+                      xTickFormatter: histogramDateTimeFormatter([from, to]),
                       onBrushEnd: narrowDateRange,
                     })}
                   />

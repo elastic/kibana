@@ -8,9 +8,6 @@ import { ServerFacade } from '../types';
 
 export const createMockServer = ({ settings = {} }: any): ServerFacade => {
   const mockServer = {
-    expose: () => {
-      ' ';
-    },
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
@@ -24,10 +21,6 @@ export const createMockServer = ({ settings = {} }: any): ServerFacade => {
         }),
       },
     },
-    savedObjects: {
-      getScopedSavedObjectsClient: jest.fn(),
-    },
-    uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
   };
 
   const defaultSettings: any = {

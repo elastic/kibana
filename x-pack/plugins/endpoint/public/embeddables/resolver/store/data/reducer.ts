@@ -6,11 +6,11 @@
 
 import { Reducer } from 'redux';
 import { DataState, ResolverAction } from '../../types';
-import { sampleData } from './sample';
 
 function initialState(): DataState {
   return {
-    results: sampleData.data.result.search_results,
+    results: [],
+    isLoading: false,
   };
 }
 
@@ -24,6 +24,12 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     return {
       ...state,
       results: search_results,
+      isLoading: false,
+    };
+  } else if (action.type === 'appRequestedResolverData') {
+    return {
+      ...state,
+      isLoading: true,
     };
   } else {
     return state;

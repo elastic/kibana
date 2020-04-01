@@ -37,40 +37,22 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await browser.setWindowSize(1600, 850);
     }
 
-    async getUrlOfTab(tabIndex) {
-      return await retry.try(async () => {
-        log.debug(`reportingPage.getUrlOfTab(${tabIndex}`);
-        const handles = await browser.getAllWindowHandles();
-        log.debug(`Switching to window ${handles[tabIndex]}`);
-        await browser.switchToWindow(handles[tabIndex]);
-
-        const url = await browser.getCurrentUrl();
-        if (!url || url === 'about:blank') {
-          throw new Error('url is blank');
-        }
-
-        await browser.switchToWindow(handles[0]);
-        return url;
-      });
-    }
-
-    async closeTab(tabIndex) {
-      return await retry.try(async () => {
-        log.debug(`reportingPage.closeTab(${tabIndex}`);
-        const handles = await browser.getAllWindowHandles();
-        log.debug(`Switching to window ${handles[tabIndex]}`);
-        await browser.switchToWindow(handles[tabIndex]);
-        await browser.closeCurrentWindow();
-        await browser.switchToWindow(handles[0]);
-      });
-    }
-
     async forceSharedItemsContainerSize({ width }) {
       await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
         el.style.flex="none";
         el.style.width="${width}px";
       `);
+    }
+
+    async getReportURL(timeout) {
+      log.debug('getReportURL');
+
+      const url = await testSubjects.getAttribute('downloadCompletedReportButton', 'href', timeout);
+
+      log.debug(`getReportURL got url: ${url}`);
+
+      return url;
     }
 
     async removeForceSharedItemsContainerSize() {
@@ -81,9 +63,8 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       `);
     }
 
-    getRawPdfReportData(url) {
-      log.debug(`getRawPdfReportData for ${url}`);
-      let data = []; // List of Buffer objects
+    getResponse(url) {
+      log.debug(`getResponse for ${url}`);
       const auth = config.get('servers.elasticsearch.auth');
       const headers = {
         Authorization: `Basic ${Buffer.from(auth).toString('base64')}`,
@@ -100,18 +81,24 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
               headers,
             },
             res => {
-              res.on('data', function(chunk) {
-                data.push(chunk);
-              });
-              res.on('end', function() {
-                data = Buffer.concat(data);
-                resolve(data);
-              });
+              resolve(res);
             }
           )
           .on('error', e => {
             reject(e);
           });
+      });
+    }
+
+    async getRawPdfReportData(url) {
+      const data = []; // List of Buffer objects
+      log.debug(`getRawPdfReportData for ${url}`);
+
+      return new Promise(async (resolve, reject) => {
+        const response = await this.getResponse(url).catch(reject);
+
+        response.on('data', chunk => data.push(chunk));
+        response.on('end', () => resolve(Buffer.concat(data)));
       });
     }
 
@@ -128,10 +115,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     async openPngReportingPanel() {
       log.debug('openPngReportingPanel');
       await PageObjects.share.openShareMenuItem('PNG Reports');
-    }
-
-    async clickDownloadReportButton(timeout) {
-      await testSubjects.click('downloadCompletedReportButton', timeout);
     }
 
     async clearToastNotifications() {
@@ -175,7 +158,9 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async setTimepickerInDataRange() {
       log.debug('Reporting:setTimepickerInDataRange');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      const fromTime = 'Sep 19, 2015 @ 06:31:44.000';
+      const toTime = 'Sep 19, 2015 @ 18:01:44.000';
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInNoDataRange() {

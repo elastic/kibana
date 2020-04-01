@@ -17,22 +17,38 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppUpdater, AppUpdatableFields, CoreStart } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
+import {
+  Plugin,
+  CoreSetup,
+  AppUpdater,
+  AppUpdatableFields,
+  CoreStart,
+  AppMountParameters,
+} from 'kibana/public';
+import './types';
 
-export class CoreAppStatusPlugin
-  implements Plugin<CoreAppStatusPluginSetup, CoreAppStatusPluginStart> {
+export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public setup(core: CoreSetup, deps: {}) {
+    core.application.register({
+      id: 'app_status_start',
+      title: 'App Status Start Page',
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        return renderApp('app_status_start', params);
+      },
+    });
+
     core.application.register({
       id: 'app_status',
       title: 'App Status',
       euiIconType: 'snowflake',
       updater$: this.appUpdater,
-      async mount(context, params) {
+      async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
-        return renderApp(context, params);
+        return renderApp('app_status', params);
       },
     });
 
@@ -40,7 +56,7 @@ export class CoreAppStatusPlugin
   }
 
   public start(core: CoreStart) {
-    return {
+    const startContract = {
       setAppStatus: (status: Partial<AppUpdatableFields>) => {
         this.appUpdater.next(() => status);
       },
@@ -48,9 +64,10 @@ export class CoreAppStatusPlugin
         return core.application.navigateToApp(appId);
       },
     };
+    window.__coreAppStatus = startContract;
+    return startContract;
   }
   public stop() {}
 }
 
-export type CoreAppStatusPluginSetup = ReturnType<CoreAppStatusPlugin['setup']>;
 export type CoreAppStatusPluginStart = ReturnType<CoreAppStatusPlugin['start']>;

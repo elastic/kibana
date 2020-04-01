@@ -5,4 +5,3 @@ This folder contains example plugins.  To run the plugins in this folder, use th
 ```
 yarn start --run-examples
 ```
-

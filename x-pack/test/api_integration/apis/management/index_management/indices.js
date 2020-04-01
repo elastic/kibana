@@ -104,7 +104,7 @@ export default function({ getService }) {
 
       it('should require index or indices to be provided', async () => {
         const { body } = await deleteIndex().expect(400);
-        expect(body.message).to.contain('index / indices is missing');
+        expect(body.message).to.contain('expected value of type [string]');
       });
     });
 
@@ -144,7 +144,7 @@ export default function({ getService }) {
 
       it('should allow to define the number of segments', async () => {
         const index = await createIndex();
-        await forceMerge(index, { max_num_segments: 1 }).expect(200);
+        await forceMerge(index, { maxNumSegments: 1 }).expect(200);
       });
     });
 

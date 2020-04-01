@@ -18,15 +18,10 @@ Array [
         <div
           class="euiCallOutHeader"
         >
-          <svg
+          <div
             aria-hidden="true"
-            class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
-            focusable="false"
-            height="16"
-            role="img"
-            viewBox="0 0 16 16"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
+            class="euiCallOutHeader__icon"
+            data-euiicon-type="help"
           />
           <span
             class="euiCallOutHeader__title"
@@ -77,12 +72,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               200
             </code>
           </span>
@@ -101,12 +92,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               status:200
             </code>
           </span>
@@ -125,12 +112,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               status:[400 TO 499]
             </code>
           </span>
@@ -149,12 +132,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               status:[400 TO 499] AND extension:PHP
             </code>
           </span>
@@ -173,12 +152,8 @@ Array [
         <dd
           class="euiDescriptionList__description"
         >
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
+          <span>
+            <code>
               status:[400 TO 499] AND (extension:php OR extension:html)
             </code>
           </span>
@@ -210,15 +185,10 @@ Array [
         <div
           class="euiCallOutHeader"
         >
-          <svg
+          <div
             aria-hidden="true"
-            class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
-            focusable="false"
-            height="16"
-            role="img"
-            viewBox="0 0 16 16"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
+            class="euiCallOutHeader__icon"
+            data-euiicon-type="help"
           />
           <span
             class="euiCallOutHeader__title"
@@ -250,15 +220,10 @@ Array [
         <div
           class="euiCallOutHeader"
         >
-          <svg
+          <div
             aria-hidden="true"
-            class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
-            focusable="false"
-            height="16"
-            role="img"
-            viewBox="0 0 16 16"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
+            class="euiCallOutHeader__icon"
+            data-euiicon-type="help"
           />
           <span
             class="euiCallOutHeader__title"
@@ -291,15 +256,9 @@ Array [
           <div
             class="euiSpacer euiSpacer--s"
           />
-          <div
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
-          >
-            <pre
-              class="euiCodeBlock__pre"
-            >
-              <code
-                class="euiCodeBlock__code"
-              >
+          <div>
+            <pre>
+              <code>
                 {"reason":"Awful error"}
               </code>
             </pre>
@@ -320,15 +279,9 @@ Array [
           <div
             class="euiSpacer euiSpacer--s"
           />
-          <div
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
-          >
-            <pre
-              class="euiCodeBlock__pre"
-            >
-              <code
-                class="euiCodeBlock__code"
-              >
+          <div>
+            <pre>
+              <code>
                 {"reason":"Bad error"}
               </code>
             </pre>
@@ -358,15 +311,10 @@ Array [
         <div
           class="euiCallOutHeader"
         >
-          <svg
+          <div
             aria-hidden="true"
-            class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
-            focusable="false"
-            height="16"
-            role="img"
-            viewBox="0 0 16 16"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
+            class="euiCallOutHeader__icon"
+            data-euiicon-type="help"
           />
           <span
             class="euiCallOutHeader__title"

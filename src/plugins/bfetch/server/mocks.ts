@@ -26,6 +26,7 @@ export type Start = jest.Mocked<BfetchServerStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
+    addBatchProcessingRoute: jest.fn(),
     addStreamingResponseRoute: jest.fn(),
   };
   return setupContract;
@@ -54,7 +55,7 @@ const createPlugin = async () => {
   };
 };
 
-export const uiActionsPluginMock = {
+export const bfetchPluginMock = {
   createSetupContract,
   createStartContract,
   createPlugin,

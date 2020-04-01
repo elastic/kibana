@@ -18,7 +18,7 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { indexPatterns } from '../';
+import { IndexPatternMissingIndices } from '../lib';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -46,7 +46,7 @@ export class IndexPatternsApiClient {
       })
       .catch((resp: any) => {
         if (resp.body.statusCode === 404 && resp.body.statuscode === 'no_matching_indices') {
-          throw new indexPatterns.IndexPatternMissingIndices(resp.body.message);
+          throw new IndexPatternMissingIndices(resp.body.message);
         }
 
         throw new Error(resp.body.message || resp.body.error || `${resp.body.statusCode} Response`);

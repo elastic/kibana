@@ -161,7 +161,7 @@ export class ManagementSidebarNav extends React.Component<
   }
 
   public render() {
-    const HEADER_ID = 'management-nav-header';
+    const HEADER_ID = 'stack-management-nav-header';
 
     return (
       <>

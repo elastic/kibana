@@ -15,6 +15,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
     fullWidth={false}
     hasDividers={true}
     isInvalid={false}
+    isLoading={false}
     onChange={[Function]}
     options={
       Array [

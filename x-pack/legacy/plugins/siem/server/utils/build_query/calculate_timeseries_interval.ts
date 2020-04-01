@@ -89,13 +89,6 @@ export const calculateAuto = {
   }),
 };
 
-export const calculateTimeseriesInterval = (
-  lowerBoundInMsSinceEpoch: number,
-  upperBoundInMsSinceEpoch: number
-) => {
-  const duration = moment.duration(upperBoundInMsSinceEpoch - lowerBoundInMsSinceEpoch, 'ms');
-
-  const matchedInterval = calculateAuto.near(50, duration);
-
-  return matchedInterval ? Math.max(matchedInterval.asSeconds(), 1) : null;
+export const calculateTimeSeriesInterval = (from: number, to: number) => {
+  return `${Math.floor((to - from) / 32)}ms`;
 };

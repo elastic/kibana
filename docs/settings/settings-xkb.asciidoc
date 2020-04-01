@@ -10,6 +10,7 @@ include::{asciidoc-dir}/../../shared/settings.asciidoc[]
 
 For more {kib} configuration settings, see <<settings>>.
 
+include::alert-action-settings.asciidoc[]
 include::apm-settings.asciidoc[]
 include::dev-settings.asciidoc[]
 include::graph-settings.asciidoc[]

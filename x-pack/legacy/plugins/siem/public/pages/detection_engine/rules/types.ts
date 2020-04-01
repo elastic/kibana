@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../../src/plugins/data/common';
-import { Rule } from '../../../containers/detection_engine/rules';
+import { AlertAction } from '../../../../../../../plugins/alerting/common';
+import { RuleAlertAction, RuleType } from '../../../../common/detection_engine/types';
+import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from './components/query_bar';
-import { FormData, FormHook } from './components/shared_imports';
+import { FormData, FormHook } from '../../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';
 
 export interface EuiBasicTableSortTypes {
@@ -23,34 +24,11 @@ export interface EuiBasicTableOnChange {
   sort?: EuiBasicTableSortTypes;
 }
 
-export interface TableData {
-  id: string;
-  immutable: boolean;
-  rule_id: string;
-  rule: {
-    href: string;
-    name: string;
-    status: string;
-  };
-  method: string;
-  severity: string;
-  lastCompletedRun: string | undefined;
-  lastResponse: {
-    type: string;
-    message?: string;
-  };
-  tags: string[];
-  activate: boolean;
-  isLoading: boolean;
-  sourceRule: Rule;
-  status?: string | null;
-  statusDate?: string | null;
-}
-
 export enum RuleStep {
   defineRule = 'define-rule',
   aboutRule = 'about-rule',
   scheduleRule = 'schedule-rule',
+  ruleActions = 'rule-actions',
 }
 export type RuleStatusType = 'passive' | 'active' | 'valid';
 
@@ -61,7 +39,7 @@ export interface RuleStepData {
 
 export interface RuleStepProps {
   addPadding?: boolean;
-  descriptionDirection?: 'row' | 'column';
+  descriptionColumns?: 'multi' | 'single' | 'singleSplit';
   setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
   isReadOnlyView: boolean;
   isUpdateView?: boolean;
@@ -81,28 +59,48 @@ export interface AboutStepRule extends StepRuleData {
   references: string[];
   falsePositives: string[];
   tags: string[];
-  timeline: FieldValueTimeline;
-  threats: IMitreEnterpriseAttack[];
+  threat: IMitreEnterpriseAttack[];
+  note: string;
+}
+
+export interface AboutStepRuleDetails {
+  note: string;
+  description: string;
 }
 
 export interface DefineStepRule extends StepRuleData {
+  anomalyThreshold: number;
   index: string[];
+  machineLearningJobId: string;
   queryBar: FieldValueQueryBar;
+  ruleType: RuleType;
+  timeline: FieldValueTimeline;
 }
 
 export interface ScheduleStepRule extends StepRuleData {
-  enabled: boolean;
   interval: string;
   from: string;
   to?: string;
 }
 
+export interface ActionsStepRule extends StepRuleData {
+  actions: AlertAction[];
+  enabled: boolean;
+  kibanaSiemAppUrl?: string;
+  throttle?: string | null;
+}
+
 export interface DefineStepRuleJson {
-  index: string[];
-  filters: esFilters.Filter[];
+  anomaly_threshold?: number;
+  index?: string[];
+  filters?: Filter[];
+  machine_learning_job_id?: string;
   saved_id?: string;
-  query: string;
-  language: string;
+  query?: string;
+  language?: string;
+  timeline_id?: string;
+  timeline_title?: string;
+  type: RuleType;
 }
 
 export interface AboutStepRuleJson {
@@ -113,24 +111,23 @@ export interface AboutStepRuleJson {
   references: string[];
   false_positives: string[];
   tags: string[];
-  timeline_id?: string;
-  timeline_title?: string;
-  threats: IMitreEnterpriseAttack[];
+  threat: IMitreEnterpriseAttack[];
+  note?: string;
 }
 
 export interface ScheduleStepRuleJson {
-  enabled: boolean;
   interval: string;
   from: string;
   to?: string;
   meta?: unknown;
 }
 
-export type MyRule = Omit<DefineStepRule & ScheduleStepRule & AboutStepRule, 'isNew'> & {
-  immutable: boolean;
-};
-
-export type FormatRuleType = 'query' | 'saved_query';
+export interface ActionsStepRuleJson {
+  actions: RuleAlertAction[];
+  enabled: boolean;
+  throttle?: string | null;
+  meta?: unknown;
+}
 
 export interface IMitreAttack {
   id: string;
@@ -140,5 +137,5 @@ export interface IMitreAttack {
 export interface IMitreEnterpriseAttack {
   framework: string;
   tactic: IMitreAttack;
-  techniques: IMitreAttack[];
+  technique: IMitreAttack[];
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, Component } from 'react';
-import chrome from 'ui/chrome';
+import chrome from 'plugins/monitoring/np_imports/ui/chrome';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { capitalize, partial } from 'lodash';

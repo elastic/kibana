@@ -43,6 +43,7 @@ import {
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
+  BuildKibanaPlatformPluginsTask,
   OptimizeBuildTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
@@ -53,6 +54,7 @@ import {
   VerifyExistingNodeBuildsTask,
   PathLengthTask,
   WriteShaSumsTask,
+  UuidVerificationTask,
 } from './tasks';
 
 export async function buildDistributables(options) {
@@ -118,6 +120,7 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
+  await run(BuildKibanaPlatformPluginsTask);
   await run(OptimizeBuildTask);
   await run(CleanClientModulesOnDLLTask);
   await run(CleanTypescriptTask);
@@ -134,6 +137,7 @@ export async function buildDistributables(options) {
   await run(CleanNodeBuildsTask);
 
   await run(PathLengthTask);
+  await run(UuidVerificationTask);
 
   /**
    * package platform-specific builds into archives

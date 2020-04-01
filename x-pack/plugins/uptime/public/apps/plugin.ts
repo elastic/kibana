@@ -22,12 +22,14 @@ import { PLUGIN } from '../../common';
 import { createApolloClient } from '../lib/adapters/framework/apollo_client_adapter';
 // @ts-ignore
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
+import { getKibanaFrameworkAdapter } from '../lib/adapters/framework/new_platform_adapter';
 // import { renderApp } from './render_app';
 
 export interface StartObject {
   core: LegacyCoreStart;
   plugins: any;
 }
+console.log('adapter', getKibanaFrameworkAdapter);
 
 export class UptimePlugin implements Plugin {
   // private el: HTMLElement | undefined;
@@ -70,13 +72,11 @@ export class UptimePlugin implements Plugin {
         const { element } = params;
         // console.log('plugins from mount', plugins);
         const libs: UMFrontendLibs = {
-          // @ts-ignore
           framework: getKibanaFrameworkAdapter(coreStart, plugins),
         };
         // console.log(libs);
         // console.log('corestart from mount', coreStart);
-        // @ts-ignore
-        libs.framework.render({}, {}, element);
+        libs.framework.render(element);
         return () => {};
         // console.log('value after setting el', this.el);
         // return renderApp(element);

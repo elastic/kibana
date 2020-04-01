@@ -399,7 +399,7 @@ export const ecsSchema = gql`
     references: ToStringArray
     severity: ToStringArray
     tags: ToStringArray
-    threats: ToAny
+    threat: ToAny
     type: ToStringArray
     size: ToStringArray
     to: ToStringArray
@@ -410,11 +410,16 @@ export const ecsSchema = gql`
     created_by: ToStringArray
     updated_by: ToStringArray
     version: ToStringArray
+    note: ToStringArray
   }
 
   type SignalField {
     rule: RuleField
     original_time: ToStringArray
+  }
+
+  type RuleEcsField {
+    reference: ToStringArray
   }
 
   type ECS {
@@ -428,6 +433,7 @@ export const ecsSchema = gql`
     geo: GeoEcsFields
     host: HostEcsFields
     network: NetworkEcsField
+    rule: RuleEcsField
     signal: SignalField
     source: SourceEcsFields
     suricata: SuricataEcsFields

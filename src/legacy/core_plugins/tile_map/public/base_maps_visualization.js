@@ -63,28 +63,21 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      * @param status
      * @return {Promise}
      */
-    async render(esResponse, visParams, status) {
+    async render(esResponse, visParams) {
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
       }
 
       await this._mapIsLoaded;
-
-      if (status.resize) {
-        this._kibanaMap.resize();
-      }
-      if (status.params || status.aggs) {
-        this._params = visParams;
-        await this._updateParams();
-      }
+      this._kibanaMap.resize();
+      this._params = visParams;
+      await this._updateParams();
 
       if (this._hasESResponseChanged(esResponse)) {
         await this._updateData(esResponse);
       }
-      if (status.uiState) {
-        this._kibanaMap.useUiStateFromVisualization(this.vis);
-      }
+      this._kibanaMap.useUiStateFromVisualization(this.vis);
 
       await this._whenBaseLayerIsLoaded();
     }

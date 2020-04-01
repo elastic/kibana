@@ -41,7 +41,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
-  'src/legacy/ui/public/assets/fonts/**/*',
+  'src/core/server/core_app/assets/fonts/**/*',
   'packages/kbn-utility-types/test-d/**/*',
   '**/Jenkinsfile*',
   'Dockerfile*',
@@ -52,6 +52,12 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
+
+  // filename is required by storybook
+  'packages/kbn-storybook/storybook_config/preview-head.html',
+
+  // filename required by api-extractor
+  'api-documenter.json',
 ];
 
 /**
@@ -82,7 +88,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'src/babel-*',
   'packages/*',
   'packages/kbn-ui-framework/generator-kui',
-  'src/legacy/ui/public/angular-bootstrap',
   'src/legacy/ui/public/flot-charts',
   'src/legacy/ui/public/utils/lodash-mixins',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
@@ -117,22 +122,19 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/timelion/server/series_functions/__tests__/fixtures/seriesList.js',
   'src/legacy/core_plugins/timelion/server/series_functions/__tests__/fixtures/tlConfig.js',
   'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
-  'src/fixtures/vislib/mock_data/terms/_seriesMultiple.js',
-  'src/legacy/ui/public/angular-bootstrap/bindHtml/bindHtml.js',
-  'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-html-unsafe-popup.html',
-  'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-popup.html',
-  'src/legacy/ui/public/assets/favicons/android-chrome-192x192.png',
-  'src/legacy/ui/public/assets/favicons/android-chrome-256x256.png',
-  'src/legacy/ui/public/assets/favicons/android-chrome-512x512.png',
-  'src/legacy/ui/public/assets/favicons/apple-touch-icon.png',
-  'src/legacy/ui/public/assets/favicons/favicon-16x16.png',
-  'src/legacy/ui/public/assets/favicons/favicon-32x32.png',
-  'src/legacy/ui/public/assets/favicons/mstile-70x70.png',
-  'src/legacy/ui/public/assets/favicons/mstile-144x144.png',
-  'src/legacy/ui/public/assets/favicons/mstile-150x150.png',
-  'src/legacy/ui/public/assets/favicons/mstile-310x150.png',
-  'src/legacy/ui/public/assets/favicons/mstile-310x310.png',
-  'src/legacy/ui/public/assets/favicons/safari-pinned-tab.svg',
+  'src/legacy/core_plugins/vis_type_vislib/public/vislib/__tests__/lib/fixtures/mock_data/terms/_seriesMultiple.js',
+  'src/core/server/core_app/assets/favicons/android-chrome-192x192.png',
+  'src/core/server/core_app/assets/favicons/android-chrome-256x256.png',
+  'src/core/server/core_app/assets/favicons/android-chrome-512x512.png',
+  'src/core/server/core_app/assets/favicons/apple-touch-icon.png',
+  'src/core/server/core_app/assets/favicons/favicon-16x16.png',
+  'src/core/server/core_app/assets/favicons/favicon-32x32.png',
+  'src/core/server/core_app/assets/favicons/mstile-70x70.png',
+  'src/core/server/core_app/assets/favicons/mstile-144x144.png',
+  'src/core/server/core_app/assets/favicons/mstile-150x150.png',
+  'src/core/server/core_app/assets/favicons/mstile-310x150.png',
+  'src/core/server/core_app/assets/favicons/mstile-310x310.png',
+  'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
   'src/legacy/ui/public/styles/bootstrap/component-animations.less',
   'src/legacy/ui/public/styles/bootstrap/input-groups.less',
   'src/legacy/ui/public/styles/bootstrap/list-group.less',

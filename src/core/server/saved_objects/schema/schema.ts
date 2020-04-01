@@ -19,6 +19,10 @@
 
 import { LegacyConfig } from '../../legacy';
 
+/**
+ * @deprecated
+ * @internal
+ **/
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
@@ -26,12 +30,18 @@ interface SavedObjectsSchemaTypeDefinition {
   convertToAliasScript?: string;
 }
 
-/** @internal */
+/**
+ * @deprecated
+ * @internal
+ **/
 export interface SavedObjectsSchemaDefinition {
-  [key: string]: SavedObjectsSchemaTypeDefinition;
+  [type: string]: SavedObjectsSchemaTypeDefinition;
 }
 
-/** @internal */
+/**
+ * @deprecated This is only used by the {@link SavedObjectsLegacyService | legacy savedObjects service}
+ * @internal
+ **/
 export class SavedObjectsSchema {
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
@@ -46,7 +56,6 @@ export class SavedObjectsSchema {
     return false;
   }
 
-  // TODO: Remove dependency on config when we move SavedObjectsSchema to NP
   public getIndexForType(config: LegacyConfig, type: string): string | undefined {
     if (this.definition != null && this.definition.hasOwnProperty(type)) {
       const { indexPattern } = this.definition[type];

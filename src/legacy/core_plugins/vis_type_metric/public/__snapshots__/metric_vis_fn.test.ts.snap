@@ -13,7 +13,7 @@ Object {
         "metrics": undefined,
       },
       "metric": Object {
-        "colorSchema": "\\"Green to Red\\"",
+        "colorSchema": "Green to Red",
         "colorsRange": "{range from=0 to=10000}",
         "invertColors": false,
         "labels": Object {

@@ -19,8 +19,11 @@ import { Location } from 'history';
 import React, { Component } from 'react';
 import { isEmpty, flatten } from 'lodash';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
+import {
+  Coordinate,
+  TimeSeries
+} from '../../../../../../../../plugins/apm/typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
@@ -39,7 +42,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_ROUTE_CHANGE,
   TRANSACTION_REQUEST
-} from '../../../../../common/transaction_types';
+} from '../../../../../../../../plugins/apm/common/transaction_types';
 
 interface TransactionChartProps {
   hasMLJob: boolean;

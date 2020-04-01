@@ -5,7 +5,7 @@
  */
 
 import squel from 'squel';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 import { Filter } from '../../../types';
@@ -20,16 +20,16 @@ interface Arguments {
   count: number;
 }
 
-export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
+export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().esdocs;
 
   return {
     name: 'esdocs',
     type: 'datatable',
-    help,
     context: {
       types: ['filter'],
     },
+    help,
     args: {
       query: {
         types: ['string'],
@@ -62,10 +62,10 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
         help: argHelp.sort,
       },
     },
-    fn: (context, args, handlers) => {
+    fn: (input, args, context) => {
       const { count, index, fields, sort } = args;
 
-      context.and = context.and.concat([
+      input.and = input.and.concat([
         {
           type: 'luceneQueryString',
           query: args.query,
@@ -96,10 +96,10 @@ export function esdocs(): ExpressionFunction<'esdocs', Filter, Arguments, any> {
         }
       }
 
-      return queryEsSQL(handlers.elasticsearchClient, {
+      return queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
         count,
         query: query.toString(),
-        filter: context.and,
+        filter: input.and,
       });
     },
   };

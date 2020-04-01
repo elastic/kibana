@@ -78,7 +78,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     coreNavLinks
       .getAll()
       // Filter only legacy links
-      .filter(link => link.legacy)
+      .filter(link => link.legacy && !link.disableSubUrlTracking)
       .forEach(link => {
         const active = url.startsWith(link.subUrlBase!);
         link = coreNavLinks.update(link.id, { active })!;
@@ -146,7 +146,7 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
   // link.active and link.lastUrl properties
   coreNavLinks
     .getAll()
-    .filter(link => link.subUrlBase)
+    .filter(link => link.subUrlBase && !link.disableSubUrlTracking)
     .forEach(link => {
       coreNavLinks.update(link.id, {
         subUrlBase: relativeToAbsolute(chrome.addBasePath(link.subUrlBase)),

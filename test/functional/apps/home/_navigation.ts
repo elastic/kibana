@@ -52,7 +52,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana browser back navigation should work', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded('makelogs');
+      await esArchiver.loadIfNeeded('logstash_functional');
       if (browser.isInternetExplorer) {
         await kibanaServer.uiSettings.replace({ 'state:storeInSessionStorage': false });
       }
@@ -64,8 +64,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/33468
-    it.skip('detect navigate back issues', async () => {
+    it('detect navigate back issues', async () => {
       let currUrl;
       // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
       // Navigate to home app
@@ -88,9 +87,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       // Navigating back from time settings
       await browser.goBack(); // undo time settings
-      await browser.goBack(); // undo automatically set config, should it be in the history stack? (separate issue!)
       currUrl = await browser.getCurrentUrl();
-      // Discover view also keeps adds some default arguments into the _a URL parameter, so we can only check that the url starts the same.
       expect(currUrl.startsWith(discoverUrl)).to.be(true);
 
       // Navigate back home

@@ -5,23 +5,26 @@
  */
 
 import numeral from '@elastic/numeral';
-import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 export interface Arguments {
   format: string;
 }
 
-export function formatnumber(): ExpressionFunction<'formatnumber', number, Arguments, string> {
+export function formatnumber(): ExpressionFunctionDefinition<
+  'formatnumber',
+  number,
+  Arguments,
+  string
+> {
   const { help, args: argHelp } = getFunctionHelp().formatnumber;
 
   return {
     name: 'formatnumber',
     type: 'string',
     help,
-    context: {
-      types: ['number'],
-    },
+    inputTypes: ['number'],
     args: {
       format: {
         aliases: ['_'],
@@ -30,11 +33,11 @@ export function formatnumber(): ExpressionFunction<'formatnumber', number, Argum
         required: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.format) {
-        return String(context);
+        return String(input);
       }
-      return numeral(context).format(args.format);
+      return numeral(input).format(args.format);
     },
   };
 }

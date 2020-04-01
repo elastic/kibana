@@ -160,7 +160,7 @@ export class Worker extends events.EventEmitter {
     };
 
     return this._client
-      .callWithInternalUser('update', {
+      .callAsInternalUser('update', {
         index: job._index,
         id: job._id,
         if_seq_no: job._seq_no,
@@ -199,7 +199,7 @@ export class Worker extends events.EventEmitter {
     });
 
     return this._client
-      .callWithInternalUser('update', {
+      .callAsInternalUser('update', {
         index: job._index,
         id: job._id,
         if_seq_no: job._seq_no,
@@ -226,8 +226,10 @@ export class Worker extends events.EventEmitter {
       docOutput.content = output.content;
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
-      docOutput.size = output.size;
       docOutput.csv_contains_formulas = output.csv_contains_formulas;
+      docOutput.size = output.size;
+      docOutput.warnings =
+        output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
     } else {
       docOutput.content = output || defaultOutput;
       docOutput.content_type = unknownMime;
@@ -248,7 +250,11 @@ export class Worker extends events.EventEmitter {
       Promise.resolve(this.workerFn.call(null, job, jobSource.payload, cancellationToken))
         .then(res => {
           // job execution was successful
-          this.info(`Job execution completed successfully`);
+          if (res && res.warnings && res.warnings.length > 0) {
+            this.warn(`Job execution completed with warnings`);
+          } else {
+            this.info(`Job execution completed successfully`);
+          }
 
           isResolved = true;
           resolve(res);
@@ -286,7 +292,7 @@ export class Worker extends events.EventEmitter {
         };
 
         return this._client
-          .callWithInternalUser('update', {
+          .callAsInternalUser('update', {
             index: job._index,
             id: job._id,
             if_seq_no: job._seq_no,
@@ -431,7 +437,7 @@ export class Worker extends events.EventEmitter {
     };
 
     return this._client
-      .callWithInternalUser('search', {
+      .callAsInternalUser('search', {
         index: `${this.queue.index}-*`,
         body: query,
       })

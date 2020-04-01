@@ -7,12 +7,12 @@
 import { CallWithRequest } from '../types';
 
 export const getPolicyExists = async (
-  callWithRequest: CallWithRequest<{ path: string; method: 'GET' }, {}, unknown>,
+  callWithRequest: CallWithRequest<{ path: string; method: 'GET' }, unknown>,
   policy: string
 ): Promise<boolean> => {
   try {
     await callWithRequest('transport.request', {
-      path: `_ilm/policy/${policy}`,
+      path: `/_ilm/policy/${policy}`,
       method: 'GET',
     });
     // Return true that there exists a policy which is not 404 or some error

@@ -3,15 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { times } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { AlertExecutorOptions, AlertType } from '../../../../../../legacy/plugins/alerting';
-import { ActionTypeExecutorOptions, ActionType } from '../../../../../../legacy/plugins/actions';
+import { AlertExecutorOptions, AlertType } from '../../../../../../plugins/alerting/server';
+import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['actions', 'alerting', 'elasticsearch'],
+    require: ['xpack_main', 'actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
       server.plugins.xpack_main.registerFeature({
@@ -20,6 +20,7 @@ export default function(kibana: any) {
         app: ['alerting', 'kibana'],
         privileges: {
           all: {
+            app: ['alerting', 'kibana'],
             savedObject: {
               all: ['alert'],
               read: [],
@@ -28,6 +29,7 @@ export default function(kibana: any) {
             api: ['alerting-read', 'alerting-all'],
           },
           read: {
+            app: ['alerting', 'kibana'],
             savedObject: {
               all: [],
               read: ['alert'],
@@ -42,6 +44,7 @@ export default function(kibana: any) {
       const noopActionType: ActionType = {
         id: 'test.noop',
         name: 'Test: Noop',
+        minimumLicenseRequired: 'gold',
         async executor() {
           return { status: 'ok', actionId: '' };
         },
@@ -49,6 +52,7 @@ export default function(kibana: any) {
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -62,8 +66,8 @@ export default function(kibana: any) {
             encrypted: schema.string(),
           }),
         },
-        async executor({ config, secrets, params, services }: ActionTypeExecutorOptions) {
-          return await services.callCluster('index', {
+        async executor({ config, secrets, params, services, actionId }: ActionTypeExecutorOptions) {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -74,11 +78,13 @@ export default function(kibana: any) {
               source: 'action:test.index-record',
             },
           });
+          return { status: 'ok', actionId };
         },
       };
       const failingActionType: ActionType = {
         id: 'test.failing',
         name: 'Test: Failing',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -97,12 +103,13 @@ export default function(kibana: any) {
               source: 'action:test.failing',
             },
           });
-          throw new Error('Failed to execute action type');
+          throw new Error(`expected failure for ${params.index} ${params.reference}`);
         },
       };
       const rateLimitedActionType: ActionType = {
         id: 'test.rate-limit',
         name: 'Test: Rate Limit',
+        minimumLicenseRequired: 'gold',
         maxAttempts: 2,
         validate: {
           params: schema.object({
@@ -132,6 +139,7 @@ export default function(kibana: any) {
       const authorizationActionType: ActionType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -141,7 +149,7 @@ export default function(kibana: any) {
             reference: schema.string(),
           }),
         },
-        async executor({ params, services }: ActionTypeExecutorOptions) {
+        async executor({ params, services, actionId }: ActionTypeExecutorOptions) {
           // Call cluster
           let callClusterSuccess = false;
           let callClusterError;
@@ -186,22 +194,30 @@ export default function(kibana: any) {
             },
           });
           return {
+            actionId,
             status: 'ok',
-            actionId: '',
           };
         },
       };
-      server.plugins.actions.setup.registerType(noopActionType);
-      server.plugins.actions.setup.registerType(indexRecordActionType);
-      server.plugins.actions.setup.registerType(failingActionType);
-      server.plugins.actions.setup.registerType(rateLimitedActionType);
-      server.plugins.actions.setup.registerType(authorizationActionType);
+      server.newPlatform.setup.plugins.actions.registerType(noopActionType);
+      server.newPlatform.setup.plugins.actions.registerType(indexRecordActionType);
+      server.newPlatform.setup.plugins.actions.registerType(failingActionType);
+      server.newPlatform.setup.plugins.actions.registerType(rateLimitedActionType);
+      server.newPlatform.setup.plugins.actions.registerType(authorizationActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
-        actionGroups: ['default', 'other'],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
+        defaultActionGroupId: 'default',
+        actionVariables: {
+          state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
+          context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
+        },
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -248,10 +264,43 @@ export default function(kibana: any) {
           };
         },
       };
+      // Alert types
+      const cumulativeFiringAlertType: AlertType = {
+        id: 'test.cumulative-firing',
+        name: 'Test: Cumulative Firing',
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
+        defaultActionGroupId: 'default',
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const { services, state } = alertExecutorOptions;
+          const group = 'default';
+
+          const runCount = (state.runCount || 0) + 1;
+
+          times(runCount, index => {
+            services
+              .alertInstanceFactory(`instance-${index}`)
+              .replaceState({ instanceStateValue: true })
+              .scheduleActions(group);
+          });
+
+          return {
+            runCount,
+          };
+        },
+      };
       const neverFiringAlertType: AlertType = {
         id: 'test.never-firing',
         name: 'Test: Never firing',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -271,7 +320,13 @@ export default function(kibana: any) {
       const failingAlertType: AlertType = {
         id: 'test.failing',
         name: 'Test: Failing',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -289,7 +344,13 @@ export default function(kibana: any) {
       const authorizationAlertType: AlertType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -348,7 +409,13 @@ export default function(kibana: any) {
       const validationAlertType: AlertType = {
         id: 'test.validation',
         name: 'Test: Validation',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         validate: {
           params: schema.object({
             param1: schema.string(),
@@ -359,15 +426,39 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.setup.registerType(neverFiringAlertType);
-      server.plugins.alerting.setup.registerType(failingAlertType);
-      server.plugins.alerting.setup.registerType(validationAlertType);
-      server.plugins.alerting.setup.registerType(authorizationAlertType);
-      server.plugins.alerting.setup.registerType(noopAlertType);
+      const onlyContextVariablesAlertType: AlertType = {
+        id: 'test.onlyContextVariables',
+        name: 'Test: Only Context Variables',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        actionVariables: {
+          context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
+        },
+        async executor(opts: AlertExecutorOptions) {},
+      };
+      const onlyStateVariablesAlertType: AlertType = {
+        id: 'test.onlyStateVariables',
+        name: 'Test: Only State Variables',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        actionVariables: {
+          state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
+        },
+        async executor(opts: AlertExecutorOptions) {},
+      };
+      server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(cumulativeFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(neverFiringAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(failingAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(validationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(authorizationAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(onlyContextVariablesAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(onlyStateVariablesAlertType);
     },
   });
 }

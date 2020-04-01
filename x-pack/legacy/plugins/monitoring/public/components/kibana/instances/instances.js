@@ -27,7 +27,7 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
-const getColumns = (kbnUrl, scope, setupMode) => {
+const getColumns = setupMode => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -68,11 +68,7 @@ const getColumns = (kbnUrl, scope, setupMode) => {
         return (
           <div>
             <EuiLink
-              onClick={() => {
-                scope.$evalAsync(() => {
-                  kbnUrl.changePath(`/kibana/instances/${kibana.kibana.uuid}`);
-                });
-              }}
+              href={`#/kibana/instances/${kibana.kibana.uuid}`}
               data-test-subj={`kibanaLink-${name}`}
             >
               {name}

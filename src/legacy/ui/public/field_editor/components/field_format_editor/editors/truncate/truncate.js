@@ -38,7 +38,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor {
   }
 
   render() {
-    const { formatParams } = this.props;
+    const { formatParams, onError } = this.props;
     const { error, samples } = this.state;
 
     return (
@@ -55,8 +55,15 @@ export class TruncateFormatEditor extends DefaultFormatEditor {
         >
           <EuiFieldNumber
             defaultValue={formatParams.fieldLength}
+            min={1}
             onChange={e => {
-              this.onChange({ fieldLength: e.target.value ? Number(e.target.value) : null });
+              if (e.target.checkValidity()) {
+                this.onChange({
+                  fieldLength: e.target.value ? Number(e.target.value) : null,
+                });
+              } else {
+                onError(e.target.validationMessage);
+              }
             }}
             isInvalid={!!error}
           />

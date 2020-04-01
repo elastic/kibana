@@ -35,6 +35,7 @@ import { SecurityLicense } from '../../common/licensing';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
+export { featurePrivilegeIterator } from './privileges';
 
 interface SetupAuthorizationParams {
   packageVersion: string;
@@ -80,7 +81,7 @@ export function setupAuthorization({
     clusterClient,
     applicationName
   );
-  const privileges = privilegesFactory(actions, featuresService);
+  const privileges = privilegesFactory(actions, featuresService, license);
   const logger = loggers.get('authorization');
 
   const authz = {
@@ -112,8 +113,7 @@ export function setupAuthorization({
         authz
       );
 
-      // if we're an anonymous route, we disable all ui capabilities
-      if (request.route.options.authRequired === false) {
+      if (!request.auth.isAuthenticated) {
         return disableUICapabilities.all(capabilities);
       }
 
@@ -121,7 +121,7 @@ export function setupAuthorization({
     },
 
     registerPrivilegesWithCluster: async () => {
-      validateFeaturePrivileges(actions, featuresService.getFeatures());
+      validateFeaturePrivileges(featuresService.getFeatures());
 
       await registerPrivilegesWithCluster(logger, privileges, applicationName, clusterClient);
     },

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { copyPersistentState } from '../../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers/util';
 
 export class AbstractSource {
   static isIndexingSource = false;
@@ -132,11 +133,15 @@ export class AbstractSource {
   }
 
   // Returns function used to format value
-  async getFieldFormatter(/* fieldName */) {
+  async createFieldFormatter(/* field */) {
     return null;
   }
 
   async loadStylePropsMeta() {
     throw new Error(`Source#loadStylePropsMeta not implemented`);
+  }
+
+  async getValueSuggestions(/* field, query */) {
+    return [];
   }
 }

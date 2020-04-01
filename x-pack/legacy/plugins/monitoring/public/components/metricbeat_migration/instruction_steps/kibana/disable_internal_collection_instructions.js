@@ -61,7 +61,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
         </EuiText>
         <EuiSpacer size="s" />
         <EuiCodeBlock isCopyable language="bash">
-          xpack.monitoring.kibana.collection.enabled: false
+          monitoring.kibana.collection.enabled: false
         </EuiCodeBlock>
         <EuiSpacer size="s" />
         <EuiText>
@@ -70,7 +70,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.note"
               defaultMessage="For {config}, leave the default value of ({defaultValue})."
               values={{
-                config: <Monospace>xpack.monitoring.enabled</Monospace>,
+                config: <Monospace>monitoring.enabled</Monospace>,
                 defaultValue: <Monospace>true</Monospace>,
               }}
             />

@@ -4,21 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  UMBackendFrameworkAdapter,
-  UMMonitorsAdapter,
-  UMMonitorStatesAdapter,
-  UMPingsAdapter,
-  UMSavedObjectsAdapter,
-} from './adapters';
+import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
+import { UptimeRequests } from './requests';
 
 export interface UMDomainLibs {
+  requests: UptimeRequests;
   license: UMLicenseCheck;
-  monitors: UMMonitorsAdapter;
-  monitorStates: UMMonitorStatesAdapter;
-  pings: UMPingsAdapter;
-  savedObjects: UMSavedObjectsAdapter;
 }
 
 export interface UMServerLibs extends UMDomainLibs {

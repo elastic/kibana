@@ -8,76 +8,23 @@ import gql from 'graphql-tag';
 
 export const MatrixHistogramGqlQuery = gql`
   query GetMatrixHistogramQuery(
-    $isAlertsHistogram: Boolean!
-    $isAnomaliesHistogram: Boolean!
-    $isAuthenticationsHistogram: Boolean!
     $defaultIndex: [String!]!
-    $isEventsType: Boolean!
     $filterQuery: String
+    $histogramType: HistogramType!
     $inspect: Boolean!
     $sourceId: ID!
-    $stackByField: String
+    $stackByField: String!
     $timerange: TimerangeInput!
   ) {
     source(id: $sourceId) {
       id
-      AlertsHistogram(
+      MatrixHistogram(
         timerange: $timerange
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
         stackByField: $stackByField
-      ) @include(if: $isAlertsHistogram) {
-        matrixHistogramData {
-          x
-          y
-          g
-        }
-        totalCount
-        inspect @include(if: $inspect) {
-          dsl
-          response
-        }
-      }
-      AnomaliesHistogram(
-        timerange: $timerange
-        filterQuery: $filterQuery
-        defaultIndex: $defaultIndex
-        stackByField: $stackByField
-      ) @include(if: $isAnomaliesHistogram) {
-        matrixHistogramData {
-          x
-          y
-          g
-        }
-        totalCount
-        inspect @include(if: $inspect) {
-          dsl
-          response
-        }
-      }
-      AuthenticationsHistogram(
-        timerange: $timerange
-        filterQuery: $filterQuery
-        defaultIndex: $defaultIndex
-        stackByField: $stackByField
-      ) @include(if: $isAuthenticationsHistogram) {
-        matrixHistogramData {
-          x
-          y
-          g
-        }
-        totalCount
-        inspect @include(if: $inspect) {
-          dsl
-          response
-        }
-      }
-      EventsHistogram(
-        timerange: $timerange
-        filterQuery: $filterQuery
-        defaultIndex: $defaultIndex
-        stackByField: $stackByField
-      ) @include(if: $isEventsType) {
+        histogramType: $histogramType
+      ) {
         matrixHistogramData {
           x
           y

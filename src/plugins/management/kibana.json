@@ -3,5 +3,5 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["kibana_legacy"]
+  "requiredPlugins": ["kibanaLegacy", "home"]
 }

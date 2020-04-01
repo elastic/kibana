@@ -4,31 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/server';
+import {
+  PluginInitializerContext,
+  CoreStart,
+  CoreSetup,
+  Plugin as PluginType,
+  ISavedObjectsRepository,
+} from '../../../../src/core/server';
 import { initServerWithKibana } from './kibana.index';
-import { PluginSetupContract } from '../../features/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
+import { umDynamicSettings } from './lib/saved_objects';
 
 interface UptimePluginsSetup {
   features: PluginSetupContract;
   usageCollection: UsageCollectionSetup;
 }
 
-export class UptimePlugin implements Plugin {
-  public async setup(coreSetup: CoreSetup, plugins: UptimePluginsSetup) {
-    initServerWithKibana(
-      {
-        router: coreSetup.http.createRouter(),
-      },
-      plugins
+export class Plugin implements PluginType {
+  private savedObjectsClient?: ISavedObjectsRepository;
+
+  constructor(_initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, plugins: UptimeCorePlugins) {
+    initServerWithKibana({ router: core.http.createRouter() }, plugins);
+    core.savedObjects.registerType(umDynamicSettings);
+    KibanaTelemetryAdapter.registerUsageCollector(
+      plugins.usageCollection,
+      () => this.savedObjectsClient
     );
   }
 
-  public start() {}
+  public start(_core: CoreStart, _plugins: any) {
+    this.savedObjectsClient = _core.savedObjects.createInternalRepository();
+  }
 
   public stop() {}
-}
-
-export function plugin(_initializerContext: PluginInitializerContext) {
-  return new Plugin();
 }

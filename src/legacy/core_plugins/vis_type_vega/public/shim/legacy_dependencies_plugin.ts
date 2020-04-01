@@ -17,14 +17,15 @@
  * under the License.
  */
 
+// TODO remove this file as soon as serviceSettings is exposed in the new platform
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import chrome from 'ui/chrome';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import 'ui/vis/map/service_settings';
-import 'ui/es'; // required for $injector.get('es') below
 import { CoreStart, Plugin } from 'kibana/public';
 
 /** @internal */
 export interface LegacyDependenciesPluginSetup {
-  es: any;
   serviceSettings: any;
 }
 
@@ -34,9 +35,6 @@ export class LegacyDependenciesPlugin
     const $injector = await chrome.dangerouslyGetActiveInjector();
 
     return {
-      // Client of Elastic Search.
-      es: $injector.get('es'),
-
       // Settings for EMSClient.
       // EMSClient, which currently lives in the tile_map vis,
       //  will probably end up being exposed from the future vis_type_maps plugin,

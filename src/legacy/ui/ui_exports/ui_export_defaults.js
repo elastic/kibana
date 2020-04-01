@@ -30,9 +30,6 @@ export const UI_EXPORT_DEFAULTS = {
     ui: resolve(ROOT, 'src/legacy/ui/public'),
     __kibanaCore__$: resolve(ROOT, 'src/core/public'),
     test_harness: resolve(ROOT, 'src/test_harness/public'),
-    querystring: 'querystring-browser',
-    moment$: resolve(ROOT, 'webpackShims/moment'),
-    'moment-timezone$': resolve(ROOT, 'webpackShims/moment-timezone'),
   },
 
   styleSheetPaths: ['light', 'dark'].map(theme => ({
@@ -47,6 +44,5 @@ export const UI_EXPORT_DEFAULTS = {
 
   appExtensions: {
     fieldFormatEditors: ['ui/field_editor/components/field_format_editor/register'],
-    search: ['ui/courier/search_strategy/default_search_strategy'],
   },
 };

@@ -18,7 +18,7 @@ export const FIELD = i18n.translate('xpack.siem.editDataProvider.fieldLabel', {
   defaultMessage: 'Field',
 });
 
-export const FIELD_PLACEHOLDER = i18n.translate('xpack.siem.editDataProvider.fieldPlaceholder', {
+export const FIELD_PLACEHOLDER = i18n.translate('xpack.siem.editDataProvider.placeholder', {
   defaultMessage: 'Select a field',
 });
 

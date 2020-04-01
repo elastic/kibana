@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
+export function getOtherCategoryLabel() {
+  return i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {
+    defaultMessage: 'Other',
+  });
+}
+
 export function getComputedFieldName(styleName, fieldName) {
   return `${getComputedFieldNamePrefix(fieldName)}__${styleName}`;
 }
@@ -26,18 +34,43 @@ export function isOnlySingleFeatureType(featureType, supportedFeatures, hasFeatu
   }, true);
 }
 
-export function scaleValue(value, range) {
-  if (isNaN(value) || !range) {
-    return -1; //Nothing to scale, put outside scaled range
+export function assignCategoriesToPalette({ categories, paletteValues }) {
+  const stops = [];
+  let fallback = null;
+
+  if (categories && categories.length && paletteValues && paletteValues.length) {
+    const maxLength = Math.min(paletteValues.length, categories.length + 1);
+    fallback = paletteValues[maxLength - 1];
+    for (let i = 0; i < maxLength - 1; i++) {
+      stops.push({
+        stop: categories[i].key,
+        style: paletteValues[i],
+      });
+    }
   }
 
-  if (range.delta === 0 || value >= range.max) {
-    return 1; //snap to end of scaled range
-  }
+  return {
+    stops,
+    fallback,
+  };
+}
 
-  if (value <= range.min) {
-    return 0; //snap to beginning of scaled range
-  }
-
-  return (value - range.min) / range.delta;
+export function makeMbClampedNumberExpression({
+  lookupFunction,
+  fieldName,
+  minValue,
+  maxValue,
+  fallback,
+}) {
+  const clamp = ['max', ['min', ['to-number', [lookupFunction, fieldName]], maxValue], minValue];
+  return [
+    'coalesce',
+    [
+      'case',
+      ['==', [lookupFunction, fieldName], null],
+      minValue - 1, //== does a JS-y like check where returns true for null and undefined
+      clamp,
+    ],
+    fallback,
+  ];
 }

@@ -23,7 +23,7 @@ import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } fro
 
 import { DefaultFormatEditor } from '../default';
 
-import { DEFAULT_CONVERTER_COLOR } from '../../../../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../../../../plugins/data/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -50,7 +50,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
   addColor = () => {
     const colors = [...this.props.formatParams.colors];
     this.onChange({
-      colors: [...colors, { ...DEFAULT_CONVERTER_COLOR }],
+      colors: [...colors, { ...fieldFormats.DEFAULT_CONVERTER_COLOR }],
     });
   };
 
