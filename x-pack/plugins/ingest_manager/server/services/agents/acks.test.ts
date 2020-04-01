@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isBoom } from 'boom';
-import { SavedObjectsClientContract, SavedObjectsBulkResponse } from 'kibana/server';
+import { SavedObjectsBulkResponse } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
 import { Agent, AgentAction, AgentEvent } from '../../../common/types/models';
 import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
@@ -12,10 +12,10 @@ import { acknowledgeAgentActions } from './acks';
 
 describe('test agent acks services', () => {
   it('should succeed on valid and matched actions', async () => {
-    const mockSavedObjectsClient: SavedObjectsClientContract = (savedObjectsClientMock.create() as unknown) as SavedObjectsClientContract;
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
 
-    mockSavedObjectsClient.bulkGet = async () => {
-      return {
+    mockSavedObjectsClient.bulkGet.mockReturnValue(
+      Promise.resolve({
         saved_objects: [
           {
             id: 'action1',
@@ -28,8 +28,8 @@ describe('test agent acks services', () => {
             },
           },
         ],
-      } as SavedObjectsBulkResponse<any>;
-    };
+      } as SavedObjectsBulkResponse<any>)
+    );
 
     const agentActions = await acknowledgeAgentActions(
       mockSavedObjectsClient,
@@ -60,13 +60,13 @@ describe('test agent acks services', () => {
   });
 
   it('should fail for actions that cannot be found on agent actions list', async () => {
-    const mockSavedObjectsClient: SavedObjectsClientContract = (savedObjectsClientMock.create() as unknown) as SavedObjectsClientContract;
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
 
-    mockSavedObjectsClient.bulkGet = async () => {
-      return {
+    mockSavedObjectsClient.bulkGet.mockReturnValue(
+      Promise.resolve({
         saved_objects: [],
-      } as SavedObjectsBulkResponse<any>;
-    };
+      } as SavedObjectsBulkResponse<any>)
+    );
 
     try {
       await acknowledgeAgentActions(
@@ -92,9 +92,10 @@ describe('test agent acks services', () => {
   });
 
   it('should fail for events that have types not in the allowed acknowledgement type list', async () => {
-    const mockSavedObjectsClient: SavedObjectsClientContract = (savedObjectsClientMock.create() as unknown) as SavedObjectsClientContract;
-    mockSavedObjectsClient.bulkGet = async () => {
-      return {
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
+
+    mockSavedObjectsClient.bulkGet.mockReturnValue(
+      Promise.resolve({
         saved_objects: [
           {
             id: 'action1',
@@ -107,8 +108,8 @@ describe('test agent acks services', () => {
             },
           },
         ],
-      } as SavedObjectsBulkResponse<any>;
-    };
+      } as SavedObjectsBulkResponse<any>)
+    );
 
     try {
       await acknowledgeAgentActions(
