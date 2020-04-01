@@ -33,7 +33,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -80,6 +80,7 @@ describe('buildBulkBody', () => {
           references: ['http://google.com'],
           severity: 'high',
           tags: ['some fake tag 1', 'some fake tag 2'],
+          throttle: 'no_actions',
           type: 'query',
           to: 'now',
           note: '',
@@ -143,7 +144,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -208,6 +209,7 @@ describe('buildBulkBody', () => {
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          throttle: 'no_actions',
           lists: [
             {
               field: 'source.ip',
@@ -261,7 +263,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -325,6 +327,7 @@ describe('buildBulkBody', () => {
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          throttle: 'no_actions',
           lists: [
             {
               field: 'source.ip',
@@ -376,7 +379,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -435,6 +438,7 @@ describe('buildBulkBody', () => {
           version: 1,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          throttle: 'no_actions',
           lists: [
             {
               field: 'source.ip',
