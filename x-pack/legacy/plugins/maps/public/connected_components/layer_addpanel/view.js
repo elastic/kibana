@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 export class AddLayerPanel extends Component {
   state = {
-    layerWizardId: null,
+    layerWizard: null,
     layer: null,
     importView: false,
     layerImportAddReady: false,
@@ -35,9 +35,9 @@ export class AddLayerPanel extends Component {
   }
 
   _getPanelDescription() {
-    const { layerWizardId, importView, layerImportAddReady } = this.state;
+    const { layerWizard, importView, layerImportAddReady } = this.state;
     let panelDescription;
-    if (!layerWizardId) {
+    if (!layerWizard) {
       panelDescription = i18n.translate('xpack.maps.addLayerPanel.selectSource', {
         defaultMessage: 'Select source',
       });
@@ -85,13 +85,13 @@ export class AddLayerPanel extends Component {
 
     this.setState({
       layer: null,
-      ...(!keepSourceType ? { layerWizardId: null, importView: false } : {}),
+      ...(!keepSourceType ? { layerWizard: null, importView: false } : {}),
     });
     this.props.removeTransientLayer();
   };
 
-  _onSourceSelectionChange = ({ layerWizardId, isIndexingSource }) => {
-    this.setState({ layerWizardId, importView: isIndexingSource });
+  _onSourceSelectionChange = ({ layerWizard, isIndexingSource }) => {
+    this.setState({ layerWizard, importView: isIndexingSource });
   };
 
   _layerAddHandler = () => {
@@ -118,8 +118,8 @@ export class AddLayerPanel extends Component {
   };
 
   _renderAddLayerPanel() {
-    const { layerWizardId, importView } = this.state;
-    if (!layerWizardId) {
+    const { layerWizard, importView } = this.state;
+    if (!layerWizard) {
       return <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />;
     }
     if (importView) {
@@ -134,7 +134,7 @@ export class AddLayerPanel extends Component {
     return (
       <SourceEditor
         clearSource={this._clearLayerData}
-        layerWizardId={layerWizardId}
+        layerWizard={layerWizard}
         previewLayer={this._viewLayer}
       />
     );
@@ -148,7 +148,7 @@ export class AddLayerPanel extends Component {
 
     return (
       <FlyoutFooter
-        showNextButton={!!this.state.layerWizardId}
+        showNextButton={!!this.state.layerWizard}
         disableNextButton={!buttonEnabled}
         onClick={this._layerAddHandler}
         nextButtonText={buttonDescription}

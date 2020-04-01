@@ -171,7 +171,6 @@ registerSource({
 });
 
 export const tmsLayerWizardConfig = {
-  id: EMS_XYZ,
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
     defaultMessage: 'Tile map service configured in interface',
   }),

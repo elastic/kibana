@@ -152,7 +152,6 @@ registerSource({
 });
 
 export const emsBaseMapLayerWizardConfig = {
-  id: EMS_TMS,
   description: i18n.translate('xpack.maps.source.emsTileDescription', {
     defaultMessage: 'Tile map service from Elastic Maps Service',
   }),

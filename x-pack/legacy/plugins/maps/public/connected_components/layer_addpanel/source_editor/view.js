@@ -5,18 +5,16 @@
  */
 
 import React, { Fragment } from 'react';
-import { getLayerWizard } from '../../../layers/layer_wizard_registry';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SourceEditor = ({
   clearSource,
-  layerWizardId,
+  layerWizard,
   isIndexingTriggered,
   inspectorAdapters,
   previewLayer,
 }) => {
-  const layerWizard = getLayerWizard(layerWizardId);
   if (!layerWizard) {
     return null;
   }

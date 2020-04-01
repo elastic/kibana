@@ -163,7 +163,6 @@ registerSource({
 });
 
 export const emsBoundariesLayerWizardConfig = {
-  id: EMS_FILE,
   description: i18n.translate('xpack.maps.source.emsFileDescription', {
     defaultMessage: 'Administrative boundaries from Elastic Maps Service',
   }),

@@ -418,7 +418,6 @@ registerSource({
 });
 
 export const clustersLayerWizardConfig = {
-  id: `${ES_GEO_GRID}_clusters`,
   description: i18n.translate('xpack.maps.source.esGridClustersDescription', {
     defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
   }),
@@ -446,7 +445,6 @@ export const clustersLayerWizardConfig = {
 };
 
 export const heatmapLayerWizardConfig = {
-  id: `${ES_GEO_GRID}_heatmap`,
   description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
     defaultMessage: 'Geospatial data grouped in grids to show density',
   }),

@@ -574,7 +574,6 @@ registerSource({
 });
 
 export const esDocumentsLayerWizardConfig = {
-  id: ES_SEARCH,
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
     defaultMessage: 'Vector data from a Kibana index pattern',
   }),

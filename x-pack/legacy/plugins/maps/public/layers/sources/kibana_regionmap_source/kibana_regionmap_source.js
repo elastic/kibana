@@ -103,7 +103,6 @@ registerSource({
 });
 
 export const kibanaRegionMapLayerWizardConfig = {
-  id: REGIONMAP_FILE,
   description: i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
     defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml',
   }),

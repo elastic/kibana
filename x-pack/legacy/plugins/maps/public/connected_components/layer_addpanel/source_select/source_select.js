@@ -16,13 +16,13 @@ export function SourceSelect({ updateSourceSelection }) {
 
     const onClick = () => {
       updateSourceSelection({
-        layerWizardId: layerWizard.id,
+        layerWizard: layerWizard,
         isIndexingSource: !!layerWizard.isIndexingSource,
       });
     };
 
     return (
-      <Fragment key={layerWizard.id}>
+      <Fragment key={layerWizard.title}>
         <EuiSpacer size="s" />
         <EuiCard
           className="mapLayerAddpanel__card"

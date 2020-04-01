@@ -19,20 +19,17 @@ type SourceRegistryEntry = {
 const registry: SourceRegistryEntry[] = [];
 
 export function registerSource(entry: SourceRegistryEntry) {
+  const sourceTypeExists = registry.some(({ type }: SourceRegistryEntry) => {
+    return entry.type === type;
+  });
+  if (sourceTypeExists) {
+    throw new Error(
+      `Unable to register source type ${entry.type}. ${entry.type} has already been registered`
+    );
+  }
   registry.push(entry);
 }
 
-function getSourceByType(sourceType: string): SourceRegistryEntry | undefined {
+export function getSourceByType(sourceType: string): SourceRegistryEntry | undefined {
   return registry.find((source: SourceRegistryEntry) => source.type === sourceType);
-}
-
-export function createSourceInstance(
-  sourceDescriptor: AbstractSourceDescriptor,
-  inspectorAdapters: object
-): ISource {
-  const source = getSourceByType(sourceDescriptor.type);
-  if (!source) {
-    throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
-  }
-  return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
 }

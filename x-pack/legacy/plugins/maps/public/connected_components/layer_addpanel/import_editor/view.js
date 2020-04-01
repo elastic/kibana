@@ -5,14 +5,12 @@
  */
 
 import React, { Fragment } from 'react';
-import { getLayerWizard } from '../../../layers/layer_wizard_registry';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { GEOJSON_FILE } from '../../../../common/constants';
+import { uploadLayerWizardConfig } from '../../../layers/sources/client_file_source';
 
 export const ImportEditor = ({ clearSource, isIndexingTriggered, ...props }) => {
   const editorProperties = getEditorProperties({ isIndexingTriggered, ...props });
-  const layerWizard = getLayerWizard(GEOJSON_FILE);
   return (
     <Fragment>
       {isIndexingTriggered ? null : (
@@ -27,7 +25,7 @@ export const ImportEditor = ({ clearSource, isIndexingTriggered, ...props }) => 
         </Fragment>
       )}
       <EuiPanel style={{ position: 'relative' }}>
-        {layerWizard.renderWizard(editorProperties)}
+        {uploadLayerWizardConfig.renderWizard(editorProperties)}
       </EuiPanel>
     </Fragment>
   );

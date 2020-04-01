@@ -8,7 +8,6 @@
 type LayerWizard = {
   description: string;
   icon: string;
-  id: string;
   isIndexingSource?: boolean;
   renderWizard({
     onPreviewSource,
@@ -18,7 +17,6 @@ type LayerWizard = {
     inspectorAdapters: unknown;
   }): unknown;
   title: string;
-  sourceType: string;
 };
 
 const registry: LayerWizard[] = [];
@@ -29,8 +27,4 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
 
 export function getLayerWizards(): LayerWizard[] {
   return [...registry];
-}
-
-export function getLayerWizard(id: string): LayerWizard | undefined {
-  return registry.find((layerWizard: LayerWizard) => layerWizard.id === id);
 }

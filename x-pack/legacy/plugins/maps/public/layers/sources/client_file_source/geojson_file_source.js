@@ -135,7 +135,6 @@ registerSource({
 });
 
 export const uploadLayerWizardConfig = {
-  id: GEOJSON_FILE,
   description: i18n.translate('xpack.maps.source.geojsonFileDescription', {
     defaultMessage: 'Index GeoJSON data in Elasticsearch',
   }),

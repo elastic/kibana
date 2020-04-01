@@ -96,7 +96,6 @@ registerSource({
 });
 
 export const wmsLayerWizardConfig = {
-  id: WMS,
   description: i18n.translate('xpack.maps.source.wmsDescription', {
     defaultMessage: 'Maps from OGC Standard WMS',
   }),

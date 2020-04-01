@@ -236,7 +236,6 @@ registerSource({
 });
 
 export const point2PointLayerWizardConfig = {
-  id: ES_PEW_PEW,
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
     defaultMessage: 'Aggregated data paths between the source and destination',
   }),

@@ -90,7 +90,6 @@ registerSource({
 });
 
 export const kibanaBasemapLayerWizardConfig = {
-  id: KIBANA_TILEMAP,
   description: i18n.translate('xpack.maps.source.kbnTMSDescription', {
     defaultMessage: 'Tile map service configured in kibana.yml',
   }),
