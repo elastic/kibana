@@ -4,56 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { createMemoryHistory } from 'history';
-import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
-import { Router } from 'react-router-dom';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
-import { EuiThemeProvider } from '../../../../../../legacy/common/eui_styled_components';
-import { RouteCapture } from '../view/route_capture';
-import {
-  KibanaContextProvider,
-  KibanaServices,
-} from '../../../../../../../src/plugins/kibana_react/public';
 import { appStoreFactory } from '../store';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-
-/**
- * Component that provides the endpoint application surrounding context providers.
- */
-export const MockedAppContext = memo<{
-  store: ReturnType<typeof appStoreFactory>;
-  history: ReturnType<typeof createMemoryHistory>;
-  services: KibanaServices;
-  children: React.ReactElement;
-}>(({ store, services, history, children }) => {
-  return (
-    <Provider store={store}>
-      <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <EuiThemeProvider>
-            <Router history={history}>
-              <RouteCapture>{children}</RouteCapture>
-            </Router>
-          </EuiThemeProvider>
-        </KibanaContextProvider>
-      </I18nProvider>
-    </Provider>
-  );
-});
+import { EndpointPluginStartDependencies } from '../../../plugin';
+import { depsStartMock } from './dependencies_start_mock';
+import { AppRootProvider } from '../view/app_root_provider';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 /**
- * Mocked app context renderer
+ * Mocked app root context renderer
  */
 interface AppContextTestRender {
   store: ReturnType<typeof appStoreFactory>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: jest.Mocked<CoreStart>;
-  MockedAppContext: typeof MockedAppContext;
+  depsStart: EndpointPluginStartDependencies;
+  /**
+   * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the
+   * `AppRootContext`
+   */
+  AppWrapper: React.FC<any>;
+  /**
+   * Renders the given UI within the created `AppWrapper` providing the given UI a mocked
+   * endpoint runtime context environment
+   */
   render: UiRender;
 }
 
@@ -63,24 +42,20 @@ interface AppContextTestRender {
  * Factory also returns the content that was used to create the custom renderer, allowing
  * for further customization.
  */
-export const createAppContextTestRender = (): AppContextTestRender => {
+export const createAppRootMockRenderer = (): AppContextTestRender => {
   const store = appStoreFactory();
   const history = createMemoryHistory<never>();
   const coreStart = coreMock.createStart({ basePath: '/mock' });
-  const { http, notifications, application } = coreStart;
-  const wrapper: React.FunctionComponent<{ children: React.ReactElement }> = ({ children }) => (
-    <MockedAppContext
-      store={store}
-      history={history}
-      services={{ http, notifications, application }}
-    >
+  const depsStart = depsStartMock();
+  const AppWrapper: React.FunctionComponent<{ children: React.ReactElement }> = ({ children }) => (
+    <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
       {children}
-    </MockedAppContext>
+    </AppRootProvider>
   );
   const render: UiRender = (ui, options) => {
     // @ts-ignore
     return reactRender(ui, {
-      wrapper,
+      wrapper: AppWrapper,
       ...options,
     });
   };
@@ -89,7 +64,8 @@ export const createAppContextTestRender = (): AppContextTestRender => {
     store,
     history,
     coreStart,
-    MockedAppContext,
+    depsStart,
+    AppWrapper,
     render,
   };
 };
