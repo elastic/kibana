@@ -21,7 +21,7 @@ import { InternalRenderingServiceSetup } from './types';
 
 function createRenderingSetup() {
   const mocked: jest.Mocked<InternalRenderingServiceSetup> = {
-    render: jest.fn(),
+    render: jest.fn().mockResolvedValue('<body />'),
   };
   return mocked;
 }

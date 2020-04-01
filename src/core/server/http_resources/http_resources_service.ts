@@ -31,7 +31,7 @@ import {
   HttpResourcesServiceToolkit,
 } from './types';
 
-interface Deps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
   rendering: InternalRenderingServiceSetup;
 }
@@ -42,7 +42,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     this.logger = core.logger.get('http-resources');
   }
 
-  setup(deps: Deps) {
+  setup(deps: SetupDeps) {
     this.logger.debug('setting up HttpResourcesService');
     const cspHeader = deps.http.csp.header;
     return {
@@ -54,7 +54,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           ) => {
             router.get(route, async (context, request, response) => {
               const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-                ...options,
                 includeUserSettings: true,
               });
 
@@ -70,7 +69,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           ) => {
             router.get(route, async (context, request, response) => {
               const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-                ...options,
                 includeUserSettings: false,
               });
 
@@ -90,7 +88,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
                   const body = await deps.rendering.render(
                     request,
                     context.core.uiSettings.client,
-                    { ...options, includeUserSettings: true }
+                    { includeUserSettings: true }
                   );
 
                   return response.ok({
@@ -102,7 +100,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
                   const body = await deps.rendering.render(
                     request,
                     context.core.uiSettings.client,
-                    { ...options, includeUserSettings: false }
+                    { includeUserSettings: false }
                   );
 
                   return response.ok({
