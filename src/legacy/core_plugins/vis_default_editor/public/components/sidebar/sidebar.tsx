@@ -32,6 +32,7 @@ import { SidebarTitle } from './sidebar_title';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { SavedSearch } from '../../../../../../plugins/discover/public';
 import { Schema } from '../../schemas';
+import { TimeRange } from '../../../../../../plugins/data/public';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -42,6 +43,7 @@ interface DefaultEditorSideBarProps {
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
   savedSearch?: SavedSearch;
+  timeRange: TimeRange;
 }
 
 function DefaultEditorSideBar({
@@ -53,6 +55,7 @@ function DefaultEditorSideBar({
   isLinkedSearch,
   eventEmitter,
   savedSearch,
+  timeRange,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
@@ -211,6 +214,7 @@ function DefaultEditorSideBar({
                   <Editor
                     isTabSelected={isTabSelected}
                     {...(name === 'data' ? dataTabProps : optionTabProps)}
+                    timeRange={timeRange}
                   />
                 </div>
               );

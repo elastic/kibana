@@ -120,6 +120,7 @@ export const getOutputRuleAlertForRest = (): Omit<
   severity: 'high',
   updated_by: 'elastic',
   tags: [],
+  throttle: 'no_actions',
   threat: [
     {
       framework: 'MITRE ATT&CK',
