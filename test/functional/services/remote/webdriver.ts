@@ -65,6 +65,7 @@ Executor.prototype.execute = preventParallelCalls(
 );
 
 let attemptCounter = 0;
+let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
@@ -77,26 +78,32 @@ async function attemptToCreateCommand(
   const buildDriverInstance = async () => {
     switch (browserType) {
       case 'edge': {
-        const edgeData = await installDriver();
-        // console.log(edgeData);
-        const edgeOptions = new edge.Options();
-        if (headlessBrowser === '1') {
+        if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
+          const edgeOptions = new edge.Options();
+          if (headlessBrowser === '1') {
+            // @ts-ignore internal modules are not typed
+            edgeOptions.headless();
+          }
           // @ts-ignore internal modules are not typed
-          edgeOptions.headless();
+          edgeOptions.setEdgeChromium(true);
+          // @ts-ignore internal modules are not typed
+          edgeOptions.setBinaryPath(edgePaths.browserPath);
+          const session = await new Builder()
+            .forBrowser('MicrosoftEdge')
+            .setEdgeOptions(edgeOptions)
+            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath))
+            .build();
+          return {
+            session,
+            consoleLog$: Rx.EMPTY,
+          };
+        } else {
+          throw new Error(
+            `Chromium Edge session requires browser or driver path to be defined: ${JSON.stringify(
+              edgePaths
+            )}`
+          );
         }
-        // @ts-ignore internal modules are not typed
-        edgeOptions.setEdgeChromium(true);
-        // @ts-ignore internal modules are not typed
-        edgeOptions.setBinaryPath(edgeData.browserPath);
-        const session = new Builder()
-          .forBrowser('MicrosoftEdge')
-          .setEdgeOptions(edgeOptions)
-          .setEdgeService(new edge.ServiceBuilder(edgeData.driverPath))
-          .build();
-        return {
-          session,
-          consoleLog$: Rx.EMPTY,
-        };
       }
 
       case 'chrome': {
@@ -288,6 +295,11 @@ export async function initWebDriver(
 
     log.verbose(entry.message);
   });
+
+  // download Edge driver only in case of usage
+  if (browserType === Browsers.ChromiumEdge) {
+    edgePaths = await installDriver();
+  }
 
   return await Promise.race([
     (async () => {
