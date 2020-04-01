@@ -67,6 +67,15 @@ interface Arguments {
   aggConfigs: string;
 }
 
+type ExpressionFunctionEsaggs = ExpressionFunctionDefinition<typeof name, Input, Arguments, Output>;
+
+// Add esaggs function to ExpressionFunctionDefinitions
+declare module '../../../../expressions/public' {
+  interface ExpressionFunctionDefinitions {
+    esaggs: ExpressionFunctionEsaggs;
+  }
+}
+
 const handleCourierRequest = async ({
   searchSource,
   aggs,
@@ -210,7 +219,7 @@ const handleCourierRequest = async ({
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
+export const esaggs = (): ExpressionFunctionEsaggs => ({
   name,
   type: 'kibana_datatable',
   inputTypes: ['kibana_context', 'null'],
