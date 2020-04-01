@@ -20,7 +20,7 @@ import {
   setTimeFilter,
   setToasts,
   setUiSettings,
-} from '../../../legacy/plugins/maps/public/kibana_services';
+} from './kibana_services';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;

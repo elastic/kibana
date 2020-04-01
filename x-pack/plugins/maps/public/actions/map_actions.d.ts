@@ -8,11 +8,12 @@
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { AnyAction } from 'redux';
 import { LAYER_TYPE } from '../../common/constants';
-import { DataMeta, MapFilters } from '../../common/descriptor_types';
 import {
+  DataMeta,
+  MapFilters,
   MapCenterAndZoom,
   MapRefreshConfig,
-} from '../../../../../plugins/maps/common/descriptor_types';
+} from '../../common/descriptor_types';
 
 export type SyncContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
