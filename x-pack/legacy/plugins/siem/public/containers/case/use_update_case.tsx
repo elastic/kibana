@@ -5,8 +5,8 @@
  */
 
 import { useReducer, useCallback } from 'react';
+import { displaySuccessToast, errorToToaster, useStateToaster } from '../../components/toasters';
 import { CasePatchRequest } from '../../../../../../plugins/case/common/api';
-import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { patchCase } from './api';
 import * as i18n from './translations';
@@ -94,6 +94,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
             updateCase(response[0]);
           }
           dispatch({ type: 'FETCH_SUCCESS' });
+          displaySuccessToast(i18n.UPDATED_CASE(response[0].title), dispatchToaster);
         }
       } catch (error) {
         if (!cancel) {

@@ -198,6 +198,7 @@ export default () =>
       }),
       workers: Joi.number().min(1),
       profile: Joi.boolean().default(false),
+      validateSyntaxOfNodeModules: Joi.boolean().default(true),
     }).default(),
     status: Joi.object({
       allowAnonymous: Joi.boolean().default(false),
