@@ -44,7 +44,7 @@ kibanaPipeline(timeoutMinutes: 180) {
           "TIME_STAMP=${timestamp}",
           "QA_TEAM_ROCKS=true"
         ]) {
-//          listAndCollectVcsEnvVars()
+          listAndCollectVcsEnvVars()
 
           def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
           withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
