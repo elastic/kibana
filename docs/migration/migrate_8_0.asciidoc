@@ -142,7 +142,7 @@ been deprecated with warnings that have been logged throughout 7.x. Please use K
 POST URL snippets if you depend on these for automated PDF reports.
 
 [float]
-=== Configurations starting with `xpack.telemetry.` are no longer valid
+=== Configurations starting with `xpack.telemetry` are no longer valid
 
 *Details:*
 The `xpack.` prefix has been removed for all telemetry configurations.
