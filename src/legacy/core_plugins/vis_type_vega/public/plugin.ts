@@ -31,6 +31,16 @@ import {
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import { IServiceSettings } from '../../../../plugins/maps_legacy/public';
+
+/** @internal */
+export interface VegaVisualizationDependencies {
+  core: CoreSetup;
+  plugins: {
+    data: ReturnType<DataPublicPlugin['setup']>;
+  };
+  serviceSettings: IServiceSettings;
+}
 
 /** @internal */
 export interface VegaPluginSetupDependencies {
@@ -38,6 +48,7 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   data: ReturnType<DataPublicPlugin['setup']>;
   visTypeVega: VisTypeVegaSetup;
+  maps_legacy: any;
 }
 
 /** @internal */
@@ -55,14 +66,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    {
-      data,
-      expressions,
-      visualizations,
-      visTypeVega,
-      maps_legacy,
-      __LEGACY,
-    }: VegaPluginSetupDependencies
+    { data, expressions, visualizations, visTypeVega, maps_legacy }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: visTypeVega.config.enableExternalUrls,

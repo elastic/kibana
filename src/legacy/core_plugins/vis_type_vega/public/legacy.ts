@@ -25,10 +25,7 @@ import { plugin } from '.';
 const setupPlugins: Readonly<VegaPluginSetupDependencies> = {
   ...npSetup.plugins,
   visualizations: npSetup.plugins.visualizations,
-
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
+  maps_legacy: npSetup.plugins.maps_legacy,
 };
 
 const startPlugins: Readonly<VegaPluginStartDependencies> = {
