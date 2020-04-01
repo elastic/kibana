@@ -138,6 +138,32 @@ export const registerTestBed = <T extends string = string>(
         });
       };
 
+      const waitFor: TestBed<T>['waitFor'] = async (testSubject: T) => {
+        const triggeredAt = Date.now();
+        const MAX_WAIT_TIME = 2000;
+        const WAIT_INTERVAL = 50;
+
+        const process = async (): Promise<void> => {
+          const elemFound = exists(testSubject);
+
+          if (!elemFound) {
+            const now = Date.now();
+            if (now - triggeredAt > MAX_WAIT_TIME) {
+              throw new Error(
+                `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
+              );
+            }
+
+            return new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
+              component.update();
+              return process();
+            });
+          }
+        };
+
+        return process();
+      };
+
       /**
        * ----------------------------------------------------------------
        * Forms
@@ -254,6 +280,7 @@ export const registerTestBed = <T extends string = string>(
         exists,
         find,
         setProps,
+        waitFor,
         table: {
           getMetaData,
         },
