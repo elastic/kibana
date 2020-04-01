@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Legacy } from 'kibana';
+import crypto from 'crypto';
 import { get } from 'lodash';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
@@ -25,13 +26,52 @@ const buildLegacyDependencies = (
   };
 };
 
+const addConfigDefaults = (core: CoreSetup, baseConfig: ReportingConfigType) => {
+  // encryption key
+  let encryptionKey = baseConfig.encryptionKey;
+  if (encryptionKey === undefined) {
+    // FIXME log warning
+    encryptionKey = crypto.randomBytes(16).toString('hex');
+  }
+
+  const { kibanaServer: reportingServer } = baseConfig;
+  const serverInfo = core.http.getServerInfo();
+
+  // kibanaServer.hostname, default to server.host, don't allow "0"
+  let kibanaServerHostname = reportingServer.hostname ? reportingServer.hostname : serverInfo.host;
+  if (kibanaServerHostname === '0') {
+    // FIXME log warning
+    kibanaServerHostname = '0.0.0.0';
+  }
+
+  // kibanaServer.port, default to server.port
+  const kibanaServerPort = reportingServer.port
+      ? reportingServer.port
+      : serverInfo.port; // prettier-ignore
+
+  // kibanaServer.protocol, default to server.protocol
+  const kibanaServerProtocol = reportingServer.protocol
+    ? reportingServer.protocol
+    : serverInfo.protocol;
+
+  return {
+    ...baseConfig,
+    encryptionKey,
+    kibanaServer: {
+      hostname: kibanaServerHostname,
+      port: kibanaServerPort,
+      protocol: kibanaServerProtocol,
+    },
+  };
+};
+
 const buildConfig = (
-  coreSetup: CoreSetup,
+  core: CoreSetup,
   server: Legacy.Server,
   reportingConfig: ReportingConfigType
 ): ReportingConfig => {
   const config = server.config();
-  const { http } = coreSetup;
+  const { http } = core;
   const serverInfo = http.getServerInfo();
 
   const kbnConfig = {
@@ -39,16 +79,17 @@ const buildConfig = (
       data: config.get('path.data'),
     },
     server: {
-      basePath: coreSetup.http.basePath.serverBasePath,
+      basePath: core.http.basePath.serverBasePath,
       host: serverInfo.host,
       name: serverInfo.name,
       port: serverInfo.port,
-      uuid: coreSetup.uuid.getInstanceUuid(),
+      uuid: core.uuid.getInstanceUuid(),
       protocol: serverInfo.protocol,
     },
   };
 
   // spreading arguments as an array allows the return type to be known by the compiler
+  reportingConfig = addConfigDefaults(core, reportingConfig);
   return {
     get: (...keys: string[]) => get(reportingConfig, keys.join('.'), null),
     kbnConfig: {
@@ -63,8 +104,9 @@ export const legacyInit = async (
 ) => {
   const { core: coreSetup } = server.newPlatform.setup;
   const legacyConfig = server.config();
-  const legacyReportingConfig = legacyConfig.get('xpack.reporting') as ReportingConfigType;
-  const fakeReporting = { config: buildConfig(coreSetup, server, legacyReportingConfig) }; // fake plugin with NP-compatible config interface
+  const fakeReporting = {
+    config: buildConfig(coreSetup, server, legacyConfig.get('xpack.reporting')),
+  }; // fake plugin with NP-compatible config interface
 
   const __LEGACY = buildLegacyDependencies(server, reportingLegacyPlugin);
 
