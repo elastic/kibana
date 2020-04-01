@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
     {
-      testTitleSuffix: 'with 1 metrics and 1 influencers same as split field',
+      testTitleSuffix: 'with 1 metric and 1 influencer same as split field',
       user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
@@ -100,7 +100,8 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
     {
-      testTitleSuffix: '4 influencers, split by city and manufacturer + filtering by country code',
+      testTitleSuffix:
+        '2 detectors split by city and manufacturer, 4 influencers, filtering by country code',
       user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
