@@ -10,26 +10,8 @@ kibanaPipeline(timeoutMinutes: 180) {
     ]) {
 
       workers.base(name: 'fail-fast-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
-//        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
+        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
         listVcsEnvVars()
-
-        def CMD = "git log --pretty=format"
-        withEnv([
-          "VCS_BRANCH=${GIT_BRANCH}",
-          "VCS_SHA=${CMD}':%h' -1",
-          "VCS_AUTHOR=${CMD}'%an' -1",
-          "VCS_COMMIT_MSG=${CMD}'%an' -1",
-        ]) {
-          kibanaPipeline.bash('''
-
-          echo "### VCS_BRANCH: ${VCS_BRANCH}"
-          echo "### VCS_SHA: ${VCS_SHA}"
-          echo "### VCS_AUTHOR: ${VCS_AUTHOR}"
-          echo "### VCS_COMMIT_MSG: ${VCS_COMMIT_MSG}"
-
-          ''', "### Tre' Debugging")
-        }
-
       }
 
     }
@@ -55,54 +37,49 @@ kibanaPipeline(timeoutMinutes: 180) {
 //        ),
 //      ])
 
-//      workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
+      workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
 //        kibanaPipeline.downloadCoverageArtifacts()
-//
-//        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-//        withEnv([
-//          "TIME_STAMP=${timestamp}",
-//          "QA_TEAM_ROCKS=true"
-//        ]) {
-//
-//          def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
-//          withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
-//            withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
-//              withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-//                kibanaPipeline.bash("""
-//                source src/dev/ci_setup/setup_env.sh
-//
-//                # bootstrap from x-pack folder
-//                cd x-pack
-//                yarn kbn bootstrap --prefer-offline
-//
-//                # Return to project root
-//                cd ..
-//
-//                . src/dev/code_coverage/shell_scripts/extract_archives.sh
-//
-//                . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-//
-//                . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-//
-//                . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
-//
-//                . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
-//
-//                """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
-//              }
-//            }
-//          }
+
+        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+        withEnv([
+          "TIME_STAMP=${timestamp}",
+          "QA_TEAM_ROCKS=true"
+        ]) {
+
+          def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
+          withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+            withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+              withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+                kibanaPipeline.bash("""
+
+                CMD="git log --pretty=format"
+
+                VCS_BRANCH="${GIT_BRANCH}"
+                VCS_SHA="${CMD}':%h' -1"
+                VCS_AUTHOR="${CMD}'%an' -1")
+                VCS_COMMIT_MSG=${CMD}'%an' -1"
+                VCS_COMMIT_MSG="${CMD}'%an' -1"
+
+                echo "### VCS_BRANCH: ${VCS_BRANCH}"
+                echo "### VCS_SHA: ${VCS_SHA}"
+                echo "### VCS_AUTHOR: ${VCS_AUTHOR}"
+                echo "### VCS_COMMIT_MSG: ${VCS_COMMIT_MSG}"
+
+                """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
+              }
+            }
+          }
 //          kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
-//        }
-//
+        }
+
 //        sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
 //        kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
 //        sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
 //        kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
 //        sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
 //        kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
-//
-//      }
+
+      }
 
   }
 
