@@ -16,7 +16,7 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
   if (action.type === 'userFocusedOnResolverNode') {
     return {
       ...uiState,
-      activeDescendentId: action.payload.nodeId,
+      activeDescendantId: action.payload.nodeId,
     };
   } else if (action.type === 'userSelectedResolverNode') {
     return {

@@ -209,11 +209,24 @@ export const ProcessEventDot = styled(
             tabIndex={-1}
           >
             <g>
-              {/**
-               * placheholer until we get the real asset
-               */}
-              <circle cx={markerPositionOffset + markerSize/2}
-              cy={markerPositionOffset + markerSize/2} r={markerSize*1.2} stroke="red"/>
+              <svg
+                x={-10.15}
+                y={-10}
+                width={markerSize * 1.35}
+                height={markerSize * 1.35}
+                viewBox="0 0 88 100"
+              >
+                <g transform="matrix(.48877 0 0 .42044 -4.0957 -33.407)">
+                  <path
+                    className="backing"
+                    transform="matrix(1.6461 0 0 1.6596 -56.401 -64.183)"
+                    d="m95.148 97.617 28.238 16.221 23.609 13.713 0.071 32.566-0.071 27.302-28.167 16.344-23.68 13.59-28.238-16.221-23.609-13.713-0.07098-32.566 0.07098-27.302 28.167-16.344z"
+                    fill="transparent"
+                    stroke="#ddd"
+                    strokeWidth="3"
+                  />
+                </g>
+              </svg>
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
@@ -294,11 +307,16 @@ export const ProcessEventDot = styled(
   will-change: left, top, width, height;
   contain: strict;
 
-  &[aria-current] {
-    outline: 1px solid red;
+  & .backing {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+  }
+  &[aria-current] .backing {
+    transition-property: stroke-dashoffset;
+    transition-duration: 1s;
+    stroke-dashoffset: 0;
   }
   &[aria-selected] {
-    background: gray;
   }
 `;
 
