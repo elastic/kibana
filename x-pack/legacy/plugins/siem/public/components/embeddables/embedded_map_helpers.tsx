@@ -8,14 +8,13 @@ import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import minimatch from 'minimatch';
-import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { IndexPatternMapping, SetQuery } from './types';
 import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../plugins/maps/public';
 import { MapEmbeddable, RenderTooltipContentParams } from '../../../../maps/public';
 import * as i18n from './translations';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-import { EmbeddableStart } from '../../../../../../../src/plugins/embeddable/public';
+import { EmbeddableStart, ViewMode } from '../../../../../../../src/plugins/embeddable/public';
 import { IndexPatternSavedObject } from '../../hooks/types';
 
 /**
