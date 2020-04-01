@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString, isObject } from 'lodash';
+import { isString, isObject, isArray } from 'lodash';
 import { IBucketAggConfig, BucketAggType, BucketAggParam } from './_bucket_agg_type';
 import { IAggConfig } from '../agg_config';
 
@@ -36,7 +36,7 @@ export const isStringOrNumberType = isType('string', 'number');
 export const migrateIncludeExcludeFormat = {
   serialize(this: BucketAggParam<IBucketAggConfig>, value: any, agg: IBucketAggConfig) {
     if (this.shouldShow && !this.shouldShow(agg)) return;
-    if (!value || isString(value)) return value;
+    if (!value || isString(value) || isArray(value)) return value;
     else return value.pattern;
   },
   write(
@@ -46,15 +46,12 @@ export const migrateIncludeExcludeFormat = {
   ) {
     const value = aggConfig.getParam(this.name);
 
-    if (isObject(value)) {
+    if (isArray(value) && value.length > 0 && isNumberType(aggConfig)) {
+      output.params[this.name] = (value as number[]).filter((val: number) => !Number.isNaN(val));
+    } else if (isObject(value)) {
       output.params[this.name] = value.pattern;
     } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;
-    } else if (value && value.length > 0 && isNumberType(aggConfig)) {
-      output.params[this.name] = value
-        .split(',')
-        .map((val: string) => Number(val.trim()))
-        .filter((val: number) => !Number.isNaN(val));
     }
   },
 } as Partial<BucketAggParam<IBucketAggConfig>>;

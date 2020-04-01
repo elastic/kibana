@@ -17,33 +17,51 @@
  * under the License.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isArray } from 'lodash';
 import { AggParamEditorProps } from '../agg_param_props';
 import { StringParamEditor } from './string';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { isNumberType } from '../../../../../../plugins/data/public/search/aggs/buckets';
+import { search } from '../../../../../../plugins/data/public/';
 import { NumberRow, NumberRowModel } from './components/number_list/number_row';
 import {
   EMPTY_STRING,
   getInitModelList,
-  getNextModel,
   getRange,
+  hasInvalidValues,
   parse,
 } from './components/number_list/utils';
+import { useValidation } from './utils';
+const { isNumberType } = search.aggs;
 
-export function IncludeExcludeParamEditor(props: AggParamEditorProps<any>) {
-  const [models, setModels] = useState(getInitModelList([]));
+export function IncludeExcludeParamEditor(
+  props: AggParamEditorProps<string | Array<number | undefined>>
+) {
+  const generateId = htmlIdGenerator();
+  const [numbers, setNumbers] = useState(
+    getInitModelList(
+      props.value && isArray(props.value) ? (props.value as Array<number | undefined>) : [undefined]
+    )
+  );
   const numberRange = useMemo(() => getRange('[-Infinity,Infinity]'), []);
+  const [isValid, setIsValid] = useState(true);
 
-  useEffect(() => {
-    console.log(props.value);
-  }, [props.value]);
+  const setValidity = useCallback(
+    (isListValid: boolean) => {
+      setIsValid(isListValid);
+      props.setValidity(isListValid);
+    },
+    [props.setValidity]
+  );
 
-  const onUpdate = useCallback((modelList: NumberRowModel[]) => {
-    setModels(modelList);
-    props.setValue(modelList.map(({ value }) => (value === EMPTY_STRING ? undefined : value)));
+  useValidation(setValidity, !hasInvalidValues(numbers));
+
+  const onUpdate = useCallback((numberList: NumberRowModel[]) => {
+    setNumbers(numberList);
+    props.setValue(
+      numberList.map(({ value }) => value).filter(value => value !== EMPTY_STRING) as number[]
+    );
   }, []);
 
   const onChangeValue = useCallback(
@@ -51,63 +69,71 @@ export function IncludeExcludeParamEditor(props: AggParamEditorProps<any>) {
       const parsedValue = parse(value);
 
       onUpdate(
-        models.map(model => {
-          if (model.id === id) {
-            return {
-              id,
-              value: parsedValue,
-              isInvalid: false,
-            };
-          }
-          return model;
-        })
+        numbers.map(number =>
+          number.id === id
+            ? {
+                id,
+                value: parsedValue,
+                isInvalid: value !== EMPTY_STRING && isNaN(parseFloat(value)),
+              }
+            : number
+        )
       );
     },
-    [numberRange, models, onUpdate]
+    [numberRange, numbers, onUpdate]
   );
 
   // Add an item to the end of the list
   const onAdd = useCallback(() => {
-    const newArray = [...models, getNextModel(models, numberRange)];
+    const newArray = [
+      ...numbers,
+      {
+        id: generateId(),
+        value: '',
+        isInvalid: false,
+      } as NumberRowModel,
+    ];
     onUpdate(newArray);
-  }, [models, numberRange, onUpdate]);
+  }, [numbers, numberRange, onUpdate]);
 
   const onDelete = useCallback(
     (id: string) => {
-      const newArray = models.filter(model => model.id !== id);
+      const newArray = numbers.filter(model => model.id !== id);
       onUpdate(newArray);
     },
-    [models, onUpdate]
+    [numbers, onUpdate]
   );
 
   return isNumberType(props.agg) ? (
     <EuiFormRow
+      id={`${props.aggParam.name}-${props.agg.id}}`}
       label={props.aggParam.displayName || props.aggParam.name}
       fullWidth={true}
       compressed
+      isInvalid={props.showValidation ? !isValid : false}
     >
       <>
-        {models.map((model, arrayIndex) => (
-          <Fragment key={model.id}>
+        {numbers.map((number, arrayIndex) => (
+          <Fragment key={number.id}>
             <NumberRow
-              isInvalid={false}
-              disableDelete={models.length === 1}
-              model={model}
-              labelledbyId={''}
+              isInvalid={number.isInvalid}
+              disableDelete={numbers.length === 1}
+              model={number}
+              labelledbyId={`${props.aggParam.name}-${props.agg.id}-legend`}
               range={numberRange}
               onDelete={onDelete}
               onChange={onChangeValue}
               onBlur={props.setTouched}
-              autoFocus={models.length !== 1 && arrayIndex === models.length - 1}
+              autoFocus={numbers.length !== 1 && arrayIndex === numbers.length - 1}
             />
-            {models.length - 1 !== arrayIndex && <EuiSpacer size="s" />}
+            {numbers.length - 1 !== arrayIndex && <EuiSpacer size="s" />}
           </Fragment>
         ))}
         <EuiSpacer size="s" />
         <EuiFlexItem>
           <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
             <FormattedMessage
-              id="visDefaultEditor.controls.numberList.addUnitButtonLabel"
+              id={`visDefaultEditor.controls.${props.aggParam.name}.addUnitButtonLabel`}
               defaultMessage="Add value"
             />
           </EuiButtonEmpty>
@@ -115,6 +141,6 @@ export function IncludeExcludeParamEditor(props: AggParamEditorProps<any>) {
       </>
     </EuiFormRow>
   ) : (
-    <StringParamEditor {...props} />
+    <StringParamEditor {...props} value={props.value as string | undefined} />
   );
 }
