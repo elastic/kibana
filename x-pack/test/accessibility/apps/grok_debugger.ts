@@ -11,16 +11,24 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const grokDebugger = getService('grokDebugger');
 
-  describe('Dev tools grok debugger', () => {
+  // this test is failing as there is a violation https://github.com/elastic/kibana/issues/62102
+  describe.skip('Dev tools grok debugger', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('grokDebugger');
       await grokDebugger.assertExists();
     });
 
-    // this test is failing as there is a violation https://github.com/elastic/kibana/issues/62102
-    it.skip('Dev tools grok debugger view', async () => {
+    it('Dev tools grok debugger view', async () => {
       await grokDebugger.setEventInput('SegerCommaBob');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Dev tools grok debugger view', async () => {
       await grokDebugger.setPatternInput('%{USERNAME:u}');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Dev tools grok debugger view', async () => {
       await grokDebugger.clickSimulate();
       await a11y.testAppSnapshot();
     });
