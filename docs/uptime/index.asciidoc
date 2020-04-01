@@ -12,8 +12,10 @@ To get started with Elastic Uptime, refer to {uptime-guide}/install-uptime.html[
 
 * <<uptime-overview>>
 * <<uptime-monitor>>
+* <<uptime-settings>>
 
 --
 
 include::overview.asciidoc[]
 include::monitor.asciidoc[]
+include::settings.asciidoc[]
