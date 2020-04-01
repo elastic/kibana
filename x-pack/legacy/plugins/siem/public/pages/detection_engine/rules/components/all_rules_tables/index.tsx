@@ -97,7 +97,7 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           onChange={tableOnChangeCallback}
           pagination={paginationMemo}
           ref={tableRef}
-          {...sorting}
+          sorting={sorting}
           selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
         />
       )}
@@ -111,7 +111,7 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           noItemsMessage={emptyPrompt}
           onChange={tableOnChangeCallback}
           pagination={paginationMemo}
-          {...sorting}
+          sorting={sorting}
         />
       )}
     </>
