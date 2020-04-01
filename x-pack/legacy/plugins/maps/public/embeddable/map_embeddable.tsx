@@ -45,8 +45,8 @@ import {
   hideLayerControl,
   hideViewControl,
   setHiddenLayers,
-  MapCenter,
 } from '../actions/map_actions';
+import { MapCenterAndZoom } from '../../../../../plugins/maps/common/descriptor_types';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -71,7 +71,6 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
   filters: Filter[];
   query?: Query;
-  refresh?: unknown;
   refreshConfig: RefreshInterval;
   isLayerTOCOpen: boolean;
   openTOCDetails?: string[];
@@ -80,7 +79,7 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   hideToolbarOverlay?: boolean;
   hideLayerControl?: boolean;
   hideViewControl?: boolean;
-  mapCenter?: MapCenter;
+  mapCenter?: MapCenterAndZoom;
   hiddenLayers?: string[];
   hideFilterActions?: boolean;
 }
@@ -153,7 +152,12 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     timeRange,
     filters,
     refresh,
-  }: Pick<MapEmbeddableInput, 'query' | 'timeRange' | 'filters' | 'refresh'>) {
+  }: {
+    query?: Query;
+    timeRange?: TimeRange;
+    filters: Filter[];
+    refresh?: boolean;
+  }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;

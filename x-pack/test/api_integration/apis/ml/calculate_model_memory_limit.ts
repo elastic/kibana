@@ -15,7 +15,7 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
-  const mlSecurity = getService('mlSecurity');
+  const ml = getService('ml');
 
   const testDataList = [
     {
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
     {
-      testTitleSuffix: 'with 1 metrics and 1 influencers same as split field',
+      testTitleSuffix: 'with 1 metric and 1 influencer same as split field',
       user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
           detectors: [
             {
               function: 'avg',
-              field_name: 'geoip.city_name',
+              field_name: 'taxless_total_price',
               by_field_name: 'geoip.city_name',
             },
           ],
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               function: 'mean',
               by_field_name: 'geoip.city_name',
-              field_name: 'geoip.city_name',
+              field_name: 'taxless_total_price',
             },
           ],
           influencers: ['geoip.city_name', 'customer_gender', 'customer_full_name.keyword'],
@@ -100,7 +100,8 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
     {
-      testTitleSuffix: '4 influencers, split by customer_id and filtering by country code',
+      testTitleSuffix:
+        '2 detectors split by city and manufacturer, 4 influencers, filtering by country code',
       user: USER.ML_POWERUSER,
       requestBody: {
         indexPattern: 'ecommerce',
@@ -109,13 +110,13 @@ export default ({ getService }: FtrProviderContext) => {
           detectors: [
             {
               function: 'mean',
-              by_field_name: 'customer_id.city_name',
-              field_name: 'customer_id.city_name',
+              by_field_name: 'geoip.city_name',
+              field_name: 'taxless_total_price',
             },
             {
               function: 'avg',
               by_field_name: 'manufacturer.keyword',
-              field_name: 'manufacturer.keyword',
+              field_name: 'taxless_total_price',
             },
           ],
           influencers: [
@@ -158,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`calculates the model memory limit ${testData.testTitleSuffix}`, async () => {
         await supertest
           .post('/api/ml/validate/calculate_model_memory_limit')
-          .auth(testData.user, mlSecurity.getPasswordForUser(testData.user))
+          .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);
