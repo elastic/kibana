@@ -109,12 +109,12 @@ export const getCases = async ({
     reporters: [],
     status: 'open',
     tags: [],
-  },
-  queryParams = {
-    page: 1,
-    perPage: 20,
     sortField: SortFieldCase.createdAt,
     sortOrder: 'desc',
+  },
+  pagination = {
+    page: 1,
+    perPage: 20,
   },
   signal,
 }: FetchCasesProps): Promise<AllCases> => {
@@ -123,7 +123,10 @@ export const getCases = async ({
     tags: filterOptions.tags,
     ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
-    ...queryParams,
+    sortField: filterOptions.sortField,
+    sortOrder: filterOptions.sortOrder,
+    page: pagination.page,
+    perPage: pagination.perPage,
   };
   const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',

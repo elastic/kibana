@@ -17,7 +17,7 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, cloneDeep } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
@@ -85,6 +85,7 @@ const getSortField = (field: string): SortFieldCase => {
 interface AllCasesProps {
   userCanCrud: boolean;
 }
+
 export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const urlSearch = useGetUrlSearch(navTabs.case);
   const { actionLicense } = useGetActionLicense();
@@ -97,13 +98,11 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const {
     data,
     dispatchUpdateCaseProperty,
-    filterOptions,
+    query,
     loading,
-    queryParams,
     selectedCases,
     refetchCases,
-    setFilters,
-    setQueryParams,
+    updateQuery,
     setSelectedCases,
   } = useGetCases();
 
@@ -131,11 +130,11 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
 
   const refreshCases = useCallback(() => {
-    refetchCases(filterOptions, queryParams);
+    refetchCases(query);
     fetchCasesStatus();
     setSelectedCases([]);
     setDeleteBulk([]);
-  }, [filterOptions, queryParams]);
+  }, [query]);
 
   useEffect(() => {
     if (isDeleted) {
@@ -147,6 +146,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       dispatchResetIsUpdated();
     }
   }, [isDeleted, isUpdated]);
+
   const confirmDeleteModal = useMemo(
     () => (
       <ConfirmDeleteCaseModal
@@ -200,7 +200,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       <EuiContextMenuPanel
         data-test-subj="cases-bulk-actions"
         items={getBulkItems({
-          caseStatus: filterOptions.status,
+          caseStatus: query.filterOptions.status,
           closePopover,
           deleteCasesAction: toggleBulkDeleteModal,
           selectedCaseIds,
@@ -208,8 +208,9 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         })}
       />
     ),
-    [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal]
+    [selectedCaseIds, query.filterOptions.status, toggleBulkDeleteModal]
   );
+
   const handleDispatchUpdate = useCallback(
     (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
       dispatchUpdateCaseProperty({ ...args, refetchCasesStatus: fetchCasesStatus });
@@ -220,65 +221,70 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const actions = useMemo(
     () =>
       getActions({
-        caseStatus: filterOptions.status,
+        caseStatus: query.filterOptions.status,
         deleteCaseOnClick: toggleDeleteModal,
         dispatchUpdate: handleDispatchUpdate,
       }),
-    [filterOptions.status, toggleDeleteModal, handleDispatchUpdate]
+    [query.filterOptions.status, toggleDeleteModal, handleDispatchUpdate]
   );
 
   const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
 
-  const tableOnChangeCallback = useCallback(
-    ({ page, sort }: EuiBasicTableOnChange) => {
-      let newQueryParams = queryParams;
-      if (sort) {
-        newQueryParams = {
-          ...newQueryParams,
-          sortField: getSortField(sort.field),
-          sortOrder: sort.direction,
-        };
-      }
-      if (page) {
-        newQueryParams = {
-          ...newQueryParams,
-          page: page.index + 1,
-          perPage: page.size,
-        };
-      }
-      setQueryParams(newQueryParams);
-    },
-    [queryParams]
-  );
+  const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
+    let pagination = {};
+    let filterOptions = {};
 
-  const onFilterChangedCallback = useCallback(
-    (newFilterOptions: Partial<FilterOptions>) => {
-      if (newFilterOptions.status && newFilterOptions.status === 'closed') {
-        setQueryParams({ ...queryParams, sortField: SortFieldCase.closedAt });
-      } else if (newFilterOptions.status && newFilterOptions.status === 'open') {
-        setQueryParams({ ...queryParams, sortField: SortFieldCase.createdAt });
-      }
-      setFilters({ ...filterOptions, ...newFilterOptions });
-    },
-    [filterOptions, queryParams]
-  );
+    if (sort) {
+      filterOptions = {
+        sortField: getSortField(sort.field),
+        sortOrder: sort.direction,
+      };
+    }
+
+    if (page) {
+      pagination = {
+        page: page.index + 1,
+        perPage: page.size,
+      };
+    }
+
+    updateQuery({ pagination, filterOptions });
+  }, []);
+
+  const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
+    let filterOptions = { ...newFilterOptions };
+
+    if (newFilterOptions.status && newFilterOptions.status === 'closed') {
+      filterOptions = {
+        ...filterOptions,
+        sortField: SortFieldCase.closedAt,
+      };
+    } else if (newFilterOptions.status && newFilterOptions.status === 'open') {
+      filterOptions = {
+        ...filterOptions,
+        sortField: SortFieldCase.createdAt,
+      };
+    }
+
+    updateQuery({ filterOptions });
+  }, []);
 
   const memoizedGetCasesColumns = useMemo(
-    () => getCasesColumns(userCanCrud ? actions : [], filterOptions.status),
-    [actions, filterOptions.status, userCanCrud]
+    () => getCasesColumns(userCanCrud ? actions : [], query.filterOptions.status),
+    [actions, query.filterOptions.status, userCanCrud]
   );
   const memoizedPagination = useMemo(
     () => ({
-      pageIndex: queryParams.page - 1,
-      pageSize: queryParams.perPage,
+      pageIndex: query.pagination.page - 1,
+      pageSize: query.pagination.perPage,
       totalItemCount: data.total,
       pageSizeOptions: [5, 10, 15, 20, 25],
     }),
-    [data, queryParams]
+    [data, query.pagination]
   );
 
   const sorting: EuiTableSortingType<Case> = {
-    sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
+    sort: { field: query.filterOptions.sortField, direction: query.filterOptions.sortOrder },
   };
   const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
     () => ({ onSelectionChange: setSelectedCases }),
@@ -289,6 +295,8 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     [loading]
   );
   const isDataEmpty = useMemo(() => data.total === 0, [data]);
+
+  const initalFilters = useMemo(() => cloneDeep(query.filterOptions), [query.filterOptions]);
 
   return (
     <>
@@ -341,12 +349,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}
           onFilterChanged={onFilterChangedCallback}
-          initial={{
-            search: filterOptions.search,
-            reporters: filterOptions.reporters,
-            tags: filterOptions.tags,
-            status: filterOptions.status,
-          }}
+          initial={initalFilters}
         />
         {isCasesLoading && isDataEmpty ? (
           <Div>

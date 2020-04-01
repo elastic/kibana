@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { FilterOptions } from '../../../../containers/case/types';
+import { FilterOptions, SortFieldCase } from '../../../../containers/case/types';
 import { useGetTags } from '../../../../containers/case/use_get_tags';
 import { useGetReporters } from '../../../../containers/case/use_get_reporters';
 import { FilterPopover } from '../../../../components/filter_popover';
@@ -34,7 +34,14 @@ interface CasesTableFiltersProps {
  * @param onFilterChanged change listener to be notified on filter changes
  */
 
-const defaultInitial = { search: '', reporters: [], status: 'open', tags: [] };
+const defaultInitial: FilterOptions = {
+  search: '',
+  reporters: [],
+  status: 'open',
+  tags: [],
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+};
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
@@ -42,7 +49,7 @@ const CasesTableFiltersComponent = ({
   onFilterChanged,
   initial = defaultInitial,
 }: CasesTableFiltersProps) => {
-  const [selectedReporters, setselectedReporters] = useState(
+  const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map(r => r.full_name ?? r.username ?? '')
   );
   const [search, setSearch] = useState(initial.search);
@@ -54,7 +61,7 @@ const CasesTableFiltersComponent = ({
   const handleSelectedReporters = useCallback(
     newReporters => {
       if (!isEqual(newReporters, selectedReporters)) {
-        setselectedReporters(newReporters);
+        setSelectedReporters(newReporters);
         const reportersObj = respReporters.filter(
           r => newReporters.includes(r.username) || newReporters.includes(r.full_name)
         );

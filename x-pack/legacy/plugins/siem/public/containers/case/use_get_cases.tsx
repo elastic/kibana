@@ -6,7 +6,15 @@
 
 import { useCallback, useEffect, useReducer } from 'react';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
-import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case } from './types';
+import {
+  AllCases,
+  SortFieldCase,
+  FilterOptions,
+  Pagination,
+  Case,
+  Query,
+  UpdateQuery,
+} from './types';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { UpdateByKey } from './use_update_case';
@@ -14,10 +22,9 @@ import { getCases, patchCase } from './api';
 
 export interface UseGetCasesState {
   data: AllCases;
-  filterOptions: FilterOptions;
+  query: Query;
   isError: boolean;
   loading: string[];
-  queryParams: QueryParams;
   selectedCases: Case[];
 }
 
@@ -35,8 +42,7 @@ export type Action =
     }
   | { type: 'FETCH_FAILURE'; payload: string }
   | { type: 'FETCH_UPDATE_CASE_SUCCESS' }
-  | { type: 'UPDATE_FILTER_OPTIONS'; payload: FilterOptions }
-  | { type: 'UPDATE_QUERY_PARAMS'; payload: Partial<QueryParams> }
+  | { type: 'UPDATE_QUERY'; payload: UpdateQuery }
   | { type: 'UPDATE_TABLE_SELECTIONS'; payload: Case[] };
 
 const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesState => {
@@ -65,18 +71,21 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
         isError: true,
         loading: state.loading.filter(e => e !== action.payload),
       };
-    case 'UPDATE_FILTER_OPTIONS':
+    case 'UPDATE_QUERY':
+      const { filterOptions, pagination } = action.payload;
+      const query = { ...state.query };
+
+      if (filterOptions != null) {
+        query.filterOptions = { ...query.filterOptions, ...filterOptions };
+      }
+
+      if (pagination != null) {
+        query.pagination = { ...query.pagination, ...pagination };
+      }
+
       return {
         ...state,
-        filterOptions: action.payload,
-      };
-    case 'UPDATE_QUERY_PARAMS':
-      return {
-        ...state,
-        queryParams: {
-          ...state.queryParams,
-          ...action.payload,
-        },
+        query,
       };
     case 'UPDATE_TABLE_SELECTIONS':
       return {
@@ -93,13 +102,13 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   reporters: [],
   status: 'open',
   tags: [],
-};
-
-export const DEFAULT_QUERY_PARAMS: QueryParams = {
-  page: DEFAULT_TABLE_ACTIVE_PAGE,
-  perPage: DEFAULT_TABLE_LIMIT,
   sortField: SortFieldCase.createdAt,
   sortOrder: 'desc',
+};
+
+export const DEFAULT_PAGINATION_PARAMS: Pagination = {
+  page: DEFAULT_TABLE_ACTIVE_PAGE,
+  perPage: DEFAULT_TABLE_LIMIT,
 };
 
 const initialData: AllCases = {
@@ -118,36 +127,34 @@ interface UseGetCases extends UseGetCasesState {
     version,
     refetchCasesStatus,
   }: UpdateCase) => void;
-  refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
-  setFilters: (filters: FilterOptions) => void;
-  setQueryParams: (queryParams: QueryParams) => void;
+  refetchCases: (query: Query) => void;
+  updateQuery: (query: UpdateQuery) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
 
-export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
+export const useGetCases = (initialQueryParams?: Pagination): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
-    filterOptions: DEFAULT_FILTER_OPTIONS,
+    query: {
+      filterOptions: DEFAULT_FILTER_OPTIONS,
+      pagination: initialQueryParams ?? DEFAULT_PAGINATION_PARAMS,
+    },
     isError: false,
     loading: [],
-    queryParams: initialQueryParams ?? DEFAULT_QUERY_PARAMS,
     selectedCases: [],
   });
+
   const [, dispatchToaster] = useStateToaster();
 
   const setSelectedCases = useCallback((mySelectedCases: Case[]) => {
     dispatch({ type: 'UPDATE_TABLE_SELECTIONS', payload: mySelectedCases });
   }, []);
 
-  const setQueryParams = useCallback((newQueryParams: QueryParams) => {
-    dispatch({ type: 'UPDATE_QUERY_PARAMS', payload: newQueryParams });
+  const updateQuery = useCallback((query: UpdateQuery) => {
+    dispatch({ type: 'UPDATE_QUERY', payload: query });
   }, []);
 
-  const setFilters = useCallback((newFilters: FilterOptions) => {
-    dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: newFilters });
-  }, []);
-
-  const fetchCases = useCallback((filterOptions: FilterOptions, queryParams: QueryParams) => {
+  const fetchCases = useCallback(({ filterOptions, pagination }: Query) => {
     let didCancel = false;
     const abortCtrl = new AbortController();
 
@@ -156,7 +163,7 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
       try {
         const response = await getCases({
           filterOptions,
-          queryParams,
+          pagination,
           signal: abortCtrl.signal,
         });
         if (!didCancel) {
@@ -183,10 +190,7 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
     };
   }, []);
 
-  useEffect(() => fetchCases(state.filterOptions, state.queryParams), [
-    state.queryParams,
-    state.filterOptions,
-  ]);
+  useEffect(() => fetchCases(state.query), [state.query]);
 
   const dispatchUpdateCaseProperty = useCallback(
     ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
@@ -205,7 +209,7 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
           );
           if (!didCancel) {
             dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
-            fetchCases(state.filterOptions, state.queryParams);
+            fetchCases(state.query);
             refetchCasesStatus();
           }
         } catch (error) {
@@ -221,19 +225,18 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
         didCancel = true;
       };
     },
-    [state.filterOptions, state.queryParams]
+    [state.query]
   );
 
   const refetchCases = useCallback(() => {
-    fetchCases(state.filterOptions, state.queryParams);
-  }, [state.filterOptions, state.queryParams]);
+    fetchCases(state.query);
+  }, [state.query]);
 
   return {
     ...state,
     dispatchUpdateCaseProperty,
     refetchCases,
-    setFilters,
-    setQueryParams,
+    updateQuery,
     setSelectedCases,
   };
 };

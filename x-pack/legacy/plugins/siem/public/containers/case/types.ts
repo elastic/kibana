@@ -56,11 +56,9 @@ export interface Case {
   version: string;
 }
 
-export interface QueryParams {
+export interface Pagination {
   page: number;
   perPage: number;
-  sortField: SortFieldCase;
-  sortOrder: 'asc' | 'desc';
 }
 
 export interface FilterOptions {
@@ -68,6 +66,18 @@ export interface FilterOptions {
   status: string;
   tags: string[];
   reporters: User[];
+  sortField: SortFieldCase;
+  sortOrder: 'asc' | 'desc';
+}
+
+export interface Query {
+  filterOptions: FilterOptions;
+  pagination: Pagination;
+}
+
+export interface UpdateQuery {
+  filterOptions?: Partial<FilterOptions>;
+  pagination?: Partial<Pagination>;
 }
 
 export interface CasesStatus {
@@ -94,7 +104,7 @@ export interface ElasticUser {
 }
 
 export interface FetchCasesProps extends ApiProps {
-  queryParams?: QueryParams;
+  pagination?: Pagination;
   filterOptions?: FilterOptions;
 }
 
