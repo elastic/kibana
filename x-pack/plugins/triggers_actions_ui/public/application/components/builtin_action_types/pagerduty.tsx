@@ -25,11 +25,12 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { PagerDutyActionParams, PagerDutyActionConnector } from './types';
+import pagerDutySvg from './pagerduty.svg';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.pagerduty',
-    iconClass: 'apps',
+    iconClass: pagerDutySvg,
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {
