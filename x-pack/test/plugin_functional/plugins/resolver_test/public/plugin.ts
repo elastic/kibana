@@ -40,7 +40,7 @@ export class ResolverTestPlugin
 
         (async () => {
           const [, { embeddable }] = await core.getStartServices();
-          const factory = embeddable.getEmbeddableFactory('resolver');
+          const factory = embeddable.getEmbeddableFactory('dashboard');
           if (factory) {
             resolveEmbeddable!(factory.create({ id: 'test basic render' }));
           }
