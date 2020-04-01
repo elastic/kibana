@@ -209,6 +209,11 @@ export const ProcessEventDot = styled(
             tabIndex={-1}
           >
             <g>
+              {/**
+               * placheholer until we get the real asset
+               */}
+              <circle cx={markerPositionOffset + markerSize/2}
+              cy={markerPositionOffset + markerSize/2} r={markerSize*1.2} stroke="red"/>
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
