@@ -25,13 +25,15 @@ import { NavigationMenu } from '../../../components/navigation_menu';
 import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
+import { JobMap } from '../job_map';
 
 import { ANALYSIS_CONFIG_TYPE } from '../../common/analytics';
 
 export const Page: FC<{
   jobId: string;
   analysisType: ANALYSIS_CONFIG_TYPE;
-}> = ({ jobId, analysisType }) => (
+  isMap: string | boolean;
+}> = ({ jobId, analysisType, isMap }) => (
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />
     <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
@@ -65,13 +67,14 @@ export const Page: FC<{
         </EuiPageContentHeader>
         <EuiPageContentBody style={{ maxWidth: 'calc(100% - 0px)' }}>
           <EuiSpacer size="l" />
-          {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
+          {isMap && <JobMap analyticsId={jobId} />}
+          {!isMap && analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
             <OutlierExploration jobId={jobId} />
           )}
-          {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
+          {!isMap && analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
             <RegressionExploration jobId={jobId} />
           )}
-          {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
+          {!isMap && analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
             <ClassificationExploration jobId={jobId} />
           )}
         </EuiPageContentBody>

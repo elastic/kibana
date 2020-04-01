@@ -148,3 +148,6 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType[number];
 export type DataFrameAnalyticsListAction = ArrayElement<
   EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions']
 >;
+export function getJobMapUrl(jobId: string, analysisType: string) {
+  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType},isMap:true))`;
+}

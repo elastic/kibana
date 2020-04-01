@@ -48,10 +48,11 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   }
   const jobId: string = globalState.ml.jobId;
   const analysisType: ANALYSIS_CONFIG_TYPE = globalState.ml.analysisType;
+  const isMap: string | boolean = globalState.ml.isMap;
 
   return (
     <PageLoader context={context}>
-      <Page {...{ jobId, analysisType }} />
+      <Page {...{ jobId, analysisType, isMap }} />
     </PageLoader>
   );
 };
