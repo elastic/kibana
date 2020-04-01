@@ -53,6 +53,9 @@ export async function fetchCommitsByAuthor(
                             name
                           }
                           number
+                          mergeCommit {
+                            oid
+                          }
                           timelineItems(
                             last: 20
                             itemTypes: CROSS_REFERENCED_EVENT
@@ -124,7 +127,8 @@ export async function fetchCommitsByAuthor(
 
     const associatedPullRequest = getAssociatedPullRequest(
       pullRequestEdge,
-      options
+      options,
+      sha
     );
 
     const existingBackports = getExistingBackportPRs(
@@ -161,11 +165,13 @@ function getPullNumberFromMessage(firstMessageLine: string) {
 
 function getAssociatedPullRequest(
   pullRequestEdge: PullRequestEdge | undefined,
-  options: BackportOptions
+  options: BackportOptions,
+  sha: string
 ) {
   const isAssociated =
     pullRequestEdge?.node.repository.name === options.repoName &&
-    pullRequestEdge?.node.repository.owner.login === options.repoOwner;
+    pullRequestEdge?.node.repository.owner.login === options.repoOwner &&
+    pullRequestEdge?.node.mergeCommit.oid === sha;
 
   if (isAssociated) {
     return pullRequestEdge;
@@ -250,6 +256,9 @@ interface HistoryEdge {
 export interface PullRequestEdge {
   node: {
     number: number;
+    mergeCommit: {
+      oid: string;
+    };
     repository: {
       owner: {
         login: string;

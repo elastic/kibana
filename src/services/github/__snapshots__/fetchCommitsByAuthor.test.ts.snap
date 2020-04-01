@@ -60,6 +60,9 @@ Array [
                             name
                           }
                           number
+                          mergeCommit {
+                            oid
+                          }
                           timelineItems(
                             last: 20
                             itemTypes: CROSS_REFERENCED_EVENT

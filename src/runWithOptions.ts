@@ -25,7 +25,6 @@ export async function runWithOptions(options: BackportOptions) {
       if (e instanceof HandledError) {
         console.error(e.message);
       } else {
-        console.error(e);
         throw e;
       }
     }

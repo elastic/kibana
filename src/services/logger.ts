@@ -38,7 +38,17 @@ export function initLogger() {
 }
 
 function formatMessage(message: string | Record<any, any>) {
-  return isString(message) ? message : JSON.stringify(message, null, 2);
+  if (message == null) {
+    return '';
+  }
+
+  if (isString(message)) {
+    return message;
+  }
+
+  if (typeof message === 'object') {
+    return JSON.stringify(message, Object.getOwnPropertyNames(message), 2);
+  }
 }
 
 // log levels:

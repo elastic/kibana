@@ -96,19 +96,24 @@ async function waitForCherrypick(
   options: BackportOptions,
   commit: CommitSelected
 ) {
-  const spinner = ora(
+  const cherrypickSpinner = ora(
     `Cherry-picking commit ${getShortSha(commit.sha)}`
   ).start();
   try {
     await cherrypick(options, commit);
-    spinner.succeed();
+    cherrypickSpinner.succeed();
   } catch (e) {
+    cherrypickSpinner.fail();
+
     const filesWithConflicts = await getFilesWithConflicts(options);
     if (isEmpty(filesWithConflicts)) {
       throw e;
     }
 
-    spinner.fail();
+    /*
+     * Conflict resolution phase starts here...
+     */
+
     if (options.editor) {
       const repoPath = getRepoPath(options);
       await exec(`${options.editor} ${repoPath}`);
@@ -120,13 +125,23 @@ async function waitForCherrypick(
     // list unstaged files and require user to confirm adding+comitting them
     await waitForEnterAndListUnstaged(options);
 
-    // add unstaged files
-    await addUnstagedFiles(options);
+    /*
+     * Conflicts resolved and cherrypicking can be continued...
+     */
 
-    // continue cherrypick (similar to commit)
-    await cherrypickContinue(options);
+    const stagingSpinner = ora(`Staging and committing files`).start();
+    try {
+      // add unstaged files
+      await addUnstagedFiles(options);
 
-    ora(`Staging and committing files`).start().succeed();
+      // continue cherrypick (similar to `git commit`)
+      await cherrypickContinue(options);
+    } catch (e) {
+      stagingSpinner.fail();
+      throw e;
+    }
+
+    stagingSpinner.succeed();
   }
 }
 
@@ -138,19 +153,18 @@ async function waitForConflictsToBeResolved(options: BackportOptions) {
     const checkForConflicts = async () => {
       const filesWithConflicts = await getFilesWithConflicts(options);
       if (isEmpty(filesWithConflicts)) {
-        clearInterval(intervalId);
         resolve();
         spinner.succeed(spinnerText);
       } else {
         spinner.text = dedent(`${spinnerText}
 
-        Resolve the conflicts the following files and then return here. You do not need to \`git add\` or \`git commit\`:
+        Resolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:
         ${filesWithConflicts.join('\n')}`);
+        setTimeout(checkForConflicts, 1000);
       }
     };
 
     checkForConflicts();
-    const intervalId = setInterval(checkForConflicts, 1000);
   });
 }
 

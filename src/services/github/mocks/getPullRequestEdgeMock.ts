@@ -12,6 +12,9 @@ export function getPullRequestEdgeMock({
 }): PullRequestEdge {
   return {
     node: {
+      mergeCommit: {
+        oid: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
+      },
       repository: {
         name: 'kibana',
         owner: {

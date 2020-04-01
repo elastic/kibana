@@ -23,6 +23,9 @@ export const commitsWithPullRequestsMock: DataResponse = {
                   edges: [
                     {
                       node: {
+                        mergeCommit: {
+                          oid: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
+                        },
                         repository: {
                           name: 'kibana',
                           owner: {
@@ -48,6 +51,9 @@ export const commitsWithPullRequestsMock: DataResponse = {
                   edges: [
                     {
                       node: {
+                        mergeCommit: {
+                          oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+                        },
                         repository: {
                           name: 'kibana',
                           owner: {

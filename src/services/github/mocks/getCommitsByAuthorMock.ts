@@ -1,6 +1,6 @@
 import { DataResponse } from '../fetchCommitsByAuthor';
 
-export const getExistingBackportPRsMock = (repoName: string): DataResponse => ({
+export const getCommitsByAuthorMock = (repoName: string): DataResponse => ({
   repository: {
     ref: {
       target: {
@@ -15,6 +15,9 @@ export const getExistingBackportPRsMock = (repoName: string): DataResponse => ({
                   edges: [
                     {
                       node: {
+                        mergeCommit: {
+                          oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+                        },
                         repository: {
                           name: repoName,
                           owner: {

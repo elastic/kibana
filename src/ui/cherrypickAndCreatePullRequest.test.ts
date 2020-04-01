@@ -200,7 +200,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         sourceBranch: 'myDefaultRepoBaseBranch',
       } as BackportOptions;
 
-      const res = await runTimers(() =>
+      const res = await runTimersUntilResolved(() =>
         cherrypickAndCreatePullRequest({
           options,
           commits: [
@@ -291,7 +291,9 @@ function setupExecSpy() {
         if (conflictCheckCounts >= 4) {
           return {};
         }
-        const e = new Error('cherrypick failed');
+        const e = new Error('Not all conflicts resolved');
+        // @ts-ignore
+        e.cmd = cmd;
         // @ts-ignore
         e.code = 2;
         // @ts-ignore
@@ -330,13 +332,23 @@ function setupExecSpy() {
     }) as typeof childProcess.exec);
 }
 
-async function runTimers(fn: () => Promise<any>) {
+/*
+ * Run timers (setInterval/setTimeout) every tick continuously until the promise has been resolved
+ */
+async function runTimersUntilResolved(fn: () => Promise<any>) {
   jest.useFakeTimers();
 
+  let isResolved = false;
   const p = fn();
-  await new Promise((resolve) => setImmediate(resolve));
-  jest.advanceTimersByTime(1000);
-  jest.runOnlyPendingTimers();
+  p.finally(() => (isResolved = true));
+
+  while (isResolved === false) {
+    // tick
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // run timers
+    jest.runAllTimers();
+  }
 
   return p;
 }

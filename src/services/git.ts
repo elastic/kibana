@@ -77,7 +77,7 @@ export async function deleteRemote(
   try {
     await exec(`git remote rm ${remoteName}`, { cwd: getRepoPath(options) });
   } catch (e) {
-    const isExecError = e.code === 128;
+    const isExecError = e.cmd && e.code === 128;
     // re-throw if error is not an exec related error
     if (!isExecError) {
       throw e;
@@ -111,7 +111,7 @@ export async function cherrypickContinue(options: BackportOptions) {
       cwd: getRepoPath(options),
     });
   } catch (e) {
-    const isCherrypickError = e.code === 128;
+    const isCherrypickError = e.cmd && e.code === 128;
     if (!isCherrypickError) {
       throw e;
     }
@@ -131,7 +131,7 @@ export async function getFilesWithConflicts(options: BackportOptions) {
 
     return [];
   } catch (e) {
-    const isConflictError = e.code === 2;
+    const isConflictError = e.cmd && e.code === 2;
     if (isConflictError) {
       const files = (e.stdout as string)
         .split('\n')

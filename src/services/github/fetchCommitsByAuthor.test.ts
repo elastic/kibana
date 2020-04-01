@@ -4,7 +4,7 @@ import {
   getExistingBackportPRs,
 } from './fetchCommitsByAuthor';
 import { commitsWithPullRequestsMock } from './mocks/commitsByAuthorMock';
-import { getExistingBackportPRsMock } from './mocks/getExistingBackportPRsMock';
+import { getCommitsByAuthorMock } from './mocks/getCommitsByAuthorMock';
 import { getDefaultOptions } from '../../test/getDefaultOptions';
 import axios from 'axios';
 import { getPullRequestEdgeMock } from './mocks/getPullRequestEdgeMock';
@@ -185,11 +185,11 @@ async function getExistingBackportsByRepoName(
   repoName1: string,
   repoName2: string
 ) {
-  const existingPrsMock = getExistingBackportPRsMock(repoName1);
+  const commitsMock = getCommitsByAuthorMock(repoName1);
 
   spyOn(axios, 'post').and.returnValues(
     { data: { data: currentUserMock } },
-    { data: { data: existingPrsMock } }
+    { data: { data: commitsMock } }
   );
 
   const options = getDefaultOptions({

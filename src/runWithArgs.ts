@@ -3,6 +3,7 @@ import { runWithOptions } from './runWithOptions';
 import { HandledError } from './services/HandledError';
 import { initLogger } from './services/logger';
 import { getLogfilePath } from './services/env';
+import chalk from 'chalk';
 
 export async function runWithArgs(args: string[]) {
   const logger = initLogger();
@@ -14,8 +15,13 @@ export async function runWithArgs(args: string[]) {
     if (e instanceof HandledError) {
       console.error(e.message);
     } else {
+      console.error('\n');
+      console.error(chalk.bold('⚠️  An unknown error occurred  ⚠️'));
+      console.error(e.message);
       console.error(
-        `An unknown error occurred. Please check the logs for addtional details: ${getLogfilePath()}`
+        chalk.italic(
+          `Please check the logs for addtional details: ${getLogfilePath()}`
+        )
       );
       logger.info('Unknown error:');
       logger.info(e);
