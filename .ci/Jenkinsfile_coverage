@@ -46,29 +46,13 @@ kibanaPipeline(timeoutMinutes: 180) {
           "QA_TEAM_ROCKS=true"
         ]) {
           listVcsEnvVars()
+
           def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
           withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
             withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
               withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
                 kibanaPipeline.bash("""
-//                source src/dev/ci_setup/setup_env.sh
-//
-//                # bootstrap from x-pack folder
-//                cd x-pack
-//                yarn kbn bootstrap --prefer-offline
-//
-//                # Return to project root
-//                cd ..
-//
-//                . src/dev/code_coverage/shell_scripts/extract_archives.sh
-//
-//                . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-//
-//                . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-//
-//                . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
-//
-//                . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
+
 
                 """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
               }
@@ -98,7 +82,7 @@ def listVcsEnvVars() {
     predicate() {
       x=$1
       if [ -n "$x" ]; then
-        return
+        echo "### Defined: ${x}"
       else
         echo "### 1 or more variables that Code Coverage needs, are undefined"
         exit 1
@@ -118,7 +102,7 @@ def listVcsEnvVars() {
     {
       echo "### Checking: $X"
       predicate "${XS[X]}"
-      echo "  ${XS[X]}" > VCS_INFO.txt
+      echo "  ${XS[X]}" >> VCS_INFO.txt
     }
     done
 
