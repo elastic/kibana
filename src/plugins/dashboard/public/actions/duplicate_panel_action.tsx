@@ -22,6 +22,7 @@ import { CoreStart } from 'src/core/public';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
 import { ViewMode, IContainer, PanelState, IEmbeddable } from '../embeddable_plugin';
 import { SavedObject } from '../../../saved_objects/public';
+import { EmbeddableInput } from '../../../embeddable/public';
 import { DashboardPanelState, GridData, DASHBOARD_CONTAINER_TYPE } from '..';
 
 export const ACTION_DUPLICATE_PANEL = 'duplicatePanel';
@@ -75,9 +76,13 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
     const dashboard = embeddable.getRoot() as IContainer;
     const panelToDuplicate = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
 
-    if (!panelToDuplicate || !panelToDuplicate.savedObjectId) {
-      throw new TypeError('attempt to duplicate panel without a saved object ID');
-    } else {
+    if (!panelToDuplicate) {
+      throw new TypeError('Could not locate the panel to duplicate');
+    }
+
+    let newTitle: string = '';
+    let duplicatedEmbeddable: IEmbeddable;
+    if (panelToDuplicate.savedObjectId) {
       // Fetch existing saved object
       const savedObjectToDuplicate = await this.core.savedObjects.client.get<SavedObject>(
         embeddable.type,
@@ -85,7 +90,7 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
       );
 
       // Create the duplicate saved object
-      const newTitle = await this.getUniqueTitle(
+      newTitle = await this.getUniqueTitle(
         savedObjectToDuplicate.attributes.title,
         embeddable.type
       );
@@ -99,7 +104,7 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
       );
 
       // Create duplicate embeddable
-      const duplicatedEmbeddable = await dashboard.addSavedObjectEmbeddable(
+      duplicatedEmbeddable = await dashboard.addSavedObjectEmbeddable(
         embeddable.type,
         duplicatedSavedObject.id
       );
@@ -108,24 +113,28 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
         ...panelToDuplicate.explicitInput,
         id: duplicatedEmbeddable.id,
       });
-
-      // Place duplicated panel
-      const finalPanels = _.cloneDeep(dashboard.getInput().panels);
-      const duplicatedPanel = finalPanels[duplicatedEmbeddable.id] as DashboardPanelState;
-      this.placeDuplicatedPanelInDashboard(finalPanels, panelToDuplicate, duplicatedPanel);
-
-      this.core.notifications.toasts.addSuccess({
-        title: i18n.translate('dashboard.panel.duplicationSuccessMessage', {
-          defaultMessage: 'Added duplicate panel {newTitle}',
-          values: {
-            newTitle,
-          },
-        }),
-        'data-test-subj': 'panelDuplicateSuccess',
-      });
-      dashboard.updateInput({ panels: finalPanels });
-      dashboard.reload();
+    } else {
+      const newInput: EmbeddableInput = _.cloneDeep(panelToDuplicate.explicitInput);
+      delete newInput.id;
+      duplicatedEmbeddable = await dashboard.addNewEmbeddable(embeddable.type, newInput);
     }
+
+    // Place duplicated panel
+    const finalPanels = _.cloneDeep(dashboard.getInput().panels);
+    const duplicatedPanel = finalPanels[duplicatedEmbeddable.id] as DashboardPanelState;
+    this.placeDuplicatedPanelInDashboard(finalPanels, panelToDuplicate, duplicatedPanel);
+
+    this.core.notifications.toasts.addSuccess({
+      title: i18n.translate('dashboard.panel.duplicationSuccessMessage', {
+        defaultMessage: 'Added duplicate panel {newTitle}',
+        values: {
+          newTitle,
+        },
+      }),
+      'data-test-subj': 'panelDuplicateSuccess',
+    });
+    dashboard.updateInput({ panels: finalPanels });
+    dashboard.reload();
   }
 
   private async getUniqueTitle(rawTitle: string, embeddableType: string): Promise<string> {
