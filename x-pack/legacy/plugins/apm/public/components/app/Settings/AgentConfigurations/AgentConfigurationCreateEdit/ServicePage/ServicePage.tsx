@@ -36,7 +36,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     callApmApi => {
       return callApmApi({
         pathname: '/api/apm/settings/agent-configuration/services',
-        forceCache: true
+        isCachable: true
       });
     },
     [],
