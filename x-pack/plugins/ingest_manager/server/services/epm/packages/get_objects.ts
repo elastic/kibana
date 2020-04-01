@@ -59,10 +59,10 @@ export async function getObject(key: string) {
   // convert that to an object
   const asset: ArchiveAsset = JSON.parse(json);
 
-  const { type } = Registry.pathParts(key);
+  const { type, file } = Registry.pathParts(key);
   const savedObject: SavedObjectToBe = {
     type,
-    id: asset.id,
+    id: file.replace('.json', ''),
     attributes: asset.attributes,
     references: asset.references || [],
     migrationVersion: asset.migrationVersion || {},
