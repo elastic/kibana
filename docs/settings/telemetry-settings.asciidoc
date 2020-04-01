@@ -5,7 +5,7 @@
 ++++
 
 By default, Usage Collection (also known as Telemetry) is enabled. This
-help us to learn about the {kib} features our users are more interested in, so we
+helps us learn about the {kib} features that our users are most interested in, so we
 can focus our efforts on making them even better.
 
 You can control whether this data is sent from the {kib} servers or, if it should be sent 
