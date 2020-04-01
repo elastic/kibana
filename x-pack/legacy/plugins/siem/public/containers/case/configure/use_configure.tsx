@@ -7,8 +7,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
-import { useStateToaster, errorToToaster } from '../../../components/toasters';
-import * as i18n from '../translations';
+import { useStateToaster, errorToToaster, displaySuccessToast } from '../../../components/toasters';
+import * as i18n from './translations';
 import { ClosureType } from './types';
 import { CurrentConfiguration } from '../../../pages/case/components/configure_cases/reducer';
 
@@ -124,6 +124,8 @@ export const useCaseConfigure = ({
                 closureType: res.closureType,
               });
             }
+
+            displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
           }
         } catch (error) {
           if (!didCancel) {

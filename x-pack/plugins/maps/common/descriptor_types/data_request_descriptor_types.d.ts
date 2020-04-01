@@ -5,21 +5,14 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from './map_descriptor';
-
-type Extent = {
-  maxLat: number;
-  maxLon: number;
-  minLat: number;
-  minLon: number;
-};
+import { MapExtent, MapQuery } from './map_descriptor';
 
 // Global map state passed to every layer.
 export type MapFilters = {
-  buffer: Extent; // extent with additional buffer
-  extent: Extent; // map viewport
+  buffer: MapExtent; // extent with additional buffer
+  extent: MapExtent; // map viewport
   filters: unknown[];
-  query: Query;
+  query: MapQuery;
   refreshTimerLastTriggeredAt: string;
   timeFilters: unknown;
   zoom: number;
@@ -29,14 +22,14 @@ export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
   geogridPrecision: number;
-  sourceQuery: Query;
+  sourceQuery: MapQuery;
   sourceMeta: unknown;
 };
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
-  sourceQuery: Query;
+  sourceQuery: MapQuery;
   timeFilters: unknown;
 };
 
