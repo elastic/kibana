@@ -17,7 +17,7 @@ import {
 } from '../../../../lib';
 import { TYPE_DEFINITION } from '../../../../constants';
 
-import { NameParameter, TypeParameter } from '../../field_parameters';
+import { CustomTypeParameter, NameParameter, TypeParameter } from '../../field_parameters';
 import { FieldDescriptionSection } from './field_description_section';
 
 interface Props {
@@ -79,6 +79,13 @@ export const EditFieldHeaderForm = React.memo(
               onTypeChange={onTypeChange}
             />
           </EuiFlexItem>
+
+          {/* Custom type */}
+          {type === 'other' && (
+            <EuiFlexItem>
+              <CustomTypeParameter />
+            </EuiFlexItem>
+          )}
 
           {/* Field sub type (if any) */}
           {hasSubType && (

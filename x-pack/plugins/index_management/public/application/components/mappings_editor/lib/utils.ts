@@ -25,6 +25,7 @@ import {
   PARAMETERS_DEFINITION,
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
+  TYPE_DEFINITION,
 } from '../constants';
 
 import { State } from '../reducer';
@@ -196,6 +197,13 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
           field.type = 'object';
         }
 
+        if (field.type && !TYPE_DEFINITION[field.type]) {
+          field.customTypeName = field.type;
+          const { type, ...rest } = value;
+          field.customTypeJson = rest;
+          field.type = 'other';
+        }
+
         const meta = getFieldMeta(field, isMultiField);
         const { childFieldsName, hasChildFields, hasMultiFields } = meta;
 
@@ -285,9 +293,14 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
   const deNormalizePaths = (ids: string[], to: Fields = {}) => {
     ids.forEach(id => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
-      const { name, ...normalizedField } = source;
-      const field: Omit<Field, 'name'> = normalizedField;
+      const { name, type, customTypeName, customTypeJson, ...restNormalizedField } = source;
+      const field: Omit<Field, 'name'> =
+        type === 'other' && customTypeName && customTypeJson
+          ? { type: customTypeName, ...customTypeJson, ...restNormalizedField }
+          : { type, ...restNormalizedField };
+
       to[name] = field;
+
       if (childFields) {
         field[childFieldsName!] = {};
         return deNormalizePaths(childFields, field[childFieldsName!]);

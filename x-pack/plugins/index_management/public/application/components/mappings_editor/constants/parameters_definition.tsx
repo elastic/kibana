@@ -29,7 +29,7 @@ import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
 
 const { toInt } = fieldFormatters;
-const { emptyField, containsCharsField, numberGreaterThanField } = fieldValidators;
+const { emptyField, containsCharsField, numberGreaterThanField, isJsonField } = fieldValidators;
 
 const commonErrorMessages = {
   smallerThanZero: i18n.translate(
@@ -184,6 +184,81 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       ],
     },
     schema: t.string,
+  },
+  customTypeName: {
+    fieldConfig: {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.customTypeNameFieldLabel', {
+        defaultMessage: 'Custom Type Name',
+      }),
+      defaultValue: '',
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.customTypeNameIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Give a name for the custom type.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+    schema: t.string,
+  },
+  customTypeJson: {
+    fieldConfig: {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.customTypeNameFieldLabel', {
+        defaultMessage: 'Custom Type JSON',
+      }),
+      defaultValue: {},
+      validations: [
+        {
+          validator: isJsonField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.customTypeJsonInvalidJSONErrorMessage',
+              {
+                defaultMessage: 'Please provide valid JSON',
+              }
+            )
+          ),
+        },
+        {
+          validator: ({ value }) => {
+            try {
+              const json = JSON.parse(value);
+              if (json.type) {
+                return {
+                  code: 'ERR_CUSTOM_TYPE_OVERRIDDEN',
+                  message: i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.parameters.validations.customTypeJsonTypeFieldOverride',
+                    {
+                      defaultMessage: 'Custom JSON cannot override the "type" field.',
+                    }
+                  ),
+                };
+              }
+            } catch (e) {
+              // Swallow parse errors
+            }
+          },
+        },
+      ],
+      deserializer: (value: any) => {
+        if (value === '') {
+          return value;
+        }
+        return JSON.stringify(value, null, 2);
+      },
+      serializer: (value: string) => {
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          // swallow error and return non-parsed value;
+          return value;
+        }
+      },
+    },
   },
   store: {
     fieldConfig: {

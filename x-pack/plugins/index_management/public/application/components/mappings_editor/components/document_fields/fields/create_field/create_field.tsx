@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
+import { useForm, Form, FormDataProvider, UseField, TextField } from '../../../../shared_imports';
 
 import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
 
@@ -31,7 +31,7 @@ import {
   filterTypesForNonRootFields,
 } from '../../../../lib';
 import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
-import { NameParameter, TypeParameter } from '../../field_parameters';
+import { NameParameter, TypeParameter, CustomTypeParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -178,6 +178,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 docLink={docLink}
               />
             </EuiFlexItem>
+            {/* Custom type */}
+            {type === 'other' && (
+              <EuiFlexItem>
+                <CustomTypeParameter />
+              </EuiFlexItem>
+            )}
             {/* Field sub type (if any) */}
             {subTypeOptions && (
               <EuiFlexItem>
