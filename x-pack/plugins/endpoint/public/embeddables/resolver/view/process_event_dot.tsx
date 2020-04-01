@@ -210,23 +210,16 @@ export const ProcessEventDot = styled(
           >
             <g>
               <svg
-                x={-10.15}
-                y={-10}
-                width={markerSize * 1.35}
-                height={markerSize * 1.35}
-                viewBox="0 0 88 100"
+                x={-11.15}
+                y={-11}
+                width={markerSize * 1.5}
+                height={markerSize * 1.5}
+                viewBox="0 -3 88 106"
               >
-                <g transform="matrix(.48877 0 0 .42044 -4.0957 -33.407)">
-                  <path
-                    className="backing"
-                    transform="matrix(1.6461 0 0 1.6596 -56.401 -64.183)"
-                    d="m95.148 97.617 28.238 16.221 23.609 13.713 0.071 32.566-0.071 27.302-28.167 16.344-23.68 13.59-28.238-16.221-23.609-13.713-0.07098-32.566 0.07098-27.302 28.167-16.344z"
-                    fill="transparent"
-                    stroke="#ddd"
-                    strokeWidth="3"
-                  />
-                </g>
+                <title>resolver backing</title>
+                <path className="backing" d="m87.521 25.064a3.795 3.795 0 0 0-1.4313-1.4717l-40.164-23.083a3.8338 3.8338 0 0 0-3.8191 0l-40.165 23.083a3.8634 3.8634 0 0 0-1.9097 3.2926v46.165a3.7986 3.7986 0 0 0 1.9097 3.2925l40.164 23.083a3.8342 3.8342 0 0 0 3.8191 0l40.164-23.083a3.7988 3.7988 0 0 0 1.9099-3.2925v-46.165a3.7775 3.7775 0 0 0-0.47857-1.8209z" fill="transparent" stroke="#67697d" strokeWidth="2"/>   
               </svg>
+
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
