@@ -39,7 +39,7 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
             `Failed to delete space '${id}', cannot execute script in Elasticsearch query: ${error.message}`
           );
           return response.customError(
-            wrapError(Boom.notImplemented('Cannot execute script in Elasticsearch query'))
+            wrapError(Boom.badRequest('Cannot execute script in Elasticsearch query'))
           );
         }
         return response.customError(wrapError(error));

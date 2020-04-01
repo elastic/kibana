@@ -145,7 +145,7 @@ describe('Spaces Public API', () => {
     expect(status).toEqual(404);
   });
 
-  it(`returns http/501 when scripts cannot be executed in Elasticsearch`, async () => {
+  it(`returns http/400 when scripts cannot be executed in Elasticsearch`, async () => {
     const { routeHandler, savedObjectsRepositoryMock } = await setup();
 
     const request = httpServerMock.createKibanaRequest({
@@ -160,9 +160,10 @@ describe('Spaces Public API', () => {
     );
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-    const { status } = response;
+    const { status, payload } = response;
 
-    expect(status).toEqual(501);
+    expect(status).toEqual(400);
+    expect(payload.message).toEqual('Cannot execute script in Elasticsearch query');
   });
 
   it(`DELETE spaces/{id}' cannot delete reserved spaces`, async () => {

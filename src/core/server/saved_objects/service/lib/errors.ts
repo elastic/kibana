@@ -33,7 +33,7 @@ const CODE_REQUEST_ENTITY_TOO_LARGE = 'SavedObjectsClient/requestEntityTooLarge'
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
 // 409 - Conflict
 const CODE_CONFLICT = 'SavedObjectsClient/conflict';
-// 501 - Es Cannot Execute Script
+// 500 - Es Cannot Execute Script
 const CODE_ES_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
 // 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
@@ -165,7 +165,7 @@ export class SavedObjectsErrorHelpers {
   }
 
   public static decorateEsCannotExecuteScriptError(error: Error, reason?: string) {
-    return decorate(error, CODE_ES_CANNOT_EXECUTE_SCRIPT, 501, reason);
+    return decorate(error, CODE_ES_CANNOT_EXECUTE_SCRIPT, 400, reason);
   }
 
   public static isEsCannotExecuteScriptError(error: Error | DecoratedError) {
