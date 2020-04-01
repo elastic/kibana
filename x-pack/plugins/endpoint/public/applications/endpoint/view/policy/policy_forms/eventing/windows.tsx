@@ -6,6 +6,8 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiTitle, EuiText } from '@elastic/eui';
 import { EventingCheckbox } from './checkbox';
 import { OS, EventingFields } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
@@ -16,6 +18,9 @@ import {
 import { ConfigForm } from '../config_form';
 
 export const WindowsEventing = React.memo(() => {
+  const selected = usePolicyDetailsSelector(selectedWindowsEventing);
+  const total = usePolicyDetailsSelector(totalWindowsEventing);
+
   const checkboxes = useMemo(
     () => [
       {
@@ -37,21 +42,42 @@ export const WindowsEventing = React.memo(() => {
   );
 
   const renderCheckboxes = () => {
-    return checkboxes.map((item, index) => {
-      return (
-        <EventingCheckbox
-          id={`eventing${item.name}`}
-          name={item.name}
-          key={index}
-          os={item.os}
-          protectionField={item.protectionField}
-        />
-      );
-    });
+    return (
+      <>
+        <EuiTitle size="xxs">
+          <h5>
+            <FormattedMessage
+              id="xpack.endpoint.policyDetailsConfig.eventingEvents"
+              defaultMessage="Events"
+            />
+          </h5>
+        </EuiTitle>
+        {checkboxes.map((item, index) => {
+          return (
+            <EventingCheckbox
+              id={`eventing${item.name}`}
+              name={item.name}
+              key={index}
+              os={item.os}
+              protectionField={item.protectionField}
+            />
+          );
+        })}
+      </>
+    );
   };
 
-  const selected = usePolicyDetailsSelector(selectedWindowsEventing);
-  const total = usePolicyDetailsSelector(totalWindowsEventing);
+  const collectionsEnabled = () => {
+    return (
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.endpoint.policy.details.eventCollectionsEnabled"
+          defaultMessage="{selected} / {total} event collections enabled"
+          values={{ selected, total }}
+        />
+      </EuiText>
+    );
+  };
 
   return (
     <ConfigForm
@@ -62,9 +88,8 @@ export const WindowsEventing = React.memo(() => {
         i18n.translate('xpack.endpoint.policy.details.windows', { defaultMessage: 'Windows' }),
       ]}
       id="windowsEventingForm"
+      rightCorner={collectionsEnabled()}
       children={renderCheckboxes()}
-      selectedEventing={selected}
-      totalEventing={total}
     />
   );
 });
