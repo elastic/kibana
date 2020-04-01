@@ -230,4 +230,10 @@ VisualizeListingTable.propTypes = {
   listingLimit: PropTypes.number.isRequired,
 };
 
-export { VisualizeListingTable };
+const withI18nContext = I18nContext => props => (
+  <I18nContext>
+    <VisualizeListingTable {...props} />
+  </I18nContext>
+);
+
+export { withI18nContext };

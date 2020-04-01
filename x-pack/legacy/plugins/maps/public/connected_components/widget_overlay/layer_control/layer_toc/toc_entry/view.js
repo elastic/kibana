@@ -261,6 +261,8 @@ export class TOCEntry extends React.Component {
     const classes = classNames('mapTocEntry', {
       'mapTocEntry-isDragging': this.props.isDragging,
       'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
+      'mapTocEntry-isSelected':
+        this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId(),
     });
 
     return (
