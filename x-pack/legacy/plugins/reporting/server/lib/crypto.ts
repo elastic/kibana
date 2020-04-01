@@ -5,7 +5,12 @@
  */
 
 import nodeCrypto from '@elastic/node-crypto';
+import { oncePerServer } from './once_per_server';
+import { ServerFacade } from '../../types';
 
-export function cryptoFactory(encryptionKey: string | undefined) {
+function cryptoFn(server: ServerFacade) {
+  const encryptionKey = server.config().get('xpack.reporting.encryptionKey');
   return nodeCrypto({ encryptionKey });
 }
+
+export const cryptoFactory = oncePerServer(cryptoFn);

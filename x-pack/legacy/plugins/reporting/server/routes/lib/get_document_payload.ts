@@ -8,7 +8,13 @@
 import contentDisposition from 'content-disposition';
 import * as _ from 'lodash';
 import { CSV_JOB_TYPE } from '../../../common/constants';
-import { ExportTypeDefinition, ExportTypesRegistry, JobDocOutput, JobSource } from '../../../types';
+import {
+  ExportTypeDefinition,
+  ExportTypesRegistry,
+  JobDocOutput,
+  JobSource,
+  ServerFacade,
+} from '../../../types';
 
 interface ICustomHeaders {
   [x: string]: any;
@@ -16,15 +22,9 @@ interface ICustomHeaders {
 
 type ExportTypeType = ExportTypeDefinition<unknown, unknown, unknown, unknown>;
 
-interface ErrorFromPayload {
-  message: string;
-  reason: string | null;
-}
-
-// A camelCase version of JobDocOutput
 interface Payload {
   statusCode: number;
-  content: string | Buffer | ErrorFromPayload;
+  content: any;
   contentType: string;
   headers: Record<string, any>;
 }
@@ -48,17 +48,20 @@ const getReportingHeaders = (output: JobDocOutput, exportType: ExportTypeType) =
   return metaDataHeaders;
 };
 
-export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegistry) {
-  function encodeContent(content: string | null, exportType: ExportTypeType): Buffer | string {
+export function getDocumentPayloadFactory(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry
+) {
+  function encodeContent(content: string | null, exportType: ExportTypeType) {
     switch (exportType.jobContentEncoding) {
       case 'base64':
-        return content ? Buffer.from(content, 'base64') : ''; // convert null to empty string
+        return content ? Buffer.from(content, 'base64') : content; // Buffer.from rejects null
       default:
-        return content ? content : ''; // convert null to empty string
+        return content;
     }
   }
 
-  function getCompleted(output: JobDocOutput, jobType: string, title: string): Payload {
+  function getCompleted(output: JobDocOutput, jobType: string, title: string) {
     const exportType = exportTypesRegistry.get((item: ExportTypeType) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
@@ -74,7 +77,7 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
     };
   }
 
-  function getFailure(output: JobDocOutput): Payload {
+  function getFailure(output: JobDocOutput) {
     return {
       statusCode: 500,
       content: {

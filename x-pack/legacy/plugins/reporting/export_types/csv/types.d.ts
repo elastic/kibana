@@ -5,8 +5,7 @@
  */
 
 import { CancellationToken } from '../../common/cancellation_token';
-import { ScrollConfig } from '../../server/types';
-import { JobDocPayload, JobParamPostPayload } from '../../types';
+import { JobDocPayload, JobParamPostPayload, ConditionalHeaders, RequestFacade } from '../../types';
 
 interface DocValueField {
   field: string;
@@ -107,7 +106,7 @@ export interface GenerateCsvParams {
     quoteValues: boolean;
     timezone: string | null;
     maxSizeBytes: number;
-    scroll: ScrollConfig;
+    scroll: { duration: string; size: number };
     checkForFormulas?: boolean;
   };
 }

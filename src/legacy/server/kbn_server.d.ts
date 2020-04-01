@@ -39,9 +39,6 @@ import {
   LegacyServiceDiscoverPlugins,
 } from '../../core/server';
 
-// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/server/legacy';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
@@ -78,7 +75,6 @@ declare module 'hapi' {
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
-    getSavedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
     addMemoizedFactoryToRequest: (

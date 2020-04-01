@@ -20,6 +20,7 @@ export default function(kibana: any) {
         app: ['alerting', 'kibana'],
         privileges: {
           all: {
+            app: ['alerting', 'kibana'],
             savedObject: {
               all: ['alert'],
               read: [],
@@ -28,6 +29,7 @@ export default function(kibana: any) {
             api: ['alerting-read', 'alerting-all'],
           },
           read: {
+            app: ['alerting', 'kibana'],
             savedObject: {
               all: [],
               read: ['alert'],

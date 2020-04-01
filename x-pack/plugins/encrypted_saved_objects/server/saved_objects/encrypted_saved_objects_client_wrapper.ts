@@ -195,7 +195,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   private stripEncryptedAttributesFromResponse<T extends SavedObjectsUpdateResponse | SavedObject>(
     response: T
   ): T {
-    if (this.options.service.isRegistered(response.type)) {
+    if (this.options.service.isRegistered(response.type) && response.attributes) {
       response.attributes = this.options.service.stripEncryptedAttributes(
         response.type,
         response.attributes as Record<string, unknown>
@@ -214,7 +214,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     T extends SavedObjectsBulkResponse | SavedObjectsFindResponse | SavedObjectsBulkUpdateResponse
   >(response: T): T {
     for (const savedObject of response.saved_objects) {
-      if (this.options.service.isRegistered(savedObject.type)) {
+      if (this.options.service.isRegistered(savedObject.type) && savedObject.attributes) {
         savedObject.attributes = this.options.service.stripEncryptedAttributes(
           savedObject.type,
           savedObject.attributes as Record<string, unknown>

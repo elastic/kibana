@@ -33,7 +33,10 @@ export const spacesManagementApp = Object.freeze({
         defaultMessage: 'Spaces',
       }),
       async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ http, notifications, i18n: i18nStart, application }] = await getStartServices();
+        const [
+          { notifications, i18n: i18nStart, application },
+          { features },
+        ] = await getStartServices();
         const spacesBreadcrumbs = [
           {
             text: i18n.translate('xpack.spaces.management.breadcrumb', {
@@ -48,7 +51,7 @@ export const spacesManagementApp = Object.freeze({
           return (
             <SpacesGridPage
               capabilities={application.capabilities}
-              http={http}
+              getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
@@ -69,7 +72,7 @@ export const spacesManagementApp = Object.freeze({
           return (
             <ManageSpacePage
               capabilities={application.capabilities}
-              http={http}
+              getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
@@ -93,7 +96,7 @@ export const spacesManagementApp = Object.freeze({
           return (
             <ManageSpacePage
               capabilities={application.capabilities}
-              http={http}
+              getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
               spaceId={spaceId}

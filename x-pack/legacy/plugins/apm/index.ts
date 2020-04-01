@@ -96,6 +96,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
           defaultMessage: 'APM'
         }),
+        order: 900,
         icon: 'apmApp',
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
@@ -103,10 +104,18 @@ export const apm: LegacyPluginInitializer = kibana => {
         // see x-pack/plugins/features/common/feature_kibana_privileges.ts
         privileges: {
           all: {
-            api: ['apm', 'apm_write', 'actions-read', 'alerting-read'],
+            app: ['apm', 'kibana'],
+            api: [
+              'apm',
+              'apm_write',
+              'actions-read',
+              'actions-all',
+              'alerting-read',
+              'alerting-all'
+            ],
             catalogue: ['apm'],
             savedObject: {
-              all: ['action', 'action_task_params'],
+              all: ['alert', 'action', 'action_task_params'],
               read: []
             },
             ui: [
@@ -121,13 +130,28 @@ export const apm: LegacyPluginInitializer = kibana => {
             ]
           },
           read: {
-            api: ['apm', 'actions-read', 'alerting-read'],
+            app: ['apm', 'kibana'],
+            api: [
+              'apm',
+              'actions-read',
+              'actions-all',
+              'alerting-read',
+              'alerting-all'
+            ],
             catalogue: ['apm'],
             savedObject: {
-              all: ['action', 'action_task_params'],
+              all: ['alert', 'action', 'action_task_params'],
               read: []
             },
-            ui: ['show', 'alerting:show', 'actions:show']
+            ui: [
+              'show',
+              'alerting:show',
+              'actions:show',
+              'alerting:save',
+              'actions:save',
+              'alerting:delete',
+              'actions:delete'
+            ]
           }
         }
       });

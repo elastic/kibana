@@ -6,26 +6,28 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Demo, dashboardFactory, urlFactory } from './test_data';
+import { dashboardDrilldownActionFactory, Demo, urlDrilldownActionFactory } from './test_data';
 
 storiesOf('components/ActionWizard', module)
-  .add('default', () => <Demo actionFactories={[dashboardFactory, urlFactory]} />)
+  .add('default', () => (
+    <Demo actionFactories={[dashboardDrilldownActionFactory, urlDrilldownActionFactory]} />
+  ))
   .add('Only one factory is available', () => (
     // to make sure layout doesn't break
-    <Demo actionFactories={[dashboardFactory]} />
+    <Demo actionFactories={[dashboardDrilldownActionFactory]} />
   ))
   .add('Long list of action factories', () => (
     // to make sure layout doesn't break
     <Demo
       actionFactories={[
-        dashboardFactory,
-        urlFactory,
-        dashboardFactory,
-        urlFactory,
-        dashboardFactory,
-        urlFactory,
-        dashboardFactory,
-        urlFactory,
+        dashboardDrilldownActionFactory,
+        urlDrilldownActionFactory,
+        dashboardDrilldownActionFactory,
+        urlDrilldownActionFactory,
+        dashboardDrilldownActionFactory,
+        urlDrilldownActionFactory,
+        dashboardDrilldownActionFactory,
+        urlDrilldownActionFactory,
       ]}
     />
   ));

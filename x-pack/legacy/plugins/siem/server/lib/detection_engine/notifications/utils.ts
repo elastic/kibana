@@ -5,14 +5,14 @@
  */
 
 export const getNotificationResultsLink = ({
-  baseUrl,
+  kibanaSiemAppUrl,
   id,
   from,
   to,
 }: {
-  baseUrl: string;
+  kibanaSiemAppUrl: string;
   id: string;
   from: string;
   to: string;
 }) =>
-  `${baseUrl}/app/siem#/detections/rules/id/${id}?timerange=(global:(linkTo:!(timeline),timerange:(from:${from},kind:absolute,to:${to})),timeline:(linkTo:!(global),timerange:(from:${from},kind:absolute,to:${to})))`;
+  `${kibanaSiemAppUrl}#/detections/rules/id/${id}?timerange=(global:(linkTo:!(timeline),timerange:(from:${from},kind:absolute,to:${to})),timeline:(linkTo:!(global),timerange:(from:${from},kind:absolute,to:${to})))`;

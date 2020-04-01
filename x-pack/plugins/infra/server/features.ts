@@ -11,12 +11,15 @@ export const METRICS_FEATURE = {
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
     defaultMessage: 'Metrics',
   }),
+  order: 700,
   icon: 'metricsApp',
   navLinkId: 'metrics',
   app: ['infra', 'kibana'],
   catalogue: ['infraops'],
   privileges: {
     all: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infraops'],
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -25,6 +28,8 @@ export const METRICS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infraops'],
       api: ['infra'],
       savedObject: {
         all: [],
@@ -40,12 +45,15 @@ export const LOGS_FEATURE = {
   name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
     defaultMessage: 'Logs',
   }),
+  order: 800,
   icon: 'logsApp',
   navLinkId: 'logs',
   app: ['infra', 'kibana'],
   catalogue: ['infralogging'],
   privileges: {
     all: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infralogging'],
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -54,6 +62,8 @@ export const LOGS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infralogging'],
       api: ['infra'],
       savedObject: {
         all: [],

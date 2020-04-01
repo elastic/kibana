@@ -43,7 +43,7 @@ export interface BaseStateContainer<State extends BaseState> {
 
 export interface StateContainer<
   State extends BaseState,
-  PureTransitions extends object = object,
+  PureTransitions extends object,
   PureSelectors extends object = {}
 > extends BaseStateContainer<State> {
   transitions: Readonly<PureTransitionsToTransitions<PureTransitions>>;

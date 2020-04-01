@@ -41,7 +41,6 @@ import './directives/saved_object_save_as_checkbox';
 import './services/saved_sheet_register';
 
 import rootTemplate from 'plugins/timelion/index.html';
-import { start as visualizations } from '../../visualizations/public/np_ready/public/legacy';
 
 import { loadKbnTopNavDirectives } from '../../../../plugins/kibana_legacy/public';
 loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
@@ -125,7 +124,7 @@ app.controller('timelion', function(
   timefilter.enableAutoRefreshSelector();
   timefilter.enableTimeRangeSelector();
 
-  const savedVisualizations = visualizations.savedVisualizationsLoader;
+  const savedVisualizations = npStart.plugins.visualizations.savedVisualizationsLoader;
   const timezone = getTimezone(config);
 
   const defaultExpression = '.es(*)';

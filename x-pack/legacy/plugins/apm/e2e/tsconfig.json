@@ -1,13 +1,8 @@
 {
   "extends": "../../../../tsconfig.json",
-  "exclude": [],
-  "include": [
-    "./**/*"
-  ],
+  "exclude": ["tmp"],
+  "include": ["./**/*"],
   "compilerOptions": {
-    "types": [
-      "cypress",
-      "node"
-    ]
+    "types": ["cypress", "node"]
   }
 }

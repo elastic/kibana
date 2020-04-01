@@ -33,7 +33,7 @@ interface ActionContext {
 export class EditPanelAction implements Action<ActionContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
-  public order = 50;
+  public order = 15;
 
   constructor(private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']) {}
 

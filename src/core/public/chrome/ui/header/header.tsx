@@ -92,6 +92,9 @@ export class Header extends Component<HeaderProps, State> {
   constructor(props: HeaderProps) {
     super(props);
 
+    let isLocked = false;
+    props.isLocked$.subscribe(initialIsLocked => (isLocked = initialIsLocked));
+
     this.state = {
       appTitle: 'Kibana',
       isVisible: true,
@@ -101,7 +104,7 @@ export class Header extends Component<HeaderProps, State> {
       navControlsLeft: [],
       navControlsRight: [],
       currentAppId: '',
-      isLocked: false,
+      isLocked,
     };
   }
 

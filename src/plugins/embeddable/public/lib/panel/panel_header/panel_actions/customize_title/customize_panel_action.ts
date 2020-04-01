@@ -33,13 +33,15 @@ interface ActionContext {
 export class CustomizePanelTitleAction implements Action<ActionContext> {
   public readonly type = ACTION_CUSTOMIZE_PANEL;
   public id = ACTION_CUSTOMIZE_PANEL;
-  public order = 40;
+  public order = 10;
 
-  constructor(private readonly getDataFromUser: GetUserData) {}
+  constructor(private readonly getDataFromUser: GetUserData) {
+    this.order = 10;
+  }
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.customizePanel.action.displayName', {
-      defaultMessage: 'Edit panel title',
+      defaultMessage: 'Customize panel',
     });
   }
 

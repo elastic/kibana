@@ -44,6 +44,20 @@ export const BATCH_ACTIONS = i18n.translate(
   }
 );
 
+export const ACTIVE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.activeRuleDescription',
+  {
+    defaultMessage: 'active',
+  }
+);
+
+export const INACTIVE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.inactiveRuleDescription',
+  {
+    defaultMessage: 'inactive',
+  }
+);
+
 export const BATCH_ACTION_ACTIVATE_SELECTED = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.batchActions.activateSelectedTitle',
   {
@@ -255,6 +269,42 @@ export const COLUMN_ACTIVATE = i18n.translate(
   }
 );
 
+export const COLUMN_INDEXING_TIMES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.indexingTimes',
+  {
+    defaultMessage: 'Indexing Time (ms)',
+  }
+);
+
+export const COLUMN_QUERY_TIMES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.queryTimes',
+  {
+    defaultMessage: 'Query Time (ms)',
+  }
+);
+
+export const COLUMN_GAP = i18n.translate('xpack.siem.detectionEngine.rules.allRules.columns.gap', {
+  defaultMessage: 'Gap (if any)',
+});
+
+export const COLUMN_LAST_LOOKBACK_DATE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.lastLookBackDate',
+  {
+    defaultMessage: 'Last Look-Back Date',
+  }
+);
+
+export const RULES_TAB = i18n.translate('xpack.siem.detectionEngine.rules.allRules.tabs.rules', {
+  defaultMessage: 'Rules',
+});
+
+export const MONITORING_TAB = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.tabs.monitoring',
+  {
+    defaultMessage: 'Monitoring',
+  }
+);
+
 export const CUSTOM_RULES = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.filters.customRulesTitle',
   {
@@ -306,6 +356,10 @@ export const SCHEDULE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.sc
   defaultMessage: 'Schedule rule',
 });
 
+export const RULE_ACTIONS = i18n.translate('xpack.siem.detectionEngine.rules.ruleActionsTitle', {
+  defaultMessage: 'Rule actions',
+});
+
 export const DEFINITION = i18n.translate('xpack.siem.detectionEngine.rules.stepDefinitionTitle', {
   defaultMessage: 'Definition',
 });
@@ -316,6 +370,10 @@ export const ABOUT = i18n.translate('xpack.siem.detectionEngine.rules.stepAboutT
 
 export const SCHEDULE = i18n.translate('xpack.siem.detectionEngine.rules.stepScheduleTitle', {
   defaultMessage: 'Schedule',
+});
+
+export const ACTIONS = i18n.translate('xpack.siem.detectionEngine.rules.stepActionsTitle', {
+  defaultMessage: 'Actions',
 });
 
 export const OPTIONAL_FIELD = i18n.translate(
@@ -348,5 +406,59 @@ export const RELOAD_MISSING_PREPACKAGED_RULES = (missingRules: number) =>
   i18n.translate('xpack.siem.detectionEngine.rules.reloadMissingPrePackagedRulesButton', {
     values: { missingRules },
     defaultMessage:
-      'Reload {missingRules} deleted Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
+      'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
   });
+
+export const IMPORT_RULE_BTN_TITLE = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.importRuleTitle',
+  {
+    defaultMessage: 'Import rule',
+  }
+);
+
+export const SELECT_RULE = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.selectRuleDescription',
+  {
+    defaultMessage: 'Select a SIEM rule (as exported from the Detection Engine view) to import',
+  }
+);
+
+export const INITIAL_PROMPT_TEXT = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.initialPromptTextDescription',
+  {
+    defaultMessage: 'Select or drag and drop a valid rules_export.ndjson file',
+  }
+);
+
+export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.overwriteDescription',
+  {
+    defaultMessage: 'Automatically overwrite saved objects with the same rule ID',
+  }
+);
+
+export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully imported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    }
+  );
+
+export const IMPORT_FAILED = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.importFailedTitle',
+  {
+    defaultMessage: 'Failed to import rules',
+  }
+);
+
+export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, message: string) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
+    {
+      values: { ruleId, statusCode, message },
+      defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
+    }
+  );

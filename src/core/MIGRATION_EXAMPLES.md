@@ -20,6 +20,7 @@ APIs to their New Platform equivalents.
   - [Chromeless Applications](#chromeless-applications)
   - [Render HTML Content](#render-html-content)
   - [Saved Objects types](#saved-objects-types)
+  - [UiSettings](#uisettings)
 
 ## Configuration
 
@@ -976,3 +977,36 @@ const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
 The `registerType` API will throw if called after the service has started, and therefor cannot be used from 
 legacy plugin code. Legacy plugins should use the legacy savedObjects service and the legacy way to register
 saved object types until migrated.
+
+## UiSettings
+UiSettings defaults registration performed during `setup` phase via `core.uiSettings.register` API.
+
+```js
+// Before:
+uiExports: {
+  uiSettingDefaults: {
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  }
+}
+```
+
+```ts
+// After:
+// src/plugins/my-plugin/server/plugin.ts
+setup(core: CoreSetup){
+  core.uiSettings.register({
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+      schema: schema.boolean(),
+    },
+  })
+}
+```

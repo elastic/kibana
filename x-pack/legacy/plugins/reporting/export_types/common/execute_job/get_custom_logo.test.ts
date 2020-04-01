@@ -5,18 +5,16 @@
  */
 
 import { ReportingCore } from '../../../server';
-import { createMockReportingCore } from '../../../test_helpers';
+import { createMockReportingCore, createMockServer } from '../../../test_helpers';
+import { ServerFacade } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './index';
 
-const mockConfigGet = jest.fn().mockImplementation((key: string) => {
-  return 'localhost';
-});
-const mockConfig = { get: mockConfigGet, kbnConfig: { get: mockConfigGet } };
-
 let mockReportingPlugin: ReportingCore;
+let mockServer: ServerFacade;
 beforeEach(async () => {
   mockReportingPlugin = await createMockReportingCore();
+  mockServer = createMockServer('');
 });
 
 test(`gets logo from uiSettings`, async () => {
@@ -39,14 +37,14 @@ test(`gets logo from uiSettings`, async () => {
   const conditionalHeaders = await getConditionalHeaders({
     job: {} as JobDocPayloadPDF,
     filteredHeaders: permittedHeaders,
-    config: mockConfig,
+    server: mockServer,
   });
 
   const { logo } = await getCustomLogo({
     reporting: mockReportingPlugin,
-    config: mockConfig,
     job: {} as JobDocPayloadPDF,
     conditionalHeaders,
+    server: mockServer,
   });
 
   expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');

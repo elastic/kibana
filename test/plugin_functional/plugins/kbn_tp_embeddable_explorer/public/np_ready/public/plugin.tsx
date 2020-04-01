@@ -70,10 +70,11 @@ export class EmbeddableExplorerPublicPlugin
     const sayHelloAction = new SayHelloAction(alert);
     const sendMessageAction = createSendMessageAction(core.overlays);
 
+    plugins.uiActions.registerAction(helloWorldAction);
     plugins.uiActions.registerAction(sayHelloAction);
     plugins.uiActions.registerAction(sendMessageAction);
 
-    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
+    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
 
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);

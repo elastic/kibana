@@ -8,8 +8,7 @@ import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
-import { ReportingConfigType } from '../../../../server/core';
-import { ConditionalHeaders, HeadlessChromiumDriverFactory } from '../../../../types';
+import { ConditionalHeaders, HeadlessChromiumDriverFactory, ServerFacade } from '../../../../types';
 import { createLayout } from '../../../common/layouts';
 import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
@@ -28,10 +27,10 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
 };
 
 export function generatePdfObservableFactory(
-  captureConfig: ReportingConfigType['capture'],
+  server: ServerFacade,
   browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
-  const screenshotsObservable = screenshotsObservableFactory(captureConfig, browserDriverFactory);
+  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
 
   return function generatePdfObservable(
     logger: LevelLogger,
@@ -42,7 +41,7 @@ export function generatePdfObservableFactory(
     layoutParams: LayoutParams,
     logo?: string
   ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
-    const layout = createLayout(captureConfig, layoutParams) as LayoutInstance;
+    const layout = createLayout(server, layoutParams) as LayoutInstance;
     const screenshots$ = screenshotsObservable({
       logger,
       urls,

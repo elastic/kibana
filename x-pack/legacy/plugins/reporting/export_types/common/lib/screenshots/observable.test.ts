@@ -19,9 +19,12 @@ import * as Rx from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { LevelLogger } from '../../../../server/lib';
-import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../../../test_helpers';
+import {
+  createMockBrowserDriverFactory,
+  createMockLayoutInstance,
+  createMockServer,
+} from '../../../../test_helpers';
 import { ConditionalHeaders, HeadlessChromiumDriver } from '../../../../types';
-import { CaptureConfig } from '../../../../server/types';
 import { screenshotsObservableFactory } from './observable';
 import { ElementsPositionAndAttribute } from './types';
 
@@ -31,8 +34,8 @@ import { ElementsPositionAndAttribute } from './types';
 const mockLogger = jest.fn(loggingServiceMock.create);
 const logger = new LevelLogger(mockLogger());
 
-const mockConfig = { timeouts: { openUrl: 13 } } as CaptureConfig;
-const mockLayout = createMockLayoutInstance(mockConfig);
+const __LEGACY = createMockServer({ settings: { 'xpack.reporting.capture': { loadDelay: 13 } } });
+const mockLayout = createMockLayoutInstance(__LEGACY);
 
 /*
  * Tests
@@ -45,7 +48,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+    const getScreenshots$ = screenshotsObservableFactory(__LEGACY, mockBrowserDriverFactory);
     const result = await getScreenshots$({
       logger,
       urls: ['/welcome/home/start/index.htm'],
@@ -83,7 +86,7 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     // test
-    const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+    const getScreenshots$ = screenshotsObservableFactory(__LEGACY, mockBrowserDriverFactory);
     const result = await getScreenshots$({
       logger,
       urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
@@ -133,7 +136,7 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshots$ = screenshotsObservableFactory(__LEGACY, mockBrowserDriverFactory);
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
@@ -194,7 +197,7 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshots$ = screenshotsObservableFactory(__LEGACY, mockBrowserDriverFactory);
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
