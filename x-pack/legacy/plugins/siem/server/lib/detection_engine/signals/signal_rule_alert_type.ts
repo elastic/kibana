@@ -7,11 +7,7 @@
 import { performance } from 'perf_hooks';
 import { Logger } from 'src/core/server';
 
-import {
-  SIGNALS_ID,
-  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
-  NOTIFICATION_THROTTLE_RULE,
-} from '../../../../common/constants';
+import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/detection_engine/ml_helpers';
 import { SetupPlugins } from '../../../plugin';
 
@@ -244,7 +240,7 @@ export const signalRulesAlertType = ({
         }
 
         if (result.success) {
-          if (meta?.throttle === NOTIFICATION_THROTTLE_RULE && actions.length) {
+          if (actions.length) {
             const notificationRuleParams = {
               ...ruleParams,
               name,
@@ -255,7 +251,7 @@ export const signalRulesAlertType = ({
               to: 'now',
               index: ruleParams.outputIndex,
               ruleId: ruleParams.ruleId!,
-              kibanaSiemAppUrl: meta.kibanaSiemAppUrl as string,
+              kibanaSiemAppUrl: meta?.kibanaSiemAppUrl as string,
               ruleAlertId: savedObject.id,
               callCluster: services.callCluster,
             });

@@ -35,6 +35,7 @@ describe('patch_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
+    clients.alertsClient.get.mockResolvedValue(getResult()); // existing rule
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.alertsClient.update.mockResolvedValue(getResult()); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful transform

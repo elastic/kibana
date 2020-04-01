@@ -53,7 +53,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(0);
     expect(success).toEqual(true);
@@ -111,7 +111,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(5);
     expect(success).toEqual(true);
@@ -140,7 +140,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(false);
@@ -176,7 +176,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(false);
@@ -212,7 +212,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(success).toEqual(true);
   });
@@ -250,7 +250,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(success).toEqual(true);
   });
@@ -288,7 +288,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(success).toEqual(true);
   });
@@ -328,7 +328,7 @@ describe('searchAfterAndBulkCreate', () => {
       pageSize: 1,
       filter: undefined,
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: null,
+      throttle: 'no_actions',
     });
     expect(success).toEqual(false);
   });

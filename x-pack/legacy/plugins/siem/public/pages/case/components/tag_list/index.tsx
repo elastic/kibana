@@ -17,7 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
-import * as i18n from '../../translations';
+import * as i18n from './translations';
 import { Form, useForm } from '../../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
@@ -66,7 +66,7 @@ export const TagList = React.memo(
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 isDisabled={disabled}
-                aria-label={'tags'}
+                aria-label={i18n.EDIT_TAGS_ARIA}
                 iconType={'pencil'}
                 onClick={setIsEditTags.bind(null, true)}
               />

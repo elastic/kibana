@@ -7,7 +7,6 @@
     "apm-*-transaction*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Web Application Suspicious Activity: POST Request Declined",
   "query": "http.response.status_code:403 and http.request.method:post",
   "references": [
@@ -17,8 +16,8 @@
   "rule_id": "a87a4e42-1d82-44bd-b0bf-d9b7f91fb89e",
   "severity": "medium",
   "tags": [
-    "Elastic",
-    "APM"
+    "APM",
+    "Elastic"
   ],
   "type": "query",
   "version": 1

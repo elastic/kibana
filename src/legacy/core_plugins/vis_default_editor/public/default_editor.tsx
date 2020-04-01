@@ -92,6 +92,7 @@ function DefaultEditor({
           uiState={uiState}
           isLinkedSearch={linked}
           savedSearch={savedSearch}
+          timeRange={timeRange}
           eventEmitter={eventEmitter}
         />
       </Panel>
