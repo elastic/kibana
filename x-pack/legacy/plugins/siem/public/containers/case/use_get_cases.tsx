@@ -35,7 +35,7 @@ export type Action =
     }
   | { type: 'FETCH_FAILURE'; payload: string }
   | { type: 'FETCH_UPDATE_CASE_SUCCESS' }
-  | { type: 'UPDATE_FILTER_OPTIONS'; payload: FilterOptions }
+  | { type: 'UPDATE_FILTER_OPTIONS'; payload: Partial<FilterOptions> }
   | { type: 'UPDATE_QUERY_PARAMS'; payload: Partial<QueryParams> }
   | { type: 'UPDATE_TABLE_SELECTIONS'; payload: Case[] };
 
@@ -122,8 +122,8 @@ interface UseGetCases extends UseGetCasesState {
     refetchCasesStatus,
   }: UpdateCase) => void;
   refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
-  setFilters: (filters: FilterOptions) => void;
-  setQueryParams: (queryParams: QueryParams) => void;
+  setFilters: (filters: Partial<FilterOptions>) => void;
+  setQueryParams: (queryParams: Partial<QueryParams>) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
 
@@ -142,11 +142,11 @@ export const useGetCases = (initialQueryParams?: QueryParams): UseGetCases => {
     dispatch({ type: 'UPDATE_TABLE_SELECTIONS', payload: mySelectedCases });
   }, []);
 
-  const setQueryParams = useCallback((newQueryParams: QueryParams) => {
+  const setQueryParams = useCallback((newQueryParams: Partial<QueryParams>) => {
     dispatch({ type: 'UPDATE_QUERY_PARAMS', payload: newQueryParams });
   }, []);
 
-  const setFilters = useCallback((newFilters: FilterOptions) => {
+  const setFilters = useCallback((newFilters: Partial<FilterOptions>) => {
     dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: newFilters });
   }, []);
 
