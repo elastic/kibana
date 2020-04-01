@@ -41,6 +41,8 @@ import {
   ANALYSIS_CONFIG_TYPE,
   DfAnalyticsExplainResponse,
   FieldSelectionItem,
+  TRAINING_PERCENT_MIN,
+  TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
@@ -631,15 +633,15 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 })}
               >
                 <EuiRange
-                  min={0}
-                  max={100}
+                  min={TRAINING_PERCENT_MIN}
+                  max={TRAINING_PERCENT_MAX}
                   step={1}
                   showLabels
                   showRange
                   showValue
                   value={trainingPercent}
                   // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-                  onChange={e => setFormState({ trainingPercent: e.target.value })}
+                  onChange={e => setFormState({ trainingPercent: +e.target.value })}
                   data-test-subj="mlAnalyticsCreateJobFlyoutTrainingPercentSlider"
                 />
               </EuiFormRow>

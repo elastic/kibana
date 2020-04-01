@@ -10,6 +10,7 @@ import { FormSchema } from '../../../../../shared_imports';
 
 export const schema: FormSchema = {
   actions: {},
+  enabled: {},
   kibanaSiemAppUrl: {},
   throttle: {
     label: i18n.translate(

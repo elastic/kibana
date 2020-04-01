@@ -27,9 +27,14 @@ export const readPrivilegesRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+
       try {
         const clusterClient = context.core.elasticsearch.dataClient;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
+
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
 
         const index = siemClient.signalsIndex;
         const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
