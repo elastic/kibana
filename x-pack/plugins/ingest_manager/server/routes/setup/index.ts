@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, FLEET_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import { PLUGIN_ID, FLEET_SETUP_API_ROUTES, INGEST_SETUP_API_ROUTES } from '../../constants';
 import { GetFleetSetupRequestSchema, CreateFleetSetupRequestSchema } from '../../types';
 import {
   getFleetSetupHandler,
@@ -16,7 +16,7 @@ export const registerRoutes = (router: IRouter) => {
   // Ingest manager setup
   router.post(
     {
-      path: SETUP_API_ROUTE,
+      path: INGEST_SETUP_API_ROUTES.CREATE_PATTERN,
       validate: false,
       // if this route is set to `-all`, a read-only user get a 404 for this route
       // and will see `Unable to initialize Ingest Manager` in the UI
@@ -24,6 +24,17 @@ export const registerRoutes = (router: IRouter) => {
     },
     ingestManagerSetupHandler
   );
+
+  // Get Ingest setup is the same as fleet
+  router.get(
+    {
+      path: INGEST_SETUP_API_ROUTES.INFO_PATTERN,
+      validate: GetFleetSetupRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    getFleetSetupHandler
+  );
+
   // Get Fleet setup
   router.get(
     {

@@ -11,7 +11,7 @@ import {
   FLEET_SETUP_API_ROUTES,
   AGENT_API_ROUTES,
   ENROLLMENT_API_KEY_ROUTES,
-  SETUP_API_ROUTE,
+  INGEST_SETUP_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -110,6 +110,7 @@ export const enrollmentAPIKeyRouteService = {
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
 };
 
-export const setupRouteService = {
-  getSetupPath: () => SETUP_API_ROUTE,
+export const ingestSetupRouteService = {
+  getIngestSetupPath: () => INGEST_SETUP_API_ROUTES.INFO_PATTERN,
+  postIngestSetupPath: () => INGEST_SETUP_API_ROUTES.CREATE_PATTERN,
 };

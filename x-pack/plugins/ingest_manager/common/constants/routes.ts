@@ -70,6 +70,11 @@ export const FLEET_SETUP_API_ROUTES = {
   CREATE_PATTERN: `${FLEET_API_ROOT}/setup`,
 };
 
+// Ingest Manager setup API routes
+export const INGEST_SETUP_API_ROUTES = {
+  INFO_PATTERN: `${API_ROOT}/setup`,
+  CREATE_PATTERN: `${API_ROOT}/setup`,
+};
 export const SETUP_API_ROUTE = `${API_ROOT}/setup`;
 
 export const INSTALL_SCRIPT_API_ROUTES = `${FLEET_API_ROOT}/install/{osType}`;

@@ -9,18 +9,33 @@ import {
   Plugin,
   PluginInitializerContext,
   CoreStart,
+  RecursiveReadonly,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { SendRequestResponse } from 'src/plugins/es_ui_shared/public';
+import { DEFAULT_APP_CATEGORIES, deepFreeze } from '../../../../src/core/utils';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
-
-import { IngestManagerConfigType } from '../common/types';
+import { sendSetup, sendIsInitialized } from './applications/ingest_manager/hooks';
+import { IngestManagerConfigType, CreateFleetSetupResponse } from '../common/types';
 
 export { IngestManagerConfigType } from '../common/types';
 
-export type IngestManagerSetup = void;
+/**
+ * Describes public IngestManager plugin contract returned at the `setup` stage.
+ */
+export interface IngestManagerSetup {
+  /**
+   * Setup initializes the Ingest Manager
+   */
+  setup: () => Promise<SendRequestResponse<CreateFleetSetupResponse, Error>>;
+  /**
+   * isInitialized returns whether the Ingest Manager has been initialized
+   */
+  isInitialized: () => Promise<SendRequestResponse<CreateFleetSetupResponse, Error>>;
+}
+
 export type IngestManagerStart = void;
 
 export interface IngestManagerSetupDeps {
@@ -41,7 +56,10 @@ export class IngestManagerPlugin
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
   }
 
-  public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+  public async setup(
+    core: CoreSetup,
+    deps: IngestManagerSetupDeps
+  ): Promise<RecursiveReadonly<IngestManagerSetup>> {
     const config = this.config;
     // Register main Ingest Manager app
     core.application.register({
@@ -58,6 +76,10 @@ export class IngestManagerPlugin
         const { renderApp } = await import('./applications/ingest_manager');
         return renderApp(coreStart, params, deps, startDeps, config);
       },
+    });
+    return deepFreeze({
+      setup: sendSetup,
+      isInitialized: sendIsInitialized,
     });
   }
 

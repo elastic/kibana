@@ -5,11 +5,19 @@
  */
 
 import { sendRequest } from './use_request';
-import { setupRouteService } from '../../services';
+import { ingestSetupRouteService } from '../../services';
+import { CreateFleetSetupResponse } from '../../types';
 
 export const sendSetup = () => {
-  return sendRequest({
-    path: setupRouteService.getSetupPath(),
+  return sendRequest<CreateFleetSetupResponse>({
+    path: ingestSetupRouteService.postIngestSetupPath(),
     method: 'post',
+  });
+};
+
+export const sendIsInitialized = () => {
+  return sendRequest<CreateFleetSetupResponse>({
+    path: ingestSetupRouteService.getIngestSetupPath(),
+    method: 'get',
   });
 };

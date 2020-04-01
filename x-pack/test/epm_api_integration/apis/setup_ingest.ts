@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { setupRouteService } from '../../../plugins/ingest_manager/common';
+import { ingestSetupRouteService } from '../../../plugins/ingest_manager/common';
 
 /**
  * This class is a helper for setting up the ingest manager plugin. It should be used by other plugins that rely on
@@ -21,7 +21,7 @@ export class IngestInitializer {
    */
   async before() {
     await this.supertest
-      .post(setupRouteService.getSetupPath())
+      .post(ingestSetupRouteService.postIngestSetupPath())
       .set({ accept: 'application/json', 'kbn-xsrf': 'some-xsrf-token' })
       .expect(200);
   }

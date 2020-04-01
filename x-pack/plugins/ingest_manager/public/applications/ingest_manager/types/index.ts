@@ -70,4 +70,6 @@ export {
   DeletePackageResponse,
   DetailViewPanelName,
   InstallStatus,
+  // Fleet setup
+  CreateFleetSetupResponse,
 } from '../../../../common';

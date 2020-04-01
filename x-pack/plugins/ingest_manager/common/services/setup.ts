@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpSetup } from 'kibana/public';
-import { setupRouteService } from './routes';
+import { ingestSetupRouteService } from './routes';
 
 export async function setupIngestManager(http: HttpSetup) {
-  await http.post(setupRouteService.getSetupPath());
+  await http.post(ingestSetupRouteService.postIngestSetupPath());
 }
