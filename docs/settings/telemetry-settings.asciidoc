@@ -9,7 +9,7 @@ helps us learn about the {kib} features that our users are most interested in, s
 can focus our efforts on making them even better.
 
 You can control whether this data is sent from the {kib} servers, or if it should be sent 
-from the user's browser, in case there is a firewall blocking those connections from the server. Additionally, you can decide to completely disable this feature either in the config file or the {kib} UI (via Management > Kibana > Advanced Settings > Usage Data).
+from the user's browser, in case a firewall is blocking the connections from the server. Additionally, you can decide to completely disable this feature either in the config file or in {kib} via *Management > Kibana > Advanced Settings > Usage Data*.
 
 See our https://www.elastic.co/legal/privacy-statement[Privacy Statement] to learn more.
 
