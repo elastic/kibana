@@ -60,7 +60,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: RuleType;
   version: number;
-  throttle: string | null;
+  throttle: string;
   lists: ListsDefaultArraySchema | null | undefined;
 }
 
@@ -118,7 +118,6 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
   immutable: boolean;
-  throttle: string | undefined | null;
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
