@@ -16,7 +16,7 @@ import { JobParamsDiscoverCsv } from '../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
->> = async function createJobFactoryFn(reporting: ReportingCore) {
+>> = function createJobFactoryFn(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 

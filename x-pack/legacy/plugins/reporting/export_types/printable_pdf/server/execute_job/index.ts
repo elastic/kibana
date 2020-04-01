@@ -21,7 +21,7 @@ import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
-export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
+export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
   reporting: ReportingCore,
   parentLogger: Logger
 ) {
@@ -29,11 +29,12 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
   const captureConfig = config.get('capture');
   const encryptionKey = config.get('encryptionKey');
 
-  const browserDriverFactory = await reporting.getBrowserDriverFactory();
-  const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
+  return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
+    const browserDriverFactory = await reporting.getBrowserDriverFactory();
+    const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
+
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),

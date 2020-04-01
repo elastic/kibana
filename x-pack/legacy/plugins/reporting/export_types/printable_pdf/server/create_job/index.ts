@@ -17,7 +17,7 @@ import { JobParamsPDF } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = async function createJobFactoryFn(reporting: ReportingCore) {
+>> = function createJobFactoryFn(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 

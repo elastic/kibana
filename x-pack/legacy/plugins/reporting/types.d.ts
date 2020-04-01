@@ -227,11 +227,11 @@ export interface ESQueueInstance {
 export type CreateJobFactory<CreateJobFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
-) => Promise<CreateJobFnType>;
+) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
-) => Promise<ExecuteJobFnType>;
+) => ExecuteJobFnType;
 
 export interface ExportTypeDefinition<
   JobParamsType,

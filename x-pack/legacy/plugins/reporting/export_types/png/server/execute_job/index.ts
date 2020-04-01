@@ -20,19 +20,18 @@ import { generatePngObservableFactory } from '../lib/generate_png';
 
 type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
 
-export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
+export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
   reporting: ReportingCore,
   parentLogger: Logger
 ) {
   const config = reporting.getConfig();
   const captureConfig = config.get('capture');
   const encryptionKey = config.get('encryptionKey');
-
-  const browserDriverFactory = await reporting.getBrowserDriverFactory();
-  const generatePngObservable = generatePngObservableFactory(captureConfig, browserDriverFactory);
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+  return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+    const browserDriverFactory = await reporting.getBrowserDriverFactory();
+    const generatePngObservable = generatePngObservableFactory(captureConfig, browserDriverFactory);
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),

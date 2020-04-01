@@ -17,7 +17,7 @@ import { JobParamsPNG } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPNG
->> = async function createJobFactoryFn(reporting: ReportingCore) {
+>> = function createJobFactoryFn(reporting: ReportingCore) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 

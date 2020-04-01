@@ -51,11 +51,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const request = makeRequestFacade(legacyRequest);
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
-
-      const [createJobFn, executeJobFn] = await Promise.all([
-        createJobFactory(reporting, logger),
-        executeJobFactory(reporting, logger),
-      ]);
+      const createJobFn = createJobFactory(reporting, logger);
+      const executeJobFn = executeJobFactory(reporting, logger);
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
         request.headers,

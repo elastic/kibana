@@ -18,18 +18,18 @@ import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+>> = function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
   const serverBasePath = config.kbnConfig.get('server', 'basePath');
-  const elasticsearch = await reporting.getElasticsearchService();
 
   return async function executeJob(
     jobId: string,
     job: JobDocPayloadDiscoverCsv,
     cancellationToken: any
   ) {
+    const elasticsearch = await reporting.getElasticsearchService();
     const jobLogger = logger.clone([jobId]);
 
     const {
