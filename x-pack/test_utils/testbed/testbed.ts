@@ -140,7 +140,7 @@ export const registerTestBed = <T extends string = string>(
 
       const waitFor: TestBed<T>['waitFor'] = async (testSubject: T) => {
         const triggeredAt = Date.now();
-        const MAX_WAIT_TIME = 2000;
+        const MAX_WAIT_TIME = 15000;
         const WAIT_INTERVAL = 50;
 
         const process = async (): Promise<void> => {

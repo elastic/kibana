@@ -72,6 +72,7 @@ describe('<TemplateCreate />', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup();
+        await testBed.waitFor('templateForm');
       });
     });
 
@@ -101,6 +102,7 @@ describe('<TemplateCreate />', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup();
+        await testBed.waitFor('templateForm');
       });
     });
 
@@ -210,7 +212,7 @@ describe('<TemplateCreate />', () => {
 
         await act(async () => {
           // Complete step 4 (aliases) with invalid json
-          await actions.completeStepFour('{ invalidJsonString ');
+          await actions.completeStepFour('{ invalidJsonString ', false);
         });
 
         expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
@@ -222,6 +224,7 @@ describe('<TemplateCreate />', () => {
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup();
+        await testBed.waitFor('templateForm');
 
         const { actions } = testBed;
 
@@ -276,6 +279,7 @@ describe('<TemplateCreate />', () => {
     it('should render a warning message if a wildcard is used as an index pattern', async () => {
       await act(async () => {
         testBed = await setup();
+        await testBed.waitFor('templateForm');
 
         const { actions } = testBed;
         // Complete step 1 (logistics)
@@ -309,6 +313,7 @@ describe('<TemplateCreate />', () => {
 
       await act(async () => {
         testBed = await setup();
+        await testBed.waitFor('templateForm');
 
         const { actions } = testBed;
         // Complete step 1 (logistics)
@@ -324,7 +329,6 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepThree(MAPPING_FIELDS);
 
         // Complete step 4 (aliases)
-        await nextTick(100);
         await actions.completeStepFour(JSON.stringify(ALIASES));
       });
     });

@@ -120,7 +120,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     await waitFor('stepAliases');
   };
 
-  const completeStepFour = async (aliases?: string) => {
+  const completeStepFour = async (aliases?: string, waitForNextStep = true) => {
     const { find, component, waitFor } = testBed;
 
     if (aliases) {
@@ -132,7 +132,12 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     }
 
     clickNextButton();
-    await waitFor('summaryTab');
+
+    if (waitForNextStep) {
+      await waitFor('summaryTab');
+    } else {
+      component.update();
+    }
   };
 
   const selectSummaryTab = (tab: 'summary' | 'request') => {

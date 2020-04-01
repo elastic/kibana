@@ -62,11 +62,9 @@ describe('<TemplateClone />', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone);
 
-    testBed = await setup();
-
     await act(async () => {
-      await nextTick();
-      testBed.component.update();
+      testBed = await setup();
+      await testBed.waitFor('templateForm');
     });
   });
 
