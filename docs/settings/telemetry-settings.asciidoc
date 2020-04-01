@@ -26,7 +26,7 @@ browser connected to the {kib} instance.
 `telemetry.sendUsageFrom`:: *Default: 'browser'*.
 Set to `'server'` to report the cluster statistics from the {kib} server.
 If the server fails to connect to our endpoint at https://telemetry.elastic.co/, it assumes
-it is behind a firewall and falls back to `'browser'` to send it from the users' browsers
+it is behind a firewall and falls back to `'browser'` to send it from users' browsers
 when they are navigating through {kib}.
 
 `telemetry.optIn`:: *Default: true*.
