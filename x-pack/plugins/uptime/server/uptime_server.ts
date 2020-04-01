@@ -8,10 +8,20 @@ import { makeExecutableSchema } from 'graphql-tools';
 import { DEFAULT_GRAPHQL_PATH, resolvers, typeDefs } from './graphql';
 import { UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
+import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters';
+import { uptimeAlertTypeFactories } from './lib/alerts';
 
-export const initUptimeServer = (libs: UMServerLibs) => {
+export const initUptimeServer = (
+  server: UptimeCoreSetup,
+  libs: UMServerLibs,
+  plugins: UptimeCorePlugins
+) => {
   restApiRoutes.forEach(route =>
     libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
+  );
+
+  uptimeAlertTypeFactories.forEach(alertTypeFactory =>
+    plugins.alerting.registerType(alertTypeFactory(server, libs))
   );
 
   const graphQLSchema = makeExecutableSchema({
