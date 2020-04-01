@@ -5,21 +5,19 @@
  */
 
 import { IRouter } from '../../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_LIST_ITEM_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_LIST_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
-import {
-  ReadListsItemsSchema,
-  readListsItemsSchema,
-} from '../schemas/request/read_lists_items_schema';
-import { getListItemsByValues } from '../../lists/get_list_items_by_values';
-import { getListItem } from '../../lists/get_list_item';
+import { deleteListsSchema } from '../schemas/request/delete_lists_schema';
+import { DeleteListsItemsSchema } from '../schemas/request/delete_lists_items_schema';
+import { deleteListItem } from '../../lists/delete_list_item';
+import { deleteListItemByValue } from '../../lists/delete_list_item_by_value';
 
-export const readListsItemsRoute = (router: IRouter): void => {
-  router.get(
+export const deleteListsItemsRoute = (router: IRouter): void => {
+  router.delete(
     {
-      path: DETECTION_ENGINE_LIST_ITEM_URL,
+      path: DETECTION_ENGINE_LIST_URL,
       validate: {
-        query: buildRouteValidationIoTS<ReadListsItemsSchema>(readListsItemsSchema),
+        query: buildRouteValidationIoTS<DeleteListsItemsSchema>(deleteListsSchema),
       },
       options: {
         tags: ['access:siem'],
@@ -34,39 +32,41 @@ export const readListsItemsRoute = (router: IRouter): void => {
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const { listsItemsIndex } = siemClient;
+        const { listsIndex, listsItemsIndex } = siemClient;
         if (id != null) {
-          const listItem = await getListItem({
+          const deleted = await deleteListItem({
             id,
             clusterClient,
+            listsIndex,
             listsItemsIndex,
           });
-          if (listItem == null) {
+          if (deleted == null) {
+            // TODO: More specifics on which item was not found
             return siemResponse.error({
               statusCode: 404,
-              body: `list_id: "${listId}" item does not exist`,
+              body: `list_id: "${id}" item not found`,
             });
           } else {
             // TODO: outbound validation
-            // TODO: Should we return this as an array since the other value below can be an array?
-            return response.ok({ body: listItem });
+            return response.ok({ body: deleted });
           }
         } else if (listId != null) {
-          const listItems = await getListItemsByValues({
+          const deleted = await deleteListItemByValue({
+            ip,
             listId,
-            ips: ip != null ? [ip] : [],
             clusterClient,
+            listsIndex,
             listsItemsIndex,
           });
-          if (!listItems.length) {
-            // TODO: More specific error message that figures out which item value does not exist
+          if (deleted == null) {
+            // TODO: More specifics on which item was not found
             return siemResponse.error({
               statusCode: 404,
-              body: `list_id: "${listId}" item does not exist`,
+              body: `list_id: "${id}" item not found`,
             });
           } else {
             // TODO: outbound validation
-            return response.ok({ body: listItems });
+            return response.ok({ body: deleted });
           }
         } else {
           return siemResponse.error({

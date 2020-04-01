@@ -19,7 +19,7 @@ export const getListItemsByValues = async ({
   listsItemsIndex: string;
   // TODO: Make all values work and not just ip here
   ips: string[] | undefined;
-}): Promise<ListsItemsSchema[] | null> => {
+}): Promise<ListsItemsSchema[]> => {
   if (listId.trim() === '') {
     return [];
   } else {
@@ -40,7 +40,7 @@ export const getListItemsByValues = async ({
               },
               {
                 terms: {
-                  ips,
+                  ip: ips,
                 },
               },
             ],
@@ -50,8 +50,8 @@ export const getListItemsByValues = async ({
     });
     return result.hits.hits.map(hit => {
       return {
-        id: result.hits.hits[0]._id,
-        ...result.hits.hits[0]._source,
+        id: hit._id,
+        ...hit._source,
       };
     });
   }

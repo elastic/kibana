@@ -5,34 +5,28 @@
  */
 
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
+import { getListItem } from './get_list_item';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
-import { getListItemsByValues } from './get_list_items_by_values';
 
-export const getListItemByValue = async ({
-  listId,
+export const deleteListItem = async ({
+  id,
   clusterClient,
+  listsIndex,
   listsItemsIndex,
-  ip,
 }: {
-  listId: string;
+  id: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+  listsIndex: string;
   listsItemsIndex: string;
-  // TODO: Make all values work and not just ip here
-  ip: string | undefined;
 }): Promise<ListsItemsSchema | null> => {
-  if (listId.trim() === '') {
+  const listItem = await getListItem({ id, clusterClient, listsItemsIndex });
+  if (listItem == null) {
     return null;
   } else {
-    const listItems = await getListItemsByValues({
-      listId,
-      clusterClient,
-      listsItemsIndex,
-      ips: ip ? [ip] : [],
+    await clusterClient.callAsCurrentUser('delete', {
+      index: listsIndex,
+      id,
     });
-    if (listItems.length) {
-      return listItems[0];
-    } else {
-      return null;
-    }
   }
+  return listItem;
 };

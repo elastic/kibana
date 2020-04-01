@@ -57,13 +57,18 @@ export const importListsItemsRoute = (router: IRouter): void => {
             body: `list id: "${listId}" does not exist`,
           });
         }
-        const linesProcessed = await writeLinesToBulkListItems({
+        const linesResult = await writeLinesToBulkListItems({
           listId,
           stream: request.body.file,
           clusterClient,
           listsItemsIndex,
         });
-        return response.accepted({ body: { lines_processed: linesProcessed } });
+        return response.accepted({
+          body: {
+            lines_processed: linesResult.linesProcessed,
+            duplicates_found: linesResult.duplicatesFound,
+          },
+        });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

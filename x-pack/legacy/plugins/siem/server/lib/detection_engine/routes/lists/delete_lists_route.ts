@@ -10,8 +10,6 @@ import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../
 import { deleteListsSchema, DeleteListsSchema } from '../schemas/request/delete_lists_schema';
 import { deleteList } from '../../lists/delete_list';
 
-// TODO: Have you added a specific deleteListsItemsRoute to delete a list item one at a time?
-
 export const deleteListsRoute = (router: IRouter): void => {
   router.delete(
     {

@@ -5,32 +5,41 @@
  */
 
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
+import { SearchResponse } from '../../types';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
-import { getListItemsByValues } from './get_list_items_by_values';
 
-export const getListItemByValue = async ({
-  listId,
+export const getListItem = async ({
+  id,
   clusterClient,
   listsItemsIndex,
-  ip,
 }: {
-  listId: string;
+  id: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
-  // TODO: Make all values work and not just ip here
-  ip: string | undefined;
 }): Promise<ListsItemsSchema | null> => {
-  if (listId.trim() === '') {
+  if (id.trim() === '') {
     return null;
   } else {
-    const listItems = await getListItemsByValues({
-      listId,
-      clusterClient,
-      listsItemsIndex,
-      ips: ip ? [ip] : [],
+    const result: SearchResponse<Omit<
+      ListsItemsSchema,
+      'id'
+    >> = await clusterClient.callAsCurrentUser('search', {
+      body: {
+        query: {
+          term: {
+            _id: id,
+          },
+        },
+      },
+      index: listsItemsIndex,
+      ignoreUnavailable: true,
     });
-    if (listItems.length) {
-      return listItems[0];
+
+    if (result.hits.hits.length) {
+      return {
+        id: result.hits.hits[0]._id,
+        ...result.hits.hits[0]._source,
+      };
     } else {
       return null;
     }
