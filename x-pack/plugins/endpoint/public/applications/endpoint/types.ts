@@ -209,6 +209,18 @@ export enum EventingFields {
   network = 'network',
 }
 
+/** Policy: Malware protection fields */
+export interface MalwareFields {
+  mode: ProtectionModes;
+}
+
+/** Policy protection mode options */
+export enum ProtectionModes {
+  detect = 'detect',
+  prevent = 'prevent',
+  preventAndNotify = 'preventAndNotify',
+}
+
 export interface GlobalState {
   readonly hostList: HostListState;
   readonly alertList: AlertListState;
