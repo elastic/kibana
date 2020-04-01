@@ -35,7 +35,7 @@ embeddableFactories.set(
   CONTACT_CARD_EMBEDDABLE,
   new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
 );
-const getEmbeddableFactories = () => embeddableFactories.values();
+// const getEmbeddableFactories = () => embeddableFactories.values();
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
@@ -88,8 +88,33 @@ test('Duplicates an embeddable without a saved object ID', async () => {
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
 });
 
-// WORKS ON PANEL WITHOUT SAVED OBJECT ID
+test('Duplicates an embeddable with a saved object ID', async () => {
+  const dashboard = embeddable.getRoot() as IContainer;
+  const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
+  const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
+  const panel = dashboard.getInput().panels[embeddable.id];
+  panel.savedObjectId = 'holySavedObjectBatman';
 
-// WORKS ON PANEL WITH SAVED OBJECT ID -> calls mock duplicate function!
+  coreStart.savedObjects.client.get = jest
+    .fn()
+    .mockImplementation(() => ({ attributes: { title: 'Holy moly batman!' } }));
 
-// Writes the correct name
+  coreStart.savedObjects.client.find = jest.fn().mockImplementation(() => ({ total: 150 }));
+
+  coreStart.savedObjects.client.create = jest
+    .fn()
+    .mockImplementation(() => ({ id: 'brandNewSavedObject!' }));
+
+  const action = new DuplicatePanelAction(coreStart);
+  await action.execute({ embeddable });
+  expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(1);
+  expect(coreStart.savedObjects.client.find).toHaveBeenCalledTimes(1);
+  expect(coreStart.savedObjects.client.create).toHaveBeenCalledTimes(1);
+  const newPanelId = Object.keys(container.getInput().panels).find(
+    key => !originalPanelKeySet.has(key)
+  );
+  expect(newPanelId).toBeDefined();
+  const newPanel = container.getInput().panels[newPanelId!];
+  expect(newPanel.type).toEqual(CONTACT_CARD_EMBEDDABLE);
+  expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
+});
