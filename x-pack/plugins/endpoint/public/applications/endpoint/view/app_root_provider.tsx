@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, ReactNode, useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Router } from 'react-router-dom';
 import { History } from 'history';
 import { CoreStart } from 'kibana/public';
+import { useObservable } from 'react-use';
 import { EuiThemeProvider } from '../../../../../../legacy/common/eui_styled_components';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { appStoreFactory } from '../store';
@@ -24,17 +25,16 @@ export const AppRootProvider = memo<{
   history: History;
   coreStart: CoreStart;
   depsStart: EndpointPluginStartDependencies;
-  darkModeTheme?: boolean;
-  children: React.ReactElement;
+  children: ReactNode | ReactNode[];
 }>(
   ({
     store,
     history,
     coreStart: { http, notifications, uiSettings, application },
     depsStart: { data },
-    darkModeTheme = false,
     children,
   }) => {
+    const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
     const services = useMemo(() => ({ http, notifications, application, data }), [
       application,
       data,
@@ -45,7 +45,7 @@ export const AppRootProvider = memo<{
       <Provider store={store}>
         <I18nProvider>
           <KibanaContextProvider services={services}>
-            <EuiThemeProvider darkMode={darkModeTheme}>
+            <EuiThemeProvider darkMode={isDarkMode}>
               <Router history={history}>
                 <RouteCapture>{children}</RouteCapture>
               </Router>
