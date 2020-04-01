@@ -22,13 +22,12 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
       validate,
       options,
     };
-    const { router } = this.server;
     switch (method) {
       case 'GET':
-        router.get(routeDefinition, handler);
+        this.server.router.get(routeDefinition, handler);
         break;
       case 'POST':
-        router.post(routeDefinition, handler);
+        this.server.router.post(routeDefinition, handler);
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);
