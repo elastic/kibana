@@ -39,13 +39,6 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const { x, y } = selectedNode?.renderedPosition() ?? { x: -10000, y: -10000 };
   const isOpen = !!selectedNode;
   const isService = selectedNode?.data(SERVICE_NAME) !== undefined;
-  const triggerStyle: CSSProperties = {
-    background: 'transparent',
-    height: renderedHeight,
-    position: 'absolute',
-    width: renderedWidth
-  };
-  const trigger = <div style={triggerStyle} />;
   const zoom = cy?.zoom() ?? 1;
   const height = selectedNode?.height() ?? 0;
   const translateY = y - ((zoom + 1) * height) / 4;
@@ -57,6 +50,13 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const selectedNodeServiceName = selectedNodeData.id;
   const label = selectedNodeData.label || selectedNodeServiceName;
   const popoverRef = useRef<EuiPopover>(null);
+  const triggerStyle: CSSProperties = {
+    background: 'transparent',
+    height: renderedHeight,
+    position: 'absolute',
+    width: renderedWidth
+  };
+  const trigger = <div style={triggerStyle} />;
 
   // Set up Cytoscape event handlers
   useEffect(() => {
