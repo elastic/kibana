@@ -5,10 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helpers/make_checks';
+import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -92,6 +92,7 @@ export default function({ getService }: FtrProviderContext) {
 
       describe('query document scoping with mismatched check statuses', async () => {
         let checks: any[] = [];
+        let checksWithGeoLocation: any[] = [];
         let nonSummaryIp: string | null = null;
         const testMonitorId = 'scope-test-id';
         const makeApiParams = (monitorId: string, filterClauses: any[] = []): any => {
@@ -116,8 +117,30 @@ export default function({ getService }: FtrProviderContext) {
             }
             return d;
           });
+
           dateRangeEnd = new Date().toISOString();
           nonSummaryIp = checks[0][0].monitor.ip;
+
+          // adding a monitor with location to create a mix state
+          checksWithGeoLocation = await makeChecksWithStatus(
+            es,
+            testMonitorId,
+            1,
+            numIps,
+            1,
+            {},
+            'up',
+            d => {
+              // turn an all up status into having at least one down
+              d.observer = {
+                geo: {
+                  name: 'US-East',
+                  location: '40.7128, -74.0060',
+                },
+              };
+              return d;
+            }
+          );
         });
 
         it('should return all IPs', async () => {
@@ -148,6 +171,22 @@ export default function({ getService }: FtrProviderContext) {
 
         it('should not non match non summary documents if the check status does not match', async () => {
           const params = makeApiParams(testMonitorId, [{ match: { 'monitor.ip': nonSummaryIp } }]);
+          params.statusFilter = 'up';
+
+          const nonSummaryRes = await getMonitorStates(params);
+          expect(nonSummaryRes.monitorStates.summaries.length).to.eql(0);
+        });
+
+        it('should return a monitor with mix state if check status filter is down', async () => {
+          const params = makeApiParams(testMonitorId);
+          params.statusFilter = 'down';
+
+          const nonSummaryRes = await getMonitorStates(params);
+          expect(nonSummaryRes.monitorStates.summaries.length).to.eql(1);
+        });
+
+        it('should not return a monitor with mix state if check status filter is up', async () => {
+          const params = makeApiParams(testMonitorId);
           params.statusFilter = 'up';
 
           const nonSummaryRes = await getMonitorStates(params);
