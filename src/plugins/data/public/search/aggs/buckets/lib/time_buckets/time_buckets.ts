@@ -65,6 +65,7 @@ interface TimeBucketsConfig {
  * @param {[type]} display [description]
  */
 export class TimeBuckets {
+  private _uiSettings: IUiSettingsClient;
   private _lb: TimeRangeBounds['min'];
   private _ub: TimeRangeBounds['max'];
   private _originalInterval: string | null = null;
@@ -163,7 +164,7 @@ export class TimeBuckets {
   }
 
   constructor({ uiSettings }: TimeBucketsConfig) {
-    this.uiSettings = uiSettings;
+    this._uiSettings = uiSettings;
     return TimeBuckets.__cached__(this);
   }
 
@@ -343,7 +344,7 @@ export class TimeBuckets {
     const readInterval = () => {
       const interval = this._i;
       if (moment.isDuration(interval)) return interval;
-      return calcAutoIntervalNear(this.uiSettings.get('histogram:barTarget'), Number(duration));
+      return calcAutoIntervalNear(this._uiSettings.get('histogram:barTarget'), Number(duration));
     };
 
     const parsedInterval = readInterval();
@@ -354,7 +355,7 @@ export class TimeBuckets {
         return interval;
       }
 
-      const maxLength: number = this.uiSettings.get('histogram:maxBars');
+      const maxLength: number = this._uiSettings.get('histogram:maxBars');
       const approxLen = Number(duration) / Number(interval);
 
       let scaled;
@@ -411,7 +412,7 @@ export class TimeBuckets {
    */
   getScaledDateFormat() {
     const interval = this.getInterval();
-    const rules = this.uiSettings.get('dateFormat:scaled');
+    const rules = this._uiSettings.get('dateFormat:scaled');
 
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
@@ -420,6 +421,6 @@ export class TimeBuckets {
       }
     }
 
-    return this.uiSettings.get('dateFormat');
+    return this._uiSettings.get('dateFormat');
   }
 }
