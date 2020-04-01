@@ -35,4 +35,4 @@ Set to `true` to automatically opt into reporting cluster statistics. You can al
 
 `telemetry.allowChangingOptInStatus`:: *Default: true*.
 Set to `true` to allow overwriting the `telemetry.optIn` flag via the {kib} UI. 
-N.B.: When `false`, `telemetry.optIn` must be `true`. If you want to disable the telemetry and do not give any of the users the chance to change that parameter, use `telemetry.enabled`.
+Note: When `false`, `telemetry.optIn` must be `true`. To disable telemetry and not allow users to change that parameter, use `telemetry.enabled`.
