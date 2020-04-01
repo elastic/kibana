@@ -14,10 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import {
-  CustomLink,
-  Filter
-} from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { Filter } from '../../../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
@@ -28,27 +25,32 @@ import { Documentation } from './Documentation';
 
 interface Props {
   onClose: () => void;
-  customLinkSelected?: CustomLink;
   onSave: () => void;
   onDelete: () => void;
+  defaults?: {
+    url?: string;
+    label?: string;
+    filters?: Filter[];
+  };
+  customLinkId?: string;
 }
+
+const filtersEmptyState: Filter[] = [{ key: '', value: '' }];
 
 export const CustomLinkFlyout = ({
   onClose,
-  customLinkSelected,
   onSave,
-  onDelete
+  onDelete,
+  defaults,
+  customLinkId
 }: Props) => {
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
-  const [label, setLabel] = useState(customLinkSelected?.label || '');
-  const [url, setUrl] = useState(customLinkSelected?.url || '');
-  const selectedFilters = customLinkSelected?.filters;
+  const [label, setLabel] = useState(defaults?.label || '');
+  const [url, setUrl] = useState(defaults?.url || '');
   const [filters, setFilters] = useState(
-    selectedFilters?.length
-      ? selectedFilters
-      : ([{ key: '', value: '' }] as Filter[])
+    defaults?.filters?.length ? defaults.filters : filtersEmptyState
   );
 
   const isFormValid = !!label && !!url;
@@ -61,7 +63,7 @@ export const CustomLinkFlyout = ({
     event.preventDefault();
     setIsSaving(true);
     await saveCustomLink({
-      id: customLinkSelected?.id,
+      id: customLinkId,
       label,
       url,
       filters,
@@ -131,7 +133,7 @@ export const CustomLinkFlyout = ({
             onClose={onClose}
             isSaving={isSaving}
             onDelete={onDelete}
-            customLinkId={customLinkSelected?.id}
+            customLinkId={customLinkId}
           />
         </EuiFlyout>
       </form>
