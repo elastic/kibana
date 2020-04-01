@@ -47,7 +47,7 @@ export const useJsonStep = ({
   const dataGetter = useCallback<DataGetterFunc>(() => {
     const isValid = validateContent();
     const value = isValid && content.trim() !== '' ? JSON.parse(content) : {};
-    // If no key has been added to the JSON object, we strip it out so an empty objecct is not sent in the request
+    // If no key has been added to the JSON object, we strip it out so an empty object is not sent in the request
     const data = { [prop]: Object.keys(value).length > 0 ? value : undefined };
 
     return Promise.resolve({ isValid, data, path: 'template' });

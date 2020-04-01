@@ -7,11 +7,11 @@ import { parse } from 'query-string';
 import { Location } from 'history';
 
 export const getFormatVersionFromQueryparams = (location: Location): 1 | 2 | undefined => {
-  const { v } = parse(location.search.substring(1));
+  const { v: version } = parse(location.search.substring(1));
 
-  if (!Boolean(v) || typeof v !== 'string') {
+  if (!Boolean(version) || typeof version !== 'string') {
     return undefined;
   }
 
-  return +v as 1 | 2;
+  return +version as 1 | 2;
 };
