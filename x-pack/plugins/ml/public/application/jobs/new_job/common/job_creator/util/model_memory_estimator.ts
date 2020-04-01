@@ -47,12 +47,12 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
         map(cloneDeep),
         tap(v => {
           // eslint-disable-next-line no-console
-          console.log('Clone object of the incoming config: ', v);
+          console.log('Clone object of the incoming config: ', JSON.stringify(v, null, 2));
         }),
         distinctUntilChanged(isEqual),
         tap(v => {
           // eslint-disable-next-line no-console
-          console.log('New config: ', v);
+          console.log('New config: ', JSON.stringify(v, null, 2));
         }),
         // skip the first emitted config (job cloning)
         skip(1),
@@ -60,7 +60,10 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
         filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
         switchMap(payload => {
           // eslint-disable-next-line no-console
-          console.log('Call calculate endpoint with the payload: ', payload);
+          console.log(
+            'Call calculate endpoint with the payload: ',
+            JSON.stringify(payload, null, 2)
+          );
           return ml.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
             catchError(error => {
