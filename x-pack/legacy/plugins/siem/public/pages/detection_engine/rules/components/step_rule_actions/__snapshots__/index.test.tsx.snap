@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepRuleActions renders correctly against the snapshot 1`] = `
+<Fragment>
+  <Memo(styled.div)
+    addPadding={true}
+  >
+    <Form
+      data-test-subj="stepRuleActions"
+      form={
+        Object {
+          "__addField": [Function],
+          "__formData$": Object {
+            "current": Subject {
+              "callbacks": Set {},
+              "value": Object {
+                "actions": Array [],
+                "enabled": true,
+                "isNew": true,
+                "kibanaSiemAppUrl": "",
+                "throttle": "no_actions",
+              },
+            },
+          },
+          "__options": Object {
+            "errorDisplayDelay": 500,
+            "stripEmptyFields": false,
+          },
+          "__readFieldConfigFromSchema": [Function],
+          "__removeField": [Function],
+          "__updateFormDataAt": [Function],
+          "__validateFields": [Function],
+          "getErrors": [Function],
+          "getFieldDefaultValue": [Function],
+          "getFields": [Function],
+          "getFormData": [Function],
+          "isSubmitted": false,
+          "isSubmitting": false,
+          "isValid": undefined,
+          "reset": [Function],
+          "setFieldErrors": [Function],
+          "setFieldValue": [Function],
+          "submit": [Function],
+          "subscribe": [Function],
+        }
+      }
+    >
+      <Memo()
+        component={[Function]}
+        componentProps={
+          Object {
+            "dataTestSubj": "detectionEngineStepRuleActionsThrottle",
+            "euiFieldProps": Object {
+              "options": Array [
+                Object {
+                  "text": "Perform no actions",
+                  "value": "no_actions",
+                },
+                Object {
+                  "text": "On each rule execution",
+                  "value": "rule",
+                },
+                Object {
+                  "text": "Hourly",
+                  "value": "1h",
+                },
+                Object {
+                  "text": "Daily",
+                  "value": "1d",
+                },
+                Object {
+                  "text": "Weekly",
+                  "value": "7d",
+                },
+              ],
+            },
+            "handleChange": [Function],
+            "hasNoInitialSelection": false,
+            "idAria": "detectionEngineStepRuleActionsThrottle",
+            "isDisabled": false,
+          }
+        }
+        path="throttle"
+      />
+      <Memo()
+        component={[Function]}
+        defaultValue={true}
+        path="enabled"
+      />
+    </Form>
+  </Memo(styled.div)>
+  <EuiHorizontalRule
+    margin="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="flexEnd"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        fill={false}
+        isDisabled={false}
+        isLoading={false}
+        onClick={[Function]}
+      >
+        Create rule without activating it
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="create-activate"
+        fill={true}
+        isDisabled={false}
+        isLoading={false}
+        onClick={[Function]}
+      >
+        Create & activate rule
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

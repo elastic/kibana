@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddItem renders correctly against the snapshot 1`] = `
+<Styled(EuiFormRow)
+  data-test-subj="dataTestSubj"
+  describedByIds={
+    Array [
+      "idAria",
+    ]
+  }
+  error={null}
+  fullWidth={true}
+  isInvalid={false}
+>
+  <Styled(EuiButtonEmpty)
+    flush="left"
+    iconType="plusInCircle"
+    isDisabled={false}
+    onClick={[Function]}
+    size="xs"
+  >
+    text
+  </Styled(EuiButtonEmpty)>
+</Styled(EuiFormRow)>
+`;

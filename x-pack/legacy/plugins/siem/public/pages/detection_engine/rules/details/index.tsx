@@ -85,7 +85,7 @@ const ruleDetailTabs = [
   },
 ];
 
-const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
+export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   filters,
   query,
   setAbsoluteRangeDatePicker,

@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccordionTitle renders correctly against the snapshot 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="m"
+  responsive={false}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <Memo(RuleStatusIconComponent)
+      name="name"
+      type="valid"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiTitle
+      className="euiAccordionForm__title"
+      size="s"
+    >
+      <h6>
+        title
+      </h6>
+    </EuiTitle>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

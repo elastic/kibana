@@ -1,0 +1,136 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EditRulePage renders correctly against the snapshot 1`] = `
+<Fragment>
+  <Memo(WrapperPageComponent)
+    restrictWidth={true}
+  >
+    <Memo(DetectionEngineHeaderPageComponent)
+      backOptions={
+        Object {
+          "href": "#/detections/rules/id/undefined",
+          "text": "Back to ",
+        }
+      }
+      isLoading={false}
+      title="Edit rule settings"
+    />
+    <EuiTabbedContent
+      autoFocus="initial"
+      initialSelectedTab={
+        Object {
+          "content": <React.Fragment>
+            <EuiSpacer />
+            <Memo(StepPanelComponent)
+              loading={true}
+              title="Definition"
+            >
+              <EuiSpacer />
+            </Memo(StepPanelComponent)>
+          </React.Fragment>,
+          "disabled": undefined,
+          "id": "define-rule",
+          "name": "Definition",
+        }
+      }
+      onTabClick={[Function]}
+      tabs={
+        Array [
+          Object {
+            "content": <React.Fragment>
+              <EuiSpacer />
+              <Memo(StepPanelComponent)
+                loading={true}
+                title="Definition"
+              >
+                <EuiSpacer />
+              </Memo(StepPanelComponent)>
+            </React.Fragment>,
+            "disabled": undefined,
+            "id": "define-rule",
+            "name": "Definition",
+          },
+          Object {
+            "content": <React.Fragment>
+              <EuiSpacer />
+              <Memo(StepPanelComponent)
+                loading={true}
+                title="About"
+              >
+                <EuiSpacer />
+              </Memo(StepPanelComponent)>
+            </React.Fragment>,
+            "disabled": undefined,
+            "id": "about-rule",
+            "name": "About",
+          },
+          Object {
+            "content": <React.Fragment>
+              <EuiSpacer />
+              <Memo(StepPanelComponent)
+                loading={true}
+                title="Schedule"
+              >
+                <EuiSpacer />
+              </Memo(StepPanelComponent)>
+            </React.Fragment>,
+            "disabled": undefined,
+            "id": "schedule-rule",
+            "name": "Schedule",
+          },
+          Object {
+            "content": <React.Fragment>
+              <EuiSpacer />
+              <Memo(StepPanelComponent)
+                loading={true}
+                title="Actions"
+              >
+                <EuiSpacer />
+              </Memo(StepPanelComponent)>
+            </React.Fragment>,
+            "id": "rule-actions",
+            "name": "Actions",
+          },
+        ]
+      }
+    />
+    <EuiSpacer />
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      justifyContent="flexEnd"
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          href="#/detections/rules/id/undefined"
+          iconType="cross"
+        >
+          Cancel
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          iconType="save"
+          isLoading={false}
+          onClick={[Function]}
+        >
+          Save changes
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </Memo(WrapperPageComponent)>
+  <withRouter(undefined)
+    state={
+      Object {
+        "ruleName": undefined,
+      }
+    }
+  />
+</Fragment>
+`;

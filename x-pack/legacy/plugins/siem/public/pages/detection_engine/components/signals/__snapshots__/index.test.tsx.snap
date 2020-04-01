@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SignalsTableComponent renders correctly against the snapshot 1`] = `
+<EuiPanel>
+  <Memo(HeaderSectionComponent)
+    title="Signals"
+  />
+  <EuiLoadingContent
+    data-test-subj="loading-signals-panel"
+  />
+</EuiPanel>
+`;

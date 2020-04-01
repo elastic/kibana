@@ -1,0 +1,219 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SignalsHistogram renders correctly against the snapshot 1`] = `
+<Fragment>
+  <Chart
+    renderer="canvas"
+    size={
+      Array [
+        "100%",
+        174,
+      ]
+    }
+  >
+    <Connect(spec)
+      legendPosition="right"
+      onBrushEnd={[MockFunction]}
+      showLegend={true}
+      showLegendExtra={true}
+      theme={
+        Object {
+          "arcSeriesStyle": Object {
+            "arc": Object {
+              "opacity": 1,
+              "stroke": "black",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "areaSeriesStyle": Object {
+            "area": Object {
+              "opacity": 0.3,
+              "visible": true,
+            },
+            "line": Object {
+              "opacity": 1,
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "point": Object {
+              "fill": "white",
+              "opacity": 1,
+              "radius": 2,
+              "strokeWidth": 1,
+              "visible": false,
+            },
+          },
+          "axes": Object {
+            "axisLineStyle": Object {
+              "stroke": "#eaeaea",
+              "strokeWidth": 1,
+            },
+            "axisTitleStyle": Object {
+              "fill": "#333",
+              "fontFamily": "sans-serif",
+              "fontSize": 12,
+              "fontStyle": "bold",
+              "padding": 8,
+            },
+            "gridLineStyle": Object {
+              "horizontal": Object {
+                "dash": Array [
+                  0,
+                  0,
+                ],
+                "opacity": 1,
+                "stroke": "#D3DAE6",
+                "strokeWidth": 1,
+                "visible": true,
+              },
+              "vertical": Object {
+                "dash": Array [
+                  0,
+                  0,
+                ],
+                "opacity": 1,
+                "stroke": "#D3DAE6",
+                "strokeWidth": 1,
+                "visible": true,
+              },
+            },
+            "tickLabelStyle": Object {
+              "fill": "#777",
+              "fontFamily": "sans-serif",
+              "fontSize": 10,
+              "fontStyle": "normal",
+              "padding": 4,
+            },
+            "tickLineStyle": Object {
+              "stroke": "#eaeaea",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "barSeriesStyle": Object {
+            "displayValue": Object {
+              "fill": "#777",
+              "fontFamily": "sans-serif",
+              "fontSize": 8,
+              "fontStyle": "normal",
+              "offsetX": 0,
+              "offsetY": 0,
+              "padding": 0,
+            },
+            "rect": Object {
+              "opacity": 1,
+            },
+            "rectBorder": Object {
+              "strokeWidth": 0,
+              "visible": false,
+            },
+          },
+          "chartMargins": Object {
+            "bottom": 0,
+            "left": 0,
+            "right": 0,
+            "top": 4,
+          },
+          "chartPaddings": Object {
+            "bottom": 0,
+            "left": 0,
+            "right": 0,
+            "top": 0,
+          },
+          "colors": Object {
+            "defaultVizColor": "red",
+            "vizColors": Array [
+              "#1EA593",
+              "#2B70F7",
+              "#CE0060",
+              "#38007E",
+              "#FCA5D3",
+              "#F37020",
+              "#E49E29",
+              "#B0916F",
+              "#7B000B",
+              "#34130C",
+            ],
+          },
+          "crosshair": Object {
+            "band": Object {
+              "fill": "#F5F5F5",
+              "visible": true,
+            },
+            "line": Object {
+              "dash": Array [
+                5,
+                5,
+              ],
+              "stroke": "#777",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "legend": Object {
+            "horizontalHeight": 64,
+            "spacingBuffer": 10,
+            "verticalWidth": 200,
+          },
+          "lineSeriesStyle": Object {
+            "line": Object {
+              "opacity": 1,
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "point": Object {
+              "fill": "white",
+              "opacity": 1,
+              "radius": 2,
+              "strokeWidth": 1,
+              "visible": true,
+            },
+          },
+          "scales": Object {
+            "barsPadding": 0.05,
+            "histogramPadding": 0.05,
+          },
+          "sharedStyle": Object {
+            "default": Object {
+              "opacity": 1,
+            },
+            "highlighted": Object {
+              "opacity": 1,
+            },
+            "unhighlighted": Object {
+              "opacity": 0.25,
+            },
+          },
+        }
+      }
+    />
+    <Connect(spec)
+      id="signalsHistogramAxisX"
+      position="bottom"
+      tickFormat={[Function]}
+    />
+    <Connect(spec)
+      id="signalsHistogramAxisY"
+      position="left"
+    />
+    <Connect(spec)
+      data={Array []}
+      id="signalsHistogram"
+      splitSeriesAccessors={
+        Array [
+          "g",
+        ]
+      }
+      xAccessor="x"
+      xScaleType="time"
+      yAccessors={
+        Array [
+          "y",
+        ]
+      }
+      yScaleType="linear"
+    />
+  </Chart>
+</Fragment>
+`;

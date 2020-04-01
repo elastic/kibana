@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetectionEngineContainer renders correctly against the snapshot 1`] = `
+<ManageUserInfo>
+  <Switch>
+    <Route
+      exact={true}
+      path="/:pageName(detections)/:tabName(signals|alerts)"
+      strict={true}
+    >
+      <Connect(Component) />
+    </Route>
+    <Route
+      exact={true}
+      path="/:pageName(detections)/rules"
+    >
+      <Memo(RulesPageComponent) />
+    </Route>
+    <Route
+      exact={true}
+      path="/:pageName(detections)/rules/create"
+    >
+      <Memo(CreateRulePageComponent) />
+    </Route>
+    <Route
+      exact={true}
+      path="/:pageName(detections)/rules/id/:detailName"
+    >
+      <Connect(Component) />
+    </Route>
+    <Route
+      exact={true}
+      path="/:pageName(detections)/rules/id/:detailName/edit"
+    >
+      <Memo(EditRulePageComponent) />
+    </Route>
+    <Route
+      path="/detections/"
+      render={[Function]}
+    />
+  </Switch>
+</ManageUserInfo>
+`;

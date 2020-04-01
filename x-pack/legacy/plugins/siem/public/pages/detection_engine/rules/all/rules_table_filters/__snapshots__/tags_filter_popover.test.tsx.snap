@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TagsFilterPopover renders correctly against the snapshot 1`] = `
+<EuiPopover
+  anchorPosition="downCenter"
+  button={
+    <EuiFilterButton
+      data-test-subj="tags-filter-popover-button"
+      hasActiveFilters={false}
+      iconType="arrowDown"
+      isSelected={false}
+      numActiveFilters={0}
+      onClick={[Function]}
+    >
+      Tags
+    </EuiFilterButton>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <styled.div />
+  <EuiFlexGroup
+    gutterSize="m"
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      grow={true}
+    >
+      <EuiPanel>
+        <EuiText>
+          No tags available
+        </EuiText>
+      </EuiPanel>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPopover>
+`;

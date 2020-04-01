@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuleActionsField renders correctly against the snapshot 1`] = `<Fragment />`;

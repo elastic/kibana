@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SignalsTableFilterGroup renders correctly against the snapshot 1`] = `
+<EuiFilterGroup>
+  <EuiFilterButton
+    data-test-subj="openSignals"
+    hasActiveFilters={true}
+    onClick={[Function]}
+    withNext={true}
+  >
+    Open signals
+  </EuiFilterButton>
+  <EuiFilterButton
+    data-test-subj="closedSignals"
+    hasActiveFilters={false}
+    onClick={[Function]}
+  >
+    Closed signals
+  </EuiFilterButton>
+</EuiFilterGroup>
+`;

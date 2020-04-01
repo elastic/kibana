@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`detection_engine_header_page renders correctly against the snapshot 1`] = `
+<Memo(HeaderPageComponent)
+  badgeOptions={
+    Object {
+      "beta": true,
+      "text": "Beta",
+      "tooltip": "Detections is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.",
+    }
+  }
+  title="Title"
+/>
+`;

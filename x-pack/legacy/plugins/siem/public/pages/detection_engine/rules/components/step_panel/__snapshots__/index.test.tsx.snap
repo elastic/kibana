@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepPanel renders correctly against the snapshot 1`] = `
+<Styled(EuiPanel)>
+  <Memo(HeaderSectionComponent)
+    title="Title"
+  />
+  <div />
+</Styled(EuiPanel)>
+`;

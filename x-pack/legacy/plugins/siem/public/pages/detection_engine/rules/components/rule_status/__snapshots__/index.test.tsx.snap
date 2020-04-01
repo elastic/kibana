@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuleStatus renders correctly against the snapshot 1`] = `
+<div
+  className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    Last response
+    :
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiLoadingSpinner
+      data-test-subj="rule-status-loader"
+      size="m"
+    />
+  </EuiFlexItem>
+</div>
+`;

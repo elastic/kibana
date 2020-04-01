@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`no_write_signals_callout renders correctly against the snapshot 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="alert"
+  title="Signals index permissions required"
+>
+  <p>
+    You are currently missing the required permissions to update signals. Please contact your administrator for further assistance.
+  </p>
+  <EuiButton
+    color="warning"
+    onClick={[Function]}
+  >
+    Dismiss
+  </EuiButton>
+</EuiCallOut>
+`;

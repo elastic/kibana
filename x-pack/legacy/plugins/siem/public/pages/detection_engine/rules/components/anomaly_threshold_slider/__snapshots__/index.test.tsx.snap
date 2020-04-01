@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnomalyThresholdSlider renders correctly against the snapshot 1`] = `
+<EuiFormRow
+  data-test-subj="anomalyThresholdSlider"
+  describedByIds={Array []}
+  display="row"
+  fullWidth={false}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  labelType="label"
+>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiRange
+        compressed={false}
+        fullWidth={true}
+        isLoading={false}
+        levels={Array []}
+        max={100}
+        min={0}
+        onChange={[Function]}
+        showInput={true}
+        showLabels={false}
+        showRange={true}
+        showTicks={true}
+        showValue={false}
+        step={1}
+        tickInterval={25}
+        value={Array []}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiFormRow>
+`;

@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuleStatusFailedCallOut renders correctly against the snapshot 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  title={
+    <ForwardRef
+      alignItems="center"
+      gutterSize="xs"
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        Rule failure at
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={true}
+      >
+        <Memo(FormattedDate)
+          fieldName="last_failure_at"
+          value="date"
+        />
+      </EuiFlexItem>
+    </ForwardRef>
+  }
+>
+  <p>
+    message
+  </p>
+</EuiCallOut>
+`;

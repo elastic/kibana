@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetectionEngineNoIndex renders correctly against the snapshot 1`] = `
+<EmptyPage
+  actionPrimaryIcon="documents"
+  actionPrimaryLabel="View documentation"
+  actionPrimaryTarget="_blank"
+  actionPrimaryUrl="https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/detection-engine-overview.html#detections-permissions"
+  data-test-subj="no_index"
+  message="To use the detection engine, a user with the required cluster and index privileges must first access this page. For more help, contact your administrator."
+  title="Let’s set up your detection engine"
+/>
+`;

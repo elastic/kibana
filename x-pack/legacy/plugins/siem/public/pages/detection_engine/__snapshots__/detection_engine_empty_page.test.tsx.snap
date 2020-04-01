@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetectionEngineEmptyPage renders correctly against the snapshot 1`] = `
+<EmptyPage
+  actionPrimaryIcon="gear"
+  actionPrimaryLabel="Add data with Beats"
+  actionPrimaryUrl="/app/kibana#/home/tutorial_directory/siem"
+  actionSecondaryIcon="popout"
+  actionSecondaryLabel="View getting started guide"
+  actionSecondaryTarget="_blank"
+  actionSecondaryUrl="https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html"
+  data-test-subj="empty-page"
+  message="To begin using security information and event management (SIEM), you’ll need to add SIEM-related data, in Elastic Common Schema (ECS) format, to the Elastic Stack. An easy way to get started is by installing and configuring our data shippers, called Beats. Let’s do that now!"
+  title="Welcome to SIEM. Let’s get you started."
+/>
+`;

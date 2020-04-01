@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QueryBarDefineRule renders correctly against the snapshot 1`] = `
+<Fragment>
+  <Styled(EuiFormRow)
+    data-test-subj="dataTestSubj"
+    describedByIds={
+      Array [
+        "idAria",
+      ]
+    }
+    error={null}
+    fullWidth={true}
+    isInvalid={false}
+  >
+    <EuiMutationObserver
+      observerOptions={
+        Object {
+          "attributes": true,
+          "childList": true,
+          "subtree": true,
+        }
+      }
+      onMutation={[Function]}
+    >
+      <Component />
+    </EuiMutationObserver>
+  </Styled(EuiFormRow)>
+  <OpenTimelineModal
+    hideActions={
+      Array [
+        "duplicate",
+      ]
+    }
+    modalTitle="Import query from saved timeline"
+    onClose={[Function]}
+    onOpen={[Function]}
+  />
+</Fragment>
+`;

@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OptionalFieldLabel renders correctly against the snapshot 1`] = `
+<div
+  className="euiText euiText--extraSmall"
+>
+  <EuiTextColor
+    color="subdued"
+    component="div"
+  >
+    Optional
+  </EuiTextColor>
+</div>
+`;

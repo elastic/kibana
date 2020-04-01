@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SignalsUtilityBar renders correctly against the snapshot 1`] = `
+<Fragment>
+  <UtilityBar>
+    <UtilityBarSection>
+      <UtilityBarGroup>
+        <UtilityBarText
+          dataTestSubj="showingSignals"
+        >
+          Showing 100 signals
+        </UtilityBarText>
+      </UtilityBarGroup>
+      <UtilityBarGroup>
+        <UtilityBarText
+          dataTestSubj="selectedSignals"
+        >
+          Selected 100 signals
+        </UtilityBarText>
+        <UtilityBarAction
+          dataTestSubj="openCloseSignal"
+          disabled={true}
+          iconType="securitySignalDetected"
+          onClick={[Function]}
+        >
+          Open selected
+        </UtilityBarAction>
+        <UtilityBarAction
+          iconType="cross"
+          onClick={[Function]}
+        >
+          Clear selection
+        </UtilityBarAction>
+      </UtilityBarGroup>
+    </UtilityBarSection>
+  </UtilityBar>
+</Fragment>
+`;

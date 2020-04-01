@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScheduleItem renders correctly against the snapshot 1`] = `
+<Styled(EuiFormRow)
+  data-test-subj="dataTestSubj"
+  describedByIds={
+    Array [
+      "idAria",
+    ]
+  }
+  error={null}
+  fullWidth={false}
+  isInvalid={false}
+  label={
+    <ForwardRef
+      alignItems="center"
+      gutterSize="s"
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem
+        component="span"
+        grow={false}
+      />
+      <ForwardRef(Styled(EuiFlexItem))
+        component="span"
+        grow={false}
+      />
+    </ForwardRef>
+  }
+>
+  <EuiFormControlLayout
+    append={
+      <ForwardRef(Styled(EuiSelect))
+        disabled={false}
+        fullWidth={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "Seconds",
+              "value": "s",
+            },
+            Object {
+              "text": "Minutes",
+              "value": "m",
+            },
+            Object {
+              "text": "Hours",
+              "value": "h",
+            },
+          ]
+        }
+        value="s"
+      />
+    }
+  >
+    <EuiFieldNumber
+      disabled={false}
+      fullWidth={true}
+      min={0}
+      onChange={[Function]}
+      value={0}
+    />
+  </EuiFormControlLayout>
+</Styled(EuiFormRow)>
+`;

@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PrePackagedRulesPrompt renders correctly against the snapshot 1`] = `
+<Styled(EuiEmptyPrompt)
+  actions={
+    <ForwardRef
+      justifyContent="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="load-prebuilt-rules"
+          fill={true}
+          iconType="indexOpen"
+          isDisabled={false}
+          isLoading={false}
+          onClick={[Function]}
+        >
+          Load prebuilt detection rules
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          href="#detections/rules/create"
+          iconType="plusInCircle"
+          isDisabled={false}
+        >
+          Create your own rules
+        </EuiButton>
+      </EuiFlexItem>
+    </ForwardRef>
+  }
+  body={
+    <p>
+      Elastic SIEM comes with prebuilt detection rules that run in the background and create signals when their conditions are met. By default, all prebuilt rules are disabled and you select which rules you want to activate.
+    </p>
+  }
+  iconType="securityAnalyticsApp"
+  title={
+    <h2>
+      Load Elastic prebuilt detection rules
+    </h2>
+  }
+/>
+`;

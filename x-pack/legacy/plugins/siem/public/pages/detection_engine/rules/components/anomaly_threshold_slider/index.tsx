@@ -16,7 +16,7 @@ interface AnomalyThresholdSliderProps {
 type Event = React.ChangeEvent<HTMLInputElement>;
 type EventArg = Event | React.MouseEvent<HTMLButtonElement>;
 
-export const AnomalyThresholdSlider: React.FC<AnomalyThresholdSliderProps> = ({
+const AnomalyThresholdSliderComponent: React.FC<AnomalyThresholdSliderProps> = ({
   describedByIds = [],
   field,
 }) => {
@@ -51,3 +51,5 @@ export const AnomalyThresholdSlider: React.FC<AnomalyThresholdSliderProps> = ({
     </EuiFormRow>
   );
 };
+
+export const AnomalyThresholdSlider = React.memo(AnomalyThresholdSliderComponent);
