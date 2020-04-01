@@ -33,7 +33,7 @@ const CODE_REQUEST_ENTITY_TOO_LARGE = 'SavedObjectsClient/requestEntityTooLarge'
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
 // 409 - Conflict
 const CODE_CONFLICT = 'SavedObjectsClient/conflict';
-// 500 - Es Cannot Execute Script
+// 400 - Es Cannot Execute Script
 const CODE_ES_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
 // 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
