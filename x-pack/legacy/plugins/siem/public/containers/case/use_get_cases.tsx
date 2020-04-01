@@ -68,7 +68,10 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
     case 'UPDATE_FILTER_OPTIONS':
       return {
         ...state,
-        filterOptions: action.payload,
+        filterOptions: {
+          ...state.filterOptions,
+          ...action.payload,
+        },
       };
     case 'UPDATE_QUERY_PARAMS':
       return {
