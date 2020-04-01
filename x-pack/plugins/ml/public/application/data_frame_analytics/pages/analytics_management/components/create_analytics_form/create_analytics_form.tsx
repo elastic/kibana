@@ -667,7 +667,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                   numTopFeatureImportanceValuesValid &&
                   !sourceIndexNameEmpty && [
                     i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.excludesOptionsNoSupportedFields',
+                      'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesErrorText',
                       {
                         defaultMessage: 'Invalid maximum number of feature importance values.',
                       }
