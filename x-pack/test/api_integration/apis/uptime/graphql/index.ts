@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
 export default function({ loadTestFile }: FtrProviderContext) {
   describe('graphql', () => {
     // each of these test files imports a GQL query from
