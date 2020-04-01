@@ -98,7 +98,7 @@ export const ProcessEventDot = styled(
       const selfId = adjacentNodeMap.self;
 
       /** Dimensions of the SVG viewbox for the process event node. */
-      const viewBoxWidth = 90;
+      const viewBoxWidth = 60;
       const viewBoxHeight = 15;
       const viewBoxMinX = -7.5;
       const viewBoxMinY = -7.5;
@@ -162,7 +162,7 @@ export const ProcessEventDot = styled(
           /** Adjust it up and to the left, so that the cube is centered */
           transform: `translateX(${cubeIconSideLength *
             scale *
-            -0.5}px) translateY(${cubeIconSideLength * scale * -0.5}px)`,
+            -0.5}px) translateY(${cubeIconSideLength * scale * -0.75}px)`,
         }),
         [left, scale, top]
       );
