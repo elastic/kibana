@@ -178,7 +178,7 @@ export class DashboardStateManager {
             // Skip this update if current dashboardId in the url is different from what we have in the current instance of state manager
             // As dashboard is driven by angular at the moment, the destroy cycle happens async,
             // If the dashboardId has changed it means this instance
-            // is going to be destroy soon and we shouldn't sync state anymore,
+            // is going to be destroyed soon and we shouldn't sync state anymore,
             // as it could potentially trigger further url updates
             const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
             if (currentDashboardIdInUrl !== this.savedDashboard.id) return;
@@ -248,7 +248,7 @@ export class DashboardStateManager {
 
         const oldVersion = savedDashboardPanelMap[panelState.explicitInput.id]?.version;
         const newVersion = convertedPanelStateMap[panelState.explicitInput.id]?.version;
-        if (oldVersion !== newVersion) {
+        if (oldVersion && newVersion && oldVersion !== newVersion) {
           dirtyBecauseOfInitialStateMigration = true;
         }
       }

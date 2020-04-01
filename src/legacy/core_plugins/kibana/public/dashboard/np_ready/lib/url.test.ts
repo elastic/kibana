@@ -19,7 +19,7 @@
 
 import { getDashboardIdFromUrl } from './url';
 
-test('getDashboardIdFromDashboardUrl', () => {
+test('getDashboardIdFromUrl', () => {
   let url =
     "http://localhost:5601/wev/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
   expect(getDashboardIdFromUrl(url)).toEqual(undefined);
