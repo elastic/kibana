@@ -7,7 +7,7 @@ import expect from '@kbn/expect';
 import {
   createDashboardEditUrl,
   DashboardConstants,
-} from '../../../../../../src/plugins/dashboard/public';
+} from '../../../../../../src/plugins/dashboard/public/dashboard_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
