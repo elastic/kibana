@@ -23,12 +23,6 @@ import { Optional } from '@kbn/utility-types';
 
 import { AggGroupNames, AggParam, IAggGroupNames } from '../../../../plugins/data/public';
 
-export interface ISchemas {
-  [AggGroupNames.Buckets]: Schema[];
-  [AggGroupNames.Metrics]: Schema[];
-  all: Schema[];
-}
-
 export interface Schema {
   aggFilter: string[];
   editor: boolean | string;
@@ -44,7 +38,7 @@ export interface Schema {
   aggSettings?: any;
 }
 
-export class Schemas implements ISchemas {
+export class Schemas {
   all: Schema[] = [];
   [AggGroupNames.Buckets]: Schema[] = [];
   [AggGroupNames.Metrics]: Schema[] = [];

@@ -38,7 +38,7 @@ import {
   toggleEnabledAgg,
 } from './state';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
-import { ISchemas } from '../../schemas';
+import { Schemas } from '../../schemas';
 import { TimeRange } from '../../../../../../plugins/data/public';
 import { EditorVisState } from './state/reducers';
 
@@ -47,7 +47,7 @@ export interface DefaultEditorDataTabProps {
   formIsTouched: boolean;
   isTabSelected: boolean;
   metricAggs: IAggConfig[];
-  schemas: ISchemas;
+  schemas: Schemas;
   state: EditorVisState;
   setTouched(isTouched: boolean): void;
   setValidity(modelName: string, value: boolean): void;
