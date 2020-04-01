@@ -55,7 +55,7 @@ kibanaPipeline(timeoutMinutes: 180) {
 
 
     echo "### Print vcs info file"
-    cat VCS_INFO.txt || echo "### VCS Info file NOT found" && exit 1
+    cat VCS_INFO.txt || echo "### VCS Info file NOT found"
 
 
 
