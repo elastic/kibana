@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
-import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
+import { API_URLS } from '../../../common/constants/rest_api';
 
 export const createGetMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
