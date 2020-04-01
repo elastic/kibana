@@ -127,13 +127,13 @@ describe('connector_add_flyout', () => {
     const subscriptionLinks = callout.find('EuiButton');
     expect(subscriptionLinks).toHaveLength(2);
 
-    const [linkToSubscribePage, linkToManageLicense] = subscriptionLinks.getElements();
+    const [linkToManageLicense, linkToSubscribePage] = subscriptionLinks.getElements();
 
-    expect(linkToSubscribePage.props.href).toMatchInlineSnapshot(
-      `"https://www.elastic.co/subscriptions"`
-    );
     expect(linkToManageLicense.props.href).toMatchInlineSnapshot(
       `"/app/kibana#/management/elasticsearch/license_management/"`
+    );
+    expect(linkToSubscribePage.props.href).toMatchInlineSnapshot(
+      `"https://www.elastic.co/subscriptions"`
     );
   });
 });
