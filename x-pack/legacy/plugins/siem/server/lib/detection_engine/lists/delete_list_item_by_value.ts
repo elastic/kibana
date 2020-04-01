@@ -13,52 +13,46 @@ export const deleteListItemByValue = async ({
   listId,
   ip,
   clusterClient,
-  listsIndex,
   listsItemsIndex,
 }: {
   listId: string;
   ip: string | null | undefined;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsIndex: string;
   listsItemsIndex: string;
 }): Promise<ListsItemsSchema[] | null> => {
+  // TODO: Check before we call into these functions at the validation level that the string is not empty?
   if (listId.trim() === '') {
     return null;
   } else {
-    const list = await getList({ id: listId, clusterClient, listsIndex });
-    if (list == null) {
-      return null;
-    } else {
-      const listItems = await getListItemsByValues({
-        ips: ip ? [ip] : [],
-        listId,
-        clusterClient,
-        listsItemsIndex,
-      });
-      const ips = listItems.map(listItem => listItem.ip).filter(ipFilter => ipFilter != null);
-      await clusterClient.callAsCurrentUser('deleteByQuery', {
-        index: listsItemsIndex,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    list_id: listId,
-                  },
+    const listItems = await getListItemsByValues({
+      ips: ip ? [ip] : [],
+      listId,
+      clusterClient,
+      listsItemsIndex,
+    });
+    const ips = listItems.map(listItem => listItem.ip).filter(ipFilter => ipFilter != null);
+    await clusterClient.callAsCurrentUser('deleteByQuery', {
+      index: listsItemsIndex,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  list_id: listId,
                 },
-                {
-                  terms: {
-                    ip: ips,
-                  },
+              },
+              {
+                terms: {
+                  ip: ips,
                 },
-              ],
-            },
+              },
+            ],
           },
         },
-      });
-      // TODO: We don't filter down here like we do above? Issue later?
-      return listItems;
-    }
+      },
+    });
+    // TODO: We don't filter down here like we do above? This might an issue later?
+    return listItems;
   }
 };

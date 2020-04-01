@@ -11,12 +11,10 @@ import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema'
 export const deleteListItem = async ({
   id,
   clusterClient,
-  listsIndex,
   listsItemsIndex,
 }: {
   id: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-  listsIndex: string;
   listsItemsIndex: string;
 }): Promise<ListsItemsSchema | null> => {
   const listItem = await getListItem({ id, clusterClient, listsItemsIndex });
@@ -24,7 +22,7 @@ export const deleteListItem = async ({
     return null;
   } else {
     await clusterClient.callAsCurrentUser('delete', {
-      index: listsIndex,
+      index: listsItemsIndex,
       id,
     });
   }

@@ -5,19 +5,21 @@
  */
 
 import { IRouter } from '../../../../../../../../../src/core/server';
-import { DETECTION_ENGINE_LIST_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_LIST_ITEM_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse, buildRouteValidationIoTS } from '../utils';
-import { deleteListsSchema } from '../schemas/request/delete_lists_schema';
-import { DeleteListsItemsSchema } from '../schemas/request/delete_lists_items_schema';
+import {
+  DeleteListsItemsSchema,
+  deleteListsItemsSchema,
+} from '../schemas/request/delete_lists_items_schema';
 import { deleteListItem } from '../../lists/delete_list_item';
 import { deleteListItemByValue } from '../../lists/delete_list_item_by_value';
 
 export const deleteListsItemsRoute = (router: IRouter): void => {
   router.delete(
     {
-      path: DETECTION_ENGINE_LIST_URL,
+      path: DETECTION_ENGINE_LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidationIoTS<DeleteListsItemsSchema>(deleteListsSchema),
+        query: buildRouteValidationIoTS<DeleteListsItemsSchema>(deleteListsItemsSchema),
       },
       options: {
         tags: ['access:siem'],
@@ -32,12 +34,11 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const { listsIndex, listsItemsIndex } = siemClient;
+        const { listsItemsIndex } = siemClient;
         if (id != null) {
           const deleted = await deleteListItem({
             id,
             clusterClient,
-            listsIndex,
             listsItemsIndex,
           });
           if (deleted == null) {
@@ -55,7 +56,6 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
             ip,
             listId,
             clusterClient,
-            listsIndex,
             listsItemsIndex,
           });
           if (deleted == null) {

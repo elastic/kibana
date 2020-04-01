@@ -45,6 +45,7 @@ import { createListsIndexRoute } from '../lib/detection_engine/routes/lists/crea
 import { deleteListsIndexRoute } from '../lib/detection_engine/routes/lists/delete_lists_index_route';
 import { readListsIndexRoute } from '../lib/detection_engine/routes/lists/read_lists_index_route';
 import { SetupPlugins } from '../plugin';
+import { deleteListsItemsRoute } from '../lib/detection_engine/routes/lists/delete_lists_items_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -110,6 +111,8 @@ export const initRoutes = (
     // list items routes
     createListsItemsRoute(router);
     readListsItemsRoute(router);
+    // TODO: Add a updateListsItemsRoute
+    deleteListsItemsRoute(router);
     patchListsItemsRoute(router);
     importListsItemsRoute(router);
     exportListsItemsRoute(router);

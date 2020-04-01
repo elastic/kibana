@@ -44,7 +44,7 @@ export const readListsItemsRoute = (router: IRouter): void => {
           if (listItem == null) {
             return siemResponse.error({
               statusCode: 404,
-              body: `list_id: "${listId}" item does not exist`,
+              body: `id: "${id}" item does not exist`,
             });
           } else {
             // TODO: outbound validation
