@@ -29,7 +29,6 @@ interface LinkProps {
 export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): LinkProps => {
   validateParams({ app, pathname, hash, search });
 
-  const history = useHistory();
   const prefixer = usePrefixPathWithBasepath();
   const navigateToApp = useKibana().services.application?.navigateToApp;
 
