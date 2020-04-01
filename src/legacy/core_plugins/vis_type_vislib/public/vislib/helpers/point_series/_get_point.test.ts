@@ -19,6 +19,7 @@
 
 import { getPoint } from './_get_point';
 import { setFormatService } from '../../../services';
+import { Table, Column, Aspect, Row } from './point_series';
 
 describe('getPoint', function() {
   beforeAll(() => {
@@ -30,27 +31,26 @@ describe('getPoint', function() {
   });
 
   const table = {
-    columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+    columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
     rows: [
       { '0': 1, '1': 2, '2': 3 },
       { '0': 4, '1': 'NaN', '2': 6 },
     ],
-  };
+  } as Table;
 
   describe('Without series aspect', function() {
-    let seriesAspect: any;
-    let xAspect: object;
-    let yAspect: { [key: string]: any };
+    let seriesAspect: undefined;
+    let xAspect: Aspect;
+    let yAspect: Aspect;
 
     beforeEach(function() {
-      seriesAspect = null;
-      xAspect = { accessor: 0 };
-      yAspect = { accessor: 1, title: 'Y' };
+      xAspect = { accessor: '0' } as Aspect;
+      yAspect = { accessor: '1', title: 'Y' } as Aspect;
     });
 
     it('properly unwraps values', function() {
       const row = table.rows[0];
-      const zAspect = { accessor: 2 };
+      const zAspect = { accessor: '2' } as Aspect;
       const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect, zAspect);
 
       expect(point).toHaveProperty('x', 1);
@@ -67,18 +67,18 @@ describe('getPoint', function() {
   });
 
   describe('With series aspect', function() {
-    let row: object;
-    let xAspect: object;
-    let yAspect: object;
+    let row: Row;
+    let xAspect: Aspect;
+    let yAspect: Aspect;
 
     beforeEach(function() {
       row = table.rows[0];
-      xAspect = { accessor: 0 };
-      yAspect = { accessor: 2 };
+      xAspect = { accessor: '0' } as Aspect;
+      yAspect = { accessor: '2' } as Aspect;
     });
 
     it('properly unwraps values', function() {
-      const seriesAspect = [{ accessor: 1 }];
+      const seriesAspect = [{ accessor: '1' } as Aspect];
       const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect);
 
       expect(point).toHaveProperty('x', 1);
@@ -87,7 +87,9 @@ describe('getPoint', function() {
     });
 
     it('properly formats series values', function() {
-      const seriesAspect = [{ accessor: 1, format: { id: 'number', params: { pattern: '$' } } }];
+      const seriesAspect = [
+        { accessor: '1', format: { id: 'number', params: { pattern: '$' } } } as Aspect,
+      ];
       const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect);
 
       expect(point).toHaveProperty('x', 1);

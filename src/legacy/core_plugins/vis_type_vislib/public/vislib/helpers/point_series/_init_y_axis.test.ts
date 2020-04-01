@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-// @ts-ignore
 import { initYAxis } from './_init_y_axis';
+import { Chart } from './point_series';
 
 describe('initYAxis', function() {
   const baseChart = {
@@ -34,7 +34,7 @@ describe('initYAxis', function() {
         },
       ],
     },
-  };
+  } as Chart;
 
   describe('with a single y aspect', function() {
     const singleYBaseChart = _.cloneDeep(baseChart);
@@ -55,7 +55,7 @@ describe('initYAxis', function() {
 
   describe('with multiple y aspects', function() {
     it('sets the yAxisFormatter the the field formats convert fn for the first y aspect', function() {
-      const chart: any = _.cloneDeep(baseChart);
+      const chart: Chart = _.cloneDeep(baseChart);
       initYAxis(chart);
 
       expect(chart).toHaveProperty('yAxisFormat');

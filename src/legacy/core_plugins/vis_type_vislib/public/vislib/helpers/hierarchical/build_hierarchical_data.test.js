@@ -71,7 +71,7 @@ function tableVisResponseHandler(table, dimensions) {
   return converted;
 }
 
-jest.mock('../../services', () => ({
+jest.mock('../../../services', () => ({
   getFormatService: jest.fn(() => ({
     deserialize: () => ({
       convert: jest.fn(v => v),

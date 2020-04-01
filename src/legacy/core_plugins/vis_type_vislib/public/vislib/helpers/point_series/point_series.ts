@@ -23,17 +23,21 @@ import { getAspects } from './_get_aspects';
 import { initYAxis } from './_init_y_axis';
 import { initXAxis } from './_init_x_axis';
 import { orderedDateAxis } from './_ordered_date_axis';
+import { Serie } from './_add_to_siri';
 
-export interface DateParams {
+export interface DateHistogramParams {
   date: boolean;
   interval: string;
   intervalESValue: number;
   intervalESUnit: string;
   format: string;
-  bounds: {
+  bounds?: {
     min: string | number;
     max: string | number;
   };
+}
+export interface HistogramParams {
+  interval: number;
 }
 export interface FakeParams {
   defaultValue: string;
@@ -44,14 +48,14 @@ export interface Dimension {
     id?: string;
     params?: { pattern?: string; [key: string]: any };
   };
-  params: DateParams | FakeParams | {};
+  params: DateHistogramParams | HistogramParams | FakeParams | {};
 }
 
 export interface Dimensions {
-  x: Dimension;
+  x: Dimension | null;
   y: Dimension[];
-  z: Dimension[];
-  series: Dimension | Dimension[];
+  z?: Dimension[];
+  series?: Dimension | Dimension[];
 }
 export interface Aspect {
   accessor: Column['id'];
@@ -62,14 +66,13 @@ export interface Aspect {
 }
 export type Aspects = { [key in keyof Dimensions]: Aspect[] };
 
-interface Column {
+export interface Column {
   id: string | -1;
   name: string;
-  meta: object;
 }
 
 export interface Row {
-  [key: string]: number | 'NaN';
+  [key: string]: number | string;
 }
 
 export interface Table {
@@ -83,33 +86,36 @@ export interface Table {
     name: string;
   };
 }
+export interface DateHistogramOrdered {
+  interval: Duration;
+  intervalESUnit: DateHistogramParams['intervalESUnit'];
+  intervalESValue: DateHistogramParams['intervalESValue'];
+}
+export interface HistogramOrdered {
+  interval: HistogramParams['interval'];
+}
+
+type Ordered = (DateHistogramOrdered | HistogramOrdered) & {
+  date?: boolean;
+  min?: number;
+  max?: number;
+  endzones?: boolean;
+};
 
 export interface Chart {
   aspects: Aspects;
-  series?: any;
-  xAxisOrderedValues?: any;
+  series: Serie[];
+  xAxisOrderedValues?: Array<string | number>;
   xAxisFormat?: Dimension['format'];
   xAxisLabel?: Column['name'];
   yAxisFormat?: Dimension['format'];
   yAxisLabel?: Column['name'];
   zAxisFormat?: Dimension['format'];
   zAxisLabel?: Column['name'];
-  ordered: (
-    | {
-        interval: Duration;
-        intervalESUnit: DateParams['intervalESUnit'];
-        intervalESValue: DateParams['intervalESValue'];
-      }
-    | {
-        interval: DateParams['interval'];
-      }
-  ) & {
-    date?: boolean;
-    min?: number;
-    max?: number;
-    endzones?: boolean;
-  };
+  ordered?: Ordered;
 }
+
+export type OrderedChart = Chart & { ordered: Ordered };
 
 export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   const chart: Chart = {
@@ -119,8 +125,8 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   initXAxis(chart, table);
   initYAxis(chart);
 
-  if ((chart.aspects.x[0].params as DateParams).date) {
-    orderedDateAxis(chart);
+  if ((chart.aspects.x[0].params as DateHistogramParams).date) {
+    orderedDateAxis(chart as OrderedChart);
   }
 
   chart.series = getSeries(table, chart);

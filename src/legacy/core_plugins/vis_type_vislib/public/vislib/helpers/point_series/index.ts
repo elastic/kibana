@@ -17,5 +17,4 @@
  * under the License.
  */
 
-// @ts-ignore
 export { buildPointSeriesData } from './point_series';

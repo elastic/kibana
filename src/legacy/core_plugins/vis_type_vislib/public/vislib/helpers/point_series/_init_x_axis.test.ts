@@ -18,14 +18,22 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
 import { initXAxis } from './_init_x_axis';
-// @ts-ignore
 import { makeFakeXAspect } from './_fake_x_aspect';
+import {
+  Aspects,
+  Chart,
+  Column,
+  DateHistogramOrdered,
+  DateHistogramParams,
+  HistogramOrdered,
+  HistogramParams,
+  Table,
+} from './point_series';
 
 describe('initXAxis', function() {
-  let chart: any;
-  let table: any;
+  let chart: Chart;
+  let table: Table;
 
   beforeEach(function() {
     chart = {
@@ -33,15 +41,15 @@ describe('initXAxis', function() {
         x: [
           {
             ...makeFakeXAspect(),
-            accessor: 0,
+            accessor: '0',
             title: 'label',
           },
         ],
-      },
-    };
+      } as Aspects,
+    } as Chart;
 
     table = {
-      columns: [{ id: '0' }],
+      columns: [{ id: '0' } as Column],
       rows: [{ '0': 'hello' }, { '0': 'world' }, { '0': 'foo' }, { '0': 'bar' }, { '0': 'baz' }],
     };
   });
@@ -53,7 +61,7 @@ describe('initXAxis', function() {
   });
 
   it('makes the chart ordered if the agg is ordered', function() {
-    chart.aspects.x[0].params.interval = 10;
+    (chart.aspects.x[0].params as HistogramParams).interval = 10;
 
     initXAxis(chart, table);
     expect(chart).toHaveProperty('xAxisLabel', 'label');
@@ -74,7 +82,7 @@ describe('initXAxis', function() {
 
     it('only returns unique values', function() {
       table = {
-        columns: [{ id: '0' }],
+        columns: [{ id: '0' } as Column],
         rows: [
           { '0': 'hello' },
           { '0': 'world' },
@@ -94,36 +102,39 @@ describe('initXAxis', function() {
       chart = {
         aspects: {
           x: [makeFakeXAspect()],
-        },
-      };
+        } as Aspects,
+      } as Chart;
       initXAxis(chart, table);
       expect(chart.xAxisOrderedValues).toEqual(['_all']);
     });
   });
 
   it('reads the date interval param from the x agg', function() {
-    chart.aspects.x[0].params.interval = 'P1D';
-    chart.aspects.x[0].params.intervalESValue = 1;
-    chart.aspects.x[0].params.intervalESUnit = 'd';
-    chart.aspects.x[0].params.date = true;
+    const dateHistogramParams = chart.aspects.x[0].params as DateHistogramParams;
+    dateHistogramParams.interval = 'P1D';
+    dateHistogramParams.intervalESValue = 1;
+    dateHistogramParams.intervalESUnit = 'd';
+    dateHistogramParams.date = true;
     initXAxis(chart, table);
     expect(chart).toHaveProperty('xAxisLabel', 'label');
     expect(chart).toHaveProperty('xAxisFormat', chart.aspects.x[0].format);
     expect(chart).toHaveProperty('ordered');
 
-    expect(moment.isDuration(chart.ordered.interval)).toBe(true);
-    expect(chart.ordered.interval.toISOString()).toEqual('P1D');
-    expect(chart.ordered.intervalESValue).toBe(1);
-    expect(chart.ordered.intervalESUnit).toBe('d');
+    expect(chart.ordered).toEqual(expect.any(Object));
+    const { intervalESUnit, intervalESValue, interval } = chart.ordered as DateHistogramOrdered;
+    expect(moment.isDuration(interval)).toBe(true);
+    expect(interval.toISOString()).toEqual('P1D');
+    expect(intervalESValue).toBe(1);
+    expect(intervalESUnit).toBe('d');
   });
 
   it('reads the numeric interval param from the x agg', function() {
-    chart.aspects.x[0].params.interval = 0.5;
+    (chart.aspects.x[0].params as HistogramParams).interval = 0.5;
     initXAxis(chart, table);
     expect(chart).toHaveProperty('xAxisLabel', 'label');
     expect(chart).toHaveProperty('xAxisFormat', chart.aspects.x[0].format);
     expect(chart).toHaveProperty('ordered');
 
-    expect(chart.ordered.interval).toEqual(0.5);
+    expect((chart.ordered as HistogramOrdered).interval).toEqual(0.5);
   });
 });

@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-// @ts-ignore
 import { makeFakeXAspect } from './_fake_x_aspect';
 
 describe('makeFakeXAspect', function() {

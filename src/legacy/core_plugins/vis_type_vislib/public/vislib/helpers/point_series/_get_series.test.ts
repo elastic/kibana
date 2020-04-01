@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { getSeries } from './_get_series';
 import { setFormatService } from '../../../services';
+import { Chart, Column, Table, Aspect } from './point_series';
+import { Serie } from './_add_to_siri';
+import { Point } from './_get_point';
 
 describe('getSeries', function() {
   beforeAll(() => {
@@ -32,7 +34,7 @@ describe('getSeries', function() {
 
   it('produces a single series with points for each row', function() {
     const table = {
-      columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+      columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
         { '0': 1, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
@@ -40,15 +42,15 @@ describe('getSeries', function() {
         { '0': 1, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
       ],
-    };
+    } as Table;
 
     const chart = {
       aspects: {
-        x: [{ accessor: 0 }],
-        y: [{ accessor: 1, title: 'y' }],
-        z: [{ accessor: 2 }],
+        x: [{ accessor: '0' }],
+        y: [{ accessor: '1', title: 'y' }],
+        z: [{ accessor: '2' }],
       },
-    };
+    } as Chart;
 
     const series = getSeries(table, chart);
 
@@ -64,7 +66,7 @@ describe('getSeries', function() {
     expect(siri.values).toEqual(expect.any(Array));
     expect(siri.values).toHaveLength(5);
 
-    siri.values.forEach(function(point: typeof chart.aspects) {
+    siri.values.forEach(point => {
       expect(point).toHaveProperty('x', 1);
       expect(point).toHaveProperty('y', 2);
       expect(point).toHaveProperty('z', 3);
@@ -73,7 +75,7 @@ describe('getSeries', function() {
 
   it('adds the seriesId to each point', function() {
     const table = {
-      columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+      columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
         { '0': 1, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
@@ -81,32 +83,32 @@ describe('getSeries', function() {
         { '0': 1, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
       ],
-    };
+    } as Table;
 
     const chart = {
       aspects: {
-        x: [{ accessor: 0 }],
+        x: [{ accessor: '0' }],
         y: [
-          { accessor: 1, title: '0' },
-          { accessor: 2, title: '1' },
+          { accessor: '1', title: '0' },
+          { accessor: '2', title: '1' },
         ],
       },
-    };
+    } as Chart;
 
     const series = getSeries(table, chart);
 
-    series[0].values.forEach(function(point: typeof chart.aspects) {
-      expect(point).toHaveProperty('seriesId', 1);
+    series[0].values.forEach(point => {
+      expect(point).toHaveProperty('seriesId', '1');
     });
 
-    series[1].values.forEach(function(point: typeof chart.aspects) {
-      expect(point).toHaveProperty('seriesId', 2);
+    series[1].values.forEach(point => {
+      expect(point).toHaveProperty('seriesId', '2');
     });
   });
 
   it('produces multiple series if there are multiple y aspects', function() {
     const table = {
-      columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+      columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
         { '0': 1, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
@@ -114,24 +116,24 @@ describe('getSeries', function() {
         { '0': 1, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
       ],
-    };
+    } as Table;
 
     const chart = {
       aspects: {
-        x: [{ accessor: 0 }],
+        x: [{ accessor: '0' }],
         y: [
-          { accessor: 1, title: '0' },
-          { accessor: 2, title: '1' },
+          { accessor: '1', title: '0' },
+          { accessor: '2', title: '1' },
         ],
       },
-    };
+    } as Chart;
 
     const series = getSeries(table, chart);
 
     expect(series).toEqual(expect.any(Array));
     expect(series).toHaveLength(2);
 
-    series.forEach(function(siri: any, i: number) {
+    series.forEach(function(siri: Serie, i: number) {
       expect(siri).toEqual(expect.any(Object));
       expect(siri).toHaveProperty('label', '' + i);
       expect(siri).toHaveProperty('values');
@@ -139,7 +141,7 @@ describe('getSeries', function() {
       expect(siri.values).toEqual(expect.any(Array));
       expect(siri.values).toHaveLength(5);
 
-      siri.values.forEach(function(point: typeof chart.aspects) {
+      siri.values.forEach(function(point: Point) {
         expect(point).toHaveProperty('x', 1);
         expect(point).toHaveProperty('y', i + 2);
       });
@@ -148,7 +150,7 @@ describe('getSeries', function() {
 
   it('produces multiple series if there is a series aspect', function() {
     const table = {
-      columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+      columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
         { '0': 0, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
@@ -157,22 +159,22 @@ describe('getSeries', function() {
         { '0': 0, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
       ],
-    };
+    } as Table;
 
     const chart = {
       aspects: {
-        x: [{ accessor: -1 }],
-        series: [{ accessor: 0, fieldFormatter: _.identity }],
-        y: [{ accessor: 1, title: '0' }],
+        x: [{ accessor: -1 } as Aspect],
+        series: [{ accessor: '0' }],
+        y: [{ accessor: '1', title: '0' }],
       },
-    };
+    } as Chart;
 
     const series = getSeries(table, chart);
 
     expect(series).toEqual(expect.any(Array));
     expect(series).toHaveLength(2);
 
-    series.forEach(function(siri: any, i: number) {
+    series.forEach(function(siri: Serie, i: number) {
       expect(siri).toEqual(expect.any(Object));
       expect(siri).toHaveProperty('label', '' + i);
       expect(siri).toHaveProperty('values');
@@ -180,7 +182,7 @@ describe('getSeries', function() {
       expect(siri.values).toEqual(expect.any(Array));
       expect(siri.values).toHaveLength(3);
 
-      siri.values.forEach(function(point: typeof chart.aspects) {
+      siri.values.forEach(function(point: Point) {
         expect(point).toHaveProperty('y', 2);
       });
     });
@@ -188,7 +190,7 @@ describe('getSeries', function() {
 
   it('produces multiple series if there is a series aspect and multiple y aspects', function() {
     const table = {
-      columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+      columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
         { '0': 0, '1': 3, '2': 4 },
         { '0': 1, '1': 3, '2': 4 },
@@ -197,18 +199,18 @@ describe('getSeries', function() {
         { '0': 0, '1': 3, '2': 4 },
         { '0': 1, '1': 3, '2': 4 },
       ],
-    };
+    } as Table;
 
     const chart = {
       aspects: {
-        x: [{ accessor: -1 }],
-        series: [{ accessor: 0, fieldFormatter: _.identity }],
+        x: [{ accessor: -1 } as Aspect],
+        series: [{ accessor: '0' }],
         y: [
-          { accessor: 1, title: '0' },
-          { accessor: 2, title: '1' },
+          { accessor: '1', title: '0' },
+          { accessor: '2', title: '1' },
         ],
       },
-    };
+    } as Chart;
 
     const series = getSeries(table, chart);
 
@@ -220,7 +222,7 @@ describe('getSeries', function() {
     checkSiri(series[2], '1: 0', 3);
     checkSiri(series[3], '1: 1', 4);
 
-    function checkSiri(siri: any, label: string, y: number) {
+    function checkSiri(siri: Serie, label: string, y: number) {
       expect(siri).toEqual(expect.any(Object));
       expect(siri).toHaveProperty('label', label);
       expect(siri).toHaveProperty('values');
@@ -228,7 +230,7 @@ describe('getSeries', function() {
       expect(siri.values).toEqual(expect.any(Array));
       expect(siri.values).toHaveLength(3);
 
-      siri.values.forEach(function(point: typeof chart.aspects) {
+      siri.values.forEach(function(point: Point) {
         expect(point).toHaveProperty('y', y);
       });
     }
@@ -236,7 +238,7 @@ describe('getSeries', function() {
 
   it('produces a series list in the same order as its corresponding metric column', function() {
     const table = {
-      columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+      columns: [{ id: '0' }, { id: '1' }, { id: '3' }] as Column[],
       rows: [
         { '0': 0, '1': 2, '2': 3 },
         { '0': 1, '1': 2, '2': 3 },
@@ -244,18 +246,18 @@ describe('getSeries', function() {
         { '0': 1, '1': 2, '2': 3 },
         { '0': 0, '1': 2, '2': 3 },
       ],
-    };
+    } as Table;
 
     const chart = {
       aspects: {
-        x: [{ accessor: -1 }],
-        series: [{ accessor: 0, fieldFormatter: _.identity }],
+        x: [{ accessor: -1 } as Aspect],
+        series: [{ accessor: '0' }],
         y: [
-          { accessor: 1, title: '0' },
-          { accessor: 2, title: '1' },
+          { accessor: '1', title: '0' },
+          { accessor: '2', title: '1' },
         ],
       },
-    };
+    } as Chart;
 
     const series = getSeries(table, chart);
     expect(series[0]).toHaveProperty('label', '0: 0');

@@ -17,14 +17,14 @@
  * under the License.
  */
 
-// @ts-ignore
 import { getAspects } from './_get_aspects';
+import { Dimension, Dimensions, Table, Row, Aspect } from './point_series';
 
 describe('getAspects', function() {
-  let table: any;
-  let dimensions: any;
+  let table: Table;
+  let dimensions: Dimensions;
 
-  function validate(aspect: any, i: string) {
+  function validate(aspect: Aspect, i: string) {
     expect(aspect).toEqual(expect.any(Object));
     expect(aspect).toHaveProperty('accessor', i);
   }
@@ -32,21 +32,21 @@ describe('getAspects', function() {
   function init(group: number, x: number | null, y: number) {
     table = {
       columns: [
-        { id: '0', title: 'date' }, // date
-        { id: '1', title: 'date utc_time' }, // date
-        { id: '2', title: 'ext' }, // extension
-        { id: '3', title: 'geo.src' }, // extension
-        { id: '4', title: 'count' }, // count
-        { id: '5', title: 'avg bytes' }, // avg
+        { id: '0', name: 'date' }, // date
+        { id: '1', name: 'date utc_time' }, // date
+        { id: '2', name: 'ext' }, // extension
+        { id: '3', name: 'geo.src' }, // extension
+        { id: '4', name: 'count' }, // count
+        { id: '5', name: 'avg bytes' }, // avg
       ],
-      rows: [],
-    };
+      rows: [] as Row[],
+    } as Table;
 
     dimensions = {
-      x: { accessor: x },
-      y: { accessor: y },
-      series: { accessor: group },
-    };
+      x: { accessor: x } as Dimension,
+      y: [{ accessor: y } as Dimension],
+      series: { accessor: group } as Dimension,
+    } as Dimensions;
   }
 
   it('produces an aspect object for each of the aspect types found in the columns', function() {
@@ -54,7 +54,7 @@ describe('getAspects', function() {
 
     const aspects = getAspects(table, dimensions);
     validate(aspects.x[0], '0');
-    validate(aspects.series[0], '1');
+    validate(aspects.series![0], '1');
     validate(aspects.y[0], '2');
   });
 

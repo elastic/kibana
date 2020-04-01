@@ -17,31 +17,33 @@
  * under the License.
  */
 
-// @ts-ignore
-import { addToSiri } from './_add_to_siri';
+import { addToSiri, Serie } from './_add_to_siri';
+import { Point } from './_get_point';
+import { Dimension } from './point_series';
 
 describe('addToSiri', function() {
   it('creates a new series the first time it sees an id', function() {
-    const series = new Map();
-    const point = {};
+    const series = new Map<string, Serie>();
+    const point = {} as Point;
     const id = 'id';
     addToSiri(series, point, id, id, { id });
 
+    const expectedSerie = series.get(id) as Serie;
     expect(series.has(id)).toBe(true);
-    expect(series.get(id)).toEqual(expect.any(Object));
-    expect(series.get(id).label).toBe(id);
-    expect(series.get(id).values).toHaveLength(1);
-    expect(series.get(id).values[0]).toBe(point);
+    expect(expectedSerie).toEqual(expect.any(Object));
+    expect(expectedSerie.label).toBe(id);
+    expect(expectedSerie.values).toHaveLength(1);
+    expect(expectedSerie.values[0]).toBe(point);
   });
 
   it('adds points to existing series if id has been seen', function() {
     const series = new Map();
     const id = 'id';
 
-    const point = {};
+    const point = {} as Point;
     addToSiri(series, point, id, id, { id });
 
-    const point2 = {};
+    const point2 = {} as Point;
     addToSiri(series, point2, id, id, { id });
 
     expect(series.has(id)).toBe(true);
@@ -56,7 +58,7 @@ describe('addToSiri', function() {
     const series = new Map();
     const id = 'id';
     const label = 'label';
-    const point = {};
+    const point = {} as Point;
     addToSiri(series, point, id, label, { id });
 
     expect(series.has(id)).toBe(true);
@@ -70,8 +72,8 @@ describe('addToSiri', function() {
     const series = new Map();
     const id = 'id-id2';
 
-    const point = {};
-    addToSiri(series, point, id);
+    const point = {} as Point;
+    addToSiri(series, point, id, undefined, {} as Dimension['format']);
 
     expect(series.has(id)).toBe(true);
     expect(series.get(id)).toEqual(expect.any(Object));

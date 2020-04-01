@@ -20,6 +20,7 @@
 import moment from 'moment';
 import _ from 'lodash';
 import { orderedDateAxis } from './_ordered_date_axis';
+import { DateHistogramParams, OrderedChart } from './point_series';
 
 describe('orderedDateAxis', function() {
   const baseArgs = {
@@ -45,7 +46,7 @@ describe('orderedDateAxis', function() {
           },
         ],
       },
-    },
+    } as OrderedChart,
   };
 
   describe('ordered object', function() {
@@ -67,7 +68,7 @@ describe('orderedDateAxis', function() {
 
     it('does not set the min/max when the buckets are unbounded', function() {
       const args = _.cloneDeep(baseArgs);
-      args.chart.aspects.x[0].params.bounds = null as any;
+      (args.chart.aspects.x[0].params as DateHistogramParams).bounds = undefined;
       orderedDateAxis(args.chart);
       expect(args.chart.ordered).not.toHaveProperty('min');
       expect(args.chart.ordered).not.toHaveProperty('max');

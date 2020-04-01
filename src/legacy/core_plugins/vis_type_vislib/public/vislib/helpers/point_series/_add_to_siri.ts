@@ -35,7 +35,7 @@ export function addToSiri(
   series: Map<string, Serie>,
   point: Point,
   id: string,
-  yLabel: string,
+  yLabel: string | undefined | null,
   yFormat: Dimension['format'],
   zFormat?: Dimension['format'],
   zLabel?: string

@@ -45,15 +45,16 @@ export interface Point {
   };
   parent: Aspect | null;
   series?: string;
+  seriesId?: string;
 }
 export function getPoint(
   table: Table,
   x: Aspect,
-  series: Aspect[],
+  series: Aspect[] | undefined,
   row: Row,
   rowIndex: number,
   y: Aspect,
-  z: Aspect
+  z?: Aspect
 ): Point | undefined {
   const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
   const yRow = row[y.accessor];

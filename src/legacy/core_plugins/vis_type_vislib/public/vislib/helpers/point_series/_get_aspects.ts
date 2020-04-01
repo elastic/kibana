@@ -44,7 +44,7 @@ export function getAspects(table: Table, dimensions: Dimensions) {
       if (!aspects[name]) {
         aspects[name] = [];
       }
-      aspects[name].push({
+      aspects[name]!.push({
         accessor: column.id,
         column: d.accessor,
         title: column.name,

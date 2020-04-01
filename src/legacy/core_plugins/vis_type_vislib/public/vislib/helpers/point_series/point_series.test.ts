@@ -18,8 +18,9 @@
  */
 
 import _ from 'lodash';
-import { buildPointSeriesData } from './point_series';
+import { buildPointSeriesData, Column, Dimensions, Table } from './point_series';
 import { setFormatService } from '../../../services';
+import { Serie } from './_add_to_siri';
 
 describe('pointSeriesChartDataFromTable', function() {
   beforeAll(() => {
@@ -32,9 +33,9 @@ describe('pointSeriesChartDataFromTable', function() {
 
   it('handles a table with just a count', function() {
     const table = {
-      columns: [{ id: '0' }],
+      columns: [{ id: '0' } as Column],
       rows: [{ '0': 100 }],
-    };
+    } as Table;
     const chartData = buildPointSeriesData(table, {
       y: [
         {
@@ -42,7 +43,7 @@ describe('pointSeriesChartDataFromTable', function() {
           params: {},
         },
       ],
-    });
+    } as Dimensions);
 
     expect(chartData).toEqual(expect.any(Object));
     expect(chartData.series).toEqual(expect.any(Array));
@@ -64,12 +65,12 @@ describe('pointSeriesChartDataFromTable', function() {
         { '0': 2, '1': 200 },
         { '0': 3, '1': 200 },
       ],
-    };
+    } as Table;
 
     const dimensions = {
-      x: [{ accessor: 0, params: {} }],
+      x: { accessor: 0, params: {} },
       y: [{ accessor: 1, params: {} }],
-    };
+    } as Dimensions;
 
     const chartData = buildPointSeriesData(table, dimensions);
 
@@ -89,21 +90,21 @@ describe('pointSeriesChartDataFromTable', function() {
         { '0': 2, '1': 200, '2': 300 },
         { '0': 3, '1': 200, '2': 300 },
       ],
-    };
+    } as Table;
 
     const dimensions = {
-      x: [{ accessor: 0, params: {} }],
+      x: { accessor: 0, params: {} },
       y: [
         { accessor: 1, params: {} },
         { accessor: 2, params: {} },
       ],
-    };
+    } as Dimensions;
 
     const chartData = buildPointSeriesData(table, dimensions);
     expect(chartData).toEqual(expect.any(Object));
     expect(chartData.series).toEqual(expect.any(Array));
     expect(chartData.series).toHaveLength(2);
-    chartData.series.forEach(function(siri: any, i: number) {
+    chartData.series.forEach(function(siri: Serie, i: number) {
       expect(siri).toHaveProperty('label', `Count-${i}`);
       expect(siri.values).toHaveLength(3);
     });
@@ -126,20 +127,20 @@ describe('pointSeriesChartDataFromTable', function() {
     };
 
     const dimensions = {
-      x: [{ accessor: 0, params: {} }],
+      x: { accessor: 0, params: {} },
       series: [{ accessor: 1, params: {} }],
       y: [
         { accessor: 2, params: {} },
         { accessor: 3, params: {} },
       ],
-    };
+    } as Dimensions;
 
     const chartData = buildPointSeriesData(table, dimensions);
     expect(chartData).toEqual(expect.any(Object));
     expect(chartData.series).toEqual(expect.any(Array));
     // one series for each extension, and then one for each metric inside
     expect(chartData.series).toHaveLength(4);
-    chartData.series.forEach(function(siri: any) {
+    chartData.series.forEach(function(siri: Serie) {
       expect(siri.values).toHaveLength(2);
     });
   });

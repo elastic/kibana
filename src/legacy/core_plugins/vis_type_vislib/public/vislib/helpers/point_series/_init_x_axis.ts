@@ -19,7 +19,7 @@
 
 import { uniq } from 'lodash';
 import moment from 'moment';
-import { Chart, Table, FakeParams, DateParams } from './point_series';
+import { Chart, Table, FakeParams, DateHistogramParams, HistogramParams } from './point_series';
 
 export function initXAxis(chart: Chart, table: Table) {
   const { format, title, params, accessor } = chart.aspects.x[0];
@@ -31,10 +31,10 @@ export function initXAxis(chart: Chart, table: Table) {
   chart.xAxisFormat = format;
   chart.xAxisLabel = title;
 
-  const { interval, date } = params as DateParams;
+  const { interval, date } = params as DateHistogramParams;
   if (interval) {
     if (date) {
-      const { intervalESUnit, intervalESValue } = params as DateParams;
+      const { intervalESUnit, intervalESValue } = params as DateHistogramParams;
       chart.ordered = {
         interval: moment.duration(interval),
         intervalESUnit,
@@ -42,7 +42,7 @@ export function initXAxis(chart: Chart, table: Table) {
       };
     } else {
       chart.ordered = {
-        interval,
+        interval: (params as HistogramParams).interval,
       };
     }
   }

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Chart, DateParams } from './point_series';
+import { DateHistogramParams, OrderedChart } from './point_series';
 
-export function orderedDateAxis(chart: Chart) {
+export function orderedDateAxis(chart: OrderedChart) {
   const x = chart.aspects.x[0];
-  const { bounds } = x.params as DateParams;
+  const { bounds } = x.params as DateHistogramParams;
 
   chart.ordered.date = true;
 
