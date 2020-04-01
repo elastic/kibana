@@ -53,7 +53,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
     point_size: '',
     value_template: '{{value}}',
     offset_time: '',
-    split_color_mode: 'gradient',
+    split_color_mode: 'rainbow',
     axis_min: '',
     axis_max: '',
     stacked: STACKED_OPTIONS.NONE,
@@ -140,17 +140,17 @@ export const TimeseriesConfig = injectI18n(function(props) {
   const splitColorOptions = [
     {
       label: intl.formatMessage({
-        id: 'visTypeTimeseries.timeSeries.gradientLabel',
-        defaultMessage: 'Gradient',
-      }),
-      value: 'gradient',
-    },
-    {
-      label: intl.formatMessage({
         id: 'visTypeTimeseries.timeSeries.rainbowLabel',
         defaultMessage: 'Rainbow',
       }),
       value: 'rainbow',
+    },
+    {
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.gradientLabel',
+        defaultMessage: 'Gradient',
+      }),
+      value: 'gradient',
     },
   ];
   const selectedSplitColorOption = splitColorOptions.find(option => {
