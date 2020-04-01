@@ -32,7 +32,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover field visualize button', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/61714
+  describe.skip('discover field visualize button', () => {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
