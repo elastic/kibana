@@ -6,7 +6,7 @@
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { ISource } from './sources/source';
 import { DataRequest } from './util/data_request';
-import { SyncContext } from '../../../../legacy/plugins/maps/public/actions/map_actions';
+import { SyncContext } from '../actions/map_actions';
 
 export interface ILayer {
   getDataRequest(id: string): DataRequest | undefined;

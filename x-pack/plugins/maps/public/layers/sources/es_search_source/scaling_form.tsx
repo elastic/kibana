@@ -32,7 +32,7 @@ import {
 // @ts-ignore
 import { loadIndexSettings } from './load_index_settings';
 import { IFieldType } from '../../../../../../../src/plugins/data/public';
-import { OnSourceChangeArgs } from '../../../../../../legacy/plugins/maps/public/connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
 
 interface Props {
   filterByMapBounds: boolean;

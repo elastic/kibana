@@ -20,6 +20,7 @@ import {
   setTimeFilter,
   setToasts,
   setUiSettings,
+  // @ts-ignore
 } from './kibana_services';
 
 export interface MapsPluginSetupDependencies {
@@ -38,7 +39,6 @@ export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   setHttp(http);
   setUiSettings(core.uiSettings);
   setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-  npSetInjectedVarFunc(core.injectedMetadata.getInjectedVar);
   setToasts(core.notifications.toasts);
 };
 

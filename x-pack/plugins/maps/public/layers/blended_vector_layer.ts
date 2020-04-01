@@ -28,7 +28,7 @@ import { IVectorLayer, VectorLayerArguments } from './vector_layer';
 import { IESSource } from './sources/es_source';
 import { IESAggSource } from './sources/es_agg_source';
 import { ISource } from './sources/source';
-import { SyncContext } from '../../../../legacy/plugins/maps/public/actions/map_actions';
+import { SyncContext } from '../actions/map_actions';
 import { DataRequestAbortError } from './util/data_request';
 import {
   VectorStyleDescriptor,
