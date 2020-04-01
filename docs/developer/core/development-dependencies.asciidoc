@@ -96,7 +96,7 @@ module.exports = window.angular;
 
 What this shim does is fairly simple if you go line by line:
 
-. makes sure that jQuery is loaded before angular (which actually runs the shim above)
+. makes sure that jQuery is loaded before angular (which actually runs the shim)
 . load the angular.js file from the node_modules directory
 . load the angular-elastic plugin, a plugin we want to always be included whenever we import angular
 . use the `ui/modules` module to add the module exported by angular-elastic as a dependency to the `kibana` angular module

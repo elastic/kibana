@@ -31,21 +31,16 @@ import { CONTEXT_MENU_TRIGGER } from './embeddable_api';
 
 const REACT_ROOT_ID = 'embeddableExplorerRoot';
 
-import {
-  SayHelloAction,
-  createSendMessageAction,
-  ContactCardEmbeddableFactory,
-} from './embeddable_api';
+import { SayHelloAction, createSendMessageAction } from './embeddable_api';
 import { App } from './app';
 import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
-import { HelloWorldEmbeddableFactory } from '../../../../../../../examples/embeddable_examples/public';
 import {
-  IEmbeddableStart,
-  IEmbeddableSetup,
+  EmbeddableStart,
+  EmbeddableSetup,
 } from '.../../../../../../../src/plugins/embeddable/public';
 
 export interface SetupDependencies {
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   inspector: InspectorSetupContract;
   __LEGACY: {
     ExitFullScreenButton: React.ComponentType<any>;
@@ -53,7 +48,7 @@ export interface SetupDependencies {
 }
 
 interface StartDependencies {
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {
@@ -74,27 +69,12 @@ export class EmbeddableExplorerPublicPlugin
     const helloWorldAction = createHelloWorldAction(core.overlays);
     const sayHelloAction = new SayHelloAction(alert);
     const sendMessageAction = createSendMessageAction(core.overlays);
-    const helloWorldEmbeddableFactory = new HelloWorldEmbeddableFactory();
-    const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-      {},
-      plugins.uiActions.executeTriggerActions,
-      core.overlays
-    );
 
     plugins.uiActions.registerAction(helloWorldAction);
     plugins.uiActions.registerAction(sayHelloAction);
     plugins.uiActions.registerAction(sendMessageAction);
 
     plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
-
-    plugins.embeddable.registerEmbeddableFactory(
-      helloWorldEmbeddableFactory.type,
-      helloWorldEmbeddableFactory
-    );
-    plugins.embeddable.registerEmbeddableFactory(
-      contactCardEmbeddableFactory.type,
-      contactCardEmbeddableFactory
-    );
 
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);

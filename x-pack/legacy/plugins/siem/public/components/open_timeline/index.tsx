@@ -52,7 +52,10 @@ interface OwnProps<TCache = object> {
 }
 
 export type OpenTimelineOwnProps = OwnProps &
-  Pick<OpenTimelineProps, 'defaultPageSize' | 'title'> &
+  Pick<
+    OpenTimelineProps,
+    'defaultPageSize' | 'title' | 'importDataModalToggle' | 'setImportDataModalToggle'
+  > &
   PropsFromRedux;
 
 /** Returns a collection of selected timeline ids */
@@ -74,7 +77,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     defaultPageSize,
     hideActions = [],
     isModal = false,
+    importDataModalToggle,
     onOpenTimeline,
+    setImportDataModalToggle,
     timeline,
     title,
     updateTimeline,
@@ -256,7 +261,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
         onlyUserFavorite={onlyFavorites}
       >
-        {({ timelines, loading, totalCount }) => {
+        {({ timelines, loading, totalCount, refetch }) => {
           return !isModal ? (
             <OpenTimeline
               data-test-subj={'open-timeline'}
@@ -264,6 +269,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               defaultPageSize={defaultPageSize}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+              importDataModalToggle={importDataModalToggle}
               onAddTimelinesToFavorites={undefined}
               onDeleteSelected={onDeleteSelected}
               onlyFavorites={onlyFavorites}
@@ -276,7 +282,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               pageIndex={pageIndex}
               pageSize={pageSize}
               query={search}
+              refetch={refetch}
               searchResults={timelines}
+              setImportDataModalToggle={setImportDataModalToggle}
               selectedItems={selectedItems}
               sortDirection={sortDirection}
               sortField={sortField}

@@ -3,8 +3,11 @@
   "server": true,
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "apm"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
   "ui": false,
   "requiredPlugins": ["apm_oss", "data", "home", "licensing"],
-  "optionalPlugins": ["cloud", "usageCollection"]
+  "optionalPlugins": ["cloud", "usageCollection", "taskManager","actions", "alerting"]
 }

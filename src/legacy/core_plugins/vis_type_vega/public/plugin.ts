@@ -20,7 +20,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 import {
   setNotifications,
   setData,
@@ -84,9 +84,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 
-    visualizations.types.createBaseVisualization(
-      createVegaTypeDefinition(visualizationDependencies)
-    );
+    visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
   }
 
   public start(core: CoreStart, { data }: VegaPluginStartDependencies) {

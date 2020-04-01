@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
-import { parseInterval } from '../../../../../legacy/plugins/ml/common/util/parse_interval';
-import { CombinedJob } from '../../../../../legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 // @ts-ignore
 import { validateJobObject } from './validate_job_object';
 

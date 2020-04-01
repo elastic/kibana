@@ -25,6 +25,7 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
@@ -35,6 +36,11 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'long_window_logstash',
+      ]);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');
       await esArchiver.load('visualize');
@@ -56,6 +62,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.unload('long_window_logstash');
       await esArchiver.unload('visualize');
       await esArchiver.unload('discover');
+      await security.testUser.restoreDefaults();
     });
 
     it('should visualize monthly data with different day intervals', async () => {

@@ -5,3 +5,4 @@
  */
 export { DefaultLayout } from './default';
 export { WithHeaderLayout } from './with_header';
+export { WithoutHeaderLayout } from './without_header';

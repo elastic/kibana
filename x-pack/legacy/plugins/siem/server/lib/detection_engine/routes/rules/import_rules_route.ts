@@ -24,6 +24,7 @@ import {
   isImportRegular,
   transformError,
   buildSiemResponse,
+  validateLicenseForRuleType,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
@@ -54,28 +55,29 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
       },
     },
     async (context, request, response) => {
-      const alertsClient = context.alerting.getAlertsClient();
-      const actionsClient = context.actions.getActionsClient();
-      const clusterClient = context.core.elasticsearch.dataClient;
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.siem.getSiemClient();
       const siemResponse = buildSiemResponse(response);
 
-      if (!actionsClient || !alertsClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-
-      const { filename } = request.body.file.hapi;
-      const fileExtension = extname(filename).toLowerCase();
-      if (fileExtension !== '.ndjson') {
-        return siemResponse.error({
-          statusCode: 400,
-          body: `Invalid file extension ${fileExtension}`,
-        });
-      }
-
-      const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       try {
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.siem?.getSiemClient();
+
+        if (!siemClient || !actionsClient || !alertsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const { filename } = request.body.file.hapi;
+        const fileExtension = extname(filename).toLowerCase();
+        if (fileExtension !== '.ndjson') {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `Invalid file extension ${fileExtension}`,
+          });
+        }
+
+        const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
         const readStream = createRulesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
           request.body.file,
@@ -107,6 +109,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     return null;
                   }
                   const {
+                    anomaly_threshold: anomalyThreshold,
                     description,
                     enabled,
                     false_positives: falsePositives,
@@ -114,6 +117,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     immutable,
                     query,
                     language,
+                    machine_learning_job_id: machineLearningJobId,
                     output_index: outputIndex,
                     saved_id: savedId,
                     meta,
@@ -130,11 +134,19 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     to,
                     type,
                     references,
+                    note,
                     timeline_id: timelineId,
                     timeline_title: timelineTitle,
                     version,
+                    lists,
                   } = parsedRule;
+
                   try {
+                    validateLicenseForRuleType({
+                      license: context.licensing.license,
+                      ruleType: type,
+                    });
+
                     const signalsIndex = siemClient.signalsIndex;
                     const indexExists = await getIndexExists(
                       clusterClient.callAsCurrentUser,
@@ -154,6 +166,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                       await createRules({
                         alertsClient,
                         actionsClient,
+                        anomalyThreshold,
                         description,
                         enabled,
                         falsePositives,
@@ -161,6 +174,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         immutable,
                         query,
                         language,
+                        machineLearningJobId,
                         outputIndex: signalsIndex,
                         savedId,
                         timelineId,
@@ -179,7 +193,9 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         type,
                         threat,
                         references,
+                        note,
                         version,
+                        lists,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null && request.query.overwrite) {
@@ -213,7 +229,11 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         type,
                         threat,
                         references,
+                        note,
                         version,
+                        lists,
+                        anomalyThreshold,
+                        machineLearningJobId,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
                     } else if (rule != null) {

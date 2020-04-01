@@ -23,6 +23,10 @@ import { functionWrapper } from '../../../../plugins/expressions/common/expressi
 
 jest.mock('ui/new_platform');
 
+jest.mock('../../vis_default_editor/public', () => ({
+  Schemas: class {},
+}));
+
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(createMetricVisFn());
   const context = {

@@ -13,7 +13,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../components/detection_engine/utility_bar';
+} from '../../../../components/utility_bar';
 import { columns } from './columns';
 import { ColumnTypes, PageTypes, SortTypes } from './types';
 

@@ -18,17 +18,17 @@
  */
 import { i18n } from '@kbn/i18n';
 import semver from 'semver';
-import { GridData } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
-
 import uuid from 'uuid';
 import {
+  GridData,
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
-} from './types';
+} from '../../../../../../plugins/dashboard/public';
+
 import {
   SavedDashboardPanelTo60,
   SavedDashboardPanel620,
@@ -113,7 +113,7 @@ function migratePre61PanelToLatest(
     ? PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS
     : PANEL_HEIGHT_SCALE_FACTOR;
 
-  // These are snapshotted here instead of imported form dashboard_embeddable_container because
+  // These are snapshotted here instead of imported from dashboard because
   // this function is called from both client and server side, and having an import from a public
   // folder will cause errors for the server side version.  Also, this is only run for the point in time
   // from panels created in < 7.3 so maybe using a snapshot of the default values when this migration was

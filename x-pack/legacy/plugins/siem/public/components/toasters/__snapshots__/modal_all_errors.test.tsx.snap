@@ -21,6 +21,7 @@ exports[`Modal all errors rendering it renders the default all errors modal when
         size="s"
       />
       <EuiAccordion
+        arrowDisplay="left"
         buttonContent="Error 1, Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt u ..."
         data-test-subj="modal-all-errors-accordion"
         id="accordion1"

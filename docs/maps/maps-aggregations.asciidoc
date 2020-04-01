@@ -2,10 +2,25 @@
 [[maps-aggregations]]
 == Plot big data without plotting too much data
 
-Use {ref}/search-aggregations.html[aggregations] to plot large data sets without overwhemling your network or your browser.
+Use {ref}/search-aggregations.html[aggregations] to plot large data sets without overwhelming your network or your browser.
+When using aggregations, the documents stay in Elasticsearch and only the calculated values for each group are returned to your computer.
 
 Aggregations group your documents into buckets and calculate metrics for each bucket.
-Your documents stay in Elasticsearch and only the metrics for each group are returned to your computer.
+Use metric aggregations for <<maps-vector-style-data-driven, data driven styling>>. For example, use the count aggregation to shade world countries by web log traffic.
+
+You can add the following metric aggregations:
+
+* *Average.* The mean of the values.
+
+* *Count.* The number of documents.
+
+* *Max.* The highest value.
+
+* *Min.* The lowest value.
+
+* *Sum.* The total value.
+
+* *Unique count.* The number of distinct values.
 
 Use aggregated layers with document layers to show aggregated views when the map shows larger
 amounts of the globe and individual documents when the map shows smaller regions.

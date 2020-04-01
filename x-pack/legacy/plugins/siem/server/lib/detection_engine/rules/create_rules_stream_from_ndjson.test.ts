@@ -7,6 +7,7 @@ import { Readable } from 'stream';
 import { createRulesStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from 'src/legacy/utils/streams';
 import { ImportRuleAlertRest } from '../types';
+import { BadRequestError } from '../errors/bad_request_error';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -48,6 +49,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -64,13 +66,16 @@ describe('create_rules_stream_from_ndjson', () => {
           immutable: false,
           query: '',
           language: 'kuery',
+          lists: [],
           max_signals: 100,
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -87,9 +92,11 @@ describe('create_rules_stream_from_ndjson', () => {
           immutable: false,
           query: '',
           language: 'kuery',
+          lists: [],
           max_signals: 100,
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -132,6 +139,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -150,11 +158,14 @@ describe('create_rules_stream_from_ndjson', () => {
           language: 'kuery',
           max_signals: 100,
           tags: [],
+          lists: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -172,8 +183,10 @@ describe('create_rules_stream_from_ndjson', () => {
           query: '',
           language: 'kuery',
           max_signals: 100,
+          lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -199,6 +212,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -216,12 +230,15 @@ describe('create_rules_stream_from_ndjson', () => {
           query: '',
           language: 'kuery',
           max_signals: 100,
+          lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -239,8 +256,10 @@ describe('create_rules_stream_from_ndjson', () => {
           query: '',
           language: 'kuery',
           max_signals: 100,
+          lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -266,6 +285,7 @@ describe('create_rules_stream_from_ndjson', () => {
       ]);
       const resultOrError = result as Error[];
       expect(resultOrError[0]).toEqual({
+        actions: [],
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -283,13 +303,16 @@ describe('create_rules_stream_from_ndjson', () => {
         query: '',
         language: 'kuery',
         max_signals: 100,
+        lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
       expect(resultOrError[1].message).toEqual('Unexpected token , in JSON at position 1');
       expect(resultOrError[2]).toEqual({
+        actions: [],
         rule_id: 'rule-2',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -307,8 +330,10 @@ describe('create_rules_stream_from_ndjson', () => {
         query: '',
         language: 'kuery',
         max_signals: 100,
+        lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -331,8 +356,9 @@ describe('create_rules_stream_from_ndjson', () => {
         ndJsonStream,
         ...rulesObjectsStream,
       ]);
-      const resultOrError = result as TypeError[];
+      const resultOrError = result as BadRequestError[];
       expect(resultOrError[0]).toEqual({
+        actions: [],
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -350,8 +376,10 @@ describe('create_rules_stream_from_ndjson', () => {
         query: '',
         language: 'kuery',
         max_signals: 100,
+        lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -359,6 +387,7 @@ describe('create_rules_stream_from_ndjson', () => {
         'child "description" fails because ["description" is required]'
       );
       expect(resultOrError[2]).toEqual({
+        actions: [],
         rule_id: 'rule-2',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -376,14 +405,16 @@ describe('create_rules_stream_from_ndjson', () => {
         query: '',
         language: 'kuery',
         max_signals: 100,
+        lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
     });
 
-    test('non validated data is an instanceof TypeError', async () => {
+    test('non validated data is an instanceof BadRequestError', async () => {
       const sample1 = getOutputSample();
       const sample2 = getOutputSample();
       sample2.rule_id = 'rule-2';
@@ -400,8 +431,8 @@ describe('create_rules_stream_from_ndjson', () => {
         ndJsonStream,
         ...rulesObjectsStream,
       ]);
-      const resultOrError = result as TypeError[];
-      expect(resultOrError[1] instanceof TypeError).toEqual(true);
+      const resultOrError = result as BadRequestError[];
+      expect(resultOrError[1] instanceof BadRequestError).toEqual(true);
     });
   });
 });

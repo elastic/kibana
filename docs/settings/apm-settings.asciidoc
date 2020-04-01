@@ -32,7 +32,7 @@ image::settings/images/apm-settings.png[APM app settings in Kibana]
 // tag::general-apm-settings[]
 
 If you'd like to change any of the default values,
-copy and paste the relevant settings below into your `kibana.yml` configuration file.
+copy and paste the relevant settings into your `kibana.yml` configuration file.
 
 xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 `true`.

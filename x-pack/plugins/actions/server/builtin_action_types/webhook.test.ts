@@ -12,7 +12,7 @@ import { getActionType } from './webhook';
 import { ActionType, Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import axios from 'axios';
@@ -104,8 +104,8 @@ describe('config validation', () => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [method]: types that failed validation:
-- [method.0]: expected value to equal [post] but got [https]
-- [method.1]: expected value to equal [put] but got [https]"
+- [method.0]: expected value to equal [post]
+- [method.1]: expected value to equal [put]"
 `);
   });
 
@@ -141,8 +141,8 @@ describe('config validation', () => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [headers]: types that failed validation:
-- [headers.0]: could not parse record value from [application/json]
-- [headers.1]: expected value to equal [null] but got [application/json]"
+- [headers.0]: could not parse record value from json input
+- [headers.1]: expected value to equal [null]"
 `);
   });
 
@@ -164,7 +164,7 @@ describe('config validation', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: _ => {
           throw new Error(`target url is not whitelisted`);
         },
@@ -207,7 +207,7 @@ describe('execute()', () => {
     axiosRequestMock.mockReset();
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: configUtilsMock,
+      configurationUtilities: actionsConfigMock.create(),
     });
   });
 

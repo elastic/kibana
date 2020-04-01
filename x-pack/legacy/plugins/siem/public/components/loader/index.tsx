@@ -62,7 +62,7 @@ export const Loader = React.memo<LoaderProps>(({ children, overlay, overlayBackg
   <Aside overlay={overlay} overlayBackground={overlayBackground}>
     <FlexGroup overlay={{ overlay }}>
       <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size={size} />
+        <EuiLoadingSpinner data-test-subj="loading-spinner" size={size} />
       </EuiFlexItem>
 
       {children && (

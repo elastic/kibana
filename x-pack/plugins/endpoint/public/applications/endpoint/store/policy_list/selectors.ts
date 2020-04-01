@@ -15,3 +15,5 @@ export const selectPageSize = (state: PolicyListState) => state.pageSize;
 export const selectTotal = (state: PolicyListState) => state.total;
 
 export const selectIsLoading = (state: PolicyListState) => state.isLoading;
+
+export const selectApiError = (state: PolicyListState) => state.apiError;

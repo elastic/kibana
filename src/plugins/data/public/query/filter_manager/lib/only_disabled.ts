@@ -18,8 +18,7 @@
  */
 
 import { filter } from 'lodash';
-import { Filter } from '../../../../common';
-import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
+import { Filter, compareFilters, COMPARE_ALL_OPTIONS } from '../../../../common';
 
 const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;
 

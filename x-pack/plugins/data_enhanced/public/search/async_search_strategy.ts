@@ -6,6 +6,7 @@
 
 import { EMPTY, fromEvent, NEVER, Observable, throwError, timer } from 'rxjs';
 import { mergeMap, expand, takeUntil } from 'rxjs/operators';
+import { AbortError } from '../../../../../src/plugins/data/common';
 import {
   IKibanaSearchResponse,
   ISearchContext,
@@ -45,10 +46,7 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
               if (id !== undefined) {
                 context.core.http.delete(`/internal/search/${request.serverStrategy}/${id}`);
               }
-
-              const error = new Error('Aborted');
-              error.name = 'AbortError';
-              return throwError(error);
+              return throwError(new AbortError());
             })
           )
         : NEVER;

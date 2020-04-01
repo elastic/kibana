@@ -13,6 +13,7 @@ import {
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../__mocks__';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -38,6 +39,14 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
 });
 
 describe('get_prepackaged_rule_status_route', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -58,7 +67,7 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getAlertsClient = jest.fn();
+      context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

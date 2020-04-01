@@ -12,6 +12,6 @@ export const plugin = (ctx: PluginInitializerContext) => new SnapshotRestoreServ
 export const config: PluginConfigDescriptor<SnapshotRestoreConfig> = {
   schema: configSchema,
   exposeToBrowser: {
-    slmUi: true,
+    slm_ui: true,
   },
 };

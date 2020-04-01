@@ -10,9 +10,9 @@ import { render } from '@testing-library/react';
 import { APMError } from '../../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument,
-  MockApmPluginContextWrapper
+  expectTextsNotInDocument
 } from '../../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
   wrapper: MockApmPluginContextWrapper

@@ -19,9 +19,11 @@ import {
   createBulkErrorObject,
   buildRouteValidation,
   buildSiemResponse,
+  validateLicenseForRuleType,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const createRulesBulkRoute = (router: IRouter) => {
   router.post(
@@ -35,13 +37,14 @@ export const createRulesBulkRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const alertsClient = context.alerting.getAlertsClient();
-      const actionsClient = context.actions.getActionsClient();
-      const clusterClient = context.core.elasticsearch.dataClient;
-      const siemClient = context.siem.getSiemClient();
       const siemResponse = buildSiemResponse(response);
+      const alertsClient = context.alerting?.getAlertsClient();
+      const actionsClient = context.actions?.getActionsClient();
+      const clusterClient = context.core.elasticsearch.dataClient;
+      const savedObjectsClient = context.core.savedObjects.client;
+      const siemClient = context.siem?.getSiemClient();
 
-      if (!actionsClient || !alertsClient) {
+      if (!siemClient || !actionsClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -53,12 +56,15 @@ export const createRulesBulkRoute = (router: IRouter) => {
           .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async payloadRule => {
             const {
+              actions,
+              anomaly_threshold: anomalyThreshold,
               description,
               enabled,
               false_positives: falsePositives,
               from,
               query,
               language,
+              machine_learning_job_id: machineLearningJobId,
               output_index: outputIndex,
               saved_id: savedId,
               meta,
@@ -72,15 +78,20 @@ export const createRulesBulkRoute = (router: IRouter) => {
               severity,
               tags,
               threat,
+              throttle,
               to,
               type,
               references,
+              note,
               timeline_id: timelineId,
               timeline_title: timelineTitle,
               version,
+              lists,
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
+              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+
               const finalIndex = outputIndex ?? siemClient.signalsIndex;
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
@@ -103,6 +114,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
+                anomalyThreshold,
                 description,
                 enabled,
                 falsePositives,
@@ -110,6 +122,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 immutable: false,
                 query,
                 language,
+                machineLearningJobId,
                 outputIndex: finalIndex,
                 savedId,
                 timelineId,
@@ -128,9 +141,22 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 type,
                 threat,
                 references,
+                note,
                 version,
+                lists,
               });
-              return transformValidateBulkError(ruleIdOrUuid, createdRule);
+
+              const ruleActions = await updateRulesNotifications({
+                ruleAlertId: createdRule.id,
+                alertsClient,
+                savedObjectsClient,
+                enabled,
+                actions,
+                throttle,
+                name,
+              });
+
+              return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);
             } catch (err) {
               return transformBulkError(ruleIdOrUuid, err);
             }

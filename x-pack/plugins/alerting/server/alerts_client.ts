@@ -27,7 +27,7 @@ import {
 import { validateAlertTypeParams } from './lib';
 import {
   InvalidateAPIKeyParams,
-  CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult,
+  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../plugins/security/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
@@ -37,7 +37,7 @@ import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instan
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
-  | { apiKeysEnabled: true; result: SecurityPluginCreateAPIKeyResult };
+  | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginInvalidateAPIKeyResult };
@@ -107,6 +107,7 @@ interface UpdateOptions {
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
     params: Record<string, any>;
+    throttle: string | null;
   };
 }
 

@@ -23,6 +23,9 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
+import { UptimeAlertsFlyoutWrapper } from './components/connected';
+import { UptimeAlertsContextProvider } from './components/functional/alerts';
+import { kibanaService } from './state/kibana_service';
 
 export interface UptimeAppColors {
   danger: string;
@@ -83,6 +86,8 @@ const Application = (props: UptimeAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
+  kibanaService.core = core;
+
   // @ts-ignore
   store.dispatch(setBasePath(basePath));
 
@@ -96,11 +101,14 @@ const Application = (props: UptimeAppProps) => {
                 <UptimeRefreshContextProvider>
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
-                      <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                        <main>
-                          <PageRouter autocomplete={plugins.data.autocomplete} />
-                        </main>
-                      </EuiPage>
+                      <UptimeAlertsContextProvider>
+                        <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                          <main>
+                            <UptimeAlertsFlyoutWrapper />
+                            <PageRouter autocomplete={plugins.data.autocomplete} />
+                          </main>
+                        </EuiPage>
+                      </UptimeAlertsContextProvider>
                     </UptimeThemeContextProvider>
                   </UptimeSettingsContextProvider>
                 </UptimeRefreshContextProvider>

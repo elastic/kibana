@@ -17,23 +17,19 @@
  * under the License.
  */
 
-export const mockOsCollector = {
-  collect: jest.fn(),
-};
+import { collectorMock } from './collectors/mocks';
+
+export const mockOsCollector = collectorMock.create();
 jest.doMock('./collectors/os', () => ({
   OsMetricsCollector: jest.fn().mockImplementation(() => mockOsCollector),
 }));
 
-export const mockProcessCollector = {
-  collect: jest.fn(),
-};
+export const mockProcessCollector = collectorMock.create();
 jest.doMock('./collectors/process', () => ({
   ProcessMetricsCollector: jest.fn().mockImplementation(() => mockProcessCollector),
 }));
 
-export const mockServerCollector = {
-  collect: jest.fn(),
-};
+export const mockServerCollector = collectorMock.create();
 jest.doMock('./collectors/server', () => ({
   ServerMetricsCollector: jest.fn().mockImplementation(() => mockServerCollector),
 }));

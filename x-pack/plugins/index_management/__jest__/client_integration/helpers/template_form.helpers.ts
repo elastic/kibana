@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
 import { Template } from '../../../common/types';
 import { nextTick } from './index';
@@ -121,8 +120,9 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       await nextTick();
     }
 
-    clickNextButton();
     await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
+    clickNextButton();
+    await nextTick(50);
     component.update();
   };
 

@@ -14,7 +14,7 @@ GeoJSON is the most commonly used and flexible option.
 [float]
 
 === Upload a GeoJSON file
-Follow the instructions below to upload a GeoJSON data file, or try the
+Follow these instructions to upload a GeoJSON data file, or try the
 <<indexing-geojson-data-tutorial, end-to-end integrated example>>.
 
 . Open *Elastic Maps*, and then click *Add layer*.

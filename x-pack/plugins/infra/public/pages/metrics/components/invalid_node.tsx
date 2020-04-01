@@ -6,19 +6,20 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { identity } from 'fp-ts/lib/function';
 import React from 'react';
-
 import { euiStyled } from '../../../../../observability/public';
 import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useLinkProps } from '../../../hooks/use_link_props';
 
 interface InvalidNodeErrorProps {
   nodeName: string;
 }
 
 export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = ({ nodeName }) => {
-  const prependBasePath = useKibana().services.http?.basePath.prepend ?? identity;
+  const tutorialLinkProps = useLinkProps({
+    app: 'kibana',
+    hash: '/home/tutorial_directory/metrics',
+  });
 
   return (
     <CenteredEmptyPrompt
@@ -44,11 +45,7 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
       actions={
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiButton
-              href={prependBasePath('/app/kibana#/home/tutorial_directory/metrics')}
-              color="primary"
-              fill
-            >
+            <EuiButton {...tutorialLinkProps} color="primary" fill>
               <FormattedMessage
                 id="xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel"
                 defaultMessage="View setup instructions"
@@ -56,7 +53,7 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem>
-            <ViewSourceConfigurationButton data-test-subj="configureSourceButton">
+            <ViewSourceConfigurationButton app="metrics" data-test-subj="configureSourceButton">
               <FormattedMessage
                 id="xpack.infra.configureSourceActionLabel"
                 defaultMessage="Change source configuration"

@@ -19,7 +19,7 @@ The numeral pattern syntax expresses:
 Number of decimal places:: The `.` character turns on the option to show decimal
 places using a locale-specific decimal separator, most often `.` or `,`.
 To add trailing zeroes such as `5.00`, use a pattern like `0.00`.
-To have optional zeroes, use the `[]` characters. Examples below.
+To have optional zeroes, use the `[]` characters.
 Thousands separator:: The thousands separator `,` turns on the option to group
 thousands using a locale-specific separator. The separator is most often `,` or `.`,
 and sometimes ` `.
@@ -145,7 +145,7 @@ with multiple forms, such as German.
 [float]
 === Complete number pattern reference
 
-These number formats, combined with the patterns described above,
+These number formats, combined with the previously described patterns,
 produce the complete set of options for numeral formatting.
 The output here is all for the `en` locale.
 
@@ -180,5 +180,3 @@ The output here is all for the `en` locale.
 | 1e-27 | 000 | 1e-27
 | -1e-27 | 000 | -1e-27
 |===
-
-

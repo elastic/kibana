@@ -13,7 +13,7 @@ import {
   getLogEntryIndexBeforeTime,
   getUniqueLogEntryKey,
 } from '../../../utils/log_entry';
-import { LogEntryHighlights } from './log_entry_highlights';
+import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
 
 export const useNextAndPrevious = ({
   highlightTerms,
@@ -23,7 +23,7 @@ export const useNextAndPrevious = ({
 }: {
   highlightTerms: string[];
   jumpToTargetPosition: (target: TimeKey) => void;
-  logEntryHighlights: LogEntryHighlights | undefined;
+  logEntryHighlights: LogEntriesHighlightsResponse['data'] | undefined;
   visibleMidpoint: TimeKey | null;
 }) => {
   const [currentTimeKey, setCurrentTimeKey] = useState<UniqueTimeKey | null>(null);

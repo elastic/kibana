@@ -8,10 +8,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiComboBoxOptionProps, EuiText } from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 
 interface Props {
-  option: EuiComboBoxOptionProps<{ isDeprecated: boolean }>;
+  option: EuiComboBoxOptionOption<{ isDeprecated: boolean }>;
 }
 
 export const RoleComboBoxOption = ({ option }: Props) => {

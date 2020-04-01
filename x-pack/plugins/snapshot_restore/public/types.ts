@@ -5,5 +5,5 @@
  */
 
 export interface ClientConfigType {
-  slmUi: { enabled: boolean };
+  slm_ui: { enabled: boolean };
 }

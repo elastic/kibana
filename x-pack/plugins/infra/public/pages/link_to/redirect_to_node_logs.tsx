@@ -19,6 +19,7 @@ import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useSource } from '../../containers/source/source';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { LinkDescriptor } from '../../hooks/use_link_props';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
@@ -81,6 +82,14 @@ export const getNodeLogsUrl = ({
   nodeId: string;
   nodeType: InventoryItemType;
   time?: number;
-}) => {
-  return [`link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');
+}): LinkDescriptor => {
+  return {
+    app: 'logs',
+    pathname: `link-to/${nodeType}-logs/${nodeId}`,
+    search: time
+      ? {
+          time: `${time}`,
+        }
+      : undefined,
+  };
 };

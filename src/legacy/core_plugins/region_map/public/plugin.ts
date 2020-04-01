@@ -24,7 +24,7 @@ import {
   IUiSettingsClient,
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
@@ -70,7 +70,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
     expressions.registerFunction(createRegionMapFn);
 
-    visualizations.types.createBaseVisualization(
+    visualizations.createBaseVisualization(
       createRegionMapTypeDefinition(visualizationDependencies)
     );
   }

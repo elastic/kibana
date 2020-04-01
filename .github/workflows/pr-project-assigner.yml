@@ -8,13 +8,14 @@ jobs:
     name: Assign a PR to project based on label
     steps:
       - name: Assign to project
-        uses: elastic/github-actions/project-assigner@v1.0.3
+        uses: elastic/github-actions/project-assigner@v2.0.0
         id: project_assigner
         with:
           issue-mappings: |
             [
-              { "label": "Team:AppArch", "projectName": "kibana-app-arch", "columnId": 6173897 },
-              { "label": "Feature:Lens", "projectName": "Lens", "columnId": 6219362 },
-              { "label": "Team:Canvas", "projectName": "canvas", "columnId": 6187580 }
             ]
           ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
+
+# { "label": "Team:AppArch", "projectNumber": 37, "columnName": "Review in progress" },
+# { "label": "Feature:Lens", "projectNumber": 32, "columnName": "In progress" },
+# { "label": "Team:Canvas", "projectNumber": 38, "columnName": "Review in progress" }

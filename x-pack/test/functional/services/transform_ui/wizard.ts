@@ -160,15 +160,15 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertQueryInputExists() {
-      await testSubjects.existOrFail('tarnsformQueryInput');
+      await testSubjects.existOrFail('transformQueryInput');
     },
 
     async assertQueryInputMissing() {
-      await testSubjects.missingOrFail('tarnsformQueryInput');
+      await testSubjects.missingOrFail('transformQueryInput');
     },
 
     async assertQueryValue(expectedQuery: string) {
-      const actualQuery = await testSubjects.getVisibleText('tarnsformQueryInput');
+      const actualQuery = await testSubjects.getVisibleText('transformQueryInput');
       expect(actualQuery).to.eql(
         expectedQuery,
         `Query input text should be '${expectedQuery}' (got ${actualQuery})`

@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCode,
@@ -391,15 +392,13 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             }}
             showGutter={false}
             minLines={6}
-            aria-label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeHDFS.configurationAriaLabel"
-                defaultMessage="Additional configuration for HDFS repository '{name}'"
-                values={{
-                  name,
-                }}
-              />
-            }
+            aria-label={i18n.translate(
+              'xpack.snapshotRestore.repositoryForm.typeHDFS.configurationAriaLabel',
+              {
+                defaultMessage: `Additional configuration for HDFS repository '{name}'`,
+                values: { name },
+              }
+            )}
             onChange={(value: string) => {
               setAdditionalConf(value);
               try {

@@ -50,7 +50,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zeek.html',
       },
     }),
-    // TODO: euiIconType: 'logoZeek',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/zeek.svg',
     artifacts: {
       dashboards: [
         {

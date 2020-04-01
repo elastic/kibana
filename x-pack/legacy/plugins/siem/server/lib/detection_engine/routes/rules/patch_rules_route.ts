@@ -12,10 +12,16 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import {
+  buildRouteValidation,
+  transformError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const patchRulesRoute = (router: IRouter) => {
   router.patch(
@@ -30,6 +36,7 @@ export const patchRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -54,14 +61,22 @@ export const patchRulesRoute = (router: IRouter) => {
         to,
         type,
         threat,
+        throttle,
         references,
+        note,
         version,
+        anomaly_threshold: anomalyThreshold,
+        machine_learning_job_id: machineLearningJobId,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const alertsClient = context.alerting.getAlertsClient();
-        const actionsClient = context.actions.getActionsClient();
+        if (type) {
+          validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+        }
+
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
         if (!actionsClient || !alertsClient) {
@@ -97,9 +112,21 @@ export const patchRulesRoute = (router: IRouter) => {
           type,
           threat,
           references,
+          note,
           version,
+          anomalyThreshold,
+          machineLearningJobId,
         });
         if (rule != null) {
+          const ruleActions = await updateRulesNotifications({
+            ruleAlertId: rule.id,
+            alertsClient,
+            savedObjectsClient,
+            enabled: rule.enabled!,
+            actions,
+            throttle,
+            name: rule.name!,
+          });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({
@@ -111,7 +138,11 @@ export const patchRulesRoute = (router: IRouter) => {
             searchFields: ['alertId'],
           });
 
-          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleActions,
+            ruleStatuses.saved_objects[0]
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

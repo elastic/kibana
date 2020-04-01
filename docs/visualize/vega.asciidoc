@@ -18,47 +18,47 @@ NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals a
 
 * To experiment using sample data, first click the {kib} logo in the upper left hand corner
 and then click the link next to *Sample Data*.
-* Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph. 
-*Note*: The default graph is written in Vega-Lite, but you can build visualizations 
-in either language. See <<vega-vs-vegalite, Vega vs. Vega-Lite>> for more information. 
+* Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph.
+*Note*: The default graph is written in Vega-Lite, but you can build visualizations
+in either language. See <<vega-vs-vegalite, Vega vs. Vega-Lite>> for more information.
 * Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
-or `square`. Check out the 
+or `square`. Check out the
 https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega-Lite docs] for more information.
 * Explore other available https://vega.github.io/vega/examples/[Vega] or
-https://vega.github.io/vega-lite/examples/[Vega-Lite] visualizations. 
+https://vega.github.io/vega-lite/examples/[Vega-Lite] visualizations.
 *Note*: You might need to make URLs absolute, for example, replace
 `"url": "data/world-110m.json"` with
-`"url": "https://vega.github.io/editor/data/world-110m.json"`. 
+`"url": "https://vega.github.io/editor/data/world-110m.json"`.
 See <<vega-using-vega-and-vegalite-examples, Vega and Vega-Lite examples>>.
-* For more information on getting started, check out this https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[blog post].  
+* For more information on getting started, check out this https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[blog post].
 
 
 [[vega-vs-vegalite]]
 === Vega vs Vega-Lite
 
-The Vega visualization in {kib} supports both Vega and Vega-Lite. You can use the 
-`schema` value to define which language you would like to use and its minimum 
+The Vega visualization in {kib} supports both Vega and Vega-Lite. You can use the
+`schema` value to define which language you would like to use and its minimum
 required version.
- 
-For example: 
+
+For example:
 
 * Vega-Lite v2: `$schema: https://vega.github.io/schema/vega-lite/v2.json`
 * Vega v4: `$schema: https://vega.github.io/schema/vega/v4.json`
- 
+
 The `schema` URL is only used for identification, and does not need to be accessible by {kib}.
 
-Vega-Lite is a simplified version of Vega; it automates some constructions and has 
-much shorter specifications than Vega. Vega-Lite is automatically converted into 
+Vega-Lite is a simplified version of Vega; it automates some constructions and has
+much shorter specifications than Vega. Vega-Lite is automatically converted into
 Vega before rendering, but it has some limitations, and there are some visualizations
 that can be expressed in Vega that cannot be expressed in Vega-Lite. You can learn more
 in the https://vega.github.io/vega-lite/[Vega-Lite documentation].
 
 You can use https://vega.github.io/editor/[this editor] to convert Vega-Lite into
-Vega. 
+Vega.
 
-When you create a Vega visualization in {kib}, you can edit the `schema` 
-value in the dev tools to the left of the graph to define which of the two expression 
-languages you would like to use (see examples above).
+When you create a Vega visualization in {kib}, you can edit the `schema`
+value in the dev tools to the left of the graph to define which of the two expression
+languages you would like to use.
 
 
 [[vega-querying-elasticsearch]]
@@ -176,7 +176,7 @@ except that the timerange is shifted back by 10 minutes:
 ----
 
 The `"%timefilter%"` can also be used to specify a single min or max
-value. As shown above, the date_histogram's `extended_bounds` can be set
+value. The date_histogram's `extended_bounds` can be set
 with two values - min and max. Instead of hardcoding a value, you may
 use `"min": {"%timefilter%": "min"}`, which will be replaced with the
 beginning of the current time range. The `shift` and `unit` values are
@@ -234,7 +234,7 @@ the graph must specify `type=map` in the host configuration:
       // defaults to true, shows +/- buttons to zoom in/out
       "zoomControl": false,
 
-      // Defaults to 'false', disables mouse wheel zoom. If set to 
+      // Defaults to 'false', disables mouse wheel zoom. If set to
       // 'true', map may zoom unexpectedly while scrolling dashboard
       "scrollWheelZoom": false,
 
@@ -295,7 +295,7 @@ to your kibana.yml file.
 === Useful Links
 
 ==== Vega Editor
-The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any 
+The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any
 {kib}-specific features like {es} requests and interactive base maps.
 
 ==== Vega-Lite resources
@@ -303,14 +303,14 @@ The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Veg
 * https://vega.github.io/vega-lite/docs/[Docs]
 * https://vega.github.io/vega-lite/examples/[Examples]
 
-==== Vega resources 
+==== Vega resources
 * https://vega.github.io/vega/tutorials/[Tutorials]
 * https://vega.github.io/vega/docs/[Docs]
 * https://vega.github.io/vega/examples/[Examples]
 
 ==== Elastic blog posts
 * https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[Getting Started with Vega Visualizations in Kibana]
-* https://www.elastic.co/blog/custom-vega-visualizations-in-kibana[Custom Vega Visualizations in Kibana]  
+* https://www.elastic.co/blog/custom-vega-visualizations-in-kibana[Custom Vega Visualizations in Kibana]
 * https://www.elastic.co/blog/sankey-visualization-with-vega-in-kibana[Sankey Visualization with Vega in Kibana]
 
 
@@ -324,7 +324,7 @@ replace `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`. Also,
 regular Vega examples use `"autosize": "pad"` layout model, whereas
 Kibana uses `fit`. Remove all `autosize`, `width`, and `height`
-values. See link:#sizing-and-positioning[sizing and positioning] below.
+values. See link:#sizing-and-positioning[sizing and positioning].
 
 [[vega-additional-configuration-options]]
 ==== Additional configuration options

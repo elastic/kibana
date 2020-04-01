@@ -64,7 +64,7 @@ describe('LinkIcon', () => {
 
     expect(
       wrapper
-        .find('.euiIcon')
+        .find('[data-euiicon-type]')
         .first()
         .exists()
     ).toBe(true);

@@ -7,12 +7,18 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
+import { i18n } from '@kbn/i18n';
 
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '../../../../../../../../src/core/server';
+import { ILicense } from '../../../../../../../plugins/licensing/server';
+import { MINIMUM_ML_LICENSE } from '../../../../common/constants';
+import { RuleType } from '../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../common/detection_engine/ml_helpers';
+import { BadRequestError } from '../errors/bad_request_error';
 
 export interface OutputError {
   message: string;
@@ -31,9 +37,8 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
         message: err.message,
         statusCode: err.statusCode,
       };
-    } else if (err instanceof TypeError) {
-      // allows us to throw type errors instead of booms in some conditions
-      // where we don't want to mingle Boom with the rest of the code
+    } else if (err instanceof BadRequestError) {
+      // allows us to throw request validation errors in the absence of Boom
       return {
         message: err.message,
         statusCode: 400,
@@ -178,7 +183,7 @@ export const transformImportError = (
       message: err.message,
       existingImportSuccessError,
     });
-  } else if (err instanceof TypeError) {
+  } else if (err instanceof BadRequestError) {
     return createImportErrorObject({
       ruleId,
       statusCode: 400,
@@ -205,7 +210,7 @@ export const transformBulkError = (
       statusCode: err.output.statusCode,
       message: err.message,
     });
-  } else if (err instanceof TypeError) {
+  } else if (err instanceof BadRequestError) {
     return createBulkErrorObject({
       ruleId,
       statusCode: 400,
@@ -288,4 +293,29 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };
   }, {});
+};
+
+/**
+ * Checks the current Kibana License against the rule under operation.
+ *
+ * @param license ILicense representing the user license
+ * @param ruleType the type of the current rule
+ *
+ * @throws BadRequestError if rule and license are incompatible
+ */
+export const validateLicenseForRuleType = ({
+  license,
+  ruleType,
+}: {
+  license: ILicense;
+  ruleType: RuleType;
+}) => {
+  if (isMlRule(ruleType) && !license.hasAtLeast(MINIMUM_ML_LICENSE)) {
+    const message = i18n.translate('xpack.siem.licensing.unsupportedMachineLearningMessage', {
+      defaultMessage:
+        'Your license does not support machine learning. Please upgrade your license.',
+    });
+
+    throw new BadRequestError(message);
+  }
 };

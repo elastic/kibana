@@ -20,7 +20,7 @@ import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_
 import {
   serviceRt,
   agentConfigurationIntakeRt
-} from '../../../common/runtime_types/agent_configuration_intake_rt';
+} from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
 
 // get list of configurations
@@ -29,6 +29,31 @@ export const agentConfigurationRoute = createRoute(core => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await listConfigurations({ setup });
+  }
+}));
+
+// get a single configuration
+export const getSingleAgentConfigurationRoute = createRoute(() => ({
+  path: '/api/apm/settings/agent-configuration/view',
+  params: {
+    query: serviceRt
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { name, environment } = context.params.query;
+
+    const service = { name, environment };
+    const config = await findExactConfiguration({ service, setup });
+
+    if (!config) {
+      context.logger.info(
+        `Config was not found for ${service.name}/${service.environment}`
+      );
+
+      throw Boom.notFound();
+    }
+
+    return config._source;
   }
 }));
 
@@ -68,45 +93,7 @@ export const deleteAgentConfigurationRoute = createRoute(() => ({
   }
 }));
 
-// get list of services
-export const listAgentConfigurationServicesRoute = createRoute(() => ({
-  method: 'GET',
-  path: '/api/apm/settings/agent-configuration/services',
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    return await getServiceNames({
-      setup
-    });
-  }
-}));
-
-// get environments for service
-export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
-  path: '/api/apm/settings/agent-configuration/environments',
-  params: {
-    query: t.partial({ serviceName: t.string })
-  },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { serviceName } = context.params.query;
-    return await getEnvironments({ serviceName, setup });
-  }
-}));
-
-// get agentName for service
-export const agentConfigurationAgentNameRoute = createRoute(() => ({
-  path: '/api/apm/settings/agent-configuration/agent_name',
-  params: {
-    query: t.type({ serviceName: t.string })
-  },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { serviceName } = context.params.query;
-    const agentName = await getAgentNameByService({ serviceName, setup });
-    return { agentName };
-  }
-}));
-
+// create/update configuration
 export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
   method: 'PUT',
   path: '/api/apm/settings/agent-configuration',
@@ -154,10 +141,10 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {
-    body: t.type({
-      service: serviceRt,
-      etag: t.string
-    })
+    body: t.intersection([
+      t.type({ service: serviceRt }),
+      t.partial({ etag: t.string })
+    ])
   },
   handler: async ({ context, request }) => {
     const { service, etag } = context.params.body;
@@ -186,5 +173,48 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
     }
 
     return config;
+  }
+}));
+
+/*
+ * Utility endpoints (not documented as part of the public API)
+ */
+
+// get list of services
+export const listAgentConfigurationServicesRoute = createRoute(() => ({
+  method: 'GET',
+  path: '/api/apm/settings/agent-configuration/services',
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    return await getServiceNames({
+      setup
+    });
+  }
+}));
+
+// get environments for service
+export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
+  path: '/api/apm/settings/agent-configuration/environments',
+  params: {
+    query: t.partial({ serviceName: t.string })
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.query;
+    return await getEnvironments({ serviceName, setup });
+  }
+}));
+
+// get agentName for service
+export const agentConfigurationAgentNameRoute = createRoute(() => ({
+  path: '/api/apm/settings/agent-configuration/agent_name',
+  params: {
+    query: t.type({ serviceName: t.string })
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.query;
+    const agentName = await getAgentNameByService({ serviceName, setup });
+    return { agentName };
   }
 }));

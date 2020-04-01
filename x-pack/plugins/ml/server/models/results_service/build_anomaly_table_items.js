@@ -12,7 +12,7 @@ import {
   getEntityFieldValue,
   showActualForFunction,
   showTypicalForFunction,
-} from '../../../../../legacy/plugins/ml/common/util/anomaly_utils';
+} from '../../../common/util/anomaly_utils';
 
 // Builds the items for display in the anomalies table from the supplied list of anomaly records.
 // Provide the timezone to use for aggregating anomalies (by day or hour) as set in the

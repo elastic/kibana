@@ -31,6 +31,8 @@ export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContain
 export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
+export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="eui-flyout-header"]';
+
 export const TIMELINE_FLYOUT_BODY = '[data-test-subj="eui-flyout-body"]';
 
 export const TIMELINE_INSPECT_BUTTON = '[data-test-subj="inspect-empty-button"]';

@@ -25,6 +25,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
 import { IndexPattern, IFieldType } from '../../../../../kibana_services';
 
+jest.mock('ui/new_platform');
+
 function getMockIndexPattern() {
   return ({
     id: 'test',

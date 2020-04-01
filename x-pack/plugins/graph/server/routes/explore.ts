@@ -23,7 +23,7 @@ export function registerExploreRoute({
       validate: {
         body: schema.object({
           index: schema.string(),
-          query: schema.object({}, { allowUnknowns: true }),
+          query: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },

@@ -24,7 +24,7 @@ import { useConfig } from './app_context';
 import { AuthorizationContext, WithPrivileges, NotAuthorizedSection } from './lib/authorization';
 
 export const App: React.FunctionComponent = () => {
-  const { slmUi } = useConfig();
+  const { slm_ui: slmUi } = useConfig();
   const { apiError } = useContext(AuthorizationContext);
 
   const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];

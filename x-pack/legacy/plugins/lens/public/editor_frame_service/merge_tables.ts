@@ -10,7 +10,9 @@ import {
   ExpressionValueSearchContext,
   KibanaDatatable,
 } from 'src/plugins/expressions/public';
-import { toAbsoluteDates } from '../../../../../../src/legacy/core_plugins/data/public';
+import { search } from '../../../../../../src/plugins/data/public';
+const { toAbsoluteDates } = search.aggs;
+
 import { LensMultiTable } from '../types';
 
 interface MergeTables {

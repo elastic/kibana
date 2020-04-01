@@ -38,7 +38,7 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { KibanaRequest, InternalHttpServiceSetup } from '../http';
-import { SavedObjectsClientContract, SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
+import { SavedObjectsClientContract, SavedObjectsType } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -269,7 +269,9 @@ interface WrappedClientFactoryWrapper {
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsStartDeps {}
+export interface SavedObjectsStartDeps {
+  pluginsInitialized?: boolean;
+}
 
 export class SavedObjectsService
   implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
@@ -301,10 +303,6 @@ export class SavedObjectsService
     legacyTypes.forEach(type => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
-    const importableExportableTypes = getImportableAndExportableTypes(
-      setupDeps.legacyPlugins.uiExports
-    );
-
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
       .pipe(first())
@@ -320,7 +318,6 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
-      importableExportableTypes,
     });
 
     return {
@@ -354,7 +351,7 @@ export class SavedObjectsService
   }
 
   public async start(
-    core: SavedObjectsStartDeps,
+    { pluginsInitialized = true }: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
@@ -381,9 +378,11 @@ export class SavedObjectsService
      * However, our build system optimize step and some tests depend on the
      * HTTP server running without an Elasticsearch server being available.
      * So, when the `migrations.skip` is true, we skip migrations altogether.
+     *
+     * We also cannot safely run migrations if plugins are not initialized since
+     * not plugin migrations won't be registered.
      */
-    const cliArgs = this.coreContext.env.cliArgs;
-    const skipMigrations = cliArgs.optimize || this.config.migration.skip;
+    const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
     if (skipMigrations) {
       this.logger.warn(
@@ -478,17 +477,4 @@ export class SavedObjectsService
       ),
     });
   }
-}
-
-function getImportableAndExportableTypes({
-  savedObjectMappings = [],
-  savedObjectsManagement = {},
-}: SavedObjectsLegacyUiExports) {
-  const visibleTypes = savedObjectMappings.reduce(
-    (types, mapping) => [...types, ...Object.keys(mapping.properties)],
-    [] as string[]
-  );
-  return visibleTypes.filter(
-    type => savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
-  );
 }

@@ -42,7 +42,7 @@ describe('CustomExtentsOptions component', () => {
     setMultipleValidity = jest.fn();
 
     defaultProps = {
-      axis: { ...valueAxis },
+      axisScale: { ...valueAxis.scale },
       setValueAxis,
       setValueAxisScale,
       setMultipleValidity,
@@ -57,7 +57,7 @@ describe('CustomExtentsOptions component', () => {
 
   describe('boundsMargin', () => {
     it('should set validity as true when value is positive', () => {
-      defaultProps.axis.scale.boundsMargin = 5;
+      defaultProps.axisScale.boundsMargin = 5;
       mount(<CustomExtentsOptions {...defaultProps} />);
 
       expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, true);
@@ -66,17 +66,17 @@ describe('CustomExtentsOptions component', () => {
     it('should set validity as true when value is empty', () => {
       const comp = mount(<CustomExtentsOptions {...defaultProps} />);
       comp.setProps({
-        axis: { ...valueAxis, scale: { ...valueAxis.scale, boundsMargin: undefined } },
+        axisScale: { ...valueAxis.scale, boundsMargin: undefined },
       });
 
       expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, true);
     });
 
     it('should set validity as false when value is negative', () => {
-      defaultProps.axis.scale.defaultYExtents = true;
+      defaultProps.axisScale.defaultYExtents = true;
       const comp = mount(<CustomExtentsOptions {...defaultProps} />);
       comp.setProps({
-        axis: { ...valueAxis, scale: { ...valueAxis.scale, boundsMargin: -1 } },
+        axisScale: { ...valueAxis.scale, boundsMargin: -1 },
       });
 
       expect(setMultipleValidity).toBeCalledWith(BOUNDS_MARGIN, false);
@@ -91,7 +91,7 @@ describe('CustomExtentsOptions component', () => {
     });
 
     it('should hide bounds margin input when defaultYExtents is false', () => {
-      defaultProps.axis.scale = { ...defaultProps.axis.scale, defaultYExtents: false };
+      defaultProps.axisScale = { ...defaultProps.axisScale, defaultYExtents: false };
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
 
       expect(comp.find({ paramName: BOUNDS_MARGIN }).exists()).toBeFalsy();
@@ -102,7 +102,7 @@ describe('CustomExtentsOptions component', () => {
       comp.find({ paramName: DEFAULT_Y_EXTENTS }).prop('setValue')(DEFAULT_Y_EXTENTS, true);
 
       expect(setMultipleValidity).not.toBeCalled();
-      expect(setValueAxis).toBeCalledWith(SCALE, defaultProps.axis.scale);
+      expect(setValueAxis).toBeCalledWith(SCALE, defaultProps.axisScale);
     });
 
     it('should reset boundsMargin when value is false', () => {
@@ -110,7 +110,7 @@ describe('CustomExtentsOptions component', () => {
       comp.find({ paramName: DEFAULT_Y_EXTENTS }).prop('setValue')(DEFAULT_Y_EXTENTS, false);
 
       const newScale = {
-        ...defaultProps.axis.scale,
+        ...defaultProps.axisScale,
         boundsMargin: undefined,
         defaultYExtents: false,
       };
@@ -126,7 +126,7 @@ describe('CustomExtentsOptions component', () => {
     });
 
     it('should hide YExtents when value is false', () => {
-      defaultProps.axis.scale = { ...defaultProps.axis.scale, setYExtents: false };
+      defaultProps.axisScale = { ...defaultProps.axisScale, setYExtents: false };
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
 
       expect(comp.find(YExtents).exists()).toBeFalsy();
@@ -136,7 +136,7 @@ describe('CustomExtentsOptions component', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
       comp.find({ paramName: SET_Y_EXTENTS }).prop('setValue')(SET_Y_EXTENTS, true);
 
-      expect(setValueAxis).toBeCalledWith(SCALE, defaultProps.axis.scale);
+      expect(setValueAxis).toBeCalledWith(SCALE, defaultProps.axisScale);
     });
 
     it('should reset min and max when value is false', () => {
@@ -144,7 +144,7 @@ describe('CustomExtentsOptions component', () => {
       comp.find({ paramName: SET_Y_EXTENTS }).prop('setValue')(SET_Y_EXTENTS, false);
 
       const newScale = {
-        ...defaultProps.axis.scale,
+        ...defaultProps.axisScale,
         min: undefined,
         max: undefined,
         setYExtents: false,

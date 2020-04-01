@@ -19,7 +19,7 @@ import {
 
 import { throwErrors } from '../../../../common/runtime_types';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(

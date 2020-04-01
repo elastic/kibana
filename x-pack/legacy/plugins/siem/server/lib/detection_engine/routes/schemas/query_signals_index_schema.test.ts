@@ -6,8 +6,17 @@
 
 import { querySignalsSchema } from './query_signals_index_schema';
 import { SignalsQueryRestParams } from '../../signals/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('query, aggs, size, _source and track_total_hits on signals index', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('query, aggs, size, _source and track_total_hits simultaneously', () => {
     expect(
       querySignalsSchema.validate<Partial<SignalsQueryRestParams>>({

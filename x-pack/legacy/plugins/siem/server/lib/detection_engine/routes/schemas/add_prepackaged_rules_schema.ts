@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  actions,
   enabled,
   description,
   false_positives,
@@ -31,12 +32,18 @@ import {
   to,
   type,
   threat,
+  throttle,
   references,
+  note,
   version,
+  lists,
+  anomaly_threshold,
+  machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import { hasListsFeature } from '../../feature_flags';
 
 /**
  * Big differences between this schema and the createRulesSchema
@@ -45,9 +52,15 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *  - immutable is forbidden but defaults to true instead of to false and it can only ever be true
  *  - enabled defaults to false instead of true
  *  - version is a required field that must exist
- *  - index is a required field that must exist
+ *  - index is a required field that must exist if type !== machine_learning
  */
 export const addPrepackagedRulesSchema = Joi.object({
+  actions: actions.default([]),
+  anomaly_threshold: anomaly_threshold.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   description: description.required(),
   enabled: enabled.default(false),
   false_positives: false_positives.default([]),
@@ -58,10 +71,27 @@ export const addPrepackagedRulesSchema = Joi.object({
     .forbidden()
     .default(true)
     .valid(true),
-  index: index.required(),
+  index: index.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: Joi.required(),
+  }),
   interval: interval.default('5m'),
-  query: query.allow('').default(''),
-  language: language.default('kuery'),
+  query: query.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: query.allow('').default(''),
+  }),
+  language: language.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: language.default('kuery'),
+  }),
+  machine_learning_job_id: machine_learning_job_id.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   saved_id: saved_id.when('type', {
     is: 'saved_query',
     then: Joi.required(),
@@ -78,6 +108,11 @@ export const addPrepackagedRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
+  throttle: throttle.default(null),
   references: references.default([]),
+  note: note.allow(''),
   version: version.required(),
+
+  // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
+  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 });

@@ -30,6 +30,8 @@ export async function loadAllActions({
   return await http.get(`${BASE_ACTION_API_PATH}/_find`, {
     query: {
       per_page: MAX_ACTIONS_RETURNED,
+      sort_field: 'name.keyword',
+      sort_order: 'asc',
     },
   });
 }

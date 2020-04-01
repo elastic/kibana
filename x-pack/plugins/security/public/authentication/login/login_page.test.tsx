@@ -8,15 +8,18 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from '@testing-library/react';
 import { nextTick } from 'test_utils/enzyme_helpers';
-import { LoginState } from './login_state';
+import { LoginState } from '../../../common/login_state';
 import { LoginPage } from './login_page';
 import { coreMock } from '../../../../../../src/core/public/mocks';
-import { DisabledLoginForm, BasicLoginForm } from './components';
+import { DisabledLoginForm, LoginForm } from './components';
 
 const createLoginState = (options?: Partial<LoginState>) => {
   return {
     allowLogin: true,
     layout: 'form',
+    requiresSecureConnection: false,
+    showLoginForm: true,
+    selector: { enabled: false, providers: [] },
     ...options,
   } as LoginState;
 };
@@ -55,9 +58,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -74,14 +77,14 @@ describe('LoginPage', () => {
   describe('disabled form states', () => {
     it('renders as expected when secure connection is required but not present', async () => {
       const coreStartMock = coreMock.createStart();
-      httpMock.get.mockResolvedValue(createLoginState());
+      httpMock.get.mockResolvedValue(createLoginState({ requiresSecureConnection: true }));
 
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={true}
         />
       );
 
@@ -100,9 +103,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -121,9 +124,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -144,9 +147,30 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+    });
+
+    it('renders as expected when login is not enabled', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState({ showLoginForm: false }));
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
         />
       );
 
@@ -167,9 +191,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -179,7 +203,7 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
 
     it('renders as expected when info message is set', async () => {
@@ -190,9 +214,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -202,7 +226,7 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
 
     it('renders as expected when loginAssistanceMessage is set', async () => {
@@ -212,9 +236,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage="This is an *important* message"
-          requiresSecureConnection={false}
         />
       );
 
@@ -224,7 +248,7 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
   });
 
@@ -236,9 +260,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -261,9 +285,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 

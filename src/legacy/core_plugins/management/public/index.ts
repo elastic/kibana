@@ -30,8 +30,6 @@ export {
   plugin,
   IndexPatternCreationConfig,
   IndexPatternListConfig,
-  SavedObjectsManagementAction,
-  SavedObjectsManagementRecord,
 } from './np_ready';
 
 export {

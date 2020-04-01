@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, aggGroupNamesMap, AggGroupNames, Schema } from '../legacy_imports';
+import { AggGroupNames, search, IAggConfig } from '../../../../../plugins/data/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
@@ -41,6 +41,8 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
+import { Schema, getSchemasByGroup } from '../schemas';
+import { TimeRange } from '../../../../../plugins/data/public';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
@@ -48,6 +50,7 @@ export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps 
   reorderAggs: ReorderAggs;
   setValidity(modelName: string, value: boolean): void;
   setTouched(isTouched: boolean): void;
+  timeRange?: TimeRange;
 }
 
 function DefaultEditorAggGroup({
@@ -66,12 +69,17 @@ function DefaultEditorAggGroup({
   reorderAggs,
   setTouched,
   setValidity,
+  timeRange,
 }: DefaultEditorAggGroupProps) {
-  const groupNameLabel = (aggGroupNamesMap() as any)[groupName];
+  const groupNameLabel = (search.aggs.aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
+  const schemaNames = getSchemasByGroup(schemas, groupName).map(s => s.name);
   const group: IAggConfig[] = useMemo(
-    () => state.aggs.aggs.filter((agg: IAggConfig) => agg.schema.group === groupName) || [],
-    [groupName, state.aggs.aggs]
+    () =>
+      state.data.aggs!.aggs.filter(
+        (agg: IAggConfig) => agg.schema && schemaNames.includes(agg.schema)
+      ) || [],
+    [state.data.aggs, schemaNames]
   );
 
   const stats = {
@@ -162,14 +170,14 @@ function DefaultEditorAggGroup({
                   <DefaultEditorAgg
                     agg={agg}
                     aggIndex={index}
-                    aggIsTooLow={calcAggIsTooLow(agg, index, group)}
+                    aggIsTooLow={calcAggIsTooLow(agg, index, group, schemas)}
                     dragHandleProps={provided.dragHandleProps}
                     formIsTouched={aggsState[agg.id] ? aggsState[agg.id].touched : false}
                     groupName={groupName}
                     isDraggable={stats.count > 1}
                     isLastBucket={groupName === AggGroupNames.Buckets && index === group.length - 1}
-                    isRemovable={isAggRemovable(agg, group)}
-                    isDisabled={agg.schema.name === 'metric' && isMetricAggregationDisabled}
+                    isRemovable={isAggRemovable(agg, group, schemas)}
+                    isDisabled={agg.schema === 'metric' && isMetricAggregationDisabled}
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}
@@ -179,6 +187,8 @@ function DefaultEditorAggGroup({
                     onToggleEnableAgg={onToggleEnableAgg}
                     removeAgg={removeAgg}
                     setAggsState={setAggsState}
+                    schemas={schemas}
+                    timeRange={timeRange}
                   />
                 )}
               </EuiDraggable>

@@ -18,27 +18,32 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFactory, GetEmbeddableFactory } from '../../../../src/plugins/embeddable/public';
+import { EmbeddableFactory, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainer,
   SearchableContainerInput,
 } from './searchable_list_container';
 
+interface StartServices {
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+}
+
 export class SearchableListContainerFactory extends EmbeddableFactory {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   public readonly isContainerType = true;
 
-  constructor(private getEmbeddableFactory: GetEmbeddableFactory) {
+  constructor(private getStartServices: () => Promise<StartServices>) {
     super();
   }
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 
   public async create(initialInput: SearchableContainerInput) {
-    return new SearchableListContainer(initialInput, this.getEmbeddableFactory);
+    const { getEmbeddableFactory } = await this.getStartServices();
+    return new SearchableListContainer(initialInput, getEmbeddableFactory);
   }
 
   public getDisplayName() {

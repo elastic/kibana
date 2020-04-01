@@ -13,7 +13,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../../components/detection_engine/utility_bar';
+} from '../../../../../components/utility_bar';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
@@ -65,13 +65,15 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarText>{i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}</UtilityBarText>
+            <UtilityBarText dataTestSubj="showingSignals">
+              {i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}
+            </UtilityBarText>
           </UtilityBarGroup>
 
           <UtilityBarGroup>
             {canUserCRUD && hasIndexWrite && (
               <>
-                <UtilityBarText>
+                <UtilityBarText dataTestSubj="selectedSignals">
                   {i18n.SELECTED_SIGNALS(
                     showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
                     showClearSelection ? totalCount : Object.keys(selectedEventIds).length
@@ -79,6 +81,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
                 </UtilityBarText>
 
                 <UtilityBarAction
+                  dataTestSubj="openCloseSignal"
                   disabled={areEventsLoading || isEmpty(selectedEventIds)}
                   iconType={isFilteredToOpen ? 'securitySignalResolved' : 'securitySignalDetected'}
                   onClick={handleUpdateStatus}

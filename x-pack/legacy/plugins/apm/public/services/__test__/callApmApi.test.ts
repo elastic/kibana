@@ -5,7 +5,7 @@
  */
 
 import * as callApiExports from '../rest/callApi';
-import { createCallApmApi, APMClient } from '../rest/createCallApmApi';
+import { createCallApmApi, callApmApi } from '../rest/createCallApmApi';
 import { HttpSetup } from 'kibana/public';
 
 const callApi = jest
@@ -13,9 +13,8 @@ const callApi = jest
   .mockImplementation(() => Promise.resolve(null));
 
 describe('callApmApi', () => {
-  let callApmApi: APMClient;
   beforeEach(() => {
-    callApmApi = createCallApmApi({} as HttpSetup);
+    createCallApmApi({} as HttpSetup);
   });
 
   afterEach(() => {

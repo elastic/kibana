@@ -23,8 +23,6 @@ import { TSearchStrategiesMap } from './i_search_strategy';
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
 import { DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 
-// let mockCoreSetup: MockedKeys<CoreSetup>;
-
 const mockDefaultSearch = jest.fn(() => Promise.resolve({ total: 100, loaded: 0 }));
 const mockDefaultSearchStrategyProvider = jest.fn(() =>
   Promise.resolve({
@@ -58,5 +56,16 @@ describe('createApi', () => {
     expect(api.search({}, {}, 'noneByThisName')).rejects.toThrowErrorMatchingInlineSnapshot(
       `"No strategy found for noneByThisName"`
     );
+  });
+
+  it('logs the response if `debug` is set to `true`', async () => {
+    const spy = jest.spyOn(console, 'log');
+    await api.search({ params: {} });
+
+    expect(spy).not.toBeCalled();
+
+    await api.search({ debug: true, params: {} });
+
+    expect(spy).toBeCalled();
   });
 });

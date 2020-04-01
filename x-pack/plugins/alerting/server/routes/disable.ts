@@ -14,6 +14,7 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ALERT_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -22,7 +23,7 @@ const paramSchema = schema.object({
 export const disableAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: '/api/alert/{id}/_disable',
+      path: `${BASE_ALERT_API_PATH}/{id}/_disable`,
       validate: {
         params: paramSchema,
       },
@@ -36,6 +37,9 @@ export const disableAlertRoute = (router: IRouter, licenseState: LicenseState) =
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       verifyApiAccess(licenseState);
+      if (!context.alerting) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
       await alertsClient.disable({ id });

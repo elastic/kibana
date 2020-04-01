@@ -19,8 +19,14 @@ export type APMClientOptions = Omit<FetchOptions, 'query' | 'body'> & {
   };
 };
 
-export const createCallApmApi = (http: HttpSetup) =>
-  ((options: APMClientOptions) => {
+export let callApmApi: APMClient = () => {
+  throw new Error(
+    'callApmApi has to be initialized before used. Call createCallApmApi first.'
+  );
+};
+
+export function createCallApmApi(http: HttpSetup) {
+  callApmApi = ((options: APMClientOptions) => {
     const { pathname, params = {}, ...opts } = options;
 
     const path = (params.path || {}) as Record<string, any>;
@@ -36,3 +42,4 @@ export const createCallApmApi = (http: HttpSetup) =>
       query: params.query
     });
   }) as APMClient;
+}

@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { schema } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'kibana/server';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
 
 export const config = {
@@ -21,10 +20,19 @@ export const config = {
     }),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      defaultOutputHost: schema.string({ defaultValue: 'http://localhost:9200' }),
+      kibana: schema.object({
+        host: schema.maybe(schema.string()),
+        ca_sha256: schema.maybe(schema.string()),
+      }),
+      elasticsearch: schema.object({
+        host: schema.string({ defaultValue: 'http://localhost:9200' }),
+        ca_sha256: schema.maybe(schema.string()),
+      }),
     }),
   }),
 };
+
+export type IngestManagerConfigType = TypeOf<typeof config.schema>;
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);
@@ -37,7 +45,5 @@ export {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
   DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
 } from './constants';
-
-// TODO: Temporary exports for Fleet dependencies, remove once Fleet moved into this plugin
-export { agentConfigService, outputService } from './services';

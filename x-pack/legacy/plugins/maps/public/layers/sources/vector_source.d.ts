@@ -5,18 +5,15 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { FeatureCollection } from 'geojson';
 import { AbstractSource, ISource } from './source';
 import { IField } from '../fields/field';
+import { ESSearchSourceResponseMeta } from '../../../common/descriptor_types';
 
-export type GeoJsonFetchMeta = {
-  areResultsTrimmed: boolean;
-  areEntitiesTrimmed?: boolean;
-  entityCount?: number;
-  totalEntities?: number;
-};
+export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
 export type GeoJsonWithMeta = {
-  data: unknown; // geojson feature collection
+  data: FeatureCollection;
   meta?: GeoJsonFetchMeta;
 };
 
@@ -28,9 +25,10 @@ export interface IVectorSource extends ISource {
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
+  getFieldByName(fieldName: string): IField;
 }
 
-export class AbstractVectorSource extends AbstractSource {
+export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
@@ -38,4 +36,5 @@ export class AbstractVectorSource extends AbstractSource {
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
+  getFieldByName(fieldName: string): IField;
 }

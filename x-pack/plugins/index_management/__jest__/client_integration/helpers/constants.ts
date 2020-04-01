@@ -26,5 +26,7 @@ export const ALIASES = {
 };
 
 export const MAPPINGS = {
+  _source: {},
+  _meta: {},
   properties: {},
 };

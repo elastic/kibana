@@ -10,10 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
 
-import {
-  TransformEndpointRequest,
-  TransformEndpointResult,
-} from '../../../../../legacy/plugins/transform/public/app/hooks/use_api_types';
+import { TransformEndpointRequest, TransformEndpointResult } from '../../../common';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
 

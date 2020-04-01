@@ -28,8 +28,8 @@ export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const alertsClient = context.alerting.getAlertsClient();
       const siemResponse = buildSiemResponse(response);
+      const alertsClient = context.alerting?.getAlertsClient();
 
       if (!alertsClient) {
         return siemResponse.error({ statusCode: 404 });

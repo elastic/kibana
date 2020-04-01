@@ -87,6 +87,7 @@ describe('utils/kbn_field_types', () => {
         KBN_FIELD_TYPES.DATE,
         KBN_FIELD_TYPES.GEO_POINT,
         KBN_FIELD_TYPES.GEO_SHAPE,
+        KBN_FIELD_TYPES.HISTOGRAM,
         KBN_FIELD_TYPES.IP,
         KBN_FIELD_TYPES.MURMUR3,
         KBN_FIELD_TYPES.NESTED,

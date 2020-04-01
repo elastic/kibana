@@ -19,12 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas, AggGroupNames } from './legacy_imports';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
 import { ColorSchemas } from '../../../../plugins/charts/public';
+import { AggGroupNames } from '../../../../plugins/data/public';
+import { Schemas } from '../../vis_default_editor/public';
 
 export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'goal',

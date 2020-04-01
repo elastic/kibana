@@ -6,7 +6,7 @@
 
 import { difference } from 'lodash';
 import Boom from 'boom';
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
 
 interface BasicCalendar {

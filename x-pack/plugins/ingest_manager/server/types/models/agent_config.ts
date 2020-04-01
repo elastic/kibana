@@ -3,17 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { DatasourceSchema } from './datasource';
-
-export enum AgentConfigStatus {
-  Active = 'active',
-  Inactive = 'inactive',
-}
+import { AgentConfigStatus } from '../../../common';
 
 const AgentConfigBaseSchema = {
   name: schema.string(),
-  namespace: schema.string(),
+  namespace: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
 };
 
@@ -32,7 +28,3 @@ export const AgentConfigSchema = schema.object({
   updated_on: schema.string(),
   updated_by: schema.string(),
 });
-
-export type NewAgentConfig = TypeOf<typeof NewAgentConfigSchema>;
-
-export type AgentConfig = TypeOf<typeof AgentConfigSchema>;

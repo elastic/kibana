@@ -30,7 +30,7 @@ import { checkForDuplicateTitle } from './check_for_duplicate_title';
  * @param error {Error} the error
  * @return {boolean}
  */
-function isErrorNonFatal(error: { message: string }) {
+export function isErrorNonFatal(error: { message: string }) {
   if (!error) return false;
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }

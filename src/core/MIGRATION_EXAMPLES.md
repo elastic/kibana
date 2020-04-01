@@ -20,6 +20,7 @@ APIs to their New Platform equivalents.
   - [Chromeless Applications](#chromeless-applications)
   - [Render HTML Content](#render-html-content)
   - [Saved Objects types](#saved-objects-types)
+  - [UiSettings](#uisettings)
 
 ## Configuration
 
@@ -749,7 +750,7 @@ using the core `savedObjects`'s `registerType` setup API.
 
 The most notable difference is that in the new platform, the type registration is performed in a single call to 
 `registerType`, passing a new `SavedObjectsType` structure that is a superset of the legacy `schema`, `migrations` 
-and `mappings`.
+`mappings` and `savedObjectsManagement`.
 
 ### Concrete example
 
@@ -773,6 +774,32 @@ new kibana.Plugin({
       },
       'second-type': {
         isHidden: true,
+      },
+    },
+    savedObjectsManagement: {
+      'first-type': {
+        isImportableAndExportable: true,
+        icon: 'myFirstIcon',
+        defaultSearchField: 'title',
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+        getEditUrl(obj) {
+          return `/some-url/${encodeURIComponent(obj.id)}`;
+        },
+      },
+      'second-type': {
+        isImportableAndExportable: false,
+        icon: 'mySecondIcon',
+        getTitle(obj) {
+          return obj.attributes.myTitleField;
+        },
+        getInAppUrl(obj) {
+          return {
+            path: `/some-url/${encodeURIComponent(obj.id)}`,
+            uiCapabilitiesPath: 'myPlugin.myType.show',
+          };
+        },
       },
     },
   },
@@ -844,6 +871,17 @@ export const firstType: SavedObjectsType = {
     '1.0.0': migrateFirstTypeToV1,
     '2.0.0': migrateFirstTypeToV2,
   },
+  management: {
+    importableAndExportable: true,
+    icon: 'myFirstIcon',
+    defaultSearchField: 'title',
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getEditUrl(obj) {
+      return `/some-url/${encodeURIComponent(obj.id)}`;
+    },
+  },
 };
 ```
 
@@ -870,6 +908,19 @@ export const secondType: SavedObjectsType = {
   migrations: {
     '1.5.0': migrateSecondTypeToV15,
   },
+  management: {
+    importableAndExportable: false,
+    icon: 'mySecondIcon',
+    getTitle(obj) {
+      return obj.attributes.myTitleField;
+    },
+    getInAppUrl(obj) {
+      return {
+        path: `/some-url/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'myPlugin.myType.show',
+      };
+    },
+  },
 };
 ```
 
@@ -894,6 +945,8 @@ The NP `registerType` expected input is very close to the legacy format. However
 - The `schema.isNamespaceAgnostic` property has been renamed: `SavedObjectsType.namespaceAgnostic`
 
 - The `schema.indexPattern` was accepting either a `string` or a `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only accepts a string, as you can access the configuration during your plugin's setup phase.
+
+- The `savedObjectsManagement.isImportableAndExportable` property has been renamed: `SavedObjectsType.management.importableAndExportable`
 
 - The migration function signature has changed:
 In legacy, it was `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
@@ -924,3 +977,36 @@ const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
 The `registerType` API will throw if called after the service has started, and therefor cannot be used from 
 legacy plugin code. Legacy plugins should use the legacy savedObjects service and the legacy way to register
 saved object types until migrated.
+
+## UiSettings
+UiSettings defaults registration performed during `setup` phase via `core.uiSettings.register` API.
+
+```js
+// Before:
+uiExports: {
+  uiSettingDefaults: {
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  }
+}
+```
+
+```ts
+// After:
+// src/plugins/my-plugin/server/plugin.ts
+setup(core: CoreSetup){
+  core.uiSettings.register({
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+      schema: schema.boolean(),
+    },
+  })
+}
+```

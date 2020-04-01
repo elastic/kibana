@@ -19,7 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas, AggGroupNames } from './legacy_imports';
+import { AggGroupNames } from '../../../../plugins/data/public';
+import { Schemas } from '../../vis_default_editor/public';
 import { PieOptions } from './components/options';
 import { getPositions, Positions } from './utils/collections';
 import { createVislibVisController } from './vis_controller';

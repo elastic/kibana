@@ -20,24 +20,15 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
-import { Axis } from '../../../types';
+import { ValueAxis } from '../../../types';
 import { TextInputOption } from '../../common';
 import { LabelOptions } from './label_options';
-import {
-  ScaleTypes,
-  Positions,
-  getScaleTypes,
-  getAxisModes,
-  getPositions,
-} from '../../../utils/collections';
-import { valueAxis, categoryAxis } from './mocks';
+import { ScaleTypes, Positions } from '../../../utils/collections';
+import { valueAxis, vis } from './mocks';
 
 jest.mock('ui/new_platform');
 
 const POSITION = 'position';
-const positions = getPositions();
-const axisModes = getAxisModes();
-const scaleTypes = getScaleTypes();
 
 interface PositionOption {
   text: string;
@@ -50,7 +41,7 @@ describe('ValueAxisOptions component', () => {
   let onValueAxisPositionChanged: jest.Mock;
   let setMultipleValidity: jest.Mock;
   let defaultProps: ValueAxisOptionsParams;
-  let axis: Axis;
+  let axis: ValueAxis;
 
   beforeEach(() => {
     setParamByIndex = jest.fn();
@@ -61,22 +52,13 @@ describe('ValueAxisOptions component', () => {
     defaultProps = {
       axis,
       index: 0,
-      stateParams: {
-        categoryAxes: [{ ...categoryAxis }],
-        valueAxes: [axis],
-      },
-      vis: {
-        type: {
-          editorConfig: {
-            collections: { scaleTypes, axisModes, positions },
-          },
-        },
-      },
+      valueAxis,
+      vis,
       isCategoryAxisHorizontal: false,
       setParamByIndex,
       onValueAxisPositionChanged,
       setMultipleValidity,
-    } as any;
+    };
   });
 
   it('should init with the default set of props', () => {

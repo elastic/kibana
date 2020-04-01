@@ -6,33 +6,53 @@
 
 import * as t from 'io-ts';
 
+import { RuleTypeSchema } from '../../../../common/detection_engine/types';
+
+/**
+ * Params is an "record", since it is a type of AlertActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/alert.ts
+ */
+export const action = t.exact(
+  t.type({
+    group: t.string,
+    id: t.string,
+    action_type_id: t.string,
+    params: t.record(t.string, t.any),
+  })
+);
+
 export const NewRuleSchema = t.intersection([
   t.type({
     description: t.string,
     enabled: t.boolean,
-    filters: t.array(t.unknown),
-    index: t.array(t.string),
     interval: t.string,
-    language: t.string,
     name: t.string,
-    query: t.string,
     risk_score: t.number,
     severity: t.string,
-    type: t.union([t.literal('query'), t.literal('saved_query')]),
+    type: RuleTypeSchema,
   }),
   t.partial({
+    actions: t.array(action),
+    anomaly_threshold: t.number,
     created_by: t.string,
     false_positives: t.array(t.string),
+    filters: t.array(t.unknown),
     from: t.string,
     id: t.string,
+    index: t.array(t.string),
+    language: t.string,
+    machine_learning_job_id: t.string,
     max_signals: t.number,
+    query: t.string,
     references: t.array(t.string),
     rule_id: t.string,
     saved_id: t.string,
     tags: t.array(t.string),
     threat: t.array(t.unknown),
+    throttle: t.union([t.string, t.null]),
     to: t.string,
     updated_by: t.string,
+    note: t.string,
   }),
 ]);
 
@@ -44,9 +64,15 @@ export interface AddRulesProps {
   signal: AbortSignal;
 }
 
-const MetaRule = t.type({
-  from: t.string,
-});
+const MetaRule = t.intersection([
+  t.type({
+    from: t.string,
+  }),
+  t.partial({
+    throttle: t.string,
+    kibanaSiemAppUrl: t.string,
+  }),
+]);
 
 export const RuleSchema = t.intersection([
   t.type({
@@ -55,37 +81,42 @@ export const RuleSchema = t.intersection([
     description: t.string,
     enabled: t.boolean,
     false_positives: t.array(t.string),
-    filters: t.array(t.unknown),
     from: t.string,
     id: t.string,
-    index: t.array(t.string),
     interval: t.string,
     immutable: t.boolean,
-    language: t.string,
     name: t.string,
     max_signals: t.number,
-    query: t.string,
     references: t.array(t.string),
     risk_score: t.number,
     rule_id: t.string,
     severity: t.string,
     tags: t.array(t.string),
-    type: t.string,
+    type: RuleTypeSchema,
     to: t.string,
     threat: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
+    actions: t.array(action),
+    throttle: t.union([t.string, t.null]),
   }),
   t.partial({
+    anomaly_threshold: t.number,
+    filters: t.array(t.unknown),
+    index: t.array(t.string),
+    language: t.string,
     last_failure_at: t.string,
     last_failure_message: t.string,
     meta: MetaRule,
+    machine_learning_job_id: t.string,
     output_index: t.string,
+    query: t.string,
     saved_id: t.string,
     status: t.string,
     status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
+    note: t.string,
     version: t.number,
   }),
 ]);
@@ -96,9 +127,12 @@ export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
 export interface RuleError {
-  rule_id: string;
+  id?: string;
+  rule_id?: string;
   error: { status_code: number; message: string };
 }
+
+export type BulkRuleResponse = Array<Rule | RuleError>;
 
 export interface RuleResponseBuckets {
   rules: Rule[];
@@ -155,7 +189,7 @@ export interface BasicFetchProps {
   signal: AbortSignal;
 }
 
-export interface ImportRulesProps {
+export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
   signal: AbortSignal;
@@ -169,14 +203,14 @@ export interface ImportRulesResponseError {
   };
 }
 
-export interface ImportRulesResponse {
+export interface ImportDataResponse {
   success: boolean;
   success_count: number;
   errors: ImportRulesResponseError[];
 }
 
-export interface ExportRulesProps {
-  ruleIds?: string[];
+export interface ExportDocumentsProps {
+  ids: string[];
   filename?: string;
   excludeExportDetails?: boolean;
   signal: AbortSignal;
@@ -196,6 +230,10 @@ export interface RuleInfoStatus {
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
+  last_look_back_date: string | null | undefined;
+  gap: string | null | undefined;
+  bulk_create_time_durations: string[] | null | undefined;
+  search_after_time_durations: string[] | null | undefined;
 }
 
 export type RuleStatusResponse = Record<string, RuleStatus>;

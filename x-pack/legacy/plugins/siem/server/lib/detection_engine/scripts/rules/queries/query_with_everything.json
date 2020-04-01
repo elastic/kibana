@@ -78,5 +78,6 @@
   ],
   "timeline_id": "timeline_id",
   "timeline_title": "timeline_title",
+  "note": "# note markdown",
   "version": 1
 }

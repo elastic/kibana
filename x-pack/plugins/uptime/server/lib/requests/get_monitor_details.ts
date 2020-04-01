@@ -9,7 +9,6 @@ import {
   MonitorDetails,
   MonitorError,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
@@ -20,7 +19,7 @@ export interface GetMonitorDetailsParams {
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ callES, monitorId, dateStart, dateEnd }) => {
+> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd }) => {
   const queryFilters: any = [
     {
       range: {
@@ -38,7 +37,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
   ];
 
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 1,
       _source: ['error', '@timestamp'],

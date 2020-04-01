@@ -6,8 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { useStateToaster, displaySuccessToast } from '../../../components/toasters';
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster, displaySuccessToast } from '../../../components/toasters';
 import { getPrePackagedRulesStatus, createPrepackagedRules } from './api';
 import * as i18n from './translations';
 

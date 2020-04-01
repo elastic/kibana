@@ -21,13 +21,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
 import { Axis } from '../../../types';
-import { Positions, getPositions } from '../../../utils/collections';
+import { Positions } from '../../../utils/collections';
 import { LabelOptions } from './label_options';
-import { categoryAxis } from './mocks';
+import { categoryAxis, vis } from './mocks';
 
 jest.mock('ui/new_platform');
-
-const positions = getPositions();
 
 describe('CategoryAxisPanel component', () => {
   let setCategoryAxis: jest.Mock;
@@ -42,16 +40,10 @@ describe('CategoryAxisPanel component', () => {
 
     defaultProps = {
       axis,
-      vis: {
-        type: {
-          editorConfig: {
-            collections: { positions },
-          },
-        },
-      },
+      vis,
       onPositionChanged,
       setCategoryAxis,
-    } as any;
+    };
   });
 
   it('should init with the default set of props', () => {

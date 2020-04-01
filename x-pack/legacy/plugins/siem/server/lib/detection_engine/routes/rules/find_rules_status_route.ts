@@ -34,9 +34,9 @@ export const findRulesStatusesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const { query } = request;
-      const alertsClient = context.alerting.getAlertsClient();
-      const savedObjectsClient = context.core.savedObjects.client;
       const siemResponse = buildSiemResponse(response);
+      const alertsClient = context.alerting?.getAlertsClient();
+      const savedObjectsClient = context.core.savedObjects.client;
 
       if (!alertsClient) {
         return siemResponse.error({ statusCode: 404 });

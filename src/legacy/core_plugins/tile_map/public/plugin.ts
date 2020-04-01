@@ -24,7 +24,7 @@ import {
   IUiSettingsClient,
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 
@@ -64,9 +64,7 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
     expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
 
-    visualizations.types.createBaseVisualization(
-      createTileMapTypeDefinition(visualizationDependencies)
-    );
+    visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
   }
 
   public start(core: CoreStart) {

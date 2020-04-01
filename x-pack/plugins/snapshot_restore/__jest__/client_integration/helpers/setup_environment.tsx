@@ -35,7 +35,7 @@ const appDependencies = {
   core: coreMock.createSetup(),
   services,
   config: {
-    slmUi: { enabled: true },
+    slm_ui: { enabled: true },
   },
   plugins: {},
 };

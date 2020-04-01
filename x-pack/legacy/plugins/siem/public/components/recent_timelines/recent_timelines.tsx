@@ -21,10 +21,6 @@ import { WithHoverActions } from '../with_hover_actions';
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';
 
-export interface MeApiResponse {
-  username: string;
-}
-
 export const RecentTimelines = React.memo<{
   noTimelinesMessage: string;
   onOpenTimeline: OnOpenTimeline;
@@ -51,12 +47,9 @@ export const RecentTimelines = React.memo<{
                   <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={t} />
                   <RecentTimelineCounts timeline={t} />
                   {t.description && t.description.length && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiText color="subdued" size="xs">
-                        {t.description}
-                      </EuiText>
-                    </>
+                    <EuiText color="subdued" size="xs">
+                      {t.description}
+                    </EuiText>
                   )}
                 </EuiFlexItem>
 

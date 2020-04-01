@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getApiPath } from '../../lib/helper';
+import { API_URLS } from '../../../common/constants';
+import { apiService } from './utils';
 
-interface APIParams {
-  basePath: string;
-}
-
-export const fetchIndexPattern = async ({ basePath }: APIParams) => {
-  const url = getApiPath(`/api/uptime/index_pattern`, basePath);
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  return await response.json();
+export const fetchIndexPattern = async () => {
+  return await apiService.get(API_URLS.INDEX_PATTERN);
 };

@@ -6,6 +6,7 @@
 
 import { PrepackagedRules } from '../types';
 import { addPrepackagedRulesSchema } from '../routes/schemas/add_prepackaged_rules_schema';
+import { BadRequestError } from '../errors/bad_request_error';
 import { rawRules } from './prepackaged_rules';
 
 /**
@@ -19,7 +20,7 @@ export const validateAllPrepackagedRules = (rules: PrepackagedRules[]): Prepacka
     if (validatedRule.error != null) {
       const ruleName = rule.name ? rule.name : '(rule name unknown)';
       const ruleId = rule.rule_id ? rule.rule_id : '(rule rule_id unknown)';
-      throw new TypeError(
+      throw new BadRequestError(
         `name: "${ruleName}", rule_id: "${ruleId}" within the folder rules/prepackaged_rules ` +
           `is not a valid detection engine rule. Expect the system ` +
           `to not work with pre-packaged rules until this rule is fixed ` +

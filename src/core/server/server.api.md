@@ -419,7 +419,26 @@ export type AuthenticationHandler = (request: KibanaRequest, response: Lifecycle
 export type AuthHeaders = Record<string, string | string[]>;
 
 // @public (undocumented)
-export type AuthResult = Authenticated;
+export interface AuthNotHandled {
+    // (undocumented)
+    type: AuthResultType.notHandled;
+}
+
+// @public (undocumented)
+export interface AuthRedirected extends AuthRedirectedParams {
+    // (undocumented)
+    type: AuthResultType.redirected;
+}
+
+// @public
+export interface AuthRedirectedParams {
+    headers: {
+        location: string;
+    } & ResponseHeaders;
+}
+
+// @public (undocumented)
+export type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 
 // @public
 export interface AuthResultParams {
@@ -431,7 +450,11 @@ export interface AuthResultParams {
 // @public (undocumented)
 export enum AuthResultType {
     // (undocumented)
-    authenticated = "authenticated"
+    authenticated = "authenticated",
+    // (undocumented)
+    notHandled = "notHandled",
+    // (undocumented)
+    redirected = "redirected"
 }
 
 // @public
@@ -444,6 +467,10 @@ export enum AuthStatus {
 // @public
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
+    notHandled: () => AuthResult;
+    redirected: (headers: {
+        location: string;
+    } & ResponseHeaders) => AuthResult;
 }
 
 // @public
@@ -595,14 +622,15 @@ export interface ContextSetup {
 export type CoreId = symbol;
 
 // @public
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
@@ -619,6 +647,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
 export interface CoreStart {
     // (undocumented)
     capabilities: CapabilitiesStart;
+    // (undocumented)
+    elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
@@ -747,9 +777,21 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
+    // @deprecated (undocumented)
     readonly adminClient: IClusterClient;
+    // @deprecated (undocumented)
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+    // @deprecated (undocumented)
     readonly dataClient: IClusterClient;
+}
+
+// @public (undocumented)
+export interface ElasticsearchServiceStart {
+    // (undocumented)
+    legacy: {
+        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+        readonly client: IClusterClient;
+    };
 }
 
 // @public (undocumented)
@@ -855,8 +897,10 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
 }
 
+// Warning: (ae-forgotten-export) The symbol "PartialExceptFor" needs to be exported by the entry point index.d.ts
+//
 // @public
-export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public
 export interface ICspConfig {
@@ -941,7 +985,7 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
-export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'>;
+export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden' | 'getImportableAndExportableTypes' | 'isImportableAndExportable'>;
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -955,7 +999,7 @@ export interface IScopedRenderingClient {
 export interface IUiSettingsClient {
     get: <T = any>(key: string) => Promise<T>;
     getAll: <T = any>() => Promise<Record<string, T>>;
-    getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+    getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
     getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
@@ -969,6 +1013,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // @internal (undocumented)
     protected readonly [requestSymbol]: Request;
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
+    // (undocumented)
+    readonly auth: {
+        isAuthenticated: boolean;
+    };
     // (undocumented)
     readonly body: Body;
     readonly events: KibanaRequestEvents;
@@ -1378,10 +1426,10 @@ export type PluginName = string;
 // @public (undocumented)
 export type PluginOpaqueId = symbol;
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface PluginsServiceSetup {
-    // (undocumented)
     contracts: Map<PluginName, unknown>;
+    initialized: boolean;
     // (undocumented)
     uiPlugins: {
         internal: Map<PluginName, InternalPluginInfo>;
@@ -1390,11 +1438,13 @@ export interface PluginsServiceSetup {
     };
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface PluginsServiceStart {
-    // (undocumented)
     contracts: Map<PluginName, unknown>;
 }
+
+// @public
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
 //
@@ -1425,6 +1475,7 @@ export interface RequestHandlerContext {
         rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
+            typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
             dataClient: IScopedClusterClient;
@@ -1470,7 +1521,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
 
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod> {
-    authRequired?: boolean;
+    authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
     xsrfRequired?: Method extends 'get' ? never : boolean;
@@ -1544,6 +1595,8 @@ export interface RouteValidatorOptions {
 // @public
 export type SafeRouteMethod = 'get' | 'options';
 
+// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
@@ -1975,6 +2028,8 @@ export interface SavedObjectsLegacyService {
     // (undocumented)
     getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
     // (undocumented)
+    importAndExportableTypes: string[];
+    // (undocumented)
     importExport: {
         objectLimit: number;
         importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
@@ -2119,10 +2174,24 @@ export interface SavedObjectsType {
     convertToAliasScript?: string;
     hidden: boolean;
     indexPattern?: string;
+    management?: SavedObjectsTypeManagementDefinition;
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
     name: string;
     namespaceAgnostic: boolean;
+}
+
+// @public
+export interface SavedObjectsTypeManagementDefinition {
+    defaultSearchField?: string;
+    getEditUrl?: (savedObject: SavedObject<any>) => string;
+    getInAppUrl?: (savedObject: SavedObject<any>) => {
+        path: string;
+        uiCapabilitiesPath: string;
+    };
+    getTitle?: (savedObject: SavedObject<any>) => string;
+    icon?: string;
+    importableAndExportable?: boolean;
 }
 
 // @public
@@ -2149,9 +2218,11 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 // @public
 export class SavedObjectTypeRegistry {
     getAllTypes(): SavedObjectsType[];
+    getImportableAndExportableTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
     isHidden(type: string): boolean;
+    isImportableAndExportable(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }
@@ -2201,6 +2272,9 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 }>;
 
 // @public
+export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+// @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
 
 // @public
@@ -2220,7 +2294,7 @@ export interface StringValidationRegexString {
 }
 
 // @public
-export interface UiSettingsParams {
+export interface UiSettingsParams<T = unknown> {
     category?: string[];
     deprecation?: DeprecationSettings;
     description?: string;
@@ -2229,10 +2303,12 @@ export interface UiSettingsParams {
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
+    // (undocumented)
+    schema: Type<T>;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
-    value?: SavedObjectAttribute;
+    value?: T;
 }
 
 // @public (undocumented)
@@ -2273,9 +2349,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:164:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:166:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:44:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:228:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:47:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:232:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

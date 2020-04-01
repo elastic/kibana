@@ -18,12 +18,13 @@
  */
 
 import { set } from 'lodash';
-import { dateHistogramInterval } from '../../../../../../../legacy/core_plugins/data/server';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
+import { search } from '../../../../../../../plugins/data/server';
+const { dateHistogramInterval } = search.aggs;
 
 export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {

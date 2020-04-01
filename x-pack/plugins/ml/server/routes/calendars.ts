@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -42,6 +42,7 @@ function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) 
 }
 
 export function calendars({ router, mlLicense }: RouteInitialization) {
+  // Gets calendars - size limit has been explicitly set to 1000
   router.get(
     {
       path: '/api/ml/calendars',

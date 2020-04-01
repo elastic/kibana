@@ -75,7 +75,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
 
   useEffect(() => {
     editAction('level', 'info', index);
-    if (defaultMessage && defaultMessage.length > 0) {
+    if (!message && defaultMessage && defaultMessage.length > 0) {
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,6 +134,12 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
               <EuiButtonIcon
                 onClick={() => setIsVariablesPopoverOpen(true)}
                 iconType="indexOpen"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.addVariableTitle',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
                 aria-label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.addVariablePopoverButton',
                   {

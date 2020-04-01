@@ -6,6 +6,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const { stringifyRequest } = require('loader-utils'); // eslint-disable-line
 
 const {
   KIBANA_ROOT,
@@ -140,19 +141,63 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        exclude: /\.module.(s(a|c)ss)$/,
+        exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
         use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader', options: { importLoaders: 2 } },
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: !isProd,
+            },
+          },
           {
             loader: 'postcss-loader',
             options: {
+              sourceMap: !isProd,
               config: {
-                path: require.resolve('./postcss.config.js'),
+                path: require.resolve('./postcss.config'),
               },
             },
           },
-          { loader: 'sass-loader' },
+          {
+            loader: 'resolve-url-loader',
+            options: {
+              // eslint-disable-next-line no-unused-vars
+              join: (_, __) => (uri, base) => {
+                if (!base) {
+                  return null;
+                }
+
+                // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
+                if (uri.startsWith('ui/') && base.split(path.sep).includes('legacy')) {
+                  return path.resolve(KIBANA_ROOT, 'src/legacy/ui/public', uri.replace('ui/', ''));
+                }
+
+                return null;
+              },
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              // must always be enabled as long as we're using the `resolve-url-loader` to
+              // rewrite `ui/*` urls. They're dropped by subsequent loaders though
+              sourceMap: true,
+              prependData(loaderContext) {
+                return `@import ${stringifyRequest(
+                  loaderContext,
+                  path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+                )};\n`;
+              },
+              webpackImporter: false,
+              sassOptions: {
+                outputStyle: 'nested',
+                includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
+              },
+            },
+          },
         ],
       },
       {

@@ -363,7 +363,7 @@ describe('Field', () => {
         (component.instance() as Field).getImageAsBase64 = ({}: Blob) => Promise.resolve('');
 
         it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onImageChange([userValue]);
+          (component.instance() as Field).onImageChange(([userValue] as unknown) as FileList);
           expect(handleChange).toBeCalled();
           await wrapper.setProps({
             unsavedChanges: {
@@ -387,7 +387,9 @@ describe('Field', () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-changeImage-${setting.name}`).simulate('click');
           const newUserValue = `${userValue}=`;
-          await (component.instance() as Field).onImageChange([newUserValue]);
+          await (component.instance() as Field).onImageChange(([
+            newUserValue,
+          ] as unknown) as FileList);
           expect(handleChange).toBeCalled();
         });
 

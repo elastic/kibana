@@ -99,8 +99,8 @@ export class LayerPanel extends React.Component {
     }
   }
 
-  _onSourceChange = ({ propName, value }) => {
-    this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value);
+  _onSourceChange = ({ propName, value, newLayerType }) => {
+    this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value, newLayerType);
   };
 
   _renderFilterSection() {

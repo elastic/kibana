@@ -37,6 +37,7 @@ export const SourceProcessTokenAccordion = memo(
           }
         )}
         paddingSize="l"
+        data-test-subj="alertDetailsSourceProcessTokenAccordion"
       >
         <EuiDescriptionList type="column" listItems={columns} />
       </EuiAccordion>

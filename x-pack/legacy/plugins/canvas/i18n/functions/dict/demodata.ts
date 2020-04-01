@@ -13,7 +13,7 @@ import { DemoRows } from '../../../canvas_plugin_src/functions/server/demodata/g
 export const help: FunctionHelp<FunctionFactory<typeof demodata>> = {
   help: i18n.translate('xpack.canvas.functions.demodataHelpText', {
     defaultMessage:
-      'A mock data set that includes project {ci} times with usernames, countries, and run phases.',
+      'A sample data set that includes project {ci} times with usernames, countries, and run phases.',
     values: {
       ci: 'CI',
     },

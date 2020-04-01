@@ -5,7 +5,7 @@
  */
 import {
   PROCESSOR_EVENT,
-  SERVICE_AGENT_NAME,
+  AGENT_NAME,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
@@ -39,7 +39,7 @@ export async function getServiceAgentName(
       },
       aggs: {
         agents: {
-          terms: { field: SERVICE_AGENT_NAME, size: 1 }
+          terms: { field: AGENT_NAME, size: 1 }
         }
       }
     }

@@ -8,27 +8,25 @@ import React from 'react';
 import { EuiProgress } from '@elastic/eui';
 import { Loader } from './loader';
 import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 describe('loader', () => {
   it('shows a loading indicator when loading', async () => {
     const load = jest.fn(() => Promise.resolve());
     const inst = mount(<Loader loadDeps={[]} load={load} />);
-
     expect(inst.find(EuiProgress).length).toEqual(1);
 
-    await load();
+    await act(async () => load());
     inst.update();
-
     expect(inst.find(EuiProgress).length).toEqual(0);
   });
 
   it('hides loading indicator when failed', async () => {
     const load = jest.fn(() => Promise.reject());
     const inst = mount(<Loader loadDeps={[]} load={load} />);
-
     expect(inst.find(EuiProgress).length).toEqual(1);
 
-    await Promise.resolve();
+    await act(async () => Promise.resolve());
     inst.update();
 
     expect(inst.find(EuiProgress).length).toEqual(0);
@@ -45,7 +43,11 @@ describe('loader', () => {
       return Promise.resolve().then(() => --count);
     });
     const inst = mount(<Loader loadDeps={['bar']} load={load} />);
-    inst.setProps({ loadDeps: ['foo'] });
+
+    await act(async () => {
+      inst.setProps({ loadDeps: ['foo'] });
+    });
+
     inst.update();
 
     await Promise.resolve();

@@ -31,11 +31,7 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerImportRoute = (
-  router: IRouter,
-  config: SavedObjectConfig,
-  supportedTypes: string[]
-) => {
+export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
@@ -64,6 +60,10 @@ export const registerImportRoute = (
       if (fileExtension !== '.ndjson') {
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
+
+      const supportedTypes = context.core.savedObjects.typeRegistry
+        .getImportableAndExportableTypes()
+        .map(type => type.name);
 
       const result = await importSavedObjectsFromStream({
         supportedTypes,

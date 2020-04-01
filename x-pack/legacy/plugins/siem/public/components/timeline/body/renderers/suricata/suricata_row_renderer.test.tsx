@@ -29,7 +29,6 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
-      children: <span>{'some children'}</span>,
       timelineId: 'test',
     });
 
@@ -45,26 +44,10 @@ describe('suricata_row_renderer', () => {
     expect(suricataRowRenderer.isInstance(suricata)).toBe(true);
   });
 
-  test('should render children normally if it does not have a signature', () => {
-    const children = suricataRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
-      data: nonSuricata,
-      children: <span>{'some children'}</span>,
-      timelineId: 'test',
-    });
-    const wrapper = mount(
-      <TestProviders>
-        <span>{children}</span>
-      </TestProviders>
-    );
-    expect(wrapper.text()).toEqual('some children');
-  });
-
   test('should render a suricata row', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
-      children: <span>{'some children '}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -73,7 +56,7 @@ describe('suricata_row_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some children 4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
+      '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
 
@@ -82,7 +65,6 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
-      children: <span>{'some children'}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -90,6 +72,6 @@ describe('suricata_row_renderer', () => {
         <span>{children}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('some children');
+    expect(wrapper.text()).toEqual('');
   });
 });

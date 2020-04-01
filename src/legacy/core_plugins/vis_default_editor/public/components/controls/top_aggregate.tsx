@@ -28,7 +28,7 @@ import {
   OptionedValueProp,
   OptionedParamEditorProps,
   OptionedParamType,
-} from '../../legacy_imports';
+} from 'src/plugins/data/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 export interface AggregateValueProp extends OptionedValueProp {

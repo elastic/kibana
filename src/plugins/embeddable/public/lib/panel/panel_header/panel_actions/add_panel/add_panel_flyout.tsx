@@ -29,16 +29,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
-import { GetEmbeddableFactories, GetEmbeddableFactory } from '../../../../types';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
 
 interface Props {
   onClose: () => void;
   container: IContainer;
-  getFactory: GetEmbeddableFactory;
-  getAllFactories: GetEmbeddableFactories;
+  getFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
 }

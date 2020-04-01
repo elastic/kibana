@@ -35,7 +35,7 @@ image::siem/images/network-ui.png[]
 
 [float]
 [[detections-ui]]
-=== Detections
+=== Detections (Beta)
 
 The Detections feature automatically searches for threats and creates 
 signals when they are detected. Signal detection rules define the conditions 

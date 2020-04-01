@@ -209,7 +209,7 @@ export function MachineLearningFlyoutView({
                 {i18n.translate(
                   'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',
                   {
-                    defaultMessage: 'Create new job'
+                    defaultMessage: 'Create job'
                   }
                 )}
               </EuiButton>

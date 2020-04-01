@@ -23,14 +23,14 @@ export const drag = (subject: JQuery<HTMLElement>) => {
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(5)
+    .wait(1000)
     .trigger('mousemove', {
       button: primaryButton,
       clientX: subjectLocation.left + dndSloppyClickDetectionThreshold,
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(5);
+    .wait(1000);
 };
 
 /** Drags the subject being dragged on the specified drop target, but does not drop it  */
@@ -44,7 +44,7 @@ export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
   cy.wrap(dropTarget)
     .trigger('mousemove', { button: primaryButton, force: true })
-    .wait(5)
+    .wait(1000)
     .trigger('mouseup', { force: true })
-    .wait(5);
+    .wait(1000);
 };

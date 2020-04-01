@@ -19,8 +19,8 @@ import { Watch } from '../../../models/watch/index';
 import { WatchHistoryItem } from '../../../models/watch_history_item/index';
 
 const bodySchema = schema.object({
-  executeDetails: schema.object({}, { allowUnknowns: true }),
-  watch: schema.object({}, { allowUnknowns: true }),
+  executeDetails: schema.object({}, { unknowns: 'allow' }),
+  watch: schema.object({}, { unknowns: 'allow' }),
 });
 
 function executeWatch(dataClient: IScopedClusterClient, executeDetails: any, watchJson: any) {

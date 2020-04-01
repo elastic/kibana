@@ -33,13 +33,13 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const alertsClient = context.alerting.getAlertsClient();
-        const actionsClient = context.actions.getActionsClient();
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
         const clusterClient = context.core.elasticsearch.dataClient;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
 
-        if (!actionsClient || !alertsClient) {
+        if (!siemClient || !actionsClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 

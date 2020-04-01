@@ -8,10 +8,19 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getFindResultStatus, ruleStatusRequest } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('find_statuses', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -29,7 +38,7 @@ describe('find_statuses', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getAlertsClient = jest.fn();
+      context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(ruleStatusRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

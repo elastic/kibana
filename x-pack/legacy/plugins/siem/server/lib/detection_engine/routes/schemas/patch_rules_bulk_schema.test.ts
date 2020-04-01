@@ -6,11 +6,20 @@
 
 import { patchRulesBulkSchema } from './patch_rules_bulk_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 // only the basics of testing are here.
 // see: patch_rules_schema.test.ts for the bulk of the validation tests
 // this just wraps patchRulesSchema in an array
 describe('patch_rules_bulk_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('can take an empty array and validate it', () => {
     expect(
       patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([]).error
@@ -48,5 +57,44 @@ describe('patch_rules_bulk_schema', () => {
         },
       ]).error
     ).toBeFalsy();
+  });
+
+  test('can set "note" to be a string', () => {
+    expect(
+      patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
+        {
+          id: 'rule-1',
+          note: 'hi',
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('can set "note" to be an empty string', () => {
+    expect(
+      patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
+        {
+          id: 'rule-1',
+          note: '',
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('cannot set "note" to be anything other than a string', () => {
+    expect(
+      patchRulesBulkSchema.validate<
+        Array<Partial<Omit<PatchRuleAlertParamsRest, 'note'> & { note: object }>>
+      >([
+        {
+          id: 'rule-1',
+          note: {
+            someprop: 'some value here',
+          },
+        },
+      ]).error.message
+    ).toEqual(
+      '"value" at position 0 fails because [child "note" fails because ["note" must be a string]]'
+    );
   });
 });

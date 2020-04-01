@@ -28,8 +28,9 @@ import {
   useValidation,
 } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
-import { termsAggFilter } from '../../legacy_imports';
+import { search } from '../../../../../../plugins/data/public';
 
+const { termsAggFilter } = search.aggs;
 const DEFAULT_VALUE = '_key';
 const DEFAULT_OPTIONS = [
   {

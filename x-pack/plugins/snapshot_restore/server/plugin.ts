@@ -86,7 +86,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       config: {
         isSecurityEnabled: security !== undefined,
         isCloudEnabled: cloud !== undefined && cloud.isCloudEnabled,
-        isSlmEnabled: pluginConfig.slmUi.enabled,
+        isSlmEnabled: pluginConfig.slm_ui.enabled,
       },
       lib: {
         isEsError,

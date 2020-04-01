@@ -6,9 +6,12 @@
 
 import { EuiCheckbox } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React from 'react';
-import { Droppable } from 'react-beautiful-dnd';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import deepEqual from 'fast-deep-equal';
 
+import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
+import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { BrowserFields } from '../../../../containers/source';
 import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { DRAG_TYPE_FIELD, droppableTimelineColumnsPrefix } from '../../../drag_and_drop/helpers';
@@ -53,6 +56,26 @@ interface Props {
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
+interface DraggableContainerProps {
+  children: React.ReactNode;
+  onMount: () => void;
+  onUnmount: () => void;
+}
+
+export const DraggableContainer = React.memo<DraggableContainerProps>(
+  ({ children, onMount, onUnmount }) => {
+    useEffect(() => {
+      onMount();
+
+      return () => onUnmount();
+    }, [onMount, onUnmount]);
+
+    return <>{children}</>;
+  }
+);
+
+DraggableContainer.displayName = 'DraggableContainer';
+
 /** Renders the timeline header columns */
 export const ColumnHeadersComponent = ({
   actionsColumnWidth,
@@ -71,86 +94,157 @@ export const ColumnHeadersComponent = ({
   sort,
   timelineId,
   toggleColumn,
-}: Props) => (
-  <EventsThead data-test-subj="column-headers">
-    <EventsTrHeader>
-      <EventsThGroupActions
-        actionsColumnWidth={actionsColumnWidth}
-        justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
-        data-test-subj="actions-container"
-      >
-        {showEventsSelect && (
+}: Props) => {
+  const [draggingIndex, setDraggingIndex] = useState(null);
+
+  const handleSelectAllChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onSelectAll({ isSelected: event.currentTarget.checked });
+    },
+    [onSelectAll]
+  );
+
+  const renderClone: DraggableChildrenFn = useCallback(
+    (dragProvided, dragSnapshot, rubric) => {
+      // TODO: Remove after github.com/DefinitelyTyped/DefinitelyTyped/pull/43057 is merged
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const index = (rubric as any).source.index;
+      const header = columnHeaders[index];
+
+      const onMount = () => setDraggingIndex(index);
+      const onUnmount = () => setDraggingIndex(null);
+
+      return (
+        <EventsTh
+          data-test-subj="draggable-header"
+          {...dragProvided.draggableProps}
+          {...dragProvided.dragHandleProps}
+          ref={dragProvided.innerRef}
+        >
+          <DraggableContainer onMount={onMount} onUnmount={onUnmount}>
+            <DragEffects>
+              <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width} />
+            </DragEffects>
+          </DraggableContainer>
+        </EventsTh>
+      );
+    },
+    [columnHeaders, setDraggingIndex]
+  );
+
+  const ColumnHeaderList = useMemo(
+    () =>
+      columnHeaders.map((header, draggableIndex) => (
+        <ColumnHeader
+          key={header.id}
+          draggableIndex={draggableIndex}
+          timelineId={timelineId}
+          header={header}
+          isDragging={draggingIndex === draggableIndex}
+          onColumnRemoved={onColumnRemoved}
+          onColumnSorted={onColumnSorted}
+          onFilterChange={onFilterChange}
+          onColumnResized={onColumnResized}
+          sort={sort}
+        />
+      )),
+    [
+      columnHeaders,
+      timelineId,
+      draggingIndex,
+      onColumnRemoved,
+      onFilterChange,
+      onColumnResized,
+      sort,
+    ]
+  );
+
+  return (
+    <EventsThead data-test-subj="column-headers">
+      <EventsTrHeader>
+        <EventsThGroupActions
+          actionsColumnWidth={actionsColumnWidth}
+          justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
+          data-test-subj="actions-container"
+        >
+          {showEventsSelect && (
+            <EventsTh>
+              <EventsThContent textAlign="center">
+                <EventsSelect checkState="unchecked" timelineId={timelineId} />
+              </EventsThContent>
+            </EventsTh>
+          )}
+          {showSelectAllCheckbox && (
+            <EventsTh>
+              <EventsThContent textAlign="center">
+                <EuiCheckbox
+                  data-test-subj="select-all-events"
+                  id={'select-all-events'}
+                  checked={isSelectAllChecked}
+                  onChange={handleSelectAllChange}
+                />
+              </EventsThContent>
+            </EventsTh>
+          )}
           <EventsTh>
-            <EventsThContent textAlign="center">
-              <EventsSelect checkState="unchecked" timelineId={timelineId} />
-            </EventsThContent>
-          </EventsTh>
-        )}
-        {showSelectAllCheckbox && (
-          <EventsTh>
-            <EventsThContent textAlign="center">
-              <EuiCheckbox
-                data-test-subj="select-all-events"
-                id={'select-all-events'}
-                checked={isSelectAllChecked}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  onSelectAll({ isSelected: event.currentTarget.checked });
-                }}
+            <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
+              <StatefulFieldsBrowser
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                data-test-subj="field-browser"
+                height={FIELD_BROWSER_HEIGHT}
+                isEventViewer={isEventViewer}
+                onUpdateColumns={onUpdateColumns}
+                timelineId={timelineId}
+                toggleColumn={toggleColumn}
+                width={FIELD_BROWSER_WIDTH}
               />
             </EventsThContent>
           </EventsTh>
-        )}
-        <EventsTh>
-          <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
-            <StatefulFieldsBrowser
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data-test-subj="field-browser"
-              height={FIELD_BROWSER_HEIGHT}
-              isEventViewer={isEventViewer}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-              width={FIELD_BROWSER_WIDTH}
-            />
-          </EventsThContent>
-        </EventsTh>
-      </EventsThGroupActions>
+        </EventsThGroupActions>
 
-      <Droppable
-        direction={'horizontal'}
-        droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
-        isDropDisabled={false}
-        type={DRAG_TYPE_FIELD}
-      >
-        {(dropProvided, snapshot) => (
-          <>
-            <EventsThGroupData
-              data-test-subj="headers-group"
-              ref={dropProvided.innerRef}
-              isDragging={snapshot.isDraggingOver}
-              {...dropProvided.droppableProps}
-            >
-              {columnHeaders.map((header, draggableIndex) => (
-                <ColumnHeader
-                  key={header.id}
-                  draggableIndex={draggableIndex}
-                  timelineId={timelineId}
-                  header={header}
-                  onColumnRemoved={onColumnRemoved}
-                  onColumnSorted={onColumnSorted}
-                  onFilterChange={onFilterChange}
-                  onColumnResized={onColumnResized}
-                  sort={sort}
-                />
-              ))}
-            </EventsThGroupData>
-            {dropProvided.placeholder}
-          </>
-        )}
-      </Droppable>
-    </EventsTrHeader>
-  </EventsThead>
+        <Droppable
+          direction={'horizontal'}
+          droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
+          isDropDisabled={false}
+          type={DRAG_TYPE_FIELD}
+          renderClone={renderClone}
+        >
+          {(dropProvided, snapshot) => (
+            <>
+              <EventsThGroupData
+                data-test-subj="headers-group"
+                ref={dropProvided.innerRef}
+                isDragging={snapshot.isDraggingOver}
+                {...dropProvided.droppableProps}
+              >
+                {ColumnHeaderList}
+              </EventsThGroupData>
+            </>
+          )}
+        </Droppable>
+      </EventsTrHeader>
+    </EventsThead>
+  );
+};
+
+export const ColumnHeaders = React.memo(
+  ColumnHeadersComponent,
+  (prevProps, nextProps) =>
+    prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
+    prevProps.isEventViewer === nextProps.isEventViewer &&
+    prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
+    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
+    prevProps.onColumnResized === nextProps.onColumnResized &&
+    prevProps.onColumnSorted === nextProps.onColumnSorted &&
+    prevProps.onSelectAll === nextProps.onSelectAll &&
+    prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
+    prevProps.onFilterChange === nextProps.onFilterChange &&
+    prevProps.showEventsSelect === nextProps.showEventsSelect &&
+    prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
+    prevProps.sort === nextProps.sort &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.toggleColumn === nextProps.toggleColumn &&
+    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
+    deepEqual(prevProps.browserFields, nextProps.browserFields)
 );
-
-export const ColumnHeaders = React.memo(ColumnHeadersComponent);

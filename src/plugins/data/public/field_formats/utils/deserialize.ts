@@ -19,14 +19,8 @@
 
 import { identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  convertDateRangeToString,
-  DateRangeKey,
-} from '../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/date_range';
-import {
-  convertIPRangeToString,
-  IpRangeKey,
-} from '../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/ip_range';
+import { convertDateRangeToString, DateRangeKey } from '../../search/aggs/buckets/lib/date_range';
+import { convertIPRangeToString, IpRangeKey } from '../../search/aggs/buckets/lib/ip_range';
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
 import { FieldFormatId, FieldFormatsContentType, IFieldFormat } from '../..';
 import { FieldFormat } from '../../../common';
@@ -76,7 +70,8 @@ export const deserializeFieldFormat: FormatFactory = function(
   const { id } = mapping;
   if (id === 'range') {
     const RangeFormat = FieldFormat.from((range: any) => {
-      const format = getFieldFormat(this, id, mapping.params);
+      const nestedFormatter = mapping.params as SerializedFieldFormat;
+      const format = getFieldFormat(this, nestedFormatter.id, nestedFormatter.params);
       const gte = '\u2265';
       const lt = '\u003c';
       return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {

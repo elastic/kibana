@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuditMessage } from '../../../../../legacy/plugins/transform/common/types/messages';
+import { AuditMessage } from '../../../common/types/messages';
 import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
 import { RouteDependencies } from '../../types';

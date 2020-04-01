@@ -55,3 +55,10 @@ export const UPDATE_PREPACKAGED_RULES = (updateRules: number) =>
     defaultMessage:
       'Update {updateRules} Elastic prebuilt {updateRules, plural, =1 {rule} other {rules}} ',
   });
+
+export const RELEASE_NOTES_HELP = i18n.translate(
+  'xpack.siem.detectionEngine.rules.releaseNotesHelp',
+  {
+    defaultMessage: 'Release notes',
+  }
+);

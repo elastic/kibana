@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'src/core/server';
+import { SavedObject } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { FieldId } from '../../../../../../legacy/plugins/ml/common/types/fields';
-import { ES_AGGREGATION } from '../../../../../../legacy/plugins/ml/common/constants/aggregation_types';
+import { FieldId } from '../../../../common/types/fields';
+import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 

@@ -6,7 +6,7 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { getComputedFieldName } from '../style_util';
-import { VECTOR_STYLES } from '../vector_style_defaults';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 
 export class DynamicOrientationProperty extends DynamicStyleProperty {
   syncIconRotationWithMb(symbolLayerId, mbMap) {
@@ -22,11 +22,7 @@ export class DynamicOrientationProperty extends DynamicStyleProperty {
     }
   }
 
-  supportsFeatureState() {
-    return false;
-  }
-
-  isOrdinalScaled() {
+  supportsMbFeatureState() {
     return false;
   }
 }

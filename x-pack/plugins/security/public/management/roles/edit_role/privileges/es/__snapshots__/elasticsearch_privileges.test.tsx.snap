@@ -108,6 +108,7 @@ exports[`it renders without crashing 1`] = `
       labelType="label"
     >
       <EuiComboBox
+        async={false}
         compressed={false}
         fullWidth={false}
         isClearable={true}

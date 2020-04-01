@@ -28,12 +28,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig } from '../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 import { DefaultEditorAggParams } from './agg_params';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
+import { getSchemaByName } from '../schemas';
+import { TimeRange } from '../../../../../plugins/data/public';
+import { buildAggDescription } from './agg_params_helper';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: IAggConfig;
@@ -45,6 +48,7 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   isLastBucket: boolean;
   isRemovable: boolean;
   setAggsState: React.Dispatch<AggsAction>;
+  timeRange?: TimeRange;
 }
 
 function DefaultEditorAgg({
@@ -67,6 +71,8 @@ function DefaultEditorAgg({
   onToggleEnableAgg,
   removeAgg,
   setAggsState,
+  schemas,
+  timeRange,
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
@@ -80,11 +86,11 @@ function DefaultEditorAgg({
 
   let SchemaComponent;
 
-  if (agg.schema.name === 'split') {
+  if (agg.schema === 'split') {
     SchemaComponent = RowsOrColumnsControl;
   }
 
-  if (agg.schema.name === 'radius') {
+  if (agg.schema === 'radius') {
     SchemaComponent = RadiusRatioOptionControl;
   }
 
@@ -101,18 +107,15 @@ function DefaultEditorAgg({
     }
   }
 
-  // A description of the aggregation, for displaying in the collapsed agg header
-  let aggDescription = '';
+  const [aggDescription, setAggDescription] = useState(buildAggDescription(agg));
 
-  if (agg.type && agg.type.makeLabel) {
-    try {
-      aggDescription = agg.type.makeLabel(agg);
-    } catch (e) {
-      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including interval's 'write',
-      // which throws an error when interval is undefined.
-      aggDescription = '';
+  // This useEffect is required to update the timeRange value and initiate rerender to keep labels up to date (Issue #57822).
+  useEffect(() => {
+    if (timeRange && aggName === 'date_histogram') {
+      agg.aggConfigs.setTimeRange(timeRange);
     }
-  }
+    setAggDescription(buildAggDescription(agg));
+  }, [agg, aggName, timeRange]);
 
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(aggName)) {
@@ -255,10 +258,10 @@ function DefaultEditorAgg({
       </div>
     );
   };
-
+  const schemaTitle = getSchemaByName(schemas, agg.schema).title;
   const buttonContent = (
     <>
-      {agg.schema.title} {showDescription && <span>{aggDescription}</span>}
+      {schemaTitle || agg.schema} {showDescription && <span>{aggDescription}</span>}
     </>
   );
 
@@ -272,7 +275,7 @@ function DefaultEditorAgg({
       className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
       aria-label={i18n.translate('visDefaultEditor.agg.toggleEditorButtonAriaLabel', {
         defaultMessage: 'Toggle {schema} editor',
-        values: { schema: agg.schema.title },
+        values: { schema: schemaTitle || agg.schema },
       })}
       data-test-subj={`visEditorAggAccordion${agg.id}`}
       extraAction={renderAggButtons()}
@@ -303,6 +306,7 @@ function DefaultEditorAgg({
           onAggTypeChange={onAggTypeChange}
           setTouched={setTouched}
           setValidity={setValidity}
+          schemas={schemas}
         />
       </>
     </EuiAccordion>

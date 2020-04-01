@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useMemo } from 'react';
+
 import { euiStyled } from '../../../../../observability/public';
+import { TextScale } from '../../../../common/log_text_scale';
 import {
-  LogColumnConfiguration,
   isMessageLogColumnConfiguration,
   isTimestampLogColumnConfiguration,
+  LogColumnConfiguration,
 } from '../../../utils/source_configuration';
+import { useFormattedTime, TimeFormat } from '../../formatted_time';
+import { useMeasuredCharacterDimensions } from './text_styles';
 
 const DATE_COLUMN_SLACK_FACTOR = 1.1;
 const FIELD_COLUMN_MIN_WIDTH_CHARACTERS = 10;
@@ -100,3 +105,33 @@ export const getColumnWidths = (
       },
     }
   );
+
+/**
+ * This hook calculates the column widths based on the given configuration. It
+ * depends on the `CharacterDimensionsProbe` it returns being rendered so it can
+ * measure the monospace character size.
+ */
+export const useColumnWidths = ({
+  columnConfigurations,
+  scale,
+  timeFormat = 'time',
+}: {
+  columnConfigurations: LogColumnConfiguration[];
+  scale: TextScale;
+  timeFormat?: TimeFormat;
+}) => {
+  const { CharacterDimensionsProbe, dimensions } = useMeasuredCharacterDimensions(scale);
+  const referenceTime = useMemo(() => Date.now(), []);
+  const formattedCurrentDate = useFormattedTime(referenceTime, { format: timeFormat });
+  const columnWidths = useMemo(
+    () => getColumnWidths(columnConfigurations, dimensions.width, formattedCurrentDate.length),
+    [columnConfigurations, dimensions.width, formattedCurrentDate]
+  );
+  return useMemo(
+    () => ({
+      columnWidths,
+      CharacterDimensionsProbe,
+    }),
+    [columnWidths, CharacterDimensionsProbe]
+  );
+};
