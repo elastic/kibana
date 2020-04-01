@@ -22,7 +22,7 @@ import {
   buildSiemResponse,
   validateLicenseForRuleType,
 } from '../utils';
-import { createNotifications } from '../../notifications/create_notifications';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -72,16 +72,13 @@ export const createRulesRoute = (router: IRouter): void => {
 
       try {
         validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
-        if (!context.alerting || !context.actions) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-        const alertsClient = context.alerting.getAlertsClient();
-        const actionsClient = context.actions.getActionsClient();
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
         const clusterClient = context.core.elasticsearch.dataClient;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
 
-        if (!actionsClient || !alertsClient) {
+        if (!siemClient || !actionsClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -105,7 +102,6 @@ export const createRulesRoute = (router: IRouter): void => {
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
-          actions,
           anomalyThreshold,
           description,
           enabled,
@@ -129,7 +125,6 @@ export const createRulesRoute = (router: IRouter): void => {
           name,
           severity,
           tags,
-          throttle,
           to,
           type,
           threat,
@@ -139,16 +134,15 @@ export const createRulesRoute = (router: IRouter): void => {
           lists,
         });
 
-        if (throttle && actions.length) {
-          await createNotifications({
-            alertsClient,
-            enabled,
-            name,
-            interval,
-            actions,
-            ruleAlertId: createdRule.id,
-          });
-        }
+        const ruleActions = await updateRulesNotifications({
+          ruleAlertId: createdRule.id,
+          alertsClient,
+          savedObjectsClient,
+          enabled,
+          actions,
+          throttle,
+          name,
+        });
 
         const ruleStatuses = await savedObjectsClient.find<
           IRuleSavedAttributesSavedObjectAttributes
@@ -160,7 +154,11 @@ export const createRulesRoute = (router: IRouter): void => {
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
+        const [validated, errors] = transformValidate(
+          createdRule,
+          ruleActions,
+          ruleStatuses.saved_objects[0]
+        );
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
