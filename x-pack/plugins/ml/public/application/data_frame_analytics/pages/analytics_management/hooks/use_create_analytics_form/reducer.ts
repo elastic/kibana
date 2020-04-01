@@ -31,6 +31,7 @@ import {
 } from '../../../../../../../common/constants/validation';
 import {
   getDependentVar,
+  getNumTopFeatureImportanceValues,
   getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
@@ -147,6 +148,7 @@ export const validateAdvancedEditor = (state: State): State => {
   let dependentVariableEmpty = false;
   let excludesValid = true;
   let trainingPercentValid = true;
+  let numTopFeatureImportanceValuesValid = true;
 
   if (
     jobConfig.analysis === undefined &&
@@ -180,6 +182,7 @@ export const validateAdvancedEditor = (state: State): State => {
     if (
       trainingPercent !== undefined &&
       (isNaN(trainingPercent) ||
+        typeof trainingPercent !== 'number' ||
         trainingPercent < TRAINING_PERCENT_MIN ||
         trainingPercent > TRAINING_PERCENT_MAX)
     ) {
@@ -189,10 +192,33 @@ export const validateAdvancedEditor = (state: State): State => {
         error: i18n.translate(
           'xpack.ml.dataframe.analytics.create.advancedEditorMessage.trainingPercentInvalid',
           {
-            defaultMessage: 'The training percent must be a value between {min} and {max}.',
+            defaultMessage: 'The training percent must be a number between {min} and {max}.',
             values: {
               min: TRAINING_PERCENT_MIN,
               max: TRAINING_PERCENT_MAX,
+            },
+          }
+        ),
+        message: '',
+      });
+    }
+
+    const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
+    if (
+      numTopFeatureImportanceValues !== undefined &&
+      (isNaN(numTopFeatureImportanceValues) ||
+        typeof numTopFeatureImportanceValues !== 'number' ||
+        numTopFeatureImportanceValues < 0)
+    ) {
+      numTopFeatureImportanceValuesValid = false;
+      state.advancedEditorMessages.push({
+        error: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.numTopFeatureImportanceValuesInvalid',
+          {
+            defaultMessage:
+              'The value for num_top_feature_importance_values must be a number of {min} or higher.',
+            values: {
+              min: 0,
             },
           }
         ),
@@ -290,6 +316,7 @@ export const validateAdvancedEditor = (state: State): State => {
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
     !modelMemoryLimitEmpty &&
+    numTopFeatureImportanceValuesValid &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -343,6 +370,7 @@ const validateForm = (state: State): State => {
     dependentVariable,
     maxDistinctValuesError,
     modelMemoryLimit,
+    numTopFeatureImportanceValuesValid,
   } = state.form;
   const { estimatedModelMemoryLimit } = state;
 
@@ -368,6 +396,7 @@ const validateForm = (state: State): State => {
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
+    numTopFeatureImportanceValuesValid &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -441,6 +470,11 @@ export function reducer(state: State, action: Action): State {
         newFormState.sourceIndexNameEmpty = newFormState.sourceIndex === '';
         const validationMessages = indexPatterns.validate(newFormState.sourceIndex);
         newFormState.sourceIndexNameValid = Object.keys(validationMessages).length === 0;
+      }
+
+      if (action.payload.numTopFeatureImportanceValues !== undefined) {
+        newFormState.numTopFeatureImportanceValuesValid =
+          (newFormState?.numTopFeatureImportanceValues ?? 0) > 0;
       }
 
       return state.isAdvancedEditorEnabled

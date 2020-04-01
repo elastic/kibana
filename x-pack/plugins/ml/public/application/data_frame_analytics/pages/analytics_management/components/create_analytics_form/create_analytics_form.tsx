@@ -10,6 +10,7 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiForm,
+  EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
@@ -84,6 +85,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     modelMemoryLimit,
     modelMemoryLimitValidationResult,
     numTopFeatureImportanceValues,
+    numTopFeatureImportanceValuesValid,
     previousJobType,
     previousSourceIndex,
     sourceIndex,
@@ -651,20 +653,36 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                 label={i18n.translate(
                   'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesLabel',
                   {
-                    defaultMessage: 'Max. number of feature importance values per document',
+                    defaultMessage: 'Feature importance values',
                   }
                 )}
+                helpText={i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesHelpText',
+                  {
+                    defaultMessage:
+                      'Specify the maximum number of feature importance values per document to return.',
+                  }
+                )}
+                error={
+                  numTopFeatureImportanceValuesValid &&
+                  !sourceIndexNameEmpty && [
+                    i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.excludesOptionsNoSupportedFields',
+                      {
+                        defaultMessage: 'Invalid maximum number of feature importance values.',
+                      }
+                    ),
+                  ]
+                }
               >
-                <EuiFieldText
+                <EuiFieldNumber
                   disabled={false}
                   value={numTopFeatureImportanceValues}
-                  onChange={e =>
-                    setFormState({ numTopFeatureImportanceValues: parseInt(e.target.value, 10) })
-                  }
+                  onChange={e => setFormState({ numTopFeatureImportanceValues: +e.target.value })}
                   aria-label={i18n.translate(
                     'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesInputAriaLabel',
                     {
-                      defaultMessage: 'Max. number of feature importance values per document.',
+                      defaultMessage: 'Maximum number of feature importance values per document.',
                     }
                   )}
                   isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}

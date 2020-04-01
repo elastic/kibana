@@ -25,6 +25,8 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
   classification = '100mb',
 }
 
+export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 2;
+
 export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
@@ -70,6 +72,7 @@ export interface State {
     modelMemoryLimitUnitValid: boolean;
     modelMemoryLimitValidationResult: any;
     numTopFeatureImportanceValues: number | undefined;
+    numTopFeatureImportanceValuesValid: boolean;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
     sourceIndex: EsIndexName;
@@ -125,7 +128,8 @@ export const getInitialState = (): State => ({
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
     modelMemoryLimitValidationResult: null,
-    numTopFeatureImportanceValues: 0,
+    numTopFeatureImportanceValues: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
+    numTopFeatureImportanceValuesValid: true,
     previousJobType: null,
     previousSourceIndex: undefined,
     sourceIndex: '',
