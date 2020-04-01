@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { RenderingServiceSetup } from './types';
+import { InternalRenderingServiceSetup } from './types';
 
 function createRenderingSetup() {
-  const mocked: jest.Mocked<RenderingServiceSetup> = {
+  const mocked: jest.Mocked<InternalRenderingServiceSetup> = {
     render: jest.fn(),
   };
   return mocked;

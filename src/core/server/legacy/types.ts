@@ -23,7 +23,7 @@ import { ChromeNavLink } from '../../public';
 import { KibanaRequest, LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from '../plugins';
-import { RenderingServiceSetup } from '../rendering';
+import { InternalRenderingServiceSetup } from '../rendering';
 import { SavedObjectsLegacyUiExports } from '../types';
 
 /**
@@ -34,7 +34,7 @@ export type LegacyVars = Record<string, any>;
 
 type LegacyCoreSetup = InternalCoreSetup & {
   plugins: PluginsServiceSetup;
-  rendering: RenderingServiceSetup;
+  rendering: InternalRenderingServiceSetup;
 };
 type LegacyCoreStart = InternalCoreStart & { plugins: PluginsServiceStart };
 

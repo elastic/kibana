@@ -30,19 +30,19 @@ import { Template } from './views';
 import {
   IRenderOptions,
   RenderingSetupDeps,
-  RenderingServiceSetup,
+  InternalRenderingServiceSetup,
   RenderingMetadata,
 } from './types';
 
 /** @internal */
-export class RenderingService implements CoreService<RenderingServiceSetup> {
+export class RenderingService implements CoreService<InternalRenderingServiceSetup> {
   constructor(private readonly coreContext: CoreContext) {}
 
   public async setup({
     http,
     legacyPlugins,
     uiPlugins,
-  }: RenderingSetupDeps): Promise<RenderingServiceSetup> {
+  }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     return {
       render: async (
         request,

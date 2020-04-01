@@ -30,7 +30,7 @@ import { CoreApp } from './core_app';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
-import { RenderingService, RenderingServiceSetup } from './rendering';
+import { RenderingService } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
@@ -182,7 +182,7 @@ export class Server {
       uiPlugins,
     });
 
-    this.registerCoreContext(coreSetup, renderingSetup);
+    this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup);
 
     return coreSetup;
@@ -234,7 +234,7 @@ export class Server {
     await this.metrics.stop();
   }
 
-  private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
+  private registerCoreContext(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
