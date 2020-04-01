@@ -26,7 +26,6 @@ const { fail404 } = testCaseFailures;
 
 const createTestCases = (spaceId: string) => {
   const namespaces = [spaceId];
-  const allNamespaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
   return [
     // Test cases to check adding the target namespace to different saved objects
     { ...CASES.DEFAULT_SPACE_ONLY, namespaces, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
