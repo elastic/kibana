@@ -92,4 +92,45 @@ describe('ast builder', () => {
 
     expect(ast.toAst()).toMatchSnapshot();
   });
+
+  test('best way to use it', () => {
+    const {
+      createExpressionBuilder,
+      createFunctionBuilder,
+      createFunction,
+      createExpression,
+    } = astBuilder;
+
+    // if you know everything about expression upfront use createExpression
+    const ast = createExpression([createFunction('test', { arg1: true })]);
+
+    expect(ast).toMatchSnapshot();
+
+    // when you can (you know some of the functions upfront) pass them to constructor,
+    const builder = createExpressionBuilder([
+      createFunction('test', { arg1: true }),
+      createFunction('test2', { arg1: 1 }),
+    ]);
+
+    // if you need to conditionally add function use .addFunction
+    builder.addFunction(
+      createFunction('test', {
+        arg1: true,
+        // here we know all about the expression upfront so we use createExpression
+        arg2: createExpression([createFunction('test', { arg1: true })]),
+      })
+    );
+
+    // if you don't know all parameters to function upfront use createFunctionBuilder
+    // pass parameters you know to the constructor
+    const fn = createFunctionBuilder('test', { arg1: true });
+
+    // and append the rest conditionally later
+    fn.addArgument('arg2', createExpression([createFunction('test2')]));
+
+    // now we can add function to expression
+    builder.addFunction(fn.toAst());
+
+    expect(builder.toAst()).toMatchSnapshot();
+  });
 });
