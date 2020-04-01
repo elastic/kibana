@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsBulkCreateObject } from 'src/core/server';
 import { AssetType } from '../../../types';
 import * as Registry from '../registry';
 
-type ArchiveAsset = Pick<SavedObject, 'attributes' | 'migrationVersion' | 'references' | 'id'>;
+type ArchiveAsset = Pick<SavedObject, 'attributes' | 'migrationVersion' | 'references'>;
 type SavedObjectToBe = Required<SavedObjectsBulkCreateObject> & { type: AssetType };
 
 export async function getObjects(
