@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, Fragment, useState } from 'react';
+import React, { FC, useEffect, Fragment, useState, useMemo } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -66,24 +66,30 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlContext = useMlContext();
 
   const [isWizardReady, setIsWizardReady] = useState(false);
-  const [jobCreator] = useState(
-    jobCreatorFactory(jobType)(
-      mlContext.currentIndexPattern,
-      mlContext.currentSavedSearch,
-      mlContext.combinedQuery
-    )
-  );
-  const [chartInterval] = useState(getInitialChartInterval());
-  const [chartLoader] = useState(
-    new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery)
-  );
-  const [jobValidator] = useState(new JobValidator(jobCreator, existingJobsAndGroups));
-  const [resultsLoader] = useState(new ResultsLoader(jobCreator, chartInterval, chartLoader));
-
-  let firstWizardStep =
+  const [firstWizardStep, setFirstWizardStep] = useState(
     jobType === JOB_TYPE.ADVANCED
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
-      : WIZARD_STEPS.TIME_RANGE;
+      : WIZARD_STEPS.TIME_RANGE
+  );
+  const jobCreator = useMemo(
+    () =>
+      jobCreatorFactory(jobType)(
+        mlContext.currentIndexPattern,
+        mlContext.currentSavedSearch,
+        mlContext.combinedQuery
+      ),
+    [jobType]
+  );
+  const chartInterval = useMemo(() => getInitialChartInterval(), []);
+  const chartLoader = useMemo(
+    () => new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery),
+    []
+  );
+  const jobValidator = useMemo(() => new JobValidator(jobCreator, existingJobsAndGroups), []);
+  const resultsLoader = useMemo(
+    () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
+    []
+  );
 
   useEffect(() => {
     let autoSetTimeRange = false;
@@ -99,7 +105,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       if (mlJobService.tempJobCloningObjects.skipTimeRangeStep === false) {
         jobCreator.jobId = '';
       } else if (jobType !== JOB_TYPE.ADVANCED) {
-        firstWizardStep = WIZARD_STEPS.PICK_FIELDS;
+        setFirstWizardStep(WIZARD_STEPS.PICK_FIELDS);
       }
 
       mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;

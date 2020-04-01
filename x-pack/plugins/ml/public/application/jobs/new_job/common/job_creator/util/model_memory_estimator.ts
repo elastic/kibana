@@ -20,7 +20,7 @@ import {
   skip,
   tap,
 } from 'rxjs/operators';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
@@ -29,6 +29,8 @@ import { useMlKibana } from '../../../../../contexts/kibana';
 import { JobCreator } from '../job_creator';
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
+
+type ModelMemoryEstimator = ReturnType<typeof modelMemoryEstimatorProvider>;
 
 export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
@@ -94,7 +96,10 @@ export const useModelMemoryEstimator = (
   } = useMlKibana();
 
   // Initialize model memory estimator only once
-  const [modelMemoryEstimator] = useState(modelMemoryEstimatorProvider(jobValidator));
+  const modelMemoryEstimator = useMemo<ModelMemoryEstimator>(
+    () => modelMemoryEstimatorProvider(jobValidator),
+    []
+  );
 
   // Listen for estimation results and errors
   useEffect(() => {
