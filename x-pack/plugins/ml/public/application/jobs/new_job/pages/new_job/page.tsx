@@ -96,7 +96,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     const { from, to } = getTimeFilterRange();
     jobCreator.setTimeRange(from, to);
-    setIsWizardReady(true);
 
     if (mlJobService.tempJobCloningObjects.job !== undefined) {
       // cloning a job
