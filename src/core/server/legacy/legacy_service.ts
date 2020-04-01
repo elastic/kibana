@@ -285,7 +285,7 @@ export class LegacyService implements CoreService {
           this.legacyId
         ),
         createRouter: () => router,
-        resources: setupDeps.core.http.resources.create(router),
+        resources: setupDeps.core.httpResources.createRegistrar(router),
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
@@ -341,7 +341,7 @@ export class LegacyService implements CoreService {
           },
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
-          uiPlugins: setupDeps.core.plugins.uiPlugins,
+          uiPlugins: setupDeps.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,

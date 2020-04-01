@@ -22,7 +22,7 @@ import { Server } from 'hapi';
 import { ChromeNavLink } from '../../public';
 import { KibanaRequest, LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
+import { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from '../plugins';
 import { RenderingServiceSetup } from '../rendering';
 import { SavedObjectsLegacyUiExports } from '../types';
 
@@ -173,6 +173,7 @@ export type LegacyUiExports = SavedObjectsLegacyUiExports & {
 export interface LegacyServiceSetupDeps {
   core: LegacyCoreSetup;
   plugins: Record<string, unknown>;
+  uiPlugins: UiPlugins;
 }
 
 /**
