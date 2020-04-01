@@ -31,15 +31,13 @@ export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, s
   }
 
   return (
-    <EuiFlexItem>
-      <EuiFlexGroup direction="row" gutterSize="none">
-        <EuiFlexItem className={'iconPreview'} grow={false}>
-          {renderIcon()}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">{label}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    <EuiFlexGroup direction="row" gutterSize="none">
+      <EuiFlexItem className={'mapLegendIconPreview'} grow={false}>
+        {renderIcon()}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs">{label}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
