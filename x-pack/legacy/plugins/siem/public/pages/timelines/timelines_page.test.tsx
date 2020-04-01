@@ -32,7 +32,7 @@ describe('TimelinesPageComponent', () => {
           },
         },
       });
-      wrapper = shallow(<TimelinesPageComponent apolloClient={mockAppollloClient} />);
+      wrapper = shallow(<TimelinesPageComponent client={mockAppollloClient} />);
     });
 
     afterAll(() => {
@@ -70,7 +70,7 @@ describe('TimelinesPageComponent', () => {
           },
         },
       });
-      wrapper = shallow(<TimelinesPageComponent apolloClient={mockAppollloClient} />);
+      wrapper = shallow(<TimelinesPageComponent client={mockAppollloClient} />);
     });
 
     afterAll(() => {

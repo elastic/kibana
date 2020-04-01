@@ -38,6 +38,7 @@ import { SettingFormRow } from './SettingFormRow';
 import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration/all_option';
 
 function removeEmpty<T>(obj: T): T {
+  // @ts-ignore
   return Object.fromEntries(
     Object.entries(obj).filter(([k, v]) => v != null && v !== '')
   );
