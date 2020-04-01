@@ -106,6 +106,14 @@ export const ciRunUrl = obj => {
   };
 };
 
+export const itemizeVcs = vcsInfo => obj => {
+  const [branch, sha, author, commitMsg] = vcsInfo;
+  return {
+    ...obj,
+    vcs: { branch, sha, author, commitMsg },
+  };
+};
+
 export const testRunner = obj => {
   const { jsonSummaryPath } = obj;
 

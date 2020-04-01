@@ -35,8 +35,10 @@ export function runCoverageIngestionCli() {
       if (flags.path === '') throw createFlagError('please provide a single --path flag');
       if (flags.verbose) log.verbose(`Verbose logging enabled`);
 
-      const jsonSummaryPath = resolve(ROOT, flags.path);
-      parseAndProcess({ jsonSummaryPath }, log);
+      const resolveRoot = resolve.bind(null, ROOT);
+      const jsonSummaryPath = resolveRoot(flags.path);
+      const vcsInfoFilePath = resolveRoot('VCS_INFO.txt');
+      parseAndProcess({ jsonSummaryPath, vcsInfoFilePath }, log);
     },
     {
       description: `

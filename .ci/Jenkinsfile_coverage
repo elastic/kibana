@@ -13,6 +13,8 @@ kibanaPipeline(timeoutMinutes: 180) {
         maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
       }
 
+    }
+
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
         'x-pack-intake-agent': {
@@ -42,6 +44,7 @@ kibanaPipeline(timeoutMinutes: 180) {
           "TIME_STAMP=${timestamp}",
           "QA_TEAM_ROCKS=true"
         ]) {
+          collectVcsInfo()
 
           def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
           withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
@@ -83,14 +86,46 @@ kibanaPipeline(timeoutMinutes: 180) {
 
       }
 
-    }
   }
-  kibanaPipeline.sendMail()
+
+    kibanaPipeline.sendMail()
 }
 
+def collectVcsInfo() {
+  kibanaPipeline.bash(
+    '''
+
+    predicate() {
+      x=$1
+      if [ -n "$x" ]; then
+        return
+      else
+        echo "### 1 or more variables that Code Coverage needs, are undefined"
+        exit 1
+      fi
+    }
+
+    CMD="git log --pretty=format"
+
+    XS=("${GIT_BRANCH}" \
+        "$(${CMD}":%h" -1)" \
+        "$(${CMD}":%an" -1)" \
+        "$(${CMD}":%s" -1)")
+
+    touch VCS_INFO.txt
+
+    for X in "${!XS[@]}"; do
+    {
+      predicate "${XS[X]}"
+      echo "${XS[X]}" >> VCS_INFO.txt
+    }
+    done
+
+    ''', "### List && Collect VCS Info"
+  )
+}
 
 def maybeFailFast(secret) {
-
   withVaultSecret(secret: secret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: secret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: secret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
@@ -114,15 +149,15 @@ def maybeFailFast(secret) {
 
 def ossProks() {
   return [
-    'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
-    'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),
-    'oss-ciGroup3': kibanaPipeline.ossCiGroupProcess(3),
-    'oss-ciGroup4': kibanaPipeline.ossCiGroupProcess(4),
-    'oss-ciGroup5': kibanaPipeline.ossCiGroupProcess(5),
-    'oss-ciGroup6': kibanaPipeline.ossCiGroupProcess(6),
-    'oss-ciGroup7': kibanaPipeline.ossCiGroupProcess(7),
-    'oss-ciGroup8': kibanaPipeline.ossCiGroupProcess(8),
-    'oss-ciGroup9': kibanaPipeline.ossCiGroupProcess(9),
+    'oss-ciGroup1' : kibanaPipeline.ossCiGroupProcess(1),
+    'oss-ciGroup2' : kibanaPipeline.ossCiGroupProcess(2),
+    'oss-ciGroup3' : kibanaPipeline.ossCiGroupProcess(3),
+    'oss-ciGroup4' : kibanaPipeline.ossCiGroupProcess(4),
+    'oss-ciGroup5' : kibanaPipeline.ossCiGroupProcess(5),
+    'oss-ciGroup6' : kibanaPipeline.ossCiGroupProcess(6),
+    'oss-ciGroup7' : kibanaPipeline.ossCiGroupProcess(7),
+    'oss-ciGroup8' : kibanaPipeline.ossCiGroupProcess(8),
+    'oss-ciGroup9' : kibanaPipeline.ossCiGroupProcess(9),
     'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
     'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
     'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),

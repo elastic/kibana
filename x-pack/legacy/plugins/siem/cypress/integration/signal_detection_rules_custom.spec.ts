@@ -8,6 +8,7 @@ import { newRule, totalNumberOfPrebuiltRules } from '../objects/rule';
 
 import {
   ABOUT_FALSE_POSITIVES,
+  ABOUT_INVESTIGATION_NOTES,
   ABOUT_MITRE,
   ABOUT_RISK,
   ABOUT_RULE_DESCRIPTION,
@@ -19,6 +20,9 @@ import {
   DEFINITION_INDEX_PATTERNS,
   DEFINITION_TIMELINE,
   DEFINITION_STEP,
+  INVESTIGATION_NOTES_MARKDOWN,
+  INVESTIGATION_NOTES_TOGGLE,
+  RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
   SCHEDULE_LOOPBACK,
   SCHEDULE_RUNS,
@@ -169,6 +173,13 @@ describe('Signal detection rules, custom', () => {
       .eq(ABOUT_TAGS)
       .invoke('text')
       .should('eql', expectedTags);
+
+    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE)
+      .eq(INVESTIGATION_NOTES_TOGGLE)
+      .click({ force: true });
+    cy.get(ABOUT_INVESTIGATION_NOTES)
+      .invoke('text')
+      .should('eql', INVESTIGATION_NOTES_MARKDOWN);
 
     cy.get(DEFINITION_INDEX_PATTERNS).then(patterns => {
       cy.wrap(patterns).each((pattern, index) => {
