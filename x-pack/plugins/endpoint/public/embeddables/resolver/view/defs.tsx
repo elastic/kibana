@@ -13,6 +13,7 @@ import {
   euiPaletteForStatus,
   colorPalette,
 } from '@elastic/eui';
+import styled from 'styled-components';
 
 /**
  * Generating from `colorPalette` function: This could potentially
@@ -396,17 +397,25 @@ const SymbolsAndShapes = memo(() => (
 ));
 
 /**
- * This <defs> element is used to define the reusable assets for the Resolver
- * It confers sevral advantages, including but not limited to:
- * 1) Freedom of form for creative assets (beyond box-model constraints)
- * 2) Separation of concerns between creative assets and more functional areas of the app
- * 3) <use> elements can be handled by compositor (faster)
+ * This `<defs>` element is used to define the reusable assets for the Resolver
+ * It confers several advantages, including but not limited to:
+ *  1. Freedom of form for creative assets (beyond box-model constraints)
+ *  2. Separation of concerns between creative assets and more functional areas of the app
+ *  3. `<use>` elements can be handled by compositor (faster)
  */
-export const SymbolDefinitions = memo(() => (
-  <svg>
-    <defs>
-      <PaintServers />
-      <SymbolsAndShapes />
-    </defs>
-  </svg>
-));
+export const SymbolDefinitions = styled(
+  memo(({ className }: { className?: string }) => (
+    <svg className={className}>
+      <defs>
+        <PaintServers />
+        <SymbolsAndShapes />
+      </defs>
+    </svg>
+  ))
+)`
+  position: absolute;
+  left: 100%;
+  top: 100%;
+  width: 0;
+  height: 0;
+`;
