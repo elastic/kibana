@@ -32,7 +32,7 @@ export class ReportingPlugin
     const { elasticsearch, __LEGACY } = plugins;
 
     const browserDriverFactory = await createBrowserDriverFactory(config, this.logger); // required for validations :(
-    runValidations(config, elasticsearch, browserDriverFactory, this.logger); // this must run early, as it sets up config defaults
+    runValidations(config, elasticsearch, browserDriverFactory, this.logger);
 
     const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
     this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY, plugins);
