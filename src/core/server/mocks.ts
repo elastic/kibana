@@ -23,10 +23,12 @@ import { CspConfig } from './csp';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
+import { httpResourcesMock } from './http_resources/http_resources_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
+import { renderingMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { InternalCoreSetup, InternalCoreStart } from './internal_types';
@@ -35,6 +37,7 @@ import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { uuidServiceMock } from './uuid/uuid_service.mock';
 
 export { httpServerMock } from './http/http_server.mocks';
+export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
 export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
@@ -44,6 +47,7 @@ export { savedObjectsRepositoryMock } from './saved_objects/service/lib/reposito
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { metricsServiceMock } from './metrics/metrics_service.mock';
+export { renderingMock } from './rendering/rendering_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -119,7 +123,7 @@ function createCoreSetupMock({
       get: httpService.auth.get,
       isAuthenticated: httpService.auth.isAuthenticated,
     },
-    resources: httpService.resources.create(),
+    resources: httpService.resources.createRegistrar(),
     getServerInfo: httpService.getServerInfo,
   };
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
@@ -166,6 +170,8 @@ function createInternalCoreSetupMock() {
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uuid: uuidServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
+    httpResources: httpResourcesMock.createSetupContract(),
+    rendering: renderingMock.createSetupContract(),
   };
   return setupDeps;
 }
@@ -182,9 +188,6 @@ function createInternalCoreStartMock() {
 
 function createCoreRequestHandlerContextMock() {
   return {
-    rendering: {
-      render: jest.fn(),
-    },
     savedObjects: {
       client: savedObjectsClientMock.create(),
       typeRegistry: savedObjectsTypeRegistryMock.create(),

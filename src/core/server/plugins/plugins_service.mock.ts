@@ -23,23 +23,29 @@ type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 
 const createSetupContractMock = (): PluginsServiceSetup => ({
   contracts: new Map(),
-  uiPlugins: {
-    browserConfigs: new Map(),
-    internal: new Map(),
-    public: new Map(),
-  },
   initialized: true,
 });
 const createStartContractMock = () => ({ contracts: new Map() });
+
 const createServiceMock = (): PluginsServiceMock => ({
   discover: jest.fn(),
+  getUiPlugins: jest.fn().mockReturnValue(createUiPlugins()),
   setup: jest.fn().mockResolvedValue(createSetupContractMock()),
   start: jest.fn().mockResolvedValue(createStartContractMock()),
   stop: jest.fn(),
 });
 
+function createUiPlugins() {
+  return {
+    browserConfigs: new Map(),
+    internal: new Map(),
+    public: new Map(),
+  };
+}
+
 export const pluginServiceMock = {
   create: createServiceMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
+  createUiPlugins,
 };

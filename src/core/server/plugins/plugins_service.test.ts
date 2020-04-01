@@ -234,8 +234,6 @@ describe('PluginsService', () => {
       const setup = await pluginsService.setup(setupDeps);
 
       expect(setup.contracts).toBeInstanceOf(Map);
-      expect(setup.uiPlugins.public).toBeInstanceOf(Map);
-      expect(setup.uiPlugins.internal).toBeInstanceOf(Map);
       expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
@@ -467,9 +465,7 @@ describe('PluginsService', () => {
       mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
 
       await pluginsService.discover();
-      const {
-        uiPlugins: { browserConfigs },
-      } = await pluginsService.setup(setupDeps);
+      const { browserConfigs } = pluginsService.getUiPlugins();
 
       const uiConfig$ = browserConfigs.get('plugin-with-expose');
       expect(uiConfig$).toBeDefined();
@@ -507,9 +503,7 @@ describe('PluginsService', () => {
       mockPluginSystem.uiPlugins.mockReturnValue(new Map([pluginToDiscoveredEntry(plugin)]));
 
       await pluginsService.discover();
-      const {
-        uiPlugins: { browserConfigs },
-      } = await pluginsService.setup(setupDeps);
+      const { browserConfigs } = pluginsService.getUiPlugins();
 
       expect([...browserConfigs.entries()]).toHaveLength(0);
     });
@@ -540,7 +534,7 @@ describe('PluginsService', () => {
       it('includes disabled plugins', async () => {
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
         await pluginsService.discover();
-        const { uiPlugins } = await pluginsService.setup(setupDeps);
+        const uiPlugins = pluginsService.getUiPlugins();
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
           Map {
             "plugin-1" => Object {

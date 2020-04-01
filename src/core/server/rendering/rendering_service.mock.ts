@@ -17,19 +17,15 @@
  * under the License.
  */
 
-import { mockCoreContext } from '../../core_context.mock';
-import { httpServiceMock } from '../../http/http_service.mock';
-import { pluginServiceMock } from '../../plugins/plugins_service.mock';
-import { legacyServiceMock } from '../../legacy/legacy_service.mock';
+import { RenderingServiceSetup } from './types';
 
-const context = mockCoreContext.create();
-const http = httpServiceMock.createSetupContract();
-const uiPlugins = pluginServiceMock.createUiPlugins();
-const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
+function createRenderingSetup() {
+  const mocked: jest.Mocked<RenderingServiceSetup> = {
+    render: jest.fn(),
+  };
+  return mocked;
+}
 
-export const mockRenderingServiceParams = context;
-export const mockRenderingSetupDeps = {
-  http,
-  legacyPlugins,
-  uiPlugins,
+export const renderingMock = {
+  createSetupContract: createRenderingSetup,
 };
