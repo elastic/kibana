@@ -61,7 +61,7 @@ function validateInterval(
   timeBase?: string
 ) {
   if (definedOption) {
-    return { isValid: true };
+    return { isValid: true, interval: agg.buckets?.getInterval() };
   }
 
   if (!value) {
@@ -131,7 +131,7 @@ function TimeIntervalParamEditor({
 
   const scaledHelpText =
     interval && interval.scaled ? (
-      <strong className="eui-displayBlock">
+      <strong data-test-subj="currentlyScaledText" className="eui-displayBlock">
         <FormattedMessage
           id="visDefaultEditor.controls.timeInterval.scaledHelpText"
           defaultMessage="Currently scaled to {bucketDescription}"

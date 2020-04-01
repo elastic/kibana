@@ -90,7 +90,7 @@ export enum SortFieldCase {
 export interface ElasticUser {
   readonly email?: string | null;
   readonly fullName?: string | null;
-  readonly username: string;
+  readonly username?: string | null;
 }
 
 export interface FetchCasesProps extends ApiProps {

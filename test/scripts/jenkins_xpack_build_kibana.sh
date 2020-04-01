@@ -12,9 +12,6 @@ node scripts/build_kibana_platform_plugins \
 # doesn't persist, also set in kibanaPipeline.groovy
 export KBN_NP_PLUGINS_BUILT=true
 
-echo " -> downloading es snapshot"
-node scripts/es snapshot --download-only;
-
 echo " -> Ensuring all functional tests are in a ciGroup"
 cd "$XPACK_DIR"
 node scripts/functional_tests --assert-none-excluded \
