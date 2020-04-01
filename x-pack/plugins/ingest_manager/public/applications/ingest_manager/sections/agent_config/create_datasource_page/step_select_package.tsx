@@ -18,7 +18,7 @@ import {
 import { Error } from '../../../components';
 import { AgentConfig, PackageInfo } from '../../../types';
 import { useGetOneAgentConfig, useGetPackages, sendGetPackageInfoByKey } from '../../../hooks';
-import { PackageIcon } from '../../epm/components';
+import { PackageIcon } from '../../../components/package_icon';
 
 export const StepSelectPackage: React.FunctionComponent<{
   agentConfigId: string;
@@ -125,12 +125,12 @@ export const StepSelectPackage: React.FunctionComponent<{
           allowExclusions={false}
           singleSelection={true}
           isLoading={isPackagesLoading}
-          options={packages.map(({ title, name, version }) => {
+          options={packages.map(({ title, name, version, icons }) => {
             const pkgkey = `${name}-${version}`;
             return {
               label: title || name,
               key: pkgkey,
-              prepend: <PackageIcon packageName={name} size="m" />,
+              prepend: <PackageIcon packageName={name} version={version} icons={icons} size="m" />,
               checked: selectedPkgKey === pkgkey ? 'on' : undefined,
             };
           })}

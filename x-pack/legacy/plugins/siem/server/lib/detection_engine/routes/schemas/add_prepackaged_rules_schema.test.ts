@@ -4,10 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertAction } from '../../../../../../../../plugins/alerting/common';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { ThreatParams, PrepackagedRules } from '../../types';
 import { addPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('add prepackaged rules schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('empty objects do not validate', () => {
     expect(addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({}).error).toBeTruthy();
   });
@@ -1275,6 +1286,200 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
+  test('The default for "actions" will be an empty array', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        index: ['auditbeat-*'],
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.actions
+    ).toEqual([]);
+  });
+
+  test('You cannot send in an array of actions that are missing "group"', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: Array<Omit<RuleAlertAction, 'group'>>;
+        }
+      >({
+        actions: [
+          {
+            id: 'id',
+            action_type_id: 'actionTypeId',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "group" fails because ["group" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "id"', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: Array<Omit<RuleAlertAction, 'id'>>;
+        }
+      >({
+        actions: [
+          {
+            group: 'group',
+            action_type_id: 'action_type_id',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "id" fails because ["id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: Array<Omit<RuleAlertAction, 'action_type_id'>>;
+        }
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "params"', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: Array<Omit<RuleAlertAction, 'params'>>;
+        }
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            action_type_id: 'action_type_id',
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "params" fails because ["params" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are including "actionTypeId', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<
+        Partial<Omit<PrepackagedRules, 'actions'>> & {
+          actions: AlertAction[];
+        }
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            actionTypeId: 'actionTypeId',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "action_type_id" fails because ["action_type_id" is required]]]'
+    );
+  });
+
+  test('The default for "throttle" will be null', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        index: ['auditbeat-*'],
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.throttle
+    ).toEqual(null);
+  });
+
   describe('note', () => {
     test('You can set note to any string you want', () => {
       expect(
@@ -1330,6 +1535,118 @@ describe('add prepackaged rules schema', () => {
           version: 1,
         }).error.message
       ).toEqual('child "note" fails because ["note" must be a string]');
+    });
+  });
+
+  // TODO: (LIST-FEATURE) We can enable this once we change the schema's to not be global per module but rather functions that can create the schema
+  // on demand. Since they are per module, we have a an issue where the ENV variables do not take effect. It is better we change all the
+  // schema's to be function calls to avoid global side effects or just wait until the feature is available. If you want to test this early,
+  // you can remove the .skip and set your env variable of export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true locally
+  describe.skip('lists', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and lists] does validate', () => {
+      expect(
+        addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          risk_score: 50,
+          note: '# some markdown',
+          version: 1,
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty lists] does validate', () => {
+      expect(
+        addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          risk_score: 50,
+          note: '# some markdown',
+          lists: [],
+          version: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid lists] does NOT validate', () => {
+      expect(
+        addPrepackagedRulesSchema.validate<Partial<Omit<PrepackagedRules, 'lists'>>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          risk_score: 50,
+          note: '# some markdown',
+          lists: [{ invalid_value: 'invalid value' }],
+          version: 1,
+        }).error.message
+      ).toEqual(
+        'child "lists" fails because ["lists" at position 0 fails because [child "field" fails because ["field" is required]]]'
+      );
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent lists] does validate with empty lists', () => {
+      expect(
+        addPrepackagedRulesSchema.validate<Partial<Omit<PrepackagedRules, 'lists'>>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          risk_score: 50,
+          note: '# some markdown',
+          version: 1,
+        }).value.lists
+      ).toEqual([]);
     });
   });
 });

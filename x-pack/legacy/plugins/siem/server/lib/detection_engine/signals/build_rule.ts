@@ -5,12 +5,14 @@
  */
 
 import { pickBy } from 'lodash/fp';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, OutputRuleAlertRest } from '../types';
 
 interface BuildRuleParams {
   ruleParams: RuleTypeParams;
   name: string;
   id: string;
+  actions: RuleAlertAction[];
   enabled: boolean;
   createdAt: string;
   createdBy: string;
@@ -18,12 +20,14 @@ interface BuildRuleParams {
   updatedBy: string;
   interval: string;
   tags: string[];
+  throttle: string;
 }
 
 export const buildRule = ({
   ruleParams,
   name,
   id,
+  actions,
   enabled,
   createdAt,
   createdBy,
@@ -31,10 +35,12 @@ export const buildRule = ({
   updatedBy,
   interval,
   tags,
+  throttle,
 }: BuildRuleParams): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     id,
     rule_id: ruleParams.ruleId,
+    actions,
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
     timeline_id: ruleParams.timelineId,
@@ -62,8 +68,12 @@ export const buildRule = ({
     created_by: createdBy,
     updated_by: updatedBy,
     threat: ruleParams.threat,
+    throttle,
     version: ruleParams.version,
     created_at: createdAt,
     updated_at: updatedAt,
+    lists: ruleParams.lists,
+    machine_learning_job_id: ruleParams.machineLearningJobId,
+    anomaly_threshold: ruleParams.anomalyThreshold,
   });
 };

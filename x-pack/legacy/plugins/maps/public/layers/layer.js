@@ -63,7 +63,7 @@ export class AbstractLayer {
     clonedDescriptor.id = uuid();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
-    clonedDescriptor.sourceDescriptor = this._source.cloneDescriptor();
+    clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach(joinDescriptor => {
         // right.id is uuid used to track requests in inspector
@@ -78,28 +78,31 @@ export class AbstractLayer {
   }
 
   isJoinable() {
-    return this._source.isJoinable();
+    return this.getSource().isJoinable();
   }
 
   supportsElasticsearchFilters() {
-    return this._source.isESSource();
+    return this.getSource().isESSource();
   }
 
   async supportsFitToBounds() {
-    return await this._source.supportsFitToBounds();
+    return await this.getSource().supportsFitToBounds();
   }
 
-  async getDisplayName() {
+  async getDisplayName(source) {
     if (this._descriptor.label) {
       return this._descriptor.label;
     }
 
-    return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
+    const sourceDisplayName = source
+      ? await source.getDisplayName()
+      : await this.getSource().getDisplayName();
+    return sourceDisplayName || `Layer ${this._descriptor.id}`;
   }
 
   async getAttributions() {
     if (!this.hasErrors()) {
-      return await this._source.getAttributions();
+      return await this.getSource().getAttributions();
     }
     return [];
   }
@@ -191,6 +194,10 @@ export class AbstractLayer {
     return this._source;
   }
 
+  getSourceForEditing() {
+    return this._source;
+  }
+
   isVisible() {
     return this._descriptor.visible;
   }
@@ -226,12 +233,16 @@ export class AbstractLayer {
     return this._style;
   }
 
+  getStyleForEditing() {
+    return this._style;
+  }
+
   async getImmutableSourceProperties() {
-    return this._source.getImmutableProperties();
+    return this.getSource().getImmutableProperties();
   }
 
   renderSourceSettingsEditor = ({ onChange }) => {
-    return this._source.renderSourceSettingsEditor({ onChange });
+    return this.getSourceForEditing().renderSourceSettingsEditor({ onChange });
   };
 
   getPrevRequestToken(dataId) {
@@ -319,10 +330,11 @@ export class AbstractLayer {
   }
 
   renderStyleEditor({ onStyleDescriptorChange }) {
-    if (!this._style) {
+    const style = this.getStyleForEditing();
+    if (!style) {
       return null;
     }
-    return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
+    return style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
   getIndexPatternIds() {
@@ -330,10 +342,6 @@ export class AbstractLayer {
   }
 
   getQueryableIndexPatternIds() {
-    return [];
-  }
-
-  async getFields() {
     return [];
   }
 

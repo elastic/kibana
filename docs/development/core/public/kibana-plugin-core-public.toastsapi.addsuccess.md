@@ -9,7 +9,7 @@ Adds a new toast pre-configured with the success color and check icon.
 <b>Signature:</b>
 
 ```typescript
-addSuccess(toastOrTitle: ToastInput): Toast;
+addSuccess(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
 ```
 
 ## Parameters
@@ -17,6 +17,7 @@ addSuccess(toastOrTitle: ToastInput): Toast;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  toastOrTitle | <code>ToastInput</code> | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
+|  options | <code>ToastOptions</code> | a [ToastOptions](./kibana-plugin-core-public.toastoptions.md) |
 
 <b>Returns:</b>
 

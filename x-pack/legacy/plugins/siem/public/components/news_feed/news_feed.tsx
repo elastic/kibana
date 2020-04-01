@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
 import { LoadingPlaceholders } from '../page/overview/loading_placeholders';
@@ -30,12 +29,7 @@ const NewsFeedComponent: React.FC<Props> = ({ news }) => (
     ) : news.length === 0 ? (
       <NoNews />
     ) : (
-      news.map((n: NewsItem) => (
-        <React.Fragment key={n.hash}>
-          <Post newsItem={n} />
-          <EuiSpacer size="l" />
-        </React.Fragment>
-      ))
+      news.map((n: NewsItem) => <Post key={n.hash} newsItem={n} />)
     )}
   </>
 );

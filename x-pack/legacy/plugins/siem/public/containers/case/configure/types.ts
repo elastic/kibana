@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticUser, ApiProps } from '../types';
+import { ElasticUser } from '../types';
 import {
   ActionType,
-  CasesConnectorConfiguration,
   CasesConfigurationMaps,
   CaseField,
   ClosureType,
@@ -27,15 +26,11 @@ export interface CaseConfigure {
   createdAt: string;
   createdBy: ElasticUser;
   connectorId: string;
+  connectorName: string;
   closureType: ClosureType;
   updatedAt: string;
   updatedBy: ElasticUser;
   version: string;
-}
-
-export interface PatchConnectorProps extends ApiProps {
-  connectorId: string;
-  config: CasesConnectorConfiguration;
 }
 
 export interface CCMapsCombinedActionAttributes extends CasesConfigurationMaps {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../constants/categorization_job';
 
 export type CategoryId = number;
 
@@ -39,12 +39,12 @@ export interface CategoryFieldExample {
 }
 
 export enum VALIDATION_RESULT {
+  NO_EXAMPLES,
+  FAILED_TO_TOKENIZE,
+  TOO_MANY_TOKENS,
   TOKEN_COUNT,
   MEDIAN_LINE_LENGTH,
   NULL_VALUES,
-  NO_EXAMPLES,
-  TOO_MANY_TOKENS,
-  FAILED_TO_TOKENIZE,
   INSUFFICIENT_PRIVILEGES,
 }
 

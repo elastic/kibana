@@ -81,7 +81,7 @@ export interface ModelPlotConfig {
 
 // TODO, finish this when it's needed
 export interface CustomRule {
-  actions: any;
-  scope: object;
-  conditions: object;
+  actions: string[];
+  scope?: object;
+  conditions: any[];
 }

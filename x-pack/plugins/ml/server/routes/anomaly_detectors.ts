@@ -148,7 +148,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         params: schema.object({
           jobId: schema.string(),
         }),
-        body: schema.object({ ...anomalyDetectionJobSchema }),
+        body: schema.object(anomalyDetectionJobSchema),
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

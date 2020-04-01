@@ -20,6 +20,7 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
+import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
   ConfigService,
   CoreSetup,
@@ -38,9 +39,6 @@ import {
   LegacyServiceDiscoverPlugins,
 } from '../../core/server';
 
-// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/server/legacy';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
@@ -77,7 +75,6 @@ declare module 'hapi' {
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
-    getSavedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
     addMemoizedFactoryToRequest: (
@@ -104,6 +101,7 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 
 export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
+  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
   home: HomeServerPluginSetup;
   [key: string]: object;
 }

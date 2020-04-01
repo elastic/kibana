@@ -19,7 +19,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
@@ -32,7 +31,7 @@ import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { EmbeddableStart, EmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { setAngularModule, setServices } from './kibana_services';
+import { setAngularModule, setServices, setUrlTracker } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
@@ -41,26 +40,14 @@ import {
   KibanaLegacySetup,
   AngularRenderedAppUpdater,
 } from '../../../../../plugins/kibana_legacy/public';
-import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
-import { DocViewInput, DocViewInputFn } from './np_ready/doc_views/doc_views_types';
-import { DocViewTable } from './np_ready/components/table/table';
-import { JsonCodeBlock } from './np_ready/components/json_code_block/json_code_block';
+import { DiscoverSetup, DiscoverStart } from '../../../../../plugins/discover/public';
 import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
 import {
   VisualizationsStart,
   VisualizationsSetup,
-} from '../../../visualizations/public/np_ready/public';
+} from '../../../../../plugins/visualizations/public';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 
-/**
- * These are the interfaces with your public contracts. You should export these
- * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
- * @public
- */
-export interface DiscoverSetup {
-  addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
-}
-export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
@@ -68,6 +55,7 @@ export interface DiscoverSetupPlugins {
   home: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
+  discover: DiscoverSetup;
 }
 export interface DiscoverStartPlugins {
   uiActions: UiActionsStart;
@@ -78,6 +66,7 @@ export interface DiscoverStartPlugins {
   share: SharePluginStart;
   inspector: any;
   visualizations: VisualizationsStart;
+  discover: DiscoverStart;
 }
 const innerAngularName = 'app/discover';
 const embeddableAngularName = 'app/discoverEmbeddable';
@@ -87,10 +76,9 @@ const embeddableAngularName = 'app/discoverEmbeddable';
  * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
  * Discover provides embeddables, those contain a slimmer Angular
  */
-export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
+export class DiscoverPlugin implements Plugin<void, void> {
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
-  private docViewsRegistry: DocViewsRegistry | null = null;
   private embeddableInjector: auto.IInjectorService | null = null;
   private getEmbeddableInjector: (() => Promise<auto.IInjectorService>) | null = null;
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
@@ -103,8 +91,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
-  setup(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins): DiscoverSetup {
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
+  setup(core: CoreSetup<DiscoverStartPlugins, void>, plugins: DiscoverSetupPlugins) {
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      setActiveUrl: setTrackedUrl,
+    } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
       storageKey: 'lastUrl:discover',
@@ -125,26 +118,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         },
       ],
     });
+    setUrlTracker({ setTrackedUrl });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
 
     this.getEmbeddableInjector = this.getInjector.bind(this);
-    this.docViewsRegistry = new DocViewsRegistry(this.getEmbeddableInjector);
-    this.docViewsRegistry.addDocView({
-      title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
-        defaultMessage: 'Table',
-      }),
-      order: 10,
-      component: DocViewTable,
-    });
-    this.docViewsRegistry.addDocView({
-      title: i18n.translate('kbn.discover.docViews.json.jsonTitle', {
-        defaultMessage: 'JSON',
-      }),
-      order: 20,
-      component: JsonCodeBlock,
-    });
+    plugins.discover.docViews.setAngularInjectorGetter(this.getEmbeddableInjector);
     plugins.kibanaLegacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
@@ -172,14 +152,10 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       },
     });
     registerFeature(plugins.home);
-
     this.registerEmbeddable(core, plugins);
-    return {
-      addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
-    };
   }
 
-  start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+  start(core: CoreStart, plugins: DiscoverStartPlugins) {
     // we need to register the application service at setup, but to render it
     // there are some start dependencies necessary, for this reason
     // initializeInnerAngular + initializeServices are assigned at start and used
@@ -198,7 +174,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins, this.docViewsRegistry!);
+      const services = await buildServices(core, plugins);
       setServices(services);
       this.servicesInitialized = true;
 

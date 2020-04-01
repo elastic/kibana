@@ -22,6 +22,7 @@ import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs'
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
+import { SearchInterceptor } from './search_interceptor';
 
 export interface ISearchContext {
   core: CoreStart;
@@ -86,6 +87,7 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
+  setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
   __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }

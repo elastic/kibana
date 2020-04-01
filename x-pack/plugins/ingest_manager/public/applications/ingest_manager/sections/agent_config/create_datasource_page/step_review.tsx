@@ -24,6 +24,8 @@ import { NewDatasource, AgentConfig } from '../../../types';
 import { useConfig, sendGetAgentStatus } from '../../../hooks';
 import { storedDatasourceToAgentDatasource } from '../../../services';
 
+const KEYS_TO_SINK = ['inputs', 'streams'];
+
 export const StepReviewDatasource: React.FunctionComponent<{
   agentConfig: AgentConfig;
   datasource: NewDatasource;
@@ -119,7 +121,18 @@ export const StepReviewDatasource: React.FunctionComponent<{
                 <Fragment>
                   <EuiSpacer size="s" />
                   <EuiCodeBlock language="yaml" isCopyable overflowHeight={450}>
-                    {dump(fullAgentDatasource)}
+                    {dump(fullAgentDatasource, {
+                      sortKeys: (a: string, b: string) => {
+                        // Make YAML output prettier by sinking certain fields
+                        if (KEYS_TO_SINK.indexOf(a) > -1) {
+                          return 1;
+                        }
+                        if (KEYS_TO_SINK.indexOf(b) > -1) {
+                          return -1;
+                        }
+                        return 0;
+                      },
+                    })}
                   </EuiCodeBlock>
                 </Fragment>
               ),

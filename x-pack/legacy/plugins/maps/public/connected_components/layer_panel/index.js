@@ -22,7 +22,8 @@ function mapDispatchToProps(dispatch) {
     fitToBounds: layerId => {
       dispatch(fitToLayerExtent(layerId));
     },
-    updateSourceProp: (id, propName, value) => dispatch(updateSourceProp(id, propName, value)),
+    updateSourceProp: (id, propName, value, newLayerType) =>
+      dispatch(updateSourceProp(id, propName, value, newLayerType)),
   };
 }
 

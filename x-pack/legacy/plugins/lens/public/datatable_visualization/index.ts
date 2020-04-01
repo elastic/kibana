@@ -8,12 +8,11 @@ import { CoreSetup } from 'src/core/public';
 import { datatableVisualization } from './visualization';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { datatable, datatableColumns, getDatatableRenderer } from './expression';
-import { FormatFactory } from '../legacy_imports';
-import { EditorFrameSetup } from '../types';
+import { EditorFrameSetup, FormatFactory } from '../types';
 
 export interface DatatableVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: FormatFactory;
+  formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
 }
 

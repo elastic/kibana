@@ -14,8 +14,21 @@ export const caseSavedObjectType: SavedObjectsType = {
   namespaceAgnostic: false,
   mappings: {
     properties: {
-      comment_ids: {
-        type: 'keyword',
+      closed_at: {
+        type: 'date',
+      },
+      closed_by: {
+        properties: {
+          username: {
+            type: 'keyword',
+          },
+          full_name: {
+            type: 'keyword',
+          },
+          email: {
+            type: 'keyword',
+          },
+        },
       },
       created_at: {
         type: 'date',
@@ -28,10 +41,48 @@ export const caseSavedObjectType: SavedObjectsType = {
           full_name: {
             type: 'keyword',
           },
+          email: {
+            type: 'keyword',
+          },
         },
       },
       description: {
         type: 'text',
+      },
+      external_service: {
+        properties: {
+          pushed_at: {
+            type: 'date',
+          },
+          pushed_by: {
+            properties: {
+              username: {
+                type: 'keyword',
+              },
+              full_name: {
+                type: 'keyword',
+              },
+              email: {
+                type: 'keyword',
+              },
+            },
+          },
+          connector_id: {
+            type: 'keyword',
+          },
+          connector_name: {
+            type: 'keyword',
+          },
+          external_id: {
+            type: 'keyword',
+          },
+          external_title: {
+            type: 'text',
+          },
+          external_url: {
+            type: 'text',
+          },
+        },
       },
       title: {
         type: 'keyword',
@@ -42,6 +93,7 @@ export const caseSavedObjectType: SavedObjectsType = {
       tags: {
         type: 'keyword',
       },
+
       updated_at: {
         type: 'date',
       },
@@ -51,6 +103,9 @@ export const caseSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          email: {
             type: 'keyword',
           },
         },

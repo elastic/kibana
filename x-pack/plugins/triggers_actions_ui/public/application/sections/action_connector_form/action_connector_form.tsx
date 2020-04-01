@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { HttpSetup } from 'kibana/public';
 import { ReducerAction } from './connector_reducer';
 import { ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { TypeRegistry } from '../../type_registry';
@@ -47,6 +48,7 @@ interface ActionConnectorProps {
   };
   errors: IErrorObject;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  http: HttpSetup;
 }
 
 export const ActionConnectorForm = ({
@@ -56,6 +58,7 @@ export const ActionConnectorForm = ({
   serverError,
   errors,
   actionTypeRegistry,
+  http,
 }: ActionConnectorProps) => {
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -148,6 +151,7 @@ export const ActionConnectorForm = ({
           errors={errors}
           editActionConfig={setActionConfigProperty}
           editActionSecrets={setActionSecretsProperty}
+          http={http}
         />
       ) : null}
     </EuiForm>

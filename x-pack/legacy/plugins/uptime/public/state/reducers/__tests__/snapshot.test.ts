@@ -5,19 +5,20 @@
  */
 
 import { snapshotReducer } from '../snapshot';
-import { SnapshotActionTypes } from '../../actions';
+import {
+  getSnapshotCountAction,
+  getSnapshotCountActionSuccess,
+  getSnapshotCountActionFail,
+} from '../../actions';
 
 describe('snapshot reducer', () => {
   it('updates existing state', () => {
-    const action: SnapshotActionTypes = {
-      type: 'FETCH_SNAPSHOT_COUNT',
-      payload: {
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-        filters: 'foo: bar',
-        statusFilter: 'up',
-      },
-    };
+    const action = getSnapshotCountAction({
+      dateRangeStart: 'now-15m',
+      dateRangeEnd: 'now',
+      filters: 'foo: bar',
+      statusFilter: 'up',
+    });
     expect(
       snapshotReducer(
         {
@@ -31,33 +32,28 @@ describe('snapshot reducer', () => {
   });
 
   it(`sets the state's status to loading during a fetch`, () => {
-    const action: SnapshotActionTypes = {
-      type: 'FETCH_SNAPSHOT_COUNT',
-      payload: {
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-      },
-    };
+    const action = getSnapshotCountAction({
+      dateRangeStart: 'now-15m',
+      dateRangeEnd: 'now',
+    });
     expect(snapshotReducer(undefined, action)).toMatchSnapshot();
   });
 
   it('changes the count when a snapshot fetch succeeds', () => {
-    const action: SnapshotActionTypes = {
-      type: 'FETCH_SNAPSHOT_COUNT_SUCCESS',
-      payload: {
-        up: 10,
-        down: 15,
-        total: 25,
-      },
-    };
+    const action = getSnapshotCountActionSuccess({
+      up: 10,
+      down: 15,
+      total: 25,
+    });
+
     expect(snapshotReducer(undefined, action)).toMatchSnapshot();
   });
 
   it('appends a current error to existing errors list', () => {
-    const action: SnapshotActionTypes = {
-      type: 'FETCH_SNAPSHOT_COUNT_FAIL',
-      payload: new Error(`I couldn't get your data because the server denied the request`),
-    };
+    const action = getSnapshotCountActionFail(
+      new Error(`I couldn't get your data because the server denied the request`)
+    );
+
     expect(snapshotReducer(undefined, action)).toMatchSnapshot();
   });
 });

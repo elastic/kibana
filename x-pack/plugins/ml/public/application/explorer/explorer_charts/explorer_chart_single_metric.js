@@ -384,30 +384,34 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Show the time and metric values in the tooltip.
       // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
       const formattedDate = formatHumanReadableDateTime(marker.date);
-      const tooltipData = [{ name: formattedDate }];
+      const tooltipData = [{ label: formattedDate }];
       const seriesKey = config.detectorLabel;
 
       if (_.has(marker, 'anomalyScore')) {
         const score = parseInt(marker.anomalyScore);
         const displayScore = score > 0 ? score : '< 1';
         tooltipData.push({
-          name: i18n.translate('xpack.ml.explorer.singleMetricChart.anomalyScoreLabel', {
+          label: i18n.translate('xpack.ml.explorer.singleMetricChart.anomalyScoreLabel', {
             defaultMessage: 'anomaly score',
           }),
           value: displayScore,
           color: getSeverityColor(score),
-          seriesKey,
-          yAccessor: 'anomaly_score',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'anomaly_score',
         });
 
         if (showMultiBucketAnomalyTooltip(marker) === true) {
           tooltipData.push({
-            name: i18n.translate('xpack.ml.explorer.singleMetricChart.multiBucketImpactLabel', {
+            label: i18n.translate('xpack.ml.explorer.singleMetricChart.multiBucketImpactLabel', {
               defaultMessage: 'multi-bucket impact',
             }),
             value: getMultiBucketImpactLabel(marker.multiBucketImpact),
-            seriesKey,
-            yAccessor: 'multi_bucket_impact',
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'multi_bucket_impact',
           });
         }
 
@@ -418,33 +422,39 @@ export class ExplorerChartSingleMetric extends React.Component {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
           tooltipData.push({
-            name: i18n.translate('xpack.ml.explorer.singleMetricChart.actualLabel', {
+            label: i18n.translate('xpack.ml.explorer.singleMetricChart.actualLabel', {
               defaultMessage: 'actual',
             }),
             value: formatValue(marker.actual, config.functionDescription, fieldFormat),
-            seriesKey,
-            yAccessor: 'actual',
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'actual',
           });
           tooltipData.push({
-            name: i18n.translate('xpack.ml.explorer.singleMetricChart.typicalLabel', {
+            label: i18n.translate('xpack.ml.explorer.singleMetricChart.typicalLabel', {
               defaultMessage: 'typical',
             }),
             value: formatValue(marker.typical, config.functionDescription, fieldFormat),
-            seriesKey,
-            yAccessor: 'typical',
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'typical',
           });
         } else {
           tooltipData.push({
-            name: i18n.translate('xpack.ml.explorer.singleMetricChart.valueLabel', {
+            label: i18n.translate('xpack.ml.explorer.singleMetricChart.valueLabel', {
               defaultMessage: 'value',
             }),
             value: formatValue(marker.value, config.functionDescription, fieldFormat),
-            seriesKey,
-            yAccessor: 'value',
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'value',
           });
           if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
             tooltipData.push({
-              name: i18n.translate(
+              label: i18n.translate(
                 'xpack.ml.explorer.distributionChart.unusualByFieldValuesLabel',
                 {
                   defaultMessage:
@@ -457,31 +467,39 @@ export class ExplorerChartSingleMetric extends React.Component {
                   },
                 }
               ),
-              seriesKey,
-              yAccessor: 'numberOfCauses',
+              seriesIdentifier: {
+                key: seriesKey,
+              },
+              valueAccessor: 'numberOfCauses',
             });
           }
         }
       } else {
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.explorer.singleMetricChart.valueWithoutAnomalyScoreLabel',
             {
               defaultMessage: 'value',
             }
           ),
           value: formatValue(marker.value, config.functionDescription, fieldFormat),
-          seriesKey,
-          yAccessor: 'value',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'value',
         });
       }
 
       if (_.has(marker, 'scheduledEvents')) {
         tooltipData.push({
-          name: i18n.translate('xpack.ml.explorer.singleMetricChart.scheduledEventsLabel', {
+          label: i18n.translate('xpack.ml.explorer.singleMetricChart.scheduledEventsLabel', {
             defaultMessage: 'Scheduled events',
           }),
           value: marker.scheduledEvents.map(mlEscape).join('<br/>'),
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'scheduledEvents',
         });
       }
 

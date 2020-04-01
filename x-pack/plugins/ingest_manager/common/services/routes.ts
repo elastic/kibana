@@ -56,6 +56,10 @@ export const datasourceRouteService = {
   getUpdatePath: (datasourceId: string) => {
     return DATASOURCE_API_ROUTES.UPDATE_PATTERN.replace('{datasourceId}', datasourceId);
   },
+
+  getDeletePath: () => {
+    return DATASOURCE_API_ROUTES.DELETE_PATTERN;
+  },
 };
 
 export const agentConfigRouteService = {
@@ -77,6 +81,10 @@ export const agentConfigRouteService = {
 
   getDeletePath: () => {
     return AGENT_CONFIG_API_ROUTES.DELETE_PATTERN;
+  },
+
+  getInfoFullPath: (agentConfigId: string) => {
+    return AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
   },
 };
 

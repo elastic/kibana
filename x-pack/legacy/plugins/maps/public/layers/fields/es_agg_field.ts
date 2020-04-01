@@ -23,11 +23,11 @@ export interface IESAggField extends IField {
 }
 
 export class ESAggField implements IESAggField {
-  private _source: IESAggSource;
-  private _origin: FIELD_ORIGIN;
-  private _label?: string;
-  private _aggType: AGG_TYPE;
-  private _esDocField?: IField | undefined;
+  private readonly _source: IESAggSource;
+  private readonly _origin: FIELD_ORIGIN;
+  private readonly _label?: string;
+  private readonly _aggType: AGG_TYPE;
+  private readonly _esDocField?: IField | undefined;
 
   constructor({
     label,

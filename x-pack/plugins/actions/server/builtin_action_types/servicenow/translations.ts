@@ -51,3 +51,32 @@ export const UNEXPECTED_STATUS = (status: number) =>
       status,
     },
   });
+
+export const FIELD_INFORMATION = (
+  mode: string,
+  date: string | undefined,
+  user: string | undefined
+) => {
+  switch (mode) {
+    case 'create':
+      return i18n.translate('xpack.actions.builtin.servicenow.informationCreated', {
+        values: { date, user },
+        defaultMessage: '(created at {date} by {user})',
+      });
+    case 'update':
+      return i18n.translate('xpack.actions.builtin.servicenow.informationUpdated', {
+        values: { date, user },
+        defaultMessage: '(updated at {date} by {user})',
+      });
+    case 'add':
+      return i18n.translate('xpack.actions.builtin.servicenow.informationAdded', {
+        values: { date, user },
+        defaultMessage: '(added at {date} by {user})',
+      });
+    default:
+      return i18n.translate('xpack.actions.builtin.servicenow.informationDefault', {
+        values: { date, user },
+        defaultMessage: '(created at {date} by {user})',
+      });
+  }
+};

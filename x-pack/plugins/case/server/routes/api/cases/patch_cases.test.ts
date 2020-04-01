@@ -25,7 +25,7 @@ describe('PATCH cases', () => {
       toISOString: jest.fn().mockReturnValue('2019-11-25T21:54:48.952Z'),
     }));
   });
-  it(`Patch a case`, async () => {
+  it(`Close a case`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',
       method: 'patch',
@@ -50,17 +50,63 @@ describe('PATCH cases', () => {
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual([
       {
-        comment_ids: ['mock-comment-1'],
+        closed_at: '2019-11-25T21:54:48.952Z',
+        closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
         comments: [],
         created_at: '2019-11-25T21:54:48.952Z',
-        created_by: { full_name: 'elastic', username: 'elastic' },
+        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
         description: 'This is a brand new case of a bad meanie defacing data',
         id: 'mock-id-1',
+        external_service: null,
         status: 'closed',
         tags: ['defacement'],
         title: 'Super Bad Security Issue',
+        totalComment: 0,
         updated_at: '2019-11-25T21:54:48.952Z',
-        updated_by: { full_name: 'Awesome D00d', username: 'awesome' },
+        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+        version: 'WzE3LDFd',
+      },
+    ]);
+  });
+  it(`Open a case`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-4',
+            status: 'open',
+            version: 'WzUsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual([
+      {
+        closed_at: null,
+        closed_by: null,
+        comments: [],
+        created_at: '2019-11-25T22:32:17.947Z',
+        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
+        description: 'Oh no, a bad meanie going LOLBins all over the place!',
+        id: 'mock-id-4',
+        external_service: null,
+        status: 'open',
+        tags: ['LOLBins'],
+        title: 'Another bad one',
+        totalComment: 0,
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
         version: 'WzE3LDFd',
       },
     ]);

@@ -16,6 +16,8 @@ import {
   GetMonitorStatesParams,
   GetPingsParams,
   GetPingHistogramParams,
+  GetMonitorStatusParams,
+  GetMonitorStatusResult,
 } from '.';
 import {
   OverviewFilters,
@@ -35,13 +37,14 @@ type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
 export interface UptimeRequests {
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
-  getIndexPattern: ESQ<any, {}>;
+  getIndexPattern: ESQ<{}, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
   getMonitor: ESQ<GetMonitorParams, Ping>;
   getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorDurationResult>;
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;
   getMonitorStates: ESQ<GetMonitorStatesParams, GetMonitorStatesResult>;
+  getMonitorStatus: ESQ<GetMonitorStatusParams, GetMonitorStatusResult[]>;
   getPings: ESQ<GetPingsParams, PingResults>;
   getPingHistogram: ESQ<GetPingHistogramParams, HistogramResult>;
   getSnapshotCount: ESQ<GetSnapshotCountParams, Snapshot>;

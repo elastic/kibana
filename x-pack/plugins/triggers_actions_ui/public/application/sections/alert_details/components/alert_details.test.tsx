@@ -8,17 +8,11 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType } from '../../../../types';
-import {
-  EuiTitle,
-  EuiBadge,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSwitch,
-  EuiBetaBadge,
-} from '@elastic/eui';
+import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiBetaBadge } from '@elastic/eui';
 import { times, random } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { ViewInApp } from './view_in_app';
+import { PLUGIN } from '../../../constants/plugin';
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
@@ -70,7 +64,11 @@ describe('alert_details', () => {
               tooltipContent={i18n.translate(
                 'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
                 {
-                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                  defaultMessage:
+                    '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                  values: {
+                    pluginName: PLUGIN.getI18nName(i18n),
+                  },
                 }
               )}
             />
@@ -123,6 +121,9 @@ describe('alert_details', () => {
           id: '.server-log',
           name: 'Server log',
           enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
       ];
 
@@ -172,11 +173,17 @@ describe('alert_details', () => {
           id: '.server-log',
           name: 'Server log',
           enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
         {
           id: '.email',
           name: 'Send email',
           enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
       ];
 
@@ -208,31 +215,6 @@ describe('alert_details', () => {
   });
 
   describe('links', () => {
-    it('links to the Edit flyout', () => {
-      const alert = mockAlert();
-
-      const alertType = {
-        id: '.noop',
-        name: 'No Op',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
-        defaultActionGroupId: 'default',
-      };
-
-      expect(
-        shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="pencil">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-              defaultMessage="Edit"
-            />
-          </EuiButtonEmpty>
-        )
-      ).toBeTruthy();
-    });
-
     it('links to the app that created the alert', () => {
       const alert = mockAlert();
 
@@ -247,39 +229,7 @@ describe('alert_details', () => {
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="popout">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-              defaultMessage="View in app"
-            />
-          </EuiButtonEmpty>
-        )
-      ).toBeTruthy();
-    });
-
-    it('links to the activity log', () => {
-      const alert = mockAlert();
-
-      const alertType = {
-        id: '.noop',
-        name: 'No Op',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        actionVariables: { context: [], state: [] },
-        defaultActionGroupId: 'default',
-      };
-
-      expect(
-        shallow(
-          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="menuLeft">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
-              defaultMessage="Activity Log"
-            />
-          </EuiButtonEmpty>
-        )
+        ).containsMatchingElement(<ViewInApp alert={alert} />)
       ).toBeTruthy();
     });
   });

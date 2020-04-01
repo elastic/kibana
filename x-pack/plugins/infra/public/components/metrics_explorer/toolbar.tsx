@@ -63,6 +63,7 @@ export const MetricsExplorerToolbar = ({
   const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
   const [timepickerQuickRanges] = useKibanaUiSetting('timepicker:quickRanges');
   const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
+
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center">

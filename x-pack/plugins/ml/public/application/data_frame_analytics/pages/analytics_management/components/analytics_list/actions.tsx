@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { DeepReadonly } from '../../../../../../../common/types/common';
 
 import {
   checkPermission,
@@ -32,13 +33,12 @@ export const AnalyticsViewAction = {
   isPrimary: true,
   render: (item: DataFrameAnalyticsListRow) => {
     const analysisType = getAnalysisType(item.config.analysis);
-    const jobStatus = item.stats.state;
     const isDisabled =
       !isRegressionAnalysis(item.config.analysis) &&
       !isOutlierAnalysis(item.config.analysis) &&
       !isClassificationAnalysis(item.config.analysis);
 
-    const url = getResultsUrl(item.id, analysisType, jobStatus);
+    const url = getResultsUrl(item.id, analysisType);
     return (
       <EuiButtonEmpty
         isDisabled={isDisabled}
@@ -107,7 +107,7 @@ export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
       },
     },
     {
-      render: (item: DataFrameAnalyticsListRow) => {
+      render: (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
         return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
       },
     },

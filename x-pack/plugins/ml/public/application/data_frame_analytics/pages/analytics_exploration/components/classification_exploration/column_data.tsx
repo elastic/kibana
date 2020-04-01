@@ -4,77 +4,115 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { ConfusionMatrix, PredictedClass } from '../../../../common/analytics';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDataGridControlColumn,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
+import { ConfusionMatrix } from '../../../../common/analytics';
 
 interface ColumnData {
   actual_class: string;
   actual_class_doc_count: number;
-  predicted_class?: string;
-  count?: number;
-  error_count?: number;
+  [key: string]: string | number;
 }
+
+export const ACTUAL_CLASS_ID = 'actual_class';
+export const OTHER_CLASS_ID = 'other';
+export const MAX_COLUMNS = 6;
 
 export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
   const colData: Partial<ColumnData[]> = [];
+  const columns: Array<{ id: string; display?: any }> = [
+    {
+      id: ACTUAL_CLASS_ID,
+      display: <span />,
+    },
+  ];
 
-  confusionMatrixData.forEach((classData: any) => {
-    const correctlyPredictedClass = classData.predicted_classes.find(
-      (pc: PredictedClass) => pc.predicted_class === classData.actual_class
-    );
-    const incorrectlyPredictedClass = classData.predicted_classes.find(
-      (pc: PredictedClass) => pc.predicted_class !== classData.actual_class
-    );
+  let showOther = false;
 
-    let accuracy;
-    if (correctlyPredictedClass !== undefined) {
-      accuracy = correctlyPredictedClass.count / classData.actual_class_doc_count;
-      // round to 2 decimal places without converting to string;
-      accuracy = Math.round(accuracy * 100) / 100;
+  confusionMatrixData.forEach(classData => {
+    const otherCount = classData.other_predicted_class_doc_count;
+
+    if (otherCount > 0) {
+      showOther = true;
     }
 
-    let error;
-    if (incorrectlyPredictedClass !== undefined) {
-      error = incorrectlyPredictedClass.count / classData.actual_class_doc_count;
-      error = Math.round(error * 100) / 100;
-    }
-
-    let col: any = {
+    const col: any = {
       actual_class: classData.actual_class,
       actual_class_doc_count: classData.actual_class_doc_count,
+      other: otherCount,
     };
 
-    if (correctlyPredictedClass !== undefined) {
-      col = {
-        ...col,
-        predicted_class: correctlyPredictedClass.predicted_class,
-        [correctlyPredictedClass.predicted_class]: accuracy,
-        count: correctlyPredictedClass.count,
-        accuracy,
-      };
-    }
+    const predictedClasses = classData.predicted_classes || [];
 
-    if (incorrectlyPredictedClass !== undefined) {
-      col = {
-        ...col,
-        [incorrectlyPredictedClass.predicted_class]: error,
-        error_count: incorrectlyPredictedClass.count,
-      };
+    columns.push({ id: classData.actual_class });
+
+    for (let i = 0; i < predictedClasses.length; i++) {
+      const predictedClass = predictedClasses[i].predicted_class;
+      const predictedClassCount = predictedClasses[i].count;
+      col[predictedClass] = predictedClassCount;
     }
 
     colData.push(col);
   });
 
-  const columns: any = [
-    {
-      id: 'actual_class',
-      display: <span />,
-    },
-  ];
-
-  colData.forEach((data: any) => {
-    columns.push({ id: data.predicted_class });
-  });
+  if (showOther) {
+    columns.push({ id: OTHER_CLASS_ID });
+  }
 
   return { columns, columnData: colData };
+}
+
+export function getTrailingControlColumns(
+  numColumns: number,
+  setShowFullColumns: any
+): EuiDataGridControlColumn[] {
+  return [
+    {
+      id: 'actions',
+      width: 60,
+      headerCellRender: () => <span>{`${numColumns} more`}</span>,
+      rowCellRender: function RowCellRender() {
+        const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+        return (
+          <EuiPopover
+            isOpen={isPopoverOpen}
+            anchorPosition="upCenter"
+            button={
+              <EuiButtonIcon
+                aria-label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.classificationExploration.showActions',
+                  {
+                    defaultMessage: 'Show actions',
+                  }
+                )}
+                iconType="boxesHorizontal"
+                color="text"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              />
+            }
+            closePopover={() => setIsPopoverOpen(false)}
+            ownFocus={true}
+          >
+            <EuiButtonEmpty onClick={() => setShowFullColumns(true)}>
+              <EuiText size="s" grow={false} textAlign="center">
+                {i18n.translate(
+                  'xpack.ml.dataframe.analytics.classificationExploration.showAllColumns',
+                  {
+                    defaultMessage: 'Show all columns',
+                  }
+                )}
+              </EuiText>
+            </EuiButtonEmpty>
+          </EuiPopover>
+        );
+      },
+    },
+  ];
 }

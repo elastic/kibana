@@ -11,7 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
-} from 'kibana/server';
+} from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -88,6 +88,7 @@ export class IngestManagerPlugin implements Plugin {
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+            app: [PLUGIN_ID, 'kibana'],
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -96,6 +97,7 @@ export class IngestManagerPlugin implements Plugin {
           },
           read: {
             api: [`${PLUGIN_ID}-read`],
+            app: [PLUGIN_ID, 'kibana'],
             savedObject: {
               all: [],
               read: allSavedObjectTypes,

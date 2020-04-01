@@ -9,7 +9,7 @@ import {
   Plugin,
   PluginInitializerContext,
   CoreStart,
-} from 'kibana/public';
+} from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -32,7 +32,9 @@ export interface IngestManagerStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class IngestManagerPlugin implements Plugin {
+export class IngestManagerPlugin
+  implements
+    Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
   private config: IngestManagerConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -50,7 +52,8 @@ export class IngestManagerPlugin implements Plugin {
       async mount(params: AppMountParameters) {
         const [coreStart, startDeps] = (await core.getStartServices()) as [
           CoreStart,
-          IngestManagerStartDeps
+          IngestManagerStartDeps,
+          IngestManagerStart
         ];
         const { renderApp } = await import('./applications/ingest_manager');
         return renderApp(coreStart, params, deps, startDeps, config);

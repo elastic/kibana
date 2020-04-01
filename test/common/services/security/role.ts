@@ -43,7 +43,6 @@ export class Role {
         `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
       );
     }
-    this.log.debug(`created role ${name}`);
   }
 
   public async delete(name: string) {
@@ -56,6 +55,5 @@ export class Role {
         )}`
       );
     }
-    this.log.debug(`deleted role ${name}`);
   }
 }

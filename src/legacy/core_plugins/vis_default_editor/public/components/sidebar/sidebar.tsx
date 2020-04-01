@@ -21,9 +21,9 @@ import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect 
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EventEmitter } from 'events';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { AggGroupNames } from '../../legacy_imports';
+import { Vis } from 'src/plugins/visualizations/public';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -31,7 +31,9 @@ import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { SavedSearch } from '../../../../../../plugins/discover/public';
+import { AggGroupNames } from '../../../../../../plugins/data/public';
 import { getSchemasByGroup } from '../../schemas';
+import { TimeRange } from '../../../../../../plugins/data/public';
 
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
@@ -40,7 +42,9 @@ interface DefaultEditorSideBarProps {
   uiState: PersistedState;
   vis: Vis;
   isLinkedSearch: boolean;
+  eventEmitter: EventEmitter;
   savedSearch?: SavedSearch;
+  timeRange: TimeRange;
 }
 
 function DefaultEditorSideBar({
@@ -50,14 +54,18 @@ function DefaultEditorSideBar({
   uiState,
   vis,
   isLinkedSearch,
+  eventEmitter,
   savedSearch,
+  timeRange,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
-  const [state, dispatch] = useEditorReducer(vis);
+  const [state, dispatch] = useEditorReducer(vis, eventEmitter);
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
 
-  const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
+  const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
+    state.data.aggs,
+  ]);
   const metricSchemas = getSchemasByGroup(vis.type.schemas.all || [], AggGroupNames.Metrics).map(
     s => s.name
   );
@@ -90,17 +98,20 @@ function DefaultEditorSideBar({
   const applyChanges = useCallback(() => {
     if (formState.invalid || !isDirty) {
       setTouched(true);
-
       return;
     }
 
-    vis.setCurrentState(state);
-    vis.updateState();
-    vis.emit('dirtyStateChange', {
+    vis.setState({
+      ...vis.serialize(),
+      params: state.params,
+      data: { aggs: state.data.aggs ? (state.data.aggs.aggs.map(agg => agg.toJSON()) as any) : [] },
+    });
+    eventEmitter.emit('updateVis');
+    eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
     setTouched(false);
-  }, [vis, state, formState.invalid, setTouched, isDirty]);
+  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     event => {
@@ -122,18 +133,22 @@ function DefaultEditorSideBar({
         resetValidity();
       }
     };
-    vis.on('dirtyStateChange', changeHandler);
+    eventEmitter.on('dirtyStateChange', changeHandler);
 
-    return () => vis.off('dirtyStateChange', changeHandler);
-  }, [resetValidity, vis]);
+    return () => {
+      eventEmitter.off('dirtyStateChange', changeHandler);
+    };
+  }, [resetValidity, eventEmitter]);
 
   // subscribe on external vis changes using browser history, for example press back button
   useEffect(() => {
     const resetHandler = () => dispatch(discardChanges(vis));
-    vis.on('updateEditor', resetHandler);
+    eventEmitter.on('updateEditor', resetHandler);
 
-    return () => vis.off('updateEditor', resetHandler);
-  }, [dispatch, vis]);
+    return () => {
+      eventEmitter.off('updateEditor', resetHandler);
+    };
+  }, [dispatch, vis, eventEmitter]);
 
   const dataTabProps = {
     dispatch,
@@ -147,7 +162,7 @@ function DefaultEditorSideBar({
   };
 
   const optionTabProps = {
-    aggs: state.aggs,
+    aggs: state.data.aggs!,
     hasHistogramAgg,
     stateParams: state.params,
     vis,
@@ -173,7 +188,12 @@ function DefaultEditorSideBar({
             onKeyDownCapture={onSubmit}
           >
             {vis.type.requiresSearch && (
-              <SidebarTitle isLinkedSearch={isLinkedSearch} savedSearch={savedSearch} vis={vis} />
+              <SidebarTitle
+                isLinkedSearch={isLinkedSearch}
+                savedSearch={savedSearch}
+                vis={vis}
+                eventEmitter={eventEmitter}
+              />
             )}
 
             {optionTabs.length > 1 && (
@@ -197,6 +217,7 @@ function DefaultEditorSideBar({
                   <Editor
                     isTabSelected={isTabSelected}
                     {...(name === 'data' ? dataTabProps : optionTabProps)}
+                    timeRange={timeRange}
                   />
                 </div>
               );

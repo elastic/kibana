@@ -3,13 +3,43 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datasource, NewDatasource, FullAgentConfigDatasource } from '../types';
+import { safeLoad } from 'js-yaml';
+import {
+  Datasource,
+  NewDatasource,
+  DatasourceConfigRecord,
+  DatasourceConfigRecordEntry,
+  FullAgentConfigDatasource,
+} from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
+
+const configReducer = (
+  configResult: DatasourceConfigRecord,
+  configEntry: [string, DatasourceConfigRecordEntry]
+): DatasourceConfigRecord => {
+  const [configName, { type: configType, value: configValue }] = configEntry;
+  if (configValue !== undefined && configValue !== '') {
+    if (configType === 'yaml') {
+      try {
+        const yamlValue = safeLoad(configValue);
+        if (yamlValue) {
+          configResult[configName] = yamlValue;
+        }
+      } catch (e) {
+        // Silently swallow parsing error
+      }
+    } else {
+      configResult[configName] = configValue;
+    }
+  }
+  return configResult;
+};
 
 export const storedDatasourceToAgentDatasource = (
   datasource: Datasource | NewDatasource
 ): FullAgentConfigDatasource => {
   const { name, namespace, enabled, package: pkg, inputs } = datasource;
+
   const fullDatasource: FullAgentConfigDatasource = {
     id: name,
     namespace,
@@ -17,27 +47,22 @@ export const storedDatasourceToAgentDatasource = (
     use_output: DEFAULT_OUTPUT.name, // TODO: hardcoded to default output for now
     inputs: inputs
       .filter(input => input.enabled)
-      .map(input => ({
-        ...input,
-        streams: input.streams.map(stream => {
-          if (stream.config) {
+      .map(input => {
+        const fullInput = {
+          ...input,
+          ...Object.entries(input.config || {}).reduce(configReducer, {}),
+          streams: input.streams.map(stream => {
             const fullStream = {
               ...stream,
-              ...Object.entries(stream.config).reduce((acc, [configName, configValue]) => {
-                if (configValue !== undefined) {
-                  acc[configName] = configValue;
-                }
-                return acc;
-              }, {} as { [key: string]: any }),
+              ...Object.entries(stream.config || {}).reduce(configReducer, {}),
             };
             delete fullStream.config;
             return fullStream;
-          } else {
-            const fullStream = { ...stream };
-            return fullStream;
-          }
-        }),
-      })),
+          }),
+        };
+        delete fullInput.config;
+        return fullInput;
+      }),
   };
 
   if (pkg) {

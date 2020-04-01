@@ -45,6 +45,7 @@ export interface SetupTimeRange {
   start: number;
   end: number;
 }
+
 export interface SetupUIFilters {
   uiFiltersES: ESFilter[];
 }

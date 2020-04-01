@@ -440,16 +440,19 @@ export class ExplorerChartDistribution extends React.Component {
       // Show the time and metric values in the tooltip.
       // Uses date, value, upper, lower and anomalyScore (optional) marker properties.
       const formattedDate = formatHumanReadableDateTime(marker.date);
-      const tooltipData = [{ name: formattedDate }];
+      const tooltipData = [{ label: formattedDate }];
       const seriesKey = config.detectorLabel;
 
       if (_.has(marker, 'entity')) {
         tooltipData.push({
-          name: i18n.translate('xpack.ml.explorer.distributionChart.entityLabel', {
+          label: i18n.translate('xpack.ml.explorer.distributionChart.entityLabel', {
             defaultMessage: 'entity',
           }),
           value: marker.entity,
-          seriesKey,
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'entity',
         });
       }
 
@@ -457,36 +460,42 @@ export class ExplorerChartDistribution extends React.Component {
         const score = parseInt(marker.anomalyScore);
         const displayScore = score > 0 ? score : '< 1';
         tooltipData.push({
-          name: i18n.translate('xpack.ml.explorer.distributionChart.anomalyScoreLabel', {
+          label: i18n.translate('xpack.ml.explorer.distributionChart.anomalyScoreLabel', {
             defaultMessage: 'anomaly score',
           }),
           value: displayScore,
           color: getSeverityColor(score),
-          seriesKey,
-          yAccessor: 'anomaly_score',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'anomaly_score',
         });
         if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
           tooltipData.push({
-            name: i18n.translate('xpack.ml.explorer.distributionChart.valueLabel', {
+            label: i18n.translate('xpack.ml.explorer.distributionChart.valueLabel', {
               defaultMessage: 'value',
             }),
             value: formatValue(marker.value, config.functionDescription, fieldFormat),
-            seriesKey,
-            yAccessor: 'value',
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: 'value',
           });
           if (typeof marker.numberOfCauses === 'undefined' || marker.numberOfCauses === 1) {
             tooltipData.push({
-              name: i18n.translate('xpack.ml.explorer.distributionChart.typicalLabel', {
+              label: i18n.translate('xpack.ml.explorer.distributionChart.typicalLabel', {
                 defaultMessage: 'typical',
               }),
               value: formatValue(marker.typical, config.functionDescription, fieldFormat),
-              seriesKey,
-              yAccessor: 'typical',
+              seriesIdentifier: {
+                key: seriesKey,
+              },
+              valueAccessor: 'typical',
             });
           }
           if (typeof marker.byFieldName !== 'undefined' && _.has(marker, 'numberOfCauses')) {
             tooltipData.push({
-              name: i18n.translate(
+              label: i18n.translate(
                 'xpack.ml.explorer.distributionChart.unusualByFieldValuesLabel',
                 {
                   defaultMessage:
@@ -499,29 +508,33 @@ export class ExplorerChartDistribution extends React.Component {
                   },
                 }
               ),
-              seriesKey,
-              yAccessor: 'numberOfCauses',
+              seriesIdentifier: {
+                key: seriesKey,
+              },
+              valueAccessor: 'numberOfCauses',
             });
           }
         }
       } else if (chartType !== CHART_TYPE.EVENT_DISTRIBUTION) {
         tooltipData.push({
-          name: i18n.translate(
+          label: i18n.translate(
             'xpack.ml.explorer.distributionChart.valueWithoutAnomalyScoreLabel',
             {
               defaultMessage: 'value',
             }
           ),
           value: formatValue(marker.value, config.functionDescription, fieldFormat),
-          seriesKey,
-          yAccessor: 'value',
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'value',
         });
       }
 
       if (_.has(marker, 'scheduledEvents')) {
         marker.scheduledEvents.forEach((scheduledEvent, i) => {
           tooltipData.push({
-            name: i18n.translate(
+            label: i18n.translate(
               'xpack.ml.timeSeriesExplorer.timeSeriesChart.scheduledEventsLabel',
               {
                 defaultMessage: 'scheduled event{counter}',
@@ -529,8 +542,10 @@ export class ExplorerChartDistribution extends React.Component {
               }
             ),
             value: scheduledEvent,
-            seriesKey,
-            yAccessor: `scheduled_events_${i + 1}`,
+            seriesIdentifier: {
+              key: seriesKey,
+            },
+            valueAccessor: `scheduled_events_${i + 1}`,
           });
         });
       }

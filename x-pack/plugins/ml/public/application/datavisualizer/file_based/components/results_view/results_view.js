@@ -36,16 +36,16 @@ export const ResultsView = ({ data, fileName, results, showEditFlyout }) => {
   ];
 
   return (
-    <EuiPage>
+    <EuiPage data-test-subj="mlPageFileDataVisResults">
       <EuiPageBody>
         <EuiPageContentHeader>
           <EuiTitle>
-            <h1>{fileName}</h1>
+            <h1 data-test-subj="mlFileDataVisResultsTitle">{fileName}</h1>
           </EuiTitle>
         </EuiPageContentHeader>
         <EuiSpacer size="m" />
         <div className="results">
-          <EuiPanel>
+          <EuiPanel data-test-subj="mlFileDataVisFileContentPanel">
             <FileContents
               data={data}
               format={results.format}
@@ -55,7 +55,7 @@ export const ResultsView = ({ data, fileName, results, showEditFlyout }) => {
 
           <EuiSpacer size="m" />
 
-          <EuiPanel>
+          <EuiPanel data-test-subj="mlFileDataVisSummaryPanel">
             <AnalysisSummary results={results} />
 
             <EuiSpacer size="m" />
@@ -70,7 +70,7 @@ export const ResultsView = ({ data, fileName, results, showEditFlyout }) => {
 
           <EuiSpacer size="m" />
 
-          <EuiPanel>
+          <EuiPanel data-test-subj="mlFileDataVisFileStatsPanel">
             <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
           </EuiPanel>
         </div>

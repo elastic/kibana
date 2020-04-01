@@ -25,7 +25,6 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: mockDatum,
-      children: <span>{'some children'}</span>,
       timelineId: 'test',
     });
     const wrapper = shallow(<span>{children}</span>);
@@ -40,7 +39,6 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: mockDatum,
-      children: <span>{'some children'}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -48,6 +46,6 @@ describe('plain_row_renderer', () => {
         <span>{children}</span>
       </ThemeProvider>
     );
-    expect(wrapper.text()).toEqual('some children');
+    expect(wrapper.text()).toEqual('');
   });
 });

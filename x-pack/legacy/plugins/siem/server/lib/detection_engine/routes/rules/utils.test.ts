@@ -12,7 +12,7 @@ import {
   transformTags,
   getIdBulkError,
   transformOrBulkError,
-  transformRulesToNdjson,
+  transformDataToNdjson,
   transformAlertsToRules,
   transformOrImportError,
   getDuplicates,
@@ -20,403 +20,88 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
+import { ImportRuleAlertRest, RuleAlertParamsRest, RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { sampleRule } from '../../signals/__mocks__/es_results';
-import { getSimpleRule } from '../__mocks__/utils';
+import { getSimpleRule, getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { PartialAlert } from '../../../../../../../../plugins/alerting/server';
 import { SanitizedAlert } from '../../../../../../../../plugins/alerting/server/types';
+import { RuleAlertType } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 describe('utils', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getResult();
       const rule = transformAlertToRule(fullRule);
-      const expected: OutputRuleAlertRest = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        output_index: '.siem-signals',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        to: 'now',
-        type: 'query',
-        note: '# Investigative notes',
-        version: 1,
-      };
-      expect(rule).toEqual(expected);
+      expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
     test('should work with a partial data set missing data', () => {
       const fullRule = getResult();
-      const { from, language, ...omitData } = transformAlertToRule(fullRule);
-      const expected: Partial<OutputRuleAlertRest> = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        output_index: '.siem-signals',
-        interval: '5m',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        to: 'now',
-        type: 'query',
-        note: '# Investigative notes',
-        version: 1,
-      };
-      expect(omitData).toEqual(expected);
+      const { from, language, ...omitParams } = fullRule.params;
+      fullRule.params = omitParams as RuleTypeParams;
+      const rule = transformAlertToRule(fullRule);
+      const {
+        from: from2,
+        language: language2,
+        ...expectedWithoutFromWithoutLanguage
+      } = getOutputRuleAlertForRest();
+      expect(rule).toEqual(expectedWithoutFromWithoutLanguage);
     });
 
     test('should omit query if query is null', () => {
       const fullRule = getResult();
       fullRule.params.query = null;
       const rule = transformAlertToRule(fullRule);
-      const expected: Partial<OutputRuleAlertRest> = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        output_index: '.siem-signals',
-        interval: '5m',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        to: 'now',
-        type: 'query',
-        note: '# Investigative notes',
-        version: 1,
-      };
-      expect(rule).toEqual(expected);
+      const { query, ...expectedWithoutQuery } = getOutputRuleAlertForRest();
+      expect(rule).toEqual(expectedWithoutQuery);
     });
 
     test('should omit query if query is undefined', () => {
       const fullRule = getResult();
       fullRule.params.query = undefined;
       const rule = transformAlertToRule(fullRule);
-      const expected: Partial<OutputRuleAlertRest> = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        output_index: '.siem-signals',
-        interval: '5m',
-        rule_id: 'rule-1',
-        risk_score: 50,
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        to: 'now',
-        type: 'query',
-        note: '# Investigative notes',
-        version: 1,
-      };
-      expect(rule).toEqual(expected);
+      const { query, ...expectedWithoutQuery } = getOutputRuleAlertForRest();
+      expect(rule).toEqual(expectedWithoutQuery);
     });
 
     test('should omit a mix of undefined, null, and missing fields', () => {
       const fullRule = getResult();
       fullRule.params.query = undefined;
       fullRule.params.language = null;
-      const { from, enabled, ...omitData } = transformAlertToRule(fullRule);
-      const expected: Partial<OutputRuleAlertRest> = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        false_positives: [],
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        output_index: '.siem-signals',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        risk_score: 50,
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        to: 'now',
-        type: 'query',
-        note: '# Investigative notes',
-        version: 1,
-      };
-      expect(omitData).toEqual(expected);
+      const { from, ...omitParams } = fullRule.params;
+      fullRule.params = omitParams as RuleTypeParams;
+      const { enabled, ...omitEnabled } = fullRule;
+      const rule = transformAlertToRule(omitEnabled as RuleAlertType);
+      const {
+        from: from2,
+        enabled: enabled2,
+        language,
+        query,
+        ...expectedWithoutFromEnabledLanguageQuery
+      } = getOutputRuleAlertForRest();
+      expect(rule).toEqual(expectedWithoutFromEnabledLanguageQuery);
     });
 
     test('should return enabled is equal to false', () => {
       const fullRule = getResult();
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
-      const expected: OutputRuleAlertRest = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: false,
-        from: 'now-6m',
-        false_positives: [],
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        output_index: '.siem-signals',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        language: 'kuery',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        to: 'now',
-        type: 'query',
-        note: '# Investigative notes',
-        version: 1,
-      };
+      const expected = getOutputRuleAlertForRest();
+      expected.enabled = false;
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
@@ -424,65 +109,7 @@ describe('utils', () => {
       const fullRule = getResult();
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
-      const expected: OutputRuleAlertRest = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        from: 'now-6m',
-        false_positives: [],
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        output_index: '.siem-signals',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        language: 'kuery',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        to: 'now',
-        type: 'query',
-        note: '# Investigative notes',
-        version: 1,
-      };
+      const expected = getOutputRuleAlertForRest();
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
@@ -490,66 +117,25 @@ describe('utils', () => {
       const fullRule = getResult();
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
-      const expected: OutputRuleAlertRest = {
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        created_by: 'elastic',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        output_index: '.siem-signals',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: ['tag 1', 'tag 2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        to: 'now',
-        type: 'query',
-        note: '# Investigative notes',
-        version: 1,
-      };
+      const expected = getOutputRuleAlertForRest();
+      expected.tags = ['tag 1', 'tag 2'];
       expect(rule).toEqual(expected);
+    });
+
+    it('transforms ML Rule fields', () => {
+      const mlRule = getResult();
+      mlRule.params.anomalyThreshold = 55;
+      mlRule.params.machineLearningJobId = 'some_job_id';
+      mlRule.params.type = 'machine_learning';
+
+      const rule = transformAlertToRule(mlRule);
+      expect(rule).toEqual(
+        expect.objectContaining({
+          anomaly_threshold: 55,
+          machine_learning_job_id: 'some_job_id',
+          type: 'machine_learning',
+        })
+      );
     });
   });
 
@@ -629,76 +215,21 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 });
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 }, []);
       expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformFindAlerts({
-        page: 1,
-        perPage: 0,
-        total: 0,
-        data: [getResult()],
-      });
-      const expected: OutputRuleAlertRest = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        output_index: '.siem-signals',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        risk_score: 50,
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
+      const output = transformFindAlerts(
+        {
+          page: 1,
+          perPage: 0,
+          total: 0,
+          data: [getResult()],
         },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        note: '# Investigative notes',
-        version: 1,
-      };
+        []
+      );
+      const expected = getOutputRuleAlertForRest();
       expect(output).toEqual({
         page: 1,
         perPage: 0,
@@ -709,12 +240,15 @@ describe('utils', () => {
 
     test('returns 500 if the data is not of type siem alert', () => {
       const unsafeCast = ([{ name: 'something else' }] as unknown) as SanitizedAlert[];
-      const output = transformFindAlerts({
-        data: unsafeCast,
-        page: 1,
-        perPage: 1,
-        total: 1,
-      });
+      const output = transformFindAlerts(
+        {
+          data: unsafeCast,
+          page: 1,
+          perPage: 1,
+          total: 1,
+        },
+        []
+      );
       expect(output).toBeNull();
     });
   });
@@ -722,65 +256,7 @@ describe('utils', () => {
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transform(getResult());
-      const expected: OutputRuleAlertRest = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        output_index: '.siem-signals',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        risk_score: 50,
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        note: '# Investigative notes',
-        version: 1,
-      };
+      const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
@@ -894,72 +370,24 @@ describe('utils', () => {
 
   describe('transformOrBulkError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', getResult());
-      const expected: OutputRuleAlertRest = {
-        created_by: 'elastic',
-        created_at: '2019-12-13T16:40:33.400Z',
-        updated_at: '2019-12-13T16:40:33.400Z',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
+      const output = transformOrBulkError('rule-1', getResult(), {
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        immutable: false,
-        output_index: '.siem-signals',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        risk_score: 50,
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0040',
-              name: 'impact',
-              reference: 'https://attack.mitre.org/tactics/TA0040/',
-            },
-            technique: [
-              {
-                id: 'T1499',
-                name: 'endpoint denial of service',
-                reference: 'https://attack.mitre.org/techniques/T1499/',
-              },
-            ],
-          },
-        ],
-        filters: [
-          {
-            query: {
-              match_phrase: {
-                'host.name': 'some-host',
-              },
-            },
-          },
-        ],
-        meta: {
-          someMeta: 'someField',
-        },
-        timeline_id: 'some-timeline-id',
-        timeline_title: 'some-timeline-title',
-        note: '# Investigative notes',
-        version: 1,
-      };
+        actions: [],
+        ruleThrottle: 'no_actions',
+        alertThrottle: null,
+      });
+      const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
       const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
-      const output = transformOrBulkError('rule-1', unsafeCast);
+      const output = transformOrBulkError('rule-1', unsafeCast, {
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        actions: [],
+        ruleThrottle: 'no_actions',
+        alertThrottle: null,
+      });
       const expected: BulkError = {
         rule_id: 'rule-1',
         error: { message: 'Internal error transforming', status_code: 500 },
@@ -968,15 +396,15 @@ describe('utils', () => {
     });
   });
 
-  describe('transformRulesToNdjson', () => {
+  describe('transformDataToNdjson', () => {
     test('if rules are empty it returns an empty string', () => {
-      const ruleNdjson = transformRulesToNdjson([]);
+      const ruleNdjson = transformDataToNdjson([]);
       expect(ruleNdjson).toEqual('');
     });
 
     test('single rule will transform with new line ending character for ndjson', () => {
       const rule = sampleRule();
-      const ruleNdjson = transformRulesToNdjson([rule]);
+      const ruleNdjson = transformDataToNdjson([rule]);
       expect(ruleNdjson.endsWith('\n')).toBe(true);
     });
 
@@ -987,7 +415,7 @@ describe('utils', () => {
       result2.rule_id = 'some other id';
       result2.name = 'Some other rule';
 
-      const ruleNdjson = transformRulesToNdjson([result1, result2]);
+      const ruleNdjson = transformDataToNdjson([result1, result2]);
       // this is how we count characters in JavaScript :-)
       const count = ruleNdjson.split('\n').length - 1;
       expect(count).toBe(2);
@@ -1000,7 +428,7 @@ describe('utils', () => {
       result2.rule_id = 'some other id';
       result2.name = 'Some other rule';
 
-      const ruleNdjson = transformRulesToNdjson([result1, result2]);
+      const ruleNdjson = transformDataToNdjson([result1, result2]);
       const ruleStrings = ruleNdjson.split('\n');
       const reParsed1 = JSON.parse(ruleStrings[0]);
       const reParsed2 = JSON.parse(ruleStrings[1]);
@@ -1017,57 +445,8 @@ describe('utils', () => {
     test('given single alert will return the alert transformed', () => {
       const result1 = getResult();
       const transformed = transformAlertsToRules([result1]);
-      expect(transformed).toEqual([
-        {
-          created_at: '2019-12-13T16:40:33.400Z',
-          created_by: 'elastic',
-          description: 'Detecting root and admin users',
-          enabled: true,
-          false_positives: [],
-          filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
-          from: 'now-6m',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          max_signals: 100,
-          meta: { someMeta: 'someField' },
-          name: 'Detect Root/Admin Users',
-          output_index: '.siem-signals',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://www.example.com', 'https://ww.example.com'],
-          risk_score: 50,
-          rule_id: 'rule-1',
-          severity: 'high',
-          tags: [],
-          threat: [
-            {
-              framework: 'MITRE ATT&CK',
-              tactic: {
-                id: 'TA0040',
-                name: 'impact',
-                reference: 'https://attack.mitre.org/tactics/TA0040/',
-              },
-              technique: [
-                {
-                  id: 'T1499',
-                  name: 'endpoint denial of service',
-                  reference: 'https://attack.mitre.org/techniques/T1499/',
-                },
-              ],
-            },
-          ],
-          timeline_id: 'some-timeline-id',
-          timeline_title: 'some-timeline-title',
-          to: 'now',
-          type: 'query',
-          updated_at: '2019-12-13T16:40:33.400Z',
-          updated_by: 'elastic',
-          note: '# Investigative notes',
-          version: 1,
-        },
-      ]);
+      const expected = getOutputRuleAlertForRest();
+      expect(transformed).toEqual([expected]);
     });
 
     test('given two alerts will return the two alerts transformed', () => {
@@ -1077,106 +456,11 @@ describe('utils', () => {
       result2.params.ruleId = 'some other id';
 
       const transformed = transformAlertsToRules([result1, result2]);
-      expect(transformed).toEqual([
-        {
-          created_at: '2019-12-13T16:40:33.400Z',
-          created_by: 'elastic',
-          description: 'Detecting root and admin users',
-          enabled: true,
-          false_positives: [],
-          filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
-          from: 'now-6m',
-          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          max_signals: 100,
-          meta: { someMeta: 'someField' },
-          name: 'Detect Root/Admin Users',
-          output_index: '.siem-signals',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://www.example.com', 'https://ww.example.com'],
-          risk_score: 50,
-          rule_id: 'rule-1',
-          severity: 'high',
-          tags: [],
-          threat: [
-            {
-              framework: 'MITRE ATT&CK',
-              tactic: {
-                id: 'TA0040',
-                name: 'impact',
-                reference: 'https://attack.mitre.org/tactics/TA0040/',
-              },
-              technique: [
-                {
-                  id: 'T1499',
-                  name: 'endpoint denial of service',
-                  reference: 'https://attack.mitre.org/techniques/T1499/',
-                },
-              ],
-            },
-          ],
-          timeline_id: 'some-timeline-id',
-          timeline_title: 'some-timeline-title',
-          to: 'now',
-          type: 'query',
-          updated_at: '2019-12-13T16:40:33.400Z',
-          updated_by: 'elastic',
-          note: '# Investigative notes',
-          version: 1,
-        },
-        {
-          created_at: '2019-12-13T16:40:33.400Z',
-          created_by: 'elastic',
-          description: 'Detecting root and admin users',
-          enabled: true,
-          false_positives: [],
-          filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
-          from: 'now-6m',
-          id: 'some other id',
-          immutable: false,
-          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-          interval: '5m',
-          language: 'kuery',
-          max_signals: 100,
-          meta: { someMeta: 'someField' },
-          name: 'Detect Root/Admin Users',
-          output_index: '.siem-signals',
-          query: 'user.name: root or user.name: admin',
-          references: ['http://www.example.com', 'https://ww.example.com'],
-          risk_score: 50,
-          rule_id: 'some other id',
-          severity: 'high',
-          tags: [],
-          threat: [
-            {
-              framework: 'MITRE ATT&CK',
-              tactic: {
-                id: 'TA0040',
-                name: 'impact',
-                reference: 'https://attack.mitre.org/tactics/TA0040/',
-              },
-              technique: [
-                {
-                  id: 'T1499',
-                  name: 'endpoint denial of service',
-                  reference: 'https://attack.mitre.org/techniques/T1499/',
-                },
-              ],
-            },
-          ],
-          timeline_id: 'some-timeline-id',
-          timeline_title: 'some-timeline-title',
-          to: 'now',
-          type: 'query',
-          updated_at: '2019-12-13T16:40:33.400Z',
-          updated_by: 'elastic',
-          note: '# Investigative notes',
-          version: 1,
-        },
-      ]);
+      const expected1 = getOutputRuleAlertForRest();
+      const expected2 = getOutputRuleAlertForRest();
+      expected2.id = 'some other id';
+      expected2.rule_id = 'some other id';
+      expect(transformed).toEqual([expected1, expected2]);
     });
   });
 

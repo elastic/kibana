@@ -166,13 +166,14 @@ export { ParsedInterval } from '../common';
 
 export {
   ISearch,
-  ICancel,
+  ISearchCancel,
   ISearchOptions,
   IRequestTypesMap,
   IResponseTypesMap,
   ISearchContext,
   TSearchStrategyProvider,
   getDefaultSearchParams,
+  getTotalLoaded,
 } from './search';
 
 // Search namespace

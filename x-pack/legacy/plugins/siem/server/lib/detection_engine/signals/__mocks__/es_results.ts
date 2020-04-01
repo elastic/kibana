@@ -5,9 +5,15 @@
  */
 
 import { SignalSourceHit, SignalSearchResponse } from '../types';
-import { Logger } from 'kibana/server';
+import {
+  Logger,
+  SavedObject,
+  SavedObjectsFindResponse,
+} from '../../../../../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams, OutputRuleAlertRest } from '../../types';
+import { IRuleStatusAttributes } from '../../rules/types';
+import { ruleStatusSavedObjectType } from '../../../../saved_objects';
 
 export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
@@ -29,6 +35,8 @@ export const sampleRuleAlertParams = (
   riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
   note: '',
+  anomalyThreshold: undefined,
+  machineLearningJobId: undefined,
   filters: undefined,
   savedId: undefined,
   timelineId: undefined,
@@ -36,6 +44,32 @@ export const sampleRuleAlertParams = (
   meta: undefined,
   threat: undefined,
   version: 1,
+  lists: [
+    {
+      field: 'source.ip',
+      boolean_operator: 'and',
+      values: [
+        {
+          name: '127.0.0.1',
+          type: 'value',
+        },
+      ],
+    },
+    {
+      field: 'host.name',
+      boolean_operator: 'and not',
+      values: [
+        {
+          name: 'rock01',
+          type: 'value',
+        },
+        {
+          name: 'mothra',
+          type: 'value',
+        },
+      ],
+    },
+  ],
 });
 
 export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
@@ -344,5 +378,35 @@ export const sampleRule = (): Partial<OutputRuleAlertRest> => {
     note: '',
   };
 };
+
+export const exampleRuleStatus: () => SavedObject<IRuleStatusAttributes> = () => ({
+  type: ruleStatusSavedObjectType,
+  id: '042e6d90-7069-11ea-af8b-0f8ae4fa817e',
+  attributes: {
+    alertId: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
+    statusDate: '2020-03-27T22:55:59.517Z',
+    status: 'succeeded',
+    lastFailureAt: null,
+    lastSuccessAt: '2020-03-27T22:55:59.517Z',
+    lastFailureMessage: null,
+    lastSuccessMessage: 'succeeded',
+    gap: null,
+    bulkCreateTimeDurations: [],
+    searchAfterTimeDurations: [],
+    lastLookBackDate: null,
+  },
+  references: [],
+  updated_at: '2020-03-27T22:55:59.577Z',
+  version: 'WzgyMiwxXQ==',
+});
+
+export const exampleFindRuleStatusResponse: (
+  mockStatuses: Array<SavedObject<IRuleStatusAttributes>>
+) => SavedObjectsFindResponse<IRuleStatusAttributes> = (mockStatuses = [exampleRuleStatus()]) => ({
+  total: 1,
+  per_page: 6,
+  page: 1,
+  saved_objects: mockStatuses,
+});
 
 export const mockLogger: Logger = loggingServiceMock.createLogger();

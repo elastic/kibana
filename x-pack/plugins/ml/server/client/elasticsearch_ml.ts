@@ -413,6 +413,14 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'POST',
   });
 
+  ml.estimateModelMemory = ca({
+    url: {
+      fmt: '/_ml/anomaly_detectors/_estimate_model_memory',
+    },
+    needBody: true,
+    method: 'POST',
+  });
+
   ml.datafeedPreview = ca({
     url: {
       fmt: '/_ml/datafeeds/<%=datafeedId%>/_preview',
@@ -506,7 +514,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     needBody: true,
     method: 'POST',
   });
-
+  // Currently the endpoint uses a default size of 100 unless a size is supplied. So until paging is supported in the UI, explicitly supply a size of 1000
   ml.calendars = ca({
     urls: [
       {
@@ -518,7 +526,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_ml/calendars/',
+        fmt: '/_ml/calendars?size=1000',
       },
     ],
     method: 'GET',
@@ -663,7 +671,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     },
     method: 'DELETE',
   });
-
+  // Currently the endpoint uses a default size of 100 unless a size is supplied. So until paging is supported in the UI, explicitly supply a size of 1000
   ml.filters = ca({
     urls: [
       {
@@ -675,7 +683,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_ml/filters/',
+        fmt: '/_ml/filters?size=1000',
       },
     ],
     method: 'GET',

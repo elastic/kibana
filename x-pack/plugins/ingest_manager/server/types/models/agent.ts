@@ -52,3 +52,14 @@ export const AckEventSchema = schema.object({
 export const AgentEventSchema = schema.object({
   ...AgentEventBase,
 });
+
+export const NewAgentActionSchema = schema.object({
+  type: schema.oneOf([
+    schema.literal('CONFIG_CHANGE'),
+    schema.literal('DATA_DUMP'),
+    schema.literal('RESUME'),
+    schema.literal('PAUSE'),
+  ]),
+  data: schema.maybe(schema.string()),
+  sent_at: schema.maybe(schema.string()),
+});

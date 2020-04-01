@@ -2,9 +2,6 @@
 
 exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <span>
-    some children
-  </span>
   <RowRendererContainer>
     <AuditdGenericDetails
       browserFields={Object {}}
@@ -125,9 +122,6 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
 
 exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly against snapshot 1`] = `
 <span>
-  <span>
-    some children
-  </span>
   <RowRendererContainer>
     <AuditdGenericFileDetails
       browserFields={Object {}}

@@ -4,35 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import { Query, Ast } from '@elastic/eui';
 
-export enum DATA_FRAME_TASK_STATE {
-  ANALYZING = 'analyzing',
-  FAILED = 'failed',
-  REINDEXING = 'reindexing',
-  STARTED = 'started',
-  STARTING = 'starting',
-  STOPPED = 'stopped',
-}
+import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
+export { DATA_FRAME_TASK_STATE };
+
+import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
   CONTINUOUS = 'continuous',
 }
 
-export interface Clause {
-  type: string;
-  value: string;
-  match: string;
-}
+export { Query };
+export type Clause = Parameters<typeof Query['isMust']>[0];
 
-export interface Query {
-  ast: {
-    clauses: Clause[];
-  };
-  text: string;
-  syntax: any;
-}
+type ExtractClauseType<T> = T extends (x: any) => x is infer Type ? Type : never;
+export type TermClause = ExtractClauseType<typeof Ast['Term']['isInstance']>;
+export type FieldClause = ExtractClauseType<typeof Ast['Field']['isInstance']>;
 
 interface ProgressSection {
   phase: string;
@@ -50,7 +39,7 @@ export interface DataFrameAnalyticsStats {
     transport_address: string;
   };
   progress: ProgressSection[];
-  reason?: string;
+  failure_reason?: string;
   state: DATA_FRAME_TASK_STATE;
 }
 
@@ -116,6 +105,6 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
   return stats.state === DATA_FRAME_TASK_STATE.STOPPED && progress === 100;
 }
 
-export function getResultsUrl(jobId: string, analysisType: string, status: DATA_FRAME_TASK_STATE) {
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType},jobStatus:${status}))`;
+export function getResultsUrl(jobId: string, analysisType: string) {
+  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }

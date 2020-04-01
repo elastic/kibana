@@ -11,11 +11,11 @@ import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
+import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 import {
   MockApmPluginContextWrapper,
   mockApmPluginContextValue
-} from '../../../../utils/testHelpers';
-import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
+} from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 jest.mock('ui/new_platform');
 

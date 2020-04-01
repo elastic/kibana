@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { OptInExampleFlyout } from './opt_in_example_flyout';
-export { TelemetryManagementSection } from './telemetry_management_section';
 export { OptedInNoticeBanner } from './opted_in_notice_banner';

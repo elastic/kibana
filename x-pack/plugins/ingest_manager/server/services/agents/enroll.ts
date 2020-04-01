@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentType, Agent, AgentSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -37,7 +37,6 @@ export async function enroll(
     current_error_events: undefined,
     actions: [],
     access_api_key_id: undefined,
-    config_updated_at: undefined,
     last_checkin: undefined,
     default_api_key: undefined,
   };

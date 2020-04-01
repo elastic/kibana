@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from 'src/plugins/data/public';
-import { IAggType, IAggConfig, aggTypeFilters, propFilter } from './legacy_imports';
+import { IAggType, IAggConfig, IndexPattern, search } from '../../../../plugins/data/public';
 
+const { aggTypeFilters, propFilter } = search.aggs;
 const filterByName = propFilter('name');
 
 /**

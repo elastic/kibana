@@ -7,15 +7,18 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
-  EndpointMetadata,
+  HostMetadata,
   AlertData,
   AlertResultList,
   Immutable,
   ImmutableArray,
+  AlertDetails,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
+import { Datasource, NewDatasource } from '../../../../ingest_manager/common/types/models';
+import { GetAgentStatusResponse } from '../../../../ingest_manager/common/types/rest_spec';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -25,22 +28,22 @@ export type MiddlewareFactory<S = GlobalState> = (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
-export interface ManagementListState {
-  endpoints: EndpointMetadata[];
-  total: number;
+export interface HostListState {
+  hosts: HostMetadata[];
   pageSize: number;
   pageIndex: number;
+  total: number;
   loading: boolean;
   detailsError?: ServerApiError;
-  details?: Immutable<EndpointMetadata>;
+  details?: Immutable<HostMetadata>;
   location?: Immutable<EndpointAppLocation>;
 }
 
-export interface ManagementListPagination {
+export interface HostListPagination {
   pageIndex: number;
   pageSize: number;
 }
-export interface ManagingIndexUIQueryParams {
+export interface HostIndexUIQueryParams {
   selected_host?: string;
 }
 
@@ -50,18 +53,28 @@ export interface ServerApiError {
   message: string;
 }
 
-// REFACTOR to use Types from Ingest Manager - see: https://github.com/elastic/endpoint-app-team/issues/150
-export interface PolicyData {
-  name: string;
-  total: number;
-  pending: number;
-  failed: number;
-  id: string;
-  created_by: string;
-  created: string;
-  updated_by: string;
-  updated: string;
-}
+/**
+ * New policy data. Used when updating the policy record via ingest APIs
+ */
+export type NewPolicyData = NewDatasource & {
+  inputs: [
+    {
+      type: 'endpoint';
+      enabled: boolean;
+      streams: [];
+      config: {
+        policy: {
+          value: PolicyConfig;
+        };
+      };
+    }
+  ];
+};
+
+/**
+ * Endpoint Policy data, which extends Ingest's `Datasource` type
+ */
+export type PolicyData = Datasource & NewPolicyData;
 
 /**
  * Policy list store state
@@ -69,6 +82,8 @@ export interface PolicyData {
 export interface PolicyListState {
   /** Array of policy items  */
   policyItems: PolicyData[];
+  /** API error if loading data failed */
+  apiError?: ServerApiError;
   /** total number of policies */
   total: number;
   /** Number of policies per page */
@@ -80,19 +95,122 @@ export interface PolicyListState {
 }
 
 /**
- * Policy list store state
+ * Policy details store state
  */
 export interface PolicyDetailsState {
   /** A single policy item  */
-  policyItem: PolicyData | undefined;
-  /** data is being retrieved from server */
+  policyItem?: PolicyData;
+  /** API error if loading data failed */
+  apiError?: ServerApiError;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
+  /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
+  agentStatusSummary: GetAgentStatusResponse['results'];
+  /** Status of an update to the policy  */
+  updateStatus?: {
+    success: boolean;
+    error?: ServerApiError;
+  };
+}
+
+/**
+ * Endpoint Policy configuration
+ */
+export interface PolicyConfig {
+  windows: {
+    events: {
+      process: boolean;
+      network: boolean;
+    };
+    /** malware mode can be detect, prevent or prevent and notify user */
+    malware: {
+      mode: string;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: {
+    events: {
+      process: boolean;
+    };
+    malware: {
+      mode: string;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: {
+    events: {
+      process: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
+}
+
+/**
+ * Windows-specific policy configuration that is supported via the UI
+ */
+type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+
+/**
+ * Mac-specific policy configuration that is supported via the UI
+ */
+type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+
+/**
+ * Linux-specific policy configuration that is supported via the UI
+ */
+type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
+
+/**
+ * The set of Policy configuration settings that are show/edited via the UI
+ */
+export interface UIPolicyConfig {
+  windows: WindowsPolicyConfig;
+  mac: MacPolicyConfig;
+  linux: LinuxPolicyConfig;
+}
+
+/** OS used in Policy */
+export enum OS {
+  windows = 'windows',
+  mac = 'mac',
+  linux = 'linux',
+}
+
+/** Used in Policy */
+export enum EventingFields {
+  process = 'process',
+  network = 'network',
 }
 
 export interface GlobalState {
-  readonly managementList: ManagementListState;
+  readonly hostList: HostListState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
   readonly policyDetails: PolicyDetailsState;
@@ -141,7 +259,7 @@ export interface AlertListState {
   readonly location?: Immutable<EndpointAppLocation>;
 
   /** Specific Alert data to be shown in the details view */
-  readonly alertDetails?: Immutable<AlertData>;
+  readonly alertDetails?: Immutable<AlertDetails>;
 
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;

@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { VectorTileLayer } from '../../vector_tile_layer';
@@ -16,6 +15,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { EMS_TMS } from '../../../../common/constants';
+import { getInjectedVarFunc, getUiSettings } from '../../../kibana_services';
 
 export class EMSTMSSource extends AbstractTMSSource {
   static type = EMS_TMS;
@@ -152,8 +152,8 @@ export class EMSTMSSource extends AbstractTMSSource {
       return this._descriptor.id;
     }
 
-    const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
-    const emsTileLayerId = chrome.getInjected('emsTileLayerId');
+    const isDarkMode = getUiSettings().get('theme:darkMode', false);
+    const emsTileLayerId = getInjectedVarFunc()('emsTileLayerId');
     return isDarkMode ? emsTileLayerId.dark : emsTileLayerId.bright;
   }
 }

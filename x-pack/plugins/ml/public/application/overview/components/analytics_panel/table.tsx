@@ -61,7 +61,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       sortable: (item: DataFrameAnalyticsListRow) => item.stats.state,
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        return getTaskStateBadge(item.stats.state, item.stats.reason);
+        return getTaskStateBadge(item.stats.state, item.stats.failure_reason);
       },
       width: '100px',
     },

@@ -9,11 +9,10 @@ import { storiesOf } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import { Cytoscape } from './Cytoscape';
-import { getCytoscapeElements } from './get_cytoscape_elements';
 import serviceMapResponse from './cytoscape-layout-test-response.json';
 import { iconForNode } from './icons';
 
-const elementsFromResponses = getCytoscapeElements([serviceMapResponse], '');
+const elementsFromResponses = serviceMapResponse.elements;
 
 storiesOf('app/ServiceMap/Cytoscape', module).add(
   'example',
@@ -22,25 +21,22 @@ storiesOf('app/ServiceMap/Cytoscape', module).add(
       {
         data: {
           id: 'opbeans-python',
-          label: 'opbeans-python',
-          agentName: 'python',
-          type: 'service'
+          'service.name': 'opbeans-python',
+          'agent.name': 'python'
         }
       },
       {
         data: {
           id: 'opbeans-node',
-          label: 'opbeans-node',
-          agentName: 'nodejs',
-          type: 'service'
+          'service.name': 'opbeans-node',
+          'agent.name': 'nodejs'
         }
       },
       {
         data: {
           id: 'opbeans-ruby',
-          label: 'opbeans-ruby',
-          agentName: 'ruby',
-          type: 'service'
+          'service.name': 'opbeans-ruby',
+          'agent.name': 'ruby'
         }
       },
       { data: { source: 'opbeans-python', target: 'opbeans-node' } },
@@ -78,74 +74,82 @@ storiesOf('app/ServiceMap/Cytoscape', module)
     () => {
       const cy = cytoscape();
       const elements = [
-        { data: { id: 'default', label: 'default', type: undefined } },
-        { data: { id: 'cache', label: 'cache', type: 'cache' } },
-        { data: { id: 'database', label: 'database', type: 'database' } },
-        { data: { id: 'external', label: 'external', type: 'external' } },
-        { data: { id: 'messaging', label: 'messaging', type: 'messaging' } },
+        { data: { id: 'default' } },
+        { data: { id: 'cache', label: 'cache', 'span.type': 'cache' } },
+        { data: { id: 'database', label: 'database', 'span.type': 'db' } },
+        {
+          data: {
+            id: 'elasticsearch',
+            label: 'elasticsearch',
+            'span.type': 'db',
+            'span.subtype': 'elasticsearch'
+          }
+        },
+        {
+          data: { id: 'external', label: 'external', 'span.type': 'external' }
+        },
+        {
+          data: {
+            id: 'messaging',
+            label: 'messaging',
+            'span.type': 'messaging'
+          }
+        },
 
         {
           data: {
             id: 'dotnet',
-            label: 'dotnet service',
-            type: 'service',
-            agentName: 'dotnet'
+            'service.name': 'dotnet service',
+            'agent.name': 'dotnet'
           }
         },
         {
           data: {
             id: 'go',
-            label: 'go service',
-            type: 'service',
-            agentName: 'go'
+            'service.name': 'go service',
+            'agent.name': 'go'
           }
         },
         {
           data: {
             id: 'java',
-            label: 'java service',
-            type: 'service',
-            agentName: 'java'
+            'service.name': 'java service',
+            'agent.name': 'java'
           }
         },
         {
           data: {
             id: 'js-base',
-            label: 'js-base service',
-            type: 'service',
-            agentName: 'js-base'
+            'service.name': 'js-base service',
+            'agent.name': 'js-base'
           }
         },
         {
           data: {
             id: 'nodejs',
-            label: 'nodejs service',
-            type: 'service',
-            agentName: 'nodejs'
+            'service.name': 'nodejs service',
+            'agent.name': 'nodejs'
           }
         },
         {
           data: {
             id: 'php',
-            label: 'php service',
-            type: 'service',
-            agentName: 'php'
+            'service.name': 'php service',
+            'agent.name': 'php'
           }
         },
         {
           data: {
             id: 'python',
-            label: 'python service',
-            type: 'service',
-            agentName: 'python'
+            'service.name': 'python service',
+            'agent.name': 'python'
           }
         },
         {
           data: {
             id: 'ruby',
-            label: 'ruby service',
-            type: 'service',
-            agentName: 'ruby'
+            'service.name': 'ruby service',
+            'agent.name': 'ruby'
           }
         }
       ];
@@ -158,8 +162,8 @@ storiesOf('app/ServiceMap/Cytoscape', module)
               <EuiCard
                 description={
                   <pre>
-                    agentName: {node.data('agentName') || 'undefined'}, type:{' '}
-                    {node.data('type') || 'undefined'}
+                    agent.name: {node.data('agent.name') || 'undefined'},
+                    span.type: {node.data('span.type') || 'undefined'}
                   </pre>
                 }
                 icon={
@@ -190,6 +194,7 @@ storiesOf('app/ServiceMap/Cytoscape', module)
       const height = 640;
       const width = 1340;
       const serviceName = undefined; // global service map
+
       return (
         <Cytoscape
           elements={elementsFromResponses}

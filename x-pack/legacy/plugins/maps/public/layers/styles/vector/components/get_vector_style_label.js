@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { VECTOR_STYLES } from '../vector_style_defaults';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 
 export function getDisabledByMessage(styleName) {
   return i18n.translate('xpack.maps.styles.vector.disabledByMessage', {

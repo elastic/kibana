@@ -13,7 +13,6 @@ import {
   SOURCE_META_ID_ORIGIN,
   FIELD_ORIGIN,
 } from '../../../../../common/constants';
-import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
@@ -62,7 +61,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return rangeFieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return rangeFieldMetaFromLocalFeatures;
     }
@@ -87,7 +86,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       return categoryFieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return categoryFieldMetaFromLocalFeatures;
     }
@@ -107,13 +106,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   getFieldName() {
     return this._field ? this._field.getName() : '';
-  }
-
-  getComputedFieldName() {
-    if (!this.isComplete()) {
-      return null;
-    }
-    return getComputedFieldName(this._styleName, this.getField().getName());
   }
 
   isDynamic() {
@@ -150,13 +142,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   supportsFieldMeta() {
-    if (this.isOrdinal()) {
-      return this.isComplete() && this.isOrdinalScaled() && this._field.supportsFieldMeta();
-    } else if (this.isCategorical()) {
-      return this.isComplete() && this._field.supportsFieldMeta();
-    } else {
-      return false;
-    }
+    return this.isComplete() && this._field.supportsFieldMeta();
   }
 
   async getFieldMetaRequest() {
@@ -170,10 +156,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   supportsMbFeatureState() {
-    return true;
-  }
-
-  isOrdinalScaled() {
     return true;
   }
 
@@ -296,19 +278,9 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  getMbValue(value) {
-    if (!this.isOrdinal()) {
-      return this.formatField(value);
-    }
-
+  getNumericalMbFeatureStateValue(value) {
     const valueAsFloat = parseFloat(value);
-    if (this.isOrdinalScaled()) {
-      return scaleValue(valueAsFloat, this.getRangeFieldMeta());
-    }
-    if (isNaN(valueAsFloat)) {
-      return 0;
-    }
-    return valueAsFloat;
+    return isNaN(valueAsFloat) ? null : valueAsFloat;
   }
 
   renderBreakedLegend() {

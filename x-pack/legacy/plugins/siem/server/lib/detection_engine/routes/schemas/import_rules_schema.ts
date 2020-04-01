@@ -9,6 +9,7 @@ import Joi from 'joi';
 /* eslint-disable @typescript-eslint/camelcase */
 import {
   id,
+  actions,
   created_at,
   updated_at,
   created_by,
@@ -37,13 +38,18 @@ import {
   to,
   type,
   threat,
+  throttle,
   references,
   note,
   version,
+  lists,
+  anomaly_threshold,
+  machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import { hasListsFeature } from '../../feature_flags';
 
 /**
  * Differences from this and the createRulesSchema are
@@ -55,7 +61,13 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *   - updated_by is optional (but ignored in the import code)
  */
 export const importRulesSchema = Joi.object({
+  anomaly_threshold: anomaly_threshold.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   id,
+  actions: actions.default([]),
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
@@ -65,9 +77,22 @@ export const importRulesSchema = Joi.object({
   immutable: immutable.default(false).valid(false),
   index,
   interval: interval.default('5m'),
-  query: query.allow('').default(''),
-  language: language.default('kuery'),
+  query: query.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: query.allow('').default(''),
+  }),
+  language: language.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: language.default('kuery'),
+  }),
   output_index,
+  machine_learning_job_id: machine_learning_job_id.when('type', {
+    is: 'machine_learning',
+    then: Joi.required(),
+    otherwise: Joi.forbidden(),
+  }),
   saved_id: saved_id.when('type', {
     is: 'saved_query',
     then: Joi.required(),
@@ -84,6 +109,7 @@ export const importRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
+  throttle: throttle.default(null),
   references: references.default([]),
   note: note.allow(''),
   version: version.default(1),
@@ -91,6 +117,9 @@ export const importRulesSchema = Joi.object({
   updated_at,
   created_by,
   updated_by,
+
+  // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
+  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 });
 
 export const importRulesQuerySchema = Joi.object({

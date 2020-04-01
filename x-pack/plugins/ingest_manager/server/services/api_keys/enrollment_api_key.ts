@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';
@@ -26,6 +26,8 @@ export async function listEnrollmentApiKeys(
     type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
     page,
     perPage,
+    sortField: 'created_at',
+    sortOrder: 'DESC',
     filter:
       kuery && kuery !== ''
         ? kuery.replace(/enrollment_api_keys\./g, 'enrollment_api_keys.attributes.')
@@ -48,12 +50,19 @@ export async function getEnrollmentAPIKey(soClient: SavedObjectsClientContract, 
   );
 }
 
+/**
+ * Invalidate an api key and mark it as inactive
+ * @param soClient
+ * @param id
+ */
 export async function deleteEnrollmentApiKey(soClient: SavedObjectsClientContract, id: string) {
   const enrollmentApiKey = await getEnrollmentAPIKey(soClient, id);
 
   await invalidateAPIKey(soClient, enrollmentApiKey.api_key_id);
 
-  await soClient.delete(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id);
+  await soClient.update(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id, {
+    active: false,
+  });
 }
 
 export async function deleteEnrollmentApiKeyForConfigId(
@@ -90,10 +99,20 @@ export async function generateEnrollmentAPIKey(
   const id = uuid.v4();
   const { name: providedKeyName } = data;
   const configId = data.configId ?? (await agentConfigService.getDefaultAgentConfigId(soClient));
-
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
-
-  const key = await createAPIKey(soClient, name, {});
+  const key = await createAPIKey(soClient, name, {
+    // Useless role to avoid to have the privilege of the user that created the key
+    'fleet-apikey-enroll': {
+      cluster: [],
+      applications: [
+        {
+          application: '.fleet',
+          privileges: ['no-privileges'],
+          resources: ['*'],
+        },
+      ],
+    },
+  });
 
   if (!key) {
     throw new Error('Unable to create an enrollment api key');
@@ -108,6 +127,7 @@ export async function generateEnrollmentAPIKey(
       api_key: apiKey,
       name,
       config_id: configId,
+      created_at: new Date().toISOString(),
     })
   );
 }

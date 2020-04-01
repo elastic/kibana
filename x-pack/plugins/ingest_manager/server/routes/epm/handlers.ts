@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
+import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
@@ -75,8 +75,8 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
   response
 ) => {
   try {
-    const { pkgkey, filePath } = request.params;
-    const registryResponse = await getFile(`/package/${pkgkey}/${filePath}`);
+    const { pkgName, pkgVersion, filePath } = request.params;
+    const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
     const contentType = registryResponse.headers.get('Content-Type');
     const customResponseObj: CustomHttpResponseOptions<typeof registryResponse.body> = {
       body: registryResponse.body,

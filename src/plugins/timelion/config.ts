@@ -21,11 +21,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object(
   {
+    enabled: schema.boolean({ defaultValue: true }),
     ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
+  { unknowns: 'allow' }
 );
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

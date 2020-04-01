@@ -8,7 +8,7 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-
+import { useSet } from 'react-use';
 import { euiStyled } from '../../../../../../../observability/public';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
@@ -64,9 +64,31 @@ export const AnomaliesTable: React.FunctionComponent<{
     });
   }, [results]);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, React.ReactNode>
-  >({});
+  const [expandedDatasetIds, { add: expandDataset, remove: collapseDataset }] = useSet<string>(
+    new Set()
+  );
+
+  const expandedDatasetRowContents = useMemo(
+    () =>
+      [...expandedDatasetIds].reduce<Record<string, React.ReactNode>>(
+        (aggregatedDatasetRows, datasetId) => {
+          return {
+            ...aggregatedDatasetRows,
+            [getFriendlyNameForPartitionId(datasetId)]: (
+              <AnomaliesTableExpandedRow
+                partitionId={datasetId}
+                results={results}
+                setTimeRange={setTimeRange}
+                timeRange={timeRange}
+                jobId={jobId}
+              />
+            ),
+          };
+        },
+        {}
+      ),
+    [expandedDatasetIds, jobId, results, setTimeRange, timeRange]
+  );
 
   const [sorting, setSorting] = useState<SortingOptions>({
     sort: {
@@ -98,73 +120,43 @@ export const AnomaliesTable: React.FunctionComponent<{
     return sorting.sort.direction === 'asc' ? sortedItems : sortedItems.reverse();
   }, [tableItems, sorting]);
 
-  const expandItem = useCallback(
-    (item: TableItem) => {
-      const newItemIdToExpandedRowMap = {
-        ...itemIdToExpandedRowMap,
-        [item.partitionName]: (
-          <AnomaliesTableExpandedRow
-            partitionId={item.partitionId}
-            results={results}
-            topAnomalyScore={item.topAnomalyScore}
-            setTimeRange={setTimeRange}
-            timeRange={timeRange}
-            jobId={jobId}
+  const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
+    () => [
+      {
+        field: 'partitionName',
+        name: partitionColumnName,
+        sortable: true,
+        truncateText: true,
+      },
+      {
+        field: 'topAnomalyScore',
+        name: maxAnomalyScoreColumnName,
+        sortable: true,
+        truncateText: true,
+        dataType: 'number' as const,
+      },
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '40px',
+        isExpander: true,
+        render: (item: TableItem) => (
+          <RowExpansionButton
+            isExpanded={expandedDatasetIds.has(item.partitionId)}
+            item={item.partitionId}
+            onExpand={expandDataset}
+            onCollapse={collapseDataset}
           />
         ),
-      };
-      setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
-    },
-    [itemIdToExpandedRowMap, jobId, results, setTimeRange, timeRange]
+      },
+    ],
+    [collapseDataset, expandDataset, expandedDatasetIds]
   );
-
-  const collapseItem = useCallback(
-    (item: TableItem) => {
-      if (itemIdToExpandedRowMap[item.partitionName]) {
-        const {
-          [item.partitionName]: toggledItem,
-          ...remainingExpandedRowMap
-        } = itemIdToExpandedRowMap;
-        setItemIdToExpandedRowMap(remainingExpandedRowMap);
-      }
-    },
-    [itemIdToExpandedRowMap]
-  );
-
-  const columns: Array<EuiBasicTableColumn<TableItem>> = [
-    {
-      field: 'partitionName',
-      name: partitionColumnName,
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'topAnomalyScore',
-      name: maxAnomalyScoreColumnName,
-      sortable: true,
-      truncateText: true,
-      dataType: 'number' as const,
-    },
-    {
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      render: (item: TableItem) => (
-        <RowExpansionButton
-          isExpanded={item.partitionName in itemIdToExpandedRowMap}
-          item={item}
-          onExpand={expandItem}
-          onCollapse={collapseItem}
-        />
-      ),
-    },
-  ];
 
   return (
     <StyledEuiBasicTable
       items={sortedTableItems}
       itemId="partitionName"
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      itemIdToExpandedRowMap={expandedDatasetRowContents}
       isExpandable={true}
       hasActions={true}
       columns={columns}

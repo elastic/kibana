@@ -11,13 +11,23 @@ import {
   getFindResultWithSingleHit,
   getPatchBulkRequest,
   getResult,
+  typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('patch_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
 
   beforeEach(() => {
     server = serverMock.create();
@@ -47,11 +57,58 @@ describe('patch_rules_bulk', () => {
       ]);
     });
 
+    test('allows ML Params to be patched', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: `${DETECTION_ENGINE_RULES_URL}/bulk_update`,
+        body: [
+          {
+            rule_id: 'my-rule-id',
+            anomaly_threshold: 4,
+            machine_learning_job_id: 'some_job_id',
+          },
+        ],
+      });
+      await server.inject(request, context);
+
+      expect(clients.alertsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            params: expect.objectContaining({
+              anomalyThreshold: 4,
+              machineLearningJobId: 'some_job_id',
+            }),
+          }),
+        })
+      );
+    });
+
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting!.getAlertsClient = jest.fn();
       const response = await server.inject(getPatchBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
+    it('rejects patching of an ML rule with an insufficient license', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const request = requestMock.create({
+        method: 'patch',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [typicalMlRulePayload()],
+      });
+
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message: 'Your license does not support machine learning. Please upgrade your license.',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
     });
   });
 
@@ -89,7 +146,7 @@ describe('patch_rules_bulk', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query]]]'
+        '"value" at position 0 fails because [child "type" fails because ["type" must be one of [query, saved_query, machine_learning]]]'
       );
     });
   });

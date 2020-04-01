@@ -44,7 +44,9 @@ export const patchRules = async ({
   references,
   note,
   version,
-  throttle,
+  lists,
+  anomalyThreshold,
+  machineLearningJobId,
 }: PatchRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -75,8 +77,10 @@ export const patchRules = async ({
     type,
     references,
     version,
-    throttle,
     note,
+    lists,
+    anomalyThreshold,
+    machineLearningJobId,
   });
 
   const nextParams = defaults(
@@ -106,6 +110,9 @@ export const patchRules = async ({
       references,
       note,
       version: calculatedVersion,
+      lists,
+      anomalyThreshold,
+      machineLearningJobId,
     }
   );
 
@@ -113,7 +120,7 @@ export const patchRules = async ({
     id: rule.id,
     data: {
       tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
-      throttle: throttle ?? rule.throttle ?? null,
+      throttle: rule.throttle,
       name: calculateName({ updatedName: name, originalName: rule.name }),
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),

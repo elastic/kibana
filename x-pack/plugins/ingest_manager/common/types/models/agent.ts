@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from '../../../../../../src/core/public';
+import { SavedObjectAttributes } from 'src/core/public';
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
 
 export type AgentType =
@@ -14,13 +14,16 @@ export type AgentType =
 
 export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
 
-export interface AgentAction extends SavedObjectAttributes {
+export interface NewAgentAction {
   type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
-  id: string;
-  created_at: string;
   data?: string;
   sent_at?: string;
 }
+
+export type AgentAction = NewAgentAction & {
+  id: string;
+  created_at: string;
+} & SavedObjectAttributes;
 
 export interface AgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
@@ -56,8 +59,9 @@ interface AgentBase {
   access_api_key_id?: string;
   default_api_key?: string;
   config_id?: string;
+  config_revision?: number;
+  config_newest_revision?: number;
   last_checkin?: string;
-  config_updated_at?: string;
   actions: AgentAction[];
 }
 

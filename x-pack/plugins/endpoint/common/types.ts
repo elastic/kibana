@@ -44,6 +44,7 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
+  static MAX_LONG_INT = '9223372036854775807'; // 2^63-1
 }
 
 export interface AlertResultList {
@@ -83,10 +84,10 @@ export interface AlertResultList {
   prev: string | null;
 }
 
-export interface EndpointResultList {
-  /* the endpoints restricted by the page size */
-  endpoints: EndpointMetadata[];
-  /* the total number of unique endpoints in the index */
+export interface HostResultList {
+  /* the hosts restricted by the page size */
+  hosts: HostMetadata[];
+  /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
   request_page_size: number;
@@ -238,12 +239,20 @@ interface AlertMetadata {
   prev: string | null;
 }
 
+interface AlertState {
+  state: {
+    host_metadata: HostMetadata;
+  };
+}
+
 /**
  * Union of alert data and metadata.
  */
 export type AlertData = AlertEvent & AlertMetadata;
 
-export interface EndpointMetadata {
+export type AlertDetails = AlertData & AlertState;
+
+export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
@@ -258,7 +267,7 @@ export interface EndpointMetadata {
     version: string;
   };
   host: HostFields;
-}
+}>;
 
 /**
  * Represents `total` response from Elasticsearch after ES 7.0.
@@ -311,8 +320,8 @@ export interface EndpointEvent {
     version: string;
   };
   event: {
-    category: string;
-    type: string;
+    category: string | string[];
+    type: string | string[];
     id: string;
     kind: string;
   };
@@ -325,8 +334,10 @@ export interface EndpointEvent {
   };
   process: {
     entity_id: string;
+    name: string;
     parent?: {
       entity_id: string;
+      name?: string;
     };
   };
 }

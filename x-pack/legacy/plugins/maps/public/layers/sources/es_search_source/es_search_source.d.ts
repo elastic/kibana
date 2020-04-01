@@ -8,5 +8,5 @@ import { AbstractESSource } from '../es_source';
 import { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
 
 export class ESSearchSource extends AbstractESSource {
-  constructor(sourceDescriptor: ESSearchSourceDescriptor, inspectorAdapters: unknown);
+  constructor(sourceDescriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters: unknown);
 }

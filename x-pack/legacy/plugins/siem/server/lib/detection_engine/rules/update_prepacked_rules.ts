@@ -41,7 +41,6 @@ export const updatePrepackagedRules = async (
       threat,
       references,
       version,
-      throttle,
       note,
     } = rule;
 
@@ -75,7 +74,6 @@ export const updatePrepackagedRules = async (
       threat,
       references,
       version,
-      throttle,
       note,
     });
   });

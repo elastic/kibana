@@ -7,23 +7,22 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { remoteClustersUrl } from '../../../services/documentation';
 
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContentHeader,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
-import { remoteClustersUrl } from '../../../services/documentation';
-
-export const RemoteClusterPageTitle = ({ title }) => (
+export const RemoteClusterPageTitle = ({ title, description }) => (
   <Fragment>
     <EuiSpacer size="xs" />
 
-    <EuiPageContentHeader>
+    <EuiTitle size="l">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="l" data-test-subj="remoteClusterPageTitle">
@@ -47,10 +46,23 @@ export const RemoteClusterPageTitle = ({ title }) => (
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageContentHeader>
+    </EuiTitle>
+
+    {description ? (
+      <>
+        <EuiSpacer size="s" />
+
+        <EuiTitle size="s">
+          <EuiText color="subdued">{description}</EuiText>
+        </EuiTitle>
+      </>
+    ) : null}
+
+    <EuiSpacer size="m" />
   </Fragment>
 );
 
 RemoteClusterPageTitle.propTypes = {
   title: PropTypes.node.isRequired,
+  description: PropTypes.node,
 };

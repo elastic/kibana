@@ -8,7 +8,7 @@ import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { useConfig } from '../../hooks';
 import { CreateDatasourcePage } from '../agent_config/create_datasource_page';
-import { Home } from './screens/home';
+import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
 
 export const EPMApp: React.FunctionComponent = () => {
@@ -23,8 +23,8 @@ export const EPMApp: React.FunctionComponent = () => {
         <Route path="/epm/detail/:pkgkey/:panel?">
           <Detail />
         </Route>
-        <Route path="/epm/">
-          <Home />
+        <Route path="/epm/:tabId?" exact={true}>
+          <EPMHomePage />
         </Route>
       </Switch>
     </Router>

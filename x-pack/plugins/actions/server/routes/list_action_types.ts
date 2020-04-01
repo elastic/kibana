@@ -11,13 +11,13 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 
-export const listActionTypesRoute = (router: IRouter, licenseState: LicenseState) => {
+export const listActionTypesRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `/api/action/types`,
+      path: `${BASE_ACTION_API_PATH}/types`,
       validate: {},
       options: {
         tags: ['access:actions-read'],

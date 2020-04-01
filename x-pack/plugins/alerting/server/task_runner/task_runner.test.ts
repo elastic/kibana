@@ -12,6 +12,8 @@ import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
+import { actionsMock } from '../../../actions/server/mocks';
 
 const alertType = {
   id: 'test',
@@ -55,9 +57,11 @@ describe('Task Runner', () => {
     savedObjectsClient,
   };
 
-  const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
+  const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> & {
+    actionsPlugin: jest.Mocked<ActionsPluginStart>;
+  } = {
     getServices: jest.fn().mockReturnValue(services),
-    executeAction: jest.fn(),
+    actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsPlugin,
     logger: loggingServiceMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
@@ -154,7 +158,8 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
   });
 
-  test('executeAction is called per alert instance that is scheduled', async () => {
+  test('actionsPlugin.execute is called per alert instance that is scheduled', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     alertType.executor.mockImplementation(
       ({ services: executorServices }: AlertExecutorOptions) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
@@ -175,8 +180,9 @@ describe('Task Runner', () => {
       references: [],
     });
     await taskRunner.run();
-    expect(taskRunnerFactoryInitializerParams.executeAction).toHaveBeenCalledTimes(1);
-    expect(taskRunnerFactoryInitializerParams.executeAction.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(taskRunnerFactoryInitializerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.actionsPlugin.execute.mock.calls[0])
+      .toMatchInlineSnapshot(`
                   Array [
                     Object {
                       "apiKey": "MTIzOmFiYw==",

@@ -19,6 +19,7 @@ import {
   createIndexPattern,
 } from './install';
 import { Fields, Field } from '../../fields/field';
+import { dupeFields } from './tests/test_data';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -60,9 +61,31 @@ describe('creating index patterns from yaml fields', () => {
     expect(flattened).toMatchSnapshot('flattenFields');
   });
 
-  test('dedupFields function remove duplicated fields when parsing multiple files', () => {
-    const deduped = dedupeFields(fields);
-    expect(deduped).toMatchSnapshot('dedupeFields');
+  describe('dedupFields', () => {
+    const deduped = dedupeFields(dupeFields);
+    const checkIfDup = (field: Field) => {
+      return deduped.filter(item => item.name === field.name);
+    };
+    test('there there is one field object with name of "1"', () => {
+      expect(checkIfDup({ name: '1' }).length).toBe(1);
+    });
+    test('there there is one field object with name of "1.1"', () => {
+      expect(checkIfDup({ name: '1.1' }).length).toBe(1);
+    });
+    test('there there is one field object with name of "2"', () => {
+      expect(checkIfDup({ name: '2' }).length).toBe(1);
+    });
+    test('there there is one field object with name of "4"', () => {
+      expect(checkIfDup({ name: '4' }).length).toBe(1);
+    });
+    // existing field takes precendence
+    test('the new merged field has correct attributes', () => {
+      const mergedField = deduped.find(field => field.name === '1');
+      expect(mergedField?.searchable).toBe(true);
+      expect(mergedField?.aggregatable).toBe(true);
+      expect(mergedField?.analyzed).toBe(true);
+      expect(mergedField?.count).toBe(0);
+    });
   });
 
   describe('getFieldByPath searches recursively for field in fields given dot separated path', () => {

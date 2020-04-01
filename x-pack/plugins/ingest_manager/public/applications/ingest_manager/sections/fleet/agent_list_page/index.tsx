@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useCallback } from 'react';
-import styled, { CSSProperties } from 'styled-components';
 import {
   EuiBasicTable,
   EuiButton,
@@ -17,20 +16,16 @@ import {
   EuiLink,
   EuiPopover,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
-  EuiTitle,
-  EuiStat,
-  EuiI18nNumber,
-  EuiHealth,
   EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { CSSProperties } from 'styled-components';
 import { AgentEnrollmentFlyout } from './components';
-import { WithHeaderLayout } from '../../../layouts';
 import { Agent } from '../../../types';
 import {
   usePagination,
@@ -44,17 +39,9 @@ import { ConnectedLink } from '../components';
 import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
-import { DonutChart } from './components/donut_chart';
-import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
 import { AgentStatusKueryHelper } from '../../../services';
 import { FLEET_AGENT_DETAIL_PATH, AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 
-const Divider = styled.div`
-  width: 0;
-  height: 100%;
-  border-left: ${props => props.theme.eui.euiBorderThin};
-  height: 45px;
-`;
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -203,11 +190,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       .join(' or ');
   }
 
-  const agentStatusRequest = useGetAgentStatus(undefined, {
-    pollIntervalMs: REFRESH_INTERVAL_MS,
-  });
-  const agentStatus = agentStatusRequest.data?.results;
-
   const agentsRequest = useGetAgents(
     {
       page: pagination.currentPage,
@@ -289,6 +271,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
+      width: '100px',
       name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
@@ -299,10 +282,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.agentList.configColumnTitle', {
         defaultMessage: 'Configuration',
       }),
-      render: (configId: string) => {
+      render: (configId: string, agent: Agent) => {
         const configName = agentConfigs.find(p => p.id === configId)?.name;
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
               <EuiLink
                 href={`${CONFIG_DETAILS_URI}${configId}`}
@@ -312,21 +295,42 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 {configName || configId}
               </EuiLink>
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.revisionNumber"
-                  defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: '999' }} // TODO fix when we have revision
-                />
-              </EuiText>
-            </EuiFlexItem>
+            {agent.config_revision && (
+              <EuiFlexItem grow={false}>
+                <EuiText color="default" size="xs" className="eui-textNoWrap">
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.revisionNumber"
+                    defaultMessage="rev. {revNumber}"
+                    values={{ revNumber: agent.config_revision }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            )}
+            {agent.config_revision &&
+              agent.config_newest_revision &&
+              agent.config_newest_revision > agent.config_revision && (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <EuiIcon size="m" type="alert" color="warning" />
+                    &nbsp;
+                    {true && (
+                      <>
+                        <FormattedMessage
+                          id="xpack.ingestManager.agentList.outOfDateLabel"
+                          defaultMessage="Out-of-date"
+                        />
+                      </>
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
           </EuiFlexGroup>
         );
       },
     },
     {
       field: 'local_metadata.agent_version',
+      width: '100px',
       name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
@@ -376,154 +380,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       }
     />
   );
-  const headerRightColumn = (
-    <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
-      <EuiFlexItem grow={false}>
-        <EuiStat
-          titleSize="xs"
-          textAlign="right"
-          title={<EuiI18nNumber value={agentStatus?.total ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.totalLabel', {
-            defaultMessage: 'Agents',
-          })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DonutChart
-          width={40}
-          height={40}
-          data={{
-            online: agentStatus?.online || 0,
-            offline: agentStatus?.offline || 0,
-            error: agentStatus?.error || 0,
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiStat
-          textAlign="right"
-          titleSize="xs"
-          title={
-            <EuiHealth color="success">
-              {' '}
-              <EuiI18nNumber value={agentStatus?.online ?? 0} />
-            </EuiHealth>
-          }
-          description={i18n.translate('xpack.ingestManager.agentListStatus.onlineLabel', {
-            defaultMessage: 'Online',
-          })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiStat
-          textAlign="right"
-          titleSize="xs"
-          title={<EuiI18nNumber value={agentStatus?.offline ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.offlineLabel', {
-            defaultMessage: 'Offline',
-          })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiStat
-          textAlign="right"
-          titleSize="xs"
-          title={<EuiI18nNumber value={agentStatus?.error ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.errorLabel', {
-            defaultMessage: 'Error',
-          })}
-        />
-      </EuiFlexItem>
-      {hasWriteCapabilites && (
-        <>
-          <EuiFlexItem grow={false}>
-            <Divider />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
-              <FormattedMessage
-                id="xpack.ingestManager.agentList.enrollButton"
-                defaultMessage="Enroll new agents"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </>
-      )}
-    </EuiFlexGroup>
-  );
-  const headerLeftColumn = (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiText>
-          <h1>
-            <FormattedMessage id="xpack.ingestManager.fleet.pageTitle" defaultMessage="Fleet" />
-          </h1>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.ingestManager.fleet.pageSubtitle"
-              defaultMessage="Manage and deploy configuration updates to a group of agents of any size."
-            />
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 
   return (
-    <WithHeaderLayout
-      leftColumn={headerLeftColumn}
-      rightColumn={headerRightColumn}
-      tabs={[
-        {
-          id: 'agents',
-          name: 'Agents',
-          isSelected: true,
-        },
-        {
-          id: 'enrollment_keys',
-          name: 'Enrollment keys',
-        },
-      ]}
-    >
+    <>
       {isEnrollmentFlyoutOpen ? (
         <AgentEnrollmentFlyout
           agentConfigs={agentConfigs}
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       ) : null}
-      <EuiTitle size="l">
-        <h1>
-          <FormattedMessage id="xpack.ingestManager.agentList.pageTitle" defaultMessage="Agents" />
-        </h1>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.ingestManager.agentList.pageDescription"
-                defaultMessage="Use agents to faciliate data collection for your Elastic stack."
-              />
-            </EuiText>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={i18n.translate('xpack.ingestManager.agentList.showInactiveSwitchLabel', {
-              defaultMessage: 'Show inactive agents',
-            })}
-            checked={showInactive}
-            onChange={() => setShowInactive(!showInactive)}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-
       <EuiFlexGroup alignItems={'center'}>
         {selectedAgents.length ? (
           <EuiFlexItem>
@@ -568,7 +433,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         ) : null}
         <EuiFlexItem grow={4}>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={3}>
+            <EuiFlexItem grow={6}>
               <SearchBar
                 value={search}
                 onChange={newSearch => {
@@ -581,7 +446,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 fieldPrefix="agents"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={2}>
               <EuiFilterGroup>
                 <EuiPopover
                   ownFocus
@@ -662,6 +527,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                     ))}
                   </div>
                 </EuiPopover>
+                <EuiFilterButton
+                  hasActiveFilters={showInactive}
+                  onClick={() => setShowInactive(!showInactive)}
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.showInactiveSwitchLabel"
+                    defaultMessage="Show inactive"
+                  />
+                </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -724,6 +598,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           setPagination(newPagination);
         }}
       />
-    </WithHeaderLayout>
+    </>
   );
 };

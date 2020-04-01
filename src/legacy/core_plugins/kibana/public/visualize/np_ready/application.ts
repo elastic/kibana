@@ -21,14 +21,7 @@ import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext } from 'kibana/public';
-import {
-  configureAppAngularModule,
-  KbnUrlProvider,
-  RedirectWhenMissingProvider,
-  IPrivate,
-  PrivateProvider,
-  PromiseServiceCreator,
-} from '../legacy_imports';
+import { configureAppAngularModule } from '../legacy_imports';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import {
   createTopNavDirective,
@@ -83,35 +76,14 @@ function mountVisualizeApp(appBasePath: string, element: HTMLElement) {
 
 function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
   createLocalI18nModule();
-  createLocalPrivateModule();
-  createLocalPromiseModule();
-  createLocalKbnUrlModule();
   createLocalTopNavModule(navigation);
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
     'app/visualize/I18n',
-    'app/visualize/Private',
     'app/visualize/TopNav',
-    'app/visualize/KbnUrl',
-    'app/visualize/Promise',
   ]);
   return visualizeAngularModule;
-}
-
-function createLocalKbnUrlModule() {
-  angular
-    .module('app/visualize/KbnUrl', ['app/visualize/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
-}
-
-function createLocalPromiseModule() {
-  angular.module('app/visualize/Promise', []).service('Promise', PromiseServiceCreator);
-}
-
-function createLocalPrivateModule() {
-  angular.module('app/visualize/Private', []).provider('Private', PrivateProvider);
 }
 
 function createLocalTopNavModule(navigation: NavigationStart) {

@@ -20,7 +20,7 @@
 import React, { FunctionComponent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { IAggConfig } from '../../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 import {
   safeMakeLabel,
   useAvailableOptions,

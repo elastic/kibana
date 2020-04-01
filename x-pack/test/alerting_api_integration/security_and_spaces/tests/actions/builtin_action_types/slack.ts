@@ -159,6 +159,20 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('ok');
     });
 
+    it('should handle an empty message error', async () => {
+      const { body: result } = await supertest
+        .post(`/api/action/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            message: '',
+          },
+        })
+        .expect(200);
+      expect(result.status).to.eql('error');
+      expect(result.message).to.match(/error validating action params: \[message\]: /);
+    });
+
     it('should handle a 40x slack error', async () => {
       const { body: result } = await supertest
         .post(`/api/action/${simulatedActionId}/_execute`)

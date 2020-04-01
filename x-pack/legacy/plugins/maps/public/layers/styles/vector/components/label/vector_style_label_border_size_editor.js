@@ -7,10 +7,9 @@
 import React from 'react';
 
 import { EuiFormRow, EuiSelect, EuiToolTip } from '@elastic/eui';
-import { VECTOR_STYLES } from '../../vector_style_defaults';
 import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
 import { i18n } from '@kbn/i18n';
-import { LABEL_BORDER_SIZES } from '../../../../../../common/constants';
+import { LABEL_BORDER_SIZES, VECTOR_STYLES } from '../../../../../../common/constants';
 
 const options = [
   {

@@ -5,7 +5,12 @@
         "type": "boolean"
       },
       "name": {
-        "type": "text"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
       },
       "tags": {
         "type": "keyword"

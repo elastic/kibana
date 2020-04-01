@@ -8,7 +8,7 @@ import React, { Fragment, Component } from 'react';
 
 import { RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,7 +33,7 @@ export class UpdateSourceEditor extends Component {
   async _loadFields() {
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({

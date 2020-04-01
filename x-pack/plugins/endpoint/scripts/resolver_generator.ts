@@ -32,7 +32,7 @@ async function main() {
     },
     metadataIndex: {
       alias: 'mi',
-      describe: 'index to store endpoint metadata in',
+      describe: 'index to store host metadata in',
       default: 'endpoint-agent-1',
       type: 'string',
     },
@@ -76,15 +76,15 @@ async function main() {
       type: 'number',
       default: 30,
     },
-    numEndpoints: {
+    numHosts: {
       alias: 'ne',
-      describe: 'number of different endpoints to generate alerts for',
+      describe: 'number of different hosts to generate alerts for',
       type: 'number',
       default: 1,
     },
-    alertsPerEndpoint: {
+    alertsPerHost: {
       alias: 'ape',
-      describe: 'number of resolver trees to make for each endpoint',
+      describe: 'number of resolver trees to make for each host',
       type: 'number',
       default: 1,
     },
@@ -131,14 +131,19 @@ async function main() {
       process.exit(1);
     }
   }
-
-  const generator = new EndpointDocGenerator(argv.seed);
-  for (let i = 0; i < argv.numEndpoints; i++) {
+  let seed = argv.seed;
+  if (!seed) {
+    seed = Math.random().toString();
+    // eslint-disable-next-line no-console
+    console.log('No seed supplied, using random seed: ' + seed);
+  }
+  const generator = new EndpointDocGenerator(seed);
+  for (let i = 0; i < argv.numHosts; i++) {
     await client.index({
       index: argv.metadataIndex,
-      body: generator.generateEndpointMetadata(),
+      body: generator.generateHostMetadata(),
     });
-    for (let j = 0; j < argv.alertsPerEndpoint; j++) {
+    for (let j = 0; j < argv.alertsPerHost; j++) {
       const resolverDocs = generator.generateFullResolverTree(
         argv.ancestors,
         argv.generations,

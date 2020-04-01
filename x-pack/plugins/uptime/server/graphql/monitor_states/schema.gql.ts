@@ -177,6 +177,7 @@ export const monitorStatesSchema = gql`
       pagination: String
       filters: String
       statusFilter: String
+      pageSize: Int
     ): MonitorSummaryResult
   }
 `;

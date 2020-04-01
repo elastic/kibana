@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, FakeRequest, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, FakeRequest, SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../../types';
 import { appContextService } from '../app_context';
 import { outputService } from '../output';

@@ -39,6 +39,7 @@ import { createIndexPatternSelect } from './ui/index_pattern_select';
 import { IndexPatternsService } from './index_patterns';
 import {
   setFieldFormats,
+  setHttp,
   setIndexPatterns,
   setInjectedMetadata,
   setNotifications,
@@ -120,7 +121,10 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core, this.packageInfo),
+      search: this.searchService.setup(core, {
+        packageInfo: this.packageInfo,
+        query: queryService,
+      }),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
     };
@@ -128,6 +132,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays } = core;
+    setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);

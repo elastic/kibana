@@ -12,12 +12,14 @@
     "features",
     "home",
     "licensing",
-    "usageCollection"
+    "usageCollection",
+    "share"
   ],
   "optionalPlugins": [
     "security",
     "spaces",
-    "management"
+    "management",
+    "licenseManagement"
   ],
   "server": true,
   "ui": true

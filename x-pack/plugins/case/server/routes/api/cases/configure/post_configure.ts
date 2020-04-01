@@ -42,8 +42,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
             )
           );
         }
-        const updatedBy = await caseService.getUser({ request, response });
-        const { full_name, username } = updatedBy;
+        const { email, full_name, username } = await caseService.getUser({ request, response });
 
         const creationDate = new Date().toISOString();
         const post = await caseConfigureService.post({
@@ -51,7 +50,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           attributes: {
             ...query,
             created_at: creationDate,
-            created_by: { full_name, username },
+            created_by: { email, full_name, username },
             updated_at: null,
             updated_by: null,
           },

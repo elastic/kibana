@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface NavTabs {
   name: string;
@@ -24,11 +25,11 @@ export const navTabs: NavTabs[] = [
     href: '/',
   },
   {
-    id: 'management',
-    name: i18n.translate('xpack.endpoint.headerNav.management', {
-      defaultMessage: 'Management',
+    id: 'hosts',
+    name: i18n.translate('xpack.endpoint.headerNav.hosts', {
+      defaultMessage: 'Hosts',
     }),
-    href: '/management',
+    href: '/hosts',
   },
   {
     id: 'alerts',
@@ -46,30 +47,33 @@ export const navTabs: NavTabs[] = [
   },
 ];
 
-export const HeaderNavigation: React.FunctionComponent<{ basename: string }> = React.memo(
-  ({ basename }) => {
-    const history = useHistory();
-    const location = useLocation();
+export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
+  const history = useHistory();
+  const location = useLocation();
+  const { services } = useKibana();
+  const BASE_PATH = services.application.getUrlForApp('endpoint');
 
-    function renderNavTabs(tabs: NavTabs[]) {
-      return tabs.map((tab, index) => {
-        return (
-          <EuiTab
-            data-test-subj={`${tab.id}EndpointTab`}
-            key={index}
-            href={`${basename}${tab.href}`}
-            onClick={(event: MouseEvent) => {
-              event.preventDefault();
-              history.push(tab.href);
-            }}
-            isSelected={tab.href === location.pathname}
-          >
-            {tab.name}
-          </EuiTab>
-        );
-      });
-    }
+  const tabList = useMemo(() => {
+    return navTabs.map((tab, index) => {
+      return (
+        <EuiTab
+          data-test-subj={`${tab.id}EndpointTab`}
+          key={index}
+          href={`${BASE_PATH}${tab.href}`}
+          onClick={(event: MouseEvent) => {
+            event.preventDefault();
+            history.push(tab.href);
+          }}
+          isSelected={
+            tab.href === location.pathname ||
+            (tab.href !== '/' && location.pathname.startsWith(tab.href))
+          }
+        >
+          {tab.name}
+        </EuiTab>
+      );
+    });
+  }, [BASE_PATH, history, location.pathname]);
 
-    return <EuiTabs>{renderNavTabs(navTabs)}</EuiTabs>;
-  }
-);
+  return <EuiTabs>{tabList}</EuiTabs>;
+});

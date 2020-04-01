@@ -12,8 +12,10 @@ export const NO_CASES = i18n.translate('xpack.siem.case.caseTable.noCases.title'
   defaultMessage: 'No Cases',
 });
 export const NO_CASES_BODY = i18n.translate('xpack.siem.case.caseTable.noCases.body', {
-  defaultMessage: 'Create a new case to see it displayed in the case workflow table.',
+  defaultMessage:
+    'There are no cases to display. Please create a new case or change your filter settings above.',
 });
+
 export const ADD_NEW_CASE = i18n.translate('xpack.siem.case.caseTable.addNewCase', {
   defaultMessage: 'Add New Case',
 });
@@ -57,12 +59,26 @@ export const CLOSED_CASES = i18n.translate('xpack.siem.case.caseTable.closedCase
 export const CLOSED = i18n.translate('xpack.siem.case.caseTable.closed', {
   defaultMessage: 'Closed',
 });
+
 export const DELETE = i18n.translate('xpack.siem.case.caseTable.delete', {
   defaultMessage: 'Delete',
 });
-export const REOPEN_CASE = i18n.translate('xpack.siem.case.caseTable.reopenCase', {
-  defaultMessage: 'Reopen case',
+
+export const REQUIRES_UPDATE = i18n.translate('xpack.siem.case.caseTable.requiresUpdate', {
+  defaultMessage: ' requires update',
 });
-export const CLOSE_CASE = i18n.translate('xpack.siem.case.caseTable.closeCase', {
-  defaultMessage: 'Close case',
+
+export const UP_TO_DATE = i18n.translate('xpack.siem.case.caseTable.upToDate', {
+  defaultMessage: ' is up to date',
+});
+export const NOT_PUSHED = i18n.translate('xpack.siem.case.caseTable.notPushed', {
+  defaultMessage: 'Not pushed',
+});
+
+export const REFRESH = i18n.translate('xpack.siem.case.caseTable.refreshTitle', {
+  defaultMessage: 'Refresh',
+});
+
+export const SERVICENOW_LINK_ARIA = i18n.translate('xpack.siem.case.caseTable.serviceNowLinkAria', {
+  defaultMessage: 'click to view the incident on servicenow',
 });

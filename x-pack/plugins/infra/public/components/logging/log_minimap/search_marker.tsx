@@ -10,10 +10,9 @@ import * as React from 'react';
 import { euiStyled, keyframes } from '../../../../../observability/public';
 import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
-import { SummaryHighlightBucket } from './types';
-
+import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';
 interface SearchMarkerProps {
-  bucket: SummaryHighlightBucket;
+  bucket: LogEntriesSummaryHighlightsBucket;
   height: number;
   width: number;
   jumpToTarget: (target: LogEntryTime) => void;

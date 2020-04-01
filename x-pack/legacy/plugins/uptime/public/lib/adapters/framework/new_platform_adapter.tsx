@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { PluginsSetup } from 'ui/new_platform/new_platform';
+import { alertTypeInitializers } from '../../alert_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
@@ -32,15 +33,30 @@ export const getKibanaFrameworkAdapter = (
     http: { basePath },
     i18n,
   } = core;
+
+  const {
+    data: { autocomplete },
+    // TODO: after NP migration we can likely fix this typing problem
+    // @ts-ignore we don't control this type
+    triggers_actions_ui,
+  } = plugins;
+
+  alertTypeInitializers.forEach(init =>
+    triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }))
+  );
+
   let breadcrumbs: ChromeBreadcrumb[] = [];
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
     breadcrumbs = nextBreadcrumbs || [];
   });
+
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
     INTEGRATED_SOLUTIONS
   );
+
   const canSave = get(capabilities, 'uptime.save', false);
+
   const props: UptimeAppProps = {
     basePath: basePath.get(),
     canSave,

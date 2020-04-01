@@ -26,16 +26,10 @@ describe('SkeletonRow', () => {
     expect(wrapper.find('.siemSkeletonRow__cell')).toHaveLength(10);
   });
 
-  test('it applies row and cell styles when cellColor/cellMargin/rowHeight/rowPadding/style provided', () => {
+  test('it applies row and cell styles when cellColor/cellMargin/rowHeight/rowPadding provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <SkeletonRow
-          cellColor="red"
-          cellMargin="10px"
-          rowHeight="100px"
-          rowPadding="10px"
-          style={{ width: 'auto' }}
-        />
+        <SkeletonRow cellColor="red" cellMargin="10px" rowHeight="100px" rowPadding="10px" />
       </TestProviders>
     );
     const siemSkeletonRow = wrapper.find('.siemSkeletonRow').first();
@@ -43,7 +37,6 @@ describe('SkeletonRow', () => {
 
     expect(siemSkeletonRow).toHaveStyleRule('height', '100px');
     expect(siemSkeletonRow).toHaveStyleRule('padding', '10px');
-    expect(siemSkeletonRow.props().style!.width).toBe('auto');
     expect(siemSkeletonRowCell).toHaveStyleRule('background-color', 'red');
     expect(siemSkeletonRowCell).toHaveStyleRule('margin-left', '10px', {
       modifier: '& + &',

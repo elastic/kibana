@@ -9,6 +9,7 @@ import {
   EMS_FILES_CATALOGUE_PATH,
   EMS_TILES_CATALOGUE_PATH,
   EMS_GLYPHS_PATH,
+  EMS_APP_NAME,
 } from '../common/constants';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
@@ -56,7 +57,8 @@ export function getEMSClient() {
 
       emsClient = new EMSClient({
         language: i18n.getLocale(),
-        kbnVersion: chrome.getInjected('kbnPkgVersion'),
+        appVersion: chrome.getInjected('kbnPkgVersion'),
+        appName: EMS_APP_NAME,
         tileApiUrl,
         fileApiUrl,
         landingPageUrl: chrome.getInjected('emsLandingPageUrl'),

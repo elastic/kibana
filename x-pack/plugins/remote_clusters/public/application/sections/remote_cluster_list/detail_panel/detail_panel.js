@@ -125,7 +125,7 @@ export class DetailPanel extends Component {
           title={
             <FormattedMessage
               id="xpack.remoteClusters.detailPanel.deprecatedSettingsTitle"
-              defaultMessage='"{remoteCluster}" contains deprecated settings'
+              defaultMessage="'{remoteCluster}' has deprecated settings"
               values={{
                 remoteCluster: clusterName,
               }}
@@ -134,28 +134,38 @@ export class DetailPanel extends Component {
           color="warning"
           iconType="help"
         >
-          <FormattedMessage
-            id="xpack.remoteClusters.detailPanel.deprecatedSettingsMessage"
-            defaultMessage="We recommend updating this remote cluster to use the correct settings. {helpLink}"
-            values={{
-              helpLink: isConfiguredByNode ? (
-                // A remote cluster is not editable if configured in elasticsearch.yml, so we direct the user to documentation instead
-                <EuiLink href={proxyModeUrl} target="_blank">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.deprecatedSettingsLearnMoreLinkLabel"
-                    defaultMessage="Learn more."
-                  />
-                </EuiLink>
-              ) : (
-                <EuiLink {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${clusterName}`)}>
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.deprecatedSettingsEditLinkLabel"
-                    defaultMessage="Edit remote cluster."
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
+          {/* A remote cluster is not editable if configured in elasticsearch.yml, so we direct the user to documentation instead */}
+          {isConfiguredByNode ? (
+            <FormattedMessage
+              id="xpack.remoteClusters.detailPanel.deprecatedSettingsConfiguredByNodeMessage"
+              defaultMessage="Edit the cluster to update the settings. {helpLink}"
+              values={{
+                helpLink: (
+                  <EuiLink href={proxyModeUrl} target="_blank">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.deprecatedSettingsLearnMoreLinkLabel"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.remoteClusters.detailPanel.deprecatedSettingsMessage"
+              defaultMessage="{editLink} to update the settings."
+              values={{
+                editLink: (
+                  <EuiLink {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${clusterName}`)}>
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.deprecatedSettingsEditLinkLabel"
+                      defaultMessage="Edit the cluster"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          )}
         </EuiCallOut>
         <EuiSpacer size="l" />
       </>
@@ -249,7 +259,7 @@ export class DetailPanel extends Component {
               <EuiTitle size="xs">
                 <FormattedMessage
                   id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
-                  defaultMessage="Maximum number of connections"
+                  defaultMessage="Maximum connections"
                 />
               </EuiTitle>
             </EuiDescriptionListTitle>
@@ -363,7 +373,7 @@ export class DetailPanel extends Component {
               <EuiTitle size="xs">
                 <FormattedMessage
                   id="xpack.remoteClusters.detailPanel.maxSocketConnectionsLabel"
-                  defaultMessage="Maximum number of socket connections"
+                  defaultMessage="Maximum socket connections"
                 />
               </EuiTitle>
             </EuiDescriptionListTitle>

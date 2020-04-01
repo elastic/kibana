@@ -27,6 +27,7 @@ describe('buildRule', () => {
       },
     ];
     const rule = buildRule({
+      actions: [],
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -37,8 +38,10 @@ describe('buildRule', () => {
       updatedBy: 'elastic',
       interval: 'some interval',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
     const expected: Partial<OutputRuleAlertRest> = {
+      actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: false,
@@ -64,6 +67,7 @@ describe('buildRule', () => {
       updated_by: 'elastic',
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      throttle: 'no_actions',
       filters: [
         {
           query: 'host.name: Rebecca',
@@ -75,15 +79,42 @@ describe('buildRule', () => {
           query: 'host.name: Braden',
         },
       ],
+      lists: [
+        {
+          field: 'source.ip',
+          boolean_operator: 'and',
+          values: [
+            {
+              name: '127.0.0.1',
+              type: 'value',
+            },
+          ],
+        },
+        {
+          field: 'host.name',
+          boolean_operator: 'and not',
+          values: [
+            {
+              name: 'rock01',
+              type: 'value',
+            },
+            {
+              name: 'mothra',
+              type: 'value',
+            },
+          ],
+        },
+      ],
       version: 1,
     };
     expect(rule).toEqual(expected);
   });
 
-  test('it omits a null value such as if enabled is null if is present', () => {
+  test('it omits a null value such as if "enabled" is null if is present', () => {
     const ruleParams = sampleRuleAlertParams();
     ruleParams.filters = undefined;
     const rule = buildRule({
+      actions: [],
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -94,8 +125,10 @@ describe('buildRule', () => {
       updatedBy: 'elastic',
       interval: 'some interval',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
     const expected: Partial<OutputRuleAlertRest> = {
+      actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: true,
@@ -122,14 +155,42 @@ describe('buildRule', () => {
       version: 1,
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      throttle: 'no_actions',
+      lists: [
+        {
+          field: 'source.ip',
+          boolean_operator: 'and',
+          values: [
+            {
+              name: '127.0.0.1',
+              type: 'value',
+            },
+          ],
+        },
+        {
+          field: 'host.name',
+          boolean_operator: 'and not',
+          values: [
+            {
+              name: 'rock01',
+              type: 'value',
+            },
+            {
+              name: 'mothra',
+              type: 'value',
+            },
+          ],
+        },
+      ],
     };
     expect(rule).toEqual(expected);
   });
 
-  test('it omits a null value such as if filters is undefined if is present', () => {
+  test('it omits a null value such as if "filters" is undefined if is present', () => {
     const ruleParams = sampleRuleAlertParams();
     ruleParams.filters = undefined;
     const rule = buildRule({
+      actions: [],
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -140,8 +201,10 @@ describe('buildRule', () => {
       updatedBy: 'elastic',
       interval: 'some interval',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
     });
     const expected: Partial<OutputRuleAlertRest> = {
+      actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: true,
@@ -154,6 +217,7 @@ describe('buildRule', () => {
       language: 'kuery',
       max_signals: 10000,
       name: 'some-name',
+      note: '',
       output_index: '.siem-signals',
       query: 'user.name: root or user.name: admin',
       references: ['http://google.com'],
@@ -163,11 +227,37 @@ describe('buildRule', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
       to: 'now',
       type: 'query',
-      note: '',
       updated_by: 'elastic',
       version: 1,
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      throttle: 'no_actions',
+      lists: [
+        {
+          field: 'source.ip',
+          boolean_operator: 'and',
+          values: [
+            {
+              name: '127.0.0.1',
+              type: 'value',
+            },
+          ],
+        },
+        {
+          field: 'host.name',
+          boolean_operator: 'and not',
+          values: [
+            {
+              name: 'rock01',
+              type: 'value',
+            },
+            {
+              name: 'mothra',
+              type: 'value',
+            },
+          ],
+        },
+      ],
     };
     expect(rule).toEqual(expected);
   });

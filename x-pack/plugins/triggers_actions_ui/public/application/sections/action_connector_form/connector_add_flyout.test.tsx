@@ -79,6 +79,9 @@ describe('connector_add_flyout', () => {
               id: actionType.id,
               enabled: true,
               name: 'Test',
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
             },
           ]}
         />

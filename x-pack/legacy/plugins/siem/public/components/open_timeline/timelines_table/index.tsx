@@ -17,6 +17,8 @@ import {
   OnTableChange,
   OnToggleShowNotes,
   OpenTimelineResult,
+  EnableExportTimelineDownloader,
+  OnOpenDeleteTimelineModal,
 } from '../types';
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
@@ -46,34 +48,44 @@ const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
  * view, and the full view shown in the `All Timelines` view of the
  * `Timelines` page
  */
-const getTimelinesTableColumns = ({
+
+export const getTimelinesTableColumns = ({
   actionTimelineToShow,
   deleteTimelines,
+  enableExportTimelineDownloader,
   itemIdToExpandedNotesRowMap,
+  onOpenDeleteTimelineModal,
   onOpenTimeline,
   onToggleShowNotes,
   showExtendedColumns,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
+  enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
-}) => [
-  ...getCommonColumns({
-    itemIdToExpandedNotesRowMap,
-    onOpenTimeline,
-    onToggleShowNotes,
-  }),
-  ...getExtendedColumnsIfEnabled(showExtendedColumns),
-  ...getIconHeaderColumns(),
-  ...getActionsColumns({
-    deleteTimelines,
-    onOpenTimeline,
-    actionTimelineToShow,
-  }),
-];
+}) => {
+  return [
+    ...getCommonColumns({
+      itemIdToExpandedNotesRowMap,
+      onOpenTimeline,
+      onToggleShowNotes,
+    }),
+    ...getExtendedColumnsIfEnabled(showExtendedColumns),
+    ...getIconHeaderColumns(),
+    ...getActionsColumns({
+      actionTimelineToShow,
+      deleteTimelines,
+      enableExportTimelineDownloader,
+      onOpenDeleteTimelineModal,
+      onOpenTimeline,
+    }),
+  ];
+};
 
 export interface TimelinesTableProps {
   actionTimelineToShow: ActionTimelineToShow[];
@@ -81,6 +93,8 @@ export interface TimelinesTableProps {
   defaultPageSize: number;
   loading: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  enableExportTimelineDownloader?: EnableExportTimelineDownloader;
+  onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
   onTableChange: OnTableChange;
@@ -91,6 +105,8 @@ export interface TimelinesTableProps {
   showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
 }
 
@@ -105,6 +121,8 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     defaultPageSize,
     loading: isLoading,
     itemIdToExpandedNotesRowMap,
+    enableExportTimelineDownloader,
+    onOpenDeleteTimelineModal,
     onOpenTimeline,
     onSelectionChange,
     onTableChange,
@@ -115,6 +133,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     showExtendedColumns,
     sortField,
     sortDirection,
+    tableRef,
     totalSearchResultsCount,
   }) => {
     const pagination = {
@@ -142,14 +161,17 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         !selectable ? i18n.MISSING_SAVED_OBJECT_ID : undefined,
       onSelectionChange,
     };
-
+    const basicTableProps = tableRef != null ? { ref: tableRef } : {};
     return (
       <BasicTable
         columns={getTimelinesTableColumns({
           actionTimelineToShow,
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
+          enableExportTimelineDownloader,
+          onOpenDeleteTimelineModal,
           onOpenTimeline,
+          onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
         })}
@@ -166,6 +188,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         pagination={pagination}
         selection={actionTimelineToShow.includes('selectable') ? selection : undefined}
         sorting={sorting}
+        {...basicTableProps}
       />
     );
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpFetchQuery } from 'kibana/public';
+import { HttpFetchQuery } from 'src/core/public';
 import { useRequest, sendRequest } from './use_request';
 import { epmRouteService } from '../../services';
 import {

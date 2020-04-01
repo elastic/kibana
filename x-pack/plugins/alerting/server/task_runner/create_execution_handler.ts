@@ -14,7 +14,7 @@ interface CreateExecutionHandlerOptions {
   alertId: string;
   alertName: string;
   tags?: string[];
-  executeAction: ActionsPluginStartContract['execute'];
+  actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
   spaceId: string;
   apiKey: string | null;
@@ -34,7 +34,7 @@ export function createExecutionHandler({
   alertId,
   alertName,
   tags,
-  executeAction,
+  actionsPlugin,
   actions: alertActions,
   spaceId,
   apiKey,
@@ -64,12 +64,18 @@ export function createExecutionHandler({
         };
       });
     for (const action of actions) {
-      await executeAction({
-        id: action.id,
-        params: action.params,
-        spaceId,
-        apiKey,
-      });
+      if (actionsPlugin.isActionTypeEnabled(action.actionTypeId)) {
+        await actionsPlugin.execute({
+          id: action.id,
+          params: action.params,
+          spaceId,
+          apiKey,
+        });
+      } else {
+        logger.warn(
+          `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
+        );
+      }
     }
   };
 }

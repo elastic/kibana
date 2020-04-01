@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SearchSource } from '../search_source';
+import { SearchSource } from './search_source';
 import { IndexPattern } from '../..';
 import { mockDataServices } from '../aggs/test_helpers';
 

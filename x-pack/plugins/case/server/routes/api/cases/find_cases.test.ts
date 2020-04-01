@@ -34,6 +34,6 @@ describe('GET all cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.cases).toHaveLength(3);
+    expect(response.payload.cases).toHaveLength(4);
   });
 });

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { AggTypeFilters, AggTypeFieldFilters } from './legacy_imports';
+import { PluginsStart } from './legacy_imports';
 import { ManagementSetup as ManagementSetupLegacy } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 // @ts-ignore
@@ -26,6 +26,7 @@ import {
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup } from '../../../../../src/plugins/management/public';
 import { IndexMgmtSetup } from '../../../../plugins/index_management/public';
+import { search } from '../../../../../src/plugins/data/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services';
 import { setNotifications, setFatalErrors } from './kibana_services';
@@ -33,8 +34,6 @@ import { renderApp } from './application';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
-    aggTypeFilters: AggTypeFilters;
-    aggTypeFieldFilters: AggTypeFieldFilters;
     managementLegacy: ManagementSetupLegacy;
   };
   home?: HomePublicPluginSetup;
@@ -46,7 +45,7 @@ export class RollupPlugin implements Plugin {
   setup(
     core: CoreSetup,
     {
-      __LEGACY: { aggTypeFilters, aggTypeFieldFilters, managementLegacy },
+      __LEGACY: { managementLegacy },
       home,
       management,
       indexManagement,
@@ -64,8 +63,6 @@ export class RollupPlugin implements Plugin {
     if (isRollupIndexPatternsEnabled) {
       managementLegacy.indexPattern.creation.add(RollupIndexPatternCreationConfig);
       managementLegacy.indexPattern.list.add(RollupIndexPatternListConfig);
-      initAggTypeFilter(aggTypeFilters);
-      initAggTypeFieldFilter(aggTypeFieldFilters);
     }
 
     if (home) {
@@ -104,9 +101,16 @@ export class RollupPlugin implements Plugin {
     }
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, plugins: PluginsStart) {
     setHttp(core.http);
     setNotifications(core.notifications);
     setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
+
+    const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
+
+    if (isRollupIndexPatternsEnabled) {
+      initAggTypeFilter(search.aggs.aggTypeFilters);
+      initAggTypeFieldFilter(plugins.data.search.__LEGACY.aggTypeFieldFilters);
+    }
   }
 }

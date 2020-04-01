@@ -5,18 +5,16 @@
  */
 
 import { useReducer, useCallback } from 'react';
-
-import { CaseRequest } from '../../../../../../plugins/case/common/api';
-import { errorToToaster, useStateToaster } from '../../components/toasters';
+import { displaySuccessToast, errorToToaster, useStateToaster } from '../../components/toasters';
+import { CasePatchRequest } from '../../../../../../plugins/case/common/api';
 
 import { patchCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
 
-type UpdateKey = keyof CaseRequest;
+type UpdateKey = keyof Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>;
 
 interface NewCaseState {
-  caseData: Case;
   isLoading: boolean;
   isError: boolean;
   updateKey: UpdateKey | null;
@@ -24,12 +22,15 @@ interface NewCaseState {
 
 export interface UpdateByKey {
   updateKey: UpdateKey;
-  updateValue: CaseRequest[UpdateKey];
+  updateValue: CasePatchRequest[UpdateKey];
+  fetchCaseUserActions?: (caseId: string) => void;
+  updateCase?: (newCase: Case) => void;
+  version: string;
 }
 
 type Action =
   | { type: 'FETCH_INIT'; payload: UpdateKey }
-  | { type: 'FETCH_SUCCESS'; payload: Case }
+  | { type: 'FETCH_SUCCESS' }
   | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
@@ -47,7 +48,6 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: false,
         isError: false,
-        caseData: action.payload,
         updateKey: null,
       };
     case 'FETCH_FAILURE':
@@ -65,27 +65,36 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
 }
-export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase => {
+export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
-    caseData: initialData,
     updateKey: null,
   });
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateCaseProperty = useCallback(
-    async ({ updateKey, updateValue }: UpdateByKey) => {
+    async ({ fetchCaseUserActions, updateKey, updateValue, updateCase, version }: UpdateByKey) => {
       let cancel = false;
+      const abortCtrl = new AbortController();
+
       try {
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
         const response = await patchCase(
           caseId,
           { [updateKey]: updateValue },
-          state.caseData.version
+          version,
+          abortCtrl.signal
         );
         if (!cancel) {
-          dispatch({ type: 'FETCH_SUCCESS', payload: response[0] });
+          if (fetchCaseUserActions != null) {
+            fetchCaseUserActions(caseId);
+          }
+          if (updateCase != null) {
+            updateCase(response[0]);
+          }
+          dispatch({ type: 'FETCH_SUCCESS' });
+          displaySuccessToast(i18n.UPDATED_CASE(response[0].title), dispatchToaster);
         }
       } catch (error) {
         if (!cancel) {
@@ -99,9 +108,10 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
       }
       return () => {
         cancel = true;
+        abortCtrl.abort();
       };
     },
-    [state]
+    []
   );
 
   return { ...state, updateCaseProperty: dispatchUpdateCaseProperty };

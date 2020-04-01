@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export {
+  ToggleAlertFlyoutButtonComponent,
+  UptimeAlertsContextProvider,
+  UptimeAlertsFlyoutWrapperComponent,
+} from './alerts';
+export * from './alerts';
 export { DonutChart } from './charts/donut_chart';
 export { KueryBarComponent } from './kuery_bar/kuery_bar';
 export { MonitorCharts } from './monitor_charts';

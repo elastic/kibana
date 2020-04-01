@@ -8,14 +8,13 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { useStateToaster, errorToToaster } from '../../../components/toasters';
 import * as i18n from '../translations';
-import { fetchConnectors, patchConfigConnector } from './api';
-import { CasesConfigurationMapping, Connector } from './types';
+import { fetchConnectors } from './api';
+import { Connector } from './types';
 
 export interface ReturnConnectors {
   loading: boolean;
   connectors: Connector[];
   refetchConnectors: () => void;
-  updateConnector: (connectorId: string, mappings: CasesConfigurationMapping[]) => unknown;
 }
 
 export const useConnectors = (): ReturnConnectors => {
@@ -53,55 +52,6 @@ export const useConnectors = (): ReturnConnectors => {
     };
   }, []);
 
-  const updateConnector = useCallback(
-    (connectorId: string, mappings: CasesConfigurationMapping[]) => {
-      if (connectorId === 'none') {
-        return;
-      }
-
-      let didCancel = false;
-      const abortCtrl = new AbortController();
-      const update = async () => {
-        try {
-          setLoading(true);
-          await patchConfigConnector({
-            connectorId,
-            config: {
-              cases_configuration: {
-                mapping: mappings.map(m => ({
-                  source: m.source,
-                  target: m.target,
-                  action_type: m.actionType,
-                })),
-              },
-            },
-            signal: abortCtrl.signal,
-          });
-          if (!didCancel) {
-            setLoading(false);
-            refetchConnectors();
-          }
-        } catch (error) {
-          if (!didCancel) {
-            setLoading(false);
-            refetchConnectors();
-            errorToToaster({
-              title: i18n.ERROR_TITLE,
-              error: error.body && error.body.message ? new Error(error.body.message) : error,
-              dispatchToaster,
-            });
-          }
-        }
-      };
-      update();
-      return () => {
-        didCancel = true;
-        abortCtrl.abort();
-      };
-    },
-    []
-  );
-
   useEffect(() => {
     refetchConnectors();
   }, []);
@@ -110,6 +60,5 @@ export const useConnectors = (): ReturnConnectors => {
     loading,
     connectors,
     refetchConnectors,
-    updateConnector,
   };
 };

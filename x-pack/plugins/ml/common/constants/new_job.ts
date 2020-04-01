@@ -25,15 +25,3 @@ export const DEFAULT_RARE_BUCKET_SPAN = '1h';
 export const DEFAULT_QUERY_DELAY = '60s';
 
 export const SHARED_RESULTS_INDEX_NAME = 'shared';
-
-// Categorization
-export const NUMBER_OF_CATEGORY_EXAMPLES = 5;
-export const CATEGORY_EXAMPLES_SAMPLE_SIZE = 1000;
-export const CATEGORY_EXAMPLES_WARNING_LIMIT = 0.75;
-export const CATEGORY_EXAMPLES_ERROR_LIMIT = 0.02;
-
-export enum CATEGORY_EXAMPLES_VALIDATION_STATUS {
-  VALID = 'valid',
-  PARTIALLY_VALID = 'partially_valid',
-  INVALID = 'invalid',
-}

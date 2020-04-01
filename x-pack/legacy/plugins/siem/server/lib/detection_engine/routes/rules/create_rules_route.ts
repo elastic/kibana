@@ -16,7 +16,13 @@ import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
-import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
+import {
+  buildRouteValidation,
+  transformError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -31,6 +37,8 @@ export const createRulesRoute = (router: IRouter): void => {
     },
     async (context, request, response) => {
       const {
+        actions,
+        anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
@@ -42,6 +50,7 @@ export const createRulesRoute = (router: IRouter): void => {
         timeline_id: timelineId,
         timeline_title: timelineTitle,
         meta,
+        machine_learning_job_id: machineLearningJobId,
         filters,
         rule_id: ruleId,
         index,
@@ -52,24 +61,24 @@ export const createRulesRoute = (router: IRouter): void => {
         severity,
         tags,
         threat,
+        throttle,
         to,
         type,
         references,
         note,
+        lists,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
       try {
-        if (!context.alerting || !context.actions) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-        const alertsClient = context.alerting.getAlertsClient();
-        const actionsClient = context.actions.getActionsClient();
+        validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
         const clusterClient = context.core.elasticsearch.dataClient;
         const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.siem.getSiemClient();
+        const siemClient = context.siem?.getSiemClient();
 
-        if (!actionsClient || !alertsClient) {
+        if (!siemClient || !actionsClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -93,6 +102,7 @@ export const createRulesRoute = (router: IRouter): void => {
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
+          anomalyThreshold,
           description,
           enabled,
           falsePositives,
@@ -105,6 +115,7 @@ export const createRulesRoute = (router: IRouter): void => {
           timelineId,
           timelineTitle,
           meta,
+          machineLearningJobId,
           filters,
           ruleId: ruleId ?? uuid.v4(),
           index,
@@ -120,7 +131,19 @@ export const createRulesRoute = (router: IRouter): void => {
           references,
           note,
           version: 1,
+          lists,
         });
+
+        const ruleActions = await updateRulesNotifications({
+          ruleAlertId: createdRule.id,
+          alertsClient,
+          savedObjectsClient,
+          enabled,
+          actions,
+          throttle,
+          name,
+        });
+
         const ruleStatuses = await savedObjectsClient.find<
           IRuleSavedAttributesSavedObjectAttributes
         >({
@@ -131,7 +154,11 @@ export const createRulesRoute = (router: IRouter): void => {
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const [validated, errors] = transformValidate(createdRule, ruleStatuses.saved_objects[0]);
+        const [validated, errors] = transformValidate(
+          createdRule,
+          ruleActions,
+          ruleStatuses.saved_objects[0]
+        );
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

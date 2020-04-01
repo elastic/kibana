@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import fs from 'fs';
 import { join } from 'path';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 
 const fixturesDir = join(__dirname, '..', 'fixtures');
 const restFixturesDir = join(__dirname, '../../rest/', 'fixtures');
@@ -21,14 +21,26 @@ const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
 };
 
 export const expectFixtureEql = <T>(data: T, fixtureName: string, excluder?: (d: T) => void) => {
+  expect(data).not.to.eql(null);
+  expect(data).not.to.eql(undefined);
+
   let fixturePath = join(fixturesDir, `${fixtureName}.json`);
   if (!fs.existsSync(fixturePath)) {
     fixturePath = join(restFixturesDir, `${fixtureName}.json`);
   }
 
+  excluder = excluder || (d => d);
   const dataExcluded = excludeFieldsFrom(data, excluder);
   expect(dataExcluded).not.to.be(undefined);
-  if (process.env.UPDATE_UPTIME_FIXTURES) {
+  const fixtureExists = () => fs.existsSync(dataExcluded);
+  const fixtureChanged = () =>
+    !isEqual(
+      dataExcluded,
+      excludeFieldsFrom(JSON.parse(fs.readFileSync(fixturePath, 'utf8')), excluder)
+    );
+  if (process.env.UPDATE_UPTIME_FIXTURES && (!fixtureExists() || fixtureChanged())) {
+    // Check if the data has changed. We can't simply write it because the order of attributes
+    // can change leading to different bytes on disk, which we don't care about
     fs.writeFileSync(fixturePath, JSON.stringify(dataExcluded, null, 2));
   }
   const fileContents = fs.readFileSync(fixturePath, 'utf8');

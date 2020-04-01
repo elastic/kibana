@@ -51,10 +51,6 @@ export class ESTermSource extends AbstractESAggSource {
     return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
-  getIndexPatternIds() {
-    return [this._descriptor.indexPatternId];
-  }
-
   getTermField() {
     return this._termField;
   }
@@ -90,7 +86,7 @@ export class ESTermSource extends AbstractESAggSource {
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = { size: DEFAULT_MAX_BUCKETS_LIMIT };
     searchSource.setField('aggs', {
@@ -126,7 +122,7 @@ export class ESTermSource extends AbstractESAggSource {
 
   async getDisplayName() {
     //no need to localize. this is never rendered.
-    return `es_table ${this._descriptor.indexPatternId}`;
+    return `es_table ${this.getIndexPatternId()}`;
   }
 
   async filterAndFormatPropertiesToHtml(properties) {

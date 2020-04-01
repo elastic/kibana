@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpFetchQuery } from 'kibana/public';
+import { HttpFetchQuery } from 'src/core/public';
 import { useRequest, sendRequest } from './use_request';
 import { agentConfigRouteService } from '../../services';
 import {
@@ -28,6 +28,13 @@ export const useGetAgentConfigs = (query: HttpFetchQuery = {}) => {
 export const useGetOneAgentConfig = (agentConfigId: string) => {
   return useRequest<GetOneAgentConfigResponse>({
     path: agentConfigRouteService.getInfoPath(agentConfigId),
+    method: 'get',
+  });
+};
+
+export const useGetOneAgentConfigFull = (agentConfigId: string) => {
+  return useRequest({
+    path: agentConfigRouteService.getInfoFullPath(agentConfigId),
     method: 'get',
   });
 };

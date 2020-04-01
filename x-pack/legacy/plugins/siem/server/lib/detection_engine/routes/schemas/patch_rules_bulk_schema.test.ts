@@ -6,11 +6,20 @@
 
 import { patchRulesBulkSchema } from './patch_rules_bulk_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 // only the basics of testing are here.
 // see: patch_rules_schema.test.ts for the bulk of the validation tests
 // this just wraps patchRulesSchema in an array
 describe('patch_rules_bulk_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('can take an empty array and validate it', () => {
     expect(
       patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([]).error

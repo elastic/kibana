@@ -5,6 +5,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["licensing", "data", "navigation"],
-  "optionalPlugins": ["home"],
+  "optionalPlugins": ["home", "features"],
   "configPath": ["xpack", "graph"]
 }

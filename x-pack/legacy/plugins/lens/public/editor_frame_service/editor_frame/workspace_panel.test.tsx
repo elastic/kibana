@@ -36,7 +36,7 @@ describe('workspace_panel', () => {
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
 
-    mockDatasource = createMockDatasource();
+    mockDatasource = createMockDatasource('a');
 
     expressionRendererMock = createExpressionRendererMock();
   });
@@ -199,7 +199,7 @@ describe('workspace_panel', () => {
   });
 
   it('should include data fetching for each layer in the expression', () => {
-    const mockDatasource2 = createMockDatasource();
+    const mockDatasource2 = createMockDatasource('a');
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,

@@ -10,7 +10,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
-import { nullableType } from './lib/nullable';
 import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
@@ -20,10 +19,10 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const ConfigSchemaProps = {
-  service: nullableType(schema.string()),
-  host: nullableType(schema.string()),
-  port: nullableType(portSchema()),
-  secure: nullableType(schema.boolean()),
+  service: schema.nullable(schema.string()),
+  host: schema.nullable(schema.string()),
+  port: schema.nullable(portSchema()),
+  secure: schema.nullable(schema.boolean()),
   from: schema.string(),
 };
 
@@ -75,8 +74,8 @@ function validateConfig(
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
 const SecretsSchema = schema.object({
-  user: schema.string(),
-  password: schema.string(),
+  user: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()),
 });
 
 // params definition
@@ -118,6 +117,7 @@ export function getActionType(params: GetActionTypeParams): ActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: '.email',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
@@ -143,10 +143,14 @@ async function executor(
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
 
-  const transport: any = {
-    user: secrets.user,
-    password: secrets.password,
-  };
+  const transport: any = {};
+
+  if (secrets.user != null) {
+    transport.user = secrets.user;
+  }
+  if (secrets.password != null) {
+    transport.password = secrets.password;
+  }
 
   if (config.service !== null) {
     transport.service = config.service;

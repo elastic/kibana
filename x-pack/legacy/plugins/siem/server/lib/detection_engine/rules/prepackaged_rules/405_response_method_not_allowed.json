@@ -7,7 +7,6 @@
     "apm-*-transaction*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Web Application Suspicious Activity: Unauthorized Method",
   "query": "http.response.status_code:405",
   "references": [
@@ -17,8 +16,8 @@
   "rule_id": "75ee75d8-c180-481c-ba88-ee50129a6aef",
   "severity": "medium",
   "tags": [
-    "Elastic",
-    "APM"
+    "APM",
+    "Elastic"
   ],
   "type": "query",
   "version": 1

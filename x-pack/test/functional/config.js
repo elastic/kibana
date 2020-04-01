@@ -217,5 +217,39 @@ export default async function({ readConfigFile }) {
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests',
     },
+    security: {
+      roles: {
+        test_logstash_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        test_api_keys: {
+          elasticsearch: {
+            cluster: ['manage_security', 'manage_api_key'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
+        },
+      },
+      defaultRoles: ['superuser'],
+    },
   };
 }

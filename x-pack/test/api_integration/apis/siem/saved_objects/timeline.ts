@@ -192,7 +192,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(responseToTest.data!.persistTimeline.timeline.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.data!.persistTimeline.timeline.savedObjectId).to.eql(savedObjectId);
         expect(responseToTest.data!.persistTimeline.timeline.title).to.be(newTitle);
         expect(responseToTest.data!.persistTimeline.timeline.version).to.not.be.eql(version);
       });

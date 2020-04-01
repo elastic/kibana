@@ -26,11 +26,12 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { LICENSE_TYPE } from '../../licensing/common/types';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 
 import { ActionsConfig } from './config';
-import { Services } from './types';
-import { ActionExecutor, TaskRunnerFactory } from './lib';
+import { Services, ActionType } from './types';
+import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
@@ -49,7 +50,6 @@ import {
   listActionTypesRoute,
   executeActionRoute,
 } from './routes';
-import { LicenseState } from './lib/license_state';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 
@@ -60,10 +60,11 @@ export const EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
-  registerType: ActionTypeRegistry['register'];
+  registerType: (actionType: ActionType) => void;
 }
 
 export interface PluginStartContract {
+  isActionTypeEnabled(id: string): boolean;
   execute(options: ExecuteOptions): Promise<void>;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 }
@@ -91,7 +92,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
-  private licenseState: LicenseState | null = null;
+  private licenseState: ILicenseState | null = null;
   private spaces?: SpacesServiceSetup;
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;
@@ -115,6 +116,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
+    this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 
@@ -156,6 +158,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       taskRunnerFactory,
       taskManager: plugins.taskManager,
       actionsConfigUtils,
+      licenseState: this.licenseState,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -172,7 +175,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
+      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
         registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeActionsTelemetry(
@@ -190,7 +193,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     );
 
     // Routes
-    this.licenseState = new LicenseState(plugins.licensing.license$);
     const router = core.http.createRouter();
     createActionRoute(router, this.licenseState);
     deleteActionRoute(router, this.licenseState);
@@ -201,7 +203,17 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     executeActionRoute(router, this.licenseState, actionExecutor);
 
     return {
-      registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
+      registerType: (actionType: ActionType) => {
+        if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
+          throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
+        }
+        if (LICENSE_TYPE[actionType.minimumLicenseRequired] < LICENSE_TYPE.gold) {
+          throw new Error(
+            `Third party action type "${actionType.id}" can only set minimumLicenseRequired to a gold license or higher`
+          );
+        }
+        actionTypeRegistry.register(actionType);
+      },
     };
   }
 
@@ -227,6 +239,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     taskRunnerFactory!.initialize({
       logger,
+      actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
@@ -238,10 +251,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     return {
       execute: createExecuteFunction({
         taskManager: plugins.taskManager,
+        actionTypeRegistry: actionTypeRegistry!,
         getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
         getBasePath: this.getBasePath,
         isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
       }),
+      isActionTypeEnabled: id => {
+        return this.actionTypeRegistry!.isActionTypeEnabled(id);
+      },
       // Ability to get an actions client from legacy code
       async getActionsClientWithRequest(request: KibanaRequest) {
         if (isESOUsingEphemeralEncryptionKey === true) {

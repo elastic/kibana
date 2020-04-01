@@ -10,11 +10,18 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
-    async enterSearchBarQuery() {
-      return await testSubjects.setValue('alertsSearchBar', 'test query');
+    async enterSearchBarQuery(query: string) {
+      return await testSubjects.setValue('alertsSearchBar', query, { clearWithKeyboard: true });
     },
     async submitSearchBarFilter() {
       return await testSubjects.click('querySubmitButton');
+    },
+    async setSearchBarDate(timestamp: string) {
+      await testSubjects.click('superDatePickerShowDatesButton');
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await testSubjects.setValue('superDatePickerAbsoluteDateInput', timestamp);
+      await this.submitSearchBarFilter();
     },
   };
 }

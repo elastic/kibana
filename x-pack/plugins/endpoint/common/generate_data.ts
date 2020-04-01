@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields, HostFields } from './types';
+import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields } from './types';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -16,6 +16,7 @@ interface EventOptions {
   parentEntityID?: string;
   eventType?: string;
   eventCategory?: string;
+  processName?: string;
 }
 
 const Windows: OSFields[] = [
@@ -64,8 +65,22 @@ const POLICIES: Array<{ name: string; id: string }> = [
 
 const FILE_OPERATIONS: string[] = ['creation', 'open', 'rename', 'execution', 'deletion'];
 
+interface EventInfo {
+  category: string;
+  /**
+   * This denotes the `event.type` field for when an event is created, this can be `start` or `creation`
+   */
+  creationType: string;
+}
+
 // These are from the v1 schemas and aren't all valid ECS event categories, still in flux
-const OTHER_EVENT_CATEGORIES: string[] = ['driver', 'file', 'library', 'network', 'registry'];
+const OTHER_EVENT_CATEGORIES: EventInfo[] = [
+  { category: 'driver', creationType: 'start' },
+  { category: 'file', creationType: 'creation' },
+  { category: 'library', creationType: 'start' },
+  { category: 'network', creationType: 'start' },
+  { category: 'registry', creationType: 'creation' },
+];
 
 interface HostInfo {
   agent: {
@@ -89,8 +104,8 @@ export class EndpointDocGenerator {
     this.commonInfo = this.createHostData();
   }
 
-  // This function will create new values for all the host fields, so documents from a different endpoint can be created
-  // This provides a convenient way to make documents from multiple endpoints that are all tied to a single seed value
+  // This function will create new values for all the host fields, so documents from a different host can be created
+  // This provides a convenient way to make documents from multiple hosts that are all tied to a single seed value
   public randomizeHostData() {
     this.commonInfo = this.createHostData();
   }
@@ -114,7 +129,7 @@ export class EndpointDocGenerator {
     };
   }
 
-  public generateEndpointMetadata(ts = new Date().getTime()): EndpointMetadata {
+  public generateHostMetadata(ts = new Date().getTime()): HostMetadata {
     return {
       '@timestamp': ts,
       event: {
@@ -233,20 +248,21 @@ export class EndpointDocGenerator {
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
-      agent: { ...this.commonInfo.agent, type: 'endgame' },
+      agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
         version: '1.4.0',
       },
       event: {
         category: options.eventCategory ? options.eventCategory : 'process',
         kind: 'event',
-        type: options.eventType ? options.eventType : 'creation',
+        type: options.eventType ? options.eventType : 'start',
         id: this.seededUUIDv4(),
       },
       host: this.commonInfo.host,
       process: {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
+        name: options.processName ? options.processName : 'powershell.exe',
       },
     };
   }
@@ -309,7 +325,7 @@ export class EndpointDocGenerator {
     for (let i = 0; i < generations; i++) {
       const newParents: EndpointEvent[] = [];
       parents.forEach(element => {
-        const numChildren = this.randomN(maxChildrenPerNode);
+        const numChildren = this.randomN(maxChildrenPerNode + 1);
         for (let j = 0; j < numChildren; j++) {
           timestamp = timestamp + 1000;
           const child = this.generateEvent({
@@ -352,12 +368,14 @@ export class EndpointDocGenerator {
     const ts = node['@timestamp'] + 1000;
     const relatedEvents: EndpointEvent[] = [];
     for (let i = 0; i < numRelatedEvents; i++) {
+      const eventInfo = this.randomChoice(OTHER_EVENT_CATEGORIES);
       relatedEvents.push(
         this.generateEvent({
           timestamp: ts,
           entityID: node.process.entity_id,
           parentEntityID: node.process.parent?.entity_id,
-          eventCategory: this.randomChoice(OTHER_EVENT_CATEGORIES),
+          eventCategory: eventInfo.category,
+          eventType: eventInfo.creationType,
         })
       );
     }

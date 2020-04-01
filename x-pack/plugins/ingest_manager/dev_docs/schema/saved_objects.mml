@@ -76,7 +76,7 @@ classDiagram
     ca_sha256
     config
     // Encrypted - user to create API keys
-    admin_username
-    admin_password
+    fleet_enroll_username
+    fleet_enroll_password
   }
 

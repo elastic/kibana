@@ -14,10 +14,9 @@ jest.mock('../components/vector_style_editor', () => ({
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { VECTOR_STYLES } from '../vector_style_defaults';
 import { DynamicColorProperty } from './dynamic_color_property';
 import { StyleMeta } from '../style_meta';
-import { COLOR_MAP_TYPE, FIELD_ORIGIN } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
 
 const mockField = {
   async getLabel() {
@@ -71,21 +70,15 @@ class MockLayer {
     return new MockStyle();
   }
 
-  findDataRequestById() {
+  getDataRequest() {
     return null;
   }
 }
 
-const makeProperty = options => {
-  return new DynamicColorProperty(
-    options,
-    VECTOR_STYLES.LINE_COLOR,
-    mockField,
-    new MockLayer(),
-    () => {
-      return x => x + '_format';
-    }
-  );
+const makeProperty = (options, field = mockField) => {
+  return new DynamicColorProperty(options, VECTOR_STYLES.LINE_COLOR, field, new MockLayer(), () => {
+    return x => x + '_format';
+  });
 };
 
 const defaultLegendParams = {
@@ -237,7 +230,72 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
   });
 });
 
-describe('get mapbox color expression', () => {
+describe('supportsFieldMeta', () => {
+  test('should support it when field does for ordinals', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+    };
+    const styleProp = makeProperty(dynamicStyleOptions);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(true);
+  });
+
+  test('should support it when field does for categories', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.CATEGORICAL,
+    };
+    const styleProp = makeProperty(dynamicStyleOptions);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(true);
+  });
+
+  test('should not support it when field does not', () => {
+    const field = Object.create(mockField);
+    field.supportsFieldMeta = function() {
+      return false;
+    };
+
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+    };
+    const styleProp = makeProperty(dynamicStyleOptions, field);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(false);
+  });
+
+  test('should not support it when field config not complete', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+    };
+    const styleProp = makeProperty(dynamicStyleOptions, null);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(false);
+  });
+
+  test('should not support it when using custom ramp for ordinals', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.ORDINAL,
+      useCustomColorRamp: true,
+      customColorRamp: [],
+    };
+    const styleProp = makeProperty(dynamicStyleOptions);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(false);
+  });
+
+  test('should not support it when using custom palette for categories', () => {
+    const dynamicStyleOptions = {
+      type: COLOR_MAP_TYPE.CATEGORICAL,
+      useCustomColorPalette: true,
+      customColorPalette: [],
+    };
+    const styleProp = makeProperty(dynamicStyleOptions);
+
+    expect(styleProp.supportsFieldMeta()).toEqual(false);
+  });
+});
+
+describe('get mapbox color expression (via internal _getMbColor)', () => {
   describe('ordinal color ramp', () => {
     test('should return null when field is not provided', async () => {
       const dynamicStyleOptions = {
@@ -260,44 +318,46 @@ describe('get mapbox color expression', () => {
       test('should return null when color ramp is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          field: {
-            name: 'myField',
-          },
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
       });
-
       test('should return mapbox expression for color ramp', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          field: {
-            name: 'myField',
-          },
           color: 'Blues',
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
           'interpolate',
           ['linear'],
-          ['coalesce', ['feature-state', '__kbn__dynamic__myField__lineColor'], -1],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['feature-state', 'foobar'], null],
+              -1,
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 0],
+            ],
+            -1,
+          ],
           -1,
           'rgba(0,0,0,0)',
           0,
           '#f7faff',
-          0.125,
+          12.5,
           '#ddeaf7',
-          0.25,
+          25,
           '#c5daee',
-          0.375,
+          37.5,
           '#9dc9e0',
-          0.5,
+          50,
           '#6aadd5',
-          0.625,
+          62.5,
           '#4191c5',
-          0.75,
+          75,
           '#2070b4',
-          0.875,
+          87.5,
           '#072f6b',
         ]);
       });
@@ -307,9 +367,6 @@ describe('get mapbox color expression', () => {
       test('should return null when customColorRamp is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          field: {
-            name: 'myField',
-          },
           useCustomColorRamp: true,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
@@ -319,9 +376,6 @@ describe('get mapbox color expression', () => {
       test('should return null when customColorRamp is empty', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          field: {
-            name: 'myField',
-          },
           useCustomColorRamp: true,
           customColorRamp: [],
         };
@@ -332,9 +386,6 @@ describe('get mapbox color expression', () => {
       test('should return mapbox expression for custom color ramp', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
-          field: {
-            name: 'myField',
-          },
           useCustomColorRamp: true,
           customColorRamp: [
             { stop: 10, color: '#f7faff' },
@@ -344,7 +395,7 @@ describe('get mapbox color expression', () => {
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
           'step',
-          ['coalesce', ['feature-state', '__kbn__dynamic__myField__lineColor'], 9],
+          ['coalesce', ['feature-state', 'foobar'], 9],
           'rgba(0,0,0,0)',
           10,
           '#f7faff',
@@ -377,9 +428,6 @@ describe('get mapbox color expression', () => {
       test('should return null when color palette is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          field: {
-            name: 'myField',
-          },
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
@@ -388,15 +436,12 @@ describe('get mapbox color expression', () => {
       test('should return mapbox expression for color palette', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          field: {
-            name: 'myField',
-          },
           colorCategory: 'palette_0',
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
           'match',
-          ['to-string', ['get', 'myField']],
+          ['to-string', ['get', 'foobar']],
           'US',
           '#54B399',
           'CN',
@@ -410,9 +455,6 @@ describe('get mapbox color expression', () => {
       test('should return null when customColorPalette is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          field: {
-            name: 'myField',
-          },
           useCustomColorPalette: true,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
@@ -422,9 +464,6 @@ describe('get mapbox color expression', () => {
       test('should return null when customColorPalette is empty', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          field: {
-            name: 'myField',
-          },
           useCustomColorPalette: true,
           customColorPalette: [],
         };
@@ -435,9 +474,6 @@ describe('get mapbox color expression', () => {
       test('should return mapbox expression for custom color palette', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
-          field: {
-            name: 'myField',
-          },
           useCustomColorPalette: true,
           customColorPalette: [
             { stop: null, color: '#f7faff' },
@@ -447,7 +483,7 @@ describe('get mapbox color expression', () => {
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
           'match',
-          ['to-string', ['get', 'myField']],
+          ['to-string', ['get', 'foobar']],
           'MX',
           '#072f6b',
           '#f7faff',

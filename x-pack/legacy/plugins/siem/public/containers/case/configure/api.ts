@@ -16,7 +16,7 @@ import { KibanaServices } from '../../../lib/kibana';
 import { CASES_CONFIGURE_URL } from '../constants';
 import { ApiProps } from '../types';
 import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';
-import { CaseConfigure, PatchConnectorProps } from './types';
+import { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<CasesConnectorsFindResult> => {
   const response = await KibanaServices.get().http.fetch(
@@ -78,21 +78,4 @@ export const patchCaseConfigure = async (
   return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
     decodeCaseConfigureResponse(response)
   );
-};
-
-export const patchConfigConnector = async ({
-  connectorId,
-  config,
-  signal,
-}: PatchConnectorProps): Promise<CasesConnectorsFindResult> => {
-  const response = await KibanaServices.get().http.fetch(
-    `${CASES_CONFIGURE_URL}/connectors/${connectorId}`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify(config),
-      signal,
-    }
-  );
-
-  return response;
 };

@@ -9,7 +9,7 @@ Adds a new toast pre-configured with the danger color and alert icon.
 <b>Signature:</b>
 
 ```typescript
-addDanger(toastOrTitle: ToastInput): Toast;
+addDanger(toastOrTitle: ToastInput, options?: ToastOptions): Toast;
 ```
 
 ## Parameters
@@ -17,6 +17,7 @@ addDanger(toastOrTitle: ToastInput): Toast;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  toastOrTitle | <code>ToastInput</code> | a [ToastInput](./kibana-plugin-core-public.toastinput.md) |
+|  options | <code>ToastOptions</code> | a [ToastOptions](./kibana-plugin-core-public.toastoptions.md) |
 
 <b>Returns:</b>
 

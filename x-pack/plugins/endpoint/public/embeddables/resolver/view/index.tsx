@@ -14,8 +14,9 @@ import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
+import { SymbolDefinitions, NamedColors } from './defs';
 import { ResolverAction } from '../types';
-import { LegacyEndpointEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -33,19 +34,29 @@ const StyledGraphControls = styled(GraphControls)`
   right: 5px;
 `;
 
+const StyledResolverContainer = styled.div`
+  display: flex;
+  flex-grow: 1;
+  contain: layout;
+`;
+
+const bgColor = NamedColors.resolverBackground;
+
 export const Resolver = styled(
   React.memo(function Resolver({
     className,
     selectedEvent,
   }: {
     className?: string;
-    selectedEvent?: LegacyEndpointEvent;
+    selectedEvent?: ResolverEvent;
   }) {
     const { processNodePositions, edgeLineSegments } = useSelector(
       selectors.processNodePositionsAndEdgeLineSegments
     );
 
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
+    const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
+
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
 
@@ -62,29 +73,42 @@ export const Resolver = styled(
             <EuiLoadingSpinner size="xl" />
           </div>
         ) : (
-          <>
-            <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
-              {Array.from(processNodePositions).map(([processEvent, position], index) => (
+          <StyledResolverContainer
+            className="resolver-graph kbn-resetFocusState"
+            onMouseDown={onMouseDown}
+            ref={ref}
+            role="tree"
+            tabIndex={0}
+          >
+            {edgeLineSegments.map(([startPosition, endPosition], index) => (
+              <EdgeLine
+                key={index}
+                startPosition={startPosition}
+                endPosition={endPosition}
+                projectionMatrix={projectionMatrix}
+              />
+            ))}
+            {[...processNodePositions].map(([processEvent, position], index) => {
+              const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
+              if (!adjacentNodeMap) {
+                // This should never happen
+                throw new Error('Issue calculating adjacency node map.');
+              }
+              return (
                 <ProcessEventDot
                   key={index}
                   position={position}
                   projectionMatrix={projectionMatrix}
                   event={processEvent}
+                  adjacentNodeMap={adjacentNodeMap}
                 />
-              ))}
-              {edgeLineSegments.map(([startPosition, endPosition], index) => (
-                <EdgeLine
-                  key={index}
-                  startPosition={startPosition}
-                  endPosition={endPosition}
-                  projectionMatrix={projectionMatrix}
-                />
-              ))}
-            </div>
-            <StyledPanel />
-            <StyledGraphControls />
-          </>
+              );
+            })}
+          </StyledResolverContainer>
         )}
+        <StyledPanel />
+        <StyledGraphControls />
+        <SymbolDefinitions />
       </div>
     );
   })
@@ -111,4 +135,6 @@ export const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
+  contain: strict;
+  background-color: ${bgColor};
 `;

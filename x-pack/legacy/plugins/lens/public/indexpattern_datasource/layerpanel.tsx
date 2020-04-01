@@ -11,7 +11,8 @@ import { DatasourceLayerPanelProps } from '../types';
 import { IndexPatternPrivateState } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
 
-export interface IndexPatternLayerPanelProps extends DatasourceLayerPanelProps {
+export interface IndexPatternLayerPanelProps
+  extends DatasourceLayerPanelProps<IndexPatternPrivateState> {
   state: IndexPatternPrivateState;
   onChangeIndexPattern: (newId: string) => void;
 }

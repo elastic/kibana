@@ -6,13 +6,14 @@
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { GetBasePathFunction, RawAction } from './types';
+import { GetBasePathFunction, RawAction, ActionTypeRegistryContract } from './types';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
   getBasePath: GetBasePathFunction;
   isESOUsingEphemeralEncryptionKey: boolean;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export interface ExecuteOptions {
@@ -25,6 +26,7 @@ export interface ExecuteOptions {
 export function createExecuteFunction({
   getBasePath,
   taskManager,
+  actionTypeRegistry,
   getScopedSavedObjectsClient,
   isESOUsingEphemeralEncryptionKey,
 }: CreateExecuteFunctionOptions) {
@@ -60,6 +62,9 @@ export function createExecuteFunction({
 
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
     const actionSavedObject = await savedObjectsClient.get<RawAction>('action', id);
+
+    actionTypeRegistry.ensureActionTypeEnabled(actionSavedObject.attributes.actionTypeId);
+
     const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,
       params,

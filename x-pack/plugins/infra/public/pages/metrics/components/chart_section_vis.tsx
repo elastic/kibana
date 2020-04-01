@@ -120,7 +120,8 @@ export const ChartSectionVis = ({
             tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
             theme={getChartTheme(isDarkMode)}
-            showLegend={true}
+            showLegend
+            showLegendExtra
             legendPosition="right"
           />
         </Chart>

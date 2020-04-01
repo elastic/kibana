@@ -13,12 +13,13 @@ export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
 const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgkey}`;
+const EPM_PACKAGES_FILE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
 export const EPM_API_ROUTES = {
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INFO_PATTERN: EPM_PACKAGES_ONE,
   INSTALL_PATTERN: EPM_PACKAGES_ONE,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
-  FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
+  FILEPATH_PATTERN: `${EPM_PACKAGES_FILE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
 };
 
@@ -50,6 +51,7 @@ export const AGENT_API_ROUTES = {
   EVENTS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/events`,
   CHECKIN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
+  ACTIONS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/actions`,
   ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
   UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
   STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,

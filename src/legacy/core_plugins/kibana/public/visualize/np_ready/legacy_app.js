@@ -21,7 +21,11 @@ import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { createHashHistory } from 'history';
 
-import { createKbnUrlStateStorage } from '../../../../../../plugins/kibana_utils/public';
+import {
+  createKbnUrlStateStorage,
+  redirectWhenMissing,
+  ensureDefaultIndexPattern,
+} from '../../../../../../plugins/kibana_utils/public';
 
 import editorTemplate from './editor/editor.html';
 import visualizeListingTemplate from './listing/visualize_listing.html';
@@ -29,7 +33,6 @@ import visualizeListingTemplate from './listing/visualize_listing.html';
 import { initVisualizeAppDirective } from './visualize_app';
 import { VisualizeConstants } from './visualize_constants';
 import { VisualizeListingController } from './listing/visualize_listing';
-import { ensureDefaultIndexPattern } from '../legacy_imports';
 
 import {
   getLandingBreadcrumbs,
@@ -37,6 +40,50 @@ import {
   getCreateBreadcrumbs,
   getEditBreadcrumbs,
 } from './breadcrumbs';
+import { createSavedSearchesLoader } from '../../../../../../plugins/discover/public';
+
+const getResolvedResults = deps => {
+  const { core, data, visualizations } = deps;
+
+  const results = {};
+
+  return savedVis => {
+    results.savedVis = savedVis;
+    return visualizations
+      .convertToSerializedVis(savedVis)
+      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+      .then(vis => {
+        if (vis.type.setup) {
+          return vis.type.setup(vis).catch(() => vis);
+        }
+        return vis;
+      })
+      .then(vis => {
+        results.vis = vis;
+        return deps.embeddable.getEmbeddableFactory('visualization').createFromObject(results.vis, {
+          timeRange: data.query.timefilter.timefilter.getTime(),
+          filters: data.query.filterManager.getFilters(),
+        });
+      })
+      .then(embeddableHandler => {
+        results.embeddableHandler = embeddableHandler;
+        if (results.vis.data.savedSearchId) {
+          return createSavedSearchesLoader({
+            savedObjectsClient: core.savedObjects.client,
+            indexPatterns: data.indexPatterns,
+            chrome: core.chrome,
+            overlays: core.overlays,
+          }).get(results.vis.data.savedSearchId);
+        }
+      })
+      .then(savedSearch => {
+        if (savedSearch) {
+          results.savedSearch = savedSearch;
+        }
+        return results;
+      });
+  };
+};
 
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
@@ -79,8 +126,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => false,
-          hasDefaultIndex: ($rootScope, kbnUrl) =>
-            ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
+          hasDefaultIndex: history => ensureDefaultIndexPattern(deps.core, deps.data, history),
         },
       })
       .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -91,8 +137,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => true,
-          hasDefaultIndex: ($rootScope, kbnUrl) =>
-            ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
+          hasDefaultIndex: history => ensureDefaultIndexPattern(deps.core, deps.data, history),
         },
       })
       .when(VisualizeConstants.CREATE_PATH, {
@@ -100,8 +145,8 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
-            const { core, data, savedVisualizations, visualizations } = deps;
+          resolved: function($route, history) {
+            const { core, data, savedVisualizations, visualizations, toastNotifications } = deps;
             const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
             const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -118,17 +163,14 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
-            return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(core, data, history)
               .then(() => savedVisualizations.get($route.current.params))
-              .then(savedVis => {
-                if (savedVis.vis.type.setup) {
-                  return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
-                }
-                return savedVis;
-              })
+              .then(getResolvedResults(deps))
               .catch(
                 redirectWhenMissing({
-                  '*': '/visualize',
+                  history,
+                  mapping: VisualizeConstants.LANDING_PAGE_PATH,
+                  toastNotifications,
                 })
               );
           },
@@ -139,29 +181,32 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
-          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
-            const { chrome, core, data, savedVisualizations } = deps;
-            return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+          resolved: function($route, history) {
+            const { chrome, core, data, savedVisualizations, toastNotifications } = deps;
+
+            return ensureDefaultIndexPattern(core, data, history)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
                 chrome.recentlyAccessed.add(savedVis.getFullPath(), savedVis.title, savedVis.id);
                 return savedVis;
               })
-              .then(savedVis => {
-                if (savedVis.vis.type.setup) {
-                  return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
-                }
-                return savedVis;
-              })
+              .then(getResolvedResults(deps))
               .catch(
                 redirectWhenMissing({
-                  visualization: '/visualize',
-                  search:
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                  'index-pattern':
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                  'index-pattern-field':
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                  history,
+                  mapping: {
+                    visualization: VisualizeConstants.LANDING_PAGE_PATH,
+                    search:
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    'index-pattern':
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    'index-pattern-field':
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                  },
+                  toastNotifications,
+                  onBeforeRedirect() {
+                    deps.setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
+                  },
                 })
               );
           },

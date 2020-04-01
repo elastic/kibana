@@ -14,6 +14,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
  */
 export const signalParamsSchema = () =>
   schema.object({
+    anomalyThreshold: schema.maybe(schema.number()),
     description: schema.string(),
     note: schema.nullable(schema.string()),
     falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -26,15 +27,17 @@ export const signalParamsSchema = () =>
     savedId: schema.nullable(schema.string()),
     timelineId: schema.nullable(schema.string()),
     timelineTitle: schema.nullable(schema.string()),
-    meta: schema.nullable(schema.object({}, { allowUnknowns: true })),
+    meta: schema.nullable(schema.object({}, { unknowns: 'allow' })),
+    machineLearningJobId: schema.maybe(schema.string()),
     query: schema.nullable(schema.string()),
-    filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
+    filters: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
     maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
     riskScore: schema.number(),
     severity: schema.string(),
-    threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
+    threat: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
     to: schema.string(),
     type: schema.string(),
     references: schema.arrayOf(schema.string(), { defaultValue: [] }),
     version: schema.number({ defaultValue: 1 }),
+    lists: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   });

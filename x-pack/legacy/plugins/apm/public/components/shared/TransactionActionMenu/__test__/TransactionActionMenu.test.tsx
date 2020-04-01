@@ -5,11 +5,19 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
-import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
+import {
+  expectTextsNotInDocument,
+  expectTextsInDocument
+} from '../../../../utils/testHelpers';
+import * as hooks from '../../../../hooks/useFetcher';
+import { LicenseContext } from '../../../../context/LicenseContext';
+import { License } from '../../../../../../../../plugins/licensing/common/license';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import * as apmApi from '../../../../services/rest/createCallApmApi';
 
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
@@ -23,6 +31,15 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 };
 
 describe('TransactionActionMenu component', () => {
+  beforeAll(() => {
+    spyOn(hooks, 'useFetcher').and.returnValue({
+      data: [],
+      status: 'success'
+    });
+  });
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   it('should always render the discover link', async () => {
     const { queryByText } = await renderTransaction(
       Transactions.transactionWithMinimalData
@@ -123,5 +140,170 @@ describe('TransactionActionMenu component', () => {
     );
 
     expect(container).toMatchSnapshot();
+  });
+
+  describe('Custom links', () => {
+    beforeAll(() => {
+      spyOn(apmApi, 'callApmApi').and.returnValue({});
+    });
+    afterAll(() => {
+      jest.resetAllMocks();
+    });
+    it('doesnt show custom links when license is not valid', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'gold',
+          status: 'invalid',
+          type: 'gold',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <TransactionActionMenu
+              transaction={
+                Transactions.transactionWithMinimalData as Transaction
+              }
+            />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      act(() => {
+        fireEvent.click(component.getByText('Actions'));
+      });
+      expectTextsNotInDocument(component, ['Custom Links']);
+    });
+    it('doesnt show custom links when basic license', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'basic',
+          status: 'active',
+          type: 'basic',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <TransactionActionMenu
+              transaction={
+                Transactions.transactionWithMinimalData as Transaction
+              }
+            />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      act(() => {
+        fireEvent.click(component.getByText('Actions'));
+      });
+      expectTextsNotInDocument(component, ['Custom Links']);
+    });
+    it('shows custom links when trial license', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'trial',
+          status: 'active',
+          type: 'trial',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <TransactionActionMenu
+              transaction={
+                Transactions.transactionWithMinimalData as Transaction
+              }
+            />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      act(() => {
+        fireEvent.click(component.getByText('Actions'));
+      });
+      expectTextsInDocument(component, ['Custom Links']);
+    });
+    it('shows custom links when gold license', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'gold',
+          status: 'active',
+          type: 'gold',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <TransactionActionMenu
+              transaction={
+                Transactions.transactionWithMinimalData as Transaction
+              }
+            />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      act(() => {
+        fireEvent.click(component.getByText('Actions'));
+      });
+      expectTextsInDocument(component, ['Custom Links']);
+    });
+    it('opens flyout with filters prefilled', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'gold',
+          status: 'active',
+          type: 'gold',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <TransactionActionMenu
+              transaction={
+                Transactions.transactionWithMinimalData as Transaction
+              }
+            />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      act(() => {
+        fireEvent.click(component.getByText('Actions'));
+      });
+      expectTextsInDocument(component, ['Custom Links']);
+      act(() => {
+        fireEvent.click(component.getByText('Create custom link'));
+      });
+      expectTextsInDocument(component, ['Create link']);
+      const getFilterKeyValue = (key: string) => {
+        return {
+          [(component.getAllByText(key)[0] as HTMLOptionElement)
+            .text]: (component.getAllByTestId(
+            `${key}.value`
+          )[0] as HTMLInputElement).value
+        };
+      };
+      expect(getFilterKeyValue('service.name')).toEqual({
+        'service.name': 'opbeans-go'
+      });
+      expect(getFilterKeyValue('transaction.name')).toEqual({
+        'transaction.name': 'GET /api/products/:id/customers'
+      });
+      expect(getFilterKeyValue('transaction.type')).toEqual({
+        'transaction.type': 'request'
+      });
+    });
   });
 });

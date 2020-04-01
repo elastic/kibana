@@ -24,19 +24,13 @@
  * directly where they are needed.
  */
 
-// @ts-ignore
-export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
-export { VisSavedObject, VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/';
+export {
+  VisSavedObject,
+  VISUALIZE_EMBEDDABLE_TYPE,
+} from '../../../../../plugins/visualizations/public/';
 export {
   configureAppAngularModule,
-  ensureDefaultIndexPattern,
-  IPrivate,
   migrateLegacyQuery,
-  PrivateProvider,
-  PromiseServiceCreator,
   subscribeWithScope,
 } from '../../../../../plugins/kibana_legacy/public';

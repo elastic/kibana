@@ -5,12 +5,18 @@
  */
 
 import { createAction } from 'redux-actions';
-import { AsyncAction } from './types';
+import { AsyncAction, AsyncAction1 } from './types';
+import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
-export function createAsyncAction<Payload>(actionStr: string): AsyncAction {
+export function createAsyncAction<Payload, SuccessPayload>(
+  actionStr: string
+): AsyncAction1<Payload, SuccessPayload>;
+export function createAsyncAction<Payload, SuccessPayload>(
+  actionStr: string
+): AsyncAction<Payload, SuccessPayload> {
   return {
     get: createAction<Payload>(actionStr),
-    success: createAction<Payload>(`${actionStr}_SUCCESS`),
-    fail: createAction<Payload>(`${actionStr}_FAIL`),
+    success: createAction<SuccessPayload>(`${actionStr}_SUCCESS`),
+    fail: createAction<IHttpFetchError>(`${actionStr}_FAIL`),
   };
 }

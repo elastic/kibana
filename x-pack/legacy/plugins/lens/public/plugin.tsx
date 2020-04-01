@@ -8,10 +8,14 @@ import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AppMountParameters, CoreSetup, CoreStart } from 'src/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
+
+import { AppMountParameters, CoreSetup, CoreStart } from 'src/core/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
+import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { EditorFrameService } from './editor_frame_service';
 import { IndexPatternDatasource } from './indexpattern_datasource';
@@ -19,7 +23,6 @@ import { addHelpMenuToAppChrome } from './help_menu_util';
 import { SavedObjectIndexStore } from './persistence';
 import { XyVisualization } from './xy_visualization';
 import { MetricVisualization } from './metric_visualization';
-import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
 import { DatatableVisualization } from './datatable_visualization';
 import { App } from './app_plugin';
 import {
@@ -28,18 +31,13 @@ import {
   stopReportManager,
   trackUiEvent,
 } from './lens_ui_telemetry';
-import { KibanaLegacySetup } from '../../../../../src/plugins/kibana_legacy/public';
+
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../../plugins/lens/common';
-import {
-  addEmbeddableToDashboardUrl,
-  getUrlVars,
-  getLensUrlFromDashboardAbsoluteUrl,
-} from '../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
-import { FormatFactory } from './legacy_imports';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { addEmbeddableToDashboardUrl, getUrlVars } from './helpers';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
-import { VisualizationsSetup } from './legacy_imports';
+import { VisualizationsSetup, DashboardConstants } from './legacy_imports';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -47,7 +45,6 @@ export interface LensPluginSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   __LEGACY: {
-    formatFactory: FormatFactory;
     visualizations: VisualizationsSetup;
   };
 }
@@ -56,6 +53,7 @@ export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
 }
 
 export const isRisonObject = (value: RisonValue): value is RisonObject => {
@@ -84,7 +82,7 @@ export class LensPlugin {
       expressions,
       data,
       embeddable,
-      __LEGACY: { formatFactory, visualizations },
+      __LEGACY: { visualizations },
     }: LensPluginSetupDependencies
   ) {
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
@@ -96,7 +94,9 @@ export class LensPlugin {
       expressions,
       data,
       editorFrame: editorFrameSetupInterface,
-      formatFactory,
+      formatFactory: core
+        .getStartServices()
+        .then(([_, { data: dataStart }]) => dataStart.fieldFormats.deserialize),
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
@@ -114,7 +114,7 @@ export class LensPlugin {
         const savedObjectsClient = coreStart.savedObjects.client;
         addHelpMenuToAppChrome(coreStart.chrome);
 
-        const instance = await this.createEditorFrame!({});
+        const instance = await this.createEditorFrame!();
 
         setReportManager(
           new LensReportManager({
@@ -142,40 +142,24 @@ export class LensPlugin {
             routeProps.history.push(`/lens/edit/${id}`);
           } else if (addToDashboardMode && id) {
             routeProps.history.push(`/lens/edit/${id}`);
-            const url = coreStart.chrome.navLinks.get('kibana:dashboard');
-            if (!url) {
+            const lastDashboardLink = coreStart.chrome.navLinks.get('kibana:dashboard');
+            if (!lastDashboardLink || !lastDashboardLink.url) {
               throw new Error('Cannot get last dashboard url');
             }
-            const lastDashboardAbsoluteUrl = url.url;
-            const basePath = coreStart.http.basePath.get();
-            const lensUrl = getLensUrlFromDashboardAbsoluteUrl(
-              lastDashboardAbsoluteUrl,
-              basePath,
-              id
-            );
-            if (!lastDashboardAbsoluteUrl || !lensUrl) {
-              throw new Error('Cannot get last dashboard url');
-            }
-            window.history.pushState({}, '', lensUrl);
-            const urlVars = getUrlVars(lastDashboardAbsoluteUrl);
+            const urlVars = getUrlVars(lastDashboardLink.url);
             updateUrlTime(urlVars); // we need to pass in timerange in query params directly
-            const dashboardParsedUrl = addEmbeddableToDashboardUrl(
-              lastDashboardAbsoluteUrl,
-              basePath,
-              id,
-              urlVars
-            );
-            if (!dashboardParsedUrl) {
-              throw new Error('Problem parsing dashboard url');
-            }
-            window.history.pushState({}, '', dashboardParsedUrl);
+            const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardLink.url, id, urlVars);
+            window.history.pushState({}, '', dashboardUrl);
           }
         };
 
         const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
           trackUiEvent('loaded');
           const addToDashboardMode =
-            !!routeProps.location.search && routeProps.location.search.includes('addToDashboard');
+            !!routeProps.location.search &&
+            routeProps.location.search.includes(
+              DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM
+            );
           return (
             <App
               core={coreStart}
@@ -217,6 +201,7 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    this.xyVisualization.start(core, startDependencies);
   }
 
   stop() {

@@ -17,9 +17,14 @@
  * under the License.
  */
 
-import { IndexPattern } from 'src/plugins/data/public';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES } from '../legacy_imports';
+import {
+  AggGroupNames,
+  BUCKET_TYPES,
+  IAggConfig,
+  IAggType,
+  IndexPattern,
+  IndexPatternField,
+} from 'src/plugins/data/public';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
@@ -28,12 +33,17 @@ import {
 import { FieldParamEditor, OrderByParamEditor } from './controls';
 import { EditorConfig } from './utils';
 import { Schema } from '../schemas';
+import { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
 }));
 
-jest.mock('ui/new_platform');
+const mockFilter: any = {
+  filter(fields: IndexPatternField[]): IndexPatternField[] {
+    return fields;
+  },
+};
 
 describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
@@ -48,7 +58,7 @@ describe('DefaultEditorAggParams helpers', () => {
         hideCustomLabel: true,
       } as Schema,
     ];
-    const state = {} as VisState;
+    const state = {} as EditorVisState;
     const metricAggs: IAggConfig[] = [];
     const emptyParams = {
       basic: [],
@@ -62,14 +72,20 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: 'metric',
       } as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
+      const params = getAggParamsToRender(
+        { agg, editorConfig, metricAggs, state, schemas },
+        mockFilter
+      );
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
       agg = { schema: 'metric' } as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
+      const params = getAggParamsToRender(
+        { agg, editorConfig, metricAggs, state, schemas },
+        mockFilter
+      );
 
       expect(params).toEqual(emptyParams);
     });
@@ -85,7 +101,10 @@ describe('DefaultEditorAggParams helpers', () => {
           hidden: true,
         },
       };
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
+      const params = getAggParamsToRender(
+        { agg, editorConfig, metricAggs, state, schemas },
+        mockFilter
+      );
 
       expect(params).toEqual(emptyParams);
     });
@@ -97,7 +116,10 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: 'metric2',
       } as any) as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
+      const params = getAggParamsToRender(
+        { agg, editorConfig, metricAggs, state, schemas },
+        mockFilter
+      );
 
       expect(params).toEqual(emptyParams);
     });
@@ -136,7 +158,10 @@ describe('DefaultEditorAggParams helpers', () => {
           field: 'field',
         },
       } as any) as IAggConfig;
-      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
+      const params = getAggParamsToRender(
+        { agg, editorConfig, metricAggs, state, schemas },
+        mockFilter
+      );
 
       expect(params).toEqual({
         basic: [
@@ -172,7 +197,13 @@ describe('DefaultEditorAggParams helpers', () => {
   describe('getAggTypeOptions', () => {
     it('should return agg type options grouped by subtype', () => {
       const indexPattern = {} as IndexPattern;
-      const aggs = getAggTypeOptions({} as IAggConfig, indexPattern, 'metrics', []);
+      const aggs = getAggTypeOptions(
+        { metrics: [] },
+        {} as IAggConfig,
+        indexPattern,
+        'metrics',
+        []
+      );
 
       expect(aggs).toEqual(['indexedFields']);
     });

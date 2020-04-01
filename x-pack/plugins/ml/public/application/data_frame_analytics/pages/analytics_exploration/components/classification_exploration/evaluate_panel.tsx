@@ -39,14 +39,56 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
-import { getColumnData } from './column_data';
+import {
+  getColumnData,
+  ACTUAL_CLASS_ID,
+  MAX_COLUMNS,
+  getTrailingControlColumns,
+} from './column_data';
 
 const defaultPanelWidth = 500;
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus: DATA_FRAME_TASK_STATE;
+  jobStatus?: DATA_FRAME_TASK_STATE;
   searchQuery: ResultsSearchQuery;
+}
+
+enum SUBSET_TITLE {
+  TRAINING = 'training',
+  TESTING = 'testing',
+  ENTIRE = 'entire',
+}
+
+const entireDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixEntireHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for entire dataset',
+  }
+);
+
+const testingDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTestingHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for testing dataset',
+  }
+);
+
+const trainingDatasetHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTrainingHelpText',
+  {
+    defaultMessage: 'Normalized confusion matrix for training dataset',
+  }
+);
+
+function getHelpText(dataSubsetTitle: string) {
+  let helpText = entireDatasetHelpText;
+  if (dataSubsetTitle === SUBSET_TITLE.TESTING) {
+    helpText = testingDatasetHelpText;
+  } else if (dataSubsetTitle === SUBSET_TITLE.TRAINING) {
+    helpText = trainingDatasetHelpText;
+  }
+  return helpText;
 }
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
@@ -57,9 +99,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [columns, setColumns] = useState<any>([]);
   const [columnsData, setColumnsData] = useState<any>([]);
+  const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
   const [popoverContents, setPopoverContents] = useState<any>([]);
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
+  const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   const [panelWidth, setPanelWidth] = useState<number>(defaultPanelWidth);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(() =>
@@ -168,8 +212,9 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
           const colId = children?.props?.columnId;
           const gridItem = columnData[rowIndex];
 
-          if (gridItem !== undefined) {
-            const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
+          if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
+            // @ts-ignore
+            const count = gridItem[colId];
             return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
           }
 
@@ -190,6 +235,18 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       hasIsTrainingClause[0] &&
       hasIsTrainingClause[0].match[`${resultsField}.is_training`];
 
+    const noTrainingQuery = isTrainingClause === false || isTrainingClause === undefined;
+
+    if (noTrainingQuery) {
+      setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
+    } else {
+      setDataSubsetTitle(
+        isTrainingClause && isTrainingClause.query === 'true'
+          ? SUBSET_TITLE.TRAINING
+          : SUBSET_TITLE.TESTING
+      );
+    }
+
     loadData({ isTrainingClause });
   }, [JSON.stringify(searchQuery)]);
 
@@ -203,17 +260,26 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setCellProps: any;
   }) => {
     const cellValue = columnsData[rowIndex][columnId];
+    const actualCount = columnsData[rowIndex] && columnsData[rowIndex].actual_class_doc_count;
+    let accuracy: number | string = '0%';
+
+    if (columnId !== ACTUAL_CLASS_ID && actualCount) {
+      accuracy = cellValue / actualCount;
+      // round to 2 decimal places without converting to string;
+      accuracy = Math.round(accuracy * 100) / 100;
+      accuracy = `${Math.round(accuracy * 100)}%`;
+    }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-      setCellProps({
-        style: {
-          backgroundColor: `rgba(0, 179, 164, ${cellValue})`,
-        },
-      });
+      if (columnId !== ACTUAL_CLASS_ID) {
+        setCellProps({
+          style: {
+            backgroundColor: `rgba(0, 179, 164, ${accuracy})`,
+          },
+        });
+      }
     }, [rowIndex, columnId, setCellProps]);
-    return (
-      <span>{typeof cellValue === 'number' ? `${Math.round(cellValue * 100)}%` : cellValue}</span>
-    );
+    return <span>{columnId === ACTUAL_CLASS_ID ? cellValue : accuracy}</span>;
   };
 
   if (isLoading === true) {
@@ -221,6 +287,15 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+
+  const showTrailingColumns = columnsData.length > MAX_COLUMNS;
+  const extraColumns = columnsData.length - MAX_COLUMNS;
+  const shownColumns =
+    showTrailingColumns === true && showFullColumns === false
+      ? columns.slice(0, MAX_COLUMNS + 1)
+      : columns;
+  const rowCount =
+    showTrailingColumns === true && showFullColumns === false ? MAX_COLUMNS : columnsData.length;
 
   return (
     <EuiPanel
@@ -243,9 +318,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 </span>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{getTaskStateBadge(jobStatus)}</span>
-            </EuiFlexItem>
+            {jobStatus !== undefined && (
+              <EuiFlexItem grow={false}>
+                <span>{getTaskStateBadge(jobStatus)}</span>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiSpacer />
             </EuiFlexItem>
@@ -277,14 +354,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs">
                 <EuiTitle size="xxs">
-                  <span>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixHelpText',
-                      {
-                        defaultMessage: 'Normalized confusion matrix',
-                      }
-                    )}
-                  </span>
+                  <span>{getHelpText(dataSubsetTitle)}</span>
                 </EuiTitle>
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
@@ -313,7 +383,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             )}
             {/* BEGIN TABLE ELEMENTS */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" style={{ paddingLeft: '10%', paddingRight: '10%' }}>
+              <EuiFlexGroup gutterSize="s" style={{ paddingLeft: '5%', paddingRight: '5%' }}>
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
                     className="mlDataFrameAnalyticsClassification__actualLabel"
@@ -346,15 +416,30 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                         <EuiFlexItem grow={false} style={{ width: '90%' }}>
                           <EuiDataGrid
                             data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
-                            aria-label="Classification confusion matrix"
-                            columns={columns}
+                            aria-label={i18n.translate(
+                              'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel',
+                              {
+                                defaultMessage: 'Classification confusion matrix',
+                              }
+                            )}
+                            columns={shownColumns}
                             columnVisibility={{ visibleColumns, setVisibleColumns }}
-                            rowCount={columnsData.length}
+                            rowCount={rowCount}
                             renderCellValue={renderCellValue}
                             inMemory={{ level: 'sorting' }}
-                            toolbarVisibility={false}
+                            toolbarVisibility={{
+                              showColumnSelector: true,
+                              showStyleSelector: false,
+                              showFullScreenSelector: false,
+                              showSortSelector: false,
+                            }}
                             popoverContents={popoverContents}
                             gridStyle={{ rowHover: 'none' }}
+                            trailingControlColumns={
+                              showTrailingColumns === true && showFullColumns === false
+                                ? getTrailingControlColumns(extraColumns, setShowFullColumns)
+                                : undefined
+                            }
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>

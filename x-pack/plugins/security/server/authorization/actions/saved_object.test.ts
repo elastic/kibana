@@ -8,13 +8,6 @@ import { SavedObjectActions } from './saved_object';
 
 const version = '1.0.0-zeta1';
 
-describe('#all', () => {
-  test(`returns saved_object:*`, () => {
-    const savedObjectActions = new SavedObjectActions(version);
-    expect(savedObjectActions.all).toBe('saved_object:1.0.0-zeta1:*');
-  });
-});
-
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((type: any) => {
     test(`type of ${JSON.stringify(type)} throws error`, () => {

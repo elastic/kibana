@@ -115,6 +115,17 @@ export const getColumns = ({
             )}
             isDropDisabled={true}
             type={DRAG_TYPE_FIELD}
+            renderClone={provided => (
+              <div
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                ref={provided.innerRef}
+              >
+                <DragEffects>
+                  <DraggableFieldBadge fieldId={field} />
+                </DragEffects>
+              </div>
+            )}
           >
             <Draggable
               draggableId={getDraggableFieldId({
@@ -122,30 +133,23 @@ export const getColumns = ({
                 fieldId: field,
               })}
               index={0}
-              type={DRAG_TYPE_FIELD}
             >
-              {(provided, snapshot) => (
+              {provided => (
                 <div
                   {...provided.draggableProps}
                   {...provided.dragHandleProps}
                   ref={provided.innerRef}
                 >
-                  {!snapshot.isDragging ? (
-                    <FieldName
-                      categoryId={data.category}
-                      categoryColumns={getColumnsWithTimestamp({
-                        browserFields,
-                        category: data.category,
-                      })}
-                      data-test-subj="field-name"
-                      fieldId={field}
-                      onUpdateColumns={onUpdateColumns}
-                    />
-                  ) : (
-                    <DragEffects>
-                      <DraggableFieldBadge fieldId={field} />
-                    </DragEffects>
-                  )}
+                  <FieldName
+                    categoryId={data.category}
+                    categoryColumns={getColumnsWithTimestamp({
+                      browserFields,
+                      category: data.category,
+                    })}
+                    data-test-subj="field-name"
+                    fieldId={field}
+                    onUpdateColumns={onUpdateColumns}
+                  />
                 </div>
               )}
             </Draggable>

@@ -39,7 +39,7 @@ describe('suggestion_panel', () => {
 
   beforeEach(() => {
     mockVisualization = createMockVisualization();
-    mockDatasource = createMockDatasource();
+    mockDatasource = createMockDatasource('a');
     expressionRendererMock = createExpressionRendererMock();
     dispatchMock = jest.fn();
 

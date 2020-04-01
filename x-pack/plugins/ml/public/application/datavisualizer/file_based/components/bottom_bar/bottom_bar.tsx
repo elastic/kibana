@@ -48,6 +48,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
                 fill
                 isDisabled={disableImport}
                 onClick={() => onChangeMode(DATAVISUALIZER_MODE.IMPORT)}
+                data-test-subj="mlFileDataVisOpenImportPageButton"
               >
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.bottomBar.readMode.importButtonLabel"

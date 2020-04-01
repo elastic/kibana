@@ -39,12 +39,12 @@ const START_DATE_MINUS_2INTERVALS = getStartDate(-2 * INTERVAL_MILLIS);
    are offset from the top of the minute by 30 seconds, the queries always
    run from the top of the hour.
 
-  { "date":"2019-12-31T23:59:30.000Z", "testedValue":1, "group":"groupA" }
-  { "date":"2019-12-31T23:59:30.000Z", "testedValue":2, "group":"groupB" }
-  { "date":"2019-12-31T23:58:30.000Z", "testedValue":2, "group":"groupA" }
-  { "date":"2019-12-31T23:58:30.000Z", "testedValue":3, "group":"groupB" }
-  { "date":"2019-12-31T23:57:30.000Z", "testedValue":4, "group":"groupA" }
-  { "date":"2019-12-31T23:57:30.000Z", "testedValue":5, "group":"groupB" }
+  { "date":"2019-12-31T23:59:30.000Z", "testedValue":1, "group":"group-0" }
+  { "date":"2019-12-31T23:59:30.000Z", "testedValue":2, "group":"group-1" }
+  { "date":"2019-12-31T23:58:30.000Z", "testedValue":2, "group":"group-0" }
+  { "date":"2019-12-31T23:58:30.000Z", "testedValue":3, "group":"group-1" }
+  { "date":"2019-12-31T23:57:30.000Z", "testedValue":4, "group":"group-0" }
+  { "date":"2019-12-31T23:57:30.000Z", "testedValue":5, "group":"group-1" }
 */
 
 // eslint-disable-next-line import/no-default-export
@@ -162,7 +162,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       const expected = {
         results: [
           {
-            group: 'groupA',
+            group: 'group-0',
             metrics: [
               [START_DATE_MINUS_2INTERVALS, 1],
               [START_DATE_MINUS_1INTERVALS, 2],
@@ -170,7 +170,7 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
             ],
           },
           {
-            group: 'groupB',
+            group: 'group-1',
             metrics: [
               [START_DATE_MINUS_2INTERVALS, 1],
               [START_DATE_MINUS_1INTERVALS, 2],
@@ -197,25 +197,55 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       const expected = {
         results: [
           {
-            group: 'groupA',
-            metrics: [
-              [START_DATE_MINUS_2INTERVALS, 4 / 1],
-              [START_DATE_MINUS_1INTERVALS, (4 + 2) / 2],
-              [START_DATE_MINUS_0INTERVALS, (4 + 2 + 1) / 3],
-            ],
-          },
-          {
-            group: 'groupB',
+            group: 'group-1',
             metrics: [
               [START_DATE_MINUS_2INTERVALS, 5 / 1],
               [START_DATE_MINUS_1INTERVALS, (5 + 3) / 2],
               [START_DATE_MINUS_0INTERVALS, (5 + 3 + 2) / 3],
             ],
           },
+          {
+            group: 'group-0',
+            metrics: [
+              [START_DATE_MINUS_2INTERVALS, 4 / 1],
+              [START_DATE_MINUS_1INTERVALS, (4 + 2) / 2],
+              [START_DATE_MINUS_0INTERVALS, (4 + 2 + 1) / 3],
+            ],
+          },
         ],
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
+    });
+
+    it('should return correct sorted group for average', async () => {
+      const query = getQueryBody({
+        aggType: 'avg',
+        aggField: 'testedValue',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 1,
+        dateStart: START_DATE_MINUS_2INTERVALS,
+        dateEnd: START_DATE_MINUS_0INTERVALS,
+      });
+      const result = await runQueryExpect(query, 200);
+      expect(result.results.length).to.be(1);
+      expect(result.results[0].group).to.be('group-1');
+    });
+
+    it('should return correct sorted group for min', async () => {
+      const query = getQueryBody({
+        aggType: 'min',
+        aggField: 'testedValue',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 1,
+        dateStart: START_DATE_MINUS_2INTERVALS,
+        dateEnd: START_DATE_MINUS_0INTERVALS,
+      });
+      const result = await runQueryExpect(query, 200);
+      expect(result.results.length).to.be(1);
+      expect(result.results[0].group).to.be('group-0');
     });
 
     it('should return an error when passed invalid input', async () => {
@@ -242,6 +272,32 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
         statusCode: 400,
       };
       expect(await runQueryExpect(query, 400)).eql(expected);
+    });
+
+    it('should handle epoch_millis time field', async () => {
+      const query = getQueryBody({
+        dateStart: START_DATE,
+        dateEnd: START_DATE,
+        timeField: 'date_epoch_millis',
+      });
+      const expected = {
+        results: [{ group: 'all documents', metrics: [[START_DATE, 6]] }],
+      };
+      expect(await runQueryExpect(query, 200)).eql(expected);
+    });
+
+    it('should handle ES errors', async () => {
+      const query = getQueryBody({
+        dateStart: START_DATE,
+        dateEnd: START_DATE,
+        timeField: 'source', // bad field for time
+        aggType: 'avg',
+        aggField: 'source', // bad field for agg
+      });
+      const expected = {
+        results: [],
+      };
+      expect(await runQueryExpect(query, 200)).eql(expected);
     });
   });
 

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
@@ -54,13 +54,9 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
 
 DropAndTargetDataProviders.displayName = 'DropAndTargetDataProviders';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const NumberProviderAndBadge = styled(EuiBadge)`
-//   margin: 0px 5px;
-// `;
-const NumberProviderAndBadge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ margin: '0px 5px' }} />
-);
+const NumberProviderAndBadge = styled(EuiBadge)`
+  margin: 0px 5px;
+`;
 
 NumberProviderAndBadge.displayName = 'NumberProviderAndBadge';
 
@@ -89,8 +85,13 @@ export const ProviderItemAndDragDrop = React.memo<ProviderItemDropProps>(
     onToggleDataProviderExcluded,
     timelineId,
   }) => {
-    const onMouseEnter = () => onChangeDroppableAndProvider(dataProvider.id);
-    const onMouseLeave = () => onChangeDroppableAndProvider('');
+    const onMouseEnter = useCallback(() => onChangeDroppableAndProvider(dataProvider.id), [
+      onChangeDroppableAndProvider,
+      dataProvider.id,
+    ]);
+    const onMouseLeave = useCallback(() => onChangeDroppableAndProvider(''), [
+      onChangeDroppableAndProvider,
+    ]);
     const hasAndItem = dataProvider.and.length > 0;
     return (
       <EuiFlexGroup

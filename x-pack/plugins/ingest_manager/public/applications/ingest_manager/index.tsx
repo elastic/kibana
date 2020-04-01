@@ -9,7 +9,7 @@ import { useObservable } from 'react-use';
 import { HashRouter as Router, Redirect, Switch, Route, RouteProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { CoreStart, AppMountParameters } from 'kibana/public';
+import { CoreStart, AppMountParameters } from 'src/core/public';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
 import {
   IngestManagerSetupDeps,

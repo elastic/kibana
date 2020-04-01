@@ -56,7 +56,7 @@ core.chrome.setHelpExtension(elem => {
 |  [getBrand$()](./kibana-plugin-core-public.chromestart.getbrand_.md) | Get an observable of the current brand information. |
 |  [getBreadcrumbs$()](./kibana-plugin-core-public.chromestart.getbreadcrumbs_.md) | Get an observable of the current list of breadcrumbs |
 |  [getHelpExtension$()](./kibana-plugin-core-public.chromestart.gethelpextension_.md) | Get an observable of the current custom help conttent |
-|  [getIsCollapsed$()](./kibana-plugin-core-public.chromestart.getiscollapsed_.md) | Get an observable of the current collapsed state of the chrome. |
+|  [getIsNavDrawerLocked$()](./kibana-plugin-core-public.chromestart.getisnavdrawerlocked_.md) | Get an observable of the current locked state of the nav drawer. |
 |  [getIsVisible$()](./kibana-plugin-core-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
 |  [removeApplicationClass(className)](./kibana-plugin-core-public.chromestart.removeapplicationclass.md) | Remove a className added with <code>addApplicationClass()</code>. If className is unknown it is ignored. |
 |  [setAppTitle(appTitle)](./kibana-plugin-core-public.chromestart.setapptitle.md) | Sets the current app's title |
@@ -65,6 +65,5 @@ core.chrome.setHelpExtension(elem => {
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-core-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
 |  [setHelpExtension(helpExtension)](./kibana-plugin-core-public.chromestart.sethelpextension.md) | Override the current set of custom help content |
 |  [setHelpSupportUrl(url)](./kibana-plugin-core-public.chromestart.sethelpsupporturl.md) | Override the default support URL shown in the help menu |
-|  [setIsCollapsed(isCollapsed)](./kibana-plugin-core-public.chromestart.setiscollapsed.md) | Set the collapsed state of the chrome navigation. |
 |  [setIsVisible(isVisible)](./kibana-plugin-core-public.chromestart.setisvisible.md) | Set the temporary visibility for the chrome. This does nothing if the chrome is hidden by default and should be used to hide the chrome for things like full-screen modes with an exit button. |
 

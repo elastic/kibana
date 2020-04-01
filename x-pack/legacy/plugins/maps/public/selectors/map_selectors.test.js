@@ -5,6 +5,7 @@
  */
 
 jest.mock('../layers/vector_layer', () => {});
+jest.mock('../layers/blended_vector_layer', () => {});
 jest.mock('../layers/heatmap_layer', () => {});
 jest.mock('../layers/vector_tile_layer', () => {});
 jest.mock('../layers/sources/all_sources', () => {});
@@ -14,15 +15,15 @@ jest.mock('../../../../../plugins/maps/public/reducers/non_serializable_instance
     return {};
   },
 }));
-jest.mock('ui/timefilter', () => ({
-  timefilter: {
+jest.mock('../kibana_services', () => ({
+  getTimeFilter: () => ({
     getTime: () => {
       return {
         to: 'now',
         from: 'now-15m',
       };
     },
-  },
+  }),
 }));
 
 import { getTimeFilters } from './map_selectors';

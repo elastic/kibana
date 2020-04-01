@@ -46,6 +46,7 @@ import {
   unmuteAllAlertRoute,
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
+  healthRoute,
 } from './routes';
 import { LicensingPluginSetup } from '../../licensing/server';
 import {
@@ -137,11 +138,12 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
+
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
+      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeAlertingTelemetry(
@@ -172,16 +174,7 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
-
-    alertTypeRegistry.register({
-      id: 'test',
-      actionGroups: [{ id: 'default', name: 'Default' }],
-      defaultActionGroupId: 'default',
-      name: 'Test',
-      executor: async options => {
-        return { status: 'ok' };
-      },
-    });
+    healthRoute(router, this.licenseState);
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
@@ -215,7 +208,7 @@ export class AlertingPlugin {
       logger,
       getServices: this.getServicesFactory(core.savedObjects),
       spaceIdToNamespace: this.spaceIdToNamespace,
-      executeAction: plugins.actions.execute,
+      actionsPlugin: plugins.actions,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
     });

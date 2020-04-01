@@ -5,16 +5,26 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { CaseConfigureServiceSetup, CaseServiceSetup } from '../../services';
+import {
+  CaseConfigureServiceSetup,
+  CaseServiceSetup,
+  CaseUserActionServiceSetup,
+} from '../../services';
 
 export interface RouteDeps {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
+  userActionService: CaseUserActionServiceSetup;
   router: IRouter;
 }
 
 export enum SortFieldCase {
+  closedAt = 'closed_at',
   createdAt = 'created_at',
   status = 'status',
-  updatedAt = 'updated_at',
+}
+
+export interface TotalCommentByCase {
+  caseId: string;
+  totalComments: number;
 }

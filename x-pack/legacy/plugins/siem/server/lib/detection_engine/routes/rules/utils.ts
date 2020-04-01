@@ -28,6 +28,9 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+import { hasListsFeature } from '../../feature_flags';
+// import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
+import { RuleActions } from '../../rule_actions/types';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -98,14 +101,17 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (
   alert: RuleAlertType,
+  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    actions: ruleActions?.actions ?? [],
     created_at: alert.createdAt.toISOString(),
     updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
+    anomaly_threshold: alert.params.anomalyThreshold,
     false_positives: alert.params.falsePositives,
     filters: alert.params.filters,
     from: alert.params.from,
@@ -117,6 +123,7 @@ export const transformAlertToRule = (
     language: alert.params.language,
     output_index: alert.params.outputIndex,
     max_signals: alert.params.maxSignals,
+    machine_learning_job_id: alert.params.machineLearningJobId,
     risk_score: alert.params.riskScore,
     name: alert.name,
     query: alert.params.query,
@@ -131,6 +138,7 @@ export const transformAlertToRule = (
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat,
+    throttle: ruleActions?.ruleThrottle || 'no_actions',
     note: alert.params.note,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
@@ -139,13 +147,15 @@ export const transformAlertToRule = (
     last_success_at: ruleStatus?.attributes.lastSuccessAt,
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
+    // TODO: (LIST-FEATURE) Remove hasListsFeature() check once we have lists available for a release
+    lists: hasListsFeature() ? alert.params.lists : null,
   });
 };
 
-export const transformRulesToNdjson = (rules: Array<Partial<OutputRuleAlertRest>>): string => {
-  if (rules.length !== 0) {
-    const rulesString = rules.map(rule => JSON.stringify(rule)).join('\n');
-    return `${rulesString}\n`;
+export const transformDataToNdjson = (data: unknown[]): string => {
+  if (data.length !== 0) {
+    const dataString = data.map(rule => JSON.stringify(rule)).join('\n');
+    return `${dataString}\n`;
   } else {
     return '';
   }
@@ -159,6 +169,7 @@ export const transformAlertsToRules = (
 
 export const transformFindAlerts = (
   findResults: FindResult,
+  ruleActions: Array<RuleActions | null>,
   ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
 ): {
   page: number;
@@ -171,7 +182,7 @@ export const transformFindAlerts = (
       page: findResults.page,
       perPage: findResults.perPage,
       total: findResults.total,
-      data: findResults.data.map(alert => transformAlertToRule(alert)),
+      data: findResults.data.map((alert, idx) => transformAlertToRule(alert, ruleActions[idx])),
     };
   } else if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
     return {
@@ -179,7 +190,7 @@ export const transformFindAlerts = (
       perPage: findResults.perPage,
       total: findResults.total,
       data: findResults.data.map((alert, idx) =>
-        transformAlertToRule(alert, ruleStatuses[idx].saved_objects[0])
+        transformAlertToRule(alert, ruleActions[idx], ruleStatuses[idx].saved_objects[0])
       ),
     };
   } else {
@@ -189,28 +200,31 @@ export const transformFindAlerts = (
 
 export const transform = (
   alert: PartialAlert,
+  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> | null => {
-  if (!ruleStatus && isAlertType(alert)) {
-    return transformAlertToRule(alert);
+  if (isAlertType(alert)) {
+    return transformAlertToRule(
+      alert,
+      ruleActions,
+      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined
+    );
   }
-  if (isAlertType(alert) && isRuleStatusSavedObjectType(ruleStatus)) {
-    return transformAlertToRule(alert, ruleStatus);
-  } else {
-    return null;
-  }
+
+  return null;
 };
 
 export const transformOrBulkError = (
   ruleId: string,
   alert: PartialAlert,
+  ruleActions: RuleActions,
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
     if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
-      return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
+      return transformAlertToRule(alert, ruleActions, ruleStatus?.saved_objects[0] ?? ruleStatus);
     } else {
-      return transformAlertToRule(alert);
+      return transformAlertToRule(alert, ruleActions);
     }
   } else {
     return createBulkErrorObject({

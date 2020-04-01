@@ -25,6 +25,7 @@ import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 import { i18n } from '@kbn/i18n';
+import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -309,6 +310,7 @@ export class ExplorerSwimlane extends React.Component {
       return function(lane) {
         const bucketScore = getBucketScore(lane, time);
         if (bucketScore !== 0) {
+          lane = lane === '' ? EMPTY_FIELD_VALUE_LABEL : lane;
           cellMouseover(this, lane, bucketScore, i, time);
         }
       };
@@ -323,24 +325,28 @@ export class ExplorerSwimlane extends React.Component {
 
       // Display date using same format as Kibana visualizations.
       const formattedDate = formatHumanReadableDateTime(time * 1000);
-      const tooltipData = [{ name: formattedDate }];
+      const tooltipData = [{ label: formattedDate }];
 
       if (swimlaneData.fieldName !== undefined) {
         tooltipData.push({
-          name: swimlaneData.fieldName,
+          label: swimlaneData.fieldName,
           value: laneLabel,
-          seriesKey: laneLabel,
-          yAccessor: 'fieldName',
+          seriesIdentifier: {
+            key: laneLabel,
+          },
+          valueAccessor: 'fieldName',
         });
       }
       tooltipData.push({
-        name: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
+        label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
           defaultMessage: 'Max anomaly score',
         }),
         value: displayScore,
         color: colorScore(displayScore),
-        seriesKey: laneLabel,
-        yAccessor: 'anomaly_score',
+        seriesIdentifier: {
+          key: laneLabel,
+        },
+        valueAccessor: 'anomaly_score',
       });
 
       const offsets = target.className === 'sl-cell-inner' ? { x: 6, y: 0 } : { x: 8, y: 1 };
@@ -372,7 +378,7 @@ export class ExplorerSwimlane extends React.Component {
             values: { label: mlEscape(label) },
           });
         } else {
-          return mlEscape(label);
+          return label === '' ? `<i>${EMPTY_FIELD_VALUE_LABEL}</i>` : mlEscape(label);
         }
       })
       .on('click', () => {
@@ -383,9 +389,17 @@ export class ExplorerSwimlane extends React.Component {
       .each(function() {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
-            .on('mouseover', label => {
+            .on('mouseover', value => {
               mlChartTooltipService.show(
-                [{ skipHeader: true }, { name: swimlaneData.fieldName, value: label }],
+                [
+                  { skipHeader: true },
+                  {
+                    label: swimlaneData.fieldName,
+                    value: value === '' ? EMPTY_FIELD_VALUE_LABEL : value,
+                    seriesIdentifier: { key: value },
+                    valueAccessor: 'fieldName',
+                  },
+                ],
                 this,
                 {
                   x: laneLabelWidth,
@@ -396,7 +410,7 @@ export class ExplorerSwimlane extends React.Component {
             .on('mouseout', () => {
               mlChartTooltipService.hide();
             })
-            .attr('aria-label', label => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(label)}`);
+            .attr('aria-label', value => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(value)}`);
         }
       });
 
