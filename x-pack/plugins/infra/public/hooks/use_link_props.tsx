@@ -9,7 +9,6 @@ import { stringify } from 'query-string';
 import url from 'url';
 import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/public';
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
-import { useHistory } from '../utils/history_context';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 type Search = Record<string, string | string[]>;
