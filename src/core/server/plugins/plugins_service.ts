@@ -41,6 +41,7 @@ export interface PluginsServiceSetup {
   contracts: Map<PluginName, unknown>;
 }
 
+/** @internal */
 export interface UiPlugins {
   /**
    * Paths to all discovered ui plugin entrypoints on the filesystem, even if

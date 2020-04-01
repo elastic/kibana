@@ -102,29 +102,6 @@ export interface IRenderOptions {
   vars?: Record<string, any>;
 }
 
-/** @public */
-export interface IScopedRenderingClient {
-  /**
-   * Generate a `KibanaResponse` which renders an HTML page bootstrapped
-   * with the `core` bundle. Intended as a response body for HTTP route handlers.
-   *
-   * @example
-   * ```ts
-   * router.get(
-   *   { path: '/', validate: false },
-   *   (context, request, response) =>
-   *     response.ok({
-   *       body: await context.core.rendering.render(),
-   *       headers: {
-   *         'content-security-policy': context.core.http.csp.header,
-   *       },
-   *     })
-   * );
-   * ```
-   */
-  render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
-}
-
 /** @internal */
 export interface InternalRenderingServiceSetup {
   /**

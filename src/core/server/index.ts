@@ -49,7 +49,6 @@ import {
 import { HttpServiceSetup } from './http';
 import { HttpResources } from './http_resources';
 
-import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
@@ -301,8 +300,6 @@ export {
  * Plugin specific context passed to a route handler.
  *
  * Provides the following clients and services:
- *    - {@link IScopedRenderingClient | rendering} - Rendering client
- *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
@@ -398,7 +395,6 @@ export {
   CapabilitiesStart,
   ContextSetup,
   HttpResources,
-  IScopedRenderingClient,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
