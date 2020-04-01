@@ -18,21 +18,17 @@
  */
 
 import _ from 'lodash';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { parseInterval } from '../../../../../../common';
+import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
   EsInterval,
 } from './calc_es_interval';
-
-export interface Bounds {
-  min: Moment | Date | number | null;
-  max: Moment | Date | number | null;
-}
 
 interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed
@@ -69,8 +65,8 @@ interface TimeBucketsConfig {
  * @param {[type]} display [description]
  */
 export class TimeBuckets {
-  private _lb: Bounds['min'] = null;
-  private _ub: Bounds['max'] = null;
+  private _lb: TimeRangeBounds['min'];
+  private _ub: TimeRangeBounds['max'];
   private _originalInterval: string | null = null;
   private _i?: moment.Duration | 'auto';
 
@@ -179,10 +175,10 @@ export class TimeBuckets {
    * @return {moment.duration|undefined}
    */
   private getDuration(): moment.Duration | undefined {
-    if (this._ub === null || this._lb === null || !this.hasBounds()) {
+    if (this._ub === undefined || this._lb === undefined || !this.hasBounds()) {
       return;
     }
-    const difference = (this._ub as number) - (this._lb as number);
+    const difference = this._ub.valueOf() - this._lb.valueOf();
     return moment.duration(difference, 'ms');
   }
 
@@ -197,7 +193,7 @@ export class TimeBuckets {
    *
    * @returns {undefined}
    */
-  setBounds(input?: Bounds | Bounds[]) {
+  setBounds(input?: null | TimeRangeBounds | TimeRangeBounds[]) {
     if (!input) return this.clearBounds();
 
     let bounds;
@@ -233,7 +229,7 @@ export class TimeBuckets {
    * @return {undefined}
    */
   clearBounds() {
-    this._lb = this._ub = null;
+    this._lb = this._ub = undefined;
   }
 
   /**
@@ -259,7 +255,7 @@ export class TimeBuckets {
    *                      object
    *
    */
-  getBounds(): Bounds | undefined {
+  getBounds(): TimeRangeBounds | undefined {
     if (!this.hasBounds()) return;
     return {
       min: this._lb,

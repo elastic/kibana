@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import moment from 'moment';
 import { IUiSettingsClient } from 'src/core/public';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
 import { toAbsoluteDates, TimeRange } from '../../../../common';
@@ -32,8 +32,8 @@ export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
 
     buckets.setInterval('auto');
     buckets.setBounds({
-      min: dates.from,
-      max: dates.to,
+      min: moment(dates.from),
+      max: moment(dates.to),
     });
 
     return buckets.getInterval().expression;

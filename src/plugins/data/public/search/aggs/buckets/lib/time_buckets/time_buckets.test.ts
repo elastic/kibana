@@ -19,7 +19,7 @@
 import moment from 'moment';
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 
-import { TimeBuckets, Bounds } from './time_buckets';
+import { TimeBuckets } from './time_buckets';
 
 describe('TimeBuckets', () => {
   const { uiSettings } = coreMock.createSetup();
@@ -42,7 +42,7 @@ describe('TimeBuckets', () => {
 
   test('setBounds/getBounds - bounds is correct', () => {
     const timeBuckets = new TimeBuckets({ uiSettings });
-    const bounds: Bounds = {
+    const bounds = {
       min: moment('2020-03-25'),
       max: moment('2020-03-31'),
     };
@@ -54,7 +54,7 @@ describe('TimeBuckets', () => {
 
   test('setBounds/getBounds - bounds is undefined', () => {
     const timeBuckets = new TimeBuckets({ uiSettings });
-    const bounds: Bounds = {
+    const bounds = {
       min: moment('2020-03-25'),
       max: moment('2020-03-31'),
     };
@@ -82,7 +82,7 @@ describe('TimeBuckets', () => {
 
   test('setInterval/getInterval - intreval is a string and bounds is defined', () => {
     const timeBuckets = new TimeBuckets({ uiSettings });
-    const bounds: Bounds = {
+    const bounds = {
       min: moment('2020-03-25'),
       max: moment('2020-03-31'),
     };

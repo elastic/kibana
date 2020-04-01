@@ -22,7 +22,7 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'src/core/public';
 
-import { TimeBuckets, Bounds } from './lib/time_buckets';
+import { TimeBuckets } from './lib/time_buckets';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
@@ -46,11 +46,7 @@ const updateTimeBuckets = (
 ) => {
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
   const buckets = customBuckets || agg.buckets;
-  if (agg.fieldIsTimeField()) {
-    buckets.setBounds(bounds as Bounds);
-  } else {
-    buckets.setBounds();
-  }
+  buckets.setBounds(agg.fieldIsTimeField() ? bounds : null);
   buckets.setInterval(agg.params.interval);
 };
 
@@ -211,7 +207,7 @@ export const getDateHistogramBucketAgg = ({
             });
             if (all) {
               output.metricScale = interval.scale;
-              output.metricScaleText = interval.preScaled ? interval.preScaled.description : '';
+              output.metricScaleText = interval.preScaled?.description || '';
             }
           }
         },
