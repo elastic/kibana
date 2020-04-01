@@ -89,33 +89,83 @@ export const ProcessEventDot = styled(
        */
       const [left, top] = applyMatrix3(position, projectionMatrix);
 
-      const [magFactorX] = projectionMatrix;
+      /** The scale of the projection in the x-axis. Used to determine to overall scale of the process event node. */
+      const [xScale] = projectionMatrix;
+
+      /** The scale to render the process node at. */
+      const scale = 4 * xScale;
 
       const selfId = adjacentNodeMap.self;
+
+      /** Dimensions of the SVG viewbox for the process event node. */
+      const viewBoxWidth = 90;
+      const viewBoxHeight = 15;
+      const viewBoxMinX = -7.5;
+      const viewBoxMinY = -7.5;
+      const viewBox = `${viewBoxMinX} ${viewBoxMinY} ${viewBoxWidth} ${viewBoxHeight}`;
+
+      /** The width (and height) of the cube icon used to represent a process */
+      const cubeIconSideLength = 15;
+
+      /** The x position of the cube icon. TODO: Why is this value choosen? */
+      const cubeIconX = -cubeIconSideLength / 2;
+      /** TODO, why? */
+      const cubeIconY = cubeIconX;
+
+      /**
+       * The cube icon shows a cube in an non-orthographic perspective. This is the ratio of the side length
+       * to the length of the right side (as seen by the viewer)
+       * TODO, consider rendering the cube in the same perspective (isometric) that is used to layout the nodes
+       * on the graph.
+       * TODO, this number is just a guess, calculate it using some tool
+       */
+      const rightSideOfIsometricCubeLengthRatio = 1 / 1.8847;
+
+      /** The Y position of the background for the process name text element */
+      const labelBackgroundY = cubeIconY + 0.25 * cubeIconSideLength;
+
+      const labelYHeight = cubeIconSideLength * rightSideOfIsometricCubeLengthRatio;
+
+      /** The height of the background of the process name text element */
+      const labelBackgroundHeight = cubeIconSideLength * rightSideOfIsometricCubeLengthRatio;
+
+      /** The width of the background of the process name text element.
+       * Note: this is not dynamic based on the text.
+       * TODO, this label needs ellipsis logic.
+       */
+      const labelBackgroundWidth = labelBackgroundHeight * 5;
+
+      /** The font-size (unitless) of the description text */
+      const descriptionTextFontSize = 2.67;
+
+      /** The description (e.g. TERMINATED PROCESS) text x position */
+      const descriptionTextX = cubeIconX + cubeIconSideLength;
+      /**
+       * The description (e.g. TERMINATED PROCESS) text y position
+       * The bottom of the description text should be aligned roughly with the top of the label background.
+       * The text is vertically centered on the y coordinate, so we subtract half its height from the
+       * labelBackgroundY.
+       **/
+      const descriptionTextY = labelBackgroundY - descriptionTextFontSize / 2;
+
+      /** TODO why? */
+      const labelX = cubeIconX + 0.7 * cubeIconSideLength + 50 / 2;
+      /** The y position for the process name text element */
+      const labelY = labelBackgroundY + labelYHeight / 2;
 
       const nodeViewportStyle = useMemo(
         () => ({
           left: `${left}px`,
           top: `${top}px`,
-          // Width of symbol viewport scaled to fit
-          width: `${360 * magFactorX}px`,
-          // Height according to symbol viewbox AR
-          height: `${120 * magFactorX}px`,
-          // Adjusted to position/scale with camera
-          transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
-            120 *
-            magFactorX}px)`,
+          width: `${viewBoxWidth * scale}px`,
+          height: `${viewBoxHeight * scale}px`,
+          /** Adjust it up and to the left, so that the cube is centered */
+          transform: `translateX(${cubeIconSideLength *
+            scale *
+            -0.5}px) translateY(${cubeIconSideLength * scale * -0.5}px)`,
         }),
-        [left, magFactorX, top]
+        [left, scale, top]
       );
-
-      const markerBaseSize = 15;
-      const markerSize = markerBaseSize;
-      const markerPositionOffset = -markerBaseSize / 2;
-
-      const labelYOffset = markerPositionOffset + 0.25 * markerSize - 0.5;
-
-      const labelYHeight = markerSize / 1.7647;
 
       /**
        * An element that should be animated when the node is clicked.
@@ -169,7 +219,7 @@ export const ProcessEventDot = styled(
           <svg
             data-test-subj={'resolverNode'}
             className={className + ' kbn-resetFocusState'}
-            viewBox="-15 -15 90 30"
+            viewBox={viewBox}
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
             aria-level={adjacentNodeMap.level}
@@ -189,10 +239,10 @@ export const ProcessEventDot = styled(
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
-                x={markerPositionOffset}
-                y={markerPositionOffset}
-                width={markerSize}
-                height={markerSize}
+                x={cubeIconX}
+                y={cubeIconY}
+                width={cubeIconSideLength}
+                height={cubeIconSideLength}
                 opacity="1"
                 className="cube"
               >
@@ -208,19 +258,21 @@ export const ProcessEventDot = styled(
                   ref={animationTarget}
                 />
               </use>
+              {/* Background color for the process name */}
               <use
                 role="presentation"
                 xlinkHref={`#${SymbolIds.processNodeLabel}`}
-                x={markerPositionOffset + markerSize - 0.5}
-                y={labelYOffset}
-                width={(markerSize / 1.7647) * 5}
-                height={markerSize / 1.7647}
+                x={descriptionTextX}
+                y={labelBackgroundY}
+                width={labelBackgroundWidth}
+                height={labelBackgroundHeight}
                 opacity="1"
                 fill={labelFill}
               />
+              {/** The process name */}
               <text
-                x={markerPositionOffset + 0.7 * markerSize + 50 / 2}
-                y={labelYOffset + labelYHeight / 2}
+                x={labelX}
+                y={labelY}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize="3.75"
@@ -233,12 +285,13 @@ export const ProcessEventDot = styled(
               >
                 {eventModel.eventName(event)}
               </text>
+              {/** 'TERMINATED PROCESS' */}
               <text
-                x={markerPositionOffset + markerSize}
-                y={labelYOffset - 1}
+                x={descriptionTextX}
+                y={descriptionTextY}
                 textAnchor="start"
                 dominantBaseline="middle"
-                fontSize="2.67"
+                fontSize={descriptionTextFontSize}
                 fill={descriptionFill}
                 id={descriptionId}
                 paintOrder="stroke"
@@ -255,13 +308,11 @@ export const ProcessEventDot = styled(
   )
 )`
   position: absolute;
-  display: block;
   text-align: left;
   font-size: 10px;
   user-select: none;
   box-sizing: border-box;
   border-radius: 10%;
-  padding: 4px;
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;

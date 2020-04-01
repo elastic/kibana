@@ -22,6 +22,7 @@ export function eventTimestamp(
   }
 }
 
+/** TODO, seems wrong */
 export function eventName(event: EndpointEvent | LegacyEndpointEvent): string {
   if (isLegacyEvent(event)) {
     return event.endgame.process_name ? event.endgame.process_name : '';
