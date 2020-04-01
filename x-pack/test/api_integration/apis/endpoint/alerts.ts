@@ -93,7 +93,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(404);
       });
 
-      it('should return one entry for each alert with default paging', async () => {
+      it.skip('should return one entry for each alert with default paging', async () => {
         const { body } = await supertest
           .get('/api/endpoint/alerts')
           .set('kbn-xsrf', 'xxx')
@@ -111,7 +111,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.result_from_index).to.eql(0);
       });
 
-      it('should return the page_size and page_index specified in the query params', async () => {
+      it.skip('should return the page_size and page_index specified in the query params', async () => {
         const pageSize = 1;
         const pageIndex = 1;
         const { body } = await supertest
@@ -140,7 +140,7 @@ export default function({ getService }: FtrProviderContext) {
             .expect(200);
           body = response.body;
         });
-        it('should return accurate total counts', async () => {
+        it.skip('should return accurate total counts', async () => {
           expect(body.total).to.eql(numberOfAlertsInFixture);
           /**
            * Nothing was returned due to pagination.
@@ -160,7 +160,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.message).to.contain('Value must be equal to or greater than [1]');
       });
 
-      it('should return links to the next and previous pages using cursor-based pagination', async () => {
+      it.skip('should return links to the next and previous pages using cursor-based pagination', async () => {
         const { body } = await supertest
           .get('/api/endpoint/alerts?page_index=0')
           .set('kbn-xsrf', 'xxx')
@@ -346,7 +346,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(valid).to.eql(true);
       });
 
-      it('should filter results of alert data using rison-encoded filters', async () => {
+      it.skip('should filter results of alert data using rison-encoded filters', async () => {
         const hostname = 'Host-abmfhmc5ku';
         const { body } = await supertest
           .get(
@@ -361,7 +361,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.result_from_index).to.eql(0);
       });
 
-      it('should filter results of alert data using KQL', async () => {
+      it.skip('should filter results of alert data using KQL', async () => {
         const agentID = '7cf9f7a3-28a6-4d1e-bb45-005aa28f18d0';
         const { body } = await supertest
           .get(
@@ -376,7 +376,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.result_from_index).to.eql(0);
       });
 
-      it('should return alert details by id, getting last alert', async () => {
+      it.skip('should return alert details by id, getting last alert', async () => {
         const documentID = 'zbNm0HABdD75WLjLYgcB';
         const prevDocumentID = '2rNm0HABdD75WLjLYgcU';
         const { body } = await supertest
