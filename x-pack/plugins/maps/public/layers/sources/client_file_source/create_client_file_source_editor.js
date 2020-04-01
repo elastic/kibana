@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { getFileUploadComponent } from '../../../../../../legacy/plugins/maps/public/kibana_services';
+import { getFileUploadComponent } from '../../../kibana_services';
 
 export function ClientFileCreateSourceEditor({
   previewGeojsonFile,

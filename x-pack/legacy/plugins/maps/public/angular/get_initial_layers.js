@@ -9,7 +9,8 @@ import { KibanaTilemapSource } from '../../../../../plugins/maps/public/layers/s
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EMSTMSSource } from '../../../../../plugins/maps/public/layers/sources/ems_tms_source';
 import { getInjectedVarFunc } from '../kibana_services';
-import { getKibanaTileMap } from '../meta';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getKibanaTileMap } from '../../../../../plugins/maps/public/meta';
 
 export function getInitialLayers(layerListJSON, initialLayers = []) {
   if (layerListJSON) {

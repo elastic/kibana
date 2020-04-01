@@ -8,8 +8,8 @@ import {
   DEFAULT_MAX_RESULT_WINDOW,
   DEFAULT_MAX_INNER_RESULT_WINDOW,
   INDEX_SETTINGS_API_PATH,
-} from '../../../../../../legacy/plugins/maps/common/constants';
-import { getHttp, getToasts } from '../../../../../../legacy/plugins/maps/public/kibana_services';
+} from '../../../../common/constants';
+import { getHttp, getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 
 let toastDisplayed = false;

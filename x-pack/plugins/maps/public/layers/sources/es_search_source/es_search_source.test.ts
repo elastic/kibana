@@ -8,8 +8,8 @@ jest.mock('../../../kibana_services');
 
 import { ESSearchSource } from './es_search_source';
 import { VectorLayer } from '../../vector_layer';
-import { ES_SEARCH, SCALING_TYPES } from '../../../../../../legacy/plugins/maps/common/constants';
-import { ESSearchSourceDescriptor } from '../../../../../../legacy/plugins/maps/common/descriptor_types';
+import { ES_SEARCH, SCALING_TYPES } from '../../../../common/constants';
+import { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
 
 const descriptor: ESSearchSourceDescriptor = {
   type: ES_SEARCH,
@@ -21,7 +21,7 @@ const descriptor: ESSearchSourceDescriptor = {
 
 describe('ES Search Source', () => {
   beforeEach(() => {
-    require('../../../../../../legacy/plugins/maps/public/kibana_services').getUiSettings = () => ({
+    require('../../../kibana_services').getUiSettings = () => ({
       get: jest.fn(),
     });
   });

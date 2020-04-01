@@ -6,8 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 
-import { MetricsEditor } from '../../../../../../legacy/plugins/maps/public/components/metrics_editor';
-import { getIndexPatternService } from '../../../../../../legacy/plugins/maps/public/kibana_services';
+import { MetricsEditor } from '../../../components/metrics_editor';
+import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';

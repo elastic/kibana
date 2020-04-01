@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LayerDescriptor } from '../../../../legacy/plugins/maps/common/descriptor_types';
+import { LayerDescriptor } from '../../common/descriptor_types';
 import { ISource } from './sources/source';
 import { DataRequest } from './util/data_request';
 import { SyncContext } from '../../../../legacy/plugins/maps/public/actions/map_actions';

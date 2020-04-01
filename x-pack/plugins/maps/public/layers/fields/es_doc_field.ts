@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FIELD_ORIGIN } from '../../../../../legacy/plugins/maps/common/constants';
+import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { COLOR_PALETTE_MAX_SIZE } from '../../../../../legacy/plugins/maps/common/constants';
+import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { IField, AbstractField } from './field';

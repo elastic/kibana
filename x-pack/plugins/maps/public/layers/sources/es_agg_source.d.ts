@@ -6,9 +6,9 @@
 
 import { IESSource } from './es_source';
 import { AbstractESSource } from './es_source';
-import { AGG_TYPE } from '../../../../../legacy/plugins/maps/common/constants';
+import { AGG_TYPE } from '../../../common/constants';
 import { IESAggField } from '../fields/es_agg_field';
-import { AbstractESAggSourceDescriptor } from '../../../../../legacy/plugins/maps/common/descriptor_types';
+import { AbstractESAggSourceDescriptor } from '../../../common/descriptor_types';
 
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;

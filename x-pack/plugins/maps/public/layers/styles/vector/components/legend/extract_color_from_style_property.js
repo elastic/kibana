@@ -5,10 +5,7 @@
  */
 
 import { getColorRampCenterColor, getColorPalette } from '../../../color_utils';
-import {
-  COLOR_MAP_TYPE,
-  STYLE_TYPE,
-} from '../../../../../../../../legacy/plugins/maps/common/constants';
+import { COLOR_MAP_TYPE, STYLE_TYPE } from '../../../../../../common/constants';
 
 export function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
   if (!colorStyleProperty) {

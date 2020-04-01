@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
+import { getHttp } from '../kibana_services';
 import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function NoIndexPatternCallout() {
+  const http = getHttp();
   return (
     <EuiCallOut
       title={i18n.translate('xpack.maps.noIndexPattern.messageTitle', {
@@ -24,7 +24,7 @@ export function NoIndexPatternCallout() {
           id="xpack.maps.noIndexPattern.doThisPrefixDescription"
           defaultMessage="You'll need to "
         />
-        <EuiLink href={chrome.addBasePath('/app/kibana#/management/kibana/index_pattern')}>
+        <EuiLink href={http.basePath.prepend('/app/kibana#/management/kibana/index_pattern')}>
           <FormattedMessage
             id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
             defaultMessage="create an index pattern"
@@ -40,7 +40,7 @@ export function NoIndexPatternCallout() {
           id="xpack.maps.noIndexPattern.hintDescription"
           defaultMessage="Don't have any geospatial data sets? "
         />
-        <EuiLink href={chrome.addBasePath('/app/kibana#/home/tutorial_directory/sampleData')}>
+        <EuiLink href={http.basePath.prepend('/app/kibana#/home/tutorial_directory/sampleData')}>
           <FormattedMessage
             id="xpack.maps.noIndexPattern.getStartedLinkText"
             defaultMessage="Get started with some sample data sets."

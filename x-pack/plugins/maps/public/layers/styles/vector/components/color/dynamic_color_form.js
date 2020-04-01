@@ -9,10 +9,7 @@ import React, { Fragment } from 'react';
 import { FieldSelect } from '../field_select';
 import { ColorMapSelect } from './color_map_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import {
-  CATEGORICAL_DATA_TYPES,
-  COLOR_MAP_TYPE,
-} from '../../../../../../../../legacy/plugins/maps/common/constants';
+import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { COLOR_GRADIENTS, COLOR_PALETTES } from '../../../color_utils';
 import { i18n } from '@kbn/i18n';
 

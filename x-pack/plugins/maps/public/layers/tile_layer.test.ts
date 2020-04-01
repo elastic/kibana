@@ -5,8 +5,8 @@
  */
 
 import { TileLayer } from './tile_layer';
-import { EMS_XYZ } from '../../../../legacy/plugins/maps/common/constants';
-import { XYZTMSSourceDescriptor } from '../../../../legacy/plugins/maps/common/descriptor_types';
+import { EMS_XYZ } from '../../common/constants';
+import { XYZTMSSourceDescriptor } from '../../common/descriptor_types';
 import { ITMSSource, AbstractTMSSource } from './sources/tms_source';
 import { ILayer } from './layer';
 

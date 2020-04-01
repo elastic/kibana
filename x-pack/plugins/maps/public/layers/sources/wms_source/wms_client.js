@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { parseXmlString } from '../../../../../../legacy/plugins/maps/common/parse_xml_string';
+import { parseXmlString } from '../../../../common/parse_xml_string';
 import fetch from 'node-fetch';
 import { parse, format } from 'url';
 

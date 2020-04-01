@@ -10,7 +10,7 @@ import {
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
   STYLE_TYPE,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../common/constants';
 import {
   COLOR_GRADIENTS,
   COLOR_PALETTES,
@@ -18,9 +18,9 @@ import {
   DEFAULT_LINE_COLORS,
   // @ts-ignore
 } from '../color_utils';
-import { VectorStylePropertiesDescriptor } from '../../../../../../legacy/plugins/maps/common/descriptor_types';
+import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
 // @ts-ignore
-import { getUiSettings } from '../../../../../../legacy/plugins/maps/public/kibana_services';
+import { getUiSettings } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;

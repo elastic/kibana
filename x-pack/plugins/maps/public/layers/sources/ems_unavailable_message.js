@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getInjectedVarFunc } from '../../../../../legacy/plugins/maps/public/kibana_services';
+import { getInjectedVarFunc } from '../../kibana_services';
 import { i18n } from '@kbn/i18n';
 
 export function getEmsUnavailableMessage() {

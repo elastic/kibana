@@ -6,9 +6,9 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { RENDER_AS } from '../../../../../../legacy/plugins/maps/common/constants';
-import { MetricsEditor } from '../../../../../../legacy/plugins/maps/public/components/metrics_editor';
-import { getIndexPatternService } from '../../../../../../legacy/plugins/maps/public/kibana_services';
+import { RENDER_AS } from '../../../../common/constants';
+import { MetricsEditor } from '../../../components/metrics_editor';
+import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

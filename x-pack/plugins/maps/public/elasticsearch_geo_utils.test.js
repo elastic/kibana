@@ -20,7 +20,7 @@ import {
   convertMapExtentToPolygon,
   roundCoordinates,
 } from './elasticsearch_geo_utils';
-import { indexPatterns } from '../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../src/plugins/data/public';
 
 const geoFieldName = 'location';
 const mapExtent = {

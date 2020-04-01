@@ -7,7 +7,7 @@
 import { AbstractVectorSource } from './vector_source';
 import { IVectorSource } from './vector_source';
 import { IndexPattern, SearchSource } from '../../../../../../src/plugins/data/public';
-import { VectorSourceRequestMeta } from '../../../../../legacy/plugins/maps/common/descriptor_types';
+import { VectorSourceRequestMeta } from '../../../common/descriptor_types';
 
 export interface IESSource extends IVectorSource {
   getId(): string;

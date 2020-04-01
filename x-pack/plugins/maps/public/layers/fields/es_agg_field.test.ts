@@ -5,7 +5,7 @@
  */
 
 import { ESAggField, esAggFieldsFactory } from './es_agg_field';
-import { AGG_TYPE, FIELD_ORIGIN } from '../../../../../legacy/plugins/maps/common/constants';
+import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { IESAggSource } from '../sources/es_agg_source';
 import { IIndexPattern } from 'src/plugins/data/public';
 

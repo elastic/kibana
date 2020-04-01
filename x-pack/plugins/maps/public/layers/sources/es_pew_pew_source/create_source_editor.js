@@ -8,11 +8,8 @@ import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { SingleFieldSelect } from '../../../../../../legacy/plugins/maps/public/components/single_field_select';
-import {
-  getIndexPatternService,
-  getIndexPatternSelectComponent,
-} from '../../../../../../legacy/plugins/maps/public/kibana_services';
+import { SingleFieldSelect } from '../../../components/single_field_select';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -20,7 +17,7 @@ import { EuiFormRow, EuiCallOut } from '@elastic/eui';
 import {
   AGGREGATABLE_GEO_FIELD_TYPES,
   getAggregatableGeoFields,
-} from '../../../../../../legacy/plugins/maps/public/index_pattern_util';
+} from '../../../index_pattern_util';
 
 export class CreateSourceEditor extends Component {
   static propTypes = {

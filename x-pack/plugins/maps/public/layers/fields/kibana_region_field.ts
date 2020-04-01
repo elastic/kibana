@@ -6,7 +6,7 @@
 
 import { IField, AbstractField } from './field';
 import { IKibanaRegionSource } from '../sources/kibana_regionmap_source/kibana_regionmap_source';
-import { FIELD_ORIGIN } from '../../../../../legacy/plugins/maps/common/constants';
+import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 
 export class KibanaRegionField extends AbstractField implements IField {

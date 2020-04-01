@@ -17,23 +17,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
-import { SingleFieldSelect } from '../../../../../../legacy/plugins/maps/public/components/single_field_select';
+import { SingleFieldSelect } from '../../../components/single_field_select';
 
 // @ts-ignore
-import { indexPatternService } from '../../../../../../legacy/plugins/maps/public/kibana_services';
-import {
-  getTermsFields,
-  getSourceFields,
-  // @ts-ignore
-} from '../../../../../../legacy/plugins/maps/public/index_pattern_util';
+import { indexPatternService } from '../../../kibana_services';
 // @ts-ignore
-import { ValidatedRange } from '../../../../../../legacy/plugins/maps/public/components/validated_range';
+import { ValidatedRange } from '../../../components/validated_range';
 import {
   DEFAULT_MAX_INNER_RESULT_WINDOW,
   DEFAULT_MAX_RESULT_WINDOW,
   SCALING_TYPES,
   LAYER_TYPE,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../common/constants';
 // @ts-ignore
 import { loadIndexSettings } from './load_index_settings';
 import { IFieldType } from '../../../../../../../src/plugins/data/public';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AbstractTMSSource } from './tms_source';
-import { XYZTMSSourceDescriptor } from '../../../../../legacy/plugins/maps/common/descriptor_types';
+import { XYZTMSSourceDescriptor } from '../../../common/descriptor_types';
 
 export class XYZTMSSource extends AbstractTMSSource {
   constructor(sourceDescriptor: XYZTMSSourceDescriptor, inspectorAdapters: unknown);

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { VECTOR_STYLES } from '../../../../../../../../legacy/plugins/maps/common/constants';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { VectorIcon } from './vector_icon';
 

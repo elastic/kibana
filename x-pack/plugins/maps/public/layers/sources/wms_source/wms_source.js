@@ -10,10 +10,7 @@ import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import { WMSCreateSourceEditor } from './wms_create_source_editor';
 import { i18n } from '@kbn/i18n';
-import {
-  getDataSourceLabel,
-  getUrlLabel,
-} from '../../../../../../legacy/plugins/maps/common/i18n_getters';
+import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { WmsClient } from './wms_client';
 
 export class WMSSource extends AbstractTMSSource {

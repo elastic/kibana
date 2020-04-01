@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiComboBox, EuiHighlight, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FIELD_ORIGIN } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
 

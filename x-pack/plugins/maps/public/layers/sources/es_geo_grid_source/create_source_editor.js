@@ -8,20 +8,17 @@ import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { SingleFieldSelect } from '../../../../../../legacy/plugins/maps/public/components/single_field_select';
-import { RENDER_AS } from '../../../../../../legacy/plugins/maps/common/constants';
-import {
-  getIndexPatternService,
-  getIndexPatternSelectComponent,
-} from '../../../../../../legacy/plugins/maps/public/kibana_services';
-import { NoIndexPatternCallout } from '../../../../../../legacy/plugins/maps/public/components/no_index_pattern_callout';
+import { SingleFieldSelect } from '../../../components/single_field_select';
+import { RENDER_AS } from '../../../../common/constants';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
+import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiComboBox, EuiSpacer } from '@elastic/eui';
 import {
   AGGREGATABLE_GEO_FIELD_TYPES,
   getAggregatableGeoFields,
-} from '../../../../../../legacy/plugins/maps/public/index_pattern_util';
+} from '../../../index_pattern_util';
 
 const requestTypeOptions = [
   {

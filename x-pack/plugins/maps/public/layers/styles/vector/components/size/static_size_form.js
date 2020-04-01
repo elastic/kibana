@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ValidatedRange } from '../../../../../../../../legacy/plugins/maps/public/components/validated_range';
+import { ValidatedRange } from '../../../../../components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 

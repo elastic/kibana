@@ -5,7 +5,7 @@
  */
 
 import { AbstractStyleProperty } from './style_property';
-import { SYMBOLIZE_AS_TYPES } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { SYMBOLIZE_AS_TYPES } from '../../../../../common/constants';
 
 export class SymbolizeAsProperty extends AbstractStyleProperty {
   constructor(options, styleName) {

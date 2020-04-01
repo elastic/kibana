@@ -7,9 +7,9 @@ import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import { CreateSourceEditor } from './create_source_editor';
-import { getKibanaTileMap } from '../../../../../../legacy/plugins/maps/public/meta';
+import { getKibanaTileMap } from '../../../meta';
 import { i18n } from '@kbn/i18n';
-import { getDataSourceLabel } from '../../../../../../legacy/plugins/maps/common/i18n_getters';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
 
 export class KibanaTilemapSource extends AbstractTMSSource {

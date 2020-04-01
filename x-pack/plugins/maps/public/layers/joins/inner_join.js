@@ -6,10 +6,7 @@
 
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
-import {
-  META_ID_ORIGIN_SUFFIX,
-  FORMATTERS_ID_ORIGIN_SUFFIX,
-} from '../../../../../legacy/plugins/maps/common/constants';
+import { META_ID_ORIGIN_SUFFIX, FORMATTERS_ID_ORIGIN_SUFFIX } from '../../../common/constants';
 
 export class InnerJoin {
   constructor(joinDescriptor, leftSource) {

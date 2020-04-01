@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AGG_TYPE } from '../../../../../legacy/plugins/maps/common/constants';
+import { AGG_TYPE } from '../../../common/constants';
 
 export function isMetricCountable(aggType: AGG_TYPE): boolean {
   return [AGG_TYPE.COUNT, AGG_TYPE.SUM, AGG_TYPE.UNIQUE_COUNT].includes(aggType);

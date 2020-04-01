@@ -17,7 +17,7 @@ import {
   LAYER_STYLE_TYPE,
   DEFAULT_ICON,
   VECTOR_STYLES,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';

@@ -11,7 +11,7 @@ import {
   MapFilters,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
-} from '../../../../legacy/plugins/maps/common/descriptor_types';
+} from '../../common/descriptor_types';
 import { ILayer } from './layer';
 import { IJoin } from './joins/join';
 import { IVectorStyle } from './styles/vector/vector_style';

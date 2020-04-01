@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { getKibanaTileMap } from '../../../../../../legacy/plugins/maps/public/meta';
+import { getKibanaTileMap } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 
 export function CreateSourceEditor({ onSourceConfigChange }) {

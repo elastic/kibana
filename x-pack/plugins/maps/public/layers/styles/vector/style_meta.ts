@@ -8,7 +8,7 @@ import {
   StyleMetaDescriptor,
   RangeFieldMeta,
   CategoryFieldMeta,
-} from '../../../../../../legacy/plugins/maps/common/descriptor_types';
+} from '../../../../common/descriptor_types';
 
 export class StyleMeta {
   private readonly _descriptor: StyleMetaDescriptor;

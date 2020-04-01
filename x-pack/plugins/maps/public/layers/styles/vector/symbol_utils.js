@@ -7,7 +7,7 @@
 import React from 'react';
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
-import { parseXmlString } from '../../../../../../legacy/plugins/maps/common/parse_xml_string';
+import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 
 export const LARGE_MAKI_ICON_SIZE = 15;

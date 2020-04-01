@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { DEFAULT_ICON } from '../../../../../../../../legacy/plugins/maps/common/constants';
+import { DEFAULT_ICON } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getOtherCategoryLabel } from '../../style_util';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';

@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
-import { FieldMetaOptions } from '../../../../../../../../legacy/plugins/maps/common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../../../../legacy/plugins/maps/common/constants';
+import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
 
 function getIsEnableToggleLabel(styleName: string) {
   switch (styleName) {

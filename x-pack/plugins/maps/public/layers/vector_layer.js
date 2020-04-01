@@ -18,7 +18,7 @@ import {
   LAYER_TYPE,
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
-} from '../../../../legacy/plugins/maps/common/constants';
+} from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { EuiIcon } from '@elastic/eui';

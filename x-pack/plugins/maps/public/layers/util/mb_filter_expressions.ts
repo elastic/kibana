@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  GEO_JSON_TYPE,
-  FEATURE_VISIBLE_PROPERTY_NAME,
-} from '../../../../../legacy/plugins/maps/common/constants';
+import { GEO_JSON_TYPE, FEATURE_VISIBLE_PROPERTY_NAME } from '../../../common/constants';
 
 const VISIBILITY_FILTER_CLAUSE = ['all', ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]];
 

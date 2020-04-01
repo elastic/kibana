@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
-import { getKibanaRegionList } from '../../../../../../legacy/plugins/maps/public/meta';
+import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 
 export function CreateSourceEditor({ onSourceConfigChange }) {

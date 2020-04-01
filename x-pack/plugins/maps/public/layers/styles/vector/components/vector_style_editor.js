@@ -26,7 +26,7 @@ import {
   LABEL_BORDER_SIZES,
   VECTOR_STYLES,
   STYLE_TYPE,
-} from '../../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../../common/constants';
 
 export class VectorStyleEditor extends Component {
   state = {

@@ -5,7 +5,7 @@
  */
 
 import { getIndexPatternService } from './kibana_services';
-import { indexPatterns } from '../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {

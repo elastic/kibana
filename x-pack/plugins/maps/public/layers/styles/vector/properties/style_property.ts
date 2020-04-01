@@ -8,11 +8,8 @@
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import {
-  FieldMetaOptions,
-  StylePropertyOptions,
-} from '../../../../../../../legacy/plugins/maps/common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { FieldMetaOptions, StylePropertyOptions } from '../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 
 type LegendProps = {
   isPointsOnly: boolean;

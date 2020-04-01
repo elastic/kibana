@@ -7,10 +7,10 @@
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-import { getKibanaRegionList } from '../../../../../../legacy/plugins/maps/public/meta';
+import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
-import { getDataSourceLabel } from '../../../../../../legacy/plugins/maps/common/i18n_getters';
-import { FIELD_ORIGIN } from '../../../../../../legacy/plugins/maps/common/constants';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { FIELD_ORIGIN } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {

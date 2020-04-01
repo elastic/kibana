@@ -21,7 +21,7 @@ import {
   VECTOR_STYLES,
   LAYER_STYLE_TYPE,
   FIELD_ORIGIN,
-} from '../../../../legacy/plugins/maps/common/constants';
+} from '../../common/constants';
 import { ESGeoGridSource } from './sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import { IVectorLayer, VectorLayerArguments } from './vector_layer';
@@ -34,7 +34,7 @@ import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
-} from '../../../../legacy/plugins/maps/common/descriptor_types';
+} from '../../common/descriptor_types';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 

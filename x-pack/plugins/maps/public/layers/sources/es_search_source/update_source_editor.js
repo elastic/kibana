@@ -7,16 +7,13 @@
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { SingleFieldSelect } from '../../../../../../legacy/plugins/maps/public/components/single_field_select';
-import { TooltipSelector } from '../../../../../../legacy/plugins/maps/public/components/tooltip_selector';
+import { SingleFieldSelect } from '../../../components/single_field_select';
+import { TooltipSelector } from '../../../components/tooltip_selector';
 
-import { getIndexPatternService } from '../../../../../../legacy/plugins/maps/public/kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import {
-  getTermsFields,
-  getSourceFields,
-} from '../../../../../../legacy/plugins/maps/public/index_pattern_util';
-import { SORT_ORDER } from '../../../../../../legacy/plugins/maps/common/constants';
+import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
+import { SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';

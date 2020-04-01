@@ -6,10 +6,7 @@
 /* eslint-disable max-classes-per-file */
 
 import _ from 'lodash';
-import {
-  DataRequestDescriptor,
-  DataMeta,
-} from '../../../../../legacy/plugins/maps/common/descriptor_types';
+import { DataRequestDescriptor, DataMeta } from '../../../common/descriptor_types';
 
 export class DataRequest {
   private readonly _descriptor: DataRequestDescriptor;

@@ -10,7 +10,7 @@ import {
   ES_GEO_FIELD_TYPE,
   GEOJSON_FILE,
   DEFAULT_MAX_RESULT_WINDOW,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 import { ESSearchSource } from '../es_search_source';
 import uuid from 'uuid/v4';

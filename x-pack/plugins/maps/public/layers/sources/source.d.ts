@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractSourceDescriptor } from '../../../../../legacy/plugins/maps/common/descriptor_types';
+import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
 
 export interface ISource {

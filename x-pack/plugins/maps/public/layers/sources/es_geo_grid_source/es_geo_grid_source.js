@@ -25,9 +25,9 @@ import {
   GRID_RESOLUTION,
   VECTOR_STYLES,
   FIELD_ORIGIN,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
-import { getDataSourceLabel } from '../../../../../../legacy/plugins/maps/common/i18n_getters';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';

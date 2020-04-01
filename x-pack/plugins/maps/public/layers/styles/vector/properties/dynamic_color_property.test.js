@@ -16,11 +16,7 @@ import { shallow } from 'enzyme';
 
 import { DynamicColorProperty } from './dynamic_color_property';
 import { StyleMeta } from '../style_meta';
-import {
-  COLOR_MAP_TYPE,
-  FIELD_ORIGIN,
-  VECTOR_STYLES,
-} from '../../../../../../../legacy/plugins/maps/common/constants';
+import { COLOR_MAP_TYPE, FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
 
 const mockField = {
   async getLabel() {

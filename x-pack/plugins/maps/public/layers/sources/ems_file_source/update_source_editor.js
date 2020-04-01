@@ -6,8 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { TooltipSelector } from '../../../../../../legacy/plugins/maps/public/components/tooltip_selector';
-import { getEMSClient } from '../../../../../../legacy/plugins/maps/public/meta';
+import { TooltipSelector } from '../../../components/tooltip_selector';
+import { getEMSClient } from '../../../meta';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 

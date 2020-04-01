@@ -7,11 +7,11 @@
 import { AbstractVectorSource } from '../vector_source';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import React from 'react';
-import { EMS_FILE, FIELD_ORIGIN } from '../../../../../../legacy/plugins/maps/common/constants';
-import { getEMSClient } from '../../../../../../legacy/plugins/maps/public/meta';
+import { EMS_FILE, FIELD_ORIGIN } from '../../../../common/constants';
+import { getEMSClient } from '../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
-import { getDataSourceLabel } from '../../../../../../legacy/plugins/maps/common/i18n_getters';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
 

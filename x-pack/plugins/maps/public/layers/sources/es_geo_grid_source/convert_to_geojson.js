@@ -5,10 +5,10 @@
  */
 
 import _ from 'lodash';
-import { RENDER_AS } from '../../../../../../legacy/plugins/maps/common/constants';
+import { RENDER_AS } from '../../../../common/constants';
 import { getTileBoundingBox } from './geo_tile_utils';
 import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
-import { clamp } from '../../../../../../legacy/plugins/maps/public/elasticsearch_geo_utils';
+import { clamp } from '../../../elasticsearch_geo_utils';
 
 const GRID_BUCKET_KEYS_TO_IGNORE = ['key', 'gridCentroid'];
 

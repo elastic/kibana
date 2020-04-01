@@ -16,7 +16,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { UpdateSourceEditor } from './update_source_editor';
-import { SCALING_TYPES } from '../../../../../../legacy/plugins/maps/common/constants';
+import { SCALING_TYPES } from '../../../../common/constants';
 
 const defaultProps = {
   indexPatternId: 'indexPattern1',

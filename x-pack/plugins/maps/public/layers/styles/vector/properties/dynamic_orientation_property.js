@@ -6,7 +6,7 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { getComputedFieldName } from '../style_util';
-import { VECTOR_STYLES } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 
 export class DynamicOrientationProperty extends DynamicStyleProperty {
   syncIconRotationWithMb(symbolLayerId, mbMap) {

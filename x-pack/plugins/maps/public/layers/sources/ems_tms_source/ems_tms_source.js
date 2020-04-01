@@ -9,16 +9,13 @@ import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { VectorTileLayer } from '../../vector_tile_layer';
 
-import { getEMSClient } from '../../../../../../legacy/plugins/maps/public/meta';
+import { getEMSClient } from '../../../meta';
 import { TileServiceSelect } from './tile_service_select';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
-import { getDataSourceLabel } from '../../../../../../legacy/plugins/maps/common/i18n_getters';
-import { EMS_TMS } from '../../../../../../legacy/plugins/maps/common/constants';
-import {
-  getInjectedVarFunc,
-  getUiSettings,
-} from '../../../../../../legacy/plugins/maps/public/kibana_services';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { EMS_TMS } from '../../../../common/constants';
+import { getInjectedVarFunc, getUiSettings } from '../../../kibana_services';
 
 export class EMSTMSSource extends AbstractTMSSource {
   static type = EMS_TMS;

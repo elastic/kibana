@@ -12,7 +12,7 @@ import {
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_DATA_ID_ORIGIN,
-} from '../../../../legacy/plugins/maps/common/constants';
+} from '../../common/constants';
 import uuid from 'uuid/v4';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../reducers/util.js';

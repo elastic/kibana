@@ -10,12 +10,9 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 import { i18n } from '@kbn/i18n';
-import {
-  getDataSourceLabel,
-  getUrlLabel,
-} from '../../../../../legacy/plugins/maps/common/i18n_getters';
+import { getDataSourceLabel, getUrlLabel } from '../../../common/i18n_getters';
 import _ from 'lodash';
-import { EMS_XYZ } from '../../../../../legacy/plugins/maps/common/constants';
+import { EMS_XYZ } from '../../../common/constants';
 
 export class XYZTMSSource extends AbstractTMSSource {
   static type = EMS_XYZ;

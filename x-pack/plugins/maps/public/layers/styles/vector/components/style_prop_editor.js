@@ -14,7 +14,7 @@ import {
   EuiFieldText,
   EuiToolTip,
 } from '@elastic/eui';
-import { STYLE_TYPE } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { STYLE_TYPE } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 export class StylePropEditor extends Component {

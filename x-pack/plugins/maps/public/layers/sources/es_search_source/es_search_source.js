@@ -10,10 +10,10 @@ import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
-import { SearchSource } from '../../../../../../legacy/plugins/maps/public/kibana_services';
+import { SearchSource } from '../../../kibana_services';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../vector_layer';
-import { hitsToGeoJson } from '../../../../../../legacy/plugins/maps/public/elasticsearch_geo_utils';
+import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -22,10 +22,10 @@ import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
   SCALING_TYPES,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
-import { getDataSourceLabel } from '../../../../../../legacy/plugins/maps/common/i18n_getters';
-import { getSourceFields } from '../../../../../../legacy/plugins/maps/public/index_pattern_util';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './load_index_settings';
 import { BlendedVectorLayer } from '../../blended_vector_layer';
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { getUiSettings } from '../../../../../../../../legacy/plugins/maps/public/kibana_services';
+import { getUiSettings } from '../../../../../kibana_services';
 import { StylePropEditor } from '../style_prop_editor';
 import { DynamicIconForm } from './dynamic_icon_form';
 import { StaticIconForm } from './static_icon_form';

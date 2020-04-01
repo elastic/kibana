@@ -13,7 +13,7 @@ import {
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
   FIELD_ORIGIN,
-} from '../../../../../legacy/plugins/maps/common/constants';
+} from '../../../common/constants';
 
 export const AGG_DELIMITER = '_of_';
 

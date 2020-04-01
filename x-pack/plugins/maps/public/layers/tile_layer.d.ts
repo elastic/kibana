@@ -6,7 +6,7 @@
 
 import { AbstractLayer, ILayerArguments } from './layer';
 import { ITMSSource } from './sources/tms_source';
-import { LayerDescriptor } from '../../../../legacy/plugins/maps/common/descriptor_types';
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 interface ITileLayerArguments extends ILayerArguments {
   source: ITMSSource;

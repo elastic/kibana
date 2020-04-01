@@ -9,21 +9,15 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { SingleFieldSelect } from '../../../../../../legacy/plugins/maps/public/components/single_field_select';
-import {
-  getIndexPatternService,
-  getIndexPatternSelectComponent,
-} from '../../../../../../legacy/plugins/maps/public/kibana_services';
-import { NoIndexPatternCallout } from '../../../../../../legacy/plugins/maps/public/components/no_index_pattern_callout';
+import { SingleFieldSelect } from '../../../components/single_field_select';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
+import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
-import {
-  ES_GEO_FIELD_TYPE,
-  SCALING_TYPES,
-} from '../../../../../../legacy/plugins/maps/common/constants';
+import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { ScalingForm } from './scaling_form';
-import { getTermsFields } from '../../../../../../legacy/plugins/maps/public/index_pattern_util';
+import { getTermsFields } from '../../../index_pattern_util';
 
 function getGeoFields(fields) {
   return fields.filter(field => {

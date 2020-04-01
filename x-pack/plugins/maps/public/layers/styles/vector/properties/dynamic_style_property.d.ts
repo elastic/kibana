@@ -6,13 +6,13 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { IStyleProperty } from './style_property';
-import { FIELD_ORIGIN } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { FIELD_ORIGIN } from '../../../../../common/constants';
 import {
   CategoryFieldMeta,
   DynamicStylePropertyOptions,
   FieldMetaOptions,
   RangeFieldMeta,
-} from '../../../../../../../legacy/plugins/maps/common/descriptor_types';
+} from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 
 export interface IDynamicStyleProperty extends IStyleProperty {

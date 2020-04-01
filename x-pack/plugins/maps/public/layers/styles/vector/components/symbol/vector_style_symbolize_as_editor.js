@@ -9,10 +9,7 @@ import React from 'react';
 import { EuiFormRow, EuiButtonGroup, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import {
-  SYMBOLIZE_AS_TYPES,
-  VECTOR_STYLES,
-} from '../../../../../../../../legacy/plugins/maps/common/constants';
+import { SYMBOLIZE_AS_TYPES, VECTOR_STYLES } from '../../../../../../common/constants';
 import { getDisabledByMessage } from '../get_vector_style_label';
 
 const SYMBOLIZE_AS_OPTIONS = [

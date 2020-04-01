@@ -19,8 +19,8 @@ import {
   ES_PEW_PEW,
   COUNT_PROP_NAME,
   VECTOR_STYLES,
-} from '../../../../../../legacy/plugins/maps/common/constants';
-import { getDataSourceLabel } from '../../../../../../legacy/plugins/maps/common/i18n_getters';
+} from '../../../../common/constants';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';

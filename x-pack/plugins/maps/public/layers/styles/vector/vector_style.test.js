@@ -7,7 +7,7 @@
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../../util/data_request';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
-import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../../legacy/plugins/maps/common/constants';
+import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services');
 jest.mock('ui/new_platform');
@@ -67,7 +67,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
   };
 
   beforeEach(() => {
-    require('../../../../../../legacy/plugins/maps/public/kibana_services').getUiSettings = () => ({
+    require('../../../kibana_services').getUiSettings = () => ({
       get: jest.fn(),
     });
   });

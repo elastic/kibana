@@ -9,7 +9,7 @@ import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { ColorGradient } from './components/color_gradient';
-import { COLOR_PALETTE_MAX_SIZE } from '../../../../../legacy/plugins/maps/common/constants';
+import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 import { vislibColorMaps } from '../../../../../../src/plugins/charts/public';
 
 const GRADIENT_INTERVALS = 8;

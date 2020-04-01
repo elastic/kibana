@@ -6,10 +6,7 @@
 
 import { AbstractLayer } from './layer';
 import _ from 'lodash';
-import {
-  SOURCE_DATA_ID_ORIGIN,
-  LAYER_TYPE,
-} from '../../../../legacy/plugins/maps/common/constants';
+import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 
 export class TileLayer extends AbstractLayer {
   static type = LAYER_TYPE.TILE;

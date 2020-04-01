@@ -5,7 +5,7 @@
  */
 
 import { AbstractESSource } from '../es_source';
-import { ESSearchSourceDescriptor } from '../../../../../../legacy/plugins/maps/common/descriptor_types';
+import { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
 
 export class ESSearchSource extends AbstractESSource {
   constructor(sourceDescriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters: unknown);

@@ -12,7 +12,7 @@ import {
   STYLE_TYPE,
   SOURCE_META_ID_ORIGIN,
   FIELD_ORIGIN,
-} from '../../../../../../../legacy/plugins/maps/common/constants';
+} from '../../../../../common/constants';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';

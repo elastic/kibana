@@ -5,7 +5,7 @@
  */
 
 import { AbstractStyleProperty } from './style_property';
-import { STYLE_TYPE } from '../../../../../../../legacy/plugins/maps/common/constants';
+import { STYLE_TYPE } from '../../../../../common/constants';
 
 export class StaticStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.STATIC;

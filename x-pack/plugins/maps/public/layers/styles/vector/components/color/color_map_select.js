@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 
 import { EuiSpacer, EuiSelect, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
-import { COLOR_MAP_TYPE } from '../../../../../../../../legacy/plugins/maps/common/constants';
+import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { ColorStopsCategorical } from './color_stops_categorical';
 import { i18n } from '@kbn/i18n';
 
