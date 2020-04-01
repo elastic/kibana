@@ -121,7 +121,7 @@ def collectVcsInfo() {
     }
     done
 
-    ''', "### List && Collect VCS Info"
+    ''', "### Collect VCS Info"
   )
 }
 
