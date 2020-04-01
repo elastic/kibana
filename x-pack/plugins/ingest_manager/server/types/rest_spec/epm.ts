@@ -13,7 +13,8 @@ export const GetPackagesRequestSchema = {
 
 export const GetFileRequestSchema = {
   params: schema.object({
-    pkgkey: schema.string(),
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
     filePath: schema.string(),
   }),
 };
