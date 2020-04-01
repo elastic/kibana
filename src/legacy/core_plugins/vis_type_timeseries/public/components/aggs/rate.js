@@ -63,7 +63,7 @@ export const RateAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="visTypeTimeseries.derivative.aggregationLabel"
+              id="visTypeTimeseries.rate.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -81,7 +81,7 @@ export const RateAgg = props => {
           <EuiFormRow
             id={htmlId('field')}
             label={
-              <FormattedMessage id="visTypeTimeseries.stdAgg.fieldLabel" defaultMessage="Field" />
+              <FormattedMessage id="visTypeTimeseries.rate.fieldLabel" defaultMessage="Field" />
             }
             fullWidth
           >
@@ -102,7 +102,7 @@ export const RateAgg = props => {
             id={htmlId('units')}
             label={
               <FormattedMessage
-                id="visTypeTimeseries.derivative.unitsLabel"
+                id="visTypeTimeseries.rate.unitsLabel"
                 defaultMessage="Units (1s, 1m, etc)"
                 description="1s and 1m are required values and must not be translated."
               />
