@@ -9,10 +9,9 @@ kibanaPipeline(timeoutMinutes: 180) {
       'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
 
-      workers.base(name: 'fail-fast-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
-        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
-//        listVcsEnvVars()
-      }
+//      workers.base(name: 'fail-fast-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
+//        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
+//      }
 
     }
 
@@ -52,6 +51,12 @@ kibanaPipeline(timeoutMinutes: 180) {
             withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
               withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
                 kibanaPipeline.bash("""
+
+
+
+    echo "### Print vcs info file"
+    cat VCS_INFO.txt
+
 
 
                 """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
@@ -106,10 +111,7 @@ def listVcsEnvVars() {
     }
     done
 
-    echo "### Print vcs info file"
-    cat VCS_INFO.txt
-
-    ''', "### List VCS Environment Variables"
+    ''', "### List && Collect VCS Info"
   )
 }
 
