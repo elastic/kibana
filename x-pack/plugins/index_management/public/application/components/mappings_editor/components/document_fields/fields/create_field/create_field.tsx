@@ -5,6 +5,7 @@
  */
 import React, { useEffect, useCallback } from 'react';
 import classNames from 'classnames';
+import * as _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
@@ -30,7 +31,14 @@ import {
   filterTypesForMultiField,
   filterTypesForNonRootFields,
 } from '../../../../lib';
-import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
+import {
+  Field,
+  MainType,
+  SubType,
+  NormalizedFields,
+  ComboBoxOption,
+  DataType,
+} from '../../../../types';
 import { NameParameter, TypeParameter, CustomTypeParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
@@ -81,7 +89,25 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     if (isValid) {
       form.reset();
-      dispatch({ type: 'field.add', value: data });
+
+      // The user may have selected an other data type and typed in a
+      // type we actually know about, so before creating the field, we convert the field
+      // type here.
+      const shouldConvertToKnownType = Boolean(
+        data.type === 'other' &&
+          data.customTypeName &&
+          TYPE_DEFINITION[data.customTypeName as DataType]
+      );
+
+      dispatch({
+        type: 'field.add',
+        value: shouldConvertToKnownType
+          ? {
+              ..._.omit(data, 'customTypeJson'),
+              type: data.customTypeName as DataType,
+            }
+          : data,
+      });
 
       if (exitAfter) {
         cancel();
