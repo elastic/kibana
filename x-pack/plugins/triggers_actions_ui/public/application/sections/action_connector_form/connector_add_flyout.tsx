@@ -302,7 +302,7 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <EuiButtonEmpty
           href={VIEW_LICENSE_OPTIONS_LINK}
           iconType="popout"
           iconSide="right"
@@ -312,7 +312,7 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
             id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerLinkTitle"
             defaultMessage="Subscription plans"
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiCallOut>

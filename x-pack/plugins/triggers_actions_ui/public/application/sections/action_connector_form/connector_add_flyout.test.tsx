@@ -124,15 +124,15 @@ describe('connector_add_flyout', () => {
     const callout = wrapper.find('UpgradeYourLicenseCallOut');
     expect(callout).toHaveLength(1);
 
-    const subscriptionLinks = callout.find('EuiButton');
-    expect(subscriptionLinks).toHaveLength(2);
-
-    const [linkToManageLicense, linkToSubscribePage] = subscriptionLinks.getElements();
-
-    expect(linkToManageLicense.props.href).toMatchInlineSnapshot(
+    const manageLink = callout.find('EuiButton');
+    expect(manageLink).toHaveLength(1);
+    expect(manageLink.getElements()[0].props.href).toMatchInlineSnapshot(
       `"/app/kibana#/management/elasticsearch/license_management/"`
     );
-    expect(linkToSubscribePage.props.href).toMatchInlineSnapshot(
+
+    const subscriptionLink = callout.find('EuiButtonEmpty');
+    expect(subscriptionLink).toHaveLength(1);
+    expect(subscriptionLink.getElements()[0].props.href).toMatchInlineSnapshot(
       `"https://www.elastic.co/subscriptions"`
     );
   });
