@@ -19,6 +19,7 @@ import {
   getTotalLoaded,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
+import { shimHitsTotal } from './shim_hits_total';
 
 export interface AsyncSearchResponse<T> {
   id: string;
@@ -56,22 +57,27 @@ async function asyncSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
-  const { body = undefined, index = undefined, ...params } = request.id ? {} : request.params;
+  const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
+    trackTotalHits: true, // Get the exact count of hits
+    ...request.params,
+  };
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
+  const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
+
   const method = request.id ? 'GET' : 'POST';
   const path = encodeURI(request.id ? `_async_search/${request.id}` : `${index}/_async_search`);
 
   // Wait up to 1s for the response to return
-  const query = toSnakeCase({ /* waitForCompletion: '1s', */ ...params });
+  const query = toSnakeCase({ /* waitForCompletion: '1s', */ ...queryParams });
 
-  const { response: rawResponse, id } = (await caller(
+  const { response, id } = (await caller(
     'transport.request',
     { method, path, body, query },
     options
   )) as AsyncSearchResponse<any>;
 
-  return { id, rawResponse, ...getTotalLoaded(rawResponse._shards) };
+  return { id, rawResponse: shimHitsTotal(response), ...getTotalLoaded(response._shards) };
 }
 
 async function rollupSearch(
