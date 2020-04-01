@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { ExpressionAstArgument, ExpressionAstExpression, ExpressionAstFunction } from './types';
 
 const createExpression = (chain: ExpressionAstFunction[]): ExpressionAstExpression => {
@@ -28,11 +30,11 @@ const createExpression = (chain: ExpressionAstFunction[]): ExpressionAstExpressi
 
 const createFunction = (
   name: string,
-  args: Record<string, ExpressionAstArgument[] | ExpressionAstArgument>
+  args: Record<string, ExpressionAstArgument[] | ExpressionAstArgument> = {}
 ): ExpressionAstFunction => {
   const mappedArgs: Record<string, ExpressionAstArgument[]> = {};
   Object.keys(args).forEach(key => {
-    if (args.hasOwnProperty(key)) {
+    if (args.hasOwnProperty(key) && args[key] !== undefined) {
       mappedArgs[key] = Array.isArray(args[key])
         ? (args[key] as [ExpressionAstArgument])
         : ([args[key]] as [ExpressionAstArgument]);
@@ -46,7 +48,52 @@ const createFunction = (
   };
 };
 
+class AstExpressionBuilder {
+  functions: ExpressionAstFunction[];
+  constructor(funcs?: ExpressionAstFunction[]) {
+    this.functions = funcs || [];
+  }
+
+  addFunction(fun: ExpressionAstFunction) {
+    this.functions.push(fun);
+    return this;
+  }
+
+  toAst() {
+    return createExpression(this.functions);
+  }
+}
+
+class AstFunctionBuilder {
+  name: string;
+  args: Record<string, ExpressionAstArgument | ExpressionAstArgument[]>;
+  constructor(
+    name: string,
+    args?: Record<string, ExpressionAstArgument | ExpressionAstArgument[]>
+  ) {
+    this.name = name;
+    this.args = args || {};
+  }
+  addArgument(name: string, arg: ExpressionAstArgument | ExpressionAstArgument[]) {
+    this.args[name] = arg;
+    return this;
+  }
+
+  toAst() {
+    return createFunction(this.name, this.args);
+  }
+}
+
 export const astBuilder = {
   createFunction,
   createExpression,
+  createFunctionBuilder: (
+    name: string,
+    args?: Record<string, ExpressionAstArgument | ExpressionAstArgument[]>
+  ) => {
+    return new AstFunctionBuilder(name, args);
+  },
+  createExpressionBuilder: (functions?: ExpressionAstFunction[]) => {
+    return new AstExpressionBuilder(functions);
+  },
 };

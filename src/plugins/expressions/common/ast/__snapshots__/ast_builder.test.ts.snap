@@ -59,3 +59,97 @@ Object {
   "type": "expression",
 }
 `;
+
+exports[`ast builder correctly builds the AST using builder functions 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "arg1": Array [
+          true,
+          false,
+        ],
+        "arg2": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "arg1": Array [
+                    true,
+                  ],
+                },
+                "function": "test2",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+      },
+      "function": "test1",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {},
+      "function": "test3",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
+
+exports[`ast builder correctly builds the AST using combination of builders 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "arg1": Array [
+          true,
+          false,
+        ],
+        "arg2": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {},
+                "function": "test2",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+      },
+      "function": "test1",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "arg1": Array [
+          true,
+        ],
+        "arg2": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "arg1": Array [
+                    true,
+                  ],
+                },
+                "function": "test4",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+      },
+      "function": "test3",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
