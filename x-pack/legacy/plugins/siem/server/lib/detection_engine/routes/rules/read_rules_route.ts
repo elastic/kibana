@@ -16,6 +16,7 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 
 export const readRulesRoute = (router: IRouter) => {
   router.get(
@@ -32,10 +33,7 @@ export const readRulesRoute = (router: IRouter) => {
       const { id, rule_id: ruleId } = request.query;
       const siemResponse = buildSiemResponse(response);
 
-      if (!context.alerting) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-      const alertsClient = context.alerting.getAlertsClient();
+      const alertsClient = context.alerting?.getAlertsClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
       try {
@@ -49,6 +47,10 @@ export const readRulesRoute = (router: IRouter) => {
           ruleId,
         });
         if (rule != null) {
+          const ruleActions = await getRuleActionsSavedObject({
+            savedObjectsClient,
+            ruleAlertId: rule.id,
+          });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({
@@ -59,7 +61,11 @@ export const readRulesRoute = (router: IRouter) => {
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleActions,
+            ruleStatuses.saved_objects[0]
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {
