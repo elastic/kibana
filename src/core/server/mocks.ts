@@ -123,7 +123,7 @@ function createCoreSetupMock({
       get: httpService.auth.get,
       isAuthenticated: httpService.auth.isAuthenticated,
     },
-    resources: httpService.resources.createRegistrar(),
+    resources: httpResourcesMock.createRegistrar(),
     getServerInfo: httpService.getServerInfo,
   };
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));

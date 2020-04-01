@@ -32,7 +32,6 @@ export {
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
-  KibanaResponse,
   IKibanaResponse,
   KnownHeaders,
   LegacyRequest,
