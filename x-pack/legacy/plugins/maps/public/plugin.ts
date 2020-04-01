@@ -13,17 +13,11 @@ import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
-  setLicenseId,
   setInspector,
-  setFileUpload,
   setIndexPatternSelect,
-  setHttp,
   setTimeFilter,
-  setUiSettings,
   setInjectedVarFunc,
-  setToasts,
   setIndexPatternService,
-  setAutocompleteService,
 } from './kibana_services';
 // @ts-ignore
 import {
@@ -62,26 +56,17 @@ interface MapsPluginStartDependencies {
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { licensing } = plugins;
   const { injectedMetadata, http } = core;
-  if (licensing) {
-    licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
-  }
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
-  setHttp(http);
-  setUiSettings(core.uiSettings);
   setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-  setToasts(core.notifications.toasts);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { file_upload, data, inspector } = plugins;
+  const { data, inspector } = plugins;
   setInspector(inspector);
-  setFileUpload(file_upload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
   setIndexPatternService(data.indexPatterns);
-  setAutocompleteService(data.autocomplete);
 };
 
 /** @internal */
