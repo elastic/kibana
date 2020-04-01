@@ -27,6 +27,7 @@ import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { source, sourceId, version } = useContext(Source.Context);
@@ -55,6 +56,9 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     endDateExpression,
     updateDateRange,
   } = useContext(LogPositionState.Context);
+
+  const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
+
   return (
     <>
       <WithLogTextviewUrlState />
@@ -104,6 +108,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               wrap={textWrap}
               setFlyoutItem={setFlyoutId}
               setFlyoutVisibility={setFlyoutVisibility}
+              setContextEntry={setContextEntry}
               highlightedItem={surroundingLogsId ? surroundingLogsId : null}
               currentHighlightKey={currentHighlightKey}
               startDateExpression={startDateExpression}

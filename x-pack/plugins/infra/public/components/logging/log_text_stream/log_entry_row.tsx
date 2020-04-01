@@ -33,6 +33,7 @@ interface LogEntryRowProps {
   isHighlighted: boolean;
   logEntry: LogEntry;
   openFlyoutWithItem?: (id: string) => void;
+  openViewLogInContext?: (entry: LogEntry) => void;
   scale: TextScale;
   wrap: boolean;
 }
@@ -47,6 +48,7 @@ export const LogEntryRow = memo(
     isHighlighted,
     logEntry,
     openFlyoutWithItem,
+    openViewLogInContext,
     scale,
     wrap,
   }: LogEntryRowProps) => {
@@ -64,9 +66,10 @@ export const LogEntryRow = memo(
       logEntry.id,
     ]);
 
-    const openViewInContext = useCallback(() => {
-      window.alert('Not yet implemented');
-    }, []);
+    const handleOpenViewLogInContext = useCallback(() => openViewLogInContext?.(logEntry), [
+      openViewLogInContext,
+      logEntry,
+    ]);
 
     const hasContext = useMemo(() => !isEmpty(logEntry.context), [logEntry]);
 
@@ -182,7 +185,7 @@ export const LogEntryRow = memo(
             onOpenMenu={openMenu}
             onCloseMenu={closeMenu}
             onViewDetails={openFlyout}
-            onViewInContext={hasContext ? openViewInContext : undefined}
+            onViewLogInContext={hasContext ? handleOpenViewLogInContext : undefined}
           />
         </LogEntryColumn>
       </LogEntryRowWrapper>

@@ -26,6 +26,7 @@ import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
+import { LogEntry } from '../../../../common/http_api';
 
 interface ScrollableLogTextStreamViewProps {
   columnConfigurations: LogColumnConfiguration[];
@@ -52,6 +53,7 @@ interface ScrollableLogTextStreamViewProps {
   reloadItems: () => void;
   setFlyoutItem: (id: string) => void;
   setFlyoutVisibility: (visible: boolean) => void;
+  setContextEntry: (entry: LogEntry) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
   startDateExpression: string;
@@ -228,6 +230,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                           columnConfigurations={columnConfigurations}
                                           columnWidths={columnWidths}
                                           openFlyoutWithItem={this.handleOpenFlyout}
+                                          openViewLogInContext={this.handleOpenViewLogInContext}
                                           boundingBoxRef={itemMeasureRef}
                                           logEntry={item.logEntry}
                                           highlights={item.highlights}
@@ -289,6 +292,10 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   private handleOpenFlyout = (id: string) => {
     this.props.setFlyoutItem(id);
     this.props.setFlyoutVisibility(true);
+  };
+
+  private handleOpenViewLogInContext = (entry: LogEntry) => {
+    this.props.setContextEntry(entry);
   };
 
   private handleReload = () => {
