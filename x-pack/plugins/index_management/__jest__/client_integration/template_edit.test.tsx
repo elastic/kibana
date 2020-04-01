@@ -107,11 +107,9 @@ describe('<TemplateEdit />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
 
-      testBed = await setup();
-
       await act(async () => {
-        await nextTick();
-        testBed.component.update();
+        testBed = await setup();
+        await testBed.waitFor('templateForm');
       });
     });
 
@@ -132,7 +130,7 @@ describe('<TemplateEdit />', () => {
 
     describe('form payload', () => {
       beforeEach(async () => {
-        const { actions, component, find, form } = testBed;
+        const { actions } = testBed;
 
         await act(async () => {
           // Complete step 1 (logistics)
@@ -142,17 +140,25 @@ describe('<TemplateEdit />', () => {
 
           // Step 2 (index settings)
           await actions.completeStepTwo(JSON.stringify(SETTINGS));
+        });
+      });
 
-          // Step 3 (mappings)
-          // Select the first field to edit
-          actions.clickEditButtonAtField(0);
+      it('should send the correct payload with changed values', async () => {
+        const { actions, component, find, form } = testBed;
+
+        await act(async () => {
+          // Make some changes to the mappings (step 3)
+
+          actions.clickEditButtonAtField(0); // Select the first field to edit
           await nextTick();
           component.update();
+        });
 
-          // verify edit field flyout
-          expect(find('mappingsEditorFieldEdit').length).toEqual(1);
+        // verify edit field flyout
+        expect(find('mappingsEditorFieldEdit').length).toEqual(1);
 
-          // change field name
+        await act(async () => {
+          // change the field name
           form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
 
           // Save changes
@@ -167,21 +173,13 @@ describe('<TemplateEdit />', () => {
 
           // Step 4 (aliases)
           await actions.completeStepFour(JSON.stringify(ALIASES));
-          await nextTick(50);
-          component.update();
-        });
-      });
 
-      it('should send the correct payload with changed values', async () => {
-        const { actions } = testBed;
-
-        await act(async () => {
+          // Submit the form
           actions.clickSubmitButton();
           await nextTick();
         });
 
         const latestRequest = server.requests[server.requests.length - 1];
-
         const { version, order } = templateToEdit;
 
         const expected = {

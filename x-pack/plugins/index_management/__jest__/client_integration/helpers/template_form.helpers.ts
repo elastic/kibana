@@ -63,7 +63,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     order,
     version,
   }: Partial<TemplateDeserialized> = {}) => {
-    const { form, find, component } = testBed;
+    const { form, find, waitFor } = testBed;
 
     if (name) {
       form.setInputValue('nameField.input', name);
@@ -88,12 +88,11 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     }
 
     clickNextButton();
-    await nextTick();
-    component.update();
+    await waitFor('stepSettings');
   };
 
   const completeStepTwo = async (settings?: string) => {
-    const { find, component } = testBed;
+    const { find, component, waitFor } = testBed;
 
     if (settings) {
       find('mockCodeEditor').simulate('change', {
@@ -104,42 +103,36 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     }
 
     clickNextButton();
-    await nextTick();
-    component.update();
+    await waitFor('stepMappings');
   };
 
   const completeStepThree = async (mappingFields?: MappingField[]) => {
-    const { component } = testBed;
+    const { waitFor } = testBed;
 
     if (mappingFields) {
       for (const field of mappingFields) {
         const { name, type } = field;
         await addMappingField(name, type);
       }
-    } else {
-      await nextTick();
     }
 
-    await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
     clickNextButton();
-    await nextTick(50);
-    component.update();
+    await waitFor('stepAliases');
   };
 
   const completeStepFour = async (aliases?: string) => {
-    const { find, component } = testBed;
+    const { find, component, waitFor } = testBed;
 
     if (aliases) {
       find('mockCodeEditor').simulate('change', {
         jsonString: aliases,
       }); // Using mocked EuiCodeEditor
-      await nextTick(50);
+      await nextTick();
       component.update();
     }
 
     clickNextButton();
-    await nextTick(50);
-    component.update();
+    await waitFor('summaryTab');
   };
 
   const selectSummaryTab = (tab: 'summary' | 'request') => {
