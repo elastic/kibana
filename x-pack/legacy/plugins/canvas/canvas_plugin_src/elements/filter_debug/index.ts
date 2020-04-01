@@ -7,7 +7,7 @@
 import { ElementFactory } from '../../../types';
 
 export const filterDebug: ElementFactory = () => ({
-  name: 'filter debug',
+  name: 'filterDebug',
   displayName: 'Debug filter',
   help: 'Shows the underlying global filters in a workpad',
   icon: 'bug',
