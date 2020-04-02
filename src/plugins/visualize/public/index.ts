@@ -18,11 +18,11 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { plugin } from './index';
+import { VisualizePlugin } from './plugin';
 
-const instance = plugin({
-  env: npSetup.plugins.kibanaLegacy.env,
-} as PluginInitializerContext);
-instance.setup(npSetup.core, npSetup.plugins);
-instance.start(npStart.core, npStart.plugins);
+export { EditorRenderProps } from './application/types';
+export { VisualizeConstants, createVisualizeEditUrl } from './application/visualize_constants';
+
+export const plugin = (context: PluginInitializerContext) => {
+  return new VisualizePlugin(context);
+};

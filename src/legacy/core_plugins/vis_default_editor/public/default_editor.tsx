@@ -19,7 +19,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import { EditorRenderProps } from '../../kibana/public/visualize/np_ready/types';
+import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { PanelsContainer, Panel } from '../../../../plugins/kibana_react/public';
 
 import './vis_type_agg_filter';

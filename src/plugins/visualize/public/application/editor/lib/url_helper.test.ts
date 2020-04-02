@@ -19,15 +19,6 @@
 
 import { addEmbeddableToDashboardUrl } from './url_helper';
 
-jest.mock('../../../legacy_imports', () => ({
-  DashboardConstants: {
-    ADD_EMBEDDABLE_ID: 'addEmbeddableId',
-    ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
-    CREATE_NEW_DASHBOARD_URL: '/dashboard',
-  },
-  VISUALIZE_EMBEDDABLE_TYPE: 'visualization',
-}));
-
 describe('', () => {
   it('addEmbeddableToDashboardUrl when dashboard is not saved', () => {
     const id = '123eb456cd';

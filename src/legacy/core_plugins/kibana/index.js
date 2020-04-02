@@ -57,7 +57,6 @@ export default function(kibana) {
       hacks: [
         'plugins/kibana/discover/legacy',
         'plugins/kibana/dev_tools',
-        'plugins/kibana/visualize/legacy',
         'plugins/kibana/dashboard/legacy',
       ],
       app: {

@@ -21,7 +21,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { TableListView } from '../../../../../../../plugins/kibana_react/public';
+import { TableListView } from '../../../../kibana_react/public';
 
 import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 

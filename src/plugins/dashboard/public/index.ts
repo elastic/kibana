@@ -38,6 +38,7 @@ export {
   DashboardDocPre700,
 } from './bwc';
 
+export { DashboardConstants } from './dashboard_constants';
 export {} from './types';
 export {} from './actions';
 export {

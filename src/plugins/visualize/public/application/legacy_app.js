@@ -25,7 +25,8 @@ import {
   createKbnUrlStateStorage,
   redirectWhenMissing,
   ensureDefaultIndexPattern,
-} from '../../../../../../plugins/kibana_utils/public';
+} from '../../../kibana_utils/public';
+import { createSavedSearchesLoader } from '../../../discover/public';
 
 import editorTemplate from './editor/editor.html';
 import visualizeListingTemplate from './listing/visualize_listing.html';
@@ -40,7 +41,6 @@ import {
   getCreateBreadcrumbs,
   getEditBreadcrumbs,
 } from './breadcrumbs';
-import { createSavedSearchesLoader } from '../../../../../../plugins/discover/public';
 
 const getResolvedResults = deps => {
   const { core, data, visualizations } = deps;

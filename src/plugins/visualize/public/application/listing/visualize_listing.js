@@ -24,7 +24,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
-import { syncQueryStateWithUrl } from '../../../../../../../plugins/data/public';
+import { syncQueryStateWithUrl } from '../../../../data/public';
 
 export function initListingDirective(app, I18nContext) {
   app.directive('visualizeListingTable', reactDirective =>

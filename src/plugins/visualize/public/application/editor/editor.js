@@ -31,22 +31,19 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { unhashUrl, removeQueryParam } from '../../../../../../../plugins/kibana_utils/public';
-import { MarkdownSimple, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
-import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
+import { unhashUrl, removeQueryParam } from '../../../../kibana_utils/public';
+import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
 import {
-  SavedObjectSaveModal,
-  showSaveModal,
-} from '../../../../../../../plugins/saved_objects/public';
-import {
-  esFilters,
-  connectToQueryState,
-  syncQueryStateWithUrl,
-} from '../../../../../../../plugins/data/public';
+  addFatalError,
+  subscribeWithScope,
+  migrateLegacyQuery,
+} from '../../../../kibana_legacy/public';
+import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
+import { esFilters, connectToQueryState, syncQueryStateWithUrl } from '../../../../data/public';
+import { DashboardConstants } from '../../../../dashboard/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
-import { subscribeWithScope, migrateLegacyQuery, DashboardConstants } from '../../legacy_imports';
 
 import { getServices } from '../../kibana_services';
 
@@ -252,6 +249,8 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
           isDirty: hasUnappliedChanges || hasUnsavedChanges,
         });
       },
+      // disable the Share button if no action specified
+      disableButton: !share,
     },
     {
       id: 'inspector',

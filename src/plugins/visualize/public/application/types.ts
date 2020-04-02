@@ -24,12 +24,9 @@ import {
   DataPublicPluginStart,
   SavedQuery,
 } from 'src/plugins/data/public';
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
-import { PersistedState } from 'src/plugins/visualizations/public';
-import { LegacyCoreStart } from 'kibana/public';
-import { VisSavedObject } from '../legacy_imports';
-import { SavedVisState } from '../../../../../../plugins/visualizations/public';
-import { SavedSearch } from '../../../../../../plugins/discover/public';
+import { PersistedState, SavedVisState, VisSavedObject } from 'src/plugins/visualizations/public';
+import { CoreStart } from 'kibana/public';
+import { SavedSearch } from 'src/plugins/discover/public';
 
 export type PureVisState = SavedVisState;
 
@@ -59,7 +56,7 @@ export interface VisualizeAppStateTransitions {
 }
 
 export interface EditorRenderProps {
-  core: LegacyCoreStart;
+  core: CoreStart;
   data: DataPublicPluginStart;
   filters: Filter[];
   timeRange: TimeRange;

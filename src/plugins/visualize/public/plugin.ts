@@ -30,39 +30,30 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 
-import { Storage, createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
-import {
-  DataPublicPluginStart,
-  DataPublicPluginSetup,
-  esFilters,
-} from '../../../../../plugins/data/public';
-import { EmbeddableStart } from '../../../../../plugins/embeddable/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { SharePluginStart } from '../../../../../plugins/share/public';
-import {
-  KibanaLegacySetup,
-  AngularRenderedAppUpdater,
-} from '../../../../../plugins/kibana_legacy/public';
-import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
-import { VisualizeConstants } from './np_ready/visualize_constants';
+import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
+import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
+import { EmbeddableStart } from '../../embeddable/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import { SharePluginStart } from '../../share/public';
+import { KibanaLegacySetup, AngularRenderedAppUpdater } from '../../kibana_legacy/public';
+import { VisualizationsStart } from '../../visualizations/public';
+import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../../plugins/home/public';
-import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { DefaultEditorController } from '../../../vis_default_editor/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+// the vis_default_editor is about to be moved to NP, this import will be adjusted
+import { DefaultEditorController } from '../../../legacy/core_plugins/vis_default_editor/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   navigation: NavigationStart;
-  share: SharePluginStart;
+  share?: SharePluginStart;
   visualizations: VisualizationsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   usageCollection?: UsageCollectionSetup;
   data: DataPublicPluginSetup;
@@ -74,7 +65,7 @@ export class VisualizePlugin implements Plugin {
     embeddable: EmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
-    share: SharePluginStart;
+    share?: SharePluginStart;
     visualizations: VisualizationsStart;
   } | null = null;
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
@@ -159,7 +150,7 @@ export class VisualizePlugin implements Plugin {
         };
         setServices(deps);
 
-        const { renderApp } = await import('./np_ready/application');
+        const { renderApp } = await import('./application/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {
           unmount();
@@ -168,18 +159,20 @@ export class VisualizePlugin implements Plugin {
       },
     });
 
-    home.featureCatalogue.register({
-      id: 'visualize',
-      title: 'Visualize',
-      description: i18n.translate('kbn.visualize.visualizeDescription', {
-        defaultMessage:
-          'Create visualizations and aggregate data stores in your Elasticsearch indices.',
-      }),
-      icon: 'visualizeApp',
-      path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
-    });
+    if (home) {
+      home.featureCatalogue.register({
+        id: 'visualize',
+        title: 'Visualize',
+        description: i18n.translate('kbn.visualize.visualizeDescription', {
+          defaultMessage:
+            'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+        }),
+        icon: 'visualizeApp',
+        path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.DATA,
+      });
+    }
   }
 
   public start(

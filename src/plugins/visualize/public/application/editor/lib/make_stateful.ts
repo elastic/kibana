@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { PersistedState } from '../../../../../../../../plugins/visualizations/public';
-import { ReduxLikeStateContainer } from '../../../../../../../../plugins/kibana_utils/public';
+import { PersistedState } from '../../../../../visualizations/public';
+import { ReduxLikeStateContainer } from '../../../../../kibana_utils/public';
 import { VisualizeAppState, VisualizeAppStateTransitions } from '../../types';
 
 /**
