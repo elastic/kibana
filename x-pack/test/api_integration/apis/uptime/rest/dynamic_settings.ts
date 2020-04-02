@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { defaultDynamicSettings } from '../../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
+import { defaultDynamicSettings } from '../../../../../plugins/uptime/common/runtime_types/dynamic_settings';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

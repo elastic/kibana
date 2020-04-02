@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
+import { monitorStatesQueryString } from '../../../../../plugins/uptime/public/queries/monitor_states_query';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helpers/make_checks';

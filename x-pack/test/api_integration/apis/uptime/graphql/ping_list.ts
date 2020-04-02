@@ -5,9 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import { pingsQueryString } from '../../../../../legacy/plugins/uptime/public/queries';
+import { pingsQueryString } from '../../../../../plugins/uptime/public/queries';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
-import { Ping, PingResults } from '../../../../../legacy/plugins/uptime/common/graphql/types';
+import { Ping, PingResults } from '../../../../../plugins/uptime/common/graphql/types';
 
 const expectPingFixtureEql = (data: { allPings: PingResults }, fixtureName: string) => {
   expectFixtureEql(data, fixtureName, d => d.allPings.pings.forEach((p: Ping) => delete p.id));
