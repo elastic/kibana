@@ -83,6 +83,11 @@ const OTHER_EVENT_CATEGORIES: EventInfo[] = [
 ];
 
 interface HostInfo {
+  elastic: {
+    agent: {
+      id: string;
+    };
+  };
   agent: {
     version: string;
     id: string;
@@ -115,6 +120,11 @@ export class EndpointDocGenerator {
       agent: {
         version: this.randomVersion(),
         id: this.seededUUIDv4(),
+      },
+      elastic: {
+        agent: {
+          id: this.seededUUIDv4(),
+        },
       },
       host: {
         id: this.seededUUIDv4(),
