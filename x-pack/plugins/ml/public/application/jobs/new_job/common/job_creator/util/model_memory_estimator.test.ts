@@ -75,7 +75,7 @@ describe('delay', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  test('should call the endpoint only with a valid and not initially provided configuration', () => {
+  test('should call the endpoint only with a valid configuration', () => {
     const spy = jest.fn();
 
     modelMemoryEstimator.updates$.subscribe(spy);
