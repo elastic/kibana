@@ -111,10 +111,6 @@ export class AbstractSource {
     return 0;
   }
 
-  getSyncMeta() {
-    return {};
-  }
-
   isJoinable() {
     return false;
   }

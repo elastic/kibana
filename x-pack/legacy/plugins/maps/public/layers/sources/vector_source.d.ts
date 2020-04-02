@@ -8,7 +8,7 @@
 import { FeatureCollection } from 'geojson';
 import { AbstractSource, ISource } from './source';
 import { IField } from '../fields/field';
-import { ESSearchSourceResponseMeta } from '../../../common/descriptor_types';
+import { ESSearchSourceResponseMeta, VectorSourceSyncMeta } from '../../../common/descriptor_types';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
@@ -26,6 +26,7 @@ export interface IVectorSource extends ISource {
 
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField;
+  getSyncMeta(): VectorSourceSyncMeta;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -37,4 +38,5 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField;
+  getSyncMeta(): VectorSourceSyncMeta;
 }

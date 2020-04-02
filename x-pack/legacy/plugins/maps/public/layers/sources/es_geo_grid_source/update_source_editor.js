@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isMetricCountable } from '../../util/is_metric_countable';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
+import { RenderAsSelect } from './render_as_select';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -65,6 +66,10 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'resolution', value: e });
   };
 
+  _onRequestTypeSelect = requestType => {
+    this.props.onChange({ propName: 'requestType', value: requestType });
+  };
+
   _renderMetricsPanel() {
     const metricsFilter =
       this.props.renderAs === RENDER_AS.HEATMAP
@@ -112,6 +117,11 @@ export class UpdateSourceEditor extends Component {
           <ResolutionEditor
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
+          />
+          <RenderAsSelect
+            isColumnCompressed
+            renderAs={this.props.renderAs}
+            onChange={this._onRequestTypeSelect}
           />
         </EuiPanel>
         <EuiSpacer size="s" />
