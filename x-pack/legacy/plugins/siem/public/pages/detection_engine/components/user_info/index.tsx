@@ -15,7 +15,6 @@ export interface State {
   canUserCRUD: boolean | null;
   hasIndexManage: boolean | null;
   hasIndexWrite: boolean | null;
-  hasManageApiKey: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
@@ -27,7 +26,6 @@ const initialState: State = {
   canUserCRUD: null,
   hasIndexManage: null,
   hasIndexWrite: null,
-  hasManageApiKey: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
   hasEncryptionKey: null,
@@ -39,7 +37,6 @@ export type Action =
   | { type: 'updateLoading'; loading: boolean }
   | {
       type: 'updateHasManageApiKey';
-      hasManageApiKey: boolean | null;
     }
   | {
       type: 'updateHasIndexManage';
@@ -93,7 +90,7 @@ export const userInfoReducer = (state: State, action: Action): State => {
     case 'updateHasManageApiKey': {
       return {
         ...state,
-        hasManageApiKey: action.hasManageApiKey,
+        // hasManageApiKey: action.hasManageApiKey,
       };
     }
     case 'updateIsSignalIndexExists': {
@@ -151,7 +148,6 @@ export const useUserInfo = (): State => {
       canUserCRUD,
       hasIndexManage,
       hasIndexWrite,
-      hasManageApiKey,
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
@@ -166,7 +162,6 @@ export const useUserInfo = (): State => {
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
     hasIndexWrite: hasApiIndexWrite,
-    hasManageApiKey: hasApiManageApiKey,
   } = usePrivilegeUser();
   const {
     loading: indexNameLoading,
@@ -197,11 +192,11 @@ export const useUserInfo = (): State => {
     }
   }, [loading, hasIndexWrite, hasApiIndexWrite]);
 
-  useEffect(() => {
-    if (!loading && hasManageApiKey !== hasApiManageApiKey && hasApiManageApiKey != null) {
-      dispatch({ type: 'updateHasManageApiKey', hasManageApiKey: hasApiManageApiKey });
-    }
-  }, [loading, hasManageApiKey, hasApiManageApiKey]);
+  // useEffect(() => {
+  //   if (!loading ) {
+  //     dispatch({ type: 'updateHasManageApiKey', hasManageApiKey: hasApiManageApiKey });
+  //   }
+  // }, [loading, hasManageApiKey, hasApiManageApiKey]);
 
   useEffect(() => {
     if (
@@ -258,7 +253,6 @@ export const useUserInfo = (): State => {
     canUserCRUD,
     hasIndexManage,
     hasIndexWrite,
-    hasManageApiKey,
     signalIndexName,
   };
 };

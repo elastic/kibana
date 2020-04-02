@@ -85,7 +85,6 @@ const CreateRulePageComponent: React.FC = () => {
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
-    hasManageApiKey,
   } = useUserInfo();
   const [, dispatchToaster] = useStateToaster();
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep>(RuleStep.defineRule);
@@ -117,8 +116,7 @@ const CreateRulePageComponent: React.FC = () => {
       getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule).ruleType),
     [stepsData.current['define-rule'].data]
   );
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const userHasNoPermissions = canUserCRUD != null ? !canUserCRUD : false;
 
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {

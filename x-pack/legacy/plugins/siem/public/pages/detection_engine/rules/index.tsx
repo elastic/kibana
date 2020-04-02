@@ -38,7 +38,6 @@ const RulesPageComponent: React.FC = () => {
     hasEncryptionKey,
     canUserCRUD,
     hasIndexWrite,
-    hasManageApiKey,
   } = useUserInfo();
   const {
     createPrePackagedRules,
@@ -52,7 +51,6 @@ const RulesPageComponent: React.FC = () => {
   } = usePrePackagedRules({
     canUserCRUD,
     hasIndexWrite,
-    hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
@@ -63,8 +61,7 @@ const RulesPageComponent: React.FC = () => {
     rulesNotUpdated
   );
 
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const userHasNoPermissions = canUserCRUD != null ? !canUserCRUD : false;
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {

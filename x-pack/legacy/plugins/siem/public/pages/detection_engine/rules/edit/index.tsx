@@ -69,13 +69,11 @@ const EditRulePageComponent: FC = () => {
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
-    hasManageApiKey,
   } = useUserInfo();
   const { detailName: ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
 
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const userHasNoPermissions = canUserCRUD != null ? !canUserCRUD : false;
 
   const [initForm, setInitForm] = useState(false);
   const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({

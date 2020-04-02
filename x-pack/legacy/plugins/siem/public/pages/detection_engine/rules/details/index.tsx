@@ -96,7 +96,6 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
-    hasManageApiKey,
     hasIndexWrite,
     signalIndexName,
   } = useUserInfo();
@@ -115,8 +114,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           scheduleRuleData: null,
         };
   const [lastSignals] = useSignalInfo({ ruleId });
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const userHasNoPermissions = canUserCRUD != null ? !canUserCRUD : false;
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
