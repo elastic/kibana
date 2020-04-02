@@ -18,6 +18,7 @@ import { selectSelectedMonitor } from '../state/selectors';
 import { getSelectedMonitorAction } from '../state/actions';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { useTrackPageview } from '../../../observability/public';
 
 interface StateProps {
   selectedMonitor: Ping | null;
@@ -61,8 +62,8 @@ export const MonitorPageComponent: React.FC<Props> = ({
 
   useUptimeTelemetry(UptimePage.Monitor);
 
-  // useTrackPageview({ app: 'uptime', path: 'monitor' });
-  // useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
+  useTrackPageview({ app: 'uptime', path: 'monitor' });
+  useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
   const nameOrId = selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id || '';
   useBreadcrumbs([{ text: nameOrId }]);

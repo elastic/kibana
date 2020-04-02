@@ -65,21 +65,7 @@ export interface Ping {
 
   socks5?: Socks5 | null;
 
-  summary?: {
-    up?: number | null;
-
-    down?: number | null;
-
-    geo?: {
-      name?: string | null;
-
-      location?: {
-        lat?: number | null;
-
-        lon?: number | null;
-      } | null;
-    } | null;
-  } | null;
+  summary?: Summary | null;
 
   tags?: string | null;
 
@@ -313,6 +299,26 @@ export interface Resolve {
   rtt?: Duration | null;
 }
 
+export interface Summary {
+  up?: number | null;
+
+  down?: number | null;
+
+  geo?: CheckGeo | null;
+}
+
+export interface CheckGeo {
+  name?: string | null;
+
+  location?: Location | null;
+}
+
+export interface Location {
+  lat?: number | null;
+
+  lon?: number | null;
+}
+
 export interface Socks5 {
   rtt?: Rtt | null;
 }
@@ -467,25 +473,13 @@ export interface CheckMonitor {
 }
 
 export interface CheckObserver {
-  geo?: {
-    name?: string | null;
-
-    location?: {
-      lat?: number | null;
-
-      lon?: number | null;
-    } | null;
-  } | null;
+  geo?: CheckGeo | null;
 }
 
 export interface StateGeo {
   name?: (string | null)[] | null;
 
-  location?: {
-    lat?: number | null;
-
-    lon?: number | null;
-  } | null;
+  location?: Location | null;
 }
 
 export interface StateObserver {

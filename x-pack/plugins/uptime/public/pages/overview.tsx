@@ -21,6 +21,7 @@ import { UptimeThemeContext } from '../contexts';
 import { EmptyState, FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { useTrackPageview } from '../../../observability/public';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -71,8 +72,8 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
 
   useUptimeTelemetry(UptimePage.Overview);
 
-  // useTrackPageview({ app: 'uptime', path: 'overview' });
-  // useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
+  useTrackPageview({ app: 'uptime', path: 'overview' });
+  useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
   const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
