@@ -5,11 +5,9 @@
  */
 
 import React from 'react';
-import { Router } from 'react-router-dom';
 import { mount } from 'enzyme';
-/* eslint-disable @kbn/eslint/module_migration */
-import routeData from 'react-router';
-/* eslint-enable @kbn/eslint/module_migration */
+
+import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { CaseComponent } from './';
 import { caseProps, caseClosedProps, data, dataClosed, caseUserActions } from './__mock__';
 import { TestProviders } from '../../../../mock';
@@ -23,34 +21,6 @@ jest.mock('../use_push_to_service');
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const usePushToServiceMock = usePushToService as jest.Mock;
-type Action = 'PUSH' | 'POP' | 'REPLACE';
-const pop: Action = 'POP';
-const location = {
-  pathname: '/network',
-  search: '',
-  state: '',
-  hash: '',
-};
-const mockHistory = {
-  length: 2,
-  location,
-  action: pop,
-  push: jest.fn(),
-  replace: jest.fn(),
-  go: jest.fn(),
-  goBack: jest.fn(),
-  goForward: jest.fn(),
-  block: jest.fn(),
-  createHref: jest.fn(),
-  listen: jest.fn(),
-};
-
-const mockLocation = {
-  pathname: '/welcome',
-  hash: '',
-  search: '',
-  state: '',
-};
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();

@@ -71,10 +71,9 @@ export const AddComment = React.memo<AddCommentProps>(
         form.reset();
       }
     }, [form, onCommentPosted, onCommentSaving]);
-
     return (
       <span id="add-comment-permLink">
-        {isLoading && showLoading && <MySpinner size="xl" />}
+        {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
         <Form form={form}>
           <UseField
             path="comment"
@@ -87,6 +86,7 @@ export const AddComment = React.memo<AddCommentProps>(
               onCursorPositionUpdate: handleCursorChange,
               bottomRightContent: (
                 <EuiButton
+                  data-test-subj="submit-comment"
                   iconType="plusInCircle"
                   isDisabled={isLoading || disabled}
                   isLoading={isLoading}
