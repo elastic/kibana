@@ -103,11 +103,9 @@ const SavedSerializedFilterQueryQueryRuntimeType = runtimeTypes.partial({
   serializedQuery: unionWithNullType(runtimeTypes.string),
 });
 
-const SavedFilterQueryQueryRuntimeType = unionWithNullType(
-  runtimeTypes.partial({
-    filterQuery: unionWithNullType(SavedSerializedFilterQueryQueryRuntimeType),
-  })
-);
+const SavedFilterQueryQueryRuntimeType = runtimeTypes.partial({
+  filterQuery: unionWithNullType(SavedSerializedFilterQueryQueryRuntimeType),
+});
 
 /*
  *  DatePicker Range Types

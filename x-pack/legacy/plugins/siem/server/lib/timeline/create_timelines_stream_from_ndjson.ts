@@ -22,11 +22,11 @@ import {
 
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
 import { throwErrors } from '../../../../../../plugins/case/common/api';
-import { importTimelinesSchema } from './routes/schemas/import_timelines_schema';
+import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
 
 export const validateTimelines = (): Transform => {
   return createMapStream((obj: ImportTimelineResponse) => {
-    return pipe(importTimelinesSchema.decode(obj), fold(throwErrors(Boom.badRequest), identity));
+    return pipe(ImportTimelinesSchemaRt.decode(obj), fold(throwErrors(Boom.badRequest), identity));
   });
 };
 
