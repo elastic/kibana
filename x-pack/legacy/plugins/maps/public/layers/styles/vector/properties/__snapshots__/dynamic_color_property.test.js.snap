@@ -4,9 +4,37 @@ exports[`categorical Should render categorical legend with breaks from custom 1`
 
 exports[`categorical Should render categorical legend with breaks from default 1`] = `
 <div>
-  <EuiSpacer
-    size="s"
-  />
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiFlexGroup
     direction="column"
     gutterSize="none"
@@ -15,7 +43,7 @@ exports[`categorical Should render categorical legend with breaks from default 1
       color="#54B399"
       isLinesOnly={false}
       isPointsOnly={true}
-      key="US"
+      key="0"
       label="US_format"
       styleName="lineColor"
     />
@@ -23,7 +51,7 @@ exports[`categorical Should render categorical legend with breaks from default 1
       color="#6092C0"
       isLinesOnly={false}
       isPointsOnly={true}
-      key="CN"
+      key="1"
       label="CN_format"
       styleName="lineColor"
     />
@@ -42,9 +70,14 @@ exports[`categorical Should render categorical legend with breaks from default 1
       styleName="lineColor"
     />
   </EuiFlexGroup>
+</div>
+`;
+
+exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
+<div>
   <EuiFlexGroup
     gutterSize="xs"
-    justifyContent="spaceAround"
+    justifyContent="spaceBetween"
   >
     <EuiFlexItem
       grow={false}
@@ -73,14 +106,6 @@ exports[`categorical Should render categorical legend with breaks from default 1
       </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
-</div>
-`;
-
-exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
-<div>
-  <EuiSpacer
-    size="s"
-  />
   <EuiFlexGroup
     direction="column"
     gutterSize="none"
@@ -97,14 +122,19 @@ exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
       color="#00FF00"
       isLinesOnly={false}
       isPointsOnly={true}
-      key="10"
+      key="1"
       label="10_format"
       styleName="lineColor"
     />
   </EuiFlexGroup>
+</div>
+`;
+
+exports[`ordinal Should render only single band of last color when delta is 0 1`] = `
+<div>
   <EuiFlexGroup
     gutterSize="xs"
-    justifyContent="spaceAround"
+    justifyContent="spaceBetween"
   >
     <EuiFlexItem
       grow={false}
@@ -133,14 +163,6 @@ exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
       </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
-</div>
-`;
-
-exports[`ordinal Should render only single band of last color when delta is 0 1`] = `
-<div>
-  <EuiSpacer
-    size="s"
-  />
   <EuiFlexGroup
     direction="column"
     gutterSize="none"
@@ -149,14 +171,19 @@ exports[`ordinal Should render only single band of last color when delta is 0 1`
       color="#072f6b"
       isLinesOnly={false}
       isPointsOnly={true}
-      key="100"
+      key="0"
       label="100_format"
       styleName="lineColor"
     />
   </EuiFlexGroup>
+</div>
+`;
+
+exports[`ordinal Should render ordinal legend as bands 1`] = `
+<div>
   <EuiFlexGroup
     gutterSize="xs"
-    justifyContent="spaceAround"
+    justifyContent="spaceBetween"
   >
     <EuiFlexItem
       grow={false}
@@ -185,14 +212,6 @@ exports[`ordinal Should render only single band of last color when delta is 0 1`
       </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
-</div>
-`;
-
-exports[`ordinal Should render ordinal legend as bands 1`] = `
-<div>
-  <EuiSpacer
-    size="s"
-  />
   <EuiFlexGroup
     direction="column"
     gutterSize="none"
@@ -206,68 +225,61 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       styleName="lineColor"
     />
     <Category
-      color="#cfe1f2"
+      color="#ddeaf7"
       isLinesOnly={false}
       isPointsOnly={true}
-      key="20"
-      label="20_format"
+      key="1"
+      label="13_format"
       styleName="lineColor"
     />
     <Category
-      color="#93c4de"
+      color="#c5daee"
       isLinesOnly={false}
       isPointsOnly={true}
-      key="40"
-      label="40_format"
+      key="2"
+      label="25_format"
       styleName="lineColor"
     />
     <Category
-      color="#4a97c9"
+      color="#9dc9e0"
       isLinesOnly={false}
       isPointsOnly={true}
-      key="60"
-      label="60_format"
+      key="3"
+      label="38_format"
+      styleName="lineColor"
+    />
+    <Category
+      color="#6aadd5"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="4"
+      label="50_format"
+      styleName="lineColor"
+    />
+    <Category
+      color="#4191c5"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="5"
+      label="63_format"
+      styleName="lineColor"
+    />
+    <Category
+      color="#2070b4"
+      isLinesOnly={false}
+      isPointsOnly={true}
+      key="6"
+      label="75_format"
       styleName="lineColor"
     />
     <Category
       color="#072f6b"
       isLinesOnly={false}
       isPointsOnly={true}
-      key="80"
-      label="80_format"
+      key="7"
+      label="88_format"
       styleName="lineColor"
     />
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="xs"
-    justifyContent="spaceAround"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiToolTip
-        content="foobar_label"
-        delay="regular"
-        position="top"
-        title="Border color"
-      >
-        <EuiText
-          className="eui-textTruncate"
-          size="xs"
-          style={
-            Object {
-              "maxWidth": "180px",
-            }
-          }
-        >
-          <small>
-            <strong>
-              foobar_label
-            </strong>
-          </small>
-        </EuiText>
-      </EuiToolTip>
-    </EuiFlexItem>
   </EuiFlexGroup>
 </div>
 `;
