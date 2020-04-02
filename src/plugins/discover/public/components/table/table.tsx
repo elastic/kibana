@@ -119,7 +119,7 @@ export function DocViewTable({
                 key={field}
                 field={field}
                 fieldMapping={mapping(field)}
-                fieldType={fieldType}
+                fieldType={String(fieldType)}
                 displayUnderscoreWarning={displayUnderscoreWarning}
                 displayNoMappingWarning={displayNoMappingWarning}
                 isCollapsed={isCollapsed}
