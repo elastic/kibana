@@ -47,7 +47,7 @@ export const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'keep-alive',
 ];
 
-export const KBN_SCREENSHOT_HEADER_BLACKLIST_PATTERN = ['proxy-'];
+export const KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN = ['proxy-'];
 
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 
