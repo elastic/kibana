@@ -62,7 +62,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.captureBody.description',
       {
         defaultMessage:
-          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables).'
+          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables).\nFor transactions that are initiated by receiving a message from a message broker, the agent can capture the textual message body.'
       }
     ),
     options: [
@@ -86,24 +86,10 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.captureHeaders.description',
       {
         defaultMessage:
-          'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
+          'If set to `true`, the agent will capture HTTP request and response headers (including cookies), as well as message headers/properties when using messaging frameworks (like Kafka).\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
       }
     ),
     excludeAgents: ['js-base', 'rum-js']
-  },
-
-  // LOG_LEVEL
-  {
-    key: 'log_level',
-    type: 'text',
-    defaultValue: 'info',
-    label: i18n.translate('xpack.apm.agentConfig.logLevel.label', {
-      defaultMessage: 'Log level'
-    }),
-    description: i18n.translate('xpack.apm.agentConfig.logLevel.description', {
-      defaultMessage: 'Sets the logging level for the agent'
-    }),
-    excludeAgents: ['js-base', 'rum-js', 'python']
   },
 
   // Recording
@@ -116,7 +102,7 @@ export const generalSettings: RawSettingDefinition[] = [
     }),
     description: i18n.translate('xpack.apm.agentConfig.recording.description', {
       defaultMessage:
-        'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When inactive, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when inactivated, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.'
+        'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When set to non-recording, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when set to non-recording, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.'
     })
   },
 
@@ -211,7 +197,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.transactionSampleRate.description',
       {
         defaultMessage:
-          'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but no context information, labels, or spans.'
+          'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but not context information, labels, or spans.'
       }
     )
   }
