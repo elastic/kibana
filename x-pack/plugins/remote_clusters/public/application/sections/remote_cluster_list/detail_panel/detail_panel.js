@@ -230,7 +230,9 @@ export class DetailPanel extends Component {
 
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
               {seeds.map(seed => (
-                <EuiText key={seed}>{seed}</EuiText>
+                <EuiText size="s" key={seed}>
+                  {seed}
+                </EuiText>
               ))}
             </EuiDescriptionListDescription>
           </EuiFlexItem>
