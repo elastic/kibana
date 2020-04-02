@@ -24,7 +24,7 @@ import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { Schemas } from '../schemas';
+import { ISchemas, Schemas } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('@elastic/eui', () => ({
@@ -47,7 +47,7 @@ jest.mock('./agg_add', () => ({
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggGroupProps;
   let aggs: IAggConfigs;
-  let schemas: Schemas;
+  let schemas: ISchemas;
   let setTouched: jest.Mock;
   let setValidity: jest.Mock;
   let reorderAggs: jest.Mock;
