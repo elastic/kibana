@@ -11,7 +11,7 @@ export {
   agentRouteService,
   enrollmentAPIKeyRouteService,
   epmRouteService,
-  setupRouteService,
+  ingestSetupRouteService,
   packageToConfigDatasourceInputs,
   storedDatasourceToAgentDatasource,
   AgentStatusKueryHelper,
