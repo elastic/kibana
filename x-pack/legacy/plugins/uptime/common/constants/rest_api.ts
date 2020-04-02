@@ -10,7 +10,6 @@ export enum API_URLS {
   MONITOR_LOCATIONS = `/api/uptime/monitor/locations`,
   MONITOR_DURATION = `/api/uptime/monitor/duration`,
   MONITOR_DETAILS = `/api/uptime/monitor/details`,
-  MONITOR_SELECTED = `/api/uptime/monitor/selected`,
   MONITOR_STATUS = `/api/uptime/monitor/status`,
   PINGS = '/api/uptime/pings',
   PING_HISTOGRAM = `/api/uptime/ping/histogram`,
