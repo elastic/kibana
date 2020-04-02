@@ -26,17 +26,17 @@ export const DEFAULT_LINE_COLORS = [
   '#FFF',
 ];
 
-function getLegendColors(colorRamp, numLegendColors = 4) {
+function getLegendColors(colorRamp, numLegendColors) {
   const colors = [];
-  colors[0] = getColor(colorRamp, 0);
+  colors[0] = getColorRgbString(colorRamp, 0);
   for (let i = 1; i < numLegendColors - 1; i++) {
-    colors[i] = getColor(colorRamp, Math.floor((colorRamp.length * i) / numLegendColors));
+    colors[i] = getColorRgbString(colorRamp, Math.floor((colorRamp.length * i) / numLegendColors));
   }
-  colors[numLegendColors - 1] = getColor(colorRamp, colorRamp.length - 1);
+  colors[numLegendColors - 1] = getColorRgbString(colorRamp, colorRamp.length - 1);
   return colors;
 }
 
-function getColor(colorRamp, i) {
+function getColorRgbString(colorRamp, i) {
   const color = colorRamp[i][1];
   const red = Math.floor(color[0] * 255);
   const green = Math.floor(color[1] * 255);
@@ -56,12 +56,12 @@ function getColorRamp(colorRampName) {
   return colorRamp;
 }
 
-export function getRGBColorRangeStrings(colorRampName, numberColors = GRADIENT_INTERVALS) {
+export function getRGBColorRangeStrings(colorRampName, numberColors) {
   const colorRamp = getColorRamp(colorRampName);
   return getLegendColors(colorRamp.value, numberColors);
 }
 
-export function getHexColorRangeStrings(colorRampName, numberColors = GRADIENT_INTERVALS) {
+export function getHexColorRangeStrings(colorRampName, numberColors) {
   return getRGBColorRangeStrings(colorRampName, numberColors).map(rgbColor =>
     chroma(rgbColor).hex()
   );
@@ -73,17 +73,12 @@ export function getColorRampCenterColor(colorRampName) {
   }
   const colorRamp = getColorRamp(colorRampName);
   const centerIndex = Math.floor(colorRamp.value.length / 2);
-  return getColor(colorRamp.value, centerIndex);
+  return getColorRgbString(colorRamp.value, centerIndex);
 }
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getOrdinalMbColorRampStops(
-  colorRampName,
-  min,
-  max,
-  numberColors = GRADIENT_INTERVALS
-) {
+export function getOrdinalMbColorRampStops(colorRampName, min, max, numberColors) {
   if (!colorRampName) {
     return null;
   }

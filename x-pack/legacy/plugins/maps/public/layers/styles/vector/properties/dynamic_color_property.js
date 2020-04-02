@@ -143,7 +143,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       const colorStops = getOrdinalMbColorRampStops(
         this._options.color,
         rangeFieldMeta.min,
-        rangeFieldMeta.max
+        rangeFieldMeta.max,
+        GRADIENT_INTERVALS
       );
       if (!colorStops) {
         return null;
@@ -265,7 +266,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return [];
     }
 
-    const colors = getHexColorRangeStrings(this._options.color);
+    const colors = getHexColorRangeStrings(this._options.color, GRADIENT_INTERVALS);
 
     if (rangeFieldMeta.delta === 0) {
       //map to last color.
