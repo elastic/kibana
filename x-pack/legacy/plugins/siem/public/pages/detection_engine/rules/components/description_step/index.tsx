@@ -15,7 +15,7 @@ import {
   esFilters,
   FilterManager,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { RuleType } from '../../../../../containers/detection_engine/rules';
+import { RuleType } from '../../../../../../common/detection_engine/types';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { useKibana } from '../../../../../lib/kibana';
 import { IMitreEnterpriseAttack } from '../../types';
