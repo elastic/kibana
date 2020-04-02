@@ -223,6 +223,17 @@ const comparatorMap = {
   [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
 };
 
+const mapToConditionsLookup = (
+  list: any[],
+  mapFn: (value: any, index: number, array: any[]) => unknown
+) =>
+  list
+    .map(mapFn)
+    .reduce(
+      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
+      {}
+    );
+
 export const createMetricThresholdExecutor = (alertUUID: string) =>
   async function({ services, params }: AlertExecutorOptions) {
     const { criteria, groupBy, filterQuery } = params as {
@@ -261,7 +272,9 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
       if (shouldAlertFire) {
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
-          value: alertResults.map(result => result[group].currentValue),
+          valueOf: mapToConditionsLookup(alertResults, result => result[group].currentValue),
+          thresholdOf: mapToConditionsLookup(criteria, criterion => criterion.threshold),
+          metricOf: mapToConditionsLookup(criteria, criterion => criterion.metric),
         });
       }
       // Future use: ability to fetch display current alert state
