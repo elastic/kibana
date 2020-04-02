@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Reducer, combineReducers } from 'redux';
+import { htmlIdGenerator } from '@elastic/eui';
 import { animateProcessIntoView } from './methods';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
 import { ResolverState, ResolverAction, ResolverUIState } from '../types';
+import { uniquePidForProcess } from '../models/process_event';
+
+const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
   uiState = { activeDescendantId: null, selectedDescendantId: null },
@@ -22,6 +26,12 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
     return {
       ...uiState,
       selectedDescendantId: action.payload.nodeId,
+    };
+  } else if (action.type === 'userBroughtProcessIntoView') {
+    const processNodeId = resolverNodeIdGenerator(uniquePidForProcess(action.payload.process));
+    return {
+      ...uiState,
+      activeDescendantId: processNodeId,
     };
   } else {
     return uiState;
