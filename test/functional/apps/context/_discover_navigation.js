@@ -26,13 +26,13 @@ const TEST_FILTER_COLUMN_NAMES = [
 ];
 
 export default function({ getService, getPageObjects }) {
+  const browser = getService('browser');
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/53308
-  describe.skip('context link in discover', function contextSize() {
+  describe('context link in discover', function contextSize() {
     this.tags('smoke');
     before(async function() {
       await PageObjects.common.navigateToApp('discover');
@@ -76,6 +76,23 @@ export default function({ getService, getPageObjects }) {
       ).reduce((result, hasDisabledFilter) => result && hasDisabledFilter, true);
 
       expect(hasDisabledFilters).to.be(true);
+    });
+
+    it('should go back after loading', async function() {
+      // get the timestamp of the first row
+
+      // navigate to the context view
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      await (await docTable.getRowActions({ rowIndex: 0 }))[0].click();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await browser.goBack();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('1,556');
     });
   });
 }
