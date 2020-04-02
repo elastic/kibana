@@ -43,6 +43,7 @@ export const ruleOutput: RulesSchema = {
   tags: [],
   to: 'now',
   type: 'query',
+  throttle: 'no_actions',
   threat: [
     {
       framework: 'MITRE ATT&CK',
@@ -160,7 +161,7 @@ describe('validate', () => {
   describe('transformValidateFindAlerts', () => {
     test('it should do a validation correctly of a find alert', () => {
       const findResult: FindResult = { data: [getResult()], page: 1, perPage: 0, total: 0 };
-      const [validated, errors] = transformValidateFindAlerts(findResult);
+      const [validated, errors] = transformValidateFindAlerts(findResult, []);
       expect(validated).toEqual({ data: [ruleOutput], page: 1, perPage: 0, total: 0 });
       expect(errors).toEqual(null);
     });
@@ -168,7 +169,7 @@ describe('validate', () => {
     test('it should do an in-validation correctly of a partial alert', () => {
       const findResult: FindResult = { data: [getResult()], page: 1, perPage: 0, total: 0 };
       delete findResult.page;
-      const [validated, errors] = transformValidateFindAlerts(findResult);
+      const [validated, errors] = transformValidateFindAlerts(findResult, []);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "page"');
     });

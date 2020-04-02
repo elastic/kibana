@@ -5,8 +5,8 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { TimeRange } from 'src/plugins/data/public';
-import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { TimeRange, Filter as DataFilter } from 'src/plugins/data/public';
+import { EmbeddableInput } from 'src/plugins/embeddable/public';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 import { Filter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import {
@@ -15,7 +15,6 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { Filter as DataFilter } from '../../../../../../../src/plugins/data/public';
 
 interface Arguments {
   id: string;

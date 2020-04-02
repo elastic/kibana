@@ -47,6 +47,8 @@ import {
   decodeServiceConnectorCaseResponse,
 } from './utils';
 
+import * as i18n from './translations';
+
 export const getCase = async (
   caseId: string,
   includeComments: boolean = true,
@@ -119,7 +121,7 @@ export const getCases = async ({
   signal,
 }: FetchCasesProps): Promise<AllCases> => {
   const query = {
-    reporters: filterOptions.reporters.map(r => r.username),
+    reporters: filterOptions.reporters.map(r => r.username ?? '').filter(r => r !== ''),
     tags: filterOptions.tags,
     ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
@@ -240,6 +242,11 @@ export const pushToService = async (
       signal,
     }
   );
+
+  if (response.status === 'error') {
+    throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
+  }
+
   return decodeServiceConnectorCaseResponse(response.data);
 };
 

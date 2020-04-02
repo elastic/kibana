@@ -37,6 +37,7 @@ import {
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   PivotQuery,
+  INIT_MAX_COLUMNS,
 } from '../../common';
 import { SearchItems } from '../../hooks/use_search_items';
 
@@ -131,12 +132,12 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
     columnKeys.sort(sortColumns(groupByArr));
 
     // Column visibility
-    const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(columnKeys);
+    const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>([]);
 
     useEffect(() => {
-      setVisibleColumns(columnKeys);
+      setVisibleColumns(columnKeys.splice(0, INIT_MAX_COLUMNS));
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(columnKeys)]);
+    }, [columnKeys.join()]);
 
     const [pagination, setPagination] = useState(defaultPagination);
 
@@ -163,6 +164,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
           schema = 'boolean';
           break;
         case ES_FIELD_TYPES.DATE:
+        case ES_FIELD_TYPES.DATE_NANOS:
           schema = 'datetime';
           break;
         case ES_FIELD_TYPES.BYTE:
@@ -235,7 +237,11 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
           return null;
         }
 
-        if (previewMappings.properties[columnId].type === ES_FIELD_TYPES.DATE) {
+        if (
+          [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS].includes(
+            previewMappings.properties[columnId].type
+          )
+        ) {
           return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
         }
 
