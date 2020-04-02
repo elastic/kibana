@@ -6,7 +6,7 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescriptionList } from '@elastic/eui';
-import { EuiHealth, EuiText } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Immutable, AlertDetails } from '../../../../../../../common/types';
 
