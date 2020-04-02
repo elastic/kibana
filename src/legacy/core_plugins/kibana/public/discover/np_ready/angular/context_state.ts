@@ -107,6 +107,10 @@ interface GetStateReturn {
    */
   setFilters: (filterManager: FilterManager) => void;
   /**
+   * Set state in Url using history.replace
+   */
+  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
+  /**
    * sync state to URL, used for testing
    */
   flushToUrl: () => void;
@@ -203,6 +207,10 @@ export function getState({
       if (appFilterChanged) {
         appStateContainer.set({ ...appStateContainer.getState(), ...{ filters: appFilters } });
       }
+    },
+    replaceUrlAppState: async (newPartial: Partial<AppState> = {}) => {
+      const state = { ...appStateContainer.getState(), ...newPartial };
+      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
     },
     // helper function just needed for testing
     flushToUrl: () => stateStorage.flush(),
