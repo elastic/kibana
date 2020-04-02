@@ -11,7 +11,6 @@ import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { BlendedVectorLayer } from '../layers/blended_vector_layer';
-import { ALL_SOURCES } from '../layers/sources/all_sources';
 import { getTimeFilter } from '../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
@@ -21,6 +20,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/util';
 import { InnerJoin } from '../layers/joins/inner_join';
+import { getSourceByType } from '../layers/sources/source_registry';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -49,13 +49,11 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
 }
 
 function createSourceInstance(sourceDescriptor, inspectorAdapters) {
-  const Source = ALL_SOURCES.find(Source => {
-    return Source.type === sourceDescriptor.type;
-  });
-  if (!Source) {
+  const source = getSourceByType(sourceDescriptor.type);
+  if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new Source(sourceDescriptor, inspectorAdapters);
+  return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
 }
 
 export const getOpenTooltips = ({ map }) => {

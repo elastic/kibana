@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment-timezone';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -32,6 +32,7 @@ import {
   euiDataGridToolbarSettings,
   EsFieldName,
   PivotQuery,
+  INIT_MAX_COLUMNS,
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useToastNotifications } from '../../../../app_dependencies';
@@ -76,7 +77,12 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   });
 
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(indexPatternFields);
+  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>([]);
+
+  useEffect(() => {
+    setVisibleColumns(indexPatternFields.splice(0, INIT_MAX_COLUMNS));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPatternFields.join()]);
 
   const {
     errorMessage,
