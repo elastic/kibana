@@ -7,9 +7,14 @@
 import moment from 'moment';
 import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
-import { API_URLS, INDEX_NAMES, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
+import { API_URLS, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
 import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
-import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from '../actions/types';
+import {
+  CreateMLJobSuccess,
+  DeleteJobResults,
+  MonitorIdParam,
+  HeartbeatIndicesParam,
+} from '../actions/types';
 import { DataRecognizerConfigResponse } from '../../../../../../plugins/ml/common/types/modules';
 import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
@@ -25,7 +30,8 @@ export const getExistingJobs = async (): Promise<JobExistResult> => {
 
 export const createMLJob = async ({
   monitorId,
-}: MonitorIdParam): Promise<CreateMLJobSuccess | null> => {
+  heartbeatIndices,
+}: MonitorIdParam & HeartbeatIndicesParam): Promise<CreateMLJobSuccess | null> => {
   const url = API_URLS.ML_SETUP_MODULE + ML_MODULE_ID;
 
   const data = {
@@ -35,7 +41,7 @@ export const createMLJob = async ({
     start: moment()
       .subtract(24, 'h')
       .valueOf(),
-    indexPatternName: INDEX_NAMES.HEARTBEAT,
+    indexPatternName: heartbeatIndices,
     query: {
       bool: {
         filter: [
