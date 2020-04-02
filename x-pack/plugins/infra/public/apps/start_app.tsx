@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -29,6 +29,7 @@ import { AppRouter } from '../routers';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 import '../index.scss';
+import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 
@@ -40,7 +41,7 @@ export async function startApp(
   Router: AppRouter,
   triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
 ) {
-  const { element, history } = params;
+  const { element, history, onAppLeave } = params;
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
     apolloClient: libs$.pipe(pluck('apolloClient')),
@@ -60,7 +61,9 @@ export async function startApp(
                   <ApolloClientContext.Provider value={libs.apolloClient}>
                     <EuiThemeProvider darkMode={darkMode}>
                       <HistoryContext.Provider value={history}>
-                        <Router history={history} />
+                        <NavigationWarningPromptProvider>
+                          <Router history={history} />
+                        </NavigationWarningPromptProvider>
                       </HistoryContext.Provider>
                     </EuiThemeProvider>
                   </ApolloClientContext.Provider>

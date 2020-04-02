@@ -10,6 +10,7 @@ import url from 'url';
 import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/public';
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useNavigationWarningPrompt } from '../utils/navigation_warning_prompt';
 
 type Search = Record<string, string | string[]>;
 
@@ -28,6 +29,7 @@ interface LinkProps {
 export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): LinkProps => {
   validateParams({ app, pathname, hash, search });
 
+  const { prompt } = useNavigationWarningPrompt();
   const prefixer = usePrefixPathWithBasepath();
   const navigateToApp = useKibana().services.application?.navigateToApp;
 
@@ -59,12 +61,28 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
   const onClick = useMemo(() => {
     return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
       e.preventDefault();
-      if (navigateToApp) {
-        const navigationPath = mergedHash ? `#${mergedHash}` : mergedPathname;
-        navigateToApp(app, { path: navigationPath ? navigationPath : undefined });
+
+      const navigate = () => {
+        if (navigateToApp) {
+          const navigationPath = mergedHash ? `#${mergedHash}` : mergedPathname;
+          navigateToApp(app, { path: navigationPath ? navigationPath : undefined });
+        }
+      };
+
+      // A <Prompt /> component somewhere within the app hierarchy is requesting that we
+      // prompt the user before navigating.
+      if (prompt) {
+        const wantsToNavigate = window.confirm(prompt);
+        if (wantsToNavigate) {
+          navigate();
+        } else {
+          return;
+        }
+      } else {
+        navigate();
       }
     };
-  }, [navigateToApp, mergedHash, mergedPathname, app]);
+  }, [navigateToApp, mergedHash, mergedPathname, app, prompt]);
 
   return {
     href,
