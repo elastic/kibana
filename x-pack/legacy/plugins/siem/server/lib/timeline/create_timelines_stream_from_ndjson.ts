@@ -5,9 +5,6 @@
  */
 
 import { Transform } from 'stream';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
 import {
   createConcatStream,
   createSplitStream,
@@ -21,17 +18,11 @@ import {
 
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
 import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
-import { throwErrors } from '../../../../../../plugins/case/common/api';
+import { decodeOrThrow } from '../../../../../../plugins/case/common/api';
 
 export const validateTimelines = (): Transform => {
   return createMapStream((obj: ImportTimelineResponse) => {
-    return pipe(
-      ImportTimelinesSchemaRt.decode(obj),
-      fold(
-        throwErrors(msg => new Error(msg)),
-        identity
-      )
-    );
+    return decodeOrThrow(ImportTimelinesSchemaRt)(obj);
   });
 };
 
