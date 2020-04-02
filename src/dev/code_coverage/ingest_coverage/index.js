@@ -18,14 +18,15 @@
  */
 
 import { resolve } from 'path';
-import parseAndProcess from './process';
+import { prok } from './process';
 import { run, createFlagError } from '@kbn/dev-utils';
 
 const ROOT = resolve(__dirname, '../../../..');
 const flags = {
-  string: ['path', 'verbose'],
+  string: ['path', 'verbose', 'vcsInfoPath'],
   help: `
 --path             Required, path to the file to extract coverage data
+--vcsInfoPath      Required, path to the git info file (branch, sha, author, & commit msg)
         `,
 };
 
@@ -33,12 +34,14 @@ export function runCoverageIngestionCli() {
   run(
     ({ flags, log }) => {
       if (flags.path === '') throw createFlagError('please provide a single --path flag');
+      if (flags.vcsInfoPath === '')
+        throw createFlagError('please provide a single --vcsInfoPath flag');
       if (flags.verbose) log.verbose(`Verbose logging enabled`);
 
       const resolveRoot = resolve.bind(null, ROOT);
       const jsonSummaryPath = resolveRoot(flags.path);
-      const vcsInfoFilePath = resolveRoot('VCS_INFO.txt');
-      parseAndProcess({ jsonSummaryPath, vcsInfoFilePath }, log);
+      const vcsInfoFilePath = resolveRoot(flags.vcsInfoPath);
+      prok({ jsonSummaryPath, vcsInfoFilePath }, log);
     },
     {
       description: `
