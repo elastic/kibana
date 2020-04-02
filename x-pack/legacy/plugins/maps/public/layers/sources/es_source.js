@@ -23,8 +23,6 @@ import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
 export class AbstractESSource extends AbstractVectorSource {
-  static icon = 'logoElasticsearch';
-
   constructor(descriptor, inspectorAdapters) {
     super(
       {
