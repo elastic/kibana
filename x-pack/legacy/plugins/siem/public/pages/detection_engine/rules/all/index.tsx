@@ -31,7 +31,7 @@ import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { PrePackagedRulesPrompt } from '../components/pre_packaged_rules/load_empty_prompt';
 import { GenericDownloader } from '../../../../components/generic_downloader';
-import { AllRulesTables } from '../components/all_rules_tables';
+import { AllRulesTables, SortingType } from '../components/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
@@ -128,7 +128,7 @@ export const AllRules = React.memo<AllRulesProps>(
     });
 
     const sorting = useMemo(
-      () => ({ sort: { field: 'enabled', direction: filterOptions.sortOrder } }),
+      (): SortingType => ({ sort: { field: 'enabled', direction: filterOptions.sortOrder } }),
       [filterOptions.sortOrder]
     );
 

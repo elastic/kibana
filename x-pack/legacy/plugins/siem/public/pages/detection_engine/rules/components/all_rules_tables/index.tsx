@@ -29,6 +29,13 @@ import { Rule, Rules } from '../../../../../containers/detection_engine/rules';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MyEuiBasicTable = styled(EuiBasicTable as any)`` as any;
 
+export interface SortingType {
+  sort: {
+    field: 'enabled';
+    direction: Direction;
+  };
+}
+
 interface AllRulesTablesProps {
   euiBasicTableSelectionProps: EuiTableSelectionType<Rule>;
   hasNoPermissions: boolean;
