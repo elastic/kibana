@@ -373,6 +373,14 @@ describe('resolveImportErrors()', () => {
     await testForConflicts('conflict', createError);
   });
 
+  test('extracts errors for unresolvable conflicts', async () => {
+    const createError = (type: string, id: string) => ({
+      ...SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+      metadata: { isNotOverwritable: true },
+    });
+    await testForConflicts('unresolvable_conflict', createError);
+  });
+
   test('validates references', async () => {
     const readStream = new Readable({
       objectMode: true,

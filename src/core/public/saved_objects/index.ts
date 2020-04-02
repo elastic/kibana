@@ -37,6 +37,7 @@ export {
   SavedObjectsMigrationVersion,
   SavedObjectsImportResponse,
   SavedObjectsImportConflictError,
+  SavedObjectsImportUnresolvableConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,

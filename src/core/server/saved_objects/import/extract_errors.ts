@@ -39,13 +39,15 @@ export function extractErrors(
         originalSavedObject.attributes &&
         originalSavedObject.attributes.title;
       if (savedObject.error.statusCode === 409) {
+        const type =
+          savedObject.error.metadata?.isNotOverwritable === true
+            ? 'unresolvable_conflict'
+            : 'conflict';
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
           title,
-          error: {
-            type: 'conflict',
-          },
+          error: { type },
         });
         continue;
       }

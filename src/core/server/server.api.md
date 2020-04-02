@@ -1653,6 +1653,7 @@ export interface SavedObject<T = unknown> {
         error: string;
         message: string;
         statusCode: number;
+        metadata?: Record<string, unknown>;
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
@@ -2002,7 +2003,7 @@ export interface SavedObjectsImportConflictError {
 // @public
 export interface SavedObjectsImportError {
     // (undocumented)
-    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    error: SavedObjectsImportConflictError | SavedObjectsImportUnresolvableConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
     id: string;
     // (undocumented)
@@ -2071,6 +2072,12 @@ export interface SavedObjectsImportUnknownError {
     statusCode: number;
     // (undocumented)
     type: 'unknown';
+}
+
+// @public
+export interface SavedObjectsImportUnresolvableConflictError {
+    // (undocumented)
+    type: 'unresolvable_conflict';
 }
 
 // @public

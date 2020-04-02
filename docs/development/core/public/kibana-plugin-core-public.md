@@ -109,6 +109,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsImportResponse](./kibana-plugin-core-public.savedobjectsimportresponse.md) | The response describing the result of an import. |
 |  [SavedObjectsImportRetry](./kibana-plugin-core-public.savedobjectsimportretry.md) | Describes a retry operation for importing a saved object. |
 |  [SavedObjectsImportUnknownError](./kibana-plugin-core-public.savedobjectsimportunknownerror.md) | Represents a failure to import due to an unknown reason. |
+|  [SavedObjectsImportUnresolvableConflictError](./kibana-plugin-core-public.savedobjectsimportunresolvableconflicterror.md) | Represents a failure to import due to a conflict, which cannot be resolved with an overwrite. |
 |  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-core-public.savedobjectsimportunsupportedtypeerror.md) | Represents a failure to import due to having an unsupported saved object type. |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-core-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsStart](./kibana-plugin-core-public.savedobjectsstart.md) |  |
