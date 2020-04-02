@@ -45,9 +45,14 @@ Registering a feature consists of the following fields. For more information, co
 |An array of applications this feature enables. Typically, all of your plugin's apps (from `uiExports`) will be included here.
 
 |`privileges` (required)
-|{repo}blob/{branch}/x-pack/plugins/features/server/feature.ts[`FeatureWithAllOrReadPrivileges`].
+|{repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
 |See <<example-1-canvas,Example 1>> and <<example-2-dev-tools,Example 2>>
 |The set of privileges this feature requires to function.
+
+|`subFeatures` (optional)
+|{repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
+|See <<example-3-discover,Example 3>>
+|The set of sub-features to enable granular access control beyond the `all` and `read` feature privileges. These options will only be available to clusters running a Gold license or better.
 
 |`icon`
 |`string`
@@ -192,3 +197,78 @@ server.route({
  }
 });
 -----------
+
+[[example-3-discover]]
+==== Example 3: Discover
+
+["source","javascript"]
+-----------
+init(server) {
+  const xpackMainPlugin = server.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    {
+      id: 'discover',
+      name: i18n.translate('xpack.features.discoverFeatureName', {
+        defaultMessage: 'Discover',
+      }),
+      order: 100,
+      icon: 'discoverApp',
+      navLinkId: 'kibana:discover',
+      app: ['kibana'],
+      catalogue: ['discover'],
+      privileges: {
+        all: {
+          app: ['kibana'],
+          catalogue: ['discover'],
+          savedObject: {
+            all: ['search', 'query'],
+            read: ['index-pattern'],
+          },
+          ui: ['show', 'save', 'saveQuery'],
+        },
+        read: {
+          app: ['kibana'],
+          catalogue: ['discover'],
+          savedObject: {
+            all: [],
+            read: ['index-pattern', 'search', 'query'],
+          },
+          ui: ['show'],
+        },
+      },
+      subFeatures: [
+        {
+          name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
+            defaultMessage: 'Short URLs',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'url_create',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.discoverCreateShortUrlPrivilegeName',
+                    {
+                      defaultMessage: 'Create Short URLs',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['url'],
+                    read: [],
+                  },
+                  ui: ['createShortUrl'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }
+  });
+}
+-----------
+
+Discover takes advantage of sub-feature privileges to allow fine-grained access control. In this example,
+a single "Create Short URLs" sub-feature privilege is defined, which allows users to grant access to this feature without having to grant the "All" privilege to Discover. To say another way, you can grant "Read" access to Discover, but _additionally_ grant the ability to create Short URLs.
