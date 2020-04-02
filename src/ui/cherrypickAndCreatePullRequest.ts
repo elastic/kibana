@@ -10,10 +10,10 @@ import {
   pushFeatureBranch,
   getRemoteName,
   setCommitAuthor,
-  getFilesWithConflicts,
-  getUnstagedFiles,
+  getUnmergedFiles,
   addUnstagedFiles,
   cherrypickContinue,
+  hasConflictMarkers,
 } from '../services/git';
 import { createPullRequest } from '../services/github/createPullRequest';
 import { getRepoPath } from '../services/env';
@@ -24,7 +24,6 @@ import { sequentially } from '../services/sequentially';
 import { withSpinner } from './withSpinner';
 import { confirmPrompt } from '../services/prompts';
 import { HandledError } from '../services/HandledError';
-import isEmpty = require('lodash.isempty');
 import dedent = require('dedent');
 
 export async function cherrypickAndCreatePullRequest({
@@ -99,89 +98,74 @@ async function waitForCherrypick(
   const cherrypickSpinner = ora(
     `Cherry-picking commit ${getShortSha(commit.sha)}`
   ).start();
+
+  let didCherrypick: boolean;
   try {
-    await cherrypick(options, commit);
+    didCherrypick = await cherrypick(options, commit);
     cherrypickSpinner.succeed();
   } catch (e) {
     cherrypickSpinner.fail();
+    throw e;
+  }
 
-    const filesWithConflicts = await getFilesWithConflicts(options);
-    if (isEmpty(filesWithConflicts)) {
-      throw e;
-    }
+  /*
+   * Commit was cleanly cherrypicked
+   */
+  if (didCherrypick) {
+    return;
+  }
 
-    /*
-     * Conflict resolution phase starts here...
-     */
+  /*
+   * Commit could not be cleanly cherrypicked: Initiating conflict resolution
+   */
 
-    if (options.editor) {
-      const repoPath = getRepoPath(options);
-      await exec(`${options.editor} ${repoPath}`);
-    }
+  if (options.editor) {
+    const repoPath = getRepoPath(options);
+    await exec(`${options.editor} ${repoPath}`, {});
+  }
 
-    // list conflicting files and require the user to resolve them
-    await waitForConflictsToBeResolved(options);
+  // list unmerged files and require user to confirm adding+comitting them
+  await listUnmergedFilesAndWaitForUserConfirmation(options);
 
-    // list unstaged files and require user to confirm adding+comitting them
-    await waitForEnterAndListUnstaged(options);
+  // Conflicts resolved and unstaged files will now be staged and committed
+  const stagingSpinner = ora(`Staging and committing files`).start();
+  try {
+    // add unstaged files
+    await addUnstagedFiles(options);
 
-    /*
-     * Conflicts resolved and cherrypicking can be continued...
-     */
-
-    const stagingSpinner = ora(`Staging and committing files`).start();
-    try {
-      // add unstaged files
-      await addUnstagedFiles(options);
-
-      // continue cherrypick (similar to `git commit`)
-      await cherrypickContinue(options);
-    } catch (e) {
-      stagingSpinner.fail();
-      throw e;
-    }
-
+    // continue cherrypick (similar to `git commit`)
+    await cherrypickContinue(options);
     stagingSpinner.succeed();
+  } catch (e) {
+    stagingSpinner.fail();
+    throw e;
   }
 }
 
-async function waitForConflictsToBeResolved(options: BackportOptions) {
-  const spinnerText = `Waiting for conflicts to be resolved`;
-  const spinner = ora(spinnerText).start();
-
-  return new Promise((resolve) => {
-    const checkForConflicts = async () => {
-      const filesWithConflicts = await getFilesWithConflicts(options);
-      if (isEmpty(filesWithConflicts)) {
-        resolve();
-        spinner.succeed(spinnerText);
-      } else {
-        spinner.text = dedent(`${spinnerText}
-
-        Resolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:
-        ${filesWithConflicts.join('\n')}`);
-        setTimeout(checkForConflicts, 1000);
-      }
-    };
-
-    checkForConflicts();
-  });
-}
-
-async function waitForEnterAndListUnstaged(options: BackportOptions) {
-  const unstagedFiles = await getUnstagedFiles(options);
+async function listUnmergedFilesAndWaitForUserConfirmation(
+  options: BackportOptions
+) {
+  const unmergedFiles = await getUnmergedFiles(options);
   const text = dedent(`${chalk.reset(
-    `The following files will be staged and committed:`
+    `Resolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:`
   )}
-  ${chalk.reset(unstagedFiles.join('\n'))}
+  ${chalk.reset(unmergedFiles.join('\n'))}
 
-  Press ENTER to continue...`);
+  Press ENTER to stage and commit the above files...`);
 
-  const res = await confirmPrompt(text);
+  const checkForConflicts = async () => {
+    const res = await confirmPrompt(text);
+    if (!res) {
+      throw new HandledError('Aborted');
+    }
 
-  if (!res) {
-    throw new HandledError('Aborted');
-  }
+    const hasUnresolvedConflicts = await hasConflictMarkers(options);
+    if (hasUnresolvedConflicts) {
+      await checkForConflicts();
+    }
+  };
+
+  await checkForConflicts();
 }
 
 function getPullRequestTitle(

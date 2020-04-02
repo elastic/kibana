@@ -5,7 +5,6 @@ import { stat } from './fs-promisified';
 import { getRepoOwnerPath, getRepoPath } from './env';
 import { execAsCallback, exec } from './child-process-promisified';
 import { CommitSelected } from './github/Commit';
-import uniq from 'lodash.uniq';
 import { logger } from './logger';
 import { resolve as pathResolve } from 'path';
 
@@ -97,11 +96,28 @@ export async function addRemote(options: BackportOptions, remoteName: string) {
   }
 }
 
-export function cherrypick(options: BackportOptions, commit: CommitSelected) {
-  return exec(
-    `git fetch ${options.repoOwner} ${commit.branch}:${commit.branch} --force && git cherry-pick ${commit.sha}`,
+export async function cherrypick(
+  options: BackportOptions,
+  commit: CommitSelected
+) {
+  await exec(
+    `git fetch ${options.repoOwner} ${commit.branch}:${commit.branch} --force`,
     { cwd: getRepoPath(options) }
   );
+
+  const cmd = `git cherry-pick ${commit.sha}`;
+  try {
+    await exec(cmd, { cwd: getRepoPath(options) });
+    return true;
+  } catch (e) {
+    // re-throw unknown errors
+    if (e.cmd !== cmd) {
+      throw e;
+    }
+
+    // handle cherrypick-related error
+    return false;
+  }
 }
 
 export async function cherrypickContinue(options: BackportOptions) {
@@ -117,32 +133,20 @@ export async function cherrypickContinue(options: BackportOptions) {
     }
 
     logger.info(
-      `Cherry pick continue failed. Probably because the cherry pick operation was manually completed. ${JSON.stringify(
-        e
-      )}`
+      `Cherry pick continue failed. Probably because the cherry pick operation was manually completed`,
+      e
     );
   }
 }
 
-export async function getFilesWithConflicts(options: BackportOptions) {
-  const repoPath = getRepoPath(options);
+export async function hasConflictMarkers(options: BackportOptions) {
   try {
-    await exec(`git --no-pager diff --check`, { cwd: repoPath });
-
-    return [];
+    await exec(`git --no-pager diff --check`, { cwd: getRepoPath(options) });
+    return false;
   } catch (e) {
     const isConflictError = e.cmd && e.code === 2;
     if (isConflictError) {
-      const files = (e.stdout as string)
-        .split('\n')
-        .filter((line: string) => !!line.trim())
-        .map((line: string) => {
-          const posSeparator = line.indexOf(':');
-          const filename = line.slice(0, posSeparator).trim();
-          return ` - ${pathResolve(repoPath, filename)}`;
-        });
-
-      return uniq(files);
+      return true;
     }
 
     // rethrow error since it's unrelated
@@ -150,27 +154,22 @@ export async function getFilesWithConflicts(options: BackportOptions) {
   }
 }
 
+export async function getUnmergedFiles(options: BackportOptions) {
+  const repoPath = getRepoPath(options);
+  const res = await exec(`git --no-pager diff --name-only --diff-filter=U`, {
+    cwd: repoPath,
+  });
+  return res.stdout
+    .split('\n')
+    .filter((file) => !!file)
+    .map((file) => ` - ${pathResolve(repoPath, file)}`);
+}
+
 export function setCommitAuthor(options: BackportOptions, username: string) {
   return exec(
     `git commit --amend --no-edit --author "${username} <${username}@users.noreply.github.com>"`,
     { cwd: getRepoPath(options) }
   );
-}
-
-export async function getUnstagedFiles(options: BackportOptions) {
-  const repoPath = getRepoPath(options);
-  const { stdout } = await exec(`git add --update --dry-run`, {
-    cwd: repoPath,
-  });
-
-  return stdout
-    .split('\n')
-    .map((line) => {
-      const res = /\w+ '(.*)'/.exec(line) || [];
-      return res[1];
-    })
-    .filter((line) => !!line)
-    .map((file) => ` - ${pathResolve(repoPath, file)}`);
 }
 
 export async function addUnstagedFiles(options: BackportOptions) {

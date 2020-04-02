@@ -142,7 +142,7 @@ describe('runWithOptions', () => {
   });
 
   it('exec should be called with correct args', () => {
-    expect(rpcExecMock).toHaveBeenCalledTimes(9);
+    expect(rpcExecMock).toHaveBeenCalledTimes(10);
     expect(rpcExecMock.mock.calls).toMatchSnapshot();
   });
 

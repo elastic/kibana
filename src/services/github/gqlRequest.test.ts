@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { HandledError } from '../HandledError';
 import { gqlRequest } from './gqlRequest';
-import dedent from 'dedent';
 
 describe('gqlRequest', () => {
   describe('when request succeeds', () => {
@@ -45,7 +44,7 @@ describe('gqlRequest', () => {
     });
   });
 
-  describe('when request fails', () => {
+  describe('when request fails with error messages', () => {
     beforeEach(() => {
       jest.spyOn(axios, 'post').mockRejectedValue({
         response: {
@@ -69,13 +68,32 @@ describe('gqlRequest', () => {
             foo: 'bar',
           },
         })
-      ).rejects.toThrowError(
-        new HandledError(
-          dedent(`Unexpected response from Github:
+      ).rejects.toThrowError(new HandledError(`some error, some other error`));
+    });
+  });
 
-          some error, some other error`)
-        )
-      );
+  describe('when request fails without error messages', () => {
+    beforeEach(() => {
+      jest.spyOn(axios, 'post').mockRejectedValue({
+        response: {
+          data: {
+            foo: 'bar',
+          },
+        },
+      } as any);
+    });
+
+    it('should return parsed github error', async () => {
+      return expect(
+        gqlRequest({
+          accessToken: 'myAccessToken',
+          githubApiBaseUrlV4: 'myApiHostname',
+          query: 'myQuery',
+          variables: {
+            foo: 'bar',
+          },
+        })
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 });

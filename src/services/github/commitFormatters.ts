@@ -16,15 +16,15 @@ export function getFormattedCommitMessage({
   sha: string;
 }) {
   const firstMessageLine = getFirstCommitMessageLine(message);
+  const messageHasPullNumber = firstMessageLine.match(/.+ \(#\d+\)/);
+
+  // message already contains pull number
+  if (messageHasPullNumber) {
+    return firstMessageLine;
+  }
+
+  // message doesn't contain pull number. Add it
   if (pullNumber) {
-    const messageHasPullNumber = firstMessageLine.includes(`(#${pullNumber})`);
-
-    // message already contain pull number
-    if (messageHasPullNumber) {
-      return firstMessageLine;
-    }
-
-    // message doesn't contain pull number. Add it
     return `${firstMessageLine} (#${pullNumber})`;
   }
 

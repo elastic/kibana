@@ -4,18 +4,19 @@ import { logger } from '../logger';
 
 export function handleGithubError(e: GithubApiError) {
   if (e.response?.data) {
-    logger.info(formatObject(e.config));
-    logger.info(formatObject(e.response.headers));
-    logger.info(formatObject(e.response.data));
+    logger.info('API v3 config', e.config);
+    logger.info('API v3 response headers', e.response.headers);
+    logger.info('API v3 response data', e.response.data);
+
+    const errorMessages = e.response.data.errors?.map((error) => error.message);
+    if (errorMessages) {
+      return new HandledError(errorMessages.join(','));
+    }
 
     return new HandledError(
-      formatObject({ ...e.response.data, axiosUrl: e.config.url })
+      JSON.stringify({ ...e.response.data, axiosUrl: e.config.url }, null, 2)
     );
   }
 
   return e;
-}
-
-function formatObject(obj: Record<any, any>) {
-  return JSON.stringify(obj, null, 2);
 }

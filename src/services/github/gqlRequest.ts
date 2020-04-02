@@ -1,7 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { HandledError } from '../HandledError';
 import { logger } from '../logger';
-import dedent from 'dedent';
 
 interface GithubResponse<DataResponse> {
   data: DataResponse;
@@ -30,8 +29,8 @@ export async function gqlRequest<DataResponse>({
   accessToken: string;
 }) {
   try {
-    logger.verbose(query);
-    logger.verbose(variables as any);
+    logger.verbose('gql query:', query);
+    logger.verbose('gql variables:', variables);
     const response = await axios.post<GithubResponse<DataResponse>>(
       githubApiBaseUrlV4,
       { query, variables },
@@ -43,12 +42,12 @@ export async function gqlRequest<DataResponse>({
       }
     );
 
-    logger.verbose(response.data);
+    logger.debug('gql response:', response.data);
 
     if (response.data.errors) {
       const newError = new Error();
-      ((newError as unknown) as any).response = response;
-
+      //@ts-ignore
+      newError.response = response;
       throw newError;
     }
 
@@ -58,20 +57,24 @@ export async function gqlRequest<DataResponse>({
     logger.info(e.message);
 
     if (e.response?.data) {
-      logger.info(e.config);
-      logger.info(e.response.headers);
-      logger.info(e.response.data);
+      logger.info('API v4 config:', e.config);
+      logger.info('API v4 response headers:', e.response.headers);
+      logger.info('API v4 response data', e.response.data);
 
-      const errorMessages = e.response.data.errors
-        ?.map((error) => error.message)
-        .join(', ');
+      const errorMessages = e.response.data.errors?.map(
+        (error) => error.message
+      );
 
-      const stringifiedResponseData = JSON.stringify(e.response.data, null, 2);
+      if (errorMessages) {
+        throw new HandledError(errorMessages.join(', '));
+      }
 
       throw new HandledError(
-        dedent(`Unexpected response from Github:
-
-        ${errorMessages ? errorMessages : stringifiedResponseData}`)
+        `Unexpected response from Github:\n${JSON.stringify(
+          e.response.data,
+          null,
+          2
+        )}`
       );
     }
 

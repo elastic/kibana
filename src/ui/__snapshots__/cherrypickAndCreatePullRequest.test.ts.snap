@@ -9,7 +9,19 @@ Array [
     },
   ],
   Array [
-    "git fetch elastic 7.x:7.x --force && git cherry-pick mySha",
+    "git fetch elastic 7.x:7.x --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git --no-pager diff --name-only --diff-filter=U",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -34,12 +46,6 @@ Array [
   ],
   Array [
     "git --no-pager diff --check",
-    Object {
-      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-    },
-  ],
-  Array [
-    "git add --update --dry-run",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -80,13 +86,25 @@ Array [
     },
   ],
   Array [
-    "git fetch elastic 7.x:7.x --force && git cherry-pick mySha",
+    "git fetch elastic 7.x:7.x --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
-    "git fetch elastic 7.x:7.x --force && git cherry-pick mySha2",
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git fetch elastic 7.x:7.x --force",
+    Object {
+      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha2",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },

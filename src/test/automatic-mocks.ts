@@ -6,10 +6,7 @@ jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
 jest.mock('../services/child-process-promisified', () => {
   return {
     exec: jest.fn(async (cmd: string) => {
-      const e = new Error(`Mock required for exec with cmd: "${cmd}"`);
-      // @ts-ignore
-      e.stderr = `Dummy stderr`;
-      throw e;
+      throw new Error(`Mock required for exec with cmd: "${cmd}"`);
     }),
 
     execAsCallback: jest.fn((...args) => {

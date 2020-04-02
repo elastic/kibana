@@ -63,6 +63,7 @@
     "node": ">=8.0.0"
   },
   "dependencies": {
+    "@types/safe-json-stringify": "^1.1.0",
     "axios": "^0.19.2",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
@@ -73,6 +74,7 @@
     "lodash.uniq": "^4.5.0",
     "make-dir": "^3.0.2",
     "ora": "^4.0.3",
+    "safe-json-stringify": "^1.2.0",
     "strip-json-comments": "^3.0.1",
     "winston": "^3.2.1",
     "yargs": "^15.3.1"

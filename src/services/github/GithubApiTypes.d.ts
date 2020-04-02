@@ -18,6 +18,10 @@ export interface GithubSearch<T> {
 
 export type GithubApiError = AxiosError<{
   message: string;
-  errors?: {}[];
+  errors?: Array<{
+    resource: string;
+    code: string;
+    message: string;
+  }>;
   documentation_url: string;
 }>;

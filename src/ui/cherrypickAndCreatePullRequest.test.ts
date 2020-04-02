@@ -8,6 +8,7 @@ import dedent from 'dedent';
 import ora from 'ora';
 import { PromiseReturnType } from '../types/PromiseReturnType';
 import { CommitSelected } from '../services/github/Commit';
+import { ExecError } from '../test/ExecError';
 
 type ExecReturnType = PromiseReturnType<typeof childProcess.exec>;
 
@@ -222,11 +223,28 @@ describe('cherrypickAndCreatePullRequest', () => {
       expect(promptSpy.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "[0mThe following files will be staged and committed:[0m
+            "[0mResolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:[0m
         [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
-        [0m - /myHomeDir/.backport/repositories/elastic/kibana/another-conflicting-file.js[0m
 
-        Press ENTER to continue...",
+        Press ENTER to stage and commit the above files...",
+          ],
+          Array [
+            "[0mResolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:[0m
+        [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
+
+        Press ENTER to stage and commit the above files...",
+          ],
+          Array [
+            "[0mResolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:[0m
+        [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
+
+        Press ENTER to stage and commit the above files...",
+          ],
+          Array [
+            "[0mResolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:[0m
+        [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
+
+        Press ENTER to stage and commit the above files...",
           ],
         ]
       `);
@@ -250,9 +268,6 @@ describe('cherrypickAndCreatePullRequest', () => {
             "Cherry-picking commit mySha",
           ],
           Array [
-            "Waiting for conflicts to be resolved",
-          ],
-          Array [
             "Staging and committing files",
           ],
           Array [
@@ -274,62 +289,63 @@ function setupExecSpy() {
   return jest
     .spyOn(childProcess, 'exec')
 
-    .mockImplementation((async (cmd) => {
+    .mockImplementation(async (cmd) => {
       // createFeatureBranch
       if (cmd.includes('git checkout -B')) {
-        return { stdout: 'create feature branch succeeded' };
+        return { stdout: 'create feature branch succeeded', stderr: '' };
+      }
+
+      // git fetch
+      if (cmd.startsWith('git fetch')) {
+        return { stderr: '', stdout: '' };
       }
 
       // cherrypick
-      if (cmd.includes('git cherry-pick mySha')) {
-        throw new Error('cherrypick failed');
+      if (cmd === 'git cherry-pick mySha') {
+        throw new ExecError('cherrypick failed', { cmd });
       }
 
       // filesWithConflicts
       if (cmd === 'git --no-pager diff --check') {
         conflictCheckCounts++;
         if (conflictCheckCounts >= 4) {
-          return {};
+          return { stderr: '', stdout: '' };
         }
-        const e = new Error('Not all conflicts resolved');
-        // @ts-ignore
-        e.cmd = cmd;
-        // @ts-ignore
-        e.code = 2;
-        // @ts-ignore
-        e.stdout = `conflicting-file.txt:1: leftover conflict marker\nconflicting-file.txt:3: leftover conflict marker\nconflicting-file.txt:5: leftover conflict marker\n`;
-        throw e;
+
+        throw new ExecError('Not all conflicts resolved', {
+          code: 2,
+          cmd,
+          stdout: `conflicting-file.txt:1: leftover conflict marker\nconflicting-file.txt:3: leftover conflict marker\nconflicting-file.txt:5: leftover conflict marker\n`,
+        });
       }
 
-      // getUnstagedFiles
-      if (cmd === 'git add --update --dry-run') {
-        return {
-          stdout: `add 'conflicting-file.txt'\nadd 'another-conflicting-file.js'\n`,
-        };
+      // getUnmergedFiles
+      if (cmd === 'git --no-pager diff --name-only --diff-filter=U') {
+        return { stdout: `conflicting-file.txt\n`, stderr: '' };
       }
 
       // addUnstagedFiles
       if (cmd === 'git add --update') {
-        return { stdout: `` };
+        return { stdout: ``, stderr: '' };
       }
 
       // cherrypickContinue
       if (cmd.includes('cherry-pick --continue')) {
-        return { stdout: `` };
+        return { stdout: ``, stderr: '' };
       }
 
       // pushFeatureBranch
       if (cmd.startsWith('git push ')) {
-        return { stdout: `` };
+        return { stdout: ``, stderr: '' };
       }
 
       // deleteFeatureBranch
       if (cmd.includes('git branch -D ')) {
-        return { stdout: `` };
+        return { stdout: ``, stderr: '' };
       }
 
       throw new Error(`Missing mock for "${cmd}"`);
-    }) as typeof childProcess.exec);
+    });
 }
 
 /*
