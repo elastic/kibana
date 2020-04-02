@@ -72,10 +72,11 @@ function ContextAppRouteController($routeParams, $scope, $route) {
   const {
     startSync: startStateSync,
     stopSync: stopStateSync,
-    replaceUrlAppState,
     appState,
     getFilters,
     setFilters,
+    setAppState,
+    flushToUrl,
   } = getState({
     defaultStepSize: getServices().uiSettings.get('context:defaultSize'),
     timeFieldName: indexPattern.timeFieldName,
@@ -95,16 +96,11 @@ function ContextAppRouteController($routeParams, $scope, $route) {
       'contextAppRoute.state.predecessorCount',
       'contextAppRoute.state.successorCount',
     ],
-    async (newValues, oldValues) => {
+    newValues => {
       const [columns, predecessorCount, successorCount] = newValues;
-      // eslint-disable-next-line no-unused-vars
-      const [prevColumns, prevPredecessorCount, prevSuccessorCount] = oldValues;
-      if (predecessorCount === prevPredecessorCount && successorCount === prevSuccessorCount) {
-        return;
-      }
       if (Array.isArray(columns) && predecessorCount >= 0 && successorCount >= 0) {
-        await replaceUrlAppState({ columns, predecessorCount, successorCount });
-        $route.reload();
+        setAppState({ columns, predecessorCount, successorCount });
+        flushToUrl(true);
       }
     }
   );
