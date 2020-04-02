@@ -10,8 +10,8 @@ import styled from 'styled-components';
 import { npStart } from 'ui/new_platform';
 
 import * as i18n from './translations';
-import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../plugins/maps/public';
+import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../legacy/plugins/maps/public';
+// import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../plugins/maps/public';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../legacy/plugins/maps/common/constants';

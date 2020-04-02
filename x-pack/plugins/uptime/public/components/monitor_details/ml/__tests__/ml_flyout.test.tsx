@@ -9,7 +9,7 @@ import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MLFlyoutView } from '../ml_flyout';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
-import { License } from '../../../../../../../../plugins/licensing/common/license';
+import { License } from '../../../../../../../plugins/licensing/common/license';
 
 const expiredLicense = new License({
   signature: 'test signature',

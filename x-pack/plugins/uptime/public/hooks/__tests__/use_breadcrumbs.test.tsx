@@ -9,7 +9,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { mountWithRouter } from '../../lib';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { UptimeUrlParams, getSupportedUrlParams } from '../../lib/helper';
 import { makeBaseBreadcrumb, useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
