@@ -17,9 +17,14 @@
  * under the License.
  */
 
-export { indexPatternsMixin } from './mixin';
-export {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-} from '../../../plugins/data/server/index_patterns/fetcher';
-export { IndexPatternsServiceFactory } from './mixin';
+import { PluginInitializer } from 'kibana/public';
+import {
+  SampelPanelActionTestPlugin,
+  SampelPanelActionTestPluginSetup,
+  SampelPanelActionTestPluginStart,
+} from './plugin';
+
+export const plugin: PluginInitializer<
+  SampelPanelActionTestPluginSetup,
+  SampelPanelActionTestPluginStart
+> = () => new SampelPanelActionTestPlugin();
