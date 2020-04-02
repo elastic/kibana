@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiText } from '@elastic/eui';
+import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventingCheckbox } from './checkbox';
 import { OS, EventingFields } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
@@ -52,6 +52,7 @@ export const WindowsEventing = React.memo(() => {
             />
           </h5>
         </EuiTitle>
+        <EuiSpacer size="s" />
         {checkboxes.map((item, index) => {
           return (
             <EventingCheckbox
