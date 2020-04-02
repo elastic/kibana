@@ -217,18 +217,29 @@ export default function({ getService }: FtrProviderContext) {
       after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
 
       it('should return all monitor when no status filter', async () => {
-        const nonSummaryRes = await getMonitorStates({});
-        expect(nonSummaryRes.monitorStates.summaries.length).to.eql(3);
+        const { monitorStates } = await getMonitorStates({});
+        expect(monitorStates.summaries.length).to.eql(3);
+        // Summaries are by default sorted by monitor names
+        expect(monitorStates.summaries.map(summary => summary.monitor_id)).to.eql([
+          downMonitorId,
+          mixMonitorId,
+          upMonitorId,
+        ]);
       });
 
       it('should return a monitor with mix state if check status filter is down', async () => {
-        const nonSummaryRes = await getMonitorStates({ statusFilter: 'down' });
-        expect(nonSummaryRes.monitorStates.summaries.length).to.eql(2);
+        const { monitorStates } = await getMonitorStates({ statusFilter: 'down' });
+        expect(monitorStates.summaries.length).to.eql(2);
+        monitorStates.summaries.forEach(summary => {
+          expect(summary.monitor_id).to.not.eql(upMonitorId);
+        });
       });
 
       it('should not return a monitor with mix state if check status filter is up', async () => {
-        const nonSummaryRes = await getMonitorStates({ statusFilter: 'up' });
-        expect(nonSummaryRes.monitorStates.summaries.length).to.eql(1);
+        const { monitorStates } = await getMonitorStates({ statusFilter: 'up' });
+
+        expect(monitorStates.summaries.length).to.eql(1);
+        expect(monitorStates.summaries[0].monitor_id).to.eql(upMonitorId);
       });
     });
   });
