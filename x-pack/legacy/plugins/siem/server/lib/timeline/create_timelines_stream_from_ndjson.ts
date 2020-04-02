@@ -21,21 +21,31 @@ import {
 } from '../detection_engine/rules/create_rules_stream_from_ndjson';
 
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
-import { throwErrors } from '../../../../../../plugins/case/common/api';
 import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
+import { KibanaResponseFactory } from '../../../../../../../src/core/server';
+import { excess, throwErrors } from '../../../../../../plugins/case/common/api';
 
-export const validateTimelines = (): Transform => {
+export const validateTimelines = (response: KibanaResponseFactory): Transform => {
   return createMapStream((obj: ImportTimelineResponse) => {
+    // return pipe(
+    //   ImportTimelinesSchemaRt.decode(obj),
+    //   fold(e => {
+    //     throw response.badRequest();
+    //   }, identity)
+    // );
     return pipe(ImportTimelinesSchemaRt.decode(obj), fold(throwErrors(Boom.badRequest), identity));
   });
 };
 
-export const createTimelinesStreamFromNdJson = (ruleLimit: number) => {
+export const createTimelinesStreamFromNdJson = (
+  ruleLimit: number,
+  response: KibanaResponseFactory
+) => {
   return [
     createSplitStream('\n'),
     parseNdjsonStrings(),
     filterExportedCounts(),
-    validateTimelines(),
+    validateTimelines(response),
     createLimitStream(ruleLimit),
     createConcatStream([]),
   ];

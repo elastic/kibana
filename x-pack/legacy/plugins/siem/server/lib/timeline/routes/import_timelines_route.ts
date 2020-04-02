@@ -93,9 +93,9 @@ export const importTimelinesRoute = (
 
         const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
 
-        const readStream = createTimelinesStreamFromNdJson(objectLimit);
+        const readStream = createTimelinesStreamFromNdJson(objectLimit, response);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-          (file as unknown) as Readable,
+          file,
           ...readStream,
         ]);
         const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueTimeline(
