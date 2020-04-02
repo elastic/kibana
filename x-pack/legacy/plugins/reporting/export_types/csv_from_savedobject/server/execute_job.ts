@@ -21,7 +21,7 @@ import { createGenerateCsv } from './lib';
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);

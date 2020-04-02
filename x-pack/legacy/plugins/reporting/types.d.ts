@@ -231,7 +231,7 @@ export type CreateJobFactory<CreateJobFnType> = (
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   reporting: ReportingCore,
   logger: LevelLogger
-) => ExecuteJobFnType;
+) => Promise<ExecuteJobFnType>; // FIXME: does not "need" to be async
 
 export interface ExportTypeDefinition<
   JobParamsType,

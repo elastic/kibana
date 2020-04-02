@@ -18,7 +18,7 @@ import { createGenerateCsv } from './lib/generate_csv';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);

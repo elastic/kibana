@@ -48,7 +48,7 @@ export async function createWorkerFactory<JobParamsType>(
         ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>
       >
     >) {
-      const jobExecutor = exportType.executeJobFactory(reporting, logger);
+      const jobExecutor = await exportType.executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 

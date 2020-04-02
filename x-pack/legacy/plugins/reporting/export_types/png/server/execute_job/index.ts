@@ -20,7 +20,7 @@ import { generatePngObservableFactory } from '../lib/generate_png';
 
 type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
 
-export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
+export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
   parentLogger: Logger
 ) {

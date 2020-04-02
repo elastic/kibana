@@ -21,7 +21,7 @@ import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
-export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
+export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
   parentLogger: Logger
 ) {
