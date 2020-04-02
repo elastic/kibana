@@ -12,6 +12,7 @@ import {
   hasMLJobSelector,
   hasNewMLJobSelector,
   isMLJobCreatingSelector,
+  selectDynamicSettings,
 } from '../../../state/selectors';
 import { createMLJobAction, getExistingMLJobAction } from '../../../state/actions';
 import { MLJobLink } from './ml_job_link';
@@ -24,6 +25,7 @@ import { MLFlyoutView } from './ml_flyout';
 import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useUrlParams } from '../../../hooks';
+import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 
 interface Props {
   onClose: () => void;
@@ -48,13 +50,13 @@ const showMLJobNotification = (
           </MLJobLink>
         </p>
       ),
-      toastLifeTimeMs: 5000,
+      toastLifeTimeMs: 10000,
     });
   } else {
-    notifications.toasts.warning({
+    notifications.toasts.danger({
       title: <p>{labels.JOB_CREATION_FAILED}</p>,
       body: message ?? <p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>,
-      toastLifeTimeMs: 5000,
+      toastLifeTimeMs: 10000,
     });
   }
 };
@@ -65,6 +67,12 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
   const dispatch = useDispatch();
   const { data: hasMLJob, error } = useSelector(hasNewMLJobSelector);
   const isMLJobCreating = useSelector(isMLJobCreatingSelector);
+  const { settings } = useSelector(selectDynamicSettings);
+  useEffect(() => {
+    // Attempt to load or refresh the dynamic settings
+    dispatch(getDynamicSettings({}));
+  }, [dispatch]);
+  const heartbeatIndices = settings?.heartbeatIndices || '';
   const { basePath } = useContext(UptimeSettingsContext);
 
   const { refreshApp } = useContext(UptimeRefreshContext);
@@ -72,9 +80,12 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
 
-  const createMLJob = () => dispatch(createMLJobAction.get({ monitorId: monitorId as string }));
+  const canCreateMLJob = useSelector(canCreateMLJobSelector) && heartbeatIndices !== '';
 
-  const canCreateMLJob = useSelector(canCreateMLJobSelector);
+  // This function is a noop in the form's disabled state
+  const createMLJob = heartbeatIndices
+    ? () => dispatch(createMLJobAction.get({ monitorId: monitorId as string, heartbeatIndices }))
+    : () => null;
 
   const { data: uptimeJobs } = useSelector(hasMLJobSelector);
 
@@ -108,7 +119,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
           false,
-          error?.body?.message
+          error?.message || error?.body?.message
         );
       }
       setIsCreatingJob(false);
@@ -130,9 +141,9 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
   useEffect(() => {
     if (hasExistingMLJob) {
       setIsCreatingJob(true);
-      dispatch(createMLJobAction.get({ monitorId: monitorId as string }));
+      dispatch(createMLJobAction.get({ monitorId: monitorId as string, heartbeatIndices }));
     }
-  }, [dispatch, hasExistingMLJob, monitorId]);
+  }, [dispatch, hasExistingMLJob, heartbeatIndices, monitorId]);
 
   if (hasExistingMLJob) {
     return null;

@@ -9,7 +9,6 @@ import { Ping, PingResults } from '../../../common/graphql/types';
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,
-  GetMonitorParams,
   GetMonitorChartsParams,
   GetMonitorDetailsParams,
   GetMonitorLocationsParams,
@@ -36,7 +35,6 @@ export interface UptimeRequests {
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
   getIndexPattern: ESQ<{}, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
-  getMonitor: ESQ<GetMonitorParams, Ping>;
   getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorDurationResult>;
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;
