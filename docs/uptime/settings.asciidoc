@@ -22,6 +22,6 @@ and set the correct index pattern to match only the indices that space is allowe
 Note that the pattern set here only restricts what the Uptime app shows. Users may still be able
 to manually query Elasticsearch for data outside this pattern!
 
-See the https://www.elastic.co/guide/en/uptime/current/uptime-security.html[Uptime Elasticsearch Security]
-and [Heartbeat security](https://www.elastic.co/guide/en/beats/heartbeat/current/feature-roles.html)
+See the <<uptime-security,Uptime Elasticsearch Security>>
+and {heartbeat-ref}/feature-roles.html[Heartbeat security]
 docs for more information.

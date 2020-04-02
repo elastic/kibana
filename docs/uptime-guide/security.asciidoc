@@ -2,7 +2,7 @@
 == Elasticsearch Security
 
 If you use Elasticsearch security, you'll need to enable certain privileges for users
-that would like to access the Uptime app and for Heartbeat as well. See the [Heartbeat Docs](https://www.elastic.co/guide/en/beats/heartbeat/current/feature-roles.html) for information on configuring Heartbeat roles. 
+that would like to access the Uptime app and for Heartbeat as well. See the {heartbeat-ref}/feature-roles.html[Heartbeat docs] for information on configuring Heartbeat roles. 
 For example, create user and support roles for both Heartbeat and Uptime users to implement the privileges:
 
 [float]
@@ -71,11 +71,10 @@ PUT /_security/user/jacknich
 [float]
 === Create a role for read-only Uptime users
 
-You'll need a role that lets users who are allowed to access the Heartbeat indices, but are not allowed to adjust Uptime settings. These users must have
-their `application` privileges set to `read`, instead of `all`, as in the
-example below.
+A read-only role allows assigned users to access the Heartbeat indices, but does not allow them to adjust Uptime settings.
+To create this role, `application` privileges must be set to `read`, instead of `all`.
 
-You can create this with the following request:
+As an example, you can create an `uptime_read` role with the following request:
 
 
 ["source","sh",subs="attributes,callouts"]
@@ -134,4 +133,3 @@ PUT /_security/user/uptime_reader
 }
 ---------------------------------------------------------------
 // CONSOLE
-
