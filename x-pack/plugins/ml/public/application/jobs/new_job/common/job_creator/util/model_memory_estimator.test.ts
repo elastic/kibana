@@ -8,6 +8,8 @@ import { useFakeTimers, SinonFakeTimers } from 'sinon';
 import { CalculatePayload, modelMemoryEstimatorProvider } from './model_memory_estimator';
 import { JobValidator } from '../../job_validator';
 import { ml } from '../../../../../services/ml_api_service';
+import { JobCreator } from '../job_creator';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../../../../services/ml_api_service', () => {
   return {
@@ -24,6 +26,8 @@ jest.mock('../../../../../services/ml_api_service', () => {
 describe('delay', () => {
   let clock: SinonFakeTimers;
   let modelMemoryEstimator: ReturnType<typeof modelMemoryEstimatorProvider>;
+  let mockJobCreator: JobCreator;
+  let wizardInitialized$: BehaviorSubject<boolean>;
   let mockJobValidator: JobValidator;
 
   beforeEach(() => {
@@ -31,16 +35,32 @@ describe('delay', () => {
     mockJobValidator = {
       isModelMemoryEstimationPayloadValid: true,
     } as JobValidator;
-    modelMemoryEstimator = modelMemoryEstimatorProvider(mockJobValidator);
+    wizardInitialized$ = new BehaviorSubject<boolean>(false);
+    mockJobCreator = ({
+      wizardInitialized$,
+    } as unknown) as JobCreator;
+    modelMemoryEstimator = modelMemoryEstimatorProvider(mockJobCreator, mockJobValidator);
   });
   afterEach(() => {
     clock.restore();
     jest.clearAllMocks();
   });
 
+  test('should not proceed further if the wizard has not been initialized yet', () => {
+    const spy = jest.fn();
+    modelMemoryEstimator.updates$.subscribe(spy);
+
+    modelMemoryEstimator.update({ analysisConfig: { detectors: [{}] } } as CalculatePayload);
+    clock.tick(601);
+
+    expect(ml.calculateModelMemoryLimit$).not.toHaveBeenCalled();
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   test('should not emit any value on subscription initialization', () => {
     const spy = jest.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
+    wizardInitialized$.next(true);
     expect(spy).not.toHaveBeenCalled();
   });
 
@@ -50,6 +70,7 @@ describe('delay', () => {
     modelMemoryEstimator.updates$.subscribe(spy);
     // act
     modelMemoryEstimator.update({ analysisConfig: { detectors: [{}] } } as CalculatePayload);
+    wizardInitialized$.next(true);
     clock.tick(601);
     // assert
     expect(spy).toHaveBeenCalledWith('15MB');
@@ -58,6 +79,8 @@ describe('delay', () => {
   test('should not proceed further if the payload has not been changed', () => {
     const spy = jest.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
+
+    wizardInitialized$.next(true);
 
     // first emitted
     modelMemoryEstimator.update({
@@ -77,6 +100,8 @@ describe('delay', () => {
 
   test('should call the endpoint only with a valid configuration', () => {
     const spy = jest.fn();
+
+    wizardInitialized$.next(true);
 
     modelMemoryEstimator.updates$.subscribe(spy);
 
