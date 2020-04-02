@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'endpoint']);
+  const pageObjects = getPageObjects(['common', 'endpoint', 'header']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
@@ -67,6 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'xxxx',
         ],
       ];
+      await pageObjects.header.waitUntilLoadingHasFinished();
       const tableData = await pageObjects.endpoint.getEndpointAppTableData('hostListTable');
       expect(tableData).to.eql(expectedData);
     });
