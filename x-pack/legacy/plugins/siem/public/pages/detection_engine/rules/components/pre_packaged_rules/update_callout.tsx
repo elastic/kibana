@@ -6,7 +6,9 @@
 
 import React, { memo } from 'react';
 
-import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiLink } from '@elastic/eui';
+
+import { useKibana } from '../../../../../lib/kibana';
 import * as i18n from './translations';
 
 interface UpdatePrePackagedRulesCallOutProps {
@@ -19,13 +21,25 @@ const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCal
   loading,
   numberOfUpdatedRules,
   updateRules,
-}) => (
-  <EuiCallOut title={i18n.UPDATE_PREPACKAGED_RULES_TITLE}>
-    <p>{i18n.UPDATE_PREPACKAGED_RULES_MSG(numberOfUpdatedRules)}</p>
-    <EuiButton onClick={updateRules} size="s" isLoading={loading}>
-      {i18n.UPDATE_PREPACKAGED_RULES(numberOfUpdatedRules)}
-    </EuiButton>
-  </EuiCallOut>
-);
+}) => {
+  const { services } = useKibana();
+  return (
+    <EuiCallOut title={i18n.UPDATE_PREPACKAGED_RULES_TITLE}>
+      <p>
+        {i18n.UPDATE_PREPACKAGED_RULES_MSG(numberOfUpdatedRules)}
+        <br />
+        <EuiLink
+          href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${services.docLinks.DOC_LINK_VERSION}/prebuilt-rules-changelog.html`}
+          target="_blank"
+        >
+          {i18n.RELEASE_NOTES_HELP}
+        </EuiLink>
+      </p>
+      <EuiButton onClick={updateRules} size="s" isLoading={loading}>
+        {i18n.UPDATE_PREPACKAGED_RULES(numberOfUpdatedRules)}
+      </EuiButton>
+    </EuiCallOut>
+  );
+};
 
 export const UpdatePrePackagedRulesCallOut = memo(UpdatePrePackagedRulesCallOutComponent);
