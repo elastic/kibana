@@ -27,6 +27,7 @@ import {
   DataFrameAnalyticsConfig,
   EsFieldName,
   INDEX_STATUS,
+  MAX_COLUMNS,
   defaultSearchQuery,
 } from '../../../../common';
 import { isKeywordAndTextType } from '../../../../common/fields';
@@ -198,7 +199,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
 
           if (selectedFields.length === 0) {
             const newSelectedFields = getDefaultSelectableFields(docs, resultsField);
-            setSelectedFields(newSelectedFields);
+            setSelectedFields(newSelectedFields.sort().splice(0, MAX_COLUMNS));
           }
 
           // Create a version of the doc's source with flattened field names.
