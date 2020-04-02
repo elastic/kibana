@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ESSearchSource } from './es_search_source';
+export { ESSearchSource, esDocumentsLayerWizardConfig } from './es_search_source';
