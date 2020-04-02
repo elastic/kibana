@@ -72,7 +72,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('when data is in elasticsearch', () => {
       before(async () => {
         await esArchiver.load('endpoint/alerts/api_feature');
-        await esArchiver.load('endpoint/metadata/api_feature');
+        await esArchiver.load('endpoint/alerts/host_api_feature');
         const res = await es.search({
           index: 'events-endpoint-1',
           body: ES_QUERY_MISSING,
@@ -82,7 +82,7 @@ export default function({ getService }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload('endpoint/alerts/api_feature');
-        await esArchiver.unload('endpoint/metadata/api_feature');
+        await esArchiver.unload('endpoint/alerts/host_api_feature');
       });
 
       it('should not support POST requests', async () => {
@@ -93,7 +93,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(404);
       });
 
-      it.skip('should return one entry for each alert with default paging', async () => {
+      it('should return one entry for each alert with default paging', async () => {
         const { body } = await supertest
           .get('/api/endpoint/alerts')
           .set('kbn-xsrf', 'xxx')
@@ -111,7 +111,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.result_from_index).to.eql(0);
       });
 
-      it.skip('should return the page_size and page_index specified in the query params', async () => {
+      it('should return the page_size and page_index specified in the query params', async () => {
         const pageSize = 1;
         const pageIndex = 1;
         const { body } = await supertest
@@ -140,7 +140,7 @@ export default function({ getService }: FtrProviderContext) {
             .expect(200);
           body = response.body;
         });
-        it.skip('should return accurate total counts', async () => {
+        it('should return accurate total counts', async () => {
           expect(body.total).to.eql(numberOfAlertsInFixture);
           /**
            * Nothing was returned due to pagination.
@@ -160,7 +160,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.message).to.contain('Value must be equal to or greater than [1]');
       });
 
-      it.skip('should return links to the next and previous pages using cursor-based pagination', async () => {
+      it('should return links to the next and previous pages using cursor-based pagination', async () => {
         const { body } = await supertest
           .get('/api/endpoint/alerts?page_index=0')
           .set('kbn-xsrf', 'xxx')
@@ -346,7 +346,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(valid).to.eql(true);
       });
 
-      it.skip('should filter results of alert data using rison-encoded filters', async () => {
+      it('should filter results of alert data using rison-encoded filters', async () => {
         const hostname = 'Host-abmfhmc5ku';
         const { body } = await supertest
           .get(
@@ -361,7 +361,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.result_from_index).to.eql(0);
       });
 
-      it.skip('should filter results of alert data using KQL', async () => {
+      it('should filter results of alert data using KQL', async () => {
         const agentID = '7cf9f7a3-28a6-4d1e-bb45-005aa28f18d0';
         const { body } = await supertest
           .get(
@@ -376,7 +376,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.result_from_index).to.eql(0);
       });
 
-      it.skip('should return alert details by id, getting last alert', async () => {
+      it('should return alert details by id, getting last alert', async () => {
         const documentID = 'zbNm0HABdD75WLjLYgcB';
         const prevDocumentID = '2rNm0HABdD75WLjLYgcU';
         const { body } = await supertest
