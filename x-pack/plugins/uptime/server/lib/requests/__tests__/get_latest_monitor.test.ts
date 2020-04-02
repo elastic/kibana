@@ -39,32 +39,22 @@ describe('getLatestMonitor', () => {
       },
     };
     mockEsSearchResult = {
-      aggregations: {
-        by_id: {
-          buckets: [
-            {
-              latest: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        '@timestamp': '123456',
-                        monitor: {
-                          duration: {
-                            us: 12345,
-                          },
-                          id: 'testMonitor',
-                          status: 'down',
-                          type: 'http',
-                        },
-                      },
-                    },
-                  ],
+      hits: {
+        hits: [
+          {
+            _source: {
+              '@timestamp': '123456',
+              monitor: {
+                duration: {
+                  us: 12345,
                 },
+                id: 'testMonitor',
+                status: 'down',
+                type: 'http',
               },
             },
-          ],
-        },
+          },
+        ],
       },
     };
   });

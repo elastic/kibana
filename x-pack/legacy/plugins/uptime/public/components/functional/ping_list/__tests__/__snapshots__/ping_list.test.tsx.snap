@@ -34,18 +34,22 @@ exports[`PingList component renders sorted list without errors 1`] = `
       >
         <EuiSelect
           aria-label="Status"
+          data-test-subj="xpack.uptime.pingList.statusSelect"
           onChange={[Function]}
           options={
             Array [
               Object {
+                "data-test-subj": "xpack.uptime.pingList.statusOptions.all",
                 "text": "All",
                 "value": "",
               },
               Object {
+                "data-test-subj": "xpack.uptime.pingList.statusOptions.up",
                 "text": "Up",
                 "value": "up",
               },
               Object {
+                "data-test-subj": "xpack.uptime.pingList.statusOptions.down",
                 "text": "Down",
                 "value": "down",
               },
@@ -68,10 +72,12 @@ exports[`PingList component renders sorted list without errors 1`] = `
       >
         <EuiSelect
           aria-label="Location"
+          data-test-subj="xpack.uptime.pingList.locationSelect"
           onChange={[Function]}
           options={
             Array [
               Object {
+                "data-test-subj": "xpack.uptime.pingList.locationOptions.all",
                 "text": "All",
                 "value": "",
               },
