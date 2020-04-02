@@ -154,13 +154,33 @@ export const note = t.string;
 
 // NOTE: Experimental list support not being shipped currently and behind a feature flag
 // TODO: Remove this comment once we lists have passed testing and is ready for the release
-export const boolean_operator = t.keyof({ and: null, 'and not': null });
-export const list_type = t.keyof({ value: null }); // TODO: (LIST-FEATURE) Eventually this can include "list" when we support lists CRUD
-export const list_value = t.exact(t.type({ name: t.string, type: list_type }));
-export const list = t.exact(
+export const values_operator = t.keyof({ included: null, excluded: null });
+export const values_type = t.keyof({ match: null, match_all: null, list: null, exists: null });
+export const values_type_list = t.exact(
   t.type({
-    field: t.string,
-    boolean_operator,
-    values: t.array(list_value),
+    list_id: t.string,
+    name: t.string,
+    description: t.string,
+    created_at,
   })
 );
+export const values_type_default = t.exact(t.type({ name: t.string }));
+export const list_value = t.array(t.union([values_type_list, values_type_default]));
+export const list = t.exact(
+  t.intersection([
+    t.type({
+      field: t.string,
+      values_operator,
+      values_type,
+    }),
+    t.partial({
+      values: list_value,
+    }),
+  ])
+);
+export const list_and = t.intersection([
+  list,
+  t.partial({
+    and: t.array(list),
+  }),
+]);

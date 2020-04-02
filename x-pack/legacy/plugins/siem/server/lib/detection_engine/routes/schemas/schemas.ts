@@ -126,12 +126,27 @@ export const note = Joi.string();
 
 // NOTE: Experimental list support not being shipped currently and behind a feature flag
 // TODO: (LIST-FEATURE) Remove this comment once we lists have passed testing and is ready for the release
-export const boolean_operator = Joi.string().valid('and', 'and not');
-export const list_type = Joi.string().valid('value'); // TODO: (LIST-FEATURE) Eventually this can be "list" when we support list types
-export const list_value = Joi.object({ name: Joi.string().required(), type: list_type.required() });
+export const values_operator = Joi.string().valid(['included', 'excluded']);
+export const values_types = Joi.string().valid(['match', 'match_all', 'list', 'exists']);
+export const values = Joi.object({
+  name: Joi.string().required(),
+  list_id: Joi.string(),
+  description: Joi.string(),
+  created_at,
+});
 export const list = Joi.object({
   field: Joi.string().required(),
-  boolean_operator: boolean_operator.required(),
-  values: Joi.array().items(list_value),
+  values_operator: values_operator.required(),
+  values_type: values_types.required(),
+  values: Joi.array()
+    .items(values)
+    .when('values_type', {
+      is: 'exists',
+      then: Joi.forbidden(),
+      otherwise: Joi.required(),
+    }),
 });
-export const lists = Joi.array().items(list);
+export const list_and = Joi.object({
+  and: Joi.array().items(list),
+});
+export const lists = Joi.array().items(list.concat(list_and));

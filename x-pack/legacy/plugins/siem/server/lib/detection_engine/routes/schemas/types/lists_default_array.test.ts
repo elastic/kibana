@@ -23,25 +23,31 @@ describe('lists_default_array', () => {
     const payload = [
       {
         field: 'source.ip',
-        boolean_operator: 'and',
-        values: [
-          {
-            name: '127.0.0.1',
-            type: 'value',
-          },
-        ],
+        values_operator: 'included',
+        values_type: 'exists',
       },
       {
         field: 'host.name',
-        boolean_operator: 'and not',
+        values_operator: 'excluded',
+        values_type: 'match',
         values: [
           {
             name: 'rock01',
-            type: 'value',
           },
+        ],
+        and: [
           {
-            name: 'mothra',
-            type: 'value',
+            field: 'host.id',
+            values_operator: 'included',
+            values_type: 'match_all',
+            values: [
+              {
+                name: '123',
+              },
+              {
+                name: '678',
+              },
+            ],
           },
         ],
       },
@@ -53,15 +59,111 @@ describe('lists_default_array', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should not validate an array of lists that includes a values_operator other than included or excluded', () => {
+    const payload = [
+      {
+        field: 'source.ip',
+        values_operator: 'included',
+        values_type: 'exists',
+      },
+      {
+        field: 'host.name',
+        values_operator: 'excluded',
+        values_type: 'exists',
+      },
+      {
+        field: 'host.hostname',
+        values_operator: 'jibber jabber',
+        values_type: 'exists',
+      },
+    ];
+    const decoded = ListsDefaultArray.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "jibber jabber" supplied to "values_operator"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should not validate an array of lists that includes "values" when "values_type" is "exists"', () => {
+    const payload = [
+      {
+        field: 'host.name',
+        values_operator: 'excluded',
+        values_type: 'exists',
+        values: [
+          {
+            name: '127.0.0.1',
+          },
+        ],
+      },
+    ];
+    const decoded = ListsDefaultArray.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    // TODO - this should result in an error message
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should not validate an array of lists that does not include "values" when "values_type" is "match"', () => {
+    const payload = [
+      {
+        field: 'host.name',
+        values_operator: 'excluded',
+        values_type: 'match',
+      },
+    ];
+    const decoded = ListsDefaultArray.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    // TODO - this should result in an error message
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should not validate an array of lists that does not include "values" when "values_type" is "match_all"', () => {
+    const payload = [
+      {
+        field: 'host.name',
+        values_operator: 'excluded',
+        values_type: 'match_all',
+      },
+    ];
+    const decoded = ListsDefaultArray.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    // TODO - this should result in an error message
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should not validate an array of lists that does not include "values" when "values_type" is "list"', () => {
+    const payload = [
+      {
+        field: 'host.name',
+        values_operator: 'excluded',
+        values_type: 'list',
+      },
+    ];
+    const decoded = ListsDefaultArray.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    // TODO - this should result in an error message
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual({});
+  });
+
   test('it should not validate an array with a number', () => {
     const payload = [
       {
         field: 'source.ip',
-        boolean_operator: 'and',
+        values_operator: 'included',
+        values_type: 'match_all',
         values: [
           {
             name: '127.0.0.1',
-            type: 'value',
           },
         ],
       },

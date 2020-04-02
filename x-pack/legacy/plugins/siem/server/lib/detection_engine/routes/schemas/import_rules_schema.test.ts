@@ -1729,7 +1729,7 @@ describe('import rules schema', () => {
   // on demand. Since they are per module, we have a an issue where the ENV variables do not take effect. It is better we change all the
   // schema's to be function calls to avoid global side effects or just wait until the feature is available. If you want to test this early,
   // you can remove the .skip and set your env variable of export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true locally
-  describe.skip('lists', () => {
+  describe('lists', () => {
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and lists] does validate', () => {
       expect(
         importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
@@ -1747,25 +1747,31 @@ describe('import rules schema', () => {
           lists: [
             {
               field: 'source.ip',
-              boolean_operator: 'and',
-              values: [
-                {
-                  name: '127.0.0.1',
-                  type: 'value',
-                },
-              ],
+              values_operator: 'included',
+              values_type: 'exists',
             },
             {
               field: 'host.name',
-              boolean_operator: 'and not',
+              values_operator: 'excluded',
+              values_type: 'match',
               values: [
                 {
                   name: 'rock01',
-                  type: 'value',
                 },
+              ],
+              and: [
                 {
-                  name: 'mothra',
-                  type: 'value',
+                  field: 'host.id',
+                  values_operator: 'included',
+                  values_type: 'match_all',
+                  values: [
+                    {
+                      name: '123',
+                    },
+                    {
+                      name: '678',
+                    },
+                  ],
                 },
               ],
             },
