@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 const filterTitle = i18n.translate('data.search.aggs.buckets.filterTitle', {

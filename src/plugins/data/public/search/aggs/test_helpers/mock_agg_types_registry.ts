@@ -21,7 +21,7 @@
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { getAggTypes } from '../agg_types';
-import { BucketAggType } from '../buckets/_bucket_agg_type';
+import { BucketAggType } from '../buckets/bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
 import { queryServiceMock } from '../../../query/mocks';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';

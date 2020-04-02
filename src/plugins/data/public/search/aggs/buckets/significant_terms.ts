@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { BUCKET_TYPES } from './bucket_agg_types';

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { FieldFormat, KBN_FIELD_TYPES } from '../../../../common';
 import { RangeKey } from './range_key';
 import { createFilterRange } from './create_filter/range';

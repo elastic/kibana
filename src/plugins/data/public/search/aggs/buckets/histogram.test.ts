@@ -27,7 +27,8 @@ import {
   AutoBounds,
   HistogramBucketAggDependencies,
 } from './histogram';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: HistogramBucketAggDependencies;
@@ -38,6 +39,9 @@ describe('Histogram Agg', () => {
     aggTypesDependencies = {
       uiSettings,
       notifications,
+      getInternalStartServices: () => ({
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      }),
     };
   });
 

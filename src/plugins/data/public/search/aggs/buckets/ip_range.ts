@@ -19,7 +19,7 @@
 
 import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 import { createFilterIpRange } from './create_filter/ip_range';
@@ -36,65 +36,68 @@ export interface IpRangeBucketAggDependencies {
 }
 
 export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketAggDependencies) =>
-  new BucketAggType({
-    name: BUCKET_TYPES.IP_RANGE,
-    title: ipRangeTitle,
-    createFilter: createFilterIpRange,
-    getKey(bucket, key, agg): IpRangeKey {
-      if (agg.params.ipRangeType === 'mask') {
-        return { type: 'mask', mask: key };
-      }
-      return { type: 'range', from: bucket.from, to: bucket.to };
-    },
-    getFormat(agg) {
-      const { fieldFormats } = getInternalStartServices();
-      const formatter = agg.fieldOwnFormatter(
-        TEXT_CONTEXT_TYPE,
-        fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
-      );
-      const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
-        return convertIPRangeToString(range, formatter);
-      });
-      return new IpRangeFormat();
-    },
-    makeLabel(aggConfig) {
-      return i18n.translate('data.search.aggs.buckets.ipRangeLabel', {
-        defaultMessage: '{fieldName} IP ranges',
-        values: {
-          fieldName: aggConfig.getFieldDisplayName(),
-        },
-      });
-    },
-    params: [
-      {
-        name: 'field',
-        type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.IP,
+  new BucketAggType(
+    {
+      name: BUCKET_TYPES.IP_RANGE,
+      title: ipRangeTitle,
+      createFilter: createFilterIpRange,
+      getKey(bucket, key, agg): IpRangeKey {
+        if (agg.params.ipRangeType === 'mask') {
+          return { type: 'mask', mask: key };
+        }
+        return { type: 'range', from: bucket.from, to: bucket.to };
       },
-      {
-        name: 'ipRangeType',
-        default: 'fromTo',
-        write: noop,
+      getFormat(agg) {
+        const { fieldFormats } = getInternalStartServices();
+        const formatter = agg.fieldOwnFormatter(
+          TEXT_CONTEXT_TYPE,
+          fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
+        );
+        const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
+          return convertIPRangeToString(range, formatter);
+        });
+        return new IpRangeFormat();
       },
-      {
-        name: 'ranges',
-        default: {
-          fromTo: [
-            { from: '0.0.0.0', to: '127.255.255.255' },
-            { from: '128.0.0.0', to: '191.255.255.255' },
-          ],
-          mask: [{ mask: '0.0.0.0/1' }, { mask: '128.0.0.0/2' }],
+      makeLabel(aggConfig) {
+        return i18n.translate('data.search.aggs.buckets.ipRangeLabel', {
+          defaultMessage: '{fieldName} IP ranges',
+          values: {
+            fieldName: aggConfig.getFieldDisplayName(),
+          },
+        });
+      },
+      params: [
+        {
+          name: 'field',
+          type: 'field',
+          filterFieldTypes: KBN_FIELD_TYPES.IP,
         },
-        write(aggConfig, output) {
-          const ipRangeType = aggConfig.params.ipRangeType;
-          let ranges = aggConfig.params.ranges[ipRangeType];
+        {
+          name: 'ipRangeType',
+          default: 'fromTo',
+          write: noop,
+        },
+        {
+          name: 'ranges',
+          default: {
+            fromTo: [
+              { from: '0.0.0.0', to: '127.255.255.255' },
+              { from: '128.0.0.0', to: '191.255.255.255' },
+            ],
+            mask: [{ mask: '0.0.0.0/1' }, { mask: '128.0.0.0/2' }],
+          },
+          write(aggConfig, output) {
+            const ipRangeType = aggConfig.params.ipRangeType;
+            let ranges = aggConfig.params.ranges[ipRangeType];
 
-          if (ipRangeType === 'fromTo') {
-            ranges = map(ranges, (range: any) => omit(range, isNull));
-          }
+            if (ipRangeType === 'fromTo') {
+              ranges = map(ranges, (range: any) => omit(range, isNull));
+            }
 
-          output.params.ranges = ranges;
+            output.params.ranges = ranges;
+          },
         },
-      },
-    ],
-  });
+      ],
+    },
+    { getInternalStartServices }
+  );

@@ -25,6 +25,7 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { getFieldFormats } from '../../../../public/services';
 import { FieldTypes } from '../param_types';
+import { GetInternalStartServicesFn } from '../../../types';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -44,6 +45,10 @@ interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig>
   subtype?: string;
 }
 
+interface MetricAggTypeDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
+
 // TODO need to make a more explicit interface for this
 export type IMetricAggType = MetricAggType;
 
@@ -57,8 +62,12 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
   getKey = () => {};
 
-  constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
-    super(config);
+  constructor(
+    config: MetricAggTypeConfig<TMetricAggConfig>,
+    // todo: '?' should be removed when PR will be ready to merge
+    dependencies?: MetricAggTypeDependencies
+  ) {
+    super(config, dependencies);
 
     this.getValue =
       config.getValue ||

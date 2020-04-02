@@ -20,7 +20,7 @@
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getAggTypes } from './index';
 
-import { isBucketAggType } from './buckets/_bucket_agg_type';
+import { isBucketAggType } from './buckets/bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
 import { QueryStart } from '../../query';
 import { FieldFormatsStart } from '../../field_formats';

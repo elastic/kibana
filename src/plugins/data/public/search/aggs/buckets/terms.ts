@@ -19,9 +19,8 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { IAggConfigs } from '../agg_configs';

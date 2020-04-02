@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'src/core/public';
 
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
+import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
 
@@ -43,73 +43,78 @@ export const getDateRangeBucketAgg = ({
   uiSettings,
   getInternalStartServices,
 }: DateRangeBucketAggDependencies) =>
-  new BucketAggType({
-    name: BUCKET_TYPES.DATE_RANGE,
-    title: dateRangeTitle,
-    createFilter: createFilterDateRange,
-    getKey({ from, to }): DateRangeKey {
-      return { from, to };
-    },
-    getFormat(agg) {
-      const { fieldFormats } = getInternalStartServices();
-
-      const formatter = agg.fieldOwnFormatter(
-        TEXT_CONTEXT_TYPE,
-        fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
-      );
-      const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
-        return convertDateRangeToString(range, formatter);
-      });
-      return new DateRangeFormat();
-    },
-    makeLabel(aggConfig) {
-      return aggConfig.getFieldDisplayName() + ' date ranges';
-    },
-    params: [
-      {
-        name: 'field',
-        type: 'field',
-        filterFieldTypes: KBN_FIELD_TYPES.DATE,
-        default(agg: IBucketAggConfig) {
-          return agg.getIndexPattern().timeFieldName;
-        },
+  new BucketAggType(
+    {
+      name: BUCKET_TYPES.DATE_RANGE,
+      title: dateRangeTitle,
+      createFilter: createFilterDateRange,
+      getKey({ from, to }): DateRangeKey {
+        return { from, to };
       },
-      {
-        name: 'ranges',
-        default: [
-          {
-            from: 'now-1w/w',
-            to: 'now',
+      getFormat(agg) {
+        const { fieldFormats } = getInternalStartServices();
+
+        const formatter = agg.fieldOwnFormatter(
+          TEXT_CONTEXT_TYPE,
+          fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
+        );
+        const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
+          return convertDateRangeToString(range, formatter);
+        });
+        return new DateRangeFormat();
+      },
+      makeLabel(aggConfig) {
+        return aggConfig.getFieldDisplayName() + ' date ranges';
+      },
+      params: [
+        {
+          name: 'field',
+          type: 'field',
+          filterFieldTypes: KBN_FIELD_TYPES.DATE,
+          default(agg: IBucketAggConfig) {
+            return agg.getIndexPattern().timeFieldName;
           },
-        ],
-      },
-      {
-        name: 'time_zone',
-        default: undefined,
-        // Implimentation method is the same as that of date_histogram
-        serialize: () => undefined,
-        write: (agg, output) => {
-          const field = agg.getParam('field');
-          let tz = agg.getParam('time_zone');
-
-          if (!tz && field) {
-            tz = get(agg.getIndexPattern(), [
-              'typeMeta',
-              'aggs',
-              'date_range',
-              field.name,
-              'time_zone',
-            ]);
-          }
-          if (!tz) {
-            const detectedTimezone = moment.tz.guess();
-            const tzOffset = moment().format('Z');
-            const isDefaultTimezone = uiSettings.isDefault('dateFormat:tz');
-
-            tz = isDefaultTimezone ? detectedTimezone || tzOffset : uiSettings.get('dateFormat:tz');
-          }
-          output.params.time_zone = tz;
         },
-      },
-    ],
-  });
+        {
+          name: 'ranges',
+          default: [
+            {
+              from: 'now-1w/w',
+              to: 'now',
+            },
+          ],
+        },
+        {
+          name: 'time_zone',
+          default: undefined,
+          // Implimentation method is the same as that of date_histogram
+          serialize: () => undefined,
+          write: (agg, output) => {
+            const field = agg.getParam('field');
+            let tz = agg.getParam('time_zone');
+
+            if (!tz && field) {
+              tz = get(agg.getIndexPattern(), [
+                'typeMeta',
+                'aggs',
+                'date_range',
+                field.name,
+                'time_zone',
+              ]);
+            }
+            if (!tz) {
+              const detectedTimezone = moment.tz.guess();
+              const tzOffset = moment().format('Z');
+              const isDefaultTimezone = uiSettings.isDefault('dateFormat:tz');
+
+              tz = isDefaultTimezone
+                ? detectedTimezone || tzOffset
+                : uiSettings.get('dateFormat:tz');
+            }
+            output.params.time_zone = tz;
+          },
+        },
+      ],
+    },
+    { getInternalStartServices }
+  );

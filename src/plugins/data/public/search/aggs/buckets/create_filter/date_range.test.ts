@@ -25,7 +25,7 @@ import { DateFormat } from '../../../../field_formats';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
