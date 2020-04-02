@@ -78,7 +78,6 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
-import { getSavedDashboardLoader, setSavedDashboardLoader } from './services';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -127,7 +126,7 @@ export class DashboardEmbeddableContainerPublicPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
 
   public setup(
-    core: CoreSetup<StartDependencies>,
+    core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
   ): Setup {
     const expandPanelAction = new ExpandPanelAction();
@@ -211,7 +210,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       id: '',
       title: 'Dashboards',
       mount: async (params: AppMountParameters) => {
-        const [coreStart, startDependencies] = await core.getStartServices();
+        const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         appMounted();
         const {
           embeddable: embeddableStart,
@@ -219,7 +218,7 @@ export class DashboardEmbeddableContainerPublicPlugin
           share: shareStart,
           data: dataStart,
           kibanaLegacy: { dashboardConfig },
-        } = startDependencies;
+        } = pluginsStart;
 
         const deps: RenderDeps = {
           pluginInitializerContext: this.initializerContext,
@@ -229,7 +228,7 @@ export class DashboardEmbeddableContainerPublicPlugin
           share: shareStart,
           data: dataStart,
           savedObjectsClient: coreStart.savedObjects.client,
-          savedDashboards: getSavedDashboardLoader(),
+          savedDashboards: dashboardStart.getSavedDashboardLoader(),
           chrome: coreStart.chrome,
           addBasePath: coreStart.http.basePath.prepend,
           uiSettings: coreStart.uiSettings,
@@ -304,7 +303,6 @@ export class DashboardEmbeddableContainerPublicPlugin
       chrome: core.chrome,
       overlays: core.overlays,
     });
-    setSavedDashboardLoader(savedDashboardLoader);
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
     };
