@@ -38,7 +38,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
         description: alertData.host.ip.join(', '),
       },
       {
-        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.status', {
+        title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.currentStatus', {
           defaultMessage: 'Current Status',
         }),
         description: (
