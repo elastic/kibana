@@ -74,7 +74,11 @@ export const usePushToService = ({
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
-    if (connector == null && !loadingCaseConfigure && !loadingLicense) {
+    if (
+      (connector == null || (connector != null && connector.connectorId === 'none')) &&
+      !loadingCaseConfigure &&
+      !loadingLicense
+    ) {
       errors = [
         ...errors,
         {
