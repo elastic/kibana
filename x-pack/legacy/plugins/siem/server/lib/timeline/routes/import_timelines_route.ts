@@ -11,7 +11,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
-import { Readable } from 'stream';
 import {
   buildSiemResponse,
   createBulkErrorObject,

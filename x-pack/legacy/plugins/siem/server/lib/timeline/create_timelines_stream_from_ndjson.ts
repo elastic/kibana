@@ -6,7 +6,6 @@
 
 import { Transform } from 'stream';
 import { identity } from 'fp-ts/lib/function';
-import Boom from 'boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import {
@@ -23,17 +22,17 @@ import {
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
 import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
 import { KibanaResponseFactory } from '../../../../../../../src/core/server';
-import { excess, throwErrors } from '../../../../../../plugins/case/common/api';
+import { throwErrors } from '../../../../../../plugins/case/common/api';
 
 export const validateTimelines = (response: KibanaResponseFactory): Transform => {
   return createMapStream((obj: ImportTimelineResponse) => {
-    // return pipe(
-    //   ImportTimelinesSchemaRt.decode(obj),
-    //   fold(e => {
-    //     throw response.badRequest();
-    //   }, identity)
-    // );
-    return pipe(ImportTimelinesSchemaRt.decode(obj), fold(throwErrors(Boom.badRequest), identity));
+    return pipe(
+      ImportTimelinesSchemaRt.decode(obj),
+      fold(
+        throwErrors(msg => new Error(msg)),
+        identity
+      )
+    );
   });
 };
 
