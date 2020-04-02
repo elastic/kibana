@@ -27,13 +27,9 @@
  * output: 39292992
  */
 export function getDashboardIdFromUrl(url: string): string | undefined {
-  const [, match1, match2, match3] = url.match(
-    /dashboard\/(.*)\/|dashboard\/(.*)\?|dashboard\/(.*)$/
-  ) ?? [
+  const [, dashboardId] = url.match(/dashboard\/(.*?)(\/|\?|$)/) ?? [
     undefined, // full match
-    undefined, // group1 - dashboardId is before `/`
-    undefined, // group2 - dashboardId is before `?`
-    undefined, // group3 - dashboardID is in the end
+    undefined, // group with dashboardId
   ];
-  return match1 ?? match2 ?? match3 ?? undefined;
+  return dashboardId ?? undefined;
 }
