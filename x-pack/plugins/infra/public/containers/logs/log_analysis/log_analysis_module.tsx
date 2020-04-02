@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
@@ -17,36 +17,10 @@ export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration: ModuleSourceConfiguration;
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
-  const { spaceId, sourceId, timestampField, indices } = sourceConfiguration;
-  const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes, {
-    bucketSpan: moduleDescriptor.bucketSpan,
-    indexPattern: indices.join(','),
-    timestampField,
-  });
+  const { spaceId, sourceId, timestampField } = sourceConfiguration;
+  const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
-  const [fetchModuleDefinitionRequest, fetchModuleDefinition] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'resolution',
-      createPromise: async () => {
-        dispatchModuleStatus({ type: 'fetchingModuleDefinition' });
-        return await moduleDescriptor.getModuleDefinition();
-      },
-      onResolve: response => {
-        dispatchModuleStatus({
-          type: 'fetchedModuleDefinition',
-          spaceId,
-          sourceId,
-          moduleDefinition: response,
-        });
-      },
-      onReject: () => {
-        dispatchModuleStatus({ type: 'failedFetchingModuleDefinition' });
-      },
-    },
-    [moduleDescriptor.getModuleDefinition, spaceId, sourceId]
-  );
-
-  const [fetchJobStatusRequest, fetchJobStatus] = useTrackedPromise(
+  const [, fetchJobStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
@@ -68,12 +42,6 @@ export const useLogAnalysisModule = <JobType extends string>({
     [spaceId, sourceId]
   );
 
-  const isLoadingModuleStatus = useMemo(
-    () =>
-      fetchJobStatusRequest.state === 'pending' || fetchModuleDefinitionRequest.state === 'pending',
-    [fetchJobStatusRequest.state, fetchModuleDefinitionRequest.state]
-  );
-
   const [, setUpModule] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
@@ -83,15 +51,24 @@ export const useLogAnalysisModule = <JobType extends string>({
         end: number | undefined
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
-        return await moduleDescriptor.setUpModule(start, end, {
+        const setupResult = await moduleDescriptor.setUpModule(start, end, {
           indices: selectedIndices,
           sourceId,
           spaceId,
           timestampField,
         });
+        const jobSummaries = await moduleDescriptor.getJobSummary(spaceId, sourceId);
+        return { setupResult, jobSummaries };
       },
-      onResolve: ({ datafeeds, jobs }) => {
-        dispatchModuleStatus({ type: 'finishedSetup', datafeeds, jobs, spaceId, sourceId });
+      onResolve: ({ setupResult: { datafeeds, jobs }, jobSummaries }) => {
+        dispatchModuleStatus({
+          type: 'finishedSetup',
+          datafeedSetupResults: datafeeds,
+          jobSetupResults: jobs,
+          jobSummaries,
+          spaceId,
+          sourceId,
+        });
       },
       onReject: () => {
         dispatchModuleStatus({ type: 'failedSetup' });
@@ -146,36 +123,14 @@ export const useLogAnalysisModule = <JobType extends string>({
     sourceId,
   ]);
 
-  useEffect(() => {
-    dispatchModuleStatus({
-      type: 'updatedSourceConfiguration',
-      spaceId,
-      sourceId,
-      sourceConfiguration: {
-        timestampField,
-        indexPattern: indices.join(','),
-        bucketSpan: moduleDescriptor.bucketSpan,
-      },
-    });
-  }, [
-    dispatchModuleStatus,
-    indices,
-    moduleDescriptor.bucketSpan,
-    sourceConfiguration,
-    sourceId,
-    spaceId,
-    timestampField,
-  ]);
-
   return {
     cleanUpAndSetUpModule,
     cleanUpModule,
     fetchJobStatus,
-    fetchModuleDefinition,
     isCleaningUp,
-    isLoadingModuleStatus,
     jobIds,
     jobStatus: moduleStatus.jobStatus,
+    jobSummaries: moduleStatus.jobSummaries,
     lastSetupErrorMessages: moduleStatus.lastSetupErrorMessages,
     moduleDescriptor,
     setUpModule,

@@ -61,7 +61,7 @@ export class PluginWrapper<
 
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
-  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart]>();
+  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
 
   constructor(
@@ -115,7 +115,7 @@ export class PluginWrapper<
     this.log.debug('Starting plugin');
 
     const startContract = await this.instance.start(startContext, plugins);
-    this.startDependencies$.next([startContext, plugins]);
+    this.startDependencies$.next([startContext, plugins, startContract]);
     return startContract;
   }
 

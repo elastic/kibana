@@ -31,13 +31,13 @@ import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/fin
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
-import { SecurityPluginSetup } from '../../../../../plugins/security/server/';
+import { SetupPlugins } from '../plugin';
 
 export const initRoutes = (
   router: IRouter,
   config: LegacyServices['config'],
   usingEphemeralEncryptionKey: boolean,
-  security: SecurityPluginSetup
+  security: SetupPlugins['security']
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -79,5 +79,5 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
 };

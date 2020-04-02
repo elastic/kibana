@@ -9,5 +9,5 @@ Allows plugins to get access to APIs available in start inside async handlers. P
 <b>Signature:</b>
 
 ```typescript
-export declare type StartServicesAccessor<TPluginsStart extends object = object> = () => Promise<[CoreStart, TPluginsStart]>;
+export declare type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 ```

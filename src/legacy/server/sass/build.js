@@ -34,7 +34,7 @@ const access = promisify(fs.access);
 const copyFile = promisify(fs.copyFile);
 const mkdirAsync = promisify(fs.mkdir);
 
-const UI_ASSETS_DIR = resolve(__dirname, '../../ui/public/assets');
+const UI_ASSETS_DIR = resolve(__dirname, '../../../core/server/core_app/assets');
 const DARK_THEME_IMPORTER = url => {
   if (url.includes('eui_colors_light')) {
     return { file: url.replace('eui_colors_light', 'eui_colors_dark') };

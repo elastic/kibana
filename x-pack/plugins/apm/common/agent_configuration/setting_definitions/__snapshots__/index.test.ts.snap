@@ -3,11 +3,6 @@
 exports[`settingDefinitions should have correct default values 1`] = `
 Array [
   Object {
-    "key": "active",
-    "type": "boolean",
-    "validationName": "(\\"true\\" | \\"false\\")",
-  },
-  Object {
     "key": "api_request_size",
     "type": "bytes",
     "units": Array [
@@ -22,9 +17,9 @@ Array [
     "key": "api_request_time",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -87,9 +82,9 @@ Array [
     "key": "profiling_inferred_spans_min_duration",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -98,20 +93,25 @@ Array [
     "key": "profiling_inferred_spans_sampling_interval",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
   },
   Object {
+    "key": "recording",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
     "key": "server_timeout",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -120,9 +120,9 @@ Array [
     "key": "span_frames_min_duration",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
@@ -137,9 +137,9 @@ Array [
     "key": "stress_monitor_cpu_duration_threshold",
     "type": "duration",
     "units": Array [
+      "ms",
       "s",
       "m",
-      "h",
     ],
     "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",

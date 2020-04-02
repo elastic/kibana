@@ -41,11 +41,12 @@ import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 
+const SORT_FIELD = 'enabled';
 const initialState: State = {
   exportRuleIds: [],
   filterOptions: {
     filter: '',
-    sortField: 'enabled',
+    sortField: SORT_FIELD,
     sortOrder: 'desc',
   },
   loadingRuleIds: [],
@@ -127,9 +128,7 @@ export const AllRules = React.memo<AllRulesProps>(
     });
 
     const sorting = useMemo(
-      () => ({
-        sort: { field: 'enabled', direction: filterOptions.sortOrder },
-      }),
+      () => ({ sort: { field: 'enabled', direction: filterOptions.sortOrder } }),
       [filterOptions.sortOrder]
     );
 
@@ -171,7 +170,7 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch({
           type: 'updateFilterOptions',
           filterOptions: {
-            sortField: 'enabled', // Only enabled is supported for sorting currently
+            sortField: SORT_FIELD, // Only enabled is supported for sorting currently
             sortOrder: sort?.direction ?? 'desc',
           },
           pagination: { page: page.index + 1, perPage: page.size },
@@ -300,13 +299,16 @@ export const AllRules = React.memo<AllRulesProps>(
                 <UtilityBar border>
                   <UtilityBarSection>
                     <UtilityBarGroup>
-                      <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
+                      <UtilityBarText dataTestSubj="showingRules">
+                        {i18n.SHOWING_RULES(pagination.total ?? 0)}
+                      </UtilityBarText>
                     </UtilityBarGroup>
 
                     <UtilityBarGroup>
                       <UtilityBarText>{i18n.SELECTED_RULES(selectedRuleIds.length)}</UtilityBarText>
                       {!hasNoPermissions && (
                         <UtilityBarAction
+                          dataTestSubj="bulkActions"
                           iconSide="right"
                           iconType="arrowDown"
                           popoverContent={getBatchItemsPopoverContent}

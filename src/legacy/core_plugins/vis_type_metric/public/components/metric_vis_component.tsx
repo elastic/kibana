@@ -27,8 +27,7 @@ import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { getHeatmapColors } from '../../../../../plugins/charts/public';
 import { VisParams, MetricVisMetric } from '../types';
 import { getFormatService } from '../services';
-import { SchemaConfig } from '../../../visualizations/public';
-import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
+import { SchemaConfig, ExprVis } from '../../../../../plugins/visualizations/public';
 
 export interface MetricVisComponentProps {
   visParams: VisParams;

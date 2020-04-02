@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const totalNumberOfPrebuiltRules = 130;
+
 interface Mitre {
   tactic: string;
   techniques: string[];
@@ -20,6 +22,7 @@ export interface CustomRule {
   referenceUrls: string[];
   falsePositivesExamples: string[];
   mitre: Mitre[];
+  note: string;
 }
 
 export interface MachineLearningRule {
@@ -34,6 +37,7 @@ export interface MachineLearningRule {
   referenceUrls: string[];
   falsePositivesExamples: string[];
   mitre: Mitre[];
+  note: string;
 }
 
 const mitre1: Mitre = {
@@ -56,6 +60,7 @@ export const newRule: CustomRule = {
   referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [mitre1, mitre2],
+  note: '# test markdown',
 };
 
 export const machineLearningRule: MachineLearningRule = {
@@ -69,4 +74,5 @@ export const machineLearningRule: MachineLearningRule = {
   referenceUrls: ['https://elastic.co/'],
   falsePositivesExamples: ['False1'],
   mitre: [mitre1],
+  note: '# test markdown',
 };

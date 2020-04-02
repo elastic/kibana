@@ -27,7 +27,7 @@ If not set, {kib} will generate a random key on startup, but all alert and actio
 Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>.
 
 [float]
-[[alert-settings]]
+[[action-settings]]
 ==== Action settings
 
 `xpack.actions.whitelistedHosts`::
@@ -41,7 +41,7 @@ A list of action types that are enabled. It defaults to `[*]`, enabling all type
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.  
 
 [float]
-[[action-settings]]
+[[alert-settings]]
 ==== Alert settings
 
 You do not need to configure any additional settings to use alerting in {kib}.

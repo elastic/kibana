@@ -535,7 +535,7 @@ export const ml = {
     });
   },
 
-  calculateModelMemoryLimit({
+  calculateModelMemoryLimit$({
     analysisConfig,
     indexPattern,
     query,
@@ -559,7 +559,7 @@ export const ml = {
       latestMs,
     });
 
-    return http<{ modelMemoryLimit: string }>({
+    return http$<{ modelMemoryLimit: string }>({
       path: `${basePath()}/validate/calculate_model_memory_limit`,
       method: 'POST',
       body,

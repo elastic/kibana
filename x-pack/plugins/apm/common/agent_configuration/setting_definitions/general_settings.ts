@@ -13,21 +13,6 @@ import { RawSettingDefinition } from './types';
  * Settings added here will show up in the UI and will be validated on the client and server
  */
 export const generalSettings: RawSettingDefinition[] = [
-  // Active
-  {
-    key: 'active',
-    type: 'boolean',
-    defaultValue: 'true',
-    label: i18n.translate('xpack.apm.agentConfig.active.label', {
-      defaultMessage: 'Active'
-    }),
-    description: i18n.translate('xpack.apm.agentConfig.active.description', {
-      defaultMessage:
-        'A boolean specifying if the agent should be active or not.\nWhen active, the agent instruments incoming HTTP requests, tracks errors and collects and sends metrics.\nWhen inactive, the agent works as a noop, not collecting data and not communicating with the APM Server.\nAs this is a reversible switch, agent threads are not being killed when inactivated, but they will be \nmostly idle in this state, so the overhead should be negligible.\n\nYou can use this setting to dynamically disable Elastic APM at runtime.'
-    }),
-    excludeAgents: ['js-base', 'rum-js', 'python', 'dotnet']
-  },
-
   // API Request Size
   {
     key: 'api_request_size',
@@ -40,7 +25,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.apiRequestSize.description',
       {
         defaultMessage:
-          'The maximum total compressed size of the request body which is sent to the APM server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
+          'The maximum total compressed size of the request body which is sent to the APM Server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
       }
     ),
     excludeAgents: ['js-base', 'rum-js', 'dotnet']
@@ -77,7 +62,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.captureBody.description',
       {
         defaultMessage:
-          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "off".'
+          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables).'
       }
     ),
     options: [
@@ -121,6 +106,20 @@ export const generalSettings: RawSettingDefinition[] = [
     excludeAgents: ['js-base', 'rum-js', 'python']
   },
 
+  // Recording
+  {
+    key: 'recording',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate('xpack.apm.agentConfig.recording.label', {
+      defaultMessage: 'Recording'
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.recording.description', {
+      defaultMessage:
+        'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When inactive, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when inactivated, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.'
+    })
+  },
+
   // SERVER_TIMEOUT
   {
     key: 'server_timeout',
@@ -133,7 +132,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.serverTimeout.description',
       {
         defaultMessage:
-          'If a request to the APM server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM server times out.'
+          'If a request to the APM Server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM Server times out.'
       }
     ),
     includeAgents: ['nodejs', 'java', 'go']
@@ -192,7 +191,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.transactionMaxSpans.description',
       {
         defaultMessage:
-          'Limits the amount of spans that are recorded per transaction. Default is 500.'
+          'Limits the amount of spans that are recorded per transaction.'
       }
     ),
     min: 0,

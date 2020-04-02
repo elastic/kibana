@@ -13,6 +13,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import { debounce } from 'lodash';
 import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
 import { AGENT_NAME } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import {
@@ -171,8 +172,13 @@ export function Cytoscape({
         }
       });
     };
+    // debounce hover tracking so it doesn't spam telemetry with redundant events
+    const trackNodeEdgeHover = debounce(
+      () => trackApmEvent({ metric: 'service_map_node_or_edge_hover' }),
+      1000
+    );
     const mouseoverHandler: cytoscape.EventHandler = event => {
-      trackApmEvent({ metric: 'service_map_node_or_edge_hover' });
+      trackNodeEdgeHover();
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };
