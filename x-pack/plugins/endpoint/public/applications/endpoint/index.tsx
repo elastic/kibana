@@ -61,9 +61,17 @@ interface RouterProps {
   ingestManager: IngestManagerSetup;
 }
 
-const InitIngestManager: React.FunctionComponent<{ ingestManager: IngestManagerSetup }> | null = ({
-  ingestManager,
-}) => {
+const IsAppUnavailable: React.FunctionComponent<{
+  ingestManager: IngestManagerSetup;
+  setIsAppUnavailable: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ ingestManager, setIsAppUnavailable }) => {
+  (async () => {
+    if (await isIngestManagerInitialized(ingestManager)) {
+      setIsAppUnavailable(false);
+      return <Loading />;
+    }
+  })();
+
   const [hasIngestSetupFinished, setHasIngestSetupFinished] = React.useState(false);
   const [isIngestInitSuccessful, setIsIngestInitSuccessful] = React.useState(false);
   const [ingestInitError, setIngestInitError] = React.useState<Error | undefined>(undefined);
@@ -118,7 +126,8 @@ const InitIngestManager: React.FunctionComponent<{ ingestManager: IngestManagerS
       </EuiErrorBoundary>
     );
   }
-  return null;
+  setIsAppUnavailable(false);
+  return <Loading />;
 };
 
 async function isIngestManagerInitialized(ingestManager: IngestManagerSetup) {
@@ -138,49 +147,51 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
     ingestManager,
   }) => {
     const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
-
-    (async () => {
-      if (!(await isIngestManagerInitialized(ingestManager))) {
-        return <InitIngestManager ingestManager={ingestManager} />;
-      }
-    })();
+    const [isAppUnavailable, setIsAppUnavailable] = React.useState(true);
 
     return (
       <Provider store={store}>
         <I18nProvider>
           <KibanaContextProvider services={{ http, notifications, application, data }}>
             <EuiThemeProvider darkMode={isDarkMode}>
-              <Router history={history}>
-                <RouteCapture>
-                  <HeaderNavigation />
-                  <Switch>
-                    <Route
-                      exact
-                      path="/"
-                      render={() => (
-                        <h1 data-test-subj="welcomeTitle">
+              {isAppUnavailable ? (
+                <IsAppUnavailable
+                  ingestManager={ingestManager}
+                  setIsAppUnavailable={setIsAppUnavailable}
+                />
+              ) : (
+                <Router history={history}>
+                  <RouteCapture>
+                    <HeaderNavigation />
+                    <Switch>
+                      <Route
+                        exact
+                        path="/"
+                        render={() => (
+                          <h1 data-test-subj="welcomeTitle">
+                            <FormattedMessage
+                              id="xpack.endpoint.welcomeTitle"
+                              defaultMessage="Hello World"
+                            />
+                          </h1>
+                        )}
+                      />
+                      <Route path="/hosts" component={HostList} />
+                      <Route path="/alerts" component={AlertIndex} />
+                      <Route path="/policy" exact component={PolicyList} />
+                      <Route path="/policy/:id" exact component={PolicyDetails} />
+                      <Route
+                        render={() => (
                           <FormattedMessage
-                            id="xpack.endpoint.welcomeTitle"
-                            defaultMessage="Hello World"
+                            id="xpack.endpoint.notFound"
+                            defaultMessage="Page Not Found"
                           />
-                        </h1>
-                      )}
-                    />
-                    <Route path="/hosts" component={HostList} />
-                    <Route path="/alerts" component={AlertIndex} />
-                    <Route path="/policy" exact component={PolicyList} />
-                    <Route path="/policy/:id" exact component={PolicyDetails} />
-                    <Route
-                      render={() => (
-                        <FormattedMessage
-                          id="xpack.endpoint.notFound"
-                          defaultMessage="Page Not Found"
-                        />
-                      )}
-                    />
-                  </Switch>
-                </RouteCapture>
-              </Router>
+                        )}
+                      />
+                    </Switch>
+                  </RouteCapture>
+                </Router>
+              )}
             </EuiThemeProvider>
           </KibanaContextProvider>
         </I18nProvider>
