@@ -265,7 +265,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return [];
     }
 
-    const colors = getHexColorRangeStrings(this._options.color, GRADIENT_INTERVALS);
+    const colors = getHexColorRangeStrings(this._options.color);
 
     if (rangeFieldMeta.delta === 0) {
       //map to last color.
