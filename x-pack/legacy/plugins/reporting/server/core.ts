@@ -20,6 +20,7 @@ import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { PLUGIN_ID } from '../common/constants';
 import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions, ServerFacade } from '../types';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
+import { ReportingConfigType } from './config';
 import { checkLicenseFactory, getExportTypesRegistry, LevelLogger } from './lib';
 import { registerRoutes } from './routes';
 import { ReportingSetupDeps } from './types';
@@ -76,7 +77,8 @@ interface KbnServerConfigType {
   };
 }
 
-export type ReportingConfigType = any; // FIXME
+export { ReportingConfigType };
+
 export interface ReportingConfig extends Config<ReportingConfigType> {
   kbnConfig: Config<KbnServerConfigType>;
 }

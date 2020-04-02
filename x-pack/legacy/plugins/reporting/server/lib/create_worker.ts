@@ -41,10 +41,14 @@ export async function createWorkerFactory<JobParamsType>(
     > = new Map();
 
     for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
-      ExportTypeDefinition<JobParamsType, unknown, unknown, any>
+      ExportTypeDefinition<
+        JobParamsType,
+        unknown,
+        unknown,
+        ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>
+      >
     >) {
-      // TODO: the executeJobFn should be unwrapped in the register method of the export types registry
-      const jobExecutor = await exportType.executeJobFactory(reporting, logger);
+      const jobExecutor = exportType.executeJobFactory(reporting, logger);
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
