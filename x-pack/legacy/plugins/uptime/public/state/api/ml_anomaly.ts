@@ -13,7 +13,7 @@ import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from '../actions
 import { DataRecognizerConfigResponse } from '../../../../../../plugins/ml/common/types/modules';
 import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
-export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`;
+export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`.toLowerCase();
 
 export const getMLCapabilities = async (): Promise<PrivilegesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);
@@ -28,8 +28,11 @@ export const createMLJob = async ({
 }: MonitorIdParam): Promise<CreateMLJobSuccess | null> => {
   const url = API_URLS.ML_SETUP_MODULE + ML_MODULE_ID;
 
+  // ML App doesn't support upper case characters in job name
+  const lowerCaseMonitorId = monitorId.toLowerCase();
+
   const data = {
-    prefix: `${monitorId}_`,
+    prefix: `${lowerCaseMonitorId}_`,
     useDedicatedIndex: false,
     startDatafeed: true,
     start: moment()
@@ -41,7 +44,7 @@ export const createMLJob = async ({
         filter: [
           {
             term: {
-              'monitor.id': monitorId,
+              'monitor.id': lowerCaseMonitorId,
             },
           },
         ],
@@ -50,11 +53,17 @@ export const createMLJob = async ({
   };
 
   const response: DataRecognizerConfigResponse = await apiService.post(url, data);
-  if (response?.jobs?.[0]?.id === getMLJobId(monitorId) && response?.jobs?.[0]?.success) {
-    return {
-      count: 1,
-      jobId: response?.jobs?.[0]?.id,
-    };
+  if (response?.jobs?.[0]?.id === getMLJobId(monitorId)) {
+    const jobResponse = response.jobs[0];
+    if (jobResponse.success) {
+      return {
+        count: 1,
+        jobId: jobResponse.id,
+      };
+    } else {
+      const { error } = jobResponse;
+      throw new Error(error?.msg);
+    }
   } else {
     return null;
   }
