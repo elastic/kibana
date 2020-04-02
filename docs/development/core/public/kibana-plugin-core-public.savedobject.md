@@ -15,7 +15,7 @@ export interface SavedObject<T = unknown>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [attributes](./kibana-plugin-core-public.savedobject.attributes.md) | <code>T</code> | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
-|  [error](./kibana-plugin-core-public.savedobject.error.md) | <code>{</code><br/><code>        message: string;</code><br/><code>        statusCode: number;</code><br/><code>    }</code> |  |
+|  [error](./kibana-plugin-core-public.savedobject.error.md) | <code>{</code><br/><code>        error: string;</code><br/><code>        message: string;</code><br/><code>        statusCode: number;</code><br/><code>    }</code> |  |
 |  [id](./kibana-plugin-core-public.savedobject.id.md) | <code>string</code> | The ID of this Saved Object, guaranteed to be unique for all objects of the same <code>type</code> |
 |  [migrationVersion](./kibana-plugin-core-public.savedobject.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [namespaces](./kibana-plugin-core-public.savedobject.namespaces.md) | <code>string[]</code> | Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types. |

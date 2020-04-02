@@ -87,6 +87,7 @@ export interface SavedObject<T = unknown> {
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
   error?: {
+    error: string;
     message: string;
     statusCode: number;
   };

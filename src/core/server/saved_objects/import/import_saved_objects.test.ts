@@ -21,6 +21,7 @@ import { Readable } from 'stream';
 import { SavedObject } from '../types';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { savedObjectsClientMock } from '../../mocks';
+import { SavedObjectsErrorHelpers } from '..';
 
 const emptyResponse = {
   saved_objects: [],
@@ -341,7 +342,10 @@ describe('importSavedObjects()', () => {
     `);
   });
 
-  test('extracts errors for conflicts', async () => {
+  const testForConflicts = async (
+    errorType: string,
+    createError: (type: string, id: string) => SavedObject<unknown>['error']
+  ) => {
     const readStream = new Readable({
       objectMode: true,
       read() {
@@ -354,10 +358,7 @@ describe('importSavedObjects()', () => {
       saved_objects: savedObjects.map(savedObject => ({
         type: savedObject.type,
         id: savedObject.id,
-        error: {
-          statusCode: 409,
-          message: 'conflict',
-        },
+        error: createError(savedObject.type, savedObject.id),
         attributes: {},
         references: [],
       })),
@@ -374,7 +375,7 @@ describe('importSavedObjects()', () => {
         "errors": Array [
           Object {
             "error": Object {
-              "type": "conflict",
+              "type": "${errorType}",
             },
             "id": "1",
             "title": "My Index Pattern",
@@ -382,7 +383,7 @@ describe('importSavedObjects()', () => {
           },
           Object {
             "error": Object {
-              "type": "conflict",
+              "type": "${errorType}",
             },
             "id": "2",
             "title": "My Search",
@@ -390,7 +391,7 @@ describe('importSavedObjects()', () => {
           },
           Object {
             "error": Object {
-              "type": "conflict",
+              "type": "${errorType}",
             },
             "id": "3",
             "title": "My Visualization",
@@ -398,7 +399,7 @@ describe('importSavedObjects()', () => {
           },
           Object {
             "error": Object {
-              "type": "conflict",
+              "type": "${errorType}",
             },
             "id": "4",
             "title": "My Dashboard",
@@ -409,6 +410,12 @@ describe('importSavedObjects()', () => {
         "successCount": 0,
       }
     `);
+  };
+
+  test('extracts errors for conflicts', async () => {
+    const createError = (type: string, id: string) =>
+      SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
+    await testForConflicts('conflict', createError);
   });
 
   test('validates references', async () => {
@@ -451,10 +458,8 @@ describe('importSavedObjects()', () => {
         {
           type: 'index-pattern',
           id: '2',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '2').output
+            .payload,
           attributes: {},
           references: [],
         },

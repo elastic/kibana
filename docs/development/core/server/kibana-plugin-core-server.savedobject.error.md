@@ -8,6 +8,7 @@
 
 ```typescript
 error?: {
+        error: string;
         message: string;
         statusCode: number;
     };

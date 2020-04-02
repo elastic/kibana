@@ -19,6 +19,7 @@
 
 import { SavedObject } from '../types';
 import { extractErrors } from './extract_errors';
+import { SavedObjectsErrorHelpers } from '..';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {
@@ -44,10 +45,7 @@ describe('extractErrors()', () => {
           title: 'My Dashboard 2',
         },
         references: [],
-        error: {
-          statusCode: 409,
-          message: 'Conflict',
-        },
+        error: SavedObjectsErrorHelpers.createConflictError('dashboard', '2').output.payload,
       },
       {
         id: '3',
@@ -56,10 +54,7 @@ describe('extractErrors()', () => {
           title: 'My Dashboard 3',
         },
         references: [],
-        error: {
-          statusCode: 400,
-          message: 'Bad Request',
-        },
+        error: SavedObjectsErrorHelpers.createBadRequestError().output.payload,
       },
     ];
     const result = extractErrors(savedObjects, savedObjects);
@@ -75,6 +70,7 @@ Array [
   },
   Object {
     "error": Object {
+      "error": "Bad Request",
       "message": "Bad Request",
       "statusCode": 400,
       "type": "unknown",

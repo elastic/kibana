@@ -19,6 +19,7 @@
 
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
 import { savedObjectsClientMock } from '../../mocks';
+import { SavedObjectsErrorHelpers } from '..';
 
 describe('getNonExistingReferenceAsKeys()', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
@@ -164,20 +165,15 @@ describe('getNonExistingReferenceAsKeys()', () => {
         {
           id: '1',
           type: 'index-pattern',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '1').output
+            .payload,
           attributes: {},
           references: [],
         },
         {
           id: '3',
           type: 'search',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('search', '3').output.payload,
           attributes: {},
           references: [],
         },
@@ -245,40 +241,31 @@ Object {
         {
           type: 'index-pattern',
           id: '3',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '3').output
+            .payload,
           attributes: {},
           references: [],
         },
         {
           type: 'index-pattern',
           id: '5',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '5').output
+            .payload,
           attributes: {},
           references: [],
         },
         {
           type: 'index-pattern',
           id: '6',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '6').output
+            .payload,
           attributes: {},
           references: [],
         },
         {
           type: 'search',
           id: '7',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('search', '7').output.payload,
           attributes: {},
           references: [],
         },
@@ -602,10 +589,7 @@ Object {
         {
           id: '1',
           type: 'index-pattern',
-          error: {
-            statusCode: 400,
-            message: 'Error',
-          },
+          error: SavedObjectsErrorHelpers.createBadRequestError().output.payload,
           attributes: {},
           references: [],
         },

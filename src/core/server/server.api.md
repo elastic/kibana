@@ -1650,6 +1650,7 @@ export interface SavedObject<T = unknown> {
     attributes: T;
     // (undocumented)
     error?: {
+        error: string;
         message: string;
         statusCode: number;
     };

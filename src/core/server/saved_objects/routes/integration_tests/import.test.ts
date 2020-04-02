@@ -23,6 +23,7 @@ import { registerImportRoute } from '../import';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from './test_utils';
+import { SavedObjectsErrorHelpers } from '../..';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -185,10 +186,8 @@ describe('POST /internal/saved_objects/_import', () => {
           id: 'my-pattern',
           attributes: {},
           references: [],
-          error: {
-            statusCode: 409,
-            message: 'Saved object [index-pattern/my-pattern] conflict',
-          },
+          error: SavedObjectsErrorHelpers.createConflictError('index-pattern', 'my-pattern').output
+            .payload,
         },
         {
           type: 'dashboard',
@@ -241,10 +240,10 @@ describe('POST /internal/saved_objects/_import', () => {
         {
           id: 'my-pattern-*',
           type: 'index-pattern',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError(
+            'index-pattern',
+            'my-pattern-*'
+          ).output.payload,
           references: [],
           attributes: {},
         },
