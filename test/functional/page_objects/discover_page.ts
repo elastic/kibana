@@ -40,6 +40,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await el.getVisibleText();
     }
 
+    public async findFieldByName(name: string) {
+      const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
+      await fieldSearch.type(name);
+    }
+
     public async saveSearch(searchName: string) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
