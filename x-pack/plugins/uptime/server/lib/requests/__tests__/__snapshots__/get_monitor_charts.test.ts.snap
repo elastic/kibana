@@ -62,7 +62,7 @@ Array [
       },
       "size": 0,
     },
-    "index": "heartbeat*",
+    "index": "heartbeat-7*",
   },
 ]
 `;
@@ -129,7 +129,7 @@ Array [
       },
       "size": 0,
     },
-    "index": "heartbeat*",
+    "index": "heartbeat-7*",
   },
 ]
 `;
