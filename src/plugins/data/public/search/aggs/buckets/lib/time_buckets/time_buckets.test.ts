@@ -24,19 +24,20 @@ import { TimeBuckets } from './time_buckets';
 describe('TimeBuckets', () => {
   const { uiSettings } = coreMock.createSetup();
   uiSettings.get.mockImplementation((key: string) => {
-    if (key === 'histogram:maxBars') {
-      return 4;
-    } else if (key === 'histogram:barTarget') {
-      return 2;
-    } else if (key === 'dateFormat:scaled') {
-      return [
-        ['', 'HH:mm:ss.SSS'],
-        ['PT1S', 'HH:mm:ss'],
-        ['PT1M', 'HH:mm'],
-        ['PT1H', 'YYYY-MM-DD HH:mm'],
-        ['P1DT', 'YYYY-MM-DD'],
-        ['P1YT', 'YYYY'],
-      ];
+    switch (key) {
+      case 'histogram:maxBars':
+        return 4;
+      case 'histogram:barTarget':
+        return 2;
+      case 'dateFormat:scaled':
+        return [
+          ['', 'HH:mm:ss.SSS'],
+          ['PT1S', 'HH:mm:ss'],
+          ['PT1M', 'HH:mm'],
+          ['PT1H', 'YYYY-MM-DD HH:mm'],
+          ['P1DT', 'YYYY-MM-DD'],
+          ['P1YT', 'YYYY'],
+        ];
     }
   });
 

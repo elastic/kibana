@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import { IUiSettingsClient } from 'src/core/public';
@@ -42,11 +42,7 @@ interface TimeBucketsInterval extends moment.Duration {
 }
 
 function isObject(o: any): o is Record<string, any> {
-  return _.isObject(o);
-}
-
-function isString(s: any): s is string {
-  return _.isString(s);
+  return isObjectLodash(o);
 }
 
 function isValidMoment(m: any): boolean {
@@ -108,14 +104,14 @@ export class TimeBuckets {
     if (!input) return this.clearBounds();
 
     let bounds;
-    if (_.isPlainObject(input) && !Array.isArray(input)) {
+    if (isPlainObject(input) && !Array.isArray(input)) {
       // accept the response from timefilter.getActiveBounds()
       bounds = [input.min, input.max];
     } else {
       bounds = Array.isArray(input) ? input : [];
     }
 
-    const moments: Moment[] = _.sortBy(bounds, Number);
+    const moments: Moment[] = sortBy(bounds, Number);
 
     const valid = moments.length === 2 && moments.every(isValidMoment);
     if (!valid) {
