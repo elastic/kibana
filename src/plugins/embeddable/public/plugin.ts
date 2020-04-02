@@ -18,9 +18,16 @@
  */
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { EmbeddableFactoryRegistry } from './types';
+import { EmbeddableFactoryRegistry, EmbeddableFactoryProvider } from './types';
 import { bootstrap } from './bootstrap';
-import { EmbeddableFactory, EmbeddableInput, EmbeddableOutput, IEmbeddable } from './lib';
+import {
+  EmbeddableFactory,
+  EmbeddableInput,
+  EmbeddableOutput,
+  defaultEmbeddableFactoryProvider,
+  IEmbeddable,
+} from './lib';
+import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -29,9 +36,11 @@ export interface EmbeddableSetupDependencies {
 export interface EmbeddableSetup {
   registerEmbeddableFactory: <I extends EmbeddableInput, O extends EmbeddableOutput>(
     id: string,
-    factory: EmbeddableFactory<I, O>
+    factory: EmbeddableFactoryDefinition<I, O>
   ) => void;
+  setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
+
 export interface EmbeddableStart {
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
@@ -44,7 +53,12 @@ export interface EmbeddableStart {
 }
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
+  private readonly embeddableFactoryDefinitions: Map<
+    string,
+    EmbeddableFactoryDefinition
+  > = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
+  private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -53,26 +67,47 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
+      setCustomEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
+        if (this.customEmbeddableFactoryProvider) {
+          throw new Error(
+            'Custom embeddable factory provider is already set, and can only be set once'
+          );
+        }
+        this.customEmbeddableFactoryProvider = provider;
+      },
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): EmbeddableStart {
+    this.embeddableFactoryDefinitions.forEach(def => {
+      this.embeddableFactories.set(
+        def.type,
+        this.customEmbeddableFactoryProvider
+          ? this.customEmbeddableFactoryProvider(def)
+          : defaultEmbeddableFactoryProvider(def)
+      );
+    });
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
-      getEmbeddableFactories: () => this.embeddableFactories.values(),
+      getEmbeddableFactories: () => {
+        this.ensureFactoriesExist();
+        return this.embeddableFactories.values();
+      },
     };
   }
 
   public stop() {}
 
-  private registerEmbeddableFactory = (embeddableFactoryId: string, factory: EmbeddableFactory) => {
-    if (this.embeddableFactories.has(embeddableFactoryId)) {
+  private registerEmbeddableFactory = (
+    embeddableFactoryId: string,
+    factory: EmbeddableFactoryDefinition
+  ) => {
+    if (this.embeddableFactoryDefinitions.has(embeddableFactoryId)) {
       throw new Error(
         `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] already registered in Embeddables API.`
       );
     }
-
-    this.embeddableFactories.set(embeddableFactoryId, factory);
+    this.embeddableFactoryDefinitions.set(embeddableFactoryId, factory);
   };
 
   private getEmbeddableFactory = <
@@ -81,7 +116,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string
-  ) => {
+  ): EmbeddableFactory<I, O, E> => {
+    this.ensureFactoryExists(embeddableFactoryId);
     const factory = this.embeddableFactories.get(embeddableFactoryId);
 
     if (!factory) {
@@ -92,4 +128,22 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     return factory as EmbeddableFactory<I, O, E>;
   };
+
+  // These two functions are only to support legacy plugins registering factories after the start lifecycle.
+  private ensureFactoriesExist() {
+    this.embeddableFactoryDefinitions.forEach(def => this.ensureFactoryExists(def.type));
+  }
+
+  private ensureFactoryExists(type: string) {
+    if (!this.embeddableFactories.get(type)) {
+      const def = this.embeddableFactoryDefinitions.get(type);
+      if (!def) return;
+      this.embeddableFactories.set(
+        type,
+        this.customEmbeddableFactoryProvider
+          ? this.customEmbeddableFactoryProvider(def)
+          : defaultEmbeddableFactoryProvider(def)
+      );
+    }
+  }
 }

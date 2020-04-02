@@ -21,7 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { OverlayStart, CoreStart, SavedObjectsStart, IUiSettingsClient } from 'kibana/public';
 import { Start as InspectorStart } from 'src/plugins/inspector/public';
-import { EmbeddableFactory, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableFactoryDefinition,
+  EmbeddableStart,
+} from '../../../../src/plugins/embeddable/public';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainer,
@@ -39,13 +42,11 @@ export interface StartServices {
   uiSettingsClient: IUiSettingsClient;
 }
 
-export class SearchableListContainerFactory extends EmbeddableFactory {
+export class SearchableListContainerFactory implements EmbeddableFactoryDefinition {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   public readonly isContainerType = true;
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
     return true;

@@ -38,6 +38,7 @@ export {
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddableFactoryDefinition,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactoryRenderer,

@@ -22,7 +22,7 @@ import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { OverlayStart, CoreStart, SavedObjectsStart, IUiSettingsClient } from 'kibana/public';
 import { Start as InspectorStart } from 'src/plugins/inspector/public';
 import {
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   ContainerInput,
   EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
@@ -39,13 +39,11 @@ export interface StartServices {
   uiSettingsClient: IUiSettingsClient;
 }
 
-export class ListContainerFactory extends EmbeddableFactory {
+export class ListContainerFactory implements EmbeddableFactoryDefinition {
   public readonly type = LIST_CONTAINER;
   public readonly isContainerType = true;
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
   public async isEditable() {
     return true;

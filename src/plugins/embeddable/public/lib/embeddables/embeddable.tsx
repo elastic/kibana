@@ -168,6 +168,8 @@ export abstract class Embeddable<
    */
   public destroy(): void {
     this.destoyed = true;
+    this.input$.complete();
+    this.output$.complete();
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
