@@ -51,6 +51,7 @@ export const getSignalsCount = async ({
     from: fromInMs,
   });
 
+  await callCluster('indices.refresh', { index });
   const result = await callCluster('count', query);
   const resultsLink = getNotificationResultsLink({
     kibanaSiemAppUrl: `${kibanaSiemAppUrl}`,
