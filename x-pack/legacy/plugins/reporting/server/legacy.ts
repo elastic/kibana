@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import crypto from 'crypto';
 import { get } from 'lodash';
@@ -24,11 +26,25 @@ const buildLegacyDependencies = (
   },
 });
 
-const addConfigDefaults = (core: CoreSetup, baseConfig: ReportingConfigType) => {
+const addConfigDefaults = (
+  server: Legacy.Server,
+  core: CoreSetup,
+  baseConfig: ReportingConfigType
+) => {
   // encryption key
   let encryptionKey = baseConfig.encryptionKey;
   if (encryptionKey === undefined) {
-    // FIXME log warning
+    server.log(
+      ['reporting', 'config', 'warning'],
+      i18n.translate('xpack.reporting.selfCheckEncryptionKey.warning', {
+        defaultMessage:
+          `Generating a random key for {setting}. To prevent pending reports ` +
+          `from failing on restart, please set {setting} in kibana.yml`,
+        values: {
+          setting: 'xpack.reporting.encryptionKey',
+        },
+      })
+    );
     encryptionKey = crypto.randomBytes(16).toString('hex');
   }
 
@@ -38,7 +54,18 @@ const addConfigDefaults = (core: CoreSetup, baseConfig: ReportingConfigType) => 
   // kibanaServer.hostname, default to server.host, don't allow "0"
   let kibanaServerHostname = reportingServer.hostname ? reportingServer.hostname : serverInfo.host;
   if (kibanaServerHostname === '0') {
-    // FIXME log warning
+    server.log(
+      ['reporting', 'config', 'warning'],
+      i18n.translate('xpack.reporting.selfCheckHostname.warning', {
+        defaultMessage:
+          `Found 'server.host: "0"' in settings. This is incompatible with Reporting. ` +
+          `To enable Reporting to work, '{setting}: 0.0.0.0' is being automatically to the configuration. ` +
+          `You can change to 'server.host: 0.0.0.0' or add '{setting}: 0.0.0.0' in kibana.yml to prevent this message.`,
+        values: {
+          setting: 'xpack.reporting.kibanaServer.hostname',
+        },
+      })
+    );
     kibanaServerHostname = '0.0.0.0';
   }
 
@@ -87,7 +114,7 @@ const buildConfig = (
   };
 
   // spreading arguments as an array allows the return type to be known by the compiler
-  reportingConfig = addConfigDefaults(core, reportingConfig);
+  reportingConfig = addConfigDefaults(server, core, reportingConfig);
   return {
     get: (...keys: string[]) => get(reportingConfig, keys.join('.'), null),
     kbnConfig: {
