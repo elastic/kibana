@@ -17,7 +17,7 @@ import { DEFAULT_APP_CATEGORIES, deepFreeze } from '../../../../src/core/utils';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
-import { sendSetup, sendIsInitialized } from './applications/ingest_manager/hooks';
+import { sendSetup, sendIsInitialized, setHttpClient } from './applications/ingest_manager/hooks';
 import { IngestManagerConfigType, CreateFleetSetupResponse } from '../common/types';
 
 export { IngestManagerConfigType } from '../common/types';
@@ -61,6 +61,8 @@ export class IngestManagerPlugin
     deps: IngestManagerSetupDeps
   ): Promise<RecursiveReadonly<IngestManagerSetup>> {
     const config = this.config;
+    setHttpClient(core.http);
+
     // Register main Ingest Manager app
     core.application.register({
       id: PLUGIN_ID,

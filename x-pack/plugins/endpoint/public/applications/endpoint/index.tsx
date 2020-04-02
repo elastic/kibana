@@ -12,8 +12,15 @@ import { Route, Switch, Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { useObservable } from 'react-use';
-import { EuiErrorBoundary } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import {
+  EuiPage,
+  EuiPageHeaderSection,
+  EuiPageBody,
+  EuiTitle,
+  EuiPageContent,
+  EuiText,
+  EuiPageHeader,
+} from '@elastic/eui';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from './view/route_capture';
 import { EndpointPluginStartDependencies } from '../../plugin';
@@ -25,7 +32,6 @@ import { PolicyDetails } from './view/policy';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
 import { IngestManagerSetup } from '../../../../ingest_manager/public';
 import { Loading } from './components/loading';
-import { Error } from './components/error';
 import { HeaderNavigation } from './components/header_nav';
 
 /**
@@ -68,7 +74,7 @@ const IsAppUnavailable: React.FunctionComponent<{
   (async () => {
     if (await isIngestManagerInitialized(ingestManager)) {
       setIsAppUnavailable(false);
-      return <Loading />;
+      return null;
     }
   })();
 
@@ -97,37 +103,48 @@ const IsAppUnavailable: React.FunctionComponent<{
     return <Loading />;
   }
 
+  const errorText =
+    `Response from Ingest Manager: ${ingestInitError?.message}` ||
+    'Ingest Manager failed to initialize for an unknown reason';
   if (!isIngestInitSuccessful || ingestInitError) {
     return (
-      <EuiErrorBoundary>
-        {ingestInitError ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.endpoint.ingestInitializationErrorMessageTitle"
-                defaultMessage="Unable to initialize Ingest Manager"
-              />
-            }
-            error={ingestInitError}
-          />
-        ) : (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.endpoint.ingestInitializationErrorMessageTitle"
-                defaultMessage="Unable to initialize Ingest Manager"
-              />
-            }
-            error={i18n.translate('xpack.endpoint.ingestInitializationDefaultError', {
-              defaultMessage: 'Ingest Manager failed to initialize for an unknown reason',
-            })}
-          />
-        )}
-      </EuiErrorBoundary>
+      <EuiPage className="ingestErrorPage">
+        <EuiPageBody>
+          <EuiPageHeader>
+            <EuiPageHeaderSection className="ingestErrorHeader">
+              <EuiTitle size="m">
+                <h1 data-test-subj="ingestErrorTitle">
+                  <FormattedMessage
+                    id="xpack.endpoint.endpointAppTitle"
+                    defaultMessage="Endpoint App"
+                  />
+                </h1>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+          <EuiPageContent className="ingestErrorContent">
+            <EuiText>
+              <h2>
+                <FormattedMessage
+                  id="xpack.endpoint.ingestErrorHeader"
+                  defaultMessage="Ingest Manager Initialization Failure"
+                />
+              </h2>
+              <p>
+                <FormattedMessage
+                  id="xpack.endpoint.ingestErrorMessage"
+                  defaultMessage={errorText}
+                />
+              </p>
+            </EuiText>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
+
   setIsAppUnavailable(false);
-  return <Loading />;
+  return null;
 };
 
 async function isIngestManagerInitialized(ingestManager: IngestManagerSetup) {
