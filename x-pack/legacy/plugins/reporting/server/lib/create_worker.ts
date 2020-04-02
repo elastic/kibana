@@ -20,7 +20,7 @@ import {
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 
-export async function createWorkerFactory<JobParamsType>(
+export function createWorkerFactory<JobParamsType>(
   reporting: ReportingCore,
   config: ReportingConfig,
   logger: Logger

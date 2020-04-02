@@ -48,7 +48,7 @@ describe('Create Worker', () => {
   });
 
   test('Creates a single Esqueue worker for Reporting', async () => {
-    const createWorker = await createWorkerFactory(mockReporting, mockConfig, getMockLogger());
+    const createWorker = createWorkerFactory(mockReporting, mockConfig, getMockLogger());
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     await createWorker(queue);
@@ -80,7 +80,7 @@ Object {
       { executeJobFactory: executeJobFactoryStub },
     ]);
     mockReporting.getExportTypesRegistry = () => exportTypesRegistry;
-    const createWorker = await createWorkerFactory(mockReporting, mockConfig, getMockLogger());
+    const createWorker = createWorkerFactory(mockReporting, mockConfig, getMockLogger());
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     await createWorker(queue);

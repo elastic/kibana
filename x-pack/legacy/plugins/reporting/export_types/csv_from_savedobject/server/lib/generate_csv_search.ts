@@ -153,11 +153,8 @@ export async function generateCsvSearch(
     },
   };
 
-  const [elasticsearch, config] = await Promise.all([
-    reporting.getElasticsearchService(),
-    reporting.getConfig(),
-  ]);
-
+  const config = reporting.getConfig();
+  const elasticsearch = await reporting.getElasticsearchService();
   const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
     KibanaRequest.from(req.getRawRequest())
   );
