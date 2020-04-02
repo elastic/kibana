@@ -23,6 +23,7 @@ import {
   SavedObjectsClientContract,
   ToastsStart,
   PluginInitializerContext,
+  I18nStart,
 } from 'kibana/public';
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
@@ -32,6 +33,7 @@ import { SharePluginStart } from '../../share/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { SavedVisualizations } from './application/types';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 // the vis_default_editor is about to be moved to NP, this import will be adjusted
 import { DefaultEditorController } from '../../../legacy/core_plugins/vis_default_editor/public';
 
@@ -48,8 +50,10 @@ export interface VisualizeKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   savedVisualizations: SavedVisualizations;
   share?: SharePluginStart;
+  config: KibanaLegacyStart['config'];
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
+  I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
   DefaultVisualizationEditor: typeof DefaultEditorController;
 }

@@ -107,6 +107,7 @@ export class VisualizePlugin
           pluginInitializerContext: this.initializerContext,
           addBasePath: coreStart.http.basePath.prepend,
           core: coreStart,
+          config: kibanaLegacy.config,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
           embeddable: pluginsStart.embeddable,
@@ -118,6 +119,7 @@ export class VisualizePlugin
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
+          I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           DefaultVisualizationEditor: DefaultEditorController,
         };
