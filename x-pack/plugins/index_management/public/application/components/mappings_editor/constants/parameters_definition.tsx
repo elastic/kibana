@@ -225,6 +225,21 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         {
           validator: ({ value }: ValidationFuncArg<any, any>) => {
             const json = JSON.parse(value);
+            if (Array.isArray(json)) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeJsonArrayNotAllowedErrorMessage',
+                  {
+                    defaultMessage: 'Arrays are not allowed.',
+                  }
+                ),
+              };
+            }
+          },
+        },
+        {
+          validator: ({ value }: ValidationFuncArg<any, any>) => {
+            const json = JSON.parse(value);
             if (json.type) {
               return {
                 code: 'ERR_CUSTOM_TYPE_OVERRIDDEN',
