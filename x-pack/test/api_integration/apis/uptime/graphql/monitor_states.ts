@@ -119,18 +119,6 @@ export default function({ getService }: FtrProviderContext) {
 
           dateRangeEnd = new Date().toISOString();
           nonSummaryIp = checks[0][0].monitor.ip;
-
-          // adding a monitor with geo location to create a mix state
-          await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', d => {
-            // turn an all up status into having at least one down
-            d.observer = {
-              geo: {
-                name: 'US-East',
-                location: '40.7128, -74.0060',
-              },
-            };
-            return d;
-          });
         });
 
         it('should return all IPs', async () => {
