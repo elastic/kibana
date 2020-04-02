@@ -98,6 +98,7 @@ describe('<WatchEdit />', () => {
             name: EDITED_WATCH_NAME,
             type: watch.type,
             isNew: false,
+            isActive: true,
             actions: [
               {
                 id: DEFAULT_LOGGING_ACTION_ID,
@@ -191,6 +192,7 @@ describe('<WatchEdit />', () => {
             name: EDITED_WATCH_NAME,
             type,
             isNew: false,
+            isActive: true,
             actions: [],
             timeField,
             triggerIntervalSize,
@@ -202,7 +204,6 @@ describe('<WatchEdit />', () => {
             timeWindowSize,
             timeWindowUnit,
             hasTermsAgg: false,
-            isActive: true,
             threshold: threshold && threshold[0],
           })
         );
