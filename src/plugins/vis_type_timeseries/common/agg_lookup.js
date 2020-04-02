@@ -97,7 +97,9 @@ export const lookup = {
     defaultMessage: 'Static Value',
   }),
   top_hit: i18n.translate('visTypeTimeseries.aggLookup.topHitLabel', { defaultMessage: 'Top Hit' }),
-  rate: i18n.translate('visTypeTimeseries.aggLookup.rateLabel', { defaultMessage: 'Rate' }),
+  growth_rate: i18n.translate('visTypeTimeseries.aggLookup.growthRateLabel', {
+    defaultMessage: 'Growth Rate',
+  }),
 };
 
 const pipeline = [

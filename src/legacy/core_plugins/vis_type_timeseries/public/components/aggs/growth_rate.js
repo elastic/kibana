@@ -33,11 +33,13 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiSpacer,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 
-export const RateAgg = props => {
+export const GrowthRateAgg = props => {
   const defaults = { unit: '' };
   const model = { ...defaults, ...props.model };
 
@@ -63,7 +65,7 @@ export const RateAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="visTypeTimeseries.rate.aggregationLabel"
+              id="visTypeTimeseries.growthRate.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -81,7 +83,10 @@ export const RateAgg = props => {
           <EuiFormRow
             id={htmlId('field')}
             label={
-              <FormattedMessage id="visTypeTimeseries.rate.fieldLabel" defaultMessage="Field" />
+              <FormattedMessage
+                id="visTypeTimeseries.growthRate.fieldLabel"
+                defaultMessage="Field"
+              />
             }
             fullWidth
           >
@@ -102,7 +107,7 @@ export const RateAgg = props => {
             id={htmlId('units')}
             label={
               <FormattedMessage
-                id="visTypeTimeseries.rate.unitsLabel"
+                id="visTypeTimeseries.growthRate.unitsLabel"
                 defaultMessage="Units (1s, 1m, etc)"
                 description="1s and 1m are required values and must not be translated."
               />
@@ -113,11 +118,30 @@ export const RateAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        <p>
+          <FormattedMessage
+            id="visTypeTimeseries.growthRate.helpText"
+            defaultMessage="This aggregation should only be applied to {link}, it is a shortcut for applying max, derivative and positive only to a field."
+            values={{
+              link: (
+                <EuiLink href="https://en.wikipedia.org/wiki/Monotonic_function" target="_BLANK">
+                  <FormattedMessage
+                    id="visTypeTimeseries.growthRate.helpTextLink"
+                    defaultMessage="monotonically increasing numbers"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </EuiText>
     </AggRow>
   );
 };
 
-RateAgg.propTypes = {
+GrowthRateAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,

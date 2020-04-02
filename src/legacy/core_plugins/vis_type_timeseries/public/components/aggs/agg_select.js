@@ -50,6 +50,12 @@ const metricAggs = [
     value: 'filter_ratio',
   },
   {
+    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.growthRateLabel', {
+      defaultMessage: 'Growth Rate',
+    }),
+    value: 'growth_rate',
+  },
+  {
     label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.maxLabel', {
       defaultMessage: 'Max',
     }),
@@ -114,12 +120,6 @@ const metricAggs = [
       defaultMessage: 'Variance',
     }),
     value: 'variance',
-  },
-  {
-    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.rateLabel', {
-      defaultMessage: 'Rate',
-    }),
-    value: 'rate',
   },
 ];
 

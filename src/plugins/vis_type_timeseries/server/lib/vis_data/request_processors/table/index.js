@@ -26,7 +26,7 @@ import { metricBuckets } from './metric_buckets';
 import { siblingBuckets } from './sibling_buckets';
 import { ratios as filterRatios } from './filter_ratios';
 import { normalizeQuery } from './normalize_query';
-import { rate } from './rate';
+import { growthRate } from './growth_rate';
 
 export const processors = [
   query,
@@ -37,6 +37,6 @@ export const processors = [
   metricBuckets,
   siblingBuckets,
   filterRatios,
-  rate,
+  growthRate,
   normalizeQuery,
 ];
