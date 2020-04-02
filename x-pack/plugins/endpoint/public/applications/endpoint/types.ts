@@ -205,7 +205,8 @@ export enum EventingFields {
   network = 'network',
 }
 
-/** Returns the keys of an object whose values meet a criteria.
+/**
+ * Returns the keys of an object whose values meet a criteria.
  *  Ex) interface largeNestedObject = {
  *         a: {
  *           food: Foods;
