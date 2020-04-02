@@ -34,6 +34,12 @@ var IGNORE_WARNINGS = [
   {
     name: 'MaxListenersExceededWarning',
   },
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0066',
+    file: '/node_modules/supertest/node_modules/superagent/lib/node/index.js',
+    line: 418,
+  },
 ];
 
 if (process.noProcessWarnings !== true) {
