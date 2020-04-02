@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, EmbeddableFactory, IContainer } from '../embeddable_plugin';
+import { isErrorEmbeddable, IContainer } from '../embeddable_plugin';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
@@ -30,25 +30,33 @@ import { coreMock } from '../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { DuplicatePanelAction } from '.';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(
+// eslint-disable-next-line
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
+const { setup, doStart } = embeddablePluginMock.createInstance();
+setup.registerEmbeddableFactory(
   CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
+  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
 );
-// const getEmbeddableFactories = () => embeddableFactories.values();
+const start = doStart();
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
 let coreStart: CoreStart;
 beforeEach(async () => {
   coreStart = coreMock.createStart();
+  coreStart.savedObjects.client = {
+    ...coreStart.savedObjects.client,
+    get: jest.fn().mockImplementation(() => ({ attributes: { title: 'Holy moly' } })),
+    find: jest.fn().mockImplementation(() => ({ total: 15 })),
+    create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
+  };
+
   const options = {
     ExitFullScreenButton: () => null,
     SavedObjectFinder: () => null,
     application: {} as any,
-    embeddable: {
-      getEmbeddableFactory: (id: string) => embeddableFactories.get(id)!,
-    } as any,
+    embeddable: start,
     inspector: {} as any,
     notifications: {} as any,
     overlays: coreStart.overlays,
@@ -94,17 +102,6 @@ test('Duplicates an embeddable with a saved object ID', async () => {
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const panel = dashboard.getInput().panels[embeddable.id];
   panel.savedObjectId = 'holySavedObjectBatman';
-
-  coreStart.savedObjects.client.get = jest
-    .fn()
-    .mockImplementation(() => ({ attributes: { title: 'Holy moly batman!' } }));
-
-  coreStart.savedObjects.client.find = jest.fn().mockImplementation(() => ({ total: 150 }));
-
-  coreStart.savedObjects.client.create = jest
-    .fn()
-    .mockImplementation(() => ({ id: 'brandNewSavedObject!' }));
-
   const action = new DuplicatePanelAction(coreStart);
   await action.execute({ embeddable });
   expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(1);
@@ -115,6 +112,35 @@ test('Duplicates an embeddable with a saved object ID', async () => {
   );
   expect(newPanelId).toBeDefined();
   const newPanel = container.getInput().panels[newPanelId!];
-  expect(newPanel.type).toEqual(CONTACT_CARD_EMBEDDABLE);
+  expect(newPanel.type).toEqual(embeddable.type);
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount + 1);
+});
+
+test('Gets a unique title ', async () => {
+  coreStart.savedObjects.client.find = jest.fn().mockImplementation(({ search }) => {
+    if (search === '"testFirstTitle"') return { total: 1 };
+    else if (search === '"testSecondTitle"') return { total: 41 };
+    else if (search === '"testThirdTitle"') return { total: 90 };
+  });
+  const action = new DuplicatePanelAction(coreStart);
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testFirstTitle', embeddable.type)).toEqual(
+    'testFirstTitle (copy)'
+  );
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testSecondTitle (copy 39)', embeddable.type)).toEqual(
+    'testSecondTitle (copy 40)'
+  );
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testSecondTitle (copy 20)', embeddable.type)).toEqual(
+    'testSecondTitle (copy 40)'
+  );
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testThirdTitle', embeddable.type)).toEqual(
+    'testThirdTitle (copy 89)'
+  );
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testThirdTitle (copy 10000)', embeddable.type)).toEqual(
+    'testThirdTitle (copy 89)'
+  );
 });

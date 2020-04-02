@@ -143,7 +143,10 @@ export class DuplicatePanelAction implements ActionByType<typeof ACTION_DUPLICAT
     });
     const duplicationRegex = new RegExp(`\\(${duplicatedTag}\\)`, 'g');
     const duplicationNumberRegex = new RegExp(`\\(${duplicatedTag} [0-9]+\\)`, 'g');
-    const baseTitle = rawTitle.replace(duplicationNumberRegex, '').replace(duplicationRegex, '');
+    const baseTitle = rawTitle
+      .replace(duplicationNumberRegex, '')
+      .replace(duplicationRegex, '')
+      .trim();
 
     const similarSavedObjects = await this.core.savedObjects.client.find<SavedObject>({
       type: embeddableType,
