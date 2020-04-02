@@ -406,30 +406,6 @@ export class RemoteClusterForm extends Component {
         </EuiFormRow>
 
         <EuiFormRow
-          data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
-          label={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
-              defaultMessage="Socket connections"
-            />
-          }
-          helpText={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
-              defaultMessage="The number of socket connections to open per remote cluster."
-            />
-          }
-          fullWidth
-        >
-          <EuiFieldNumber
-            value={proxySocketConnections || ''}
-            onChange={e =>
-              this.onFieldsChange({ proxySocketConnections: Number(e.target.value) || null })
-            }
-            fullWidth
-          />
-        </EuiFormRow>
-        <EuiFormRow
           data-test-subj="remoteClusterFormServerNameFormRow"
           isInvalid={Boolean(areErrorsVisible && errorServerName)}
           error={errorServerName}
@@ -468,6 +444,31 @@ export class RemoteClusterForm extends Component {
             value={serverName}
             onChange={e => this.onFieldsChange({ serverName: e.target.value })}
             isInvalid={Boolean(areErrorsVisible && errorServerName)}
+            fullWidth
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
+          label={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
+              defaultMessage="Socket connections"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
+              defaultMessage="The number of socket connections to open per remote cluster."
+            />
+          }
+          fullWidth
+        >
+          <EuiFieldNumber
+            value={proxySocketConnections || ''}
+            onChange={e =>
+              this.onFieldsChange({ proxySocketConnections: Number(e.target.value) || null })
+            }
             fullWidth
           />
         </EuiFormRow>
@@ -519,15 +520,38 @@ export class RemoteClusterForm extends Component {
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  iconType="pin"
+                  size="s"
                   title={
                     <FormattedMessage
                       id="xpack.remoteClusters.cloudClusterInformationTitle"
-                      defaultMessage="You can find the proxy address and server name of your cluster in the Security section of your deployment."
+                      defaultMessage="Use the proxy address for Elastic Cloud deployments"
                     />
                   }
-                  iconType="pin"
-                  size="s"
-                />
+                >
+                  <FormattedMessage
+                    id="xpack.remoteClusters.cloudClusterInformationDescription"
+                    defaultMessage="To find the proxy address and server name of your cluster, go to the {security} page of your deployment menu and search for {searchString}."
+                    values={{
+                      security: (
+                        <strong>
+                          <FormattedMessage
+                            id="xpack.remoteClusters.cloudClusterSecurityDescription"
+                            defaultMessage="Security"
+                          />
+                        </strong>
+                      ),
+                      searchString: (
+                        <strong>
+                          <FormattedMessage
+                            id="xpack.remoteClusters.cloudClusterSearchDescription"
+                            defaultMessage="Remote cluster parameters"
+                          />
+                        </strong>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
               </>
             ) : null}
           </>
