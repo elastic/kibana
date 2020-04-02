@@ -62,7 +62,7 @@ export const createMLJob = async ({
       };
     } else {
       const { error } = jobResponse;
-      throw new Error(error.msg);
+      throw new Error(error?.msg);
     }
   } else {
     return null;
