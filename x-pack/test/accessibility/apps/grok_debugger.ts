@@ -18,17 +18,17 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await grokDebugger.assertExists();
     });
 
-    it('Dev tools grok debugger view', async () => {
+    it('Dev tools grok debugger set input, async () => {
       await grokDebugger.setEventInput('SegerCommaBob');
       await a11y.testAppSnapshot();
     });
 
-    it('Dev tools grok debugger view', async () => {
+    it('Dev tools grok debugger set pattern', async () => {
       await grokDebugger.setPatternInput('%{USERNAME:u}');
       await a11y.testAppSnapshot();
     });
 
-    it('Dev tools grok debugger view', async () => {
+    it('Dev tools grok debugger simulate', async () => {
       await grokDebugger.clickSimulate();
       await a11y.testAppSnapshot();
     });
