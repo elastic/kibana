@@ -251,7 +251,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     <FormWrapper>
       {!connectorIsValid && (
         <SectionWrapper style={{ marginTop: 0 }}>
-          <EuiCallOut title={i18n.WARNING_NO_CONNECTOR_TITLE} color="warning" iconType="help">
+          <EuiCallOut
+            title={i18n.WARNING_NO_CONNECTOR_TITLE}
+            color="warning"
+            iconType="help"
+            data-test-subj="configure-cases-warning-callout"
+          >
             {i18n.WARNING_NO_CONNECTOR_MESSAGE}
           </EuiCallOut>
         </SectionWrapper>
@@ -283,11 +288,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         />
       </SectionWrapper>
       {actionBarVisible && (
-        <EuiBottomBar>
+        <EuiBottomBar data-test-subj="case-configure-action-bottom-bar">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
-                <EuiText>{i18n.UNSAVED_CHANGES(totalConfigurationChanges)}</EuiText>
+                <EuiText data-test-subj="case-configure-action-bottom-bar-total-changes">
+                  {i18n.UNSAVED_CHANGES(totalConfigurationChanges)}
+                </EuiText>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -300,6 +307,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
                     isLoading={persistLoading}
                     aria-label={i18n.CANCEL}
                     href={getCaseUrl(search)}
+                    data-test-subj="case-configure-action-bottom-bar-cancel-button"
                   >
                     {i18n.CANCEL}
                   </EuiButtonEmpty>
@@ -313,6 +321,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
                     isDisabled={isLoadingAny}
                     isLoading={persistLoading}
                     onClick={handleSubmit}
+                    data-test-subj="case-configure-action-bottom-bar-save-button"
                   >
                     {i18n.SAVE_CHANGES}
                   </EuiButton>

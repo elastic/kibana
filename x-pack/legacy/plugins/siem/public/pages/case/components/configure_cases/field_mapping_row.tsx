@@ -77,6 +77,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           options={thirdPartyOptions}
           valueOfSelected={selectedThirdParty}
           onChange={onChangeThirdParty.bind(null, siemField)}
+          data-test-subj={'case-configure-third-party-select'}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -85,6 +86,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           options={actionTypeOptions}
           valueOfSelected={selectedActionType}
           onChange={onChangeActionType.bind(null, siemField)}
+          data-test-subj={'case-configure-action-type-select'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
