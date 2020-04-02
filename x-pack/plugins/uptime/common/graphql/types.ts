@@ -299,6 +299,18 @@ export interface Resolve {
   rtt?: Duration | null;
 }
 
+export interface Socks5 {
+  rtt?: Rtt | null;
+}
+
+export interface Rtt {
+  connect?: Duration | null;
+
+  handshake?: Duration | null;
+
+  validate?: Duration | null;
+}
+
 export interface Summary {
   up?: number | null;
 
@@ -317,18 +329,6 @@ export interface Location {
   lat?: number | null;
 
   lon?: number | null;
-}
-
-export interface Socks5 {
-  rtt?: Rtt | null;
-}
-
-export interface Rtt {
-  connect?: Duration | null;
-
-  handshake?: Duration | null;
-
-  validate?: Duration | null;
 }
 
 export interface Tcp {
@@ -411,21 +411,7 @@ export interface State {
 
   monitor?: MonitorState | null;
 
-  summary: {
-    up?: number | null;
-
-    down?: number | null;
-
-    geo?: {
-      name?: string | null;
-
-      location?: {
-        lat?: number | null;
-
-        lon?: number | null;
-      } | null;
-    } | null;
-  };
+  summary: Summary;
 
   timestamp: UnsignedInteger;
   /** Transport encryption information. */
