@@ -5,6 +5,7 @@
  */
 
 import { LevelLogger } from '../../../../server/lib';
+import { ReportingConfigType } from '../../../../server/core';
 import { ConditionalHeaders, ElementPosition } from '../../../../types';
 import { LayoutInstance } from '../../layouts/layout';
 
@@ -46,3 +47,5 @@ export interface ScreenshotResults {
   screenshots: Screenshot[];
   error?: Error;
 }
+
+export type CaptureConfig = ReportingConfigType['capture'];

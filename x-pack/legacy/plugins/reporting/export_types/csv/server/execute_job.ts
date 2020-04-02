@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import Hapi from 'hapi';
 import { IUiSettingsClient, KibanaRequest } from '../../../../../../../src/core/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
-import { ReportingCore } from '../../../server';
+import { ReportingCore } from '../../../server/core';
 import { cryptoFactory } from '../../../server/lib';
 import { getFieldFormats } from '../../../server/services';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger } from '../../../types';

@@ -6,11 +6,11 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 import { ReportingPlugin as Plugin } from './plugin';
-import { ReportingConfig } from './core';
+import { ReportingConfig, ReportingCore } from './core';
 
 export const plugin = (context: PluginInitializerContext, config: ReportingConfig) => {
   return new Plugin(context, config);
 };
 
 export { ReportingPlugin } from './plugin';
-export { ReportingConfig, ReportingCore } from './core';
+export { ReportingConfig, ReportingCore };

@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaptureConfig } from '../../../server/types';
+import { ReportingConfigType } from '../../../server/core';
 import { LayoutTypes } from '../constants';
 import { Layout, LayoutParams } from './layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
 
-export function createLayout(captureConfig: CaptureConfig, layoutParams?: LayoutParams): Layout {
+export function createLayout(
+  captureConfig: ReportingConfigType['capture'],
+  layoutParams?: LayoutParams
+): Layout {
   if (layoutParams && layoutParams.id === LayoutTypes.PRESERVE_LAYOUT) {
     return new PreserveLayout(layoutParams.dimensions);
   }

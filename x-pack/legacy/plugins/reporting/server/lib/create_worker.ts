@@ -6,7 +6,7 @@
 
 import { CancellationToken } from '../../common/cancellation_token';
 import { PLUGIN_ID } from '../../common/constants';
-import { ReportingConfig } from '../../server/types';
+import { ReportingConfig, ReportingCore } from '../../server/types';
 import {
   ESQueueInstance,
   ESQueueWorkerExecuteFn,
@@ -17,7 +17,6 @@ import {
   Logger,
   RequestFacade,
 } from '../../types';
-import { ReportingCore } from '../core';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 

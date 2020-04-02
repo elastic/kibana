@@ -11,7 +11,8 @@ import { LevelLogger } from '../../../server/lib';
 import { ReportingConfigType } from '../../../server/core';
 import { LayoutTypes } from '../constants';
 import { getDefaultLayoutSelectors, Layout, LayoutSelectorDictionary, Size } from './layout';
-import { CaptureConfig } from './types';
+
+type CaptureConfig = ReportingConfigType['capture'];
 
 export class PrintLayout extends Layout {
   public readonly selectors: LayoutSelectorDictionary = {
