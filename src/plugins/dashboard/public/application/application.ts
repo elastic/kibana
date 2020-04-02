@@ -52,7 +52,7 @@ export interface RenderDeps {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedDashboards?: SavedObjectLoader;
+  savedDashboards: SavedObjectLoader;
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   embeddableCapabilities: {
