@@ -25,10 +25,7 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-export async function enqueueJobFactory(
-  reporting: ReportingCore,
-  parentLogger: Logger
-): Promise<EnqueueJobFn> {
+export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger): EnqueueJobFn {
   const config = reporting.getConfig();
   const logger = parentLogger.clone(['queue-job']);
   const captureConfig = config.get('capture');

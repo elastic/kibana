@@ -50,7 +50,7 @@ export class ReportingPlugin
     const { reportingCore, logger } = this;
 
     const esqueue = await createQueueFactory(reportingCore, logger);
-    const enqueueJob = await enqueueJobFactory(reportingCore, logger);
+    const enqueueJob = enqueueJobFactory(reportingCore, logger);
 
     this.reportingCore.pluginStart({
       savedObjects: core.savedObjects,
