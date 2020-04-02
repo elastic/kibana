@@ -13,7 +13,7 @@ import {
 
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
-import { ActionResult, FindActionResult, RawAction } from './types';
+import { ActionResult, FindActionResult, RawAction, PreConfiguredAction } from './types';
 
 interface ActionUpdate extends SavedObjectAttributes {
   name: string;
@@ -58,6 +58,7 @@ interface ConstructorOptions {
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
+  preconfiguredConnectors: PreConfiguredAction[];
 }
 
 interface UpdateOptions {
@@ -70,17 +71,20 @@ export class ActionsClient {
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
+  private readonly preconfiguredConnectors: PreConfiguredAction[];
 
   constructor({
     actionTypeRegistry,
     defaultKibanaIndex,
     scopedClusterClient,
     savedObjectsClient,
+    preconfiguredConnectors,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
     this.defaultKibanaIndex = defaultKibanaIndex;
+    this.preconfiguredConnectors = preconfiguredConnectors;
   }
 
   /**
@@ -106,6 +110,7 @@ export class ActionsClient {
       actionTypeId: result.attributes.actionTypeId,
       name: result.attributes.name,
       config: result.attributes.config,
+      isPreconfigured: false,
     };
   }
 
@@ -113,6 +118,9 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
+    if (this.preconfiguredConnectors.find(pConnector => pConnector.id === id) !== undefined) {
+      throw Error(`Preconfigured connector ${id} is not allowed to update.`);
+    }
     const existingObject = await this.savedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = existingObject.attributes;
     const { name, config, secrets } = action;
@@ -134,6 +142,7 @@ export class ActionsClient {
       actionTypeId: result.attributes.actionTypeId as string,
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, any>,
+      isPreconfigured: false,
     };
   }
 
@@ -141,6 +150,19 @@ export class ActionsClient {
    * Get an action
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
+    const preconfiguredConnector = this.preconfiguredConnectors.find(
+      pConnector => pConnector.id === id
+    );
+    if (preconfiguredConnector !== undefined) {
+      return {
+        id,
+        actionTypeId: preconfiguredConnector.actionTypeId,
+        name: preconfiguredConnector.name,
+        config: preconfiguredConnector.config,
+        description: preconfiguredConnector.description,
+        isPreconfigured: true,
+      };
+    }
     const result = await this.savedObjectsClient.get<RawAction>('action', id);
 
     return {
@@ -148,11 +170,31 @@ export class ActionsClient {
       actionTypeId: result.attributes.actionTypeId,
       name: result.attributes.name,
       config: result.attributes.config,
+      isPreconfigured: false,
     };
   }
 
   /**
-   * Find actions
+   * Get all actions connectors with preconfigured connectors
+   */
+  public async getAll(): Promise<FindActionResult[]> {
+    const savedObjectsActions = (
+      await this.savedObjectsClient.find<RawAction>({
+        perPage: 10000,
+        type: 'action',
+      })
+    ).saved_objects.map(actionFromSavedObject);
+
+    const mergedResult = [...savedObjectsActions, ...this.preconfiguredConnectors];
+    return await injectExtraFindData(
+      this.defaultKibanaIndex,
+      this.scopedClusterClient,
+      mergedResult
+    );
+  }
+
+  /**
+   * Find actions (only saved objects actions)
    */
   public async find({ options = {} }: FindOptions): Promise<FindResult> {
     const findResult = await this.savedObjectsClient.find<RawAction>({
@@ -178,6 +220,9 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
+    if (this.preconfiguredConnectors.find(pConnector => pConnector.id === id) !== undefined) {
+      throw Error(`Preconfigured connector ${id} is not allowed to delete.`);
+    }
     return await this.savedObjectsClient.delete('action', id);
   }
 }
@@ -186,6 +231,7 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
   return {
     id: savedObject.id,
     ...savedObject.attributes,
+    isPreconfigured: false,
   };
 }
 

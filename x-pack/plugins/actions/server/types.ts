@@ -55,6 +55,12 @@ export interface ActionResult {
   actionTypeId: string;
   name: string;
   config: Record<string, any>;
+  isPreconfigured: boolean;
+  description?: string;
+}
+
+export interface PreConfiguredAction extends ActionResult {
+  secrets: Record<string, any>;
 }
 
 export interface FindActionResult extends ActionResult {

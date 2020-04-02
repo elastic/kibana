@@ -307,6 +307,38 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it(`shouldn't update action from preconfigured list`, async () => {
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/action/custom-system-abc-connector`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action updated',
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            });
+          expect(response.statusCode).to.eql(404);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: `Preconfigured connector custom-system-abc-connector is not allowed to update.`,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });

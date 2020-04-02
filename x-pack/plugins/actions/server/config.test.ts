@@ -14,6 +14,46 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
+        "preconfigured": Array [],
+        "whitelistedHosts": Array [
+          "*",
+        ],
+      }
+    `);
+  });
+
+  test('action with preconfigured connectors', () => {
+    const config: Record<string, any> = {
+      preconfigured: [
+        {
+          id: 'my-slack1',
+          actionTypeId: '.slack',
+          name: 'Slack #xyz',
+          description: 'Send a message to the #xyz channel',
+          config: {
+            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+          },
+        },
+      ],
+    };
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "enabled": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "preconfigured": Array [
+          Object {
+            "actionTypeId": ".slack",
+            "config": Object {
+              "webhookUrl": "https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz",
+            },
+            "description": "Send a message to the #xyz channel",
+            "id": "my-slack1",
+            "name": "Slack #xyz",
+            "secrets": Object {},
+          },
+        ],
         "whitelistedHosts": Array [
           "*",
         ],

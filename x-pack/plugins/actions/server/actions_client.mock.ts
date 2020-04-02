@@ -15,6 +15,7 @@ const createActionsClientMock = () => {
     find: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
+    getAll: jest.fn(),
   };
   return mocked;
 };

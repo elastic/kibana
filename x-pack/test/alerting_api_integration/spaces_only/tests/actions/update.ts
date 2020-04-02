@@ -99,5 +99,25 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           message: `Saved object [action/${createdAction.id}] not found`,
         });
     });
+
+    it(`shouldn't update action from preconfigured list`, async () => {
+      await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/action/my-slack1`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `Preconfigured connector custom-system-abc-connector is not allowed to update.`,
+        });
+    });
   });
 }

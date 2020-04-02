@@ -20,6 +20,7 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./find'));
+    loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_action_types'));
     loadTestFile(require.resolve('./update'));

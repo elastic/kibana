@@ -71,5 +71,17 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           message: `Saved object [action/${createdAction.id}] not found`,
         });
     });
+
+    it('should handle get action request from preconfigured list', async () => {
+      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/action/my-slack1`).expect(200, {
+        id: 'my-slack1',
+        actionTypeId: '.slack',
+        name: 'Slack #xyz',
+        description: 'Send a message to the #xyz channel',
+        config: {
+          webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+        },
+      });
+    });
   });
 }
