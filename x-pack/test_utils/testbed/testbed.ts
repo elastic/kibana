@@ -138,6 +138,44 @@ export const registerTestBed = <T extends string = string>(
         });
       };
 
+      const waitFor: TestBed<T>['waitFor'] = async (testSubject: T) => {
+        const triggeredAt = Date.now();
+
+        /**
+         * The way jest run tests in parallel + the not deterministic DOM update from React "hooks"
+         * add flakiness to the tests. This is especially true for component integration tests that
+         * make many update to the DOM.
+         *
+         * For this reason, when we _know_ that an element should be there after we updated some state,
+         * we will give it 30 seconds to appear in the DOM, checking every 100 ms for its presence.
+         */
+        const MAX_WAIT_TIME = 30000;
+        const WAIT_INTERVAL = 100;
+
+        const process = async (): Promise<void> => {
+          const elemFound = exists(testSubject);
+
+          if (elemFound) {
+            // Great! nothing else to do here.
+            return;
+          }
+
+          const timeElapsed = Date.now() - triggeredAt;
+          if (timeElapsed > MAX_WAIT_TIME) {
+            throw new Error(
+              `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
+            );
+          }
+
+          return new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
+            component.update();
+            return process();
+          });
+        };
+
+        return process();
+      };
+
       /**
        * ----------------------------------------------------------------
        * Forms
@@ -254,6 +292,7 @@ export const registerTestBed = <T extends string = string>(
         exists,
         find,
         setProps,
+        waitFor,
         table: {
           getMetaData,
         },
