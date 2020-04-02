@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
 import { isEqual, cloneDeep } from 'lodash';
 import {
   catchError,
@@ -17,6 +17,7 @@ import {
   map,
   pairwise,
   filter,
+  skipWhile,
 } from 'rxjs/operators';
 import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
@@ -30,7 +31,10 @@ export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[
 
 type ModelMemoryEstimator = ReturnType<typeof modelMemoryEstimatorProvider>;
 
-export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
+export const modelMemoryEstimatorProvider = (
+  jobCreator: JobCreator,
+  jobValidator: JobValidator
+) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
   const error$ = new Subject<ErrorResponse['body']>();
 
@@ -39,7 +43,13 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
       return error$.asObservable();
     },
     get updates$(): Observable<string> {
-      return modelMemoryCheck$.pipe(
+      return combineLatest([
+        jobCreator.wizardInitialized$.pipe(
+          skipWhile(wizardInitialized => wizardInitialized === false)
+        ),
+        modelMemoryCheck$,
+      ]).pipe(
+        map(([, payload]) => payload),
         // delay the request, making sure the validation is completed
         debounceTime(VALIDATION_DELAY_MS + 100),
         // clone the object to compare payloads and proceed further only
@@ -80,7 +90,7 @@ export const useModelMemoryEstimator = (
 
   // Initialize model memory estimator only once
   const modelMemoryEstimator = useMemo<ModelMemoryEstimator>(
-    () => modelMemoryEstimatorProvider(jobValidator),
+    () => modelMemoryEstimatorProvider(jobCreator, jobValidator),
     []
   );
 
