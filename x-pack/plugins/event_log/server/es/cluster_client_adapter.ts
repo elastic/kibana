@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { reject, isUndefined } from 'lodash';
 import { Logger, ClusterClient } from '../../../../../src/core/server';
 import { IEvent } from '../types';
 import { FindOptionsType } from '../event_log_client';
@@ -113,7 +114,7 @@ export class ClusterClientAdapter {
     index: string,
     type: string,
     id: string,
-    { page, per_page: size }: FindOptionsType
+    { page, per_page: size, start, end }: Partial<FindOptionsType>
   ): Promise<any[]> {
     try {
       const {
@@ -121,18 +122,39 @@ export class ClusterClientAdapter {
       } = await this.callEs('search', {
         index,
         body: {
-          size,
-          from: (page - 1) * size,
+          ...(size && page
+            ? {
+                size,
+                from: (page - 1) * size,
+              }
+            : {}),
           query: {
             bool: {
-              must: [
-                { match: { 'kibana.saved_objects.type.keyword': type } },
-                {
-                  match: {
-                    'kibana.saved_objects.id.keyword': id,
+              must: reject(
+                [
+                  { match: { 'kibana.saved_objects.type.keyword': type } },
+                  {
+                    match: {
+                      'kibana.saved_objects.id.keyword': id,
+                    },
                   },
-                },
-              ],
+                  start && {
+                    range: {
+                      'event.start': {
+                        gte: start,
+                      },
+                    },
+                  },
+                  end && {
+                    range: {
+                      'event.end': {
+                        lte: end,
+                      },
+                    },
+                  },
+                ],
+                isUndefined
+              ),
             },
           },
         },

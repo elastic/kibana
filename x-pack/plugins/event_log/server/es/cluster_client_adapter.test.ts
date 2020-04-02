@@ -7,6 +7,7 @@
 import { ClusterClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
+import moment from 'moment';
 
 type EsClusterClient = Pick<jest.Mocked<ClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
@@ -207,7 +208,7 @@ describe('queryEventsBySavedObject', () => {
       'index-name',
       'saved-object-type',
       'saved-object-id',
-      { page: 10, per_page: 10 }
+      { page: 10, per_page: 10, start: undefined, end: undefined }
     );
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
       index: 'index-name',
@@ -221,6 +222,106 @@ describe('queryEventsBySavedObject', () => {
               {
                 match: {
                   'kibana.saved_objects.id.keyword': 'saved-object-id',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  test('supports open ended date', async () => {
+    clusterClient.callAsInternalUser.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    });
+
+    const start = moment()
+      .subtract(1, 'days')
+      .toISOString();
+
+    await clusterClientAdapter.queryEventsBySavedObject(
+      'index-name',
+      'saved-object-type',
+      'saved-object-id',
+      { page: 10, per_page: 10, start }
+    );
+    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
+      index: 'index-name',
+      body: {
+        from: 90,
+        size: 10,
+        query: {
+          bool: {
+            must: [
+              { match: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
+              {
+                match: {
+                  'kibana.saved_objects.id.keyword': 'saved-object-id',
+                },
+              },
+              {
+                range: {
+                  'event.start': {
+                    gte: start,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  test('supports optional date range', async () => {
+    clusterClient.callAsInternalUser.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    });
+
+    const start = moment()
+      .subtract(1, 'days')
+      .toISOString();
+    const end = moment()
+      .add(1, 'days')
+      .toISOString();
+
+    await clusterClientAdapter.queryEventsBySavedObject(
+      'index-name',
+      'saved-object-type',
+      'saved-object-id',
+      { page: 10, per_page: 10, start, end }
+    );
+    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
+      index: 'index-name',
+      body: {
+        from: 90,
+        size: 10,
+        query: {
+          bool: {
+            must: [
+              { match: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
+              {
+                match: {
+                  'kibana.saved_objects.id.keyword': 'saved-object-id',
+                },
+              },
+              {
+                range: {
+                  'event.start': {
+                    gte: start,
+                  },
+                },
+              },
+              {
+                range: {
+                  'event.end': {
+                    lte: end,
+                  },
                 },
               },
             ],

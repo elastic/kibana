@@ -8,6 +8,7 @@ import { EventLogClient } from './event_log_client';
 import { contextMock } from './es/context.mock';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { merge } from 'lodash';
+import moment from 'moment';
 
 describe('EventLogStart', () => {
   describe('findEventsBySavedObject', () => {
@@ -108,6 +109,129 @@ describe('EventLogStart', () => {
         }
       );
     });
+
+    test('fetches all events in time frame that reference the saved object', async () => {
+      const esContext = contextMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const eventLogClient = new EventLogClient({
+        esContext,
+        savedObjectsClient,
+      });
+
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'saved-object-id',
+        type: 'saved-object-type',
+        attributes: {},
+        references: [],
+      });
+
+      const expectedEvents = [
+        fakeEvent({
+          kibana: {
+            saved_objects: [
+              {
+                id: 'saved-object-id',
+                type: 'saved-object-type',
+              },
+              {
+                type: 'action',
+                id: '1',
+              },
+            ],
+          },
+        }),
+        fakeEvent({
+          kibana: {
+            saved_objects: [
+              {
+                id: 'saved-object-id',
+                type: 'saved-object-type',
+              },
+              {
+                type: 'action',
+                id: '2',
+              },
+            ],
+          },
+        }),
+      ];
+
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(expectedEvents);
+
+      const start = moment()
+        .subtract(1, 'days')
+        .toISOString();
+      const end = moment()
+        .add(1, 'days')
+        .toISOString();
+
+      expect(
+        await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+          start,
+          end,
+        })
+      ).toEqual(expectedEvents);
+
+      expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
+        esContext.esNames.alias,
+        'saved-object-type',
+        'saved-object-id',
+        {
+          page: 1,
+          per_page: 10,
+          start,
+          end,
+        }
+      );
+    });
+
+    test('validates that the start date is valid', async () => {
+      const esContext = contextMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const eventLogClient = new EventLogClient({
+        esContext,
+        savedObjectsClient,
+      });
+
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'saved-object-id',
+        type: 'saved-object-type',
+        attributes: {},
+        references: [],
+      });
+
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue([]);
+
+      expect(
+        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+          start: 'not a date string',
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: [start]: Invalid Date]`);
+    });
+
+    test('validates that the end date is valid', async () => {
+      const esContext = contextMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const eventLogClient = new EventLogClient({
+        esContext,
+        savedObjectsClient,
+      });
+
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'saved-object-id',
+        type: 'saved-object-type',
+        attributes: {},
+        references: [],
+      });
+
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue([]);
+
+      expect(
+        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+          end: 'not a date string',
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: [end]: Invalid Date]`);
+    });
   });
 });
 
@@ -117,8 +241,8 @@ function fakeEvent(overrides = {}) {
       event: {
         provider: 'actions',
         action: 'execute',
-        start: new Date('2020-03-30T14:55:47.054Z'),
-        end: new Date('2020-03-30T14:55:47.055Z'),
+        start: '2020-03-30T14:55:47.054Z',
+        end: '2020-03-30T14:55:47.055Z',
         duration: 1000000,
       },
       kibana: {
@@ -132,7 +256,7 @@ function fakeEvent(overrides = {}) {
         server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
       },
       message: 'action executed: .server-log:968f1b82-0414-4a10-becc-56b6473e4a29: logger',
-      '@timestamp': new Date('2020-03-30T14:55:47.055Z'),
+      '@timestamp': '2020-03-30T14:55:47.055Z',
       ecs: {
         version: '1.3.1',
       },

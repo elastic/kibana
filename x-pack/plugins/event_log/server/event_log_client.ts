@@ -18,9 +18,21 @@ interface EventLogServiceCtorParams {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+const optionalDateFieldSchema = schema.maybe(
+  schema.string({
+    validate(value) {
+      if (isNaN(Date.parse(value))) {
+        return 'Invalid Date';
+      }
+    },
+  })
+);
+
 export const findOptionsSchema = schema.object({
   per_page: schema.number({ defaultValue: 10, min: 0 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
+  start: optionalDateFieldSchema,
+  end: optionalDateFieldSchema,
 });
 export type FindOptionsType = TypeOf<typeof findOptionsSchema>;
 

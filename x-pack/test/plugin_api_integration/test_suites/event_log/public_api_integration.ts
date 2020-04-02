@@ -7,9 +7,12 @@
 import { merge, omit, times, chunk } from 'lodash';
 import uuid from 'uuid';
 import expect from '@kbn/expect/expect.js';
+import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { IValidatedEvent } from '../../../../plugins/event_log/server/types';
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -75,6 +78,57 @@ export default function({ getService }: FtrProviderContext) {
       expect(secondPage.length).to.be(3);
       assertEventsFromApiMatchCreatedEvents(secondPage, expectedSecondPage);
     });
+
+    it('should support date ranges for events', async () => {
+      const id = uuid.v4();
+
+      const firstEvent = fakeEvent(id);
+      await logTestEvent(id, firstEvent);
+      await delay(100);
+
+      const start = moment().toISOString();
+      const expectedEvents = times(6, () => fakeEvent(id));
+      await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
+
+      const end = moment().toISOString();
+
+      await delay(100);
+      const lastEvent = fakeEvent(id);
+      await logTestEvent(id, lastEvent);
+
+      await retry.try(async () => {
+        const { body: foundEvents } = await supertest
+          .get(`/api/event_log/event_log_test/${id}/_find`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        expect(foundEvents.length).to.be(8);
+      });
+
+      const { body: events } = await supertest
+        .get(`/api/event_log/event_log_test/${id}/_find?start=${start}&end=${end}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      expect(events.length).to.be(expectedEvents.length);
+      assertEventsFromApiMatchCreatedEvents(events, expectedEvents);
+
+      const { body: eventsFrom } = await supertest
+        .get(`/api/event_log/event_log_test/${id}/_find?start=${start}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      expect(eventsFrom.length).to.be(expectedEvents.length + 1);
+      assertEventsFromApiMatchCreatedEvents(eventsFrom, [...expectedEvents, lastEvent]);
+
+      const { body: eventsUntil } = await supertest
+        .get(`/api/event_log/event_log_test/${id}/_find?end=${end}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      expect(eventsUntil.length).to.be(expectedEvents.length + 1);
+      assertEventsFromApiMatchCreatedEvents(eventsUntil, [firstEvent, ...expectedEvents]);
+    });
   });
 
   function assertEventsFromApiMatchCreatedEvents(
@@ -103,8 +157,8 @@ export default function({ getService }: FtrProviderContext) {
         event: {
           provider: 'event_log_fixture',
           action: 'test',
-          start: new Date().toISOString(),
-          end: new Date().toISOString(),
+          start: moment().toISOString(),
+          end: moment().toISOString(),
           duration: 1000000,
         },
         kibana: {
@@ -116,7 +170,7 @@ export default function({ getService }: FtrProviderContext) {
             },
           ],
         },
-        message: `test ${new Date().toISOString()}`,
+        message: `test ${moment().toISOString()}`,
       },
       overrides
     );
