@@ -80,7 +80,7 @@ export const EditFieldHeaderForm = React.memo(
             />
           </EuiFlexItem>
 
-          {/* Custom type */}
+          {/* Other type */}
           {type === 'other' && (
             <EuiFlexItem>
               <OtherTypeNameParameter />

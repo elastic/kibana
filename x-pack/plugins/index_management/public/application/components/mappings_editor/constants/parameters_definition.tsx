@@ -197,7 +197,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
             i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeNameIsRequiredErrorMessage',
               {
-                defaultMessage: 'Give a name for the custom type.',
+                defaultMessage: 'The type name is required.',
               }
             )
           ),

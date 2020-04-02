@@ -204,7 +204,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 docLink={docLink}
               />
             </EuiFlexItem>
-            {/* Custom type */}
+            {/* Other type */}
             {type === 'other' && (
               <EuiFlexItem>
                 <OtherTypeNameParameter />
