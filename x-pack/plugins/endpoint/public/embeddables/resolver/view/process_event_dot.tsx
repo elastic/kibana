@@ -217,13 +217,7 @@ export const ProcessEventDot = styled(
                 height={markerSize * 1.5}
                 className="backing"
               />
-              <rect
-                x={markerPositionOffset + markerSize - 0.5}
-                y={labelYOffset - labelYHeight}
-                width={markerSize}
-                height={markerSize / 1.5}
-                fill={NamedColors.resolverBackground}
-              />
+              <rect x="7" y="-12.75" width="15" height="10" fill={NamedColors.resolverBackground} />
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
