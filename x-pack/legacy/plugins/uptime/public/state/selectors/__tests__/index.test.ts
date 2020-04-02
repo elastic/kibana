@@ -46,7 +46,6 @@ describe('state selectors', () => {
     },
     monitorStatus: {
       status: null,
-      monitor: null,
       loading: false,
     },
     indexPattern: {

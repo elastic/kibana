@@ -6,20 +6,12 @@
 
 import { QueryParams } from '../actions/types';
 import { Ping } from '../../../common/runtime_types';
-import { API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 import { apiService } from './utils';
 
 export interface APIParams {
   monitorId: string;
 }
-
-export const fetchSelectedMonitor = async ({ monitorId }: APIParams): Promise<Ping> => {
-  const queryParams = {
-    monitorId,
-  };
-
-  return await apiService.get(API_URLS.MONITOR_SELECTED, queryParams);
-};
 
 export const fetchMonitorStatus = async ({
   monitorId,

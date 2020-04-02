@@ -5,51 +5,30 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { connect, MapDispatchToPropsFunction, MapStateToPropsParam } from 'react-redux';
-import { useUptimeTelemetry, UptimePage } from '../hooks';
+import { useSelector } from 'react-redux';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
-import { MonitorStatusDetails } from '../components/connected';
-import { Ping } from '../../common/runtime_types';
-import { AppState } from '../state';
-import { selectSelectedMonitor } from '../state/selectors';
-import { getSelectedMonitorAction } from '../state/actions';
+import { MonitorStatusDetails, PingList } from '../components/connected';
+import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
 import { MonitorCharts } from '../components/functional';
-import { PingList } from '../components/connected';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { useUptimeTelemetry, UptimePage } from '../hooks';
 
-interface StateProps {
-  selectedMonitor: Ping | null;
-}
-
-interface DispatchProps {
-  dispatchGetMonitorStatus: (monitorId: string) => void;
-}
-
-type Props = StateProps & DispatchProps;
-
-export const MonitorPageComponent: React.FC<Props> = ({
-  selectedMonitor,
-  dispatchGetMonitorStatus,
-}: Props) => {
+export const MonitorPage: React.FC = () => {
   // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
 
-  useEffect(() => {
-    if (monitorId) {
-      dispatchGetMonitorStatus(monitorId);
-    }
-  }, [dispatchGetMonitorStatus, monitorId]);
+  const selectedMonitor = useSelector(monitorStatusSelector);
 
   useUptimeTelemetry(UptimePage.Monitor);
 
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
-  const nameOrId = selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id || '';
+  const nameOrId = selectedMonitor?.monitor?.name || monitorId || '';
   useBreadcrumbs([{ text: nameOrId }]);
   return (
     <>
@@ -63,21 +42,3 @@ export const MonitorPageComponent: React.FC<Props> = ({
     </>
   );
 };
-
-const mapStateToProps: MapStateToPropsParam<StateProps, {}, AppState> = state => ({
-  selectedMonitor: selectSelectedMonitor(state),
-});
-
-const mapDispatchToProps: MapDispatchToPropsFunction<DispatchProps, {}> = (dispatch, own) => {
-  return {
-    dispatchGetMonitorStatus: (monitorId: string) => {
-      dispatch(
-        getSelectedMonitorAction({
-          monitorId,
-        })
-      );
-    },
-  };
-};
-
-export const MonitorPage = connect(mapStateToProps, mapDispatchToProps)(MonitorPageComponent);

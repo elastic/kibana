@@ -31,25 +31,11 @@ describe('getLatestMonitor', () => {
             ],
           },
         },
-        aggs: {
-          by_id: {
-            terms: {
-              field: 'monitor.id',
-              size: 1000,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  size: 1,
-                  sort: {
-                    '@timestamp': { order: 'desc' },
-                  },
-                },
-              },
-            },
-          },
+        size: 1,
+        _source: ['url', 'monitor', 'observer', 'tls', '@timestamp'],
+        sort: {
+          '@timestamp': { order: 'desc' },
         },
-        size: 0,
       },
     };
     mockEsSearchResult = {
@@ -92,6 +78,7 @@ describe('getLatestMonitor', () => {
       dateEnd: 'now',
       monitorId: 'testMonitor',
     });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "@timestamp": "123456",
@@ -105,6 +92,9 @@ describe('getLatestMonitor', () => {
         },
       }
     `);
+    expect(result['@timestamp']).toBe('123456');
+    expect(result.monitor).not.toBeFalsy();
+    expect(result?.monitor?.id).toBe('testMonitor');
     expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetLatestSearchParams);
   });
 });

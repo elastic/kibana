@@ -23,11 +23,6 @@ export const xpackMain = kibana => {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        telemetry: Joi.object({
-          config: Joi.string().default(),
-          enabled: Joi.boolean().default(),
-          url: Joi.string().default(),
-        }).default(), // deprecated
       }).default();
     },
 
