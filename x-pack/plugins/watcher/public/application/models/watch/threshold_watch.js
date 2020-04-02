@@ -261,7 +261,6 @@ export class ThresholdWatch extends BaseWatch {
       timeWindowSize: this.timeWindowSize,
       timeWindowUnit: this.timeWindowUnit,
       hasTermsAgg: this.hasTermsAgg,
-      isActive: this.watchStatus.isActive,
       threshold:
         comparators[this.thresholdComparator].requiredValues > 1
           ? this.threshold

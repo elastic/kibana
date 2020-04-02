@@ -20,7 +20,7 @@ const bodySchema = schema.object(
   {
     type: schema.string(),
     isNew: schema.boolean(),
-    isActive: schema.boolean({ defaultValue: true }),
+    isActive: schema.boolean(),
   },
   { unknowns: 'allow' }
 );
