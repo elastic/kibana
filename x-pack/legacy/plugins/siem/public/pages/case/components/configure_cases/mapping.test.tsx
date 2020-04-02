@@ -31,15 +31,14 @@ describe('Mapping', () => {
 
   test('it shows the left side', () => {
     const wrapper = mount(
-      <TestProviders>
-        <Mapping
-          disabled={false}
-          mapping={mapping}
-          onChangeMapping={jest.fn()}
-          updateConnectorDisabled={false}
-          setEditFlyoutVisibility={jest.fn()}
-        />
-      </TestProviders>
+      <Mapping
+        disabled={false}
+        mapping={mapping}
+        onChangeMapping={jest.fn()}
+        updateConnectorDisabled={false}
+        setEditFlyoutVisibility={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -52,15 +51,14 @@ describe('Mapping', () => {
 
   test('it shows the right side', () => {
     const wrapper = mount(
-      <TestProviders>
-        <Mapping
-          disabled={false}
-          mapping={mapping}
-          onChangeMapping={jest.fn()}
-          updateConnectorDisabled={false}
-          setEditFlyoutVisibility={jest.fn()}
-        />
-      </TestProviders>
+      <Mapping
+        disabled={false}
+        mapping={mapping}
+        onChangeMapping={jest.fn()}
+        updateConnectorDisabled={false}
+        setEditFlyoutVisibility={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -73,15 +71,14 @@ describe('Mapping', () => {
 
   test('it shows the update button', () => {
     const wrapper = mount(
-      <TestProviders>
-        <Mapping
-          disabled={false}
-          mapping={mapping}
-          onChangeMapping={jest.fn()}
-          updateConnectorDisabled={false}
-          setEditFlyoutVisibility={jest.fn()}
-        />
-      </TestProviders>
+      <Mapping
+        disabled={false}
+        mapping={mapping}
+        onChangeMapping={jest.fn()}
+        updateConnectorDisabled={false}
+        setEditFlyoutVisibility={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -94,15 +91,14 @@ describe('Mapping', () => {
 
   test('it shows the field mapping', () => {
     const wrapper = mount(
-      <TestProviders>
-        <Mapping
-          disabled={false}
-          mapping={mapping}
-          onChangeMapping={jest.fn()}
-          updateConnectorDisabled={false}
-          setEditFlyoutVisibility={jest.fn()}
-        />
-      </TestProviders>
+      <Mapping
+        disabled={false}
+        mapping={mapping}
+        onChangeMapping={jest.fn()}
+        updateConnectorDisabled={false}
+        setEditFlyoutVisibility={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -111,5 +107,27 @@ describe('Mapping', () => {
         .first()
         .exists()
     ).toBe(true);
+  });
+
+  test('it call the callback when pressing the update button', () => {
+    const setEditFlyoutVisibility = jest.fn();
+
+    const wrapper = mount(
+      <Mapping
+        disabled={false}
+        mapping={mapping}
+        onChangeMapping={jest.fn()}
+        updateConnectorDisabled={false}
+        setEditFlyoutVisibility={setEditFlyoutVisibility}
+      />,
+      { wrappingComponent: TestProviders }
+    );
+
+    wrapper.find('button[data-test-subj="case-mapping-update-connector-button"]').simulate('click');
+
+    wrapper.update();
+
+    expect(setEditFlyoutVisibility).toHaveBeenCalled();
+    expect(setEditFlyoutVisibility).toHaveBeenCalledWith({});
   });
 });

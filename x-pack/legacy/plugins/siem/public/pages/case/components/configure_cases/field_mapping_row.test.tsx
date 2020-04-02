@@ -47,17 +47,16 @@ describe('FieldMappingRow', () => {
 
   test('it passes thirdPartyOptions correctly', () => {
     const wrapper = mount(
-      <TestProviders>
-        <FieldMappingRow
-          siemField="title"
-          disabled={false}
-          thirdPartyOptions={thirdPartyOptions}
-          onChangeActionType={jest.fn()}
-          onChangeThirdParty={jest.fn()}
-          selectedActionType={'nothing'}
-          selectedThirdParty={'short_description'}
-        />
-      </TestProviders>
+      <FieldMappingRow
+        siemField="title"
+        disabled={false}
+        thirdPartyOptions={thirdPartyOptions}
+        onChangeActionType={jest.fn()}
+        onChangeThirdParty={jest.fn()}
+        selectedActionType={'nothing'}
+        selectedThirdParty={'short_description'}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     const props = wrapper
@@ -81,17 +80,16 @@ describe('FieldMappingRow', () => {
 
   test('it passes the correct actionTypeOptions', () => {
     const wrapper = mount(
-      <TestProviders>
-        <FieldMappingRow
-          siemField="title"
-          disabled={false}
-          thirdPartyOptions={thirdPartyOptions}
-          onChangeActionType={jest.fn()}
-          onChangeThirdParty={jest.fn()}
-          selectedActionType={'nothing'}
-          selectedThirdParty={'short_description'}
-        />
-      </TestProviders>
+      <FieldMappingRow
+        siemField="title"
+        disabled={false}
+        thirdPartyOptions={thirdPartyOptions}
+        onChangeActionType={jest.fn()}
+        onChangeThirdParty={jest.fn()}
+        selectedActionType={'nothing'}
+        selectedThirdParty={'short_description'}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     const props = wrapper

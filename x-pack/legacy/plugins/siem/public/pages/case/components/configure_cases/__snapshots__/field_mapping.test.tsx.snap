@@ -46,24 +46,28 @@ exports[`FieldMappingRow it renders 1`] = `
       thirdPartyOptions={
         Array [
           Object {
+            "data-test-subj": "third-party-field-not-mapped",
             "inputDisplay": <span>
               Not mapped
             </span>,
             "value": "not_mapped",
           },
           Object {
+            "data-test-subj": "third-party-field-short-description",
             "inputDisplay": <span>
               Short Description
             </span>,
             "value": "short_description",
           },
           Object {
+            "data-test-subj": "third-party-field-comments",
             "inputDisplay": <span>
               Comments
             </span>,
             "value": "comments",
           },
           Object {
+            "data-test-subj": "third-party-field-description",
             "inputDisplay": <span>
               Description
             </span>,
@@ -83,24 +87,28 @@ exports[`FieldMappingRow it renders 1`] = `
       thirdPartyOptions={
         Array [
           Object {
+            "data-test-subj": "third-party-field-not-mapped",
             "inputDisplay": <span>
               Not mapped
             </span>,
             "value": "not_mapped",
           },
           Object {
+            "data-test-subj": "third-party-field-short-description",
             "inputDisplay": <span>
               Short Description
             </span>,
             "value": "short_description",
           },
           Object {
+            "data-test-subj": "third-party-field-comments",
             "inputDisplay": <span>
               Comments
             </span>,
             "value": "comments",
           },
           Object {
+            "data-test-subj": "third-party-field-description",
             "inputDisplay": <span>
               Description
             </span>,
@@ -120,24 +128,28 @@ exports[`FieldMappingRow it renders 1`] = `
       thirdPartyOptions={
         Array [
           Object {
+            "data-test-subj": "third-party-field-not-mapped",
             "inputDisplay": <span>
               Not mapped
             </span>,
             "value": "not_mapped",
           },
           Object {
+            "data-test-subj": "third-party-field-short-description",
             "inputDisplay": <span>
               Short Description
             </span>,
             "value": "short_description",
           },
           Object {
+            "data-test-subj": "third-party-field-comments",
             "inputDisplay": <span>
               Comments
             </span>,
             "value": "comments",
           },
           Object {
+            "data-test-subj": "third-party-field-description",
             "inputDisplay": <span>
               Description
             </span>,
@@ -196,24 +208,28 @@ exports[`FieldMappingRow it renders with default mapping 1`] = `
       thirdPartyOptions={
         Array [
           Object {
+            "data-test-subj": "third-party-field-not-mapped",
             "inputDisplay": <span>
               Not mapped
             </span>,
             "value": "not_mapped",
           },
           Object {
+            "data-test-subj": "third-party-field-short-description",
             "inputDisplay": <span>
               Short Description
             </span>,
             "value": "short_description",
           },
           Object {
+            "data-test-subj": "third-party-field-comments",
             "inputDisplay": <span>
               Comments
             </span>,
             "value": "comments",
           },
           Object {
+            "data-test-subj": "third-party-field-description",
             "inputDisplay": <span>
               Description
             </span>,
@@ -233,24 +249,28 @@ exports[`FieldMappingRow it renders with default mapping 1`] = `
       thirdPartyOptions={
         Array [
           Object {
+            "data-test-subj": "third-party-field-not-mapped",
             "inputDisplay": <span>
               Not mapped
             </span>,
             "value": "not_mapped",
           },
           Object {
+            "data-test-subj": "third-party-field-short-description",
             "inputDisplay": <span>
               Short Description
             </span>,
             "value": "short_description",
           },
           Object {
+            "data-test-subj": "third-party-field-comments",
             "inputDisplay": <span>
               Comments
             </span>,
             "value": "comments",
           },
           Object {
+            "data-test-subj": "third-party-field-description",
             "inputDisplay": <span>
               Description
             </span>,
@@ -270,24 +290,28 @@ exports[`FieldMappingRow it renders with default mapping 1`] = `
       thirdPartyOptions={
         Array [
           Object {
+            "data-test-subj": "third-party-field-not-mapped",
             "inputDisplay": <span>
               Not mapped
             </span>,
             "value": "not_mapped",
           },
           Object {
+            "data-test-subj": "third-party-field-short-description",
             "inputDisplay": <span>
               Short Description
             </span>,
             "value": "short_description",
           },
           Object {
+            "data-test-subj": "third-party-field-comments",
             "inputDisplay": <span>
               Comments
             </span>,
             "value": "comments",
           },
           Object {
+            "data-test-subj": "third-party-field-description",
             "inputDisplay": <span>
               Description
             </span>,

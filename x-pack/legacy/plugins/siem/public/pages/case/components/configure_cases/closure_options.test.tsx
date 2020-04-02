@@ -29,13 +29,12 @@ describe('ClosureOptions', () => {
 
   test('it shows the left side', () => {
     const wrapper = mount(
-      <TestProviders>
-        <ClosureOptions
-          disabled={false}
-          closureTypeSelected="close-by-user"
-          onChangeClosureType={jest.fn()}
-        />
-      </TestProviders>
+      <ClosureOptions
+        disabled={false}
+        closureTypeSelected="close-by-user"
+        onChangeClosureType={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -48,13 +47,12 @@ describe('ClosureOptions', () => {
 
   test('it shows the right side', () => {
     const wrapper = mount(
-      <TestProviders>
-        <ClosureOptions
-          disabled={false}
-          closureTypeSelected="close-by-user"
-          onChangeClosureType={jest.fn()}
-        />
-      </TestProviders>
+      <ClosureOptions
+        disabled={false}
+        closureTypeSelected="close-by-user"
+        onChangeClosureType={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -67,13 +65,12 @@ describe('ClosureOptions', () => {
 
   test('it shows closure options', () => {
     const wrapper = mount(
-      <TestProviders>
-        <ClosureOptions
-          disabled={false}
-          closureTypeSelected="close-by-user"
-          onChangeClosureType={jest.fn()}
-        />
-      </TestProviders>
+      <ClosureOptions
+        disabled={false}
+        closureTypeSelected="close-by-user"
+        onChangeClosureType={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -87,12 +84,13 @@ describe('ClosureOptions', () => {
   test('it pass the correct props to child', () => {
     const onChangeClosureType = jest.fn();
 
-    const wrapper = shallow(
+    const wrapper = mount(
       <ClosureOptions
         disabled={false}
         closureTypeSelected="close-by-user"
         onChangeClosureType={onChangeClosureType}
-      />
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     const closureOptionsRadioComponent = wrapper.find(ClosureOptionsRadio);

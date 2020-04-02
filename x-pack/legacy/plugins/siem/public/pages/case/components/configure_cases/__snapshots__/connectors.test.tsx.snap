@@ -28,6 +28,8 @@ exports[`Connectors it renders 1`] = `
             grow={false}
           >
             <ForwardRef
+              data-test-subj="case-configure-add-connector-button"
+              disabled={false}
               onClick={[MockFunction]}
             >
               Add new connector option

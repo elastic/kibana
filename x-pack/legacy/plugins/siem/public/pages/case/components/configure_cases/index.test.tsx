@@ -267,6 +267,24 @@ describe('ConfigureCases', () => {
     expect(wrapper.find(Connectors).prop('selectedConnector')).toBe('456');
   });
 
+  test('the connector is changed successfully to none', () => {
+    useCaseConfigureMock.mockImplementation(
+      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
+        useEffect(() => setConnector('123'), []);
+        return useCaseConfigureResponse;
+      }
+    );
+
+    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-no-connector"]').simulate('click');
+    wrapper.update();
+
+    expect(wrapper.find(Connectors).prop('selectedConnector')).toBe('none');
+  });
+
   test('it show the add flyout when pressing the add connector button', () => {
     const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 

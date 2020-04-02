@@ -32,21 +32,24 @@ describe('ConnectorsDropdown', () => {
 
   test('it formats the connectors correctly', () => {
     const wrapper = mount(
-      <TestProviders>
-        <ConnectorsDropdown
-          disabled={false}
-          connectors={connectors}
-          isLoading={false}
-          onChange={jest.fn()}
-          selectedConnector={'none'}
-        />
-      </TestProviders>
+      <ConnectorsDropdown
+        disabled={false}
+        connectors={connectors}
+        isLoading={false}
+        onChange={jest.fn()}
+        selectedConnector={'none'}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     const props = wrapper.find(EuiSuperSelect).props();
 
     expect(props.options).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          value: 'none',
+          'data-test-subj': 'dropdown-connector-no-connector',
+        }),
         expect.objectContaining({ value: '123', 'data-test-subj': 'dropdown-connector-123' }),
         expect.objectContaining({ value: '456', 'data-test-subj': 'dropdown-connector-456' }),
       ])
@@ -55,15 +58,14 @@ describe('ConnectorsDropdown', () => {
 
   test('it disables the dropdown', () => {
     const wrapper = mount(
-      <TestProviders>
-        <ConnectorsDropdown
-          disabled={true}
-          connectors={connectors}
-          isLoading={false}
-          onChange={jest.fn()}
-          selectedConnector={'none'}
-        />
-      </TestProviders>
+      <ConnectorsDropdown
+        disabled={true}
+        connectors={connectors}
+        isLoading={false}
+        onChange={jest.fn()}
+        selectedConnector={'none'}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -76,15 +78,14 @@ describe('ConnectorsDropdown', () => {
 
   test('it selects the correct connector', () => {
     const wrapper = mount(
-      <TestProviders>
-        <ConnectorsDropdown
-          disabled={true}
-          connectors={connectors}
-          isLoading={false}
-          onChange={jest.fn()}
-          selectedConnector={'123'}
-        />
-      </TestProviders>
+      <ConnectorsDropdown
+        disabled={false}
+        connectors={connectors}
+        isLoading={false}
+        onChange={jest.fn()}
+        selectedConnector={'123'}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(wrapper.find('button span').text()).toEqual('My Connector');

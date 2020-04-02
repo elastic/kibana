@@ -28,6 +28,7 @@ exports[`FieldMappingRow it renders 1`] = `
   <EuiFlexItem>
     <EuiSuperSelect
       compressed={false}
+      data-test-subj="case-configure-third-party-select"
       disabled={false}
       fullWidth={false}
       hasDividers={false}
@@ -58,6 +59,7 @@ exports[`FieldMappingRow it renders 1`] = `
   <EuiFlexItem>
     <EuiSuperSelect
       compressed={false}
+      data-test-subj="case-configure-action-type-select"
       disabled={false}
       fullWidth={false}
       hasDividers={false}

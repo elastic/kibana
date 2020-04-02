@@ -33,16 +33,15 @@ describe('Connectors', () => {
 
   test('it shows the left side', () => {
     const wrapper = mount(
-      <TestProviders>
-        <Connectors
-          connectors={[]}
-          disabled={false}
-          selectedConnector={'none'}
-          isLoading={false}
-          onChangeConnector={jest.fn()}
-          handleShowAddFlyout={jest.fn()}
-        />
-      </TestProviders>
+      <Connectors
+        connectors={[]}
+        disabled={false}
+        selectedConnector={'none'}
+        isLoading={false}
+        onChangeConnector={jest.fn()}
+        handleShowAddFlyout={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -55,16 +54,15 @@ describe('Connectors', () => {
 
   test('it shows the right side', () => {
     const wrapper = mount(
-      <TestProviders>
-        <Connectors
-          connectors={[]}
-          disabled={false}
-          selectedConnector={'none'}
-          isLoading={false}
-          onChangeConnector={jest.fn()}
-          handleShowAddFlyout={jest.fn()}
-        />
-      </TestProviders>
+      <Connectors
+        connectors={[]}
+        disabled={false}
+        selectedConnector={'none'}
+        isLoading={false}
+        onChangeConnector={jest.fn()}
+        handleShowAddFlyout={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -77,16 +75,15 @@ describe('Connectors', () => {
 
   test('it shows the connectors dropdown', () => {
     const wrapper = mount(
-      <TestProviders>
-        <Connectors
-          connectors={[]}
-          disabled={false}
-          selectedConnector={'none'}
-          isLoading={false}
-          onChangeConnector={jest.fn()}
-          handleShowAddFlyout={jest.fn()}
-        />
-      </TestProviders>
+      <Connectors
+        connectors={[]}
+        disabled={false}
+        selectedConnector={'none'}
+        isLoading={false}
+        onChangeConnector={jest.fn()}
+        handleShowAddFlyout={jest.fn()}
+      />,
+      { wrappingComponent: TestProviders }
     );
 
     expect(
@@ -117,5 +114,28 @@ describe('Connectors', () => {
     expect(connectorsDropdownComponent.props().connectors).toEqual(connectors);
     expect(connectorsDropdownComponent.props().selectedConnector).toEqual('none');
     expect(connectorsDropdownComponent.props().onChange).toEqual(onChange);
+  });
+
+  test('it call the callback when pressing add button', () => {
+    const handleShowAddFlyout = jest.fn();
+
+    const wrapper = mount(
+      <Connectors
+        connectors={connectors}
+        disabled={false}
+        selectedConnector={'none'}
+        isLoading={false}
+        onChangeConnector={jest.fn()}
+        handleShowAddFlyout={handleShowAddFlyout}
+      />,
+      { wrappingComponent: TestProviders }
+    );
+
+    wrapper.find('button[data-test-subj="case-configure-add-connector-button"]').simulate('click');
+
+    wrapper.update();
+
+    expect(handleShowAddFlyout).toHaveBeenCalled();
+    expect(handleShowAddFlyout).toHaveBeenCalledWith({});
   });
 });

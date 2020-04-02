@@ -13,7 +13,7 @@ exports[`ConnectorsDropdown it renders 1`] = `
   options={
     Array [
       Object {
-        "data-test-subj": "no-connector",
+        "data-test-subj": "dropdown-connector-no-connector",
         "inputDisplay": <React.Fragment>
           <ForwardRef(Styled(EuiIcon))
             size="m"

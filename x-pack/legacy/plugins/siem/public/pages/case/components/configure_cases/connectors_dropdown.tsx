@@ -34,7 +34,7 @@ const noConnectorOption = {
       <span>{i18n.NO_CONNECTOR}</span>
     </>
   ),
-  'data-test-subj': 'no-connector',
+  'data-test-subj': 'dropdown-connector-no-connector',
 };
 
 const ConnectorsDropdownComponent: React.FC<Props> = ({
