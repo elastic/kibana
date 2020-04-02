@@ -167,22 +167,6 @@ export default function({ getService }: FtrProviderContext) {
           expect(nonSummaryRes.monitorStates.summaries.length).to.eql(0);
         });
 
-        it('should return a monitor with mix state if check status filter is down', async () => {
-          const params = makeApiParams(testMonitorId);
-          params.statusFilter = 'down';
-
-          const nonSummaryRes = await getMonitorStates(params);
-          expect(nonSummaryRes.monitorStates.summaries.length).to.eql(1);
-        });
-
-        it('should not return a monitor with mix state if check status filter is up', async () => {
-          const params = makeApiParams(testMonitorId);
-          params.statusFilter = 'up';
-
-          const nonSummaryRes = await getMonitorStates(params);
-          expect(nonSummaryRes.monitorStates.summaries.length).to.eql(0);
-        });
-
         describe('matching outside of the date range', async () => {
           before('set date range to future', () => {
             const futureDate = new Date();
@@ -204,6 +188,59 @@ export default function({ getService }: FtrProviderContext) {
             expect(nonSummaryRes.monitorStates.summaries.length).to.eql(0);
           });
         });
+      });
+    });
+
+    describe(' test status filter', async () => {
+      const upMonitorId = 'up-test-id';
+      const downMonitorId = 'down-test-id';
+      const mixMonitorId = 'mix-test-id';
+      before('generate three monitors with up, down, mix state', async () => {
+        await getService('esArchiver').load('uptime/blank');
+
+        const es = getService('legacyEs');
+
+        const observer = {
+          geo: {
+            name: 'US-East',
+            location: '40.7128, -74.0060',
+          },
+        };
+
+        // Generating three monitors each with two geo locations,
+        // One in a down state ,
+        // One in an up state,
+        // One in a mix state
+
+        dateRangeStart = new Date().toISOString();
+
+        await makeChecksWithStatus(es, upMonitorId, 1, 4, 1, {}, 'up');
+        await makeChecksWithStatus(es, upMonitorId, 1, 4, 1, { observer }, 'up');
+
+        await makeChecksWithStatus(es, downMonitorId, 1, 4, 1, {}, 'down');
+        await makeChecksWithStatus(es, downMonitorId, 1, 4, 1, { observer }, 'down');
+
+        await makeChecksWithStatus(es, mixMonitorId, 1, 4, 1, {}, 'up');
+        await makeChecksWithStatus(es, mixMonitorId, 1, 4, 1, { observer }, 'down');
+
+        dateRangeEnd = new Date().toISOString();
+      });
+
+      after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
+
+      it('should return all monitor when no status filter', async () => {
+        const nonSummaryRes = await getMonitorStates({});
+        expect(nonSummaryRes.monitorStates.summaries.length).to.eql(3);
+      });
+
+      it('should return a monitor with mix state if check status filter is down', async () => {
+        const nonSummaryRes = await getMonitorStates({ statusFilter: 'down' });
+        expect(nonSummaryRes.monitorStates.summaries.length).to.eql(2);
+      });
+
+      it('should not return a monitor with mix state if check status filter is up', async () => {
+        const nonSummaryRes = await getMonitorStates({ statusFilter: 'up' });
+        expect(nonSummaryRes.monitorStates.summaries.length).to.eql(1);
       });
     });
   });
