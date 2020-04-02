@@ -10,6 +10,7 @@ import {
   getOrdinalMbColorRampStops,
   getColorPalette,
   getHexColorRangeStrings,
+  GRADIENT_INTERVALS,
 } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
@@ -21,7 +22,6 @@ import { BreakedLegend } from './components/breaked_legend';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
-const NUMBER_OF_LEGEND_COLORS = 5; //this matches the number of symbolizations bands in the coordinate-map viz
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -265,7 +265,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return [];
     }
 
-    const colors = getHexColorRangeStrings(this._options.color, NUMBER_OF_LEGEND_COLORS);
+    const colors = getHexColorRangeStrings(this._options.color, GRADIENT_INTERVALS);
 
     if (rangeFieldMeta.delta === 0) {
       //map to last color.
@@ -278,8 +278,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     return colors.map((color, index) => {
-      const rawStopValue =
-        rangeFieldMeta.min + rangeFieldMeta.delta * (index / NUMBER_OF_LEGEND_COLORS);
+      const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / GRADIENT_INTERVALS);
       return {
         color,
         stop: dynamicRound(rawStopValue),

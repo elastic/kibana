@@ -12,7 +12,7 @@ import { ColorGradient } from './components/color_gradient';
 import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 import { vislibColorMaps } from '../../../../../../../src/plugins/charts/public';
 
-const GRADIENT_INTERVALS = 8;
+export const GRADIENT_INTERVALS = 8;
 
 export const DEFAULT_FILL_COLORS = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS = [
