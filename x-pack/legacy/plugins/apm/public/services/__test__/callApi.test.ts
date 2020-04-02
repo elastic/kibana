@@ -157,6 +157,46 @@ describe('callApi', () => {
 
         expect(http.get).toHaveBeenCalledTimes(1);
       });
+
+      it('should not return cached response with `isCachable: false` option', async () => {
+        await callApi(http, {
+          isCachable: false,
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' }
+        });
+        await callApi(http, {
+          isCachable: false,
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' }
+        });
+        await callApi(http, {
+          isCachable: false,
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' }
+        });
+
+        expect(http.get).toHaveBeenCalledTimes(3);
+      });
+
+      it('should return cached response with `isCachable: true` option', async () => {
+        await callApi(http, {
+          isCachable: true,
+          pathname: `/api/kibana`,
+          query: { end: '2030' }
+        });
+        await callApi(http, {
+          isCachable: true,
+          pathname: `/api/kibana`,
+          query: { end: '2030' }
+        });
+        await callApi(http, {
+          isCachable: true,
+          pathname: `/api/kibana`,
+          query: { end: '2030' }
+        });
+
+        expect(http.get).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });
