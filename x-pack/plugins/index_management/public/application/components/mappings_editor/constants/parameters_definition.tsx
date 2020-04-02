@@ -208,7 +208,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
   },
   customTypeJson: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.customTypeNameFieldLabel', {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.customTypeJsonFieldLabel', {
         defaultMessage: 'Custom Type JSON',
       }),
       defaultValue: {},
