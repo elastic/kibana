@@ -30,7 +30,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('administrative detail tab meets a11y requirements', async () => {
-      await PageObjects.home.adminPlugin();
+      await PageObjects.home.clickAdminPlugin();
       await a11y.testAppSnapshot();
     });
 
