@@ -62,7 +62,7 @@ export const ConfigForm: React.FC<{
             <EuiText>{supportedOss.join(', ')}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexItem grow={false}>{rightCorner && rightCorner}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{rightCorner}</EuiFlexItem>
       </EuiFlexGroup>
     );
   };
