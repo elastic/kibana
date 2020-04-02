@@ -62,6 +62,9 @@ export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
+export const WMS = 'WMS';
+export const KIBANA_TILEMAP = 'KIBANA_TILEMAP';
+export const REGIONMAP_FILE = 'REGIONMAP_FILE';
 
 export enum FIELD_ORIGIN {
   SOURCE = 'source',
