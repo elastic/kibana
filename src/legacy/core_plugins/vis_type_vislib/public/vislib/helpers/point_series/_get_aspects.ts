@@ -18,7 +18,8 @@
  */
 
 import { makeFakeXAspect } from './_fake_x_aspect';
-import { Dimensions, Dimension, Table, Aspects } from './point_series';
+import { Dimensions, Dimension, Aspects } from './point_series';
+import { Table } from '../../types';
 
 /**
  * Identify and group the columns based on the aspect of the pointSeries

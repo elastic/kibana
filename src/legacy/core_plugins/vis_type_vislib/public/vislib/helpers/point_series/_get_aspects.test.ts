@@ -18,7 +18,8 @@
  */
 
 import { getAspects } from './_get_aspects';
-import { Dimension, Dimensions, Table, Row, Aspect } from './point_series';
+import { Dimension, Dimensions, Aspect } from './point_series';
+import { Table, Row } from '../../types';
 
 describe('getAspects', function() {
   let table: Table;

@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { buildPointSeriesData, Column, Dimensions, Table } from './point_series';
+import { buildPointSeriesData, Dimensions } from './point_series';
+import { Table, Column } from '../../types';
 import { setFormatService } from '../../../services';
 import { Serie } from './_add_to_siri';
 

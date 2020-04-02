@@ -23,13 +23,12 @@ import { makeFakeXAspect } from './_fake_x_aspect';
 import {
   Aspects,
   Chart,
-  Column,
   DateHistogramOrdered,
   DateHistogramParams,
   HistogramOrdered,
   HistogramParams,
-  Table,
 } from './point_series';
+import { Table, Column } from '../../types';
 
 describe('initXAxis', function() {
   let chart: Chart;

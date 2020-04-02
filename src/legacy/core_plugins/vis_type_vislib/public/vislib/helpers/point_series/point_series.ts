@@ -24,6 +24,7 @@ import { initYAxis } from './_init_y_axis';
 import { initXAxis } from './_init_x_axis';
 import { orderedDateAxis } from './_ordered_date_axis';
 import { Serie } from './_add_to_siri';
+import { Column, Table } from '../../types';
 
 export interface DateHistogramParams {
   date: boolean;
@@ -66,26 +67,6 @@ export interface Aspect {
 }
 export type Aspects = { [key in keyof Dimensions]: Aspect[] };
 
-export interface Column {
-  id: string | -1;
-  name: string;
-}
-
-export interface Row {
-  [key: string]: number | string;
-}
-
-export interface Table {
-  columns: Column[];
-  rows: Row[];
-  $parent?: {
-    table: Table;
-    column: number;
-    row: number;
-    key: number;
-    name: string;
-  };
-}
 export interface DateHistogramOrdered {
   interval: Duration;
   intervalESUnit: DateHistogramParams['intervalESUnit'];

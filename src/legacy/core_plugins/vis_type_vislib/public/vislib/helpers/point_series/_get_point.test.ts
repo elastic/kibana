@@ -19,7 +19,8 @@
 
 import { getPoint } from './_get_point';
 import { setFormatService } from '../../../services';
-import { Table, Column, Aspect, Row } from './point_series';
+import { Aspect } from './point_series';
+import { Table, Row, Column } from '../../types';
 
 describe('getPoint', function() {
   beforeAll(() => {

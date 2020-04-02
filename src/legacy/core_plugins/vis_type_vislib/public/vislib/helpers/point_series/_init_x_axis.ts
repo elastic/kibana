@@ -19,7 +19,8 @@
 
 import { uniq } from 'lodash';
 import moment from 'moment';
-import { Chart, Table, FakeParams, DateHistogramParams, HistogramParams } from './point_series';
+import { Chart, FakeParams, DateHistogramParams, HistogramParams } from './point_series';
+import { Table } from '../../types';
 
 export function initXAxis(chart: Chart, table: Table) {
   const { format, title, params, accessor } = chart.aspects.x[0];

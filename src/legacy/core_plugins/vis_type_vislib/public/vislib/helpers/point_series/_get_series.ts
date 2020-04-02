@@ -20,7 +20,8 @@
 import _ from 'lodash';
 import { getPoint, Point } from './_get_point';
 import { addToSiri, Serie } from './_add_to_siri';
-import { Chart, Table } from './point_series';
+import { Chart } from './point_series';
+import { Table } from '../../types';
 
 export function getSeries(table: Table, chart: Chart) {
   const aspects = chart.aspects;
