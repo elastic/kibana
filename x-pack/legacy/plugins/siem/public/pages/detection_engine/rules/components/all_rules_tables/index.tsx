@@ -33,7 +33,7 @@ interface AllRulesTablesProps {
   euiBasicTableSelectionProps: EuiTableSelectionType<Rule>;
   hasNoPermissions: boolean;
   monitoringColumns: Array<EuiBasicTableColumn<RuleStatusRowItemType>>;
-  paginationMemo: {
+  pagination: {
     pageIndex: number;
     pageSize: number;
     totalItemCount: number;
@@ -41,14 +41,12 @@ interface AllRulesTablesProps {
   };
   rules: Rules;
   rulesColumns: RulesColumns[];
-  rulesStatuses: RuleStatusRowItemType[] | null;
+  rulesStatuses: RuleStatusRowItemType[];
   sorting: {
-    sort?: {
-      field: string;
+    sort: {
+      field: 'enabled';
       direction: Direction;
     };
-    allowNeutralSort?: boolean;
-    enableAllColumns?: boolean;
   };
   tableOnChangeCallback: ({ page, sort }: EuiBasicTableOnChange) => void;
   tableRef?: React.MutableRefObject<EuiBasicTable | undefined>;
@@ -76,7 +74,7 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   euiBasicTableSelectionProps,
   hasNoPermissions,
   monitoringColumns,
-  paginationMemo,
+  pagination,
   rules,
   rulesColumns,
   rulesStatuses,
@@ -119,7 +117,7 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           items={rules ?? []}
           noItemsMessage={emptyPrompt}
           onChange={tableOnChangeCallback}
-          pagination={paginationMemo}
+          pagination={pagination}
           ref={tableRef}
           sorting={sorting}
           selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
@@ -134,7 +132,7 @@ const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           items={rulesStatuses}
           noItemsMessage={emptyPrompt}
           onChange={tableOnChangeCallback}
-          pagination={paginationMemo}
+          pagination={pagination}
           sorting={sorting}
         />
       )}
