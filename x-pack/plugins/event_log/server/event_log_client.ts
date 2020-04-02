@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as t from 'io-ts';
 import { Observable } from 'rxjs';
 import { ClusterClient, SavedObjectsClientContract } from 'src/core/server';
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { defaults } from 'lodash';
 import { EsContext } from './es';
 import { IEventLogClient, IEvent } from './types';
+import { DateFromString, PositiveNumberFromString } from './lib/date_from_string';
 export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -18,23 +20,13 @@ interface EventLogServiceCtorParams {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-const optionalDateFieldSchema = schema.maybe(
-  schema.string({
-    validate(value) {
-      if (isNaN(Date.parse(value))) {
-        return 'Invalid Date';
-      }
-    },
-  })
-);
-
-export const findOptionsSchema = schema.object({
-  per_page: schema.number({ defaultValue: 10, min: 0 }),
-  page: schema.number({ defaultValue: 1, min: 1 }),
-  start: optionalDateFieldSchema,
-  end: optionalDateFieldSchema,
+export const FindOptionsSchema = t.partial({
+  per_page: PositiveNumberFromString,
+  page: PositiveNumberFromString,
+  start: DateFromString,
+  end: DateFromString,
 });
-export type FindOptionsType = TypeOf<typeof findOptionsSchema>;
+export type FindOptionsType = t.TypeOf<typeof FindOptionsSchema>;
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClient implements IEventLogClient {
@@ -49,14 +41,14 @@ export class EventLogClient implements IEventLogClient {
   async findEventsBySavedObject(
     type: string,
     id: string,
-    options?: Partial<FindOptionsType>
+    options: FindOptionsType = {}
   ): Promise<IEvent[]> {
     await this.savedObjectsClient.get(type, id);
     return (await this.esContext.esAdapter.queryEventsBySavedObject(
       this.esContext.esNames.alias,
       type,
       id,
-      findOptionsSchema.validate(options ?? {})
+      defaults(options, { page: 1, per_page: 10 })
     )) as IEvent[];
   }
 }

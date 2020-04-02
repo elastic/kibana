@@ -114,7 +114,7 @@ export class ClusterClientAdapter {
     index: string,
     type: string,
     id: string,
-    { page, per_page: size, start, end }: Partial<FindOptionsType>
+    { page, per_page: size, start, end }: FindOptionsType
   ): Promise<any[]> {
     try {
       const {
@@ -125,6 +125,7 @@ export class ClusterClientAdapter {
           ...(size && page
             ? {
                 size,
+                // `page` count is a positive number, `from` is zero based index
                 from: (page - 1) * size,
               }
             : {}),
@@ -141,14 +142,14 @@ export class ClusterClientAdapter {
                   start && {
                     range: {
                       'event.start': {
-                        gte: start,
+                        gte: start.toISOString(),
                       },
                     },
                   },
                   end && {
                     range: {
                       'event.end': {
-                        lte: end,
+                        lte: end.toISOString(),
                       },
                     },
                   },
