@@ -60,6 +60,8 @@ Metrics::
 * Ensures inventory view buckets never drop below 60 seconds {pull}58503[#58503]
 Monitoring::
 * Ensures we use the monitoring cluster for retrieving xpack info {pull}59075[#59075]
+Operations::
+* Fixes the watchers usage in the log rotation {pull}60956[#60956]
 Platform::
 * Edits to filter's custom label are ignored {pull}59169[#59169]
 * Fixes a bug that could cause saved object migrations to fail when an {es} snapshot is currently in progress {pull}58884[#58884]
