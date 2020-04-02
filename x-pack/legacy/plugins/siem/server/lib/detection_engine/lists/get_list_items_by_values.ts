@@ -47,6 +47,7 @@ export const getListItemsByValues = async ({
           },
         },
       },
+      size: ips != null ? ips.length : 0,
     });
     return result.hits.hits.map(hit => {
       return {

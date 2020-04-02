@@ -5,7 +5,6 @@
  */
 
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
-import { getList } from './get_list';
 import { getListItemsByValues } from './get_list_items_by_values';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
 

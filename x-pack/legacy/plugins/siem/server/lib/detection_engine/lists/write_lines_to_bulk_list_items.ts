@@ -11,11 +11,44 @@ import { createListItemsBulk } from '../lists/create_list_items_bulk';
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { getListItemsByValues } from './get_list_items_by_values';
 
-// TODO: Should we have a flag to list duplicates
+// TODO: Should we have a flag to list duplicates to the user?
 
 interface LinesResult {
   linesProcessed: number;
   duplicatesFound: number;
+}
+
+const BUFFER_SIZE = 100;
+
+// TODO: Combine this with the readline below and pull this into its own file
+class BufferLines extends Readable {
+  private set = new Set<string>();
+  constructor() {
+    super({ encoding: 'utf-8' });
+  }
+  public _read() {
+    // No operation required to be implemented
+  }
+
+  public push(chunk: string | null, encoding?: string): boolean {
+    if (chunk == null) {
+      const bufferJSON = JSON.stringify(Array.from(this.set));
+      super.push(bufferJSON, encoding);
+      const returnCode = super.push(null);
+      this.set.clear();
+      return returnCode;
+    } else {
+      this.set.add(chunk);
+      if (this.set.size > BUFFER_SIZE) {
+        const bufferJSON = JSON.stringify(Array.from(this.set));
+        const returnCode = super.push(bufferJSON, encoding);
+        this.set.clear();
+        return returnCode;
+      } else {
+        return true;
+      }
+    }
+  }
 }
 
 export const writeLinesToBulkListItems = ({
@@ -30,8 +63,6 @@ export const writeLinesToBulkListItems = ({
   listsItemsIndex: string;
 }): Promise<LinesResult> => {
   return new Promise<LinesResult>((resolve, reject) => {
-    const bufferSize = 100;
-    const buffer = new Set<string>();
     let linesProcessed = 0;
     let duplicatesFound = 0;
 
@@ -39,40 +70,56 @@ export const writeLinesToBulkListItems = ({
       input: stream,
     });
 
-    readline.on('line', async line => {
-      buffer.add(line);
-      if (buffer.size === bufferSize) {
-        const arrayFromBuffer = Array.from(buffer);
-        // TODO: Do we want to check for the existence first and reject those?
-        const items = await getListItemsByValues({
-          listId,
-          clusterClient,
-          listsItemsIndex,
-          ips: arrayFromBuffer,
-        });
-        const duplicatesRemoved = arrayFromBuffer.filter(ip => !items.some(item => item.ip === ip));
-        linesProcessed += duplicatesRemoved.length;
-        duplicatesFound += arrayFromBuffer.length - duplicatesRemoved.length;
-        createListItemsBulk({ listId, ips: duplicatesRemoved, clusterClient, listsItemsIndex });
-        buffer.clear();
-      }
-    });
+    const readBuffer = new BufferLines();
 
-    readline.on('close', async () => {
-      const arrayFromBuffer = Array.from(buffer);
-      // TODO: Do we want to check for the existence first and reject those?
-      const items = await getListItemsByValues({
+    readBuffer.on('data', async (lines: string) => {
+      const linesParsed: string[] = JSON.parse(lines);
+
+      const linesStatus = await writeBufferToItems({
         listId,
         clusterClient,
+        buffer: linesParsed,
         listsItemsIndex,
-        ips: arrayFromBuffer,
       });
-      const duplicatesRemoved = arrayFromBuffer.filter(ip => !items.some(item => item.ip === ip));
-      linesProcessed += duplicatesRemoved.length;
-      duplicatesFound += arrayFromBuffer.length - duplicatesRemoved.length;
-      createListItemsBulk({ listId, ips: arrayFromBuffer, clusterClient, listsItemsIndex });
-      buffer.clear();
+
+      linesProcessed += linesStatus.linesProcessed;
+      duplicatesFound += linesStatus.duplicatesFound;
+    });
+
+    readBuffer.on('end', () => {
       resolve({ linesProcessed, duplicatesFound });
     });
+
+    readline.on('line', line => {
+      readBuffer.push(line);
+    });
+
+    readline.on('close', () => {
+      readBuffer.push(null);
+    });
   });
+};
+
+export const writeBufferToItems = async ({
+  listId,
+  clusterClient,
+  listsItemsIndex,
+  buffer,
+}: {
+  listId: string;
+  clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+  listsItemsIndex: string;
+  buffer: string[];
+}): Promise<LinesResult> => {
+  const items = await getListItemsByValues({
+    listId,
+    clusterClient,
+    listsItemsIndex,
+    ips: buffer,
+  });
+  const duplicatesRemoved = buffer.filter(ip => !items.some(item => item.ip === ip));
+  const linesProcessed = duplicatesRemoved.length;
+  const duplicatesFound = buffer.length - duplicatesRemoved.length;
+  await createListItemsBulk({ listId, ips: duplicatesRemoved, clusterClient, listsItemsIndex });
+  return { linesProcessed, duplicatesFound };
 };
