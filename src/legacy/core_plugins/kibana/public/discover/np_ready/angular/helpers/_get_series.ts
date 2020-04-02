@@ -18,28 +18,26 @@
  */
 
 import _ from 'lodash';
-import { getPoint } from './_get_point';
-import { addToSiri } from './_add_to_siri';
+import { getPoint, Point } from './_get_point';
+import { addToSiri, Serie } from './_add_to_siri';
+import { Chart, Table } from './point_series';
 
-export function getSeries(table, chart) {
+export function getSeries(table: Table, chart: Chart) {
   const aspects = chart.aspects;
   const xAspect = aspects.x[0];
   const yAspect = aspects.y[0];
 
   const partGetPoint = _.partial(getPoint, table, xAspect);
 
-  const series = _(table.rows)
-    .transform(function(series, row, rowIndex) {
-      const point = partGetPoint(row, rowIndex, yAspect);
+  return _(table.rows)
+    .transform((series: any, row, rowIndex) => {
+      const point: Point = partGetPoint(row, rowIndex, yAspect);
       if (point) {
         const id = `${point.series}-${yAspect.accessor}`;
         point.seriesId = id;
-        addToSiri(series, point, id);
+        addToSiri(series as Map<string, Serie>, point, id);
       }
-      return;
-    }, new Map())
+    }, new Map<string, Serie>() as any)
     .thru(series => [...series.values()])
-    .value();
-
-  return series;
+    .value() as Serie[];
 }

@@ -17,16 +17,23 @@
  * under the License.
  */
 
-export function addToSiri(series, point, id) {
+import { Point } from './_get_point';
+
+export interface Serie {
+  id: string;
+  values: Point[];
+}
+
+export function addToSiri(series: Map<string, Serie>, point: Point, id: string) {
   id = id == null ? '' : id + '';
 
   if (series.has(id)) {
-    series.get(id).values.push(point);
+    (series.get(id) as Serie).values.push(point);
     return;
   }
 
   series.set(id, {
-    id: id.split('-').pop(),
+    id: id.split('-').pop() as string,
     values: [point],
   });
 }

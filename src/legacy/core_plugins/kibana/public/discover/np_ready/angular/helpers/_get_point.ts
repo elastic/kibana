@@ -17,8 +17,35 @@
  * under the License.
  */
 
-export function getPoint(table, x, row, rowIndex, y) {
-  const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
+import { Aspect, Table, Row } from './point_series';
+
+type RowValue = number | 'NaN';
+interface Raw {
+  table: Table;
+  column: number;
+  row: number;
+  value: RowValue;
+}
+export interface Point {
+  x: RowValue | '_all';
+  y: RowValue;
+  extraMetrics: [];
+  xRaw: Raw;
+  yRaw: Raw;
+  tableRaw?: {
+    table: Table;
+    column: number;
+    row: number;
+    value: number;
+    title: string;
+  };
+  parent: null;
+  series?: string;
+  seriesId?: string;
+}
+
+export function getPoint(table: Table, x: Aspect, row: Row, rowIndex: number, y: Aspect) {
+  const xRow = row[x.accessor];
   const yRow = row[y.accessor];
 
   const point = {
@@ -45,7 +72,7 @@ export function getPoint(table, x, row, rowIndex, y) {
       title: table.$parent.name,
     },
     parent: null,
-  };
+  } as Point;
 
   if (point.y === 'NaN') {
     // filter out NaN from stats

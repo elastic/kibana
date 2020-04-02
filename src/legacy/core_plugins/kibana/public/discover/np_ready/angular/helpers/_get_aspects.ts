@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Table, Dimensions, Aspects } from './point_series';
+
 /**
  * Identify and group the columns based on the aspect of the pointSeries
  * they represent.
@@ -24,9 +26,9 @@
  * @return {object} - an object with a key for each aspect (see map). The values
  *                    may be undefined, a single aspect, or an array of aspects.
  */
-export function getAspects(table, dimensions) {
-  const aspects = {};
-  Object.keys(dimensions).forEach(name => {
+export function getAspects(table: Table, dimensions: Dimensions) {
+  const aspects: Aspects = {} as Aspects;
+  (Object.keys(dimensions) as Array<keyof Dimensions>).forEach(name => {
     const d = dimensions[name];
     const column = table.columns[d.accessor];
     if (!column) {
