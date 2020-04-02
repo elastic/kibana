@@ -138,6 +138,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
       const id = await newIndexPattern.create();
 
+      await mlContext.indexPatterns.clearCache();
+
       // id returns false if there's a duplicate index pattern.
       if (id === false) {
         addRequestMessage({
@@ -248,6 +250,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const openModal = async () => {
+    await mlContext.indexPatterns.clearCache();
     resetForm();
     await prepareFormValidation();
     dispatch({ type: ACTION.OPEN_MODAL });
