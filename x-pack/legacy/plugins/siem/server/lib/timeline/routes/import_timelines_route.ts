@@ -92,7 +92,7 @@ export const importTimelinesRoute = (
 
         const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
 
-        const readStream = createTimelinesStreamFromNdJson(objectLimit, response);
+        const readStream = createTimelinesStreamFromNdJson(objectLimit);
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
           file,
           ...readStream,

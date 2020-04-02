@@ -21,10 +21,9 @@ import {
 
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
 import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
-import { KibanaResponseFactory } from '../../../../../../../src/core/server';
 import { throwErrors } from '../../../../../../plugins/case/common/api';
 
-export const validateTimelines = (response: KibanaResponseFactory): Transform => {
+export const validateTimelines = (): Transform => {
   return createMapStream((obj: ImportTimelineResponse) => {
     return pipe(
       ImportTimelinesSchemaRt.decode(obj),
@@ -36,15 +35,12 @@ export const validateTimelines = (response: KibanaResponseFactory): Transform =>
   });
 };
 
-export const createTimelinesStreamFromNdJson = (
-  ruleLimit: number,
-  response: KibanaResponseFactory
-) => {
+export const createTimelinesStreamFromNdJson = (ruleLimit: number) => {
   return [
     createSplitStream('\n'),
     parseNdjsonStrings(),
     filterExportedCounts(),
-    validateTimelines(response),
+    validateTimelines(),
     createLimitStream(ruleLimit),
     createConcatStream([]),
   ];
