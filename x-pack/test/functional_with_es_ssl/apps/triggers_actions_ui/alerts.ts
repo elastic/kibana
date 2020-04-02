@@ -92,7 +92,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: alertName,
           tagsText: '',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
@@ -154,7 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
@@ -179,7 +179,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: updatedAlertName,
           tagsText: 'foo, bar',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
@@ -210,7 +210,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
@@ -260,7 +260,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'Index Threshold',
+          alertType: 'Index threshold',
           interval: '1m',
         },
       ]);
