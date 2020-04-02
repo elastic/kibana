@@ -5,15 +5,10 @@
  */
 import React from 'react';
 import { EuiIcon, EuiIconProps } from '@elastic/eui';
-import { PackageInfo, PackageListItem } from '../../../../common/types/models';
-import { usePackageIconType } from '../hooks';
-type Package = PackageInfo | PackageListItem;
+import { usePackageIconType, UsePackageIconType } from '../hooks';
 
-export const PackageIcon: React.FunctionComponent<{
-  packageName: string;
-  version?: string;
-  icons?: Package['icons'];
-} & Omit<EuiIconProps, 'type'>> = ({ packageName, version, icons, ...euiIconProps }) => {
-  const iconType = usePackageIconType({ packageName, version, icons });
+export const PackageIcon: React.FunctionComponent<UsePackageIconType &
+  Omit<EuiIconProps, 'type'>> = ({ packageName, version, icons, tryApi, ...euiIconProps }) => {
+  const iconType = usePackageIconType({ packageName, version, icons, tryApi });
   return <EuiIcon size="s" type={iconType} {...euiIconProps} />;
 };
