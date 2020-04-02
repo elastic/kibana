@@ -123,7 +123,7 @@ const replaceAliasPathByAliasId = (
 };
 
 export const getMainTypeFromSubType = (subType: SubType): MainType =>
-  SUB_TYPE_MAP_TO_MAIN[subType] as MainType;
+  (SUB_TYPE_MAP_TO_MAIN[subType] ?? 'other') as MainType;
 
 /**
  * In order to better work with the recursive pattern of the mappings `properties`, this method flatten the fields
@@ -195,13 +195,6 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
         // so we add it here.
         if (field.type === undefined && field.properties !== undefined) {
           field.type = 'object';
-        }
-
-        if (field.type && !TYPE_DEFINITION[field.type]) {
-          field.otherTypeName = field.type;
-          const { type, ...rest } = value;
-          field.otherTypeJson = rest;
-          field.type = 'other';
         }
 
         const meta = getFieldMeta(field, isMultiField);
@@ -293,11 +286,8 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
   const deNormalizePaths = (ids: string[], to: Fields = {}) => {
     ids.forEach(id => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
-      const { name, type, otherTypeName, otherTypeJson, ...restNormalizedField } = source;
-      const field: Omit<Field, 'name'> =
-        type === 'other' && otherTypeName && otherTypeJson
-          ? { type: otherTypeName as DataType, ...otherTypeJson, ...restNormalizedField }
-          : { type, ...restNormalizedField };
+      const { name, ...normalizedField } = source;
+      const field: Omit<Field, 'name'> = normalizedField;
 
       to[name] = field;
 
