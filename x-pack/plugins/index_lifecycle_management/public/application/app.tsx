@@ -18,14 +18,12 @@ export const App = () => {
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
 
   return (
-    <div className="policyTable__horizontalScrollContainer">
-      <HashRouter>
-        <Switch>
-          <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}policies`} />
-          <Route exact path={`${BASE_PATH}policies`} component={PolicyTable} />
-          <Route path={`${BASE_PATH}policies/edit/:policyName?`} component={EditPolicy} />
-        </Switch>
-      </HashRouter>
-    </div>
+    <HashRouter>
+      <Switch>
+        <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}policies`} />
+        <Route exact path={`${BASE_PATH}policies`} component={PolicyTable} />
+        <Route path={`${BASE_PATH}policies/edit/:policyName?`} component={EditPolicy} />
+      </Switch>
+    </HashRouter>
   );
 };

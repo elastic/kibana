@@ -6,7 +6,6 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 
-import './index.scss';
 import { IndexLifecycleManagementPlugin } from './plugin';
 
 /** @public */

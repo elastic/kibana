@@ -52,6 +52,7 @@ const COLUMNS = {
     label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
       defaultMessage: 'Name',
     }),
+    width: 200,
   },
   linkedIndices: {
     label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.linkedIndicesHeader', {
@@ -179,7 +180,6 @@ export class PolicyTable extends Component {
       return (
         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
-          className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
           href={getPolicyPath(value)}
           onClick={() => trackUiMetric('click', UIM_EDIT_CLICK)}
@@ -415,7 +415,7 @@ export class PolicyTable extends Component {
         tableContent = <EuiLoadingSpinner size="m" />;
       } else if (totalNumberOfPolicies > 0) {
         tableContent = (
-          <EuiTable className="policyTable__horizontalScroll">
+          <EuiTable>
             <EuiScreenReaderOnly>
               <caption role="status" aria-relevant="text" aria-live="polite">
                 <FormattedMessage
