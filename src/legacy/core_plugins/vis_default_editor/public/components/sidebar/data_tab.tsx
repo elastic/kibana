@@ -39,6 +39,7 @@ import {
 } from './state';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
 import { ISchemas } from '../../schemas';
+import { TimeRange } from '../../../../../../plugins/data/public';
 import { EditorVisState } from './state/reducers';
 
 export interface DefaultEditorDataTabProps {
@@ -51,6 +52,7 @@ export interface DefaultEditorDataTabProps {
   setTouched(isTouched: boolean): void;
   setValidity(modelName: string, value: boolean): void;
   setStateValue: DefaultEditorAggCommonProps['setStateParamValue'];
+  timeRange: TimeRange;
 }
 
 function DefaultEditorDataTab({
@@ -62,6 +64,7 @@ function DefaultEditorDataTab({
   setTouched,
   setValidity,
   setStateValue,
+  timeRange,
 }: DefaultEditorDataTabProps) {
   const lastParentPipelineAgg = useMemo(
     () =>
@@ -128,6 +131,7 @@ function DefaultEditorDataTab({
       <DefaultEditorAggGroup
         groupName={AggGroupNames.Buckets}
         schemas={schemas.buckets}
+        timeRange={timeRange}
         {...commonProps}
       />
     </>

@@ -18,6 +18,8 @@ export const removeServerGeneratedProperties = (
     created_at,
     updated_at,
     id,
+    last_failure_at,
+    last_failure_message,
     last_success_at,
     last_success_message,
     status,
