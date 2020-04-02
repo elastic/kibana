@@ -115,27 +115,4 @@ describe('Connectors', () => {
     expect(connectorsDropdownComponent.props().selectedConnector).toEqual('none');
     expect(connectorsDropdownComponent.props().onChange).toEqual(onChange);
   });
-
-  test('it call the callback when pressing add button', () => {
-    const handleShowAddFlyout = jest.fn();
-
-    const wrapper = mount(
-      <Connectors
-        connectors={connectors}
-        disabled={false}
-        selectedConnector={'none'}
-        isLoading={false}
-        onChangeConnector={jest.fn()}
-        handleShowAddFlyout={handleShowAddFlyout}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
-    wrapper.find('button[data-test-subj="case-configure-add-connector-button"]').simulate('click');
-
-    wrapper.update();
-
-    expect(handleShowAddFlyout).toHaveBeenCalled();
-    expect(handleShowAddFlyout).toHaveBeenCalledWith({});
-  });
 });
