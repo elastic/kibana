@@ -17,8 +17,6 @@ import {
   map,
   pairwise,
   filter,
-  skip,
-  tap,
 } from 'rxjs/operators';
 import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
@@ -47,25 +45,10 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
         // clone the object to compare payloads and proceed further only
         // if the configuration has been changed
         map(cloneDeep),
-        tap(v => {
-          // eslint-disable-next-line no-console
-          console.log('Clone object of the incoming config: ', JSON.stringify(v, null, 2));
-        }),
         distinctUntilChanged(isEqual),
-        tap(v => {
-          // eslint-disable-next-line no-console
-          console.log('New config: ', JSON.stringify(v, null, 2));
-        }),
-        // skip the first emitted config (job cloning)
-        skip(1),
         // don't call the endpoint with invalid payload
         filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
         switchMap(payload => {
-          // eslint-disable-next-line no-console
-          console.log(
-            'Call calculate endpoint with the payload: ',
-            JSON.stringify(payload, null, 2)
-          );
           return ml.calculateModelMemoryLimit$(payload).pipe(
             pluck('modelMemoryLimit'),
             catchError(error => {

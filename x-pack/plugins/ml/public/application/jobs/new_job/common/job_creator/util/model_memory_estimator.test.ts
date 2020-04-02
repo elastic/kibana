@@ -44,27 +44,12 @@ describe('delay', () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  test('should not call the endpoint on the first provided config', () => {
-    // arrange
-    const spy = jest.fn();
-    modelMemoryEstimator.updates$.subscribe(spy);
-    // act
-    modelMemoryEstimator.update({ analysisConfig: { detectors: [{}] } } as CalculatePayload);
-    clock.tick(601);
-    // assert
-    expect(spy).not.toHaveBeenCalled();
-  });
-
   test('should debounce it for 600 ms', () => {
     // arrange
     const spy = jest.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
     // act
     modelMemoryEstimator.update({ analysisConfig: { detectors: [{}] } } as CalculatePayload);
-    clock.tick(601);
-    modelMemoryEstimator.update({
-      analysisConfig: { detectors: [{ function: 'mean' }] },
-    } as CalculatePayload);
     clock.tick(601);
     // assert
     expect(spy).toHaveBeenCalledWith('15MB');
@@ -73,12 +58,6 @@ describe('delay', () => {
   test('should not proceed further if the payload has not been changed', () => {
     const spy = jest.fn();
     modelMemoryEstimator.updates$.subscribe(spy);
-
-    // ignored payload
-    modelMemoryEstimator.update({
-      analysisConfig: { detectors: [{ by_field_name: '' }] },
-    } as CalculatePayload);
-    clock.tick(601);
 
     // first emitted
     modelMemoryEstimator.update({
@@ -100,12 +79,6 @@ describe('delay', () => {
     const spy = jest.fn();
 
     modelMemoryEstimator.updates$.subscribe(spy);
-
-    // ignored payload
-    modelMemoryEstimator.update({
-      analysisConfig: { detectors: [{ by_field_name: '' }] },
-    } as CalculatePayload);
-    clock.tick(601);
 
     modelMemoryEstimator.update(({
       analysisConfig: { detectors: [] },
