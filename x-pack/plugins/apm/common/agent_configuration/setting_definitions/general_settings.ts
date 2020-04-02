@@ -91,6 +91,20 @@ export const generalSettings: RawSettingDefinition[] = [
     ),
     excludeAgents: ['js-base', 'rum-js']
   },
+  
+  // LOG_LEVEL
+  {
+    key: 'log_level',
+    type: 'text',
+    defaultValue: 'info',
+    label: i18n.translate('xpack.apm.agentConfig.logLevel.label', {
+      defaultMessage: 'Log level'
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.logLevel.description', {
+      defaultMessage: 'Sets the logging level for the agent'
+    }),
+    includeAgents: ['dotnet', 'ruby']
+  },  
 
   // Recording
   {
