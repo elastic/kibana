@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
 import { CrossClusterReplicationServerPlugin } from './plugin';
+import { configSchema, CrossClusterReplicationConfig } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) =>
   new CrossClusterReplicationServerPlugin(ctx);
+
+export const config: PluginConfigDescriptor<CrossClusterReplicationConfig> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    ui: true,
+  },
+};

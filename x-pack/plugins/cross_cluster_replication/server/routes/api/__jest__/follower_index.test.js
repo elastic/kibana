@@ -10,16 +10,8 @@ import {
   getFollowerIndexInfoMock,
   getFollowerIndexListInfoMock,
 } from '../../../../fixtures';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { registerFollowerIndexRoutes } from '../follower_index';
 import { createRouter, callRoute } from './helpers';
-
-jest.mock('../../../lib/call_with_request_factory');
-jest.mock('../../../lib/is_es_error_factory');
-jest.mock('../../../lib/license_pre_routing_factory', () => ({
-  licensePreRoutingFactory: ({ requestHandler }) => requestHandler,
-}));
 
 const DESERIALIZED_KEYS = Object.keys(
   deserializeFollowerIndex({
@@ -90,8 +82,7 @@ describe('[CCR API Routes] Follower Index', () => {
   let routeHandler;
 
   beforeAll(() => {
-    isEsErrorFactory.mockReturnValue(() => false);
-    callWithRequestFactory.mockReturnValue(getNextResponseFromQueue);
+    // callWithRequestFactory.mockReturnValue(getNextResponseFromQueue);
     registerHandlers();
   });
 

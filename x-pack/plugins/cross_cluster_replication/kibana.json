@@ -1,0 +1,18 @@
+{
+  "id": "crossClusterReplication",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "management",
+    "remoteClusters",
+    "indexManagement"
+  ],
+  "optionalPlugins": [
+    "usageCollection",
+    "security"
+  ],
+  "configPath": ["xpack", "ccr"]
+}

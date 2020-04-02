@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { deserializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../../fixtures';
 import { registerAutoFollowPatternRoutes } from '../auto_follow_pattern';
 
 import { createRouter, callRoute } from './helpers';
-
-jest.mock('../../../lib/call_with_request_factory');
-jest.mock('../../../lib/is_es_error_factory');
-jest.mock('../../../lib/license_pre_routing_factory', () => ({
-  licensePreRoutingFactory: ({ requestHandler }) => requestHandler,
-}));
 
 const DESERIALIZED_KEYS = Object.keys(deserializeAutoFollowPattern(getAutoFollowPatternMock()));
 
@@ -82,8 +74,7 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
   let routeHandler;
 
   beforeAll(() => {
-    isEsErrorFactory.mockReturnValue(() => false);
-    callWithRequestFactory.mockReturnValue(getNextResponseFromQueue);
+    // callWithRequestFactory.mockReturnValue(getNextResponseFromQueue);
     registerHandlers();
   });
 

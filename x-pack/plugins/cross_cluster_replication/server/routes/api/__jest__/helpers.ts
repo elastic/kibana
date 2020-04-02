@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { kibanaResponseFactory } from '../../../../../../../../../src/core/server';
+import { RequestHandler, kibanaResponseFactory } from 'src/core/server';
 
 export const callRoute = (
   route: RequestHandler<any, any, any>,
