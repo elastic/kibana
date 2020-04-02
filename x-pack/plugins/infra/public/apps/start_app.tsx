@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -41,7 +41,7 @@ export async function startApp(
   Router: AppRouter,
   triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
 ) {
-  const { element, history, onAppLeave } = params;
+  const { element, history } = params;
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
     apolloClient: libs$.pipe(pluck('apolloClient')),
