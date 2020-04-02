@@ -198,9 +198,9 @@ export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
         }
 
         if (field.type && !TYPE_DEFINITION[field.type]) {
-          field.customTypeName = field.type;
+          field.otherTypeName = field.type;
           const { type, ...rest } = value;
-          field.customTypeJson = rest;
+          field.otherTypeJson = rest;
           field.type = 'other';
         }
 
@@ -293,10 +293,10 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
   const deNormalizePaths = (ids: string[], to: Fields = {}) => {
     ids.forEach(id => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
-      const { name, type, customTypeName, customTypeJson, ...restNormalizedField } = source;
+      const { name, type, otherTypeName, otherTypeJson, ...restNormalizedField } = source;
       const field: Omit<Field, 'name'> =
-        type === 'other' && customTypeName && customTypeJson
-          ? { type: customTypeName as DataType, ...customTypeJson, ...restNormalizedField }
+        type === 'other' && otherTypeName && otherTypeJson
+          ? { type: otherTypeName as DataType, ...otherTypeJson, ...restNormalizedField }
           : { type, ...restNormalizedField };
 
       to[name] = field;

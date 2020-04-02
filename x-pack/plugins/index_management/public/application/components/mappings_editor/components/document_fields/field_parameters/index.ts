@@ -63,9 +63,9 @@ export * from './max_shingle_size_parameter';
 
 export * from './relations_parameter';
 
-export * from './custom_type_parameter';
+export * from './other_type_name_parameter';
 
-export * from './custom_json_parameter';
+export * from './other_type_json_parameter';
 
 export const PARAMETER_SERIALIZERS = [relationsSerializer, dynamicSerializer];
 

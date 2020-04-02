@@ -8,17 +8,17 @@ import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
 import { getFieldConfig } from '../../../lib';
-import { UseField, TextField } from '../../../shared_imports';
+import { UseField, JsonEditorField } from '../../../shared_imports';
 
-export const CustomTypeParameter = () => (
-  <UseField path="customTypeName" config={getFieldConfig('customTypeName')}>
-    {customTypeNameField => {
-      const error = customTypeNameField.getErrorsMessages();
+export const OtherTypeJsonParameter = () => (
+  <UseField path="otherTypeJson" config={getFieldConfig('otherTypeJson')}>
+    {otherTypeJsonField => {
+      const error = otherTypeJsonField.getErrorsMessages();
       const isInvalid = error ? Boolean(error.length) : false;
 
       return (
-        <EuiFormRow error={error} isInvalid={isInvalid}>
-          <TextField field={customTypeNameField} />
+        <EuiFormRow isInvalid={isInvalid}>
+          <JsonEditorField field={otherTypeJsonField} />
         </EuiFormRow>
       );
     }}

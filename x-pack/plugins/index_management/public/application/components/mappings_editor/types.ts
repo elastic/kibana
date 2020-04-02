@@ -146,8 +146,8 @@ export type ParameterName =
   /**
    * These parameters are internal to mappings editor
    */
-  | 'customTypeName'
-  | 'customTypeJson';
+  | 'otherTypeName'
+  | 'otherTypeJson';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
@@ -167,11 +167,10 @@ interface FieldBasic {
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
 
-  // customTypeName and customJSON exist together as a holder
-  // of types that the mappings editor does not yet know about but
-  // enables the user to edit
-  customTypeName?: string;
-  customTypeJson?: GenericObject;
+  // other* exist together as a holder of types that the mappings editor does not yet know about but
+  // enables the user to create mappings with them.
+  otherTypeName?: string;
+  otherTypeJson?: GenericObject;
 }
 
 type FieldParams = {

@@ -5,13 +5,13 @@
  */
 import React from 'react';
 
-import { CustomTypeJsonParameter } from '../../field_parameters';
+import { OtherTypeJsonParameter } from '../../field_parameters';
 import { BasicParametersSection } from '../edit_field';
 
 export const OtherType = () => {
   return (
     <BasicParametersSection>
-      <CustomTypeJsonParameter />
+      <OtherTypeJsonParameter />
     </BasicParametersSection>
   );
 };

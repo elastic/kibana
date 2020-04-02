@@ -185,17 +185,17 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
-  customTypeName: {
+  otherTypeName: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.customTypeNameFieldLabel', {
-        defaultMessage: 'Custom Type Name',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.otherTypeNameFieldLabel', {
+        defaultMessage: 'Type Name',
       }),
       defaultValue: '',
       validations: [
         {
           validator: emptyField(
             i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.customTypeNameIsRequiredErrorMessage',
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeNameIsRequiredErrorMessage',
               {
                 defaultMessage: 'Give a name for the custom type.',
               }
@@ -206,19 +206,19 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
-  customTypeJson: {
+  otherTypeJson: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.customTypeJsonFieldLabel', {
-        defaultMessage: 'Custom Type JSON',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.otherTypeJsonFieldLabel', {
+        defaultMessage: 'Type Fields',
       }),
       defaultValue: {},
       validations: [
         {
           validator: isJsonField(
             i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.customTypeJsonInvalidJSONErrorMessage',
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeJsonInvalidJSONErrorMessage',
               {
-                defaultMessage: 'Please provide valid JSON',
+                defaultMessage: 'Invalid JSON.',
               }
             )
           ),
@@ -231,9 +231,9 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
                 return {
                   code: 'ERR_CUSTOM_TYPE_OVERRIDDEN',
                   message: i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.parameters.validations.customTypeJsonTypeFieldOverride',
+                    'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeJsonTypeFieldErrorMessage',
                     {
-                      defaultMessage: 'Custom JSON cannot override the "type" field.',
+                      defaultMessage: 'Cannot override the "type" field.',
                     }
                   ),
                 };

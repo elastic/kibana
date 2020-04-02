@@ -39,7 +39,7 @@ import {
   ComboBoxOption,
   DataType,
 } from '../../../../types';
-import { NameParameter, TypeParameter, CustomTypeParameter } from '../../field_parameters';
+import { NameParameter, TypeParameter, OtherTypeNameParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -95,16 +95,16 @@ export const CreateField = React.memo(function CreateFieldComponent({
       // type here.
       const shouldConvertToKnownType = Boolean(
         data.type === 'other' &&
-          data.customTypeName &&
-          TYPE_DEFINITION[data.customTypeName as DataType]
+          data.otherTypeName &&
+          TYPE_DEFINITION[data.otherTypeName as DataType]
       );
 
       dispatch({
         type: 'field.add',
         value: shouldConvertToKnownType
           ? {
-              ..._.omit(data, 'customTypeJson'),
-              type: data.customTypeName as DataType,
+              ..._.omit(data, 'otherTypeJson'),
+              type: data.otherTypeName as DataType,
             }
           : data,
       });
@@ -207,7 +207,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
             {/* Custom type */}
             {type === 'other' && (
               <EuiFlexItem>
-                <CustomTypeParameter />
+                <OtherTypeNameParameter />
               </EuiFlexItem>
             )}
             {/* Field sub type (if any) */}
