@@ -114,6 +114,9 @@ export class EndpointDocGenerator {
     this.commonInfo = this.createHostData();
   }
 
+  /**
+   * Creates new random IP addresses for the host to simulate new DHCP assignment
+   */
   public updateHostData() {
     this.commonInfo.host.ip = this.randomArray(3, () => this.randomIP());
   }
@@ -137,6 +140,10 @@ export class EndpointDocGenerator {
     };
   }
 
+  /**
+   * Creates a host metadata document
+   * @param ts - Timestamp to put in the event
+   */
   public generateHostMetadata(ts = new Date().getTime()): HostMetadata {
     return {
       '@timestamp': ts,
@@ -147,6 +154,12 @@ export class EndpointDocGenerator {
     };
   }
 
+  /**
+   * Creates an alert from the simulated host represented by this EndpointDocGenerator
+   * @param ts - Timestamp to put in the event
+   * @param entityID - entityID of the originating process
+   * @param parentEntityID - optional entityID of the parent process, if it exists
+   */
   public generateAlert(
     ts = new Date().getTime(),
     entityID = this.randomString(10),
@@ -253,6 +266,10 @@ export class EndpointDocGenerator {
     };
   }
 
+  /**
+   * Creates an event, customized by the options parameter
+   * @param options - Allows event field values to be specified
+   */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
@@ -275,6 +292,17 @@ export class EndpointDocGenerator {
     };
   }
 
+  /**
+   * Generator function that creates the full set of events needed to render resolver.
+   * The number of nodes grows exponentially with the number of generations and children per node.
+   * Each node is logically a process, and will have 1 or more process events associated with it.
+   * @param alertAncestors - number of ancestor generations to create relative to the alert
+   * @param childGenerations - number of child generations to create relative to the alert
+   * @param maxChildrenPerNode - maximum number of children for any given node in the tree
+   * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
+   * @param percentNodesWithRelated - percent of nodes which should have related events
+   * @param percentChildrenTerminated - percent of nodes which will have process termination events
+   */
   public *fullResolverTreeGenerator(
     alertAncestors?: number,
     childGenerations?: number,
@@ -298,6 +326,10 @@ export class EndpointDocGenerator {
     );
   }
 
+  /**
+   * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
+   * @param alertAncestors - number of ancestor generations to create
+   */
   public createAlertEventAncestry(alertAncestors = 3): Event[] {
     const events = [];
     const startDate = new Date().getTime();
@@ -321,6 +353,15 @@ export class EndpointDocGenerator {
     return events;
   }
 
+  /**
+   * Creates the child generations of a process.  The number of returned events grows exponentially with generations and maxChildrenPerNode.
+   * @param root - The process event to use as the root node of the tree
+   * @param generations - number of child generations to create. The root node is not counted as a generation.
+   * @param maxChildrenPerNode - maximum number of children for any given node in the tree
+   * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
+   * @param percentNodesWithRelated - percent of nodes which should have related events
+   * @param percentChildrenTerminated - percent of nodes which will have process termination events
+   */
   public *descendantsTreeGenerator(
     root: Event,
     generations = 2,
@@ -375,7 +416,13 @@ export class EndpointDocGenerator {
       }
     }
   }
-  // Related events have timestamps within 6 hours of the spawning event by default
+
+  /**
+   * Creates related events for a process event
+   * @param node - process event to relate events to by entityID
+   * @param numRelatedEvents - number of related events to generate
+   * @param processDuration - maximum number of seconds after process event that related event timestamp can be
+   */
   public *relatedEventsGenerator(
     node: Event,
     numRelatedEvents = 10,
