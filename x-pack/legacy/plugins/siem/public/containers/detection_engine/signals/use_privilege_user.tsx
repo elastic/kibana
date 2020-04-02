@@ -26,10 +26,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
   const [privilegeUser, setPrivilegeUser] = useState<
     Pick<
       ReturnPrivilegeUser,
-      | 'isAuthenticated'
-      | 'hasEncryptionKey'
-      | 'hasIndexManage'
-      | 'hasIndexWrite'
+      'isAuthenticated' | 'hasEncryptionKey' | 'hasIndexManage' | 'hasIndexWrite'
     >
   >({
     isAuthenticated: null,
