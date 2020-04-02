@@ -502,7 +502,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       }
     ),
     fieldConfig: {
-      defaultValue: '',
+      defaultValue: 1,
       type: FIELD_TYPES.NUMBER,
       deserializer: (value: string | number) => +value,
       formatters: [toInt],
