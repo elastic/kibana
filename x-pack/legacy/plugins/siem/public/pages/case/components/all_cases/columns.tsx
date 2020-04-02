@@ -46,7 +46,9 @@ export const getCasesColumns = (
     render: (theCase: Case) => {
       if (theCase.id != null && theCase.title != null) {
         const caseDetailsLinkComponent = (
-          <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>
+          <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+            {theCase.title}
+          </CaseDetailsLink>
         );
         return theCase.status === 'open' ? (
           caseDetailsLinkComponent
@@ -75,7 +77,7 @@ export const getCasesColumns = (
               size="s"
             />
             <Spacer data-test-subj="case-table-column-createdBy">
-              {createdBy.fullName ?? createdBy.username ?? ''}
+              {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
             </Spacer>
           </>
         );
@@ -184,6 +186,7 @@ const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
           data-test-subj={`case-table-column-external`}
           href={theCase.externalService?.externalUrl}
           target="_blank"
+          aria-label={i18n.SERVICENOW_LINK_ARIA}
         >
           {theCase.externalService?.externalTitle}
         </EuiLink>

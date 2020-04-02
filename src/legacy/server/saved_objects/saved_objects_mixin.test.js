@@ -118,11 +118,6 @@ describe('Saved Objects Mixin', () => {
           get: stubConfig,
         };
       },
-      indexPatternsServiceFactory: () => {
-        return {
-          getFieldsForWildcard: jest.fn(),
-        };
-      },
       plugins: {
         elasticsearch: {
           getCluster: () => {
