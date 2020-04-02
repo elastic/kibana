@@ -490,6 +490,7 @@ export const buildPipeline = async (
   params: {
     timefilter: TimefilterContract;
     timeRange?: any;
+    abortSignal?: AbortSignal;
   }
 ) => {
   const { indexPattern, searchSource } = vis.data;

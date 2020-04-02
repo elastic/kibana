@@ -68,13 +68,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = setInfluencerFilterSettings(state, payload);
       break;
 
-    case EXPLORER_ACTION.SET_SEARCH_INPUT:
-      nextState = {
-        ...state,
-        searchInput: payload,
-      };
-      break;
-
     case EXPLORER_ACTION.SET_SELECTED_CELLS:
       const selectedCells = payload;
       nextState = {

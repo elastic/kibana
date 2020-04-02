@@ -36,6 +36,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     const { start, end, environment } = urlParams;
     if (start && end) {
       return callApmApi({
+        isCachable: false,
         pathname: '/api/apm/service-map',
         params: {
           query: {

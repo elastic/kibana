@@ -29,6 +29,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/pki_api_integration/config'),
   require.resolve('../test/login_selector_api_integration/config'),
   require.resolve('../test/spaces_api_integration/spaces_only/config'),
+  require.resolve('../test/spaces_api_integration/spaces_only/config'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_trial'),
   require.resolve('../test/spaces_api_integration/security_and_spaces/config_basic'),
   require.resolve('../test/saved_object_api_integration/security_and_spaces/config_trial'),

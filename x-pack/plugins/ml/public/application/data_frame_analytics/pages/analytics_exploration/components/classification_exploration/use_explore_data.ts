@@ -51,6 +51,7 @@ export interface UseExploreDataReturnType {
 
 export const useExploreData = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
+  needsDestIndexFields: boolean,
   selectedFields: Field[],
   setSelectedFields: React.Dispatch<React.SetStateAction<Field[]>>,
   setDocFields: React.Dispatch<React.SetStateAction<Field[]>>,
@@ -70,7 +71,7 @@ export const useExploreData = (
         selectedFields: defaultSelected,
         docFields,
         depVarType,
-      } = getDefaultFieldsFromJobCaps(fields, jobConfig);
+      } = getDefaultFieldsFromJobCaps(fields, jobConfig, needsDestIndexFields);
 
       setDepVarType(depVarType);
       setSelectedFields(defaultSelected);
