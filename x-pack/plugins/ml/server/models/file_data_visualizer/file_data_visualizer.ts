@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { APICaller } from 'kibana/server';
 import { FindFileStructureResponse } from '../../../common/types/file_datavisualizer';
 
@@ -27,17 +26,10 @@ export interface AnalysisResult {
 
 export function fileDataVisualizerProvider(callAsCurrentUser: APICaller) {
   async function analyzeFile(data: any, overrides: any): Promise<AnalysisResult> {
-    let results = [];
-
-    try {
-      results = await callAsCurrentUser('ml.fileStructure', {
-        body: data,
-        ...overrides,
-      });
-    } catch (error) {
-      const err = error.message !== undefined ? error.message : error;
-      throw Boom.badRequest(err);
-    }
+    const results = await callAsCurrentUser('ml.fileStructure', {
+      body: data,
+      ...overrides,
+    });
 
     const { hasOverrides, reducedOverrides } = formatOverrides(overrides);
 

@@ -7,10 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import React from 'react';
-
+import React, { FC } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiPage,
   EuiPageBody,
   EuiPageContentHeader,
@@ -18,13 +18,33 @@ import {
   EuiTabbedContent,
   EuiSpacer,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 
 import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
+// @ts-ignore
 import { FieldsStats } from '../fields_stats';
 
-export const ResultsView = ({ data, fileName, results, showEditFlyout }) => {
+interface Props {
+  data: string;
+  fileName: string;
+  results: FindFileStructureResponse;
+  showEditFlyout(): void;
+  showExplanationFlyout(): void;
+  disableButtons: boolean;
+}
+
+export const ResultsView: FC<Props> = ({
+  data,
+  fileName,
+  results,
+  showEditFlyout,
+  showExplanationFlyout,
+  disableButtons,
+}) => {
   const tabs = [
     {
       id: 'file-stats',
@@ -60,12 +80,24 @@ export const ResultsView = ({ data, fileName, results, showEditFlyout }) => {
 
             <EuiSpacer size="m" />
 
-            <EuiButton onClick={() => showEditFlyout()}>
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsView.overrideSettingsButtonLabel"
-                defaultMessage="Override settings"
-              />
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={() => showEditFlyout()} disabled={disableButtons}>
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.resultsView.overrideSettingsButtonLabel"
+                    defaultMessage="Override settings"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => showExplanationFlyout()} disabled={disableButtons}>
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.resultsView.overrideSettingsButtonLabel"
+                    defaultMessage="Analysis explanation"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
 
           <EuiSpacer size="m" />
