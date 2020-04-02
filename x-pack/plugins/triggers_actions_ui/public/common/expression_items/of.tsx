@@ -18,6 +18,7 @@ import {
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 import { ClosablePopoverTitle } from './components';
+import './of.scss';
 
 interface OfExpressionProps {
   aggType: string;
@@ -108,7 +109,7 @@ export const OfExpression = ({
           />
         </ClosablePopoverTitle>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
+          <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
             <EuiFormRow
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
