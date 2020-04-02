@@ -6,6 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
+import { CaptureConfig } from '../../../../server/types';
 import { HeadlessChromiumDriverFactory } from '../../../../types';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -13,12 +14,7 @@ import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
-import {
-  CaptureConfig,
-  ScreenSetupData,
-  ScreenshotObservableOpts,
-  ScreenshotResults,
-} from './types';
+import { ScreenSetupData, ScreenshotObservableOpts, ScreenshotResults } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 

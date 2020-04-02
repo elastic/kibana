@@ -8,7 +8,7 @@ import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
-import { ReportingConfigType } from '../../../../server/core';
+import { CaptureConfig } from '../../../../server/types';
 import { ConditionalHeaders, HeadlessChromiumDriverFactory } from '../../../../types';
 import { createLayout } from '../../../common/layouts';
 import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
@@ -28,7 +28,7 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
 };
 
 export function generatePdfObservableFactory(
-  captureConfig: ReportingConfigType['capture'],
+  captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
   const screenshotsObservable = screenshotsObservableFactory(captureConfig, browserDriverFactory);

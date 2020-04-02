@@ -8,11 +8,9 @@ import path from 'path';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { HeadlessChromiumDriver } from '../../../server/browsers';
 import { LevelLogger } from '../../../server/lib';
-import { ReportingConfigType } from '../../../server/core';
+import { CaptureConfig } from '../../../server/types';
 import { LayoutTypes } from '../constants';
 import { getDefaultLayoutSelectors, Layout, LayoutSelectorDictionary, Size } from './layout';
-
-type CaptureConfig = ReportingConfigType['capture'];
 
 export class PrintLayout extends Layout {
   public readonly selectors: LayoutSelectorDictionary = {
@@ -22,7 +20,7 @@ export class PrintLayout extends Layout {
   public readonly groupCount = 2;
   private captureConfig: CaptureConfig;
 
-  constructor(captureConfig: ReportingConfigType['capture']) {
+  constructor(captureConfig: CaptureConfig) {
     super(LayoutTypes.PRINT);
     this.captureConfig = captureConfig;
   }
