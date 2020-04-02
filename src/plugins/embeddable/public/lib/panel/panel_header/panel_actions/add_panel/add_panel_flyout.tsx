@@ -29,7 +29,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';

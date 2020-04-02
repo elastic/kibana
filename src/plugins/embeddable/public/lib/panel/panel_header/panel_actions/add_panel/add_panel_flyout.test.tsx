@@ -31,7 +31,6 @@ import { ReactWrapper } from 'enzyme';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 
 function DummySavedObjectFinder(props: { children: React.ReactNode }) {

@@ -31,7 +31,6 @@ import { FilterableContainer } from '../../../../test_samples/embeddables/filter
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
 import { esFilters, Filter } from '../../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();

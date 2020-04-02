@@ -19,7 +19,6 @@
 import { i18n } from '@kbn/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 import { ViewMode } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';

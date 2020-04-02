@@ -36,7 +36,6 @@ import {
 } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
 import { esFilters } from '../../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 
 const setup = async () => {
