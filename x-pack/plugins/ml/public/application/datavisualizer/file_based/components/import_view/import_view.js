@@ -610,6 +610,8 @@ async function createKibanaIndexPattern(
 
     const id = await emptyPattern.create();
 
+    await indexPatterns.clearCache();
+
     // check if there's a default index pattern, if not,
     // set the newly created one as the default index pattern.
     if (!kibanaConfig.get('defaultIndex')) {
