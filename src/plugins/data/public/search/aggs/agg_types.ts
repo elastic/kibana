@@ -20,7 +20,7 @@
 import { IUiSettingsClient, NotificationsSetup } from 'src/core/public';
 import { QuerySetup } from '../../query/query_service';
 
-import { countMetricAgg } from './metrics/count';
+import { getCountMetricAgg } from './metrics/count';
 import { avgMetricAgg } from './metrics/avg';
 import { sumMetricAgg } from './metrics/sum';
 import { medianMetricAgg } from './metrics/median';
@@ -28,7 +28,7 @@ import { minMetricAgg } from './metrics/min';
 import { maxMetricAgg } from './metrics/max';
 import { topHitMetricAgg } from './metrics/top_hit';
 import { stdDeviationMetricAgg } from './metrics/std_deviation';
-import { cardinalityMetricAgg } from './metrics/cardinality';
+import { getCardinalityMetricAgg } from './metrics/cardinality';
 import { percentilesMetricAgg } from './metrics/percentiles';
 import { geoBoundsMetricAgg } from './metrics/geo_bounds';
 import { geoCentroidMetricAgg } from './metrics/geo_centroid';
@@ -41,7 +41,7 @@ import { getDateHistogramBucketAgg } from './buckets/date_histogram';
 import { getHistogramBucketAgg } from './buckets/histogram';
 import { rangeBucketAgg } from './buckets/range';
 import { getDateRangeBucketAgg } from './buckets/date_range';
-import { ipRangeBucketAgg } from './buckets/ip_range';
+import { getIpRangeBucketAgg } from './buckets/ip_range';
 import { termsBucketAgg } from './buckets/terms';
 import { filterBucketAgg } from './buckets/filter';
 import { getFiltersBucketAgg } from './buckets/filters';
@@ -53,13 +53,13 @@ import { bucketAvgMetricAgg } from './metrics/bucket_avg';
 import { bucketMinMetricAgg } from './metrics/bucket_min';
 import { bucketMaxMetricAgg } from './metrics/bucket_max';
 
-import { getInternalStartServicesFn } from '../../types';
+import { GetInternalStartServicesFn } from '../../types';
 
 export interface AggTypesDependencies {
   notifications: NotificationsSetup;
   uiSettings: IUiSettingsClient;
   query: QuerySetup;
-  getInternalStartServices: getInternalStartServicesFn;
+  getInternalStartServices: GetInternalStartServicesFn;
 }
 
 export const getAggTypes = ({
@@ -69,14 +69,14 @@ export const getAggTypes = ({
   getInternalStartServices,
 }: AggTypesDependencies) => ({
   metrics: [
-    countMetricAgg,
+    getCountMetricAgg({ getInternalStartServices }),
     avgMetricAgg,
     sumMetricAgg,
     medianMetricAgg,
     minMetricAgg,
     maxMetricAgg,
     stdDeviationMetricAgg,
-    cardinalityMetricAgg,
+    getCardinalityMetricAgg({ getInternalStartServices }),
     percentilesMetricAgg,
     percentileRanksMetricAgg,
     topHitMetricAgg,
@@ -92,11 +92,11 @@ export const getAggTypes = ({
     geoCentroidMetricAgg,
   ],
   buckets: [
-    getDateHistogramBucketAgg({ uiSettings, query }),
+    getDateHistogramBucketAgg({ uiSettings, query, getInternalStartServices }),
     getHistogramBucketAgg({ uiSettings, notifications }),
     rangeBucketAgg,
     getDateRangeBucketAgg({ uiSettings, getInternalStartServices }),
-    ipRangeBucketAgg,
+    getIpRangeBucketAgg({ getInternalStartServices }),
     termsBucketAgg,
     filterBucketAgg,
     getFiltersBucketAgg({ uiSettings }),

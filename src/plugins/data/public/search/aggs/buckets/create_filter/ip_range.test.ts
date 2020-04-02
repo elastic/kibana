@@ -17,17 +17,24 @@
  * under the License.
  */
 
-import { ipRangeBucketAgg } from '../ip_range';
+import { getIpRangeBucketAgg } from '../ip_range';
 import { createFilterIpRange } from './ip_range';
 import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { IpFormat } from '../../../../../common';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
   describe('IP range', () => {
-    const typesRegistry = mockAggTypesRegistry([ipRangeBucketAgg]);
+    const typesRegistry = mockAggTypesRegistry([
+      getIpRangeBucketAgg({
+        getInternalStartServices: () => ({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        }),
+      }),
+    ]);
     const getAggConfigs = (aggs: CreateAggConfigParams[]) => {
       const field = {
         name: 'ip',

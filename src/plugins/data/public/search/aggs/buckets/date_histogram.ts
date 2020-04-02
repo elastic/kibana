@@ -33,8 +33,8 @@ import { isMetricAggType } from '../metrics/metric_agg_type';
 
 import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
 import { TimefilterContract } from '../../../query';
-import { getFieldFormats } from '../../../../public/services';
 import { QuerySetup } from '../../../query/query_service';
+import { GetInternalStartServicesFn } from '../../../types';
 
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
@@ -61,6 +61,7 @@ interface ITimeBuckets {
 export interface DateHistogramBucketAggDependencies {
   uiSettings: IUiSettingsClient;
   query: QuerySetup;
+  getInternalStartServices: GetInternalStartServicesFn;
 }
 
 export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
@@ -74,6 +75,7 @@ export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHist
 export const getDateHistogramBucketAgg = ({
   uiSettings,
   query,
+  getInternalStartServices,
 }: DateHistogramBucketAggDependencies) =>
   new BucketAggType<IBucketDateHistogramAggConfig>({
     name: BUCKET_TYPES.DATE_HISTOGRAM,
@@ -119,7 +121,8 @@ export const getDateHistogramBucketAgg = ({
       };
     },
     getFormat(agg) {
-      const DateFieldFormat = getFieldFormats().getType(FIELD_FORMAT_IDS.DATE);
+      const { fieldFormats } = getInternalStartServices();
+      const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
 
       if (!DateFieldFormat) {
         throw new Error('Unable to retrieve Date Field Format');

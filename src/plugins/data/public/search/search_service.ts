@@ -26,7 +26,7 @@ import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
 import { QuerySetup } from '../query/query_service';
-import { getInternalStartServicesFn } from '../types';
+import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
@@ -45,7 +45,7 @@ import {
 interface SearchServiceSetupDependencies {
   packageInfo: PackageInfo;
   query: QuerySetup;
-  getInternalStartServices: getInternalStartServicesFn;
+  getInternalStartServices: GetInternalStartServicesFn;
 }
 
 /**

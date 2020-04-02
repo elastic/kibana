@@ -31,6 +31,7 @@ import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { queryServiceMock } from '../../../../query/mocks';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
@@ -46,6 +47,9 @@ describe('AggConfig Filters', () => {
       aggTypesDependencies = {
         uiSettings,
         query: queryServiceMock.createSetupContract(),
+        getInternalStartServices: () => ({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        }),
       };
 
       mockDataServices();

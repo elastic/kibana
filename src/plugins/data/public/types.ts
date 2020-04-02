@@ -78,4 +78,4 @@ export interface InternalStartServices {
 }
 
 /** @internal **/
-export type getInternalStartServicesFn = () => InternalStartServices;
+export type GetInternalStartServicesFn = () => InternalStartServices;

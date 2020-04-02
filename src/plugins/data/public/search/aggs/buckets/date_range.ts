@@ -28,7 +28,7 @@ import { createFilterDateRange } from './create_filter/date_range';
 import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
 
 import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
-import { getInternalStartServicesFn } from '../../../types';
+import { GetInternalStartServicesFn } from '../../../types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
@@ -36,7 +36,7 @@ const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle',
 
 export interface DateRangeBucketAggDependencies {
   uiSettings: IUiSettingsClient;
-  getInternalStartServices: getInternalStartServicesFn;
+  getInternalStartServices: GetInternalStartServicesFn;
 }
 
 export const getDateRangeBucketAgg = ({

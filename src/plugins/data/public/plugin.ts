@@ -30,7 +30,7 @@ import {
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  getInternalStartServicesFn,
+  GetInternalStartServicesFn,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -102,7 +102,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     expressions.registerFunction(esaggs);
 
-    const getInternalStartServices: getInternalStartServicesFn = () => ({
+    const getInternalStartServices: GetInternalStartServicesFn = () => ({
       fieldFormats: getFieldFormats(),
     });
 
