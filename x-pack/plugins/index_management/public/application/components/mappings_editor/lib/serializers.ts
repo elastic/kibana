@@ -45,16 +45,19 @@ const runParametersDeserializers = (field: Field): Field =>
   );
 
 export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
+  const { otherTypeJson, ...rest } = field;
+  const updatedField: Field = Boolean(otherTypeJson) ? { ...otherTypeJson, ...rest } : { ...rest };
+
   // If a subType is present, use it as type for ES
-  if ({}.hasOwnProperty.call(field, 'subType')) {
-    field.type = field.subType as DataType;
-    delete field.subType;
+  if ({}.hasOwnProperty.call(updatedField, 'subType')) {
+    updatedField.type = updatedField.subType as DataType;
+    delete updatedField.subType;
   }
 
   // Delete temp fields
-  delete (field as any).useSameAnalyzerForSearch;
+  delete (updatedField as any).useSameAnalyzerForSearch;
 
-  return sanitizeField(runParametersSerializers(field));
+  return sanitizeField(runParametersSerializers(updatedField));
 };
 
 export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field => {
