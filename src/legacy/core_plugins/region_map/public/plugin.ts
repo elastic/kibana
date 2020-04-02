@@ -39,6 +39,7 @@ interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSet
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
   serviceSettings: IServiceSettings;
+  notificationService: any;
 }
 
 /** @internal */
@@ -73,6 +74,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
         'regionmapsConfig'
       ) as RegionMapsConfig,
       serviceSettings: mapsLegacy.serviceSettings,
+      notificationService: core.notifications.toasts,
       ...(await __LEGACY.setup()),
     };
 

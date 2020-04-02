@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { getToasts } from '../kibana_services';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
@@ -105,13 +104,12 @@ export const createZoomWarningMsg = (function() {
     'data-test-subj': 'maxZoomWarning',
   };
 
-  const toasts = getToasts();
-  return (getZoomLevel, getMaxZoomLevel) => {
+  return (toastService, getZoomLevel, getMaxZoomLevel) => {
     return () => {
       const zoomLevel = getZoomLevel();
       const maxMapZoom = getMaxZoomLevel();
       if (!disableZoomMsg && zoomLevel === maxMapZoom) {
-        toasts.addDanger(zoomToast);
+        toastService.addDanger(zoomToast);
       }
     };
   };

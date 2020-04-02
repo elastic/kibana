@@ -101,7 +101,7 @@ function makeLegendControl(container, kibanaMap, position) {
  * Serves as simple abstraction for leaflet as well.
  */
 export class KibanaMap extends EventEmitter {
-  constructor(containerNode, options) {
+  constructor(containerNode, options, services) {
     super();
     this._containerNode = containerNode;
     this._leafletBaseLayer = null;
@@ -116,6 +116,7 @@ export class KibanaMap extends EventEmitter {
     this._layers = [];
     this._listeners = [];
     this._showTooltip = false;
+    this.toastService = services.toastService;
 
     const leafletOptions = {
       minZoom: options.minZoom,
@@ -482,15 +483,21 @@ export class KibanaMap extends EventEmitter {
   }
 
   _addMaxZoomMessage = layer => {
-    const zoomWarningMsg = createZoomWarningMsg(this.getZoomLevel, this.getMaxZoomLevel);
+    if (this.toastService) {
+      const zoomWarningMsg = createZoomWarningMsg(
+        this.toastService,
+        this.getZoomLevel,
+        this.getMaxZoomLevel
+      );
 
-    this._leafletMap.on('zoomend', zoomWarningMsg);
-    this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
+      this._leafletMap.on('zoomend', zoomWarningMsg);
+      this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
 
-    layer.on('remove', () => {
-      this._leafletMap.off('zoomend', zoomWarningMsg);
-      this._containerNode.removeAttribute('data-test-subj');
-    });
+      layer.on('remove', () => {
+        this._leafletMap.off('zoomend', zoomWarningMsg);
+        this._containerNode.removeAttribute('data-test-subj');
+      });
+    }
   };
 
   setLegendPosition(position) {

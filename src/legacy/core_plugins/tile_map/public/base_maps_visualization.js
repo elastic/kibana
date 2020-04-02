@@ -28,12 +28,16 @@ import chrome from 'ui/chrome';
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(serviceSettings) {
+export function BaseMapsVisualizationProvider(mapServiceSettings, notificationService) {
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
    * @constructor
    */
+
+  const serviceSettings = mapServiceSettings;
+  const toastService = notificationService;
+
   return class BaseMapsVisualization {
     constructor(element, vis) {
       this.vis = vis;
@@ -93,8 +97,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       const centerFromUIState = uiState.get('mapCenter');
       options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.params.mapZoom;
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
+      const services = { toastService };
 
-      this._kibanaMap = new KibanaMap(this._container, options);
+      this._kibanaMap = new KibanaMap(this._container, options, services);
       this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
       this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 

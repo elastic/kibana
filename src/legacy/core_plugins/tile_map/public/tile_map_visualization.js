@@ -30,8 +30,12 @@ export const createTileMapVisualization = ({
   $injector,
   getZoomPrecision,
   getPrecision,
+  notificationService,
 }) => {
-  const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
+  const BaseMapsVisualization = new BaseMapsVisualizationProvider(
+    serviceSettings,
+    notificationService
+  );
   const tooltipFormatter = new TileMapTooltipFormatterProvider($injector);
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {

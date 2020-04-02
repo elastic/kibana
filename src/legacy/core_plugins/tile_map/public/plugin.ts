@@ -40,6 +40,7 @@ interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup
   uiSettings: IUiSettingsClient;
   getZoomPrecision: any;
   getPrecision: any;
+  notificationService: any;
 }
 
 /** @internal */
@@ -67,6 +68,7 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
       serviceSettings,
       getZoomPrecision,
       getPrecision,
+      notificationService: core.notifications.toasts,
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };

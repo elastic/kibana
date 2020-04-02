@@ -28,8 +28,16 @@ import { truncatedColorMaps } from '../../../../plugins/charts/public';
 // TODO: reference to TILE_MAP plugin should be removed
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 
-export function createRegionMapVisualization({ serviceSettings, $injector, uiSettings }) {
-  const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
+export function createRegionMapVisualization({
+  serviceSettings,
+  $injector,
+  uiSettings,
+  notificationService,
+}) {
+  const BaseMapsVisualization = new BaseMapsVisualizationProvider(
+    serviceSettings,
+    notificationService
+  );
   const tooltipFormatter = new TileMapTooltipFormatter($injector);
 
   return class RegionMapsVisualization extends BaseMapsVisualization {
