@@ -133,7 +133,7 @@ export function IncludeExcludeParamEditor(
         <EuiFlexItem>
           <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
             <FormattedMessage
-              id={`visDefaultEditor.controls.${props.aggParam.name}.addUnitButtonLabel`}
+              id="visDefaultEditor.controls.includeExclude.addUnitButtonLabel"
               defaultMessage="Add value"
             />
           </EuiButtonEmpty>
