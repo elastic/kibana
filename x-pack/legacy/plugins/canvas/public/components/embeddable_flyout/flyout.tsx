@@ -5,13 +5,12 @@
  */
 
 import React from 'react';
-
+import { npStart } from 'ui/new_platform';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import {
   SavedObjectFinderUi,
   SavedObjectMetaData,
 } from '../../../../../../../src/plugins/saved_objects/public/';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { ComponentStrings } from '../../../i18n';
 import { CoreStart } from '../../../../../../../src/core/public';
 
@@ -27,7 +26,7 @@ export interface Props {
 
 export class AddEmbeddableFlyout extends React.Component<Props> {
   onAddPanel = (id: string, savedObjectType: string, name: string) => {
-    const embeddableFactories = start.getEmbeddableFactories();
+    const embeddableFactories = npStart.plugins.embeddable.getEmbeddableFactories();
 
     // Find the embeddable type from the saved object type
     const found = Array.from(embeddableFactories).find(embeddableFactory => {
@@ -43,7 +42,7 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
   };
 
   render() {
-    const embeddableFactories = start.getEmbeddableFactories();
+    const embeddableFactories = npStart.plugins.embeddable.getEmbeddableFactories();
 
     const availableSavedObjects = Array.from(embeddableFactories)
       .filter(factory => {
