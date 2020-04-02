@@ -8,10 +8,12 @@ import { ManagementSetup } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { RegisterManagementAppArgs } from 'src/plugins/management/public';
 import { I18nStart } from 'kibana/public';
+import { CloudSetup } from '../../cloud/public';
 
 export interface Dependencies {
   management: ManagementSetup;
   usageCollection: UsageCollectionSetup;
+  cloud: CloudSetup;
 }
 
 export interface ClientConfigType {

@@ -68,20 +68,20 @@ export const getStringArray = (field: string, data: unknown, localConsole = cons
 };
 
 export const findValueToChangeInQuery = (
-  keuryNode: KueryNode,
+  kueryNode: KueryNode,
   valueToChange: FindValueToChangeInQuery[] = []
 ): FindValueToChangeInQuery[] => {
   let localValueToChange = valueToChange;
-  if (keuryNode.function === 'is' && templateFields.includes(keuryNode.arguments[0].value)) {
+  if (kueryNode.function === 'is' && templateFields.includes(kueryNode.arguments[0].value)) {
     localValueToChange = [
       ...localValueToChange,
       {
-        field: keuryNode.arguments[0].value,
-        valueToChange: keuryNode.arguments[1].value,
+        field: kueryNode.arguments[0].value,
+        valueToChange: kueryNode.arguments[1].value,
       },
     ];
   }
-  return keuryNode.arguments.reduce(
+  return kueryNode.arguments.reduce(
     (addValueToChange: FindValueToChangeInQuery[], ast: KueryNode) => {
       if (ast.function === 'is' && templateFields.includes(ast.arguments[0].value)) {
         return [

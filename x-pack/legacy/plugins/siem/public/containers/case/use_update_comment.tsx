@@ -81,9 +81,16 @@ export const useUpdateComment = (): UseUpdateComment => {
       version,
     }: UpdateComment) => {
       let cancel = false;
+      const abortCtrl = new AbortController();
       try {
         dispatch({ type: 'FETCH_INIT', payload: commentId });
-        const response = await patchComment(caseId, commentId, commentUpdate, version);
+        const response = await patchComment(
+          caseId,
+          commentId,
+          commentUpdate,
+          version,
+          abortCtrl.signal
+        );
         if (!cancel) {
           updateCase(response);
           fetchUserActions();
@@ -101,6 +108,7 @@ export const useUpdateComment = (): UseUpdateComment => {
       }
       return () => {
         cancel = true;
+        abortCtrl.abort();
       };
     },
     []

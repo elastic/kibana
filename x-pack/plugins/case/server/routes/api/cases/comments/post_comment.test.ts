@@ -20,6 +20,10 @@ describe('POST comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
     routeHandler = await createRoute(initPostCommentApi, 'post');
+    const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
+    spyOnDate.mockImplementation(() => ({
+      toISOString: jest.fn().mockReturnValue('2019-11-25T21:54:48.952Z'),
+    }));
   });
   it(`Posts a new comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
@@ -92,7 +96,7 @@ describe('POST comment', () => {
     expect(response.status).toEqual(400);
     expect(response.payload.isBoom).toEqual(true);
   });
-  it(`Returns an error if user authentication throws`, async () => {
+  it(`Allow user to create comments without authentications`, async () => {
     routeHandler = await createRoute(initPostCommentApi, 'post', true);
 
     const request = httpServerMock.createKibanaRequest({
@@ -114,7 +118,21 @@ describe('POST comment', () => {
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(response.status).toEqual(500);
-    expect(response.payload.isBoom).toEqual(true);
+    expect(response.status).toEqual(200);
+    expect(response.payload.comments[response.payload.comments.length - 1]).toEqual({
+      comment: 'Wow, good luck catching that bad meanie!',
+      created_at: '2019-11-25T21:54:48.952Z',
+      created_by: {
+        email: null,
+        full_name: null,
+        username: null,
+      },
+      id: 'mock-comment',
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzksMV0=',
+    });
   });
 });

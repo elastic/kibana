@@ -27,7 +27,6 @@ import {
 
 import { sortColumns, INDEX_STATUS, defaultSearchQuery } from '../../../../common';
 
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 
 import { useExploreData, TableItem } from '../../hooks/use_explore_data';
@@ -50,7 +49,6 @@ const ExplorationTitle: FC<{ jobId: string }> = ({ jobId }) => (
 
 interface ExplorationProps {
   jobId: string;
-  jobStatus: DATA_FRAME_TASK_STATE;
 }
 
 const getFeatureCount = (resultsField: string, tableItems: TableItem[] = []) => {
@@ -63,11 +61,12 @@ const getFeatureCount = (resultsField: string, tableItems: TableItem[] = []) => 
   ).length;
 };
 
-export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId, jobStatus }) => {
+export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
   const {
     errorMessage,
     indexPattern,
     jobConfig,
+    jobStatus,
     pagination,
     searchQuery,
     selectedFields,
@@ -173,9 +172,11 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId, job
         <EuiFlexItem grow={false}>
           <ExplorationTitle jobId={jobConfig.id} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <span>{getTaskStateBadge(jobStatus)}</span>
-        </EuiFlexItem>
+        {jobStatus !== undefined && (
+          <EuiFlexItem grow={false}>
+            <span>{getTaskStateBadge(jobStatus)}</span>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
       {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
@@ -202,6 +203,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId, job
             <ExplorationDataGrid
               colorRange={colorRange}
               columns={columns}
+              indexPattern={indexPattern}
               pagination={pagination}
               resultsField={jobConfig.dest.results_field}
               rowCount={rowCount}
