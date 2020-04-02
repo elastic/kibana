@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ getService }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('telemetry collectors', () => {
