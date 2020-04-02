@@ -40,9 +40,8 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     savedVisualizations,
     data: { query },
     toastNotifications,
-    uiSettings,
     visualizations,
-    core: { docLinks, savedObjects },
+    core: { docLinks, savedObjects, uiSettings },
   } = getServices();
 
   // syncs `_g` portion of url with query services

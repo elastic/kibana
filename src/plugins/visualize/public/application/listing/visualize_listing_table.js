@@ -33,7 +33,7 @@ class VisualizeListingTable extends Component {
   }
 
   render() {
-    const { visualizeCapabilities, uiSettings, toastNotifications } = getServices();
+    const { visualizeCapabilities, core, toastNotifications } = getServices();
     return (
       <TableListView
         headingId="visualizeListingHeading"
@@ -58,7 +58,7 @@ class VisualizeListingTable extends Component {
           defaultMessage: 'Visualizations',
         })}
         toastNotifications={toastNotifications}
-        uiSettings={uiSettings}
+        uiSettings={core.uiSettings}
       />
     );
   }

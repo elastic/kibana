@@ -27,7 +27,6 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  SavedObjectsClientContract,
 } from 'kibana/public';
 
 import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
@@ -40,7 +39,6 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
 // the vis_default_editor is about to be moved to NP, this import will be adjusted
 import { DefaultEditorController } from '../../../legacy/core_plugins/vis_default_editor/public';
 
@@ -55,27 +53,20 @@ export interface VisualizePluginStartDependencies {
 export interface VisualizePluginSetupDependencies {
   home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
-  usageCollection?: UsageCollectionSetup;
   data: DataPublicPluginSetup;
 }
 
-export class VisualizePlugin implements Plugin {
-  private startDependencies: {
-    data: DataPublicPluginStart;
-    embeddable: EmbeddableStart;
-    navigation: NavigationStart;
-    savedObjectsClient: SavedObjectsClientContract;
-    share?: SharePluginStart;
-    visualizations: VisualizationsStart;
-  } | null = null;
+export class VisualizePlugin
+  implements
+    Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public async setup(
-    core: CoreSetup,
-    { home, kibanaLegacy, usageCollection, data }: VisualizePluginSetupDependencies
+    core: CoreSetup<VisualizePluginStartDependencies>,
+    { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
   ) {
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
@@ -108,43 +99,25 @@ export class VisualizePlugin implements Plugin {
       updater$: this.appStateUpdater.asObservable(),
       navLinkId: 'kibana:visualize',
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-
-        if (this.startDependencies === null) {
-          throw new Error('not started yet');
-        }
+        const [coreStart, pluginsStart] = await core.getStartServices();
 
         appMounted();
-        const {
-          savedObjectsClient,
-          embeddable,
-          navigation,
-          visualizations,
-          data: dataStart,
-          share,
-        } = this.startDependencies;
 
         const deps: VisualizeKibanaServices = {
           pluginInitializerContext: this.initializerContext,
           addBasePath: coreStart.http.basePath.prepend,
           core: coreStart,
           chrome: coreStart.chrome,
-          data: dataStart,
-          embeddable,
-          indexPatterns: dataStart.indexPatterns,
+          data: pluginsStart.data,
+          embeddable: pluginsStart.embeddable,
           localStorage: new Storage(localStorage),
-          navigation,
-          savedObjectsClient,
-          savedVisualizations: visualizations.savedVisualizationsLoader,
-          savedQueryService: dataStart.query.savedQueries,
-          share,
+          navigation: pluginsStart.navigation,
+          savedObjectsClient: coreStart.savedObjects.client,
+          savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
+          share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
-          uiSettings: coreStart.uiSettings,
-          config: kibanaLegacy.config,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
-          visualizations,
-          usageCollection,
-          I18nContext: coreStart.i18n.Context,
+          visualizations: pluginsStart.visualizations,
           setActiveUrl,
           DefaultVisualizationEditor: DefaultEditorController,
         };
@@ -175,19 +148,7 @@ export class VisualizePlugin implements Plugin {
     }
   }
 
-  public start(
-    core: CoreStart,
-    { embeddable, navigation, data, share, visualizations }: VisualizePluginStartDependencies
-  ) {
-    this.startDependencies = {
-      data,
-      embeddable,
-      navigation,
-      savedObjectsClient: core.savedObjects.client,
-      share,
-      visualizations,
-    };
-  }
+  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {}
 
   stop() {
     if (this.stopUrlTracking) {

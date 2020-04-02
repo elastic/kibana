@@ -92,7 +92,7 @@ export function initVisualizeApp(app, deps) {
   app.factory('kbnUrlStateStorage', history =>
     createKbnUrlStateStorage({
       history,
-      useHash: deps.uiSettings.get('state:storeInSessionStorage'),
+      useHash: deps.core.uiSettings.get('state:storeInSessionStorage'),
     })
   );
 

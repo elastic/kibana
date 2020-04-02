@@ -62,16 +62,13 @@ export function initEditorDirective(app, deps) {
 
 function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlStateStorage, history) {
   const {
-    indexPatterns,
     localStorage,
     visualizeCapabilities,
     share,
-    data: { query: queryService },
+    data: { query: queryService, indexPatterns },
     toastNotifications,
     chrome,
-    core: { docLinks, fatalErrors },
-    savedQueryService,
-    uiSettings,
+    core: { docLinks, fatalErrors, uiSettings },
     I18nContext,
     setActiveUrl,
     visualizations,
@@ -369,7 +366,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       return;
     }
 
-    savedQueryService.getSavedQuery(savedQueryId).then(savedQuery => {
+    queryService.savedQueries.getSavedQuery(savedQueryId).then(savedQuery => {
       $scope.$evalAsync(() => {
         $scope.updateSavedQuery(savedQuery);
       });

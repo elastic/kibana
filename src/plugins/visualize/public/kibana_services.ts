@@ -22,8 +22,6 @@ import {
   CoreStart,
   SavedObjectsClientContract,
   ToastsStart,
-  IUiSettingsClient,
-  I18nStart,
   PluginInitializerContext,
 } from 'kibana/public';
 
@@ -31,11 +29,9 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../navigation
 import { Storage } from '../../kibana_utils/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { SharePluginStart } from '../../share/public';
-import { DataPublicPluginStart, IndexPatternsContract } from '../../data/public';
+import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { SavedVisualizations } from './application/types';
-import { UsageCollectionSetup } from '../../usage_collection/public';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
 // the vis_default_editor is about to be moved to NP, this import will be adjusted
 import { DefaultEditorController } from '../../../legacy/core_plugins/vis_default_editor/public';
 
@@ -46,20 +42,14 @@ export interface VisualizeKibanaServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  indexPatterns: IndexPatternsContract;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   savedVisualizations: SavedVisualizations;
   share?: SharePluginStart;
-  uiSettings: IUiSettingsClient;
-  config: KibanaLegacyStart['config'];
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
-  usageCollection?: UsageCollectionSetup;
-  I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
   DefaultVisualizationEditor: typeof DefaultEditorController;
 }
