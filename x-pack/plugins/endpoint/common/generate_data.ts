@@ -183,7 +183,7 @@ export class EndpointDocGenerator {
           trusted: false,
           subject_name: 'bad signer',
         },
-        malware_classifier: {
+        malware_classification: {
           identifier: 'endpointpe',
           score: 1,
           threshold: 0.66,
@@ -241,7 +241,7 @@ export class EndpointDocGenerator {
             sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
             sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
           },
-          malware_classifier: {
+          malware_classification: {
             identifier: 'Whitelisted',
             score: 0,
             threshold: 0,
