@@ -145,6 +145,11 @@ describe('Ingesting Coverage to Cluster', () => {
             true
           );
         });
+        it('should have vcs info', () => {
+          const vcs = 'vcs';
+          const portion = mutableBothIndexesChunks.filter(x => x.includes(vcs))[0];
+          expect(portion).to.contain(vcs);
+        });
       });
     });
   });
