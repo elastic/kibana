@@ -21,9 +21,6 @@ export interface InfraServerPluginDeps {
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   metrics: VisTypeTimeseriesSetup;
-  indexPatterns: {
-    indexPatternsServiceFactory: any;
-  };
   features: FeaturesPluginSetup;
   apm: APMPluginContract;
   alerting: AlertingPluginContract;
