@@ -17,8 +17,28 @@
  * under the License.
  */
 
-export * from './builder';
-export * from './types';
-export * from './parse';
-export * from './parse_expression';
-export * from './format';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionFunctionDefinitions,
+} from '../expression_functions';
+
+/**
+ * Example of how an `addFunction` method in the AST builder could
+ * be typed to enforce the correct arguments are provided.
+ */
+export class FakeAstBuilder {
+  createFunction<K extends keyof ExpressionFunctionDefinitions>(
+    name: K,
+    args: ExpressionFunctionDefinitions[K] extends ExpressionFunctionDefinition<
+      infer Name,
+      infer Input,
+      infer Arguments,
+      infer Output,
+      infer Context
+    >
+      ? Arguments
+      : never
+  ) {
+    return;
+  }
+}

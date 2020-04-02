@@ -79,6 +79,7 @@ export {
   ExpressionValueRender,
   ExpressionValueSearchContext,
   ExpressionValueUnboxed,
+  FakeAstBuilder,
   Filter,
   Font,
   FontLabel,

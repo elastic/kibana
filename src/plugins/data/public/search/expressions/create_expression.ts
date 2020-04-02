@@ -17,8 +17,25 @@
  * under the License.
  */
 
-export * from './builder';
-export * from './types';
-export * from './parse';
-export * from './parse_expression';
-export * from './format';
+import { FakeAstBuilder } from '../../../../../plugins/expressions/public';
+
+function createMyAst() {
+  const builder = new FakeAstBuilder();
+
+  builder.createFunction('visualization', {
+    index: 'foo',
+    visConfig: '{}',
+  });
+
+  builder.createFunction('esaggs', {
+    index: 'foo',
+    metricsAtAllLevels: true,
+    partialRows: false,
+    includeFormatHints: false,
+    aggConfigs: '[]',
+  });
+
+  return;
+}
+
+createMyAst();
