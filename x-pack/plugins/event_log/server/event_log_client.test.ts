@@ -102,7 +102,10 @@ describe('EventLogStart', () => {
         esContext.esNames.alias,
         'saved-object-type',
         'saved-object-id',
-        {}
+        {
+          page: 1,
+          per_page: 10,
+        }
       );
     });
   });

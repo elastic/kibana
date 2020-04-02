@@ -37,15 +37,14 @@ export class EventLogClient implements IEventLogClient {
   async findEventsBySavedObject(
     type: string,
     id: string,
-    options: Partial<FindOptionsType> = {}
+    options?: Partial<FindOptionsType>
   ): Promise<IEvent[]> {
-    const { per_page: size, page } = findOptionsSchema.validate(options);
     await this.savedObjectsClient.get(type, id);
     return (await this.esContext.esAdapter.queryEventsBySavedObject(
       this.esContext.esNames.alias,
       type,
       id,
-      { size, from: (page - 1) * size }
+      findOptionsSchema.validate(options ?? {})
     )) as IEvent[];
   }
 }

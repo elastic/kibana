@@ -6,6 +6,7 @@
 
 import { Logger, ClusterClient } from '../../../../../src/core/server';
 import { IEvent } from '../types';
+import { FindOptionsType } from '../event_log_client';
 
 export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
@@ -13,11 +14,6 @@ export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 export interface ConstructorOpts {
   logger: Logger;
   clusterClient: EsClusterClient;
-}
-
-export interface QueryEventsOptions {
-  from: number;
-  size: number;
 }
 
 export class ClusterClientAdapter {
@@ -117,7 +113,7 @@ export class ClusterClientAdapter {
     index: string,
     type: string,
     id: string,
-    options: Partial<QueryEventsOptions> = {}
+    { page, per_page: size }: FindOptionsType
   ): Promise<any[]> {
     try {
       const {
@@ -125,7 +121,8 @@ export class ClusterClientAdapter {
       } = await this.callEs('search', {
         index,
         body: {
-          ...options,
+          size,
+          from: (page - 1) * size,
           query: {
             bool: {
               must: [
