@@ -936,6 +936,48 @@ describe('FeatureRegistry', () => {
     );
   });
 
+  it('allows multiple reserved feature privileges to be registered', () => {
+    const feature: FeatureConfig = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: null,
+      reserved: {
+        description: 'my reserved privileges',
+        privileges: [
+          {
+            id: 'reserved_1',
+            privilege: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+          {
+            id: 'reserved_2',
+            privilege: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+        ],
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+    featureRegistry.register(feature);
+    const result = featureRegistry.getAll();
+    expect(result).toHaveLength(1);
+    expect(result[0].reserved?.privileges).toHaveLength(2);
+  });
+
   it('cannot register feature after getAll has been called', () => {
     const feature1: FeatureConfig = {
       id: 'test-feature',
