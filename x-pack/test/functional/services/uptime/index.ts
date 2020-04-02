@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INDEX_NAMES = {
-  HEARTBEAT: 'heartbeat-8*',
-};
+export { UptimeProvider } from './uptime';
