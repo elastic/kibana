@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './calculated_fields_descriptor_types';
 export * from './data_request_descriptor_types';
 export * from './descriptor_types';
 export * from './map_descriptor';

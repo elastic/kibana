@@ -12,6 +12,7 @@ import { FlyoutFooter } from './flyout_footer';
 import { LayerErrors } from './layer_errors';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
+import { CalculatedFieldsPanel } from './calculated_fields';
 import {
   EuiButtonIcon,
   EuiFlexItem,
@@ -224,6 +225,8 @@ export class LayerPanel extends React.Component {
               {this._renderFilterSection()}
 
               {this._renderJoinSection()}
+
+              <CalculatedFieldsPanel />
 
               <StyleSettings />
             </div>

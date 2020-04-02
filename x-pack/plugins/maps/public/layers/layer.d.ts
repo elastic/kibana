@@ -16,6 +16,7 @@ export interface ILayer {
   getSourceDataRequest(): DataRequest | undefined;
   getSource(): ISource;
   getSourceForEditing(): ISource;
+  supportsCalculatedFields(): boolean;
   syncData(syncContext: SyncContext): Promise<void>;
 }
 
@@ -34,5 +35,6 @@ export class AbstractLayer implements ILayer {
   getSourceDataRequest(): DataRequest | undefined;
   getSource(): ISource;
   getSourceForEditing(): ISource;
+  supportsCalculatedFields(): boolean;
   syncData(syncContext: SyncContext): Promise<void>;
 }

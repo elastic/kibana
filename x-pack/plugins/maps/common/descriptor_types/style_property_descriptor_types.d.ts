@@ -6,13 +6,13 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import {
-  FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
   STYLE_TYPE,
   LAYER_STYLE_TYPE,
 } from '../constants';
+import { SourceField } from './descriptor_types';
 
 // Non-static/dynamic options
 export type SymbolizeAsOptions = {
@@ -36,11 +36,6 @@ export type LabelBorderSizeStylePropertyDescriptor = {
 export type FieldMetaOptions = {
   isEnabled: boolean;
   sigma?: number;
-};
-
-export type StylePropertyField = {
-  name: string;
-  origin: FIELD_ORIGIN;
 };
 
 export type OrdinalColorStop = {
@@ -69,7 +64,7 @@ export type ColorDynamicOptions = {
   customColorPalette?: CategoryColorStop[];
   useCustomColorPalette?: boolean;
 
-  field?: StylePropertyField;
+  field?: SourceField;
   fieldMetaOptions: FieldMetaOptions;
 };
 
@@ -91,7 +86,7 @@ export type IconDynamicOptions = {
   iconPaletteId?: string;
   customIconStops?: IconStop[];
   useCustomIconMap?: boolean;
-  field?: StylePropertyField;
+  field?: SourceField;
   fieldMetaOptions: FieldMetaOptions;
 };
 
@@ -110,7 +105,7 @@ export type IconStylePropertyDescriptor =
     };
 
 export type LabelDynamicOptions = {
-  field?: StylePropertyField; // field containing label value
+  field?: SourceField; // field containing label value
 };
 
 export type LabelStaticOptions = {
@@ -128,7 +123,7 @@ export type LabelStylePropertyDescriptor =
     };
 
 export type OrientationDynamicOptions = {
-  field?: StylePropertyField;
+  field?: SourceField;
   fieldMetaOptions: FieldMetaOptions;
 };
 
@@ -149,7 +144,7 @@ export type OrientationStylePropertyDescriptor =
 export type SizeDynamicOptions = {
   minSize: number;
   maxSize: number;
-  field?: StylePropertyField;
+  field?: SourceField;
   fieldMetaOptions: FieldMetaOptions;
 };
 

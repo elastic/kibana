@@ -608,6 +608,8 @@ export class VectorLayer extends AbstractLayer {
 
     const joinStates = await this._syncJoins(syncContext, style);
     await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+
+    // compute calculated fields
   }
 
   _getSourceFeatureCollection() {
@@ -899,5 +901,9 @@ export class VectorLayer extends AbstractLayer {
     return featureCollection.features.find(feature => {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
+  }
+
+  supportsCalculatedFields() {
+    return true;
   }
 }

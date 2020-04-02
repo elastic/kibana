@@ -85,6 +85,10 @@ export class AbstractLayer {
     return this.getSource().isESSource();
   }
 
+  supportsCalculatedFields() {
+    return false;
+  }
+
   async supportsFitToBounds() {
     return await this.getSource().supportsFitToBounds();
   }

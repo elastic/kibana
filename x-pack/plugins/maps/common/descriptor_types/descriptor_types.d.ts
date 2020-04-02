@@ -5,9 +5,15 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
+import { AGG_TYPE, FIELD_ORIGIN, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
 import { VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
+import { CalculatedFieldDescriptor } from './calculated_field_descriptor_types';
+
+export type SourceProperty = {
+  name: string;
+  origin: FIELD_ORIGIN;
+}
 
 export type AttributionDescriptor = {
   attributionText?: string;
@@ -124,6 +130,7 @@ export type LayerDescriptor = {
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
+  calculatedFields?: CalculatedFieldDescriptor[];
   joins?: JoinDescriptor[];
   style?: VectorStyleDescriptor;
 };
