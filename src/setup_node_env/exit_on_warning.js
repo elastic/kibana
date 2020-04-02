@@ -34,6 +34,12 @@ var IGNORE_WARNINGS = [
   {
     name: 'MaxListenersExceededWarning',
   },
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0066',
+    file: '/node_modules/shot/lib/response.js',
+    line: 22,
+  },
 ];
 
 if (process.noProcessWarnings !== true) {
