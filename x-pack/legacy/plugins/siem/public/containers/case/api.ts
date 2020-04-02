@@ -210,7 +210,7 @@ export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promi
     query: { ids: JSON.stringify(caseIds) },
     signal,
   });
-  return response === 'true' ? true : false;
+  return response;
 };
 
 export const pushCase = async (
