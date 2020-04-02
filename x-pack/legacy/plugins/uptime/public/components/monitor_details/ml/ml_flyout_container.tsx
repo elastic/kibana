@@ -48,13 +48,13 @@ const showMLJobNotification = (
           </MLJobLink>
         </p>
       ),
-      toastLifeTimeMs: 5000,
+      toastLifeTimeMs: 10000,
     });
   } else {
-    notifications.toasts.warning({
+    notifications.toasts.danger({
       title: <p>{labels.JOB_CREATION_FAILED}</p>,
       body: message ?? <p>{labels.JOB_CREATION_FAILED_MESSAGE}</p>,
-      toastLifeTimeMs: 5000,
+      toastLifeTimeMs: 10000,
     });
   }
 };
@@ -108,7 +108,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           basePath,
           { to: dateRangeEnd, from: dateRangeStart },
           false,
-          error?.body?.message
+          error?.message || error?.body?.message
         );
       }
       setIsCreatingJob(false);
