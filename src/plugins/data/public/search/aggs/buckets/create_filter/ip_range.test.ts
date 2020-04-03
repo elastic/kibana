@@ -53,7 +53,7 @@ describe('AggConfig Filters', () => {
       return new AggConfigs(indexPattern, aggs, { typesRegistry });
     };
 
-    it('should return a range filter for ip_range agg', () => {
+    test('should return a range filter for ip_range agg', () => {
       const aggConfigs = getAggConfigs([
         {
           type: BUCKET_TYPES.IP_RANGE,
@@ -82,7 +82,7 @@ describe('AggConfig Filters', () => {
       expect(filter.range.ip).toHaveProperty('lte', '1.1.1.1');
     });
 
-    it('should return a range filter for ip_range agg using a CIDR mask', () => {
+    test('should return a range filter for ip_range agg using a CIDR mask', () => {
       const aggConfigs = getAggConfigs([
         {
           type: BUCKET_TYPES.IP_RANGE,

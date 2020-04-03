@@ -71,7 +71,8 @@ describe('AggConfig Filters', () => {
         { typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]) }
       );
     };
-    it('should return a filters filter', () => {
+
+    test('should return a filters filter', () => {
       const aggConfigs = getAggConfigs();
       const filter = createFilterFilters(aggConfigs.aggs[0] as IBucketAggConfig, 'type:nginx');
 

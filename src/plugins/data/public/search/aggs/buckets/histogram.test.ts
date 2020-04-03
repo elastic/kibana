@@ -91,18 +91,18 @@ describe('Histogram Agg', () => {
       histogramType = getHistogramBucketAgg(aggTypesDependencies);
     });
 
-    it('is ordered', () => {
+    test('is ordered', () => {
       expect(histogramType.ordered).toBeDefined();
     });
 
-    it('is not ordered by date', () => {
+    test('is not ordered by date', () => {
       expect(histogramType.ordered).not.toHaveProperty('date');
     });
   });
 
   describe('params', () => {
     describe('intervalBase', () => {
-      it('should not be written to the DSL', () => {
+      test('should not be written to the DSL', () => {
         const aggConfigs = getAggConfigs({
           intervalBase: 100,
           field: {
@@ -116,7 +116,7 @@ describe('Histogram Agg', () => {
     });
 
     describe('interval', () => {
-      it('accepts a whole number', () => {
+      test('accepts a whole number', () => {
         const params = getParams({
           interval: 100,
         });
@@ -124,7 +124,7 @@ describe('Histogram Agg', () => {
         expect(params).toHaveProperty('interval', 100);
       });
 
-      it('accepts a decimal number', function() {
+      test('accepts a decimal number', () => {
         const params = getParams({
           interval: 0.1,
         });
@@ -132,7 +132,7 @@ describe('Histogram Agg', () => {
         expect(params).toHaveProperty('interval', 0.1);
       });
 
-      it('accepts a decimal number string', function() {
+      test('accepts a decimal number string', () => {
         const params = getParams({
           interval: '0.1',
         });
@@ -140,7 +140,7 @@ describe('Histogram Agg', () => {
         expect(params).toHaveProperty('interval', 0.1);
       });
 
-      it('accepts a whole number string', function() {
+      test('accepts a whole number string', () => {
         const params = getParams({
           interval: '10',
         });
@@ -148,7 +148,7 @@ describe('Histogram Agg', () => {
         expect(params).toHaveProperty('interval', 10);
       });
 
-      it('fails on non-numeric values', function() {
+      test('fails on non-numeric values', () => {
         const params = getParams({
           interval: [],
         });
@@ -185,7 +185,7 @@ describe('Histogram Agg', () => {
           return aggConfig.write(aggConfigs).params;
         };
 
-        it('will respect the histogram:maxBars setting', () => {
+        test('will respect the histogram:maxBars setting', () => {
           const params = getInterval(
             5,
             { interval: 5 },
@@ -198,19 +198,19 @@ describe('Histogram Agg', () => {
           expect(params).toHaveProperty('interval', 2000);
         });
 
-        it('will return specified interval, if bars are below histogram:maxBars config', () => {
+        test('will return specified interval, if bars are below histogram:maxBars config', () => {
           const params = getInterval(100, { interval: 5 });
 
           expect(params).toHaveProperty('interval', 5);
         });
 
-        it('will set to intervalBase if interval is below base', () => {
+        test('will set to intervalBase if interval is below base', () => {
           const params = getInterval(1000, { interval: 3, intervalBase: 8 });
 
           expect(params).toHaveProperty('interval', 8);
         });
 
-        it('will round to nearest intervalBase multiple if interval is above base', () => {
+        test('will round to nearest intervalBase multiple if interval is above base', () => {
           const roundUp = getInterval(1000, { interval: 46, intervalBase: 10 });
           expect(roundUp).toHaveProperty('interval', 50);
 
@@ -218,13 +218,13 @@ describe('Histogram Agg', () => {
           expect(roundDown).toHaveProperty('interval', 40);
         });
 
-        it('will not change interval if it is a multiple of base', () => {
+        test('will not change interval if it is a multiple of base', () => {
           const output = getInterval(1000, { interval: 35, intervalBase: 5 });
 
           expect(output).toHaveProperty('interval', 35);
         });
 
-        it('will round to intervalBase after scaling histogram:maxBars', () => {
+        test('will round to intervalBase after scaling histogram:maxBars', () => {
           const output = getInterval(100, { interval: 5, intervalBase: 6 }, { min: 0, max: 1000 });
 
           // 100 buckets in 0 to 1000 would result in an interval of 10, so we should
@@ -236,7 +236,7 @@ describe('Histogram Agg', () => {
       describe('min_doc_count', () => {
         let output: Record<string, any>;
 
-        it('casts true values to 0', () => {
+        test('casts true values to 0', () => {
           output = getParams({ min_doc_count: true });
           expect(output).toHaveProperty('min_doc_count', 0);
 
@@ -250,7 +250,7 @@ describe('Histogram Agg', () => {
           expect(output).toHaveProperty('min_doc_count', 0);
         });
 
-        it('writes 1 for falsy values', () => {
+        test('writes 1 for falsy values', () => {
           output = getParams({ min_doc_count: '' });
           expect(output).toHaveProperty('min_doc_count', 1);
 
@@ -262,8 +262,8 @@ describe('Histogram Agg', () => {
         });
       });
 
-      describe('extended_bounds', function() {
-        it('does not write when only eb.min is set', function() {
+      describe('extended_bounds', () => {
+        test('does not write when only eb.min is set', () => {
           const output = getParams({
             has_extended_bounds: true,
             extended_bounds: { min: 0 },
@@ -271,7 +271,7 @@ describe('Histogram Agg', () => {
           expect(output).not.toHaveProperty('extended_bounds');
         });
 
-        it('does not write when only eb.max is set', function() {
+        test('does not write when only eb.max is set', () => {
           const output = getParams({
             has_extended_bounds: true,
             extended_bounds: { max: 0 },
@@ -280,7 +280,7 @@ describe('Histogram Agg', () => {
           expect(output).not.toHaveProperty('extended_bounds');
         });
 
-        it('writes when both eb.min and eb.max are set', function() {
+        test('writes when both eb.min and eb.max are set', () => {
           const output = getParams({
             has_extended_bounds: true,
             extended_bounds: { min: 99, max: 100 },
@@ -290,7 +290,7 @@ describe('Histogram Agg', () => {
           expect(output.extended_bounds).toHaveProperty('max', 100);
         });
 
-        it('does not write when nothing is set', function() {
+        test('does not write when nothing is set', () => {
           const output = getParams({
             has_extended_bounds: true,
             extended_bounds: {},
@@ -299,7 +299,7 @@ describe('Histogram Agg', () => {
           expect(output).not.toHaveProperty('extended_bounds');
         });
 
-        it('does not write when has_extended_bounds is false', function() {
+        test('does not write when has_extended_bounds is false', () => {
           const output = getParams({
             has_extended_bounds: false,
             extended_bounds: { min: 99, max: 100 },

@@ -53,8 +53,7 @@ export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfi
 
   constructor(
     config: BucketAggTypeConfig<TBucketAggConfig>,
-    // todo: '?' should be removed when PR will be ready to merge
-    dependencies?: BucketAggTypeDependencies
+    dependencies: BucketAggTypeDependencies
   ) {
     super(config, dependencies);
 

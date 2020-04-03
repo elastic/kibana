@@ -75,7 +75,7 @@ describe('AggConfig Filters', () => {
       );
     };
 
-    it('should return a range filter for date_range agg', () => {
+    test('should return a range filter for date_range agg', () => {
       const aggConfigs = getAggConfigs();
       const from = new Date('1 Feb 2015');
       const to = new Date('7 Feb 2015');

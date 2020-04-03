@@ -65,7 +65,7 @@ describe('AggConfig Filters', () => {
       );
     };
 
-    it('should return an range filter for histogram', () => {
+    test('should return an range filter for histogram', () => {
       const aggConfigs = getAggConfigs();
       const filter = createFilterHistogram(aggConfigs.aggs[0] as IBucketAggConfig, '2048');
 

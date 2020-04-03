@@ -39,15 +39,15 @@ import { movingAvgMetricAgg } from './metrics/moving_avg';
 import { serialDiffMetricAgg } from './metrics/serial_diff';
 import { getDateHistogramBucketAgg } from './buckets/date_histogram';
 import { getHistogramBucketAgg } from './buckets/histogram';
-import { rangeBucketAgg } from './buckets/range';
+import { getRangeBucketAgg } from './buckets/range';
 import { getDateRangeBucketAgg } from './buckets/date_range';
 import { getIpRangeBucketAgg } from './buckets/ip_range';
-import { termsBucketAgg } from './buckets/terms';
-import { filterBucketAgg } from './buckets/filter';
+import { getTermsBucketAgg } from './buckets/terms';
+import { getFilterBucketAgg } from './buckets/filter';
 import { getFiltersBucketAgg } from './buckets/filters';
-import { significantTermsBucketAgg } from './buckets/significant_terms';
-import { geoHashBucketAgg } from './buckets/geo_hash';
-import { geoTileBucketAgg } from './buckets/geo_tile';
+import { getSignificantTermsBucketAgg } from './buckets/significant_terms';
+import { getGeoHashBucketAgg } from './buckets/geo_hash';
+import { getGeoTitleBucketAgg } from './buckets/geo_tile';
 import { bucketSumMetricAgg } from './metrics/bucket_sum';
 import { bucketAvgMetricAgg } from './metrics/bucket_avg';
 import { bucketMinMetricAgg } from './metrics/bucket_min';
@@ -94,14 +94,14 @@ export const getAggTypes = ({
   buckets: [
     getDateHistogramBucketAgg({ uiSettings, query, getInternalStartServices }),
     getHistogramBucketAgg({ uiSettings, notifications, getInternalStartServices }),
-    rangeBucketAgg,
+    getRangeBucketAgg({ getInternalStartServices }),
     getDateRangeBucketAgg({ uiSettings, getInternalStartServices }),
     getIpRangeBucketAgg({ getInternalStartServices }),
-    termsBucketAgg,
-    filterBucketAgg,
+    getTermsBucketAgg({ getInternalStartServices }),
+    getFilterBucketAgg({ getInternalStartServices }),
     getFiltersBucketAgg({ uiSettings, getInternalStartServices }),
-    significantTermsBucketAgg,
-    geoHashBucketAgg,
-    geoTileBucketAgg,
+    getSignificantTermsBucketAgg({ getInternalStartServices }),
+    getGeoHashBucketAgg({ getInternalStartServices }),
+    getGeoTitleBucketAgg({ getInternalStartServices }),
   ],
 });
