@@ -55,7 +55,7 @@ describe('initYAxis', function() {
 
   describe('with multiple y aspects', function() {
     it('sets the yAxisFormatter the the field formats convert fn for the first y aspect', function() {
-      const chart: Chart = _.cloneDeep(baseChart);
+      const chart = _.cloneDeep(baseChart);
       initYAxis(chart);
 
       expect(chart).toHaveProperty('yAxisFormat');

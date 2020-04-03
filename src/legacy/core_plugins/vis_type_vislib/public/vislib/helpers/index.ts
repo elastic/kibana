@@ -18,5 +18,4 @@
  */
 
 export { buildPointSeriesData } from './point_series';
-// @ts-ignore
 export { buildHierarchicalData } from './hierarchical/build_hierarchical_data';

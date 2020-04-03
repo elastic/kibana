@@ -26,10 +26,10 @@ import { Table } from '../../types';
  * they represent.
  *
  * @return {object} - an object with a key for each aspect (see map). The values
- *                    may be undefined, a single aspect, or an array of aspects.
+ *                    may be undefined or an array of aspects.
  */
 export function getAspects(table: Table, dimensions: Dimensions) {
-  const aspects: Aspects = {} as Aspects;
+  const aspects = {} as Aspects;
   (Object.keys(dimensions) as Array<keyof Dimensions>).forEach(name => {
     const dimension = Array.isArray(dimensions[name])
       ? (dimensions[name] as Dimension[])

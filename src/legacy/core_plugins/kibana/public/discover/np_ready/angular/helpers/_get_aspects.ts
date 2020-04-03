@@ -27,7 +27,7 @@ import { Table, Dimensions, Aspects } from './point_series';
  *                    may be undefined or an array of aspects.
  */
 export function getAspects(table: Table, dimensions: Dimensions) {
-  const aspects: Aspects = {} as Aspects;
+  const aspects = {} as Aspects;
   (Object.keys(dimensions) as Array<keyof Dimensions>).forEach(name => {
     const d = dimensions[name];
     const column = table.columns[d.accessor];

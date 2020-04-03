@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getPoint, Point } from './_get_point';
+import { getPoint } from './_get_point';
 import { addToSiri, Serie } from './_add_to_siri';
 import { Chart, Table } from './point_series';
 
@@ -31,7 +31,7 @@ export function getSeries(table: Table, chart: Chart) {
 
   return _(table.rows)
     .transform((series: any, row, rowIndex) => {
-      const point: Point = partGetPoint(row, rowIndex, yAspect);
+      const point = partGetPoint(row, rowIndex, yAspect);
       if (point) {
         const id = `${point.series}-${yAspect.accessor}`;
         point.seriesId = id;

@@ -98,7 +98,7 @@ export interface Chart {
 }
 
 export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
-  const chart: Chart = {
+  const chart = {
     aspects: getAspects(table, dimensions),
   } as Chart;
 

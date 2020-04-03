@@ -65,7 +65,7 @@ export interface Aspect {
   format: Dimension['format'];
   params: Dimension['params'];
 }
-export type Aspects = { [key in keyof Dimensions]: Aspect[] };
+export type Aspects = { x: Aspect[]; y: Aspect[] } & { [key in keyof Dimensions]?: Aspect[] };
 
 export interface DateHistogramOrdered {
   interval: Duration;
@@ -99,7 +99,7 @@ export interface Chart {
 export type OrderedChart = Chart & { ordered: Ordered };
 
 export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
-  const chart: Chart = {
+  const chart = {
     aspects: getAspects(table, dimensions),
   } as Chart;
 

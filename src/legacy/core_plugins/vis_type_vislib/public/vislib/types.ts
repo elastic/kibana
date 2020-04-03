@@ -18,6 +18,7 @@
  */
 
 export interface Column {
+  // -1 value can be in a fake X aspect
   id: string | -1;
   name: string;
 }
