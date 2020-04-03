@@ -8,7 +8,7 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { PDFPanel } from '../pdf_panel';
 
-storiesOf('components/Export/PDFPanel', module)
+storiesOf('components/WorkpadHeader/ShareMenu/PDFPanel', module)
   .addParameters({
     info: {
       inline: true,

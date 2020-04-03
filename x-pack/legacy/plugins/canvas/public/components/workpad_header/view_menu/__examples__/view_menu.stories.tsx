@@ -8,21 +8,32 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ViewMenu } from '../view_menu';
 
-const testBoundingBox = { left: 0, right: 1280, top: 0, bottom: 720 };
-
-storiesOf('components/Export/ViewMenu', module).add('enabled', () => (
-  <ViewMenu
-    isWriteable={true}
-    zoomScale={1}
-    boundingBox={testBoundingBox}
-    setZoomScale={action('setZoomScale')}
-    workpadHeight={720}
-    workpadWidth={1280}
-    zoomIn={action('zoomIn')}
-    zoomOut={action('zoomOut')}
-    toggleWriteable={action('toggleWriteable')}
-    resetZoom={action('resetZoom')}
-    enterFullscreen={action('enterFullscreen')}
-    doRefresh={action('doRefresh')}
-  />
-));
+storiesOf('components/WorkpadHeader/ViewMenu', module)
+  .add('edit mode', () => (
+    <ViewMenu
+      isWriteable={true}
+      zoomScale={1}
+      setZoomScale={action('setZoomScale')}
+      zoomIn={action('zoomIn')}
+      zoomOut={action('zoomOut')}
+      toggleWriteable={action('toggleWriteable')}
+      resetZoom={action('resetZoom')}
+      enterFullscreen={action('enterFullscreen')}
+      doRefresh={action('doRefresh')}
+      fitToWindow={action('fitToWindow')}
+    />
+  ))
+  .add('read only mode', () => (
+    <ViewMenu
+      isWriteable={false}
+      zoomScale={1}
+      setZoomScale={action('setZoomScale')}
+      zoomIn={action('zoomIn')}
+      zoomOut={action('zoomOut')}
+      toggleWriteable={action('toggleWriteable')}
+      resetZoom={action('resetZoom')}
+      enterFullscreen={action('enterFullscreen')}
+      doRefresh={action('doRefresh')}
+      fitToWindow={action('fitToWindow')}
+    />
+  ));

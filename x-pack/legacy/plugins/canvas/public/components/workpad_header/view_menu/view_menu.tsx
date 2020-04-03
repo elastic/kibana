@@ -30,17 +30,9 @@ export interface Props {
    */
   zoomScale: number;
   /**
-   * minimum bounding box for the workpad
+   * zooms to fit entire workpad into view
    */
-  boundingBox: CanvasWorkpadBoundingBox;
-  /**
-   * width of the workpad page
-   */
-  workpadWidth: number;
-  /**
-   * height of the workpad page
-   */
-  workpadHeight: number;
+  fitToWindow: () => void;
   /**
    * handler to set the workpad zoom level to a specific value
    */
@@ -77,23 +69,17 @@ export const ViewMenu: FunctionComponent<Props> = ({
   zoomIn,
   zoomOut,
   resetZoom,
-  boundingBox,
   setZoomScale,
-  workpadWidth,
-  workpadHeight,
   toggleWriteable,
   enterFullscreen,
   doRefresh,
+  fitToWindow,
 }) => {
   const viewControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty size="xs" aria-label={strings.getViewMenuLabel()} onClick={togglePopover}>
       {strings.getViewMenuButtonLabel()}
     </EuiButtonEmpty>
   );
-
-  const fitToWindow = () => {
-    setZoomScale(getFitZoomScale(boundingBox, workpadWidth, workpadHeight));
-  };
 
   const getScaleMenuItems = (): EuiContextMenuPanelItemDescriptor[] =>
     QUICK_ZOOM_LEVELS.map((scale: number) => ({

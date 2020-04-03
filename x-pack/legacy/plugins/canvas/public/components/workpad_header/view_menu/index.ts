@@ -30,6 +30,7 @@ import {
 // @ts-ignore Untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
 import { ViewMenu as Component, Props as ComponentProps } from './view_menu';
+import { getFitZoomScale } from './get_fit_zoom_scale';
 
 interface StateProps {
   zoomScale: number;
@@ -69,13 +70,17 @@ const mergeProps = (
   stateProps: StateProps,
   dispatchProps: DispatchProps,
   ownProps: ComponentProps
-): ComponentProps => ({
-  ...stateProps,
-  ...dispatchProps,
-  ...ownProps,
-  toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
-  enterFullscreen: () => dispatchProps.setFullscreen(true),
-});
+): ComponentProps => {
+  const { boundingBox, workpadWidth, workpadHeight, ...remainingStateProps } = stateProps;
+  return {
+    ...remainingStateProps,
+    ...dispatchProps,
+    ...ownProps,
+    toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
+    enterFullscreen: () => dispatchProps.setFullscreen(true),
+    fitToWindow: () => getFitZoomScale(boundingBox, workpadWidth, workpadHeight),
+  };
+};
 
 export const ViewMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
