@@ -26,6 +26,12 @@ async function main() {
       default: 'http://localhost:9200',
       type: 'string',
     },
+    alertIndex: {
+      alias: 'ai',
+      describe: 'index to store alerts in',
+      default: '.alerts-endpoint-000001',
+      type: 'string',
+    },
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
@@ -103,7 +109,6 @@ async function main() {
       default: false,
     },
   }).argv;
-  const alertIndex = '.alerts-endpoint-000001';
   const clientOptions: ClientOptions = {
     node: argv.node,
   };
@@ -115,7 +120,7 @@ async function main() {
   if (argv.delete) {
     try {
       await client.indices.delete({
-        index: [argv.eventIndex, argv.metadataIndex, alertIndex],
+        index: [argv.eventIndex, argv.metadataIndex, argv.alertIndex],
       });
     } catch (err) {
       if (err instanceof ResponseError && err.statusCode !== 404) {
@@ -132,7 +137,7 @@ async function main() {
       {
         set: {
           field: '_index',
-          value: alertIndex,
+          value: argv.alertIndex,
           if: "ctx.event.kind == 'alert'",
         },
       },
@@ -155,7 +160,7 @@ async function main() {
     process.exit(1);
   }
 
-  await createIndex(client, alertIndex, alertMapping);
+  await createIndex(client, argv.alertIndex, alertMapping);
   await createIndex(client, argv.eventIndex, eventMapping);
   if (argv.setupOnly) {
     process.exit(0);
