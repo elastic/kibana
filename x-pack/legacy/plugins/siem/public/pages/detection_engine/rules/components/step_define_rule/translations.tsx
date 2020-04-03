@@ -62,3 +62,11 @@ export const ML_JOB_SELECT_PLACEHOLDER_TEXT = i18n.translate(
     defaultMessage: 'Select a job',
   }
 );
+
+export const ENABLE_ML_JOB_WARNING = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.mlEnableJobWarningTitle',
+  {
+    defaultMessage:
+      'This job is not currently running. Please enable job via "ML job settings" interface before running rule.',
+  }
+);

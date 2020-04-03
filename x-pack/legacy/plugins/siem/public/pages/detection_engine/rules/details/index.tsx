@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useMemo, useState } from 'react';
@@ -66,6 +67,8 @@ import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
+import { useMlCapabilities } from '../../../../components/ml_popover/hooks/use_ml_capabilities';
+import { hasMlAdminPermissions } from '../../../../components/ml/permissions/has_ml_admin_permissions';
 
 enum RuleDetailTabs {
   signals = 'signals',
@@ -117,6 +120,10 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const [lastSignals] = useSignalInfo({ ruleId });
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const mlCapabilities = useMlCapabilities();
+
+  const hasMlPermissions =
+    mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
@@ -262,13 +269,22 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     >
                       <EuiFlexGroup alignItems="center">
                         <EuiFlexItem grow={false}>
-                          <RuleSwitch
-                            id={rule?.id ?? '-1'}
-                            isDisabled={userHasNoPermissions}
-                            enabled={rule?.enabled ?? false}
-                            optionLabel={i18n.ACTIVATE_RULE}
-                            onChange={handleOnChangeEnabledRule}
-                          />
+                          <EuiToolTip
+                            position="top"
+                            content={
+                              rule?.type === 'machine_learning' && !hasMlPermissions
+                                ? detectionI18n.ML_RULES_DISABLED_MESSAGE
+                                : undefined
+                            }
+                          >
+                            <RuleSwitch
+                              id={rule?.id ?? '-1'}
+                              isDisabled={userHasNoPermissions || !hasMlPermissions}
+                              enabled={rule?.enabled ?? false}
+                              optionLabel={i18n.ACTIVATE_RULE}
+                              onChange={handleOnChangeEnabledRule}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
 
                         <EuiFlexItem grow={false}>
