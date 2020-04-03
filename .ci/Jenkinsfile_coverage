@@ -5,15 +5,6 @@ kibanaLibrary.load() // load from the Jenkins instance
 
 kibanaPipeline(timeoutMinutes: 180) {
   catchErrors {
-    withEnv([
-      'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
-    ]) {
-
-      workers.base(name: 'fail-fast-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
-        maybeFailFast('secret/kibana-issues/prod/coverage/elasticsearch')
-      }
-
-    }
 
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
