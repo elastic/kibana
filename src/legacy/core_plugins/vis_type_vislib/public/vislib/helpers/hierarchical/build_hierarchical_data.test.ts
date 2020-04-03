@@ -76,7 +76,7 @@ function tableVisResponseHandler(table: Table, dimensions: Dimensions) {
 jest.mock('../../../services', () => ({
   getFormatService: jest.fn(() => ({
     deserialize: () => ({
-      convert: jest.fn(v => v),
+      convert: jest.fn(v => JSON.stringify(v)),
     }),
   })),
 }));
@@ -346,7 +346,7 @@ describe('buildHierarchicalData convertTable', () => {
       expect(results).toHaveProperty('slices');
       expect(results.slices).toHaveProperty('children');
       expect(results).toHaveProperty('names');
-      // expect(results.names).toHaveLength(2);
+      expect(results.names).toHaveLength(2);
     });
   });
 
