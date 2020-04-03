@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { ReactWrapper, mount } from 'enzyme';
 
 import { useKibana } from '../../../../lib/kibana';
 import {
@@ -42,7 +43,6 @@ import {
   ConnectorEditFlyout,
 } from '../../../../../../../../plugins/triggers_actions_ui/public';
 import { EuiBottomBar } from '@elastic/eui';
-import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 const useCaseConfigureResponse: ReturnUseCaseConfigure = {
   loading: false,
@@ -65,17 +65,10 @@ const kibanaMockImplementationArgs = {
 };
 
 describe('ConfigureCases', () => {
-  const mount = useMountAppended();
+  let wrapper: ReactWrapper;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
-    useConnectorsMock.mockImplementation(() => useConnectorsResponse);
-    useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
-    useGetUrlSearchMock.mockImplementation(() => searchURL);
-  });
-
-  test('it renders correctly', () => {
     useCaseConfigureMock.mockImplementation(
       ({ setConnector, setClosureType, setCurrentConfiguration }) => {
         useEffect(() => setConnector('123'), []);
@@ -91,9 +84,14 @@ describe('ConfigureCases', () => {
         return useCaseConfigureResponse;
       }
     );
+    useConnectorsMock.mockImplementation(() => useConnectorsResponse);
+    useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
+    useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+  });
 
+  test('it renders correctly', () => {
     expect(wrapper.find(Connectors).exists()).toBeTruthy();
     expect(wrapper.find(ClosureOptions).exists()).toBeTruthy();
     expect(wrapper.find(Mapping).exists()).toBeTruthy();
@@ -107,24 +105,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it renders with correct props', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        useEffect(() => setClosureType('close-by-user'), []);
-        useEffect(
-          () =>
-            setCurrentConfiguration({
-              connectorId: '123',
-              closureType: 'close-by-user',
-            }),
-          []
-        );
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     // Connector
     expect(wrapper.find(Connectors).prop('connectors')).toEqual(connectors);
     expect(wrapper.find(Connectors).prop('disabled')).toBe(false);
@@ -160,14 +140,14 @@ describe('ConfigureCases', () => {
   });
 
   test('it disables correctly when the user cannot crud', () => {
-    const wrapper = mount(<ConfigureCases userCanCrud={false} />, {
+    const newWrapper = mount(<ConfigureCases userCanCrud={false} />, {
       wrappingComponent: TestProviders,
     });
 
-    expect(wrapper.find(Connectors).prop('disabled')).toBe(true);
-    expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
-    expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
-    expect(wrapper.find(Mapping).prop('updateConnectorDisabled')).toBe(true);
+    expect(newWrapper.find(Connectors).prop('disabled')).toBe(true);
+    expect(newWrapper.find(ClosureOptions).prop('disabled')).toBe(true);
+    expect(newWrapper.find(Mapping).prop('disabled')).toBe(true);
+    expect(newWrapper.find(Mapping).prop('updateConnectorDisabled')).toBe(true);
   });
 
   test('it shows the warning callout when configuration is invalid', () => {
@@ -178,22 +158,11 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
     expect(
-      wrapper.find('[data-test-subj="configure-cases-warning-callout"]').exists()
+      newWrapper.find('[data-test-subj="configure-cases-warning-callout"]').exists()
     ).toBeTruthy();
-  });
-
-  test('it pass an empty array when connectors is null', () => {
-    useConnectorsMock.mockImplementation(() => ({
-      ...useConnectorsResponse,
-      connectors: null,
-    }));
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
-    expect(wrapper.find(Connectors).prop('connectors').length).toBe(0);
   });
 
   test('it disables correctly Connector when loading connectors', () => {
@@ -202,9 +171,9 @@ describe('ConfigureCases', () => {
       loading: true,
     }));
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(Connectors).prop('disabled')).toBe(true);
+    expect(newWrapper.find(Connectors).prop('disabled')).toBe(true);
   });
 
   test('it disables correctly Connector when saving configuration', () => {
@@ -213,9 +182,9 @@ describe('ConfigureCases', () => {
       persistLoading: true,
     }));
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(Connectors).prop('disabled')).toBe(true);
+    expect(newWrapper.find(Connectors).prop('disabled')).toBe(true);
   });
 
   test('it pass the correct value to isLoading attribute on Connector', () => {
@@ -224,9 +193,9 @@ describe('ConfigureCases', () => {
       loading: true,
     }));
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(Connectors).prop('isLoading')).toBe(true);
+    expect(newWrapper.find(Connectors).prop('isLoading')).toBe(true);
   });
 
   test('it set correctly the selected connector', () => {
@@ -237,21 +206,12 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(Connectors).prop('selectedConnector')).toBe('456');
+    expect(newWrapper.find(Connectors).prop('selectedConnector')).toBe('456');
   });
 
   test('the connector is changed successfully', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
     wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
@@ -261,15 +221,7 @@ describe('ConfigureCases', () => {
   });
 
   test('the connector is changed successfully to none', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
+    wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
     wrapper.find('button[data-test-subj="dropdown-connector-no-connector"]').simulate('click');
@@ -279,8 +231,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it show the add flyout when pressing the add connector button', () => {
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     wrapper.find('button[data-test-subj="case-configure-add-connector-button"]').simulate('click');
     wrapper.update();
 
@@ -294,9 +244,9 @@ describe('ConfigureCases', () => {
       loading: true,
     }));
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
+    expect(newWrapper.find(ClosureOptions).prop('disabled')).toBe(true);
   });
 
   test('it disables correctly ClosureOptions when saving configuration', () => {
@@ -305,9 +255,9 @@ describe('ConfigureCases', () => {
       persistLoading: true,
     }));
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
+    expect(newWrapper.find(ClosureOptions).prop('disabled')).toBe(true);
   });
 
   test('it disables correctly ClosureOptions when the connector is set to none', () => {
@@ -318,9 +268,9 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
+    expect(newWrapper.find(ClosureOptions).prop('disabled')).toBe(true);
   });
 
   test('it set correctly the selected closure type', () => {
@@ -331,21 +281,12 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-pushing');
+    expect(newWrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-pushing');
   });
 
   test('the closure type is changed successfully', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setClosureType('close-by-user'), []);
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     wrapper.find('input[id="close-by-pushing"]').simulate('change');
     wrapper.update();
 
@@ -353,8 +294,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it disables the mapping permanently', () => {
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
   });
 
@@ -363,8 +302,6 @@ describe('ConfigureCases', () => {
       ...useConnectorsResponse,
       loading: true,
     }));
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
     expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
   });
@@ -375,9 +312,9 @@ describe('ConfigureCases', () => {
       loading: true,
     }));
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+    expect(newWrapper.find(Mapping).prop('disabled')).toBe(true);
   });
 
   test('it disables the update connector button when saving the configuration', () => {
@@ -386,9 +323,9 @@ describe('ConfigureCases', () => {
       persistLoading: true,
     }));
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+    expect(newWrapper.find(Mapping).prop('disabled')).toBe(true);
   });
 
   test('it disables the update connector button when the connectorId is invalid', () => {
@@ -399,9 +336,9 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+    expect(newWrapper.find(Mapping).prop('disabled')).toBe(true);
   });
 
   test('it disables the update connector button when the connectorId is set to none', () => {
@@ -412,21 +349,12 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+    expect(newWrapper.find(Mapping).prop('disabled')).toBe(true);
   });
 
   test('it show the edit flyout when pressing the update connector button', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     wrapper.find('button[data-test-subj="case-mapping-update-connector-button"]').simulate('click');
     wrapper.update();
 
@@ -435,15 +363,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it sets the mapping of a connector correctly', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     expect(wrapper.find(Mapping).prop('mapping')).toEqual(
       connectors[0].config.casesConfiguration.mapping
     );
@@ -454,48 +373,12 @@ describe('ConfigureCases', () => {
   test.todo('the mapping is changed successfully when changing the action type');
 
   test('it not shows the action bar when there is no change', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        useEffect(() => setClosureType('close-by-user'), []);
-        useEffect(
-          () =>
-            setCurrentConfiguration({
-              connectorId: '123',
-              closureType: 'close-by-user',
-            }),
-          []
-        );
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     expect(
       wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
     ).toBeFalsy();
   });
 
   test('it shows the action bar when the connector is changed', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        useEffect(() => setClosureType('close-by-user'), []);
-        useEffect(
-          () =>
-            setCurrentConfiguration({
-              connectorId: '123',
-              closureType: 'close-by-user',
-            }),
-          []
-        );
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
     wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
@@ -513,24 +396,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it shows the action bar when the closure type is changed', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        useEffect(() => setClosureType('close-by-user'), []);
-        useEffect(
-          () =>
-            setCurrentConfiguration({
-              connectorId: '123',
-              closureType: 'close-by-user',
-            }),
-          []
-        );
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     wrapper.find('input[id="close-by-pushing"]').simulate('change');
     wrapper.update();
 
@@ -546,24 +411,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it tracks the changes successfully', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        useEffect(() => setClosureType('close-by-user'), []);
-        useEffect(
-          () =>
-            setCurrentConfiguration({
-              connectorId: '123',
-              closureType: 'close-by-user',
-            }),
-          []
-        );
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
     wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
@@ -583,24 +430,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it tracks and reverts the changes successfully ', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        useEffect(() => setClosureType('close-by-user'), []);
-        useEffect(
-          () =>
-            setCurrentConfiguration({
-              connectorId: '123',
-              closureType: 'close-by-user',
-            }),
-          []
-        );
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     // change settings
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
     wrapper.update();
@@ -623,24 +452,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it close and restores the action bar when the add connector button is pressed', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        useEffect(() => setClosureType('close-by-user'), []);
-        useEffect(
-          () =>
-            setCurrentConfiguration({
-              connectorId: '123',
-              closureType: 'close-by-user',
-            }),
-          []
-        );
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     // Change closure type
     wrapper.find('input[id="close-by-pushing"]').simulate('change');
     wrapper.update();
@@ -674,24 +485,6 @@ describe('ConfigureCases', () => {
   });
 
   test('it close and restores the action bar when the update connector button is pressed', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('123'), []);
-        useEffect(() => setClosureType('close-by-user'), []);
-        useEffect(
-          () =>
-            setCurrentConfiguration({
-              connectorId: '123',
-              closureType: 'close-by-user',
-            }),
-          []
-        );
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
     // Change closure type
     wrapper.find('input[id="close-by-pushing"]').simulate('change');
     wrapper.update();
@@ -746,17 +539,17 @@ describe('ConfigureCases', () => {
       loading: true,
     }));
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
         .first()
         .prop('isDisabled')
     ).toBe(true);
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
         .first()
         .prop('isDisabled')
@@ -780,17 +573,17 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
         .first()
         .prop('isDisabled')
     ).toBe(true);
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
         .first()
         .prop('isDisabled')
@@ -814,17 +607,17 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
         .first()
         .prop('isDisabled')
     ).toBe(true);
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
         .first()
         .prop('isDisabled')
@@ -848,17 +641,17 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
         .first()
         .prop('isLoading')
     ).toBe(true);
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
         .first()
         .prop('isLoading')
@@ -882,17 +675,17 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    wrapper
+    newWrapper
       .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
       .first()
       .simulate('click');
 
-    wrapper.update();
+    newWrapper.update();
 
     expect(
-      wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+      newWrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
     ).toBeFalsy();
   });
 
@@ -915,14 +708,14 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
-    wrapper
+    newWrapper
       .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
       .first()
       .simulate('click');
 
-    wrapper.update();
+    newWrapper.update();
 
     expect(persistCaseConfigure).toHaveBeenCalled();
     expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -951,10 +744,10 @@ describe('ConfigureCases', () => {
       }
     );
 
-    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
         .first()
         .prop('href')

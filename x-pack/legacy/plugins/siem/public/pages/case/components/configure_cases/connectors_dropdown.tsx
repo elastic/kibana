@@ -12,7 +12,7 @@ import { Connector } from '../../../../containers/case/configure/types';
 import { connectors as connectorsDefinition } from '../../../../lib/connectors/config';
 import * as i18n from './translations';
 
-interface Props {
+export interface Props {
   connectors: Connector[];
   disabled: boolean;
   isLoading: boolean;

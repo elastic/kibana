@@ -5,25 +5,26 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { ClosureOptions } from './closure_options';
-import { useMountAppended } from '../../../../utils/use_mount_appended';
+import { ClosureOptions, ClosureOptionsProps } from './closure_options';
 import { TestProviders } from '../../../../mock';
 import { ClosureOptionsRadio } from './closure_options_radio';
 
 describe('ClosureOptions', () => {
-  const mount = useMountAppended();
+  let wrapper: ReactWrapper;
+  const onChangeClosureType = jest.fn();
+  const props: ClosureOptionsProps = {
+    disabled: false,
+    closureTypeSelected: 'close-by-user',
+    onChangeClosureType,
+  };
 
-  test('it shows the left side', () => {
-    const wrapper = shallow(
-      <ClosureOptions
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={jest.fn()}
-      />
-    );
+  beforeAll(() => {
+    wrapper = mount(<ClosureOptions {...props} />, { wrappingComponent: TestProviders });
+  });
 
+  test('it shows the closure options form group', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-closure-options-form-group"]')
@@ -32,16 +33,7 @@ describe('ClosureOptions', () => {
     ).toBe(true);
   });
 
-  test('it shows the right side', () => {
-    const wrapper = mount(
-      <ClosureOptions
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
+  test('it shows the closure options form row', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-closure-options-form-row"]')
@@ -51,15 +43,6 @@ describe('ClosureOptions', () => {
   });
 
   test('it shows closure options', () => {
-    const wrapper = mount(
-      <ClosureOptions
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
     expect(
       wrapper
         .find('[data-test-subj="case-closure-options-radio"]')
@@ -69,17 +52,6 @@ describe('ClosureOptions', () => {
   });
 
   test('it pass the correct props to child', () => {
-    const onChangeClosureType = jest.fn();
-
-    const wrapper = mount(
-      <ClosureOptions
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={onChangeClosureType}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
     const closureOptionsRadioComponent = wrapper.find(ClosureOptionsRadio);
     expect(closureOptionsRadioComponent.props().disabled).toEqual(false);
     expect(closureOptionsRadioComponent.props().closureTypeSelected).toEqual('close-by-user');

@@ -28,7 +28,7 @@ const EuiFormRowExtended = styled(EuiFormRow)`
   }
 `;
 
-interface Props {
+export interface Props {
   connectors: Connector[];
   disabled: boolean;
   isLoading: boolean;

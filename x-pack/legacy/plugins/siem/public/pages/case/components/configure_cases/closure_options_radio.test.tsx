@@ -5,24 +5,25 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 
-import { ClosureOptionsRadio } from './closure_options_radio';
-import { useMountAppended } from '../../../../utils/use_mount_appended';
+import { ClosureOptionsRadio, ClosureOptionsRadioComponentProps } from './closure_options_radio';
 import { TestProviders } from '../../../../mock';
 
 describe('ClosureOptionsRadio', () => {
-  const mount = useMountAppended();
+  let wrapper: ReactWrapper;
+  const onChangeClosureType = jest.fn();
+  const props: ClosureOptionsRadioComponentProps = {
+    disabled: false,
+    closureTypeSelected: 'close-by-user',
+    onChangeClosureType,
+  };
+
+  beforeAll(() => {
+    wrapper = mount(<ClosureOptionsRadio {...props} />, { wrappingComponent: TestProviders });
+  });
 
   test('it renders', () => {
-    const wrapper = shallow(
-      <ClosureOptionsRadio
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={jest.fn()}
-      />
-    );
-
     expect(
       wrapper
         .find('[data-test-subj="closure-options-radio-group"]')
@@ -32,71 +33,44 @@ describe('ClosureOptionsRadio', () => {
   });
 
   test('it shows the correct number of radio buttons', () => {
-    const wrapper = mount(
-      <ClosureOptionsRadio
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
     expect(wrapper.find('input[name="closure_options"]')).toHaveLength(2);
   });
 
-  test('it renders the correct radio buttons', () => {
-    const wrapper = mount(
-      <ClosureOptionsRadio
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
-    expect(wrapper.find('input[id="close-by-user"]')).toBeDefined();
-    expect(wrapper.find('input[id="close-by-pushing"]')).toBeDefined();
+  test('it renders close by user radio button', () => {
+    expect(wrapper.find('input[id="close-by-user"]').exists()).toBeTruthy();
   });
 
-  test('it disables correctly', () => {
-    const wrapper = mount(
-      <ClosureOptionsRadio
-        disabled={true}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
+  test('it renders close by pushing radio button', () => {
+    expect(wrapper.find('input[id="close-by-pushing"]').exists()).toBeTruthy();
+  });
 
-    expect(wrapper.find('input[id="close-by-user"]').prop('disabled')).toEqual(true);
-    expect(wrapper.find('input[id="close-by-pushing"]').prop('disabled')).toEqual(true);
+  test('it disables the close by user radio button', () => {
+    const newWrapper = mount(<ClosureOptionsRadio {...props} disabled={true} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(newWrapper.find('input[id="close-by-user"]').prop('disabled')).toEqual(true);
+  });
+
+  test('it disables correctly the close by pushing radio button', () => {
+    const newWrapper = mount(<ClosureOptionsRadio {...props} disabled={true} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(newWrapper.find('input[id="close-by-pushing"]').prop('disabled')).toEqual(true);
   });
 
   test('it selects the correct radio button', () => {
-    const wrapper = mount(
-      <ClosureOptionsRadio
-        disabled={false}
-        closureTypeSelected="close-by-pushing"
-        onChangeClosureType={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
+    const newWrapper = mount(
+      <ClosureOptionsRadio {...props} closureTypeSelected={'close-by-pushing'} />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
-
-    expect(wrapper.find('input[id="close-by-pushing"]').prop('checked')).toEqual(true);
+    expect(newWrapper.find('input[id="close-by-pushing"]').prop('checked')).toEqual(true);
   });
 
   test('it calls the onChangeClosureType function', () => {
-    const onChangeClosureType = jest.fn();
-
-    const wrapper = mount(
-      <ClosureOptionsRadio
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={onChangeClosureType}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
     wrapper.find('input[id="close-by-pushing"]').simulate('change');
     wrapper.update();
     expect(onChangeClosureType).toHaveBeenCalled();

@@ -5,28 +5,28 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { EuiSuperSelect } from '@elastic/eui';
 
-import { ConnectorsDropdown } from './connectors_dropdown';
-import { useMountAppended } from '../../../../utils/use_mount_appended';
+import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../../../mock';
 import { connectors } from './__mock__';
 
 describe('ConnectorsDropdown', () => {
-  const mount = useMountAppended();
+  let wrapper: ReactWrapper;
+  const props: Props = {
+    disabled: false,
+    connectors,
+    isLoading: false,
+    onChange: jest.fn(),
+    selectedConnector: 'none',
+  };
+
+  beforeAll(() => {
+    wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
+  });
 
   test('it renders', () => {
-    const wrapper = shallow(
-      <ConnectorsDropdown
-        disabled={false}
-        connectors={[]}
-        isLoading={false}
-        onChange={jest.fn()}
-        selectedConnector={'none'}
-      />
-    );
-
     expect(
       wrapper
         .find('[data-test-subj="dropdown-connectors"]')
@@ -36,20 +36,9 @@ describe('ConnectorsDropdown', () => {
   });
 
   test('it formats the connectors correctly', () => {
-    const wrapper = mount(
-      <ConnectorsDropdown
-        disabled={false}
-        connectors={connectors}
-        isLoading={false}
-        onChange={jest.fn()}
-        selectedConnector={'none'}
-      />,
-      { wrappingComponent: TestProviders }
-    );
+    const selectProps = wrapper.find(EuiSuperSelect).props();
 
-    const props = wrapper.find(EuiSuperSelect).props();
-
-    expect(props.options).toEqual(
+    expect(selectProps.options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           value: 'none',
@@ -62,37 +51,36 @@ describe('ConnectorsDropdown', () => {
   });
 
   test('it disables the dropdown', () => {
-    const wrapper = mount(
-      <ConnectorsDropdown
-        disabled={true}
-        connectors={connectors}
-        isLoading={false}
-        onChange={jest.fn()}
-        selectedConnector={'none'}
-      />,
-      { wrappingComponent: TestProviders }
-    );
+    const newWrapper = mount(<ConnectorsDropdown {...props} disabled={true} />, {
+      wrappingComponent: TestProviders,
+    });
 
     expect(
-      wrapper
+      newWrapper
         .find('[data-test-subj="dropdown-connectors"]')
         .first()
         .prop('disabled')
     ).toEqual(true);
   });
 
-  test('it selects the correct connector', () => {
-    const wrapper = mount(
-      <ConnectorsDropdown
-        disabled={false}
-        connectors={connectors}
-        isLoading={false}
-        onChange={jest.fn()}
-        selectedConnector={'123'}
-      />,
-      { wrappingComponent: TestProviders }
-    );
+  test('it loading correctly', () => {
+    const newWrapper = mount(<ConnectorsDropdown {...props} isLoading={true} />, {
+      wrappingComponent: TestProviders,
+    });
 
-    expect(wrapper.find('button span').text()).toEqual('My Connector');
+    expect(
+      newWrapper
+        .find('[data-test-subj="dropdown-connectors"]')
+        .first()
+        .prop('isLoading')
+    ).toEqual(true);
+  });
+
+  test('it selects the correct connector', () => {
+    const newWrapper = mount(<ConnectorsDropdown {...props} selectedConnector={'123'} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(newWrapper.find('button span').text()).toEqual('My Connector');
   });
 });

@@ -5,29 +5,31 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { Connectors } from './connectors';
-import { useMountAppended } from '../../../../utils/use_mount_appended';
+import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../../../mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors } from './__mock__';
 
 describe('Connectors', () => {
-  const mount = useMountAppended();
+  let wrapper: ReactWrapper;
+  const onChangeConnector = jest.fn();
+  const handleShowAddFlyout = jest.fn();
+  const props: Props = {
+    disabled: false,
+    connectors,
+    selectedConnector: 'none',
+    isLoading: false,
+    onChangeConnector,
+    handleShowAddFlyout,
+  };
 
-  test('it shows the left side', () => {
-    const wrapper = shallow(
-      <Connectors
-        connectors={[]}
-        disabled={false}
-        selectedConnector={'none'}
-        isLoading={false}
-        onChangeConnector={jest.fn()}
-        handleShowAddFlyout={jest.fn()}
-      />
-    );
+  beforeAll(() => {
+    wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
+  });
 
+  test('it shows the connectors from group', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-connectors-form-group"]')
@@ -36,19 +38,7 @@ describe('Connectors', () => {
     ).toBe(true);
   });
 
-  test('it shows the right side', () => {
-    const wrapper = mount(
-      <Connectors
-        connectors={[]}
-        disabled={false}
-        selectedConnector={'none'}
-        isLoading={false}
-        onChangeConnector={jest.fn()}
-        handleShowAddFlyout={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
+  test('it shows the connectors form row', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-connectors-form-row"]')
@@ -58,18 +48,6 @@ describe('Connectors', () => {
   });
 
   test('it shows the connectors dropdown', () => {
-    const wrapper = mount(
-      <Connectors
-        connectors={[]}
-        disabled={false}
-        selectedConnector={'none'}
-        isLoading={false}
-        onChangeConnector={jest.fn()}
-        handleShowAddFlyout={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
     expect(
       wrapper
         .find('[data-test-subj="case-connectors-dropdown"]')
@@ -79,24 +57,13 @@ describe('Connectors', () => {
   });
 
   test('it pass the correct props to child', () => {
-    const onChange = jest.fn();
-
-    const wrapper = shallow(
-      <Connectors
-        connectors={connectors}
-        disabled={false}
-        selectedConnector={'none'}
-        isLoading={false}
-        onChangeConnector={onChange}
-        handleShowAddFlyout={jest.fn()}
-      />
-    );
-
-    const connectorsDropdownComponent = wrapper.find(ConnectorsDropdown);
-    expect(connectorsDropdownComponent.props().disabled).toEqual(false);
-    expect(connectorsDropdownComponent.props().isLoading).toEqual(false);
-    expect(connectorsDropdownComponent.props().connectors).toEqual(connectors);
-    expect(connectorsDropdownComponent.props().selectedConnector).toEqual('none');
-    expect(connectorsDropdownComponent.props().onChange).toEqual(onChange);
+    const connectorsDropdownProps = wrapper.find(ConnectorsDropdown).props();
+    expect(connectorsDropdownProps).toMatchObject({
+      disabled: false,
+      isLoading: false,
+      connectors,
+      selectedConnector: 'none',
+      onChange: props.onChangeConnector,
+    });
   });
 });

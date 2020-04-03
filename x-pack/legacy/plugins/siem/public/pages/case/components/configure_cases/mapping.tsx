@@ -20,7 +20,7 @@ import * as i18n from './translations';
 import { FieldMapping } from './field_mapping';
 import { CasesConfigurationMapping } from '../../../../containers/case/configure/types';
 
-interface MappingProps {
+export interface MappingProps {
   disabled: boolean;
   updateConnectorDisabled: boolean;
   mapping: CasesConfigurationMapping[] | null;

@@ -5,11 +5,10 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { EuiSuperSelectOption, EuiSuperSelect } from '@elastic/eui';
 
-import { FieldMappingRow } from './field_mapping_row';
-import { useMountAppended } from '../../../../utils/use_mount_appended';
+import { FieldMappingRow, RowProps } from './field_mapping_row';
 import { TestProviders } from '../../../../mock';
 import { ThirdPartyField } from '../../../../containers/case/configure/types';
 
@@ -27,21 +26,25 @@ const thirdPartyOptions: Array<EuiSuperSelectOption<ThirdPartyField>> = [
 ];
 
 describe('FieldMappingRow', () => {
-  const mount = useMountAppended();
+  let wrapper: ReactWrapper;
+  const onChangeActionType = jest.fn();
+  const onChangeThirdParty = jest.fn();
+
+  const props: RowProps = {
+    disabled: false,
+    siemField: 'title',
+    thirdPartyOptions,
+    onChangeActionType,
+    onChangeThirdParty,
+    selectedActionType: 'nothing',
+    selectedThirdParty: 'short_description',
+  };
+
+  beforeAll(() => {
+    wrapper = mount(<FieldMappingRow {...props} />, { wrappingComponent: TestProviders });
+  });
 
   test('it renders', () => {
-    const wrapper = shallow(
-      <FieldMappingRow
-        siemField="title"
-        disabled={false}
-        thirdPartyOptions={thirdPartyOptions}
-        onChangeActionType={jest.fn()}
-        onChangeThirdParty={jest.fn()}
-        selectedActionType={'nothing'}
-        selectedThirdParty={'short_description'}
-      />
-    );
-
     expect(
       wrapper
         .find('[data-test-subj="case-configure-third-party-select"]')
@@ -58,25 +61,12 @@ describe('FieldMappingRow', () => {
   });
 
   test('it passes thirdPartyOptions correctly', () => {
-    const wrapper = mount(
-      <FieldMappingRow
-        siemField="title"
-        disabled={false}
-        thirdPartyOptions={thirdPartyOptions}
-        onChangeActionType={jest.fn()}
-        onChangeThirdParty={jest.fn()}
-        selectedActionType={'nothing'}
-        selectedThirdParty={'short_description'}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
-    const props = wrapper
+    const selectProps = wrapper
       .find(EuiSuperSelect)
       .first()
       .props();
 
-    expect(props.options).toEqual(
+    expect(selectProps.options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           value: 'short_description',
@@ -91,25 +81,12 @@ describe('FieldMappingRow', () => {
   });
 
   test('it passes the correct actionTypeOptions', () => {
-    const wrapper = mount(
-      <FieldMappingRow
-        siemField="title"
-        disabled={false}
-        thirdPartyOptions={thirdPartyOptions}
-        onChangeActionType={jest.fn()}
-        onChangeThirdParty={jest.fn()}
-        selectedActionType={'nothing'}
-        selectedThirdParty={'short_description'}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
-    const props = wrapper
+    const selectProps = wrapper
       .find(EuiSuperSelect)
       .at(1)
       .props();
 
-    expect(props.options).toEqual(
+    expect(selectProps.options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           value: 'nothing',

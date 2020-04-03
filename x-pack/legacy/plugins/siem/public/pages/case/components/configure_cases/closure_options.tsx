@@ -11,7 +11,7 @@ import { ClosureType } from '../../../../containers/case/configure/types';
 import { ClosureOptionsRadio } from './closure_options_radio';
 import * as i18n from './translations';
 
-interface ClosureOptionsProps {
+export interface ClosureOptionsProps {
   closureTypeSelected: ClosureType;
   disabled: boolean;
   onChangeClosureType: (newClosureType: ClosureType) => void;

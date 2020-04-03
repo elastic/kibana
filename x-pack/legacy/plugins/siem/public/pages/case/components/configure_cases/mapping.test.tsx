@@ -5,27 +5,29 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { TestProviders } from '../../../../mock';
-import { Mapping } from './mapping';
+import { Mapping, MappingProps } from './mapping';
 import { mapping } from './__mock__';
 
 describe('Mapping', () => {
-  const mount = useMountAppended();
+  let wrapper: ReactWrapper;
+  const onChangeMapping = jest.fn();
+  const setEditFlyoutVisibility = jest.fn();
+  const props: MappingProps = {
+    disabled: false,
+    mapping,
+    updateConnectorDisabled: false,
+    onChangeMapping,
+    setEditFlyoutVisibility,
+  };
 
-  test('it shows the left side', () => {
-    const wrapper = shallow(
-      <Mapping
-        disabled={false}
-        mapping={mapping}
-        onChangeMapping={jest.fn()}
-        updateConnectorDisabled={false}
-        setEditFlyoutVisibility={jest.fn()}
-      />
-    );
+  beforeAll(() => {
+    wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
+  });
 
+  test('it shows mapping form group', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-mapping-form-group"]')
@@ -34,18 +36,7 @@ describe('Mapping', () => {
     ).toBe(true);
   });
 
-  test('it shows the right side', () => {
-    const wrapper = mount(
-      <Mapping
-        disabled={false}
-        mapping={mapping}
-        onChangeMapping={jest.fn()}
-        updateConnectorDisabled={false}
-        setEditFlyoutVisibility={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
+  test('it shows mapping form row', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-mapping-form-row"]')
@@ -55,17 +46,6 @@ describe('Mapping', () => {
   });
 
   test('it shows the update button', () => {
-    const wrapper = mount(
-      <Mapping
-        disabled={false}
-        mapping={mapping}
-        onChangeMapping={jest.fn()}
-        updateConnectorDisabled={false}
-        setEditFlyoutVisibility={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
     expect(
       wrapper
         .find('[data-test-subj="case-mapping-update-connector-button"]')
@@ -75,17 +55,6 @@ describe('Mapping', () => {
   });
 
   test('it shows the field mapping', () => {
-    const wrapper = mount(
-      <Mapping
-        disabled={false}
-        mapping={mapping}
-        onChangeMapping={jest.fn()}
-        updateConnectorDisabled={false}
-        setEditFlyoutVisibility={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
-    );
-
     expect(
       wrapper
         .find('[data-test-subj="case-mapping-field"]')

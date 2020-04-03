@@ -5,19 +5,28 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { FieldMapping } from './field_mapping';
+import { FieldMapping, FieldMappingProps } from './field_mapping';
 import { mapping } from './__mock__';
 import { FieldMappingRow } from './field_mapping_row';
 import { defaultMapping } from '../../../../lib/connectors/config';
+import { TestProviders } from '../../../../mock';
 
 describe('FieldMappingRow', () => {
-  test('it renders', () => {
-    const wrapper = shallow(
-      <FieldMapping disabled={false} mapping={mapping} onChangeMapping={jest.fn()} />
-    );
+  let wrapper: ReactWrapper;
+  const onChangeMapping = jest.fn();
+  const props: FieldMappingProps = {
+    disabled: false,
+    mapping,
+    onChangeMapping,
+  };
 
+  beforeAll(() => {
+    wrapper = mount(<FieldMapping {...props} />, { wrappingComponent: TestProviders });
+  });
+
+  test('it renders', () => {
     expect(
       wrapper
         .find('[data-test-subj="case-configure-field-mapping-cols"]')
@@ -36,18 +45,14 @@ describe('FieldMappingRow', () => {
   });
 
   test('it shows the correct number of FieldMappingRow with default mapping', () => {
-    const wrapper = shallow(
-      <FieldMapping disabled={false} mapping={null} onChangeMapping={jest.fn()} />
-    );
+    const newWrapper = mount(<FieldMapping {...props} mapping={null} />, {
+      wrappingComponent: TestProviders,
+    });
 
-    expect(wrapper.find(FieldMappingRow).length).toEqual(3);
+    expect(newWrapper.find(FieldMappingRow).length).toEqual(3);
   });
 
   test('it pass the corrects props to mapping row', () => {
-    const wrapper = shallow(
-      <FieldMapping disabled={false} mapping={mapping} onChangeMapping={jest.fn()} />
-    );
-
     const rows = wrapper.find(FieldMappingRow);
     rows.forEach((row, index) => {
       expect(row.prop('siemField')).toEqual(mapping[index].source);
@@ -57,11 +62,11 @@ describe('FieldMappingRow', () => {
   });
 
   test('it pass the default mapping when mapping is null', () => {
-    const wrapper = shallow(
-      <FieldMapping disabled={false} mapping={null} onChangeMapping={jest.fn()} />
-    );
+    const newWrapper = mount(<FieldMapping {...props} mapping={null} />, {
+      wrappingComponent: TestProviders,
+    });
 
-    const rows = wrapper.find(FieldMappingRow);
+    const rows = newWrapper.find(FieldMappingRow);
     rows.forEach((row, index) => {
       expect(row.prop('siemField')).toEqual(defaultMapping[index].source);
       expect(row.prop('selectedActionType')).toEqual(defaultMapping[index].actionType);
@@ -70,10 +75,10 @@ describe('FieldMappingRow', () => {
   });
 
   test('it should show zero rows on empty array', () => {
-    const wrapper = shallow(
-      <FieldMapping disabled={false} mapping={[]} onChangeMapping={jest.fn()} />
-    );
+    const newWrapper = mount(<FieldMapping {...props} mapping={[]} />, {
+      wrappingComponent: TestProviders,
+    });
 
-    expect(wrapper.find(FieldMappingRow).length).toEqual(0);
+    expect(newWrapper.find(FieldMappingRow).length).toEqual(0);
   });
 });

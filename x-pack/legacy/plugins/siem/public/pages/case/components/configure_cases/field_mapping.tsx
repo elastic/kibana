@@ -48,7 +48,7 @@ const supportedThirdPartyFields: Array<EuiSuperSelectOption<ThirdPartyField>> = 
   },
 ];
 
-interface FieldMappingProps {
+export interface FieldMappingProps {
   disabled: boolean;
   mapping: CasesConfigurationMapping[] | null;
   onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;

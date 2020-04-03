@@ -21,7 +21,7 @@ import {
   ThirdPartyField,
 } from '../../../../containers/case/configure/types';
 
-interface RowProps {
+export interface RowProps {
   disabled: boolean;
   siemField: CaseField;
   thirdPartyOptions: Array<EuiSuperSelectOption<ThirdPartyField>>;
