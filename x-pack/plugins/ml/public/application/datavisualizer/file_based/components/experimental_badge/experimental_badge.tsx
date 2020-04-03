@@ -9,17 +9,19 @@ import React, { FC } from 'react';
 
 import { EuiBetaBadge } from '@elastic/eui';
 
-export const ExperimentalBadge: FC<{ tooltipContent: string }> = ({ tooltipContent }) => (
-  <span>
-    <EuiBetaBadge
-      className="ml-experimental-badge"
-      label={
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.experimentalBadge.experimentalLabel"
-          defaultMessage="Experimental"
-        />
-      }
-      tooltipContent={tooltipContent}
-    />
-  </span>
-);
+export const ExperimentalBadge: FC<{ tooltipContent: string }> = ({ tooltipContent }) => {
+  return (
+    <span>
+      <EuiBetaBadge
+        className="ml-experimental-badge"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.experimentalBadge.experimentalLabel"
+            defaultMessage="Experimental"
+          />
+        }
+        tooltipContent={tooltipContent}
+      />
+    </span>
+  );
+};
