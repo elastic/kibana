@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { SavedObject } from 'src/core/server';
 import { Agent, AgentSOAttributes, AgentAction, AgentActionSOAttributes } from '../../types';
 
@@ -27,6 +28,10 @@ export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
 
 export function savedObjectToAgentAction(so: SavedObject<AgentActionSOAttributes>): AgentAction {
   if (so.error) {
+    if (so.error.statusCode === 404) {
+      throw Boom.notFound(so.error.message);
+    }
+
     throw new Error(so.error.message);
   }
 

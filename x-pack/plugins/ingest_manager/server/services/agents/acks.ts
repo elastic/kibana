@@ -33,72 +33,81 @@ export async function acknowledgeAgentActions(
   agent: Agent,
   agentEvents: AgentEvent[]
 ): Promise<AgentAction[]> {
-  const now = new Date().toISOString();
+  for (const agentEvent of agentEvents) {
+    if (!isAllowedType(agentEvent.type)) {
+      throw Boom.badRequest(`${agentEvent.type} not allowed for acknowledgment only ACTION_RESULT`);
+    }
+  }
 
   const actionIds = agentEvents
     .map(event => event.action_id)
-    .filter(actionId => actionId !== undefined);
-  const actions = await getAgentActionByIds(soClient, actionIds as string[]);
+    .filter(actionId => actionId !== undefined) as string[];
+
+  let actions;
+  try {
+    actions = await getAgentActionByIds(soClient, actionIds);
+  } catch (error) {
+    if (Boom.isBoom(error) && error.output.statusCode === 404) {
+      throw Boom.notFound(`One or more actions cannot be found`);
+    }
+    throw error;
+  }
+
   for (const action of actions) {
     if (action.agent_id !== agent.id) {
       throw Boom.badRequest(`${action.id} cannot be allowed by this agent`);
     }
   }
 
-  const agentActionMap: Map<string, AgentAction> = new Map(
-    actions.map(agentAction => [agentAction.id, agentAction])
-  );
-
-  const matchedUpdatedActions: AgentAction[] = [];
-
-  agentEvents.forEach(agentEvent => {
-    if (!isAllowedType(agentEvent.type)) {
-      throw Boom.badRequest(`${agentEvent.type} not allowed for acknowledgment only ACTION_RESULT`);
-    }
-    if (agentActionMap.has(agentEvent.action_id!)) {
-      const action = agentActionMap.get(agentEvent.action_id!) as AgentAction;
-      if (!action.sent_at) {
-        action.sent_at = now;
-      }
-      matchedUpdatedActions.push(action);
-    } else {
-      throw Boom.badRequest('all actions should belong to current agent');
-    }
-  });
-
-  if (matchedUpdatedActions.length > 0) {
-    const configRevision = matchedUpdatedActions.reduce((acc, action) => {
-      if (action.type !== 'CONFIG_CHANGE') {
-        return acc;
-      }
-      const data = action.data || {};
-
-      if (data?.config?.id !== agent.config_id) {
-        return acc;
-      }
-
-      return data?.config?.revision > acc ? data?.config?.revision : acc;
-    }, agent.config_revision || 0);
-
-    await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-      {
-        type: AGENT_SAVED_OBJECT_TYPE,
-        id: agent.id,
-        attributes: {
-          config_revision: configRevision,
-        },
-      },
-      ...matchedUpdatedActions.map(updatedAction => ({
-        type: AGENT_ACTION_SAVED_OBJECT_TYPE,
-        id: updatedAction.id,
-        attributes: {
-          sent_at: updatedAction.sent_at,
-        },
-      })),
-    ]);
+  if (actions.length === 0) {
+    return [];
   }
+  const configRevision = getLatestConfigRevison(agent, actions);
 
-  return matchedUpdatedActions;
+  await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
+    buildUpdateAgentConfigRevision(agent.id, configRevision),
+    ...buildUpdateAgentActionSentAt(actionIds),
+  ]);
+
+  return actions;
+}
+
+function getLatestConfigRevison(agent: Agent, actions: AgentAction[]) {
+  return actions.reduce((acc, action) => {
+    if (action.type !== 'CONFIG_CHANGE') {
+      return acc;
+    }
+    const data = action.data || {};
+
+    if (data?.config?.id !== agent.config_id) {
+      return acc;
+    }
+
+    return data?.config?.revision > acc ? data?.config?.revision : acc;
+  }, agent.config_revision || 0);
+}
+
+function buildUpdateAgentConfigRevision(agentId: string, configRevision: number) {
+  return {
+    type: AGENT_SAVED_OBJECT_TYPE,
+    id: agentId,
+    attributes: {
+      config_revision: configRevision,
+    },
+  };
+}
+
+function buildUpdateAgentActionSentAt(
+  actionsIds: string[],
+  sentAt: string = new Date().toISOString()
+) {
+  return actionsIds.map(actionId => ({
+    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+    id: actionId,
+    attributes: {
+      sent_at: sentAt,
+    },
+  }));
 }
 
 function isAllowedType(eventType: string): boolean {

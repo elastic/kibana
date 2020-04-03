@@ -3,10 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isBoom } from 'boom';
+import Boom from 'boom';
 import { SavedObjectsBulkResponse } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-import { Agent, AgentAction, AgentEvent } from '../../../common/types/models';
+import {
+  Agent,
+  AgentAction,
+  AgentActionSOAttributes,
+  AgentEvent,
+} from '../../../common/types/models';
 import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
 import { acknowledgeAgentActions } from './acks';
 
@@ -19,6 +24,8 @@ describe('test agent acks services', () => {
         saved_objects: [
           {
             id: 'action1',
+            references: [],
+            type: 'agent_actions',
             attributes: {
               type: 'CONFIG_CHANGE',
               agent_id: 'id',
@@ -28,7 +35,7 @@ describe('test agent acks services', () => {
             },
           },
         ],
-      } as SavedObjectsBulkResponse<any>)
+      } as SavedObjectsBulkResponse<AgentActionSOAttributes>)
     );
 
     const agentActions = await acknowledgeAgentActions(
@@ -61,11 +68,18 @@ describe('test agent acks services', () => {
 
   it('should fail for actions that cannot be found on agent actions list', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
-
     mockSavedObjectsClient.bulkGet.mockReturnValue(
       Promise.resolve({
-        saved_objects: [],
-      } as SavedObjectsBulkResponse<any>)
+        saved_objects: [
+          {
+            id: 'action1',
+            error: {
+              message: 'Not found',
+              statusCode: 404,
+            },
+          },
+        ],
+      } as SavedObjectsBulkResponse<AgentActionSOAttributes>)
     );
 
     try {
@@ -87,7 +101,7 @@ describe('test agent acks services', () => {
       );
       expect(true).toBeFalsy();
     } catch (e) {
-      expect(isBoom(e)).toBeTruthy();
+      expect(Boom.isBoom(e)).toBeTruthy();
     }
   });
 
@@ -99,6 +113,8 @@ describe('test agent acks services', () => {
         saved_objects: [
           {
             id: 'action1',
+            references: [],
+            type: 'agent_actions',
             attributes: {
               type: 'CONFIG_CHANGE',
               agent_id: 'id',
@@ -108,7 +124,7 @@ describe('test agent acks services', () => {
             },
           },
         ],
-      } as SavedObjectsBulkResponse<any>)
+      } as SavedObjectsBulkResponse<AgentActionSOAttributes>)
     );
 
     try {
@@ -117,15 +133,6 @@ describe('test agent acks services', () => {
         ({
           id: 'id',
           type: AGENT_TYPE_PERMANENT,
-          actions: [
-            {
-              type: 'CONFIG_CHANGE',
-              id: 'action1',
-              sent_at: '2020-03-14T19:45:02.620Z',
-              timestamp: '2019-01-04T14:32:03.36764-05:00',
-              created_at: '2020-03-14T19:45:02.620Z',
-            },
-          ],
         } as unknown) as Agent,
         [
           ({
@@ -139,7 +146,7 @@ describe('test agent acks services', () => {
       );
       expect(true).toBeFalsy();
     } catch (e) {
-      expect(isBoom(e)).toBeTruthy();
+      expect(Boom.isBoom(e)).toBeTruthy();
     }
   });
 });
