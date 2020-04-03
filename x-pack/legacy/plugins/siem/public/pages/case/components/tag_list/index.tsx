@@ -65,6 +65,7 @@ export const TagList = React.memo(
           {!isLoading && (
             <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
               <EuiButtonIcon
+                data-test-subj="tag-list-edit-button"
                 isDisabled={disabled}
                 aria-label={i18n.EDIT_TAGS_ARIA}
                 iconType={'pencil'}
@@ -75,7 +76,7 @@ export const TagList = React.memo(
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="xs">
-          {tags.length === 0 && !isEditTags && <p>{i18n.NO_TAGS}</p>}
+          {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
           {tags.length > 0 &&
             !isEditTags &&
             tags.map((tag, key) => (
@@ -84,7 +85,7 @@ export const TagList = React.memo(
               </EuiFlexItem>
             ))}
           {isEditTags && (
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>
                 <Form form={form}>
                   <CommonUseField
@@ -105,6 +106,7 @@ export const TagList = React.memo(
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="secondary"
+                      data-test-subj="edit-tags-submit"
                       fill
                       iconType="save"
                       onClick={onSubmitTags}

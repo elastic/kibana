@@ -25,3 +25,13 @@ export const mockFormHook = {
   __updateFormDataAt: jest.fn(),
   __readFieldConfigFromSchema: jest.fn(),
 };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getFormMock = (sampleData: any) => ({
+  ...mockFormHook,
+  submit: () =>
+    Promise.resolve({
+      data: sampleData,
+      isValid: true,
+    }),
+  getFormData: () => sampleData,
+});

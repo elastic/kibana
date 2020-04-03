@@ -7,17 +7,18 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { AddComment } from './';
+import { Create } from './';
 import { TestProviders } from '../../../../mock';
 import { getFormMock } from '../__mock__/form';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
 import { useInsertTimeline } from '../../../../components/timeline/insert_timeline_popover/use_insert_timeline';
-import { usePostComment } from '../../../../containers/case/use_post_comment';
+import { usePostCase } from '../../../../containers/case/use_post_case';
 jest.mock('../../../../components/timeline/insert_timeline_popover/use_insert_timeline');
-jest.mock('../../../../containers/case/use_post_comment');
-import { useForm } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
+jest.mock('../../../../containers/case/use_post_case');
+import { useForm } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks';
 import { wait } from '../../../../lib/helpers';
+import { SiemPageName } from '../../../home/types';
 jest.mock(
   '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
@@ -25,22 +26,11 @@ jest.mock(
 export const useFormMock = useForm as jest.Mock;
 
 const useInsertTimelineMock = useInsertTimeline as jest.Mock;
-const usePostCommentMock = usePostComment as jest.Mock;
+const usePostCaseMock = usePostCase as jest.Mock;
 
-const onCommentSaving = jest.fn();
-const onCommentPosted = jest.fn();
-const postComment = jest.fn();
+const postCase = jest.fn();
 const handleCursorChange = jest.fn();
 const handleOnTimelineChange = jest.fn();
-
-const addCommentProps = {
-  caseId: '1234',
-  disabled: false,
-  insertQuote: null,
-  onCommentSaving,
-  onCommentPosted,
-  showLoading: false,
-};
 
 const defaultInsertTimeline = {
   cursorPosition: {
@@ -50,71 +40,82 @@ const defaultInsertTimeline = {
   handleCursorChange,
   handleOnTimelineChange,
 };
-
-const defaultPostCommment = {
+const sampleData = {
+  description: 'what a great description',
+  tags: ['coke', 'pepsi'],
+  title: 'what a cool title',
+};
+const defaultPostCase = {
   isLoading: false,
   isError: false,
-  postComment,
+  caseData: null,
+  postCase,
 };
-const sampleData = {
-  comment: 'what a cool comment',
-};
-describe('AddComment ', () => {
+describe('Create case', () => {
   const formHookMock = getFormMock(sampleData);
 
   beforeEach(() => {
     jest.resetAllMocks();
     useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
-    usePostCommentMock.mockImplementation(() => defaultPostCommment);
+    usePostCaseMock.mockImplementation(() => defaultPostCase);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
-  it('should post comment on submit click', async () => {
+  it('should post case on submit click', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <AddComment {...addCommentProps} />
+          <Create />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
-
     wrapper
-      .find(`[data-test-subj="submit-comment"]`)
+      .find(`[data-test-subj="create-case-submit"]`)
       .first()
       .simulate('click');
     await wait();
-    expect(onCommentSaving).toBeCalled();
-    expect(postComment).toBeCalledWith(sampleData, onCommentPosted);
-    expect(formHookMock.reset).toBeCalled();
+    expect(postCase).toBeCalledWith(sampleData);
   });
 
-  it('should render spinner when loading', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostCommment, isLoading: true }));
+  it('should redirect to all cases on cancel click', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, showLoading: true }} />
+          <Create />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeTruthy();
+    wrapper
+      .find(`[data-test-subj="create-case-cancel"]`)
+      .first()
+      .simulate('click');
+    expect(mockHistory.replace.mock.calls[0][0].pathname).toEqual(`/${SiemPageName.case}`);
   });
-
-  it('should insert a quote if one is available', () => {
-    const sampleQuote = 'what a cool quote';
+  it('should redirect to new case when caseData is there', () => {
+    const sampleId = '777777';
+    usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, caseData: { id: sampleId } }));
     mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, insertQuote: sampleQuote }} />
+          <Create />
         </Router>
       </TestProviders>
     );
-
-    expect(formHookMock.setFieldValue).toBeCalledWith(
-      'comment',
-      `${sampleData.comment}\n\n${sampleQuote}`
+    expect(mockHistory.replace.mock.calls[0][0].pathname).toEqual(
+      `/${SiemPageName.case}/${sampleId}`
     );
+  });
+
+  it('should render spinner when loading', () => {
+    usePostCaseMock.mockImplementation(() => ({ ...defaultPostCase, isLoading: true }));
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <Create />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
   });
 });
