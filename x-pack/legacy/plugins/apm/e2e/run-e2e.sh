@@ -25,8 +25,6 @@ APM_IT_DIR="./tmp/apm-integration-testing"
 if [ -n "${JENKINS_URL}" ] ; then
   # shellcheck disable=SC1091
   source src/dev/ci_setup/setup_env.sh true
-  # Prepare the docker image
-  docker build --tag cypress --build-arg NODE_VERSION="$(cat .node-version)" ${E2E_DIR}/ci
   set -x
 fi
 
@@ -108,39 +106,33 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-if [ -n "${JENKINS_URL}" ] ; then
-  docker run --rm -t --user "$(id -u):$(id -g)" \
-    -v `pwd`:/app -w /app --network="host" \
-    --name cypress cypress
-else
-  #
-  # Cypress
-  ##################################################
-  echo "\n${bold}Cypress (logs: ${TMP_DIR}/e2e-yarn.log)${normal}"
-  echo "Installing cypress dependencies "
-  yarn &> ${TMP_DIR}/e2e-yarn.log
+#
+# Cypress
+##################################################
+echo "\n${bold}Cypress (logs: ${TMP_DIR}/e2e-yarn.log)${normal}"
+echo "Installing cypress dependencies "
+yarn &> ${TMP_DIR}/e2e-yarn.log
 
-  #
-  # Wait for Kibana to start
-  ##################################################
-  echo "\n${bold}Waiting for Kibana to start...${normal}"
-  echo "Note: you need to start Kibana manually. Find the instructions at the top."
-  yarn wait-on -i 500 -w 500 http://localhost:$KIBANA_PORT > /dev/null
+#
+# Wait for Kibana to start
+##################################################
+echo "\n${bold}Waiting for Kibana to start...${normal}"
+echo "Note: you need to start Kibana manually. Find the instructions at the top."
+yarn wait-on -i 500 -w 500 http://localhost:$KIBANA_PORT > /dev/null
 
-  echo "\n✅ Setup completed successfully. Running tests...\n"
+echo "\n✅ Setup completed successfully. Running tests...\n"
 
-  #
-  # run cypress tests
-  ##################################################
-  yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
+#
+# run cypress tests
+##################################################
+yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
 
-  #
-  # Run interactively
-  ##################################################
-  echo "
+#
+# Run interactively
+##################################################
+echo "
 
-  ${bold}If you want to run the test interactively, run:${normal}
+${bold}If you want to run the test interactively, run:${normal}
 
-  yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
-  "
-fi
+yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true
+"
