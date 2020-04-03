@@ -793,7 +793,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.otherLongDescription"
-          defaultMessage="Manually specify type parameters"
+          defaultMessage="Specify type parameters in JSON."
         />
       </p>
     ),

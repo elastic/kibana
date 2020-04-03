@@ -25,7 +25,7 @@ const { isJsonField } = fieldValidators;
 
 const fieldConfig: FieldConfig = {
   label: i18n.translate('xpack.idxMgmt.mappingsEditor.otherTypeJsonFieldLabel', {
-    defaultMessage: 'Type Fields JSON',
+    defaultMessage: 'Type Parameters JSON',
   }),
   defaultValue: {},
   validations: [
