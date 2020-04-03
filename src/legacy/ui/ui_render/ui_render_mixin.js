@@ -26,6 +26,7 @@ import { AppBootstrap } from './bootstrap';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
+import { getApmConfig } from '../apm';
 
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
@@ -191,7 +192,10 @@ export function uiRenderMixin(kbnServer, server, config) {
       uiSettings: { asScopedToClient },
     } = kbnServer.newPlatform.__internals;
     const uiSettings = asScopedToClient(savedObjects.getClient(h.request));
-    const vars = await legacy.getVars(app.getId(), h.request, overrides);
+    const vars = await legacy.getVars(app.getId(), h.request, {
+      apmConfig: getApmConfig(app),
+      ...overrides,
+    });
     const content = await rendering.render(h.request, uiSettings, {
       app,
       includeUserSettings,
