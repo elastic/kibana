@@ -27,6 +27,7 @@ import {
   serializeV2Template,
 } from '../../../../../common/lib/template_serialization';
 import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
+import { doMappingsHaveType } from '../../mappings_editor/lib';
 import { StepProps } from '../types';
 
 const { stripEmptyFields } = serializers;
@@ -171,7 +172,10 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
   );
 
   const RequestTab = () => {
-    const endpoint = `PUT _template/${name || '<templateName>'}`;
+    const includeTypeName = doMappingsHaveType(template.mappings);
+    const endpoint = `PUT _template/${name || '<templateName>'}${
+      includeTypeName ? '?include_type_name' : ''
+    }`;
     const templateString = JSON.stringify(serializedTemplate, null, 2);
     const request = `${endpoint}\n${templateString}`;
 
