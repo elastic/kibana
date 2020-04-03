@@ -9,6 +9,7 @@ import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helpers/make_checks';
 import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
+import { MonitorSummary } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -220,17 +221,15 @@ export default function({ getService }: FtrProviderContext) {
         const { monitorStates } = await getMonitorStates({});
         expect(monitorStates.summaries.length).to.eql(3);
         // Summaries are by default sorted by monitor names
-        expect(monitorStates.summaries.map(summary => summary.monitor_id)).to.eql([
-          downMonitorId,
-          mixMonitorId,
-          upMonitorId,
-        ]);
+        expect(
+          monitorStates.summaries.map((summary: MonitorSummary) => summary.monitor_id)
+        ).to.eql([downMonitorId, mixMonitorId, upMonitorId]);
       });
 
       it('should return a monitor with mix state if check status filter is down', async () => {
         const { monitorStates } = await getMonitorStates({ statusFilter: 'down' });
         expect(monitorStates.summaries.length).to.eql(2);
-        monitorStates.summaries.forEach(summary => {
+        monitorStates.summaries.forEach((summary: MonitorSummary) => {
           expect(summary.monitor_id).to.not.eql(upMonitorId);
         });
       });
