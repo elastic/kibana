@@ -393,8 +393,8 @@ export class EndpointDocGenerator {
   public generatePolicyDatasource(): PolicyData {
     return {
       id: this.seededUUIDv4(),
-      name: 'Second Endpoint Policy',
-      description: 'this should not be allowed',
+      name: 'Endpoint Policy',
+      description: 'Policy to protect the worlds data',
       config_id: this.seededUUIDv4(),
       enabled: true,
       output_id: '',
