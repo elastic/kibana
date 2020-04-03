@@ -77,13 +77,6 @@ kibanaPipeline(timeoutMinutes: 180) {
           kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
         }
 
-        sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
-        sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
-        sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
-        kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
-
       }
 
   }
