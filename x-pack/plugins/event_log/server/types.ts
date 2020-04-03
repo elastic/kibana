@@ -16,7 +16,7 @@ import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   logEntries: schema.boolean({ defaultValue: false }),
-  indexEntries: schema.boolean({ defaultValue: false }),
+  indexEntries: schema.boolean({ defaultValue: true }),
 });
 
 export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
