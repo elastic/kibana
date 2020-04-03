@@ -18,8 +18,7 @@ export default function(providerContext: FtrProviderContext) {
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/60471
-  describe.skip('fleet_agents_acks', () => {
+  describe('fleet_agents_acks', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
