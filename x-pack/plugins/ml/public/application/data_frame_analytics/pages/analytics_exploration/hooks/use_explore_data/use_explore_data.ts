@@ -19,6 +19,7 @@ import { newJobCapsService } from '../../../../../services/new_job_capabilities_
 import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 import { getNestedProperty } from '../../../../../util/object_utils';
 import { useMlContext } from '../../../../../contexts/ml';
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 
 import {
   getDefaultSelectableFields,
@@ -26,11 +27,13 @@ import {
   DataFrameAnalyticsConfig,
   EsFieldName,
   INDEX_STATUS,
+  MAX_COLUMNS,
   defaultSearchQuery,
 } from '../../../../common';
 import { isKeywordAndTextType } from '../../../../common/fields';
 
 import { getOutlierScoreFieldName } from './common';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
 export type TableItem = Record<string, any>;
 
@@ -40,6 +43,7 @@ interface UseExploreDataReturnType {
   errorMessage: string;
   indexPattern: IndexPattern | undefined;
   jobConfig: DataFrameAnalyticsConfig | undefined;
+  jobStatus: DATA_FRAME_TASK_STATE | undefined;
   pagination: Pagination;
   searchQuery: SavedSearchQuery;
   selectedFields: EsFieldName[];
@@ -74,6 +78,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
 
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
+  const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
 
@@ -90,6 +95,15 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
   useEffect(() => {
     (async function() {
       const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+      const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
+      const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
+        ? analyticsStats.data_frame_analytics[0]
+        : undefined;
+
+      if (stats !== undefined && stats.state) {
+        setJobStatus(stats.state);
+      }
+
       if (
         Array.isArray(analyticsConfigs.data_frame_analytics) &&
         analyticsConfigs.data_frame_analytics.length > 0
@@ -103,12 +117,32 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
   useEffect(() => {
     (async () => {
       if (jobConfig !== undefined) {
-        const sourceIndex = jobConfig.source.index[0];
-        const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-        const jobCapsIndexPattern: IndexPattern = await mlContext.indexPatterns.get(indexPatternId);
-        if (jobCapsIndexPattern !== undefined) {
-          setIndexPattern(jobCapsIndexPattern);
-          await newJobCapsService.initializeFromIndexPattern(jobCapsIndexPattern, false, false);
+        try {
+          const destIndex = Array.isArray(jobConfig.dest.index)
+            ? jobConfig.dest.index[0]
+            : jobConfig.dest.index;
+          const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
+          let indexP: IndexPattern | undefined;
+
+          try {
+            indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+          } catch (e) {
+            indexP = undefined;
+          }
+
+          if (indexP === undefined) {
+            const sourceIndex = jobConfig.source.index[0];
+            const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+            indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+          }
+
+          if (indexP !== undefined) {
+            setIndexPattern(indexP);
+            await newJobCapsService.initializeFromIndexPattern(indexP, false, false);
+          }
+        } catch (e) {
+          // eslint-disable-next-line
+          console.log('Error loading index field data', e);
         }
       }
     })();
@@ -165,7 +199,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
 
           if (selectedFields.length === 0) {
             const newSelectedFields = getDefaultSelectableFields(docs, resultsField);
-            setSelectedFields(newSelectedFields);
+            setSelectedFields(newSelectedFields.sort().splice(0, MAX_COLUMNS));
           }
 
           // Create a version of the doc's source with flattened field names.
@@ -215,6 +249,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
     errorMessage,
     indexPattern,
     jobConfig,
+    jobStatus,
     pagination,
     rowCount,
     searchQuery,

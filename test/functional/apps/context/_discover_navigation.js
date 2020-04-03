@@ -31,7 +31,8 @@ export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
-  describe('context link in discover', function contextSize() {
+  // FLAKY: https://github.com/elastic/kibana/issues/53308
+  describe.skip('context link in discover', function contextSize() {
     this.tags('smoke');
     before(async function() {
       await PageObjects.common.navigateToApp('discover');

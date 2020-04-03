@@ -8,6 +8,7 @@ import * as t from 'io-ts';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
 import {
   dependentRulesSchema,
   RequiredRulesSchema,
@@ -47,7 +48,7 @@ export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixe
 };
 
 export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'machine_learning') {
+  if (isMlRule(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ anomaly_threshold: dependentRulesSchema.props.anomaly_threshold })),
       t.exact(

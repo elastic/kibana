@@ -18,11 +18,11 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import {
-  EmbeddableFactory as AbstractEmbeddableFactory,
+  EmbeddableFactoryDefinition,
   ErrorEmbeddable,
   EmbeddableInput,
   IContainer,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../../../../src/plugins/embeddable/public';
 import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
 import { getEditPath } from '../../../../../../plugins/lens/common';
@@ -36,25 +36,22 @@ interface StartServices {
   indexPatternService: IndexPatternsContract;
 }
 
-export class EmbeddableFactory extends AbstractEmbeddableFactory {
+export class EmbeddableFactory implements EmbeddableFactoryDefinition {
   type = DOC_TYPE;
+  savedObjectMetaData = {
+    name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
+      defaultMessage: 'Lens Visualization',
+    }),
+    type: DOC_TYPE,
+    getIconForSavedObject: () => 'lensApp',
+  };
 
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super({
-      savedObjectMetaData: {
-        name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
-          defaultMessage: 'Lens Visualization',
-        }),
-        type: DOC_TYPE,
-        getIconForSavedObject: () => 'lensApp',
-      },
-    });
-  }
+  constructor(private getStartServices: () => Promise<StartServices>) {}
 
-  public async isEditable() {
+  public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
     return capabilities.visualize.save as boolean;
-  }
+  };
 
   canCreateNew() {
     return false;
@@ -66,11 +63,11 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     });
   }
 
-  async createFromSavedObject(
+  createFromSavedObject = async (
     savedObjectId: string,
     input: Partial<EmbeddableInput> & { id: string },
     parent?: IContainer
-  ) {
+  ) => {
     const {
       savedObjectsClient,
       coreHttp,
@@ -111,7 +108,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
       input,
       parent
     );
-  }
+  };
 
   async create(input: EmbeddableInput) {
     return new ErrorEmbeddable('Lens can only be created from a saved object', input);
