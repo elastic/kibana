@@ -96,9 +96,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       : getJobConfigFromFormState(form);
 
     if (isAdvancedEditorEnabled) {
-      destinationIndex = Array.isArray(analyticsJobConfig.dest?.index)
-        ? analyticsJobConfig.dest?.index[0]
-        : analyticsJobConfig.dest?.index;
+      destinationIndex = analyticsJobConfig.dest?.index as string;
     }
 
     try {
