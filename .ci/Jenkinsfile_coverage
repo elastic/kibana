@@ -5,7 +5,9 @@ kibanaLibrary.load() // load from the Jenkins instance
 
 kibanaPipeline(timeoutMinutes: 180) {
   catchErrors {
-
+    withEnv([
+      'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
+    ]) {
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
         'x-pack-intake-agent': {
@@ -26,17 +28,13 @@ kibanaPipeline(timeoutMinutes: 180) {
           xpackProks()
         ),
       ])
-
       workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
         kibanaPipeline.downloadCoverageArtifacts()
-
         def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
           "TIME_STAMP=${timestamp}",
-          "QA_TEAM_ROCKS=true"
         ]) {
           collectVcsInfo()
-
           def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
           withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
             withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
@@ -67,12 +65,10 @@ kibanaPipeline(timeoutMinutes: 180) {
           }
           kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
         }
-
       }
-
-  }
-
+    }
     kibanaPipeline.sendMail()
+  }
 }
 
 def collectVcsInfo() {
@@ -108,7 +104,6 @@ def collectVcsInfo() {
     ''', "### Collect VCS Info"
   )
 }
-
 def ossProks() {
   return [
     'oss-ciGroup1' : kibanaPipeline.ossCiGroupProcess(1),
@@ -125,7 +120,6 @@ def ossProks() {
     'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
   ]
 }
-
 def xpackProks() {
   return [
     'xpack-ciGroup1' : kibanaPipeline.xpackCiGroupProcess(1),
