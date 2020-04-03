@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyConfig } from '../types';
+import { PolicyConfig, ProtectionModes } from '../types';
 
 /**
  * Generate a new Policy model.
@@ -19,7 +19,7 @@ export const generatePolicy = (): PolicyConfig => {
         network: true,
       },
       malware: {
-        mode: 'prevent',
+        mode: ProtectionModes.prevent,
       },
       logging: {
         stdout: 'debug',
@@ -44,7 +44,7 @@ export const generatePolicy = (): PolicyConfig => {
         process: true,
       },
       malware: {
-        mode: 'detect',
+        mode: ProtectionModes.detect,
       },
       logging: {
         stdout: 'debug',
