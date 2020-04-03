@@ -36,9 +36,6 @@ const initialState: State = {
 export type Action =
   | { type: 'updateLoading'; loading: boolean }
   | {
-      type: 'updateHasManageApiKey';
-    }
-  | {
       type: 'updateHasIndexManage';
       hasIndexManage: boolean | null;
     }
@@ -85,12 +82,6 @@ export const userInfoReducer = (state: State, action: Action): State => {
       return {
         ...state,
         hasIndexWrite: action.hasIndexWrite,
-      };
-    }
-    case 'updateHasManageApiKey': {
-      return {
-        ...state,
-        // hasManageApiKey: action.hasManageApiKey,
       };
     }
     case 'updateIsSignalIndexExists': {
@@ -191,12 +182,6 @@ export const useUserInfo = (): State => {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
   }, [loading, hasIndexWrite, hasApiIndexWrite]);
-
-  // useEffect(() => {
-  //   if (!loading ) {
-  //     dispatch({ type: 'updateHasManageApiKey', hasManageApiKey: hasApiManageApiKey });
-  //   }
-  // }, [loading, hasManageApiKey, hasApiManageApiKey]);
 
   useEffect(() => {
     if (
