@@ -23,7 +23,6 @@ import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { getFieldFormats } from '../../../../public/services';
 import { FieldTypes } from '../param_types';
 import { GetInternalStartServicesFn } from '../../../types';
 

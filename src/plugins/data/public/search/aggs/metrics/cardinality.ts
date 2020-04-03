@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MetricAggType } from './metric_agg_type';
+import { MetricAggType, IMetricAggConfig } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
@@ -34,27 +34,32 @@ export interface CardinalityMetricAggDependencies {
 export const getCardinalityMetricAgg = ({
   getInternalStartServices,
 }: CardinalityMetricAggDependencies) =>
-  new MetricAggType({
-    name: METRIC_TYPES.CARDINALITY,
-    title: uniqueCountTitle,
-    makeLabel(aggConfig) {
-      return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {
-        defaultMessage: 'Unique count of {field}',
-        values: { field: aggConfig.getFieldDisplayName() },
-      });
-    },
-    getFormat() {
-      const { fieldFormats } = getInternalStartServices();
-
-      return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
-    },
-    params: [
-      {
-        name: 'field',
-        type: 'field',
-        filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-          type => type !== KBN_FIELD_TYPES.HISTOGRAM
-        ),
+  new MetricAggType(
+    {
+      name: METRIC_TYPES.CARDINALITY,
+      title: uniqueCountTitle,
+      makeLabel(aggConfig: IMetricAggConfig) {
+        return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {
+          defaultMessage: 'Unique count of {field}',
+          values: { field: aggConfig.getFieldDisplayName() },
+        });
       },
-    ],
-  });
+      getFormat() {
+        const { fieldFormats } = getInternalStartServices();
+
+        return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+      },
+      params: [
+        {
+          name: 'field',
+          type: 'field',
+          filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
+            type => type !== KBN_FIELD_TYPES.HISTOGRAM
+          ),
+        },
+      ],
+    },
+    {
+      getInternalStartServices,
+    }
+  );
