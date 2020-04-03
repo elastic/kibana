@@ -84,11 +84,11 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     async clickVisualizeExplorePlugins() {
-      await testSubjects.click('DataExplorationVisualization');
+      await testSubjects.click('tab-data');
     }
 
     async clickAdminPlugin() {
-      await testSubjects.click('Administrative');
+      await testSubjects.click('tab-admin');
     }
 
     async clickOnConsole() {
