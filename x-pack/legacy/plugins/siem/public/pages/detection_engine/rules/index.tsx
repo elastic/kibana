@@ -23,7 +23,7 @@ import { AllRules } from './all';
 import { ImportDataModal } from '../../../components/import_data_modal';
 import { ReadOnlyCallOut } from './components/read_only_callout';
 import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/update_callout';
-import { getPrePackagedRuleStatus, redirectToDetections } from './helpers';
+import { getPrePackagedRuleStatus, redirectToDetections, userHasNoPermissions } from './helpers';
 import * as i18n from './translations';
 
 type Func = (refreshPrePackagedRule?: boolean) => void;
@@ -61,8 +61,6 @@ const RulesPageComponent: React.FC = () => {
     rulesNotUpdated
   );
 
-  const userHasNoPermissions = canUserCRUD != null ? !canUserCRUD : false;
-
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
       refreshRulesData.current(true);
@@ -92,7 +90,7 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
-      {userHasNoPermissions && <ReadOnlyCallOut />}
+      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={() => setShowImportModal(false)}
@@ -122,7 +120,7 @@ const RulesPageComponent: React.FC = () => {
                 <EuiButton
                   iconType="indexOpen"
                   isLoading={loadingCreatePrePackagedRules}
-                  isDisabled={userHasNoPermissions || loading}
+                  isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                   onClick={handleCreatePrePackagedRules}
                 >
                   {i18n.LOAD_PREPACKAGED_RULES}
@@ -135,7 +133,7 @@ const RulesPageComponent: React.FC = () => {
                   data-test-subj="reloadPrebuiltRulesBtn"
                   iconType="plusInCircle"
                   isLoading={loadingCreatePrePackagedRules}
-                  isDisabled={userHasNoPermissions || loading}
+                  isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                   onClick={handleCreatePrePackagedRules}
                 >
                   {i18n.RELOAD_MISSING_PREPACKAGED_RULES(rulesNotInstalled ?? 0)}
@@ -145,7 +143,7 @@ const RulesPageComponent: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"
-                isDisabled={userHasNoPermissions || loading}
+                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                 onClick={() => {
                   setShowImportModal(true);
                 }}
@@ -159,7 +157,7 @@ const RulesPageComponent: React.FC = () => {
                 fill
                 href={getCreateRuleUrl()}
                 iconType="plusInCircle"
-                isDisabled={userHasNoPermissions || loading}
+                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
               >
                 {i18n.ADD_NEW_RULE}
               </EuiButton>
@@ -177,7 +175,7 @@ const RulesPageComponent: React.FC = () => {
           createPrePackagedRules={createPrePackagedRules}
           loading={loading || prePackagedRuleLoading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-          hasNoPermissions={userHasNoPermissions}
+          hasNoPermissions={userHasNoPermissions(canUserCRUD)}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}
