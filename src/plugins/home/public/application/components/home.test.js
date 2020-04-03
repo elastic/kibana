@@ -29,6 +29,9 @@ jest.mock('../kibana_services', () => ({
     getBasePath: () => 'path',
     tutorialVariables: () => ({}),
     homeConfig: { disableWelcomeScreen: false },
+    chrome: {
+      setBreadcrumbs: () => {},
+    },
   }),
 }));
 

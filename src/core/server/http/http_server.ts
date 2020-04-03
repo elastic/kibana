@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Server } from 'hapi';
+import HapiStaticFiles from 'inert';
 import url from 'url';
 
 import { Logger, LoggerFactory } from '../logging';
@@ -44,6 +45,7 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouter: (router: IRouter) => void;
+  registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
@@ -97,10 +99,11 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  public setup(config: HttpConfig): HttpServerSetup {
+  public async setup(config: HttpConfig): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
+    await this.server.register([HapiStaticFiles]);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);
@@ -109,6 +112,7 @@ export class HttpServer {
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      registerStaticDir: this.registerStaticDir.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
@@ -337,6 +341,25 @@ export class HttpServer {
     this.registerOnPreResponse((request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
+    });
+  }
+
+  private registerStaticDir(path: string, dirPath: string) {
+    if (this.server === undefined) {
+      throw new Error('Http server is not setup up yet');
+    }
+
+    this.server.route({
+      path,
+      method: 'GET',
+      handler: {
+        directory: {
+          path: dirPath,
+          listing: false,
+          lookupCompressed: true,
+        },
+      },
+      options: { auth: false },
     });
   }
 }

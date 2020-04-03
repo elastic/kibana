@@ -18,7 +18,6 @@
  */
 
 import { format } from 'url';
-import { resolve } from 'path';
 import _ from 'lodash';
 import Boom from 'boom';
 
@@ -31,22 +30,6 @@ export default async function(kbnServer, server, config) {
   setupBasePathProvider(kbnServer);
 
   await registerHapiPlugins(server);
-
-  // provide a simple way to expose static directories
-  server.decorate('server', 'exposeStaticDir', function(routePath, dirPath) {
-    this.route({
-      path: routePath,
-      method: 'GET',
-      handler: {
-        directory: {
-          path: dirPath,
-          listing: false,
-          lookupCompressed: true,
-        },
-      },
-      config: { auth: false },
-    });
-  });
 
   // helper for creating view managers for servers
   server.decorate('server', 'setupViews', function(path, engines) {
@@ -77,7 +60,4 @@ export default async function(kbnServer, server, config) {
         .permanent(true);
     },
   });
-
-  // Expose static assets
-  server.exposeStaticDir('/ui/{path*}', resolve(__dirname, '../../ui/public/assets'));
 }

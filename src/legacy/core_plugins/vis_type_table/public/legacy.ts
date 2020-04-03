@@ -22,11 +22,10 @@ import { npSetup, npStart } from './legacy_imports';
 import { plugin } from '.';
 
 import { TablePluginSetupDependencies } from './plugin';
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 
 const plugins: Readonly<TablePluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
-  visualizations: visualizationsSetup,
+  visualizations: npSetup.plugins.visualizations,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

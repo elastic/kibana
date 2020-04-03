@@ -52,7 +52,7 @@ export async function initPlugin(server: Hapi.Server, path: string) {
         payload: Joi.string(),
       },
     },
-    handler: webhookHandler,
+    handler: webhookHandler as Hapi.Lifecycle.Method,
   });
 }
 

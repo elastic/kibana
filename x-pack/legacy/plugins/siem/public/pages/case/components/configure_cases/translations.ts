@@ -104,7 +104,7 @@ export const FIELD_MAPPING_FIRST_COL = i18n.translate(
 export const FIELD_MAPPING_SECOND_COL = i18n.translate(
   'xpack.siem.case.configureCases.fieldMappingSecondCol',
   {
-    defaultMessage: 'Third-party incident field',
+    defaultMessage: 'External incident field',
   }
 );
 
@@ -155,7 +155,7 @@ export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
   'xpack.siem.case.configureCases.warningMessage',
   {
     defaultMessage:
-      'Configuration seems to be invalid. The selected connector is missing. Did you delete the connector?',
+      'The selected connector has been deleted. Either select a different connector or create a new one.',
   }
 );
 
