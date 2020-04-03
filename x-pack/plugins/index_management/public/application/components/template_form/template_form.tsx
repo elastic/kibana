@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 import { serializers } from '../../../shared_imports';
-import { Template } from '../../../../common/types';
+import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
 import { TemplateSteps } from './template_steps';
 import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
 import { StepProps, DataGetterFunc } from './types';
@@ -24,11 +24,11 @@ import { SectionError } from '../section_error';
 const { stripEmptyFields } = serializers;
 
 interface Props {
-  onSave: (template: Template) => void;
+  onSave: (template: TemplateDeserialized) => void;
   clearSaveError: () => void;
   isSaving: boolean;
   saveError: any;
-  defaultValue?: Template;
+  defaultValue?: TemplateDeserialized;
   isEditing?: boolean;
 }
 
@@ -47,7 +47,15 @@ const stepComponentMap: { [key: number]: React.FunctionComponent<StepProps> } = 
 };
 
 export const TemplateForm: React.FunctionComponent<Props> = ({
-  defaultValue = { isManaged: false },
+  defaultValue = {
+    name: '',
+    indexPatterns: [],
+    template: {},
+    isManaged: false,
+    _kbnMeta: {
+      formatVersion: DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+    },
+  },
   onSave,
   isSaving,
   saveError,
@@ -63,7 +71,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     5: defaultValidation,
   });
 
-  const template = useRef<Partial<Template>>(defaultValue);
+  const template = useRef<TemplateDeserialized>(defaultValue);
   const stepsDataGetters = useRef<Record<number, DataGetterFunc>>({});
 
   const lastStep = Object.keys(stepComponentMap).length;
@@ -91,17 +99,31 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
   );
 
   const validateAndGetDataFromCurrentStep = async () => {
-    const validateAndGetData = stepsDataGetters.current[currentStep];
+    const validateAndGetStepData = stepsDataGetters.current[currentStep];
 
-    if (!validateAndGetData) {
+    if (!validateAndGetStepData) {
       throw new Error(`No data getter has been set for step "${currentStep}"`);
     }
 
-    const { isValid, data } = await validateAndGetData();
+    const { isValid, data, path } = await validateAndGetStepData();
 
     if (isValid) {
-      // Update the template object
-      template.current = { ...template.current, ...data };
+      // Update the template object with the current step data
+      if (path) {
+        // We only update a "slice" of the template
+        const sliceToUpdate = template.current[path as keyof TemplateDeserialized];
+
+        if (sliceToUpdate === null || typeof sliceToUpdate !== 'object') {
+          return { isValid, data };
+        }
+
+        template.current = {
+          ...template.current,
+          [path]: { ...sliceToUpdate, ...data },
+        };
+      } else {
+        template.current = { ...template.current, ...data };
+      }
     }
 
     return { isValid, data };
@@ -111,9 +133,9 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     // All steps needs validation, except for the last step
     const shouldValidate = currentStep !== lastStep;
 
-    let isValid = isStepValid;
     if (shouldValidate) {
-      isValid = isValid === false ? false : (await validateAndGetDataFromCurrentStep()).isValid;
+      const isValid =
+        isStepValid === false ? false : (await validateAndGetDataFromCurrentStep()).isValid;
 
       // If step is invalid do not let user proceed
       if (!isValid) {
@@ -222,7 +244,10 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                     fill
                     color="secondary"
                     iconType="check"
-                    onClick={onSave.bind(null, stripEmptyFields(template.current) as Template)}
+                    onClick={onSave.bind(
+                      null,
+                      stripEmptyFields(template.current!) as TemplateDeserialized
+                    )}
                     data-test-subj="submitButton"
                     isLoading={isSaving}
                   >
