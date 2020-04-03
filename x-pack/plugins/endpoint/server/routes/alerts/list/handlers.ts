@@ -50,11 +50,18 @@ export const alertListUpdateHandlerWrapper = function(
         body: {
           query: {
             ids: {
-              values: [],
+              values: [], // Populated below
             },
           },
           script: {
-            source: `doc['state'] = ${req.body.state}`,
+            source: `
+              if (ctx._source['state'] == null) {
+                def state = ['active': ${req.body.state.active}];
+                ctx._source.state = state;
+              } else {
+                ctx._source.state['active'] = ${req.body.state.active};
+              }
+            `,
             lang: 'painless',
           },
         },

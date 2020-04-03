@@ -83,12 +83,6 @@ export const alertDetailsUpdateHandlerWrapper = function(
         body: {
           doc: req.body,
         },
-        /*
-        script: {
-         source: `doc['state']['active'] = ${req.body.state.active}`,
-            lang: 'painless',
-        },
-        */
       })) as UpdateResponse<AlertEvent>;
 
       return res.ok({ body: response });
