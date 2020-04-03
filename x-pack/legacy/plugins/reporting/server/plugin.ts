@@ -12,8 +12,6 @@ import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } fr
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
 import { registerReportingUsageCollector } from './usage';
-// @ts-ignore no module definition
-import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
