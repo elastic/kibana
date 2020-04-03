@@ -11,7 +11,7 @@ import {
   ImportFailure,
   Settings,
   Mappings,
-  IngestPipeline,
+  IngestPipelineWrapper,
 } from '../../../common/types/file_datavisualizer';
 import { InputData } from './file_data_visualizer';
 
@@ -21,7 +21,7 @@ export function importDataProvider(callAsCurrentUser: APICaller) {
     index: string,
     settings: Settings,
     mappings: Mappings,
-    ingestPipeline: IngestPipeline,
+    ingestPipeline: IngestPipelineWrapper,
     data: InputData
   ): Promise<ImportResponse> {
     let createdIndex;

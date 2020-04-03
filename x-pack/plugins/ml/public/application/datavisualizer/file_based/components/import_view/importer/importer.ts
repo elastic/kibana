@@ -135,6 +135,7 @@ export class Importer {
           retries--;
         } catch (err) {
           resp.success = false;
+          resp.error = err;
           retries = 0;
         }
       }
@@ -188,7 +189,7 @@ function populateFailures(error: ImportResponse, failures: ImportFailure[], chun
 // But it's not sending every single field that Filebeat would add, so the ingest pipeline
 // cannot look for a event.timezone variable in each input record.
 // Therefore we need to replace {{ event.timezone }} with the actual browser timezone
-function updatePipelineTimezone(ingestPipeline: any) {
+function updatePipelineTimezone(ingestPipeline: IngestPipeline) {
   if (ingestPipeline !== undefined && ingestPipeline.processors && ingestPipeline.processors) {
     const dateProcessor = ingestPipeline.processors.find(
       (p: any) => p.date !== undefined && p.date.timezone === '{{ event.timezone }}'

@@ -111,7 +111,6 @@ export const AdvancedSettings: FC<Props> = ({
             defaultMessage="Index pattern name"
           />
         }
-        // disabled={createIndexPattern === false || initialized === true}
         isInvalid={indexPatternNameError !== ''}
         error={[indexPatternNameError]}
       >

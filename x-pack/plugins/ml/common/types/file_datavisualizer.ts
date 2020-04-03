@@ -46,6 +46,7 @@ export interface FindFileStructureResponse {
   explanation?: string[];
   grok_pattern?: string;
   multiline_start_pattern?: string;
+  exclude_lines_pattern?: string;
   java_timestamp_formats?: string[];
   joda_timestamp_formats?: string[];
   timestamp_field?: string;
@@ -84,7 +85,12 @@ export interface Mappings {
   [key: string]: any;
 }
 
-export interface IngestPipeline {
+export interface IngestPipelineWrapper {
   id: string;
-  pipeline: any;
+  pipeline: IngestPipeline;
+}
+
+export interface IngestPipeline {
+  description: string;
+  processors: any[];
 }

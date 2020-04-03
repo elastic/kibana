@@ -5,9 +5,10 @@
  */
 
 import { Importer, ImportConfig } from './importer';
+import { FindFileStructureResponse } from '../../../../../../../common/types/file_datavisualizer';
 
 export class NdjsonImporter extends Importer {
-  constructor(results: any, settings: ImportConfig) {
+  constructor(results: FindFileStructureResponse, settings: ImportConfig) {
     super(settings);
   }
 

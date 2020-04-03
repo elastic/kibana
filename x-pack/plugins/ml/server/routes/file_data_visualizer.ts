@@ -10,7 +10,7 @@ import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
 import {
   InputOverrides,
   Settings,
-  IngestPipeline,
+  IngestPipelineWrapper,
   Mappings,
 } from '../../common/types/file_datavisualizer';
 import { wrapError } from '../client/error_wrapper';
@@ -34,7 +34,7 @@ function importData(
   index: string,
   settings: Settings,
   mappings: Mappings,
-  ingestPipeline: IngestPipeline,
+  ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {
   const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient.callAsCurrentUser);

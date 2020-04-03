@@ -12,6 +12,11 @@ import { EuiCallOut, EuiAccordion } from '@elastic/eui';
 
 import { IMPORT_STATUS, Statuses } from '../import_progress';
 
+interface ImportError {
+  msg: string;
+  more?: string;
+}
+
 interface Props {
   errors: any[];
   statuses: Statuses;
@@ -110,11 +115,6 @@ function ImportError(error: any, key: number) {
       )}
     </React.Fragment>
   );
-}
-
-interface ImportError {
-  msg: string;
-  more?: string;
 }
 
 function toString(error: any): ImportError {

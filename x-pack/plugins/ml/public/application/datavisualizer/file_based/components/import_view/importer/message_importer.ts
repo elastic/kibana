@@ -5,13 +5,16 @@
  */
 
 import { Importer, ImportConfig } from './importer';
-import { Doc } from '../../../../../../../common/types/file_datavisualizer';
+import {
+  Doc,
+  FindFileStructureResponse,
+} from '../../../../../../../common/types/file_datavisualizer';
 
 export class MessageImporter extends Importer {
   private _excludeLinesRegex: RegExp | null;
   private _multilineStartRegex: RegExp | null;
 
-  constructor(results: any, settings: ImportConfig) {
+  constructor(results: FindFileStructureResponse, settings: ImportConfig) {
     super(settings);
 
     this._excludeLinesRegex =
