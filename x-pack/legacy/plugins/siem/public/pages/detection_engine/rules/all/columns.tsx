@@ -81,8 +81,8 @@ export type RuleStatusRowItemType = RuleStatus & {
   name: string;
   id: string;
 };
-type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
-type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
+export type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+export type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
 
 interface GetColumns {
   dispatch: React.Dispatch<Action>;
@@ -144,7 +144,6 @@ export const getColumns = ({
           </LocalizedDateTooltip>
         );
       },
-      sortable: true,
       truncateText: true,
       width: '20%',
     },
@@ -180,7 +179,7 @@ export const getColumns = ({
     },
     {
       align: 'center',
-      field: 'activate',
+      field: 'enabled',
       name: i18n.COLUMN_ACTIVATE,
       render: (value: Rule['enabled'], item: Rule) => (
         <RuleSwitch
@@ -283,7 +282,6 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
           </LocalizedDateTooltip>
         );
       },
-      sortable: true,
       truncateText: true,
       width: '20%',
     },

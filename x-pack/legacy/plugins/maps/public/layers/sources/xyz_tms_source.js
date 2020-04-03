@@ -13,16 +13,14 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../common/i18n_getters';
 import _ from 'lodash';
 import { EMS_XYZ } from '../../../common/constants';
+import { registerSource } from './source_registry';
+
+const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
+  defaultMessage: 'Tile Map Service',
+});
 
 export class XYZTMSSource extends AbstractTMSSource {
   static type = EMS_XYZ;
-  static title = i18n.translate('xpack.maps.source.ems_xyzTitle', {
-    defaultMessage: 'Tile Map Service',
-  });
-  static description = i18n.translate('xpack.maps.source.ems_xyzDescription', {
-    defaultMessage: 'Tile map service configured in interface',
-  });
-  static icon = 'grid';
 
   static createDescriptor({ urlTemplate, attributionText, attributionUrl }) {
     return {
@@ -33,18 +31,9 @@ export class XYZTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
-      const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
-      const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-    return <XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />;
-  }
-
   async getImmutableProperties() {
     return [
-      { label: getDataSourceLabel(), value: XYZTMSSource.title },
+      { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.urlTemplate },
     ];
   }
@@ -175,3 +164,24 @@ class XYZTMSEditor extends React.Component {
     );
   }
 }
+
+registerSource({
+  ConstructorFunction: XYZTMSSource,
+  type: EMS_XYZ,
+});
+
+export const tmsLayerWizardConfig = {
+  description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
+    defaultMessage: 'Tile map service configured in interface',
+  }),
+  icon: 'grid',
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = sourceConfig => {
+      const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
+      const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+    return <XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />;
+  },
+  title: sourceTitle,
+};
