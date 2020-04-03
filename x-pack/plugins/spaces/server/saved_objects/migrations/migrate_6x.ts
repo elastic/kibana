@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function migrateToKibana660(doc: Record<string, any>) {
+import { SavedObjectMigrationFn } from 'src/core/server';
+
+export const migrateToKibana660: SavedObjectMigrationFn = doc => {
   if (!doc.attributes.hasOwnProperty('disabledFeatures')) {
     doc.attributes.disabledFeatures = [];
   }
   return doc;
-}
+};
