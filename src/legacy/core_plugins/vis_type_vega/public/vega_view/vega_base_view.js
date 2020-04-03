@@ -27,7 +27,7 @@ import {
   loader as vegaLoader,
   version as vegaVersion,
 } from 'vega/build-es5/vega.js';
-import { version as vegaLiteVersion } from 'vega-lite';
+import { version as vegaLiteVersion } from 'vega-lite/build-es5/vega-lite.js';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { logger as vegaLogger, Warn, version as vegaVersion } from 'vega/build-es5/vega.js';
-import { version as vegaLiteVersion, compile } from 'vega-lite';
+import { version as vegaLiteVersion, compile } from 'vega-lite/build-es5/vega-lite.js';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import { EsQueryParser } from './es_query_parser';
