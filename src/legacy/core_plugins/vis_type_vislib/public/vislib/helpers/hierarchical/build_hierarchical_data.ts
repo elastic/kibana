@@ -18,6 +18,7 @@
  */
 
 import { toArray } from 'lodash';
+import { SerializedFieldFormat } from '../../../../../../../plugins/expressions/common/types';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';
 
@@ -25,7 +26,7 @@ export interface Dimension {
   accessor: number;
   format: {
     id?: string;
-    params?: { pattern?: string; [key: string]: any };
+    params?: SerializedFieldFormat<object>;
   };
 }
 
@@ -40,7 +41,7 @@ interface Slice {
   name: string;
   size: number;
   parent?: Slice;
-  children?: Slice[];
+  children?: [];
   rawData?: {
     table: Table;
     row: number;
@@ -66,7 +67,7 @@ export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Di
   } else {
     slices = [];
     table.rows.forEach((row, rowIndex) => {
-      let parent: Slice | undefined;
+      let parent: Slice;
       let dataLevel = slices;
 
       buckets.forEach(bucket => {
@@ -95,7 +96,7 @@ export const buildHierarchicalData = (table: Table, { metric, buckets = [] }: Di
         }
 
         parent = slice;
-        dataLevel = slice.children || [];
+        dataLevel = slice.children as [];
       });
     });
   }
