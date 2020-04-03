@@ -1533,7 +1533,7 @@ export const search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("./search/aggs/buckets/_bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
         } | {
             display: string;
             val: string;
