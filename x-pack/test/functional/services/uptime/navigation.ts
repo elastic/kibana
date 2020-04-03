@@ -9,11 +9,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   const goToUptimeRoot = async () => {
     await retry.tryForTime(30 * 1000, async () => {
       await PageObjects.common.navigateToApp('uptime');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
     });
   };
