@@ -347,7 +347,7 @@ describe('rule helpers', () => {
       expect(result).toEqual(userHasNoPermissionsExpectedResult);
     });
 
-    test('returns false when user cannot CRUD', () => {
+    test('returns true when user cannot CRUD', () => {
       const result: boolean = userHasNoPermissions(false);
       const userHasNoPermissionsExpectedResult = true;
 
