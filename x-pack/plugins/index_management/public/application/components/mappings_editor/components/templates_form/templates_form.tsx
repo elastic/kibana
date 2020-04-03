@@ -80,7 +80,7 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
       // Avoid reseting the form on component mount.
       didMountRef.current = true;
     }
-  }, [defaultValue, form]);
+  }, [defaultValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
