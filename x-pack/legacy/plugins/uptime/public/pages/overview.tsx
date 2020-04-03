@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,7 +17,6 @@ import { useUptimeTelemetry, UptimePage, useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plugins/data/public';
-import { UptimeThemeContext } from '../contexts';
 import { EmptyState, FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
@@ -54,7 +53,6 @@ const getMonitorListPageSizeValue = () => {
 };
 
 export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFilters }: Props) => {
-  const { colors } = useContext(UptimeThemeContext);
   // TODO: this is temporary until we migrate the monitor list to our Redux implementation
   const [monitorListPageSize, setMonitorListPageSize] = useState<number>(
     getMonitorListPageSizeValue()
@@ -118,13 +116,10 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
         <StatusPanel />
         <EuiSpacer size="s" />
         <MonitorList
-          dangerColor={colors.danger}
           hasActiveFilters={!!esFilters}
-          implementsCustomErrorState={true}
           linkParameters={linkParameters}
           pageSize={monitorListPageSize}
           setPageSize={setMonitorListPageSize}
-          successColor={colors.success}
           variables={{
             ...sharedProps,
             pagination,

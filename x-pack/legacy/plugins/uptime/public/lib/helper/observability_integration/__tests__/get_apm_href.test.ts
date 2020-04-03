@@ -5,7 +5,7 @@
  */
 
 import { getApmHref } from '../get_apm_href';
-import { MonitorSummary } from '../../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 
 describe('getApmHref', () => {
   let summary: MonitorSummary;

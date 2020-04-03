@@ -8,7 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { getLocationStatus, MonitorListStatusColumn } from '../monitor_list_status_column';
-import { Check } from '../../../../../common/graphql/types';
+import { Check } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
 
 describe('MonitorListStatusColumn', () => {
@@ -29,9 +29,6 @@ describe('MonitorListStatusColumn', () => {
   beforeEach(() => {
     upChecks = [
       {
-        agent: { id: '6a2f2a1c-e346-49ed-8418-6d48af8841d6' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',
@@ -49,9 +46,6 @@ describe('MonitorListStatusColumn', () => {
         timestamp: '1579794631464',
       },
       {
-        agent: { id: '1117fd01-bc1a-4aa5-bfab-40ab455eadf9' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',
@@ -69,9 +63,6 @@ describe('MonitorListStatusColumn', () => {
         timestamp: '1579794634220',
       },
       {
-        agent: { id: 'eda59510-45e8-4dfe-b0f8-959c449e3565' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',
@@ -92,9 +83,6 @@ describe('MonitorListStatusColumn', () => {
 
     downChecks = [
       {
-        agent: { id: '6a2f2a1c-e346-49ed-8418-6d48af8841d6' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',
@@ -112,9 +100,6 @@ describe('MonitorListStatusColumn', () => {
         timestamp: '1579794631464',
       },
       {
-        agent: { id: '1117fd01-bc1a-4aa5-bfab-40ab455eadf9' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',
@@ -132,9 +117,6 @@ describe('MonitorListStatusColumn', () => {
         timestamp: '1579794634220',
       },
       {
-        agent: { id: 'eda59510-45e8-4dfe-b0f8-959c449e3565' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',
@@ -155,9 +137,6 @@ describe('MonitorListStatusColumn', () => {
 
     checks = [
       {
-        agent: { id: '6a2f2a1c-e346-49ed-8418-6d48af8841d6' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',
@@ -175,9 +154,6 @@ describe('MonitorListStatusColumn', () => {
         timestamp: '1579794631464',
       },
       {
-        agent: { id: '1117fd01-bc1a-4aa5-bfab-40ab455eadf9' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',
@@ -195,9 +171,6 @@ describe('MonitorListStatusColumn', () => {
         timestamp: '1579794634220',
       },
       {
-        agent: { id: 'eda59510-45e8-4dfe-b0f8-959c449e3565' },
-        container: null,
-        kubernetes: null,
         monitor: {
           ip: '104.86.46.103',
           name: '',

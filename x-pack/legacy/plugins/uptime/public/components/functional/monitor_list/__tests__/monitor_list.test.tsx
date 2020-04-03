@@ -6,7 +6,7 @@
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { MonitorSummaryResult } from '../../../../../common/graphql/types';
+import { MonitorSummaryResult } from '../../../../../common/runtime_types';
 import { MonitorListComponent } from '../monitor_list';
 import { renderWithRouter } from '../../../../lib';
 
@@ -46,7 +46,8 @@ describe('MonitorList component', () => {
               up: 1,
               down: 2,
             },
-            timestamp: '123',
+            timestamp: 123,
+            url: {},
           },
         },
         {
@@ -72,7 +73,8 @@ describe('MonitorList component', () => {
               up: 2,
               down: 0,
             },
-            timestamp: '125',
+            timestamp: 125,
+            url: {},
           },
         },
       ],
@@ -83,13 +85,11 @@ describe('MonitorList component', () => {
   it('shallow renders the monitor list', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
-        dangerColor="danger"
         data={{ monitorStates: result }}
         hasActiveFilters={false}
         loading={false}
         pageSize={25}
         setPageSize={jest.fn()}
-        successColor="primary"
       />
     );
 
@@ -99,13 +99,11 @@ describe('MonitorList component', () => {
   it('renders a no items message when no data is provided', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
-        dangerColor="danger"
         data={{}}
         hasActiveFilters={false}
         loading={false}
         pageSize={25}
         setPageSize={jest.fn()}
-        successColor="primary"
       />
     );
     expect(component).toMatchSnapshot();
@@ -114,13 +112,11 @@ describe('MonitorList component', () => {
   it('renders the monitor list', () => {
     const component = renderWithRouter(
       <MonitorListComponent
-        dangerColor="danger"
         data={{ monitorStates: result }}
         hasActiveFilters={false}
         loading={false}
         pageSize={25}
         setPageSize={jest.fn()}
-        successColor="primary"
       />
     );
 

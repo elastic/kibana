@@ -12,7 +12,7 @@ import {
   MonitorGroupsPage,
 } from '../fetch_page';
 import { QueryContext } from '../query_context';
-import { MonitorSummary } from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { MonitorSummary } from '../../../../../../../legacy/plugins/uptime/common/runtime_types';
 import { nextPagination, prevPagination, simpleQueryContext } from './test_helpers';
 
 const simpleFixture: MonitorGroups[] = [
@@ -58,7 +58,11 @@ const simpleEnricher = (monitorGroups: MonitorGroups[]): MonitorEnricher => {
       const monitorGroup = monitorGroups.find(mg => mg.groups.some(g => g.checkGroup === cg))!;
       return {
         monitor_id: monitorGroup.id,
-        state: { summary: {}, timestamp: new Date(Date.parse('1999-12-31')).toISOString() },
+        state: {
+          summary: {},
+          timestamp: new Date(Date.parse('1999-12-31')).valueOf(),
+          url: {},
+        },
       };
     });
   };

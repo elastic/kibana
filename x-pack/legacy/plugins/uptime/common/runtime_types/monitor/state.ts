@@ -26,6 +26,15 @@ export const CheckType = t.intersection([
         uid: t.string,
       }),
     }),
+    observer: t.type({
+      geo: t.partial({
+        name: t.string,
+        location: t.partial({
+          lat: t.number,
+          lon: t.number,
+        }),
+      }),
+    }),
   }),
   t.type({
     monitor: CheckMonitorType,

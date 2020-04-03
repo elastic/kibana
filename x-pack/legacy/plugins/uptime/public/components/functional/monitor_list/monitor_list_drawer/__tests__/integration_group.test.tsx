@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { MonitorSummary } from '../../../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../../../common/runtime_types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { IntegrationGroup } from '../integration_group';
 
@@ -18,7 +18,8 @@ describe('IntegrationGroup', () => {
       state: {
         summary: {},
         checks: [],
-        timestamp: '123',
+        timestamp: 123,
+        url: {},
       },
     };
   });

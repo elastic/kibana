@@ -7,7 +7,7 @@
 import {
   CursorDirection,
   SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export interface CursorPagination {
   cursorKey?: any;

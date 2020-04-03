@@ -10,7 +10,7 @@ import {
   CursorDirection,
   MonitorSummaryResult,
   SortOrder,
-} from '../../../../../common/graphql/types';
+} from '../../../../../common/runtime_types';
 import { MonitorListComponent } from '../monitor_list';
 
 describe('MonitorListPagination component', () => {
@@ -59,7 +59,8 @@ describe('MonitorListPagination component', () => {
               up: 1,
               down: 2,
             },
-            timestamp: '123',
+            timestamp: 123,
+            url: {},
           },
         },
         {
@@ -85,7 +86,8 @@ describe('MonitorListPagination component', () => {
               up: 2,
               down: 0,
             },
-            timestamp: '125',
+            timestamp: 125,
+            url: {},
           },
         },
       ],
@@ -96,12 +98,10 @@ describe('MonitorListPagination component', () => {
   it('renders the monitor list', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
-        dangerColor="danger"
         data={{ monitorStates: result }}
         loading={false}
         pageSize={25}
         setPageSize={jest.fn()}
-        successColor="primary"
         hasActiveFilters={false}
       />
     );
@@ -112,10 +112,8 @@ describe('MonitorListPagination component', () => {
   it('renders a no items message when no data is provided', () => {
     const component = shallowWithIntl(
       <MonitorListComponent
-        dangerColor="danger"
         data={{}}
         loading={false}
-        successColor="primary"
         pageSize={25}
         setPageSize={jest.fn()}
         hasActiveFilters={false}

@@ -12,7 +12,7 @@ import {
   CursorDirection,
   MonitorSummary,
   SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 import { enrichMonitorGroups } from './enrich_monitor_groups';
 import { MonitorGroupIterator } from './monitor_group_iterator';
 

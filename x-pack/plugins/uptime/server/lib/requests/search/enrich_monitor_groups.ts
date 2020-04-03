@@ -8,12 +8,12 @@ import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
 import { QUERY, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import {
-  MonitorSummary,
-  SummaryHistogram,
   Check,
+  Histogram,
+  MonitorSummary,
   CursorDirection,
   SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
 
 export const enrichMonitorGroups: MonitorEnricher = async (
@@ -289,7 +289,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 const getHistogramForMonitors = async (
   queryContext: QueryContext,
   monitorIds: string[]
-): Promise<{ [key: string]: SummaryHistogram }> => {
+): Promise<{ [key: string]: Histogram }> => {
   const params = {
     index: queryContext.heartbeatIndices,
     body: {

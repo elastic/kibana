@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import 'jest';
-import { MonitorSummary, Check } from '../../../../../../common/graphql/types';
 import React from 'react';
 import { MonitorListDrawerComponent } from '../monitor_list_drawer';
-import { MonitorDetails } from '../../../../../../common/runtime_types';
+import { Check, MonitorDetails, MonitorSummary } from '../../../../../../common/runtime_types';
 import { shallowWithRouter } from '../../../../../lib';
 
 describe('MonitorListDrawer component', () => {
@@ -31,7 +30,7 @@ describe('MonitorListDrawer component', () => {
           up: 1,
           down: 0,
         },
-        timestamp: '123',
+        timestamp: 123,
         url: {
           domain: 'expired.badssl.com',
           full: 'https://expired.badssl.com',

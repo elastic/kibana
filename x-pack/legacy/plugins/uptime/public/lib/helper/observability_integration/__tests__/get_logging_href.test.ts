@@ -9,7 +9,7 @@ import {
   getLoggingKubernetesHref,
   getLoggingIpHref,
 } from '../get_logging_href';
-import { MonitorSummary } from '../../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 
 describe('getLoggingHref', () => {
   let summary: MonitorSummary;
@@ -36,7 +36,8 @@ describe('getLoggingHref', () => {
             timestamp: '123',
           },
         ],
-        timestamp: '123',
+        timestamp: 123,
+        url: {},
       },
     };
   });
@@ -83,7 +84,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined if necessary container is null', () => {
-    summary.state.checks![0].container!.id = null;
+    delete summary.state.checks![0].container!.id;
     expect(getLoggingContainerHref(summary, '')).toBeUndefined();
   });
 
@@ -93,7 +94,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined if necessary pod is null', () => {
-    summary.state.checks![0].kubernetes!.pod!.uid = null;
+    delete summary.state.checks![0].kubernetes!.pod!.uid;
     expect(getLoggingKubernetesHref(summary, '')).toBeUndefined();
   });
 
@@ -103,7 +104,7 @@ describe('getLoggingHref', () => {
   });
 
   it('returns undefined ip href if ip is null', () => {
-    summary.state.checks![0].monitor.ip = null;
+    delete summary.state.checks![0].monitor.ip;
     expect(getLoggingIpHref(summary, '')).toBeUndefined();
   });
 });
