@@ -18,7 +18,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await grokDebugger.assertExists();
     });
 
-    it('Dev tools grok debugger set input, async () => {
+    it('Dev tools grok debugger set input', async () => {
       await grokDebugger.setEventInput('SegerCommaBob');
       await a11y.testAppSnapshot();
     });
