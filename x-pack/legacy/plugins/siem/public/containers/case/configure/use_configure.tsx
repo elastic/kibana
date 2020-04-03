@@ -13,6 +13,7 @@ import { ClosureType } from './types';
 
 interface PersistCaseConfigure {
   connectorId: string;
+  connectorName: string;
   closureType: ClosureType;
 }
 
@@ -24,12 +25,12 @@ export interface ReturnUseCaseConfigure {
 }
 
 interface UseCaseConfigure {
-  setConnectorId: (newConnectorId: string) => void;
-  setClosureType: (newClosureType: ClosureType) => void;
+  setConnector: (newConnectorId: string, newConnectorName?: string) => void;
+  setClosureType?: (newClosureType: ClosureType) => void;
 }
 
 export const useCaseConfigure = ({
-  setConnectorId,
+  setConnector,
   setClosureType,
 }: UseCaseConfigure): ReturnUseCaseConfigure => {
   const [, dispatchToaster] = useStateToaster();
@@ -48,8 +49,10 @@ export const useCaseConfigure = ({
         if (!didCancel) {
           setLoading(false);
           if (res != null) {
-            setConnectorId(res.connectorId);
-            setClosureType(res.closureType);
+            setConnector(res.connectorId, res.connectorName);
+            if (setClosureType != null) {
+              setClosureType(res.closureType);
+            }
             setVersion(res.version);
           }
         }
@@ -74,7 +77,7 @@ export const useCaseConfigure = ({
   }, []);
 
   const persistCaseConfigure = useCallback(
-    async ({ connectorId, closureType }: PersistCaseConfigure) => {
+    async ({ connectorId, connectorName, closureType }: PersistCaseConfigure) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
       const saveCaseConfiguration = async () => {
@@ -83,7 +86,11 @@ export const useCaseConfigure = ({
           const res =
             version.length === 0
               ? await postCaseConfigure(
-                  { connector_id: connectorId, closure_type: closureType },
+                  {
+                    connector_id: connectorId,
+                    connector_name: connectorName,
+                    closure_type: closureType,
+                  },
                   abortCtrl.signal
                 )
               : await patchCaseConfigure(
@@ -92,8 +99,10 @@ export const useCaseConfigure = ({
                 );
           if (!didCancel) {
             setPersistLoading(false);
-            setConnectorId(res.connectorId);
-            setClosureType(res.closureType);
+            setConnector(res.connectorId);
+            if (setClosureType) {
+              setClosureType(res.closureType);
+            }
             setVersion(res.version);
           }
         } catch (error) {

@@ -8,7 +8,8 @@ import { SignalSourceHit, SignalHit } from './types';
 import { buildRule } from './build_rule';
 import { buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { RuleTypeParams, RuleAlertAction } from '../types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { RuleTypeParams } from '../types';
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;

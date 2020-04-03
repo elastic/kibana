@@ -40,6 +40,8 @@ export { GetTransformsResponse, PreviewData, PreviewMappings } from './pivot_pre
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigPercentiles,
+  PERCENTILES_AGG_DEFAULT_PERCENTS,
   PivotAgg,
   PivotAggDict,
   PivotAggsConfig,

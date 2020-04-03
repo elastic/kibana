@@ -29,7 +29,7 @@ import { Ping, PingResults } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { pingsQuery } from '../../../queries';
-import { LocationName } from './../location_name';
+import { LocationName } from './location_name';
 import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
 

@@ -32,7 +32,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
     Query: {
       async getMonitorStates(
         _resolver,
-        { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter },
+        { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter, pageSize },
         { APICaller, savedObjectsClient }
       ): Promise<MonitorSummaryResult> {
         const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
@@ -53,6 +53,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
             dateRangeStart,
             dateRangeEnd,
             pagination: decodedPagination,
+            pageSize,
             filters,
             // this is added to make typescript happy,
             // this sort of reassignment used to be further downstream but I've moved it here

@@ -22,6 +22,7 @@ import {
 } from './services';
 import {
   agentConfigurationRoute,
+  getSingleAgentConfigurationRoute,
   agentConfigurationSearchRoute,
   deleteAgentConfigurationRoute,
   listAgentConfigurationEnvironmentsRoute,
@@ -86,6 +87,7 @@ const createApmApi = () => {
     .add(serviceAnnotationsRoute)
 
     // Agent configuration
+    .add(getSingleAgentConfigurationRoute)
     .add(agentConfigurationAgentNameRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)

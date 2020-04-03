@@ -10,7 +10,12 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
   PatchRuleAlertParamsRest,
 } from '../../rules/types';
-import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
+import {
+  transformBulkError,
+  buildRouteValidation,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
@@ -80,6 +85,10 @@ export const patchRulesBulkRoute = (router: IRouter) => {
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
+            if (type) {
+              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+            }
+
             const rule = await patchRules({
               alertsClient,
               actionsClient,

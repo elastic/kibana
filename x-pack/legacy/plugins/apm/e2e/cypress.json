@@ -1,5 +1,6 @@
 {
-  "baseUrl": "http://localhost:5601",
+  "nodeVersion": "system",
+  "baseUrl": "http://localhost:5701",
   "video": false,
   "trashAssetsBeforeRuns": false,
   "fileServerFolder": "../",
@@ -15,5 +16,9 @@
     "mochaFile": "./cypress/test-results/[hash]-e2e-tests.xml",
     "toConsole": false
   },
-  "testFiles": "**/*.{feature,features}"
+  "testFiles": "**/*.{feature,features}",
+  "env": {
+    "elasticsearch_username": "admin",
+    "elasticsearch_password": "changeme"
+  }
 }

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ABOUT_FALSE_POSITIVES = 4;
+export const ABOUT_FALSE_POSITIVES = 3;
 
-export const ABOUT_MITRE = 5;
+export const ABOUT_MITRE = 4;
 
 export const ABOUT_RULE_DESCRIPTION = '[data-test-subj=stepAboutRuleDetailsToggleDescriptionText]';
 
@@ -16,13 +16,13 @@ export const ABOUT_SEVERITY = 0;
 
 export const ABOUT_STEP = '[data-test-subj="aboutRule"] .euiDescriptionList__description';
 
-export const ABOUT_TAGS = 6;
+export const ABOUT_TAGS = 5;
 
-export const ABOUT_TIMELINE = 2;
-
-export const ABOUT_URLS = 3;
+export const ABOUT_URLS = 2;
 
 export const DEFINITION_CUSTOM_QUERY = 1;
+
+export const DEFINITION_TIMELINE = 3;
 
 export const DEFINITION_INDEX_PATTERNS =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"] .euiDescriptionList__description .euiBadge__text';

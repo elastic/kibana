@@ -30,72 +30,79 @@ const initialCommentValue: CommentRequest = {
 
 interface AddCommentProps {
   caseId: string;
+  onCommentSaving?: () => void;
   onCommentPosted: (commentResponse: Comment) => void;
+  showLoading?: boolean;
 }
 
-export const AddComment = React.memo<AddCommentProps>(({ caseId, onCommentPosted }) => {
-  const { commentData, isLoading, postComment, resetCommentData } = usePostComment(caseId);
-  const { form } = useForm<CommentRequest>({
-    defaultValue: initialCommentValue,
-    options: { stripEmptyFields: false },
-    schema,
-  });
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
-    form,
-    'comment'
-  );
+export const AddComment = React.memo<AddCommentProps>(
+  ({ caseId, showLoading = true, onCommentPosted, onCommentSaving }) => {
+    const { commentData, isLoading, postComment, resetCommentData } = usePostComment(caseId);
+    const { form } = useForm<CommentRequest>({
+      defaultValue: initialCommentValue,
+      options: { stripEmptyFields: false },
+      schema,
+    });
+    const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
+      form,
+      'comment'
+    );
 
-  useEffect(() => {
-    if (commentData !== null) {
-      onCommentPosted(commentData);
-      form.reset();
-      resetCommentData();
-    }
-  }, [commentData]);
+    useEffect(() => {
+      if (commentData !== null) {
+        onCommentPosted(commentData);
+        form.reset();
+        resetCommentData();
+      }
+    }, [commentData]);
 
-  const onSubmit = useCallback(async () => {
-    const { isValid, data } = await form.submit();
-    if (isValid) {
-      await postComment(data);
-    }
-  }, [form]);
+    const onSubmit = useCallback(async () => {
+      const { isValid, data } = await form.submit();
+      if (isValid) {
+        if (onCommentSaving != null) {
+          onCommentSaving();
+        }
+        await postComment(data);
+      }
+    }, [form]);
 
-  return (
-    <>
-      {isLoading && <MySpinner size="xl" />}
-      <Form form={form}>
-        <UseField
-          path="comment"
-          component={MarkdownEditorForm}
-          componentProps={{
-            idAria: 'caseComment',
-            isDisabled: isLoading,
-            dataTestSubj: 'caseComment',
-            placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-            onCursorPositionUpdate: handleCursorChange,
-            bottomRightContent: (
-              <EuiButton
-                iconType="plusInCircle"
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                onClick={onSubmit}
-                size="s"
-              >
-                {i18n.ADD_COMMENT}
-              </EuiButton>
-            ),
-            topRightContent: (
-              <InsertTimelinePopover
-                hideUntitled={true}
-                isDisabled={isLoading}
-                onTimelineChange={handleOnTimelineChange}
-              />
-            ),
-          }}
-        />
-      </Form>
-    </>
-  );
-});
+    return (
+      <>
+        {isLoading && showLoading && <MySpinner size="xl" />}
+        <Form form={form}>
+          <UseField
+            path="comment"
+            component={MarkdownEditorForm}
+            componentProps={{
+              idAria: 'caseComment',
+              isDisabled: isLoading,
+              dataTestSubj: 'caseComment',
+              placeholder: i18n.ADD_COMMENT_HELP_TEXT,
+              onCursorPositionUpdate: handleCursorChange,
+              bottomRightContent: (
+                <EuiButton
+                  iconType="plusInCircle"
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onClick={onSubmit}
+                  size="s"
+                >
+                  {i18n.ADD_COMMENT}
+                </EuiButton>
+              ),
+              topRightContent: (
+                <InsertTimelinePopover
+                  hideUntitled={true}
+                  isDisabled={isLoading}
+                  onTimelineChange={handleOnTimelineChange}
+                />
+              ),
+            }}
+          />
+        </Form>
+      </>
+    );
+  }
+);
 
 AddComment.displayName = 'AddComment';

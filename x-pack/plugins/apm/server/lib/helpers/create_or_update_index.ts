@@ -9,8 +9,9 @@ import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
 export type Mappings =
   | {
-      dynamic?: boolean;
+      dynamic?: boolean | 'strict';
       properties: Record<string, Mappings>;
+      dynamic_templates?: any[];
     }
   | {
       type: string;

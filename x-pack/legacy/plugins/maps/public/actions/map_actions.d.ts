@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { LAYER_TYPE } from '../../common/constants';
 import { DataMeta, MapFilters } from '../../common/data_request_descriptor_types';
 
 export type SyncContext = {
@@ -16,3 +17,10 @@ export type SyncContext = {
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: MapFilters;
 };
+
+export function updateSourceProp(
+  layerId: string,
+  propName: string,
+  value: unknown,
+  newLayerType?: LAYER_TYPE
+): void;

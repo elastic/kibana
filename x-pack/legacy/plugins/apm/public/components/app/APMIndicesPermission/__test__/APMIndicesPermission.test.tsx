@@ -11,9 +11,9 @@ import { APMIndicesPermission } from '../';
 import * as hooks from '../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
-  MockApmPluginContextWrapper,
   expectTextsNotInDocument
 } from '../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 describe('APMIndicesPermission', () => {
   it('returns empty component when api status is loading', () => {

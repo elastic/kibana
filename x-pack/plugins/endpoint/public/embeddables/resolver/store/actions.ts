@@ -43,10 +43,23 @@ interface UserChangedSelectedEvent {
 interface AppRequestedResolverData {
   readonly type: 'appRequestedResolverData';
 }
+/**
+ * When the user switches the active descendent of the Resolver.
+ */
+interface UserFocusedOnResolverNode {
+  readonly type: 'userFocusedOnResolverNode';
+  readonly payload: {
+    /**
+     * Used to identify the process node that should be brought into view.
+     */
+    readonly nodeId: string;
+  };
+}
 
 export type ResolverAction =
   | CameraAction
   | DataAction
   | UserBroughtProcessIntoView
   | UserChangedSelectedEvent
-  | AppRequestedResolverData;
+  | AppRequestedResolverData
+  | UserFocusedOnResolverNode;

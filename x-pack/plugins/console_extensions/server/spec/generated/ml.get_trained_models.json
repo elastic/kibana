@@ -5,7 +5,8 @@
       "include_model_definition": "__flag__",
       "decompress_definition": "__flag__",
       "from": 0,
-      "size": 0
+      "size": 0,
+      "tags": []
     },
     "methods": [
       "GET"

@@ -19,6 +19,7 @@ import {
   createBulkErrorObject,
   buildRouteValidation,
   buildSiemResponse,
+  validateLicenseForRuleType,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
@@ -90,6 +91,8 @@ export const createRulesBulkRoute = (router: IRouter) => {
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
+              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+
               const finalIndex = outputIndex ?? siemClient.signalsIndex;
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {

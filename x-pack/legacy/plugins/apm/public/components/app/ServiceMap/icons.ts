@@ -8,12 +8,14 @@ import cytoscape from 'cytoscape';
 import {
   AGENT_NAME,
   SERVICE_NAME,
-  SPAN_TYPE
+  SPAN_TYPE,
+  SPAN_SUBTYPE
 } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import databaseIcon from './icons/database.svg';
 import defaultIconImport from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
 import dotNetIcon from './icons/dot-net.svg';
+import elasticsearchIcon from './icons/elasticsearch.svg';
 import globeIcon from './icons/globe.svg';
 import goIcon from './icons/go.svg';
 import javaIcon from './icons/java.svg';
@@ -63,6 +65,11 @@ export function iconForNode(node: cytoscape.NodeSingular) {
     return serviceIcons[node.data(AGENT_NAME) as string];
   } else if (isIE11) {
     return defaultIcon;
+  } else if (
+    node.data(SPAN_TYPE) === 'db' &&
+    node.data(SPAN_SUBTYPE) === 'elasticsearch'
+  ) {
+    return elasticsearchIcon;
   } else if (icons[type]) {
     return icons[type];
   } else {

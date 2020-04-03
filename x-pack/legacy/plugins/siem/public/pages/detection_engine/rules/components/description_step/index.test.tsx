@@ -18,7 +18,7 @@ import {
   Filter,
   FilterManager,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { mockAboutStepRule } from '../../all/__mocks__/mock';
+import { mockAboutStepRule, mockDefineStepRule } from '../../all/__mocks__/mock';
 import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import * as i18n from './translations';
@@ -263,7 +263,7 @@ describe('description_step', () => {
     test('returns expected ListItems array when given valid inputs', () => {
       const result: ListItems[] = buildListItems(mockAboutStep, schema, mockFilterManager);
 
-      expect(result.length).toEqual(10);
+      expect(result.length).toEqual(9);
     });
   });
 
@@ -431,10 +431,11 @@ describe('description_step', () => {
 
     describe('timeline', () => {
       test('returns timeline title if one exists', () => {
+        const mockDefineStep = mockDefineStepRule();
         const result: ListItems[] = getDescriptionItem(
           'timeline',
           'Timeline label',
-          mockAboutStep,
+          mockDefineStep,
           mockFilterManager
         );
 
@@ -444,7 +445,7 @@ describe('description_step', () => {
 
       test('returns default timeline title if none exists', () => {
         const mockStep = {
-          ...mockAboutStep,
+          ...mockDefineStepRule(),
           timeline: {
             id: '12345',
           },

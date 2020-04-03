@@ -98,7 +98,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
-              defaultMessage="Learn how to create a Slack webhook URL"
+              defaultMessage="Create a Slack webhook URL"
             />
           </EuiLink>
         }
@@ -115,7 +115,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
           fullWidth
           isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
           name="webhookUrl"
-          placeholder="URL like https://hooks.slack.com/services"
+          placeholder="Example: https://hooks.slack.com/services"
           value={webhookUrl || ''}
           data-test-subj="slackWebhookUrlInput"
           onChange={e => {
@@ -182,10 +182,16 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
                 data-test-subj="slackAddVariableButton"
                 onClick={() => setIsVariablesPopoverOpen(true)}
                 iconType="indexOpen"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.addVariableTitle',
+                  {
+                    defaultMessage: 'Add alert variable',
+                  }
+                )}
                 aria-label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.addVariablePopoverButton',
                   {
-                    defaultMessage: 'Add variable',
+                    defaultMessage: 'Add alert variable',
                   }
                 )}
               />

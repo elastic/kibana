@@ -12,6 +12,6 @@
       "_ml/data_frame/analytics/{id}",
       "_ml/data_frame/analytics"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/get-dfanalytics.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-dfanalytics.html"
   }
 }

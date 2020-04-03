@@ -13,11 +13,11 @@ import * as hooks from '../../../../../hooks/useFetcher';
 import { LicenseContext } from '../../../../../context/LicenseContext';
 import { CustomLinkOverview } from '.';
 import {
-  MockApmPluginContextWrapper,
   expectTextsInDocument,
   expectTextsNotInDocument
 } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './CustomLinkFlyout/saveCustomLink';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const data = [
   {

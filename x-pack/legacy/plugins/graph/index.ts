@@ -37,6 +37,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
           defaultMessage: 'Graph',
         }),
+        order: 1200,
         icon: 'graphApp',
         navLinkId: 'graph',
         app: ['graph', 'kibana'],
@@ -44,6 +45,8 @@ export const graph: LegacyPluginInitializer = kibana => {
         validLicenses: ['platinum', 'enterprise', 'trial'],
         privileges: {
           all: {
+            app: ['graph', 'kibana'],
+            catalogue: ['graph'],
             savedObject: {
               all: ['graph-workspace'],
               read: ['index-pattern'],
@@ -51,6 +54,8 @@ export const graph: LegacyPluginInitializer = kibana => {
             ui: ['save', 'delete'],
           },
           read: {
+            app: ['graph', 'kibana'],
+            catalogue: ['graph'],
             savedObject: {
               all: [],
               read: ['index-pattern', 'graph-workspace'],

@@ -306,6 +306,10 @@ export const SCHEDULE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.sc
   defaultMessage: 'Schedule rule',
 });
 
+export const RULE_ACTIONS = i18n.translate('xpack.siem.detectionEngine.rules.ruleActionsTitle', {
+  defaultMessage: 'Rule actions',
+});
+
 export const DEFINITION = i18n.translate('xpack.siem.detectionEngine.rules.stepDefinitionTitle', {
   defaultMessage: 'Definition',
 });
@@ -316,6 +320,10 @@ export const ABOUT = i18n.translate('xpack.siem.detectionEngine.rules.stepAboutT
 
 export const SCHEDULE = i18n.translate('xpack.siem.detectionEngine.rules.stepScheduleTitle', {
   defaultMessage: 'Schedule',
+});
+
+export const ACTIONS = i18n.translate('xpack.siem.detectionEngine.rules.stepActionsTitle', {
+  defaultMessage: 'Actions',
 });
 
 export const OPTIONAL_FIELD = i18n.translate(
@@ -350,3 +358,57 @@ export const RELOAD_MISSING_PREPACKAGED_RULES = (missingRules: number) =>
     defaultMessage:
       'Reload {missingRules} deleted Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
   });
+
+export const IMPORT_RULE_BTN_TITLE = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.importRuleTitle',
+  {
+    defaultMessage: 'Import rule',
+  }
+);
+
+export const SELECT_RULE = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.selectRuleDescription',
+  {
+    defaultMessage: 'Select a SIEM rule (as exported from the Detection Engine view) to import',
+  }
+);
+
+export const INITIAL_PROMPT_TEXT = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.initialPromptTextDescription',
+  {
+    defaultMessage: 'Select or drag and drop a valid rules_export.ndjson file',
+  }
+);
+
+export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.overwriteDescription',
+  {
+    defaultMessage: 'Automatically overwrite saved objects with the same rule ID',
+  }
+);
+
+export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully imported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    }
+  );
+
+export const IMPORT_FAILED = i18n.translate(
+  'xpack.siem.detectionEngine.components.importRuleModal.importFailedTitle',
+  {
+    defaultMessage: 'Failed to import rules',
+  }
+);
+
+export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, message: string) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
+    {
+      values: { ruleId, statusCode, message },
+      defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
+    }
+  );

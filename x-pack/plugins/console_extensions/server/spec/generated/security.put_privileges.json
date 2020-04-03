@@ -12,8 +12,8 @@
       "POST"
     ],
     "patterns": [
-      "_security/privilege"
+      "_security/privilege/"
     ],
-    "documentation": "TODO"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-privileges.html"
   }
 }

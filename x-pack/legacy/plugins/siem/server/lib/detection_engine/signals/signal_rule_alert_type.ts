@@ -5,13 +5,17 @@
  */
 
 import { Logger } from 'src/core/server';
-import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+  NOTIFICATION_THROTTLE_RULE,
+} from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
-import { SignalRuleAlertTypeDefinition, AlertAttributes } from './types';
+import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import { getGapBetweenRuns } from './utils';
 import { writeSignalRuleExceptionToSavedObject } from './write_signal_rule_exception_to_saved_object';
 import { signalParamsSchema } from './signal_params_schema';
@@ -22,6 +26,8 @@ import { getCurrentStatusSavedObject } from './get_current_status_saved_object';
 import { writeCurrentStatusSucceeded } from './write_current_status_succeeded';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
+import { getSignalsCount } from '../notifications/get_signals_count';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 
 export const signalRulesAlertType = ({
   logger,
@@ -46,6 +52,7 @@ export const signalRulesAlertType = ({
         index,
         filters,
         language,
+        meta,
         machineLearningJobId,
         outputIndex,
         savedId,
@@ -53,7 +60,10 @@ export const signalRulesAlertType = ({
         to,
         type,
       } = params;
-      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
+      const savedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
+        'alert',
+        alertId
+      );
 
       const ruleStatusSavedObjects = await getRuleStatusSavedObjects({
         alertId,
@@ -76,6 +86,7 @@ export const signalRulesAlertType = ({
         enabled,
         schedule: { interval },
         throttle,
+        params: ruleParams,
       } = savedObject.attributes;
 
       const updatedAt = savedObject.updated_at ?? '';
@@ -199,6 +210,37 @@ export const signalRulesAlertType = ({
         }
 
         if (creationSucceeded) {
+          if (meta?.throttle === NOTIFICATION_THROTTLE_RULE && actions.length) {
+            const notificationRuleParams = {
+              ...ruleParams,
+              name,
+              id: savedObject.id,
+            };
+            const { signalsCount, resultsLink } = await getSignalsCount({
+              from: `now-${interval}`,
+              to: 'now',
+              index: ruleParams.outputIndex,
+              ruleId: ruleParams.ruleId!,
+              kibanaSiemAppUrl: meta.kibanaSiemAppUrl as string,
+              ruleAlertId: savedObject.id,
+              callCluster: services.callCluster,
+            });
+
+            logger.info(
+              `Found ${signalsCount} signals using signal rule name: "${notificationRuleParams.name}", id: "${notificationRuleParams.ruleId}", rule_id: "${notificationRuleParams.ruleId}" in "${notificationRuleParams.outputIndex}" index`
+            );
+
+            if (signalsCount) {
+              const alertInstance = services.alertInstanceFactory(alertId);
+              scheduleNotificationActions({
+                alertInstance,
+                signalsCount,
+                resultsLink,
+                ruleParams: notificationRuleParams,
+              });
+            }
+          }
+
           logger.debug(
             `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", output_index: "${outputIndex}"`
           );

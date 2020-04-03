@@ -244,7 +244,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   describe('apm feature controls', () => {
     const config = {
       service: { name: 'test-service' },
-      settings: { transaction_sample_rate: 0.5 },
+      settings: { transaction_sample_rate: '0.5' },
     };
     before(async () => {
       log.info(`Creating agent configuration`);

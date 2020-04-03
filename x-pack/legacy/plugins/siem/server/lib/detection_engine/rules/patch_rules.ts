@@ -6,12 +6,12 @@
 
 import { defaults } from 'lodash/fp';
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { readRules } from './read_rules';
 import { PatchRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion, calculateName, calculateInterval } from './utils';
-import { transformRuleToAlertAction } from './transform_actions';
 
 export const patchRules = async ({
   alertsClient,

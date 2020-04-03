@@ -12,7 +12,6 @@ import { setupXPackMain } from './server/lib/setup_xpack_main';
 import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
-import { registerMonitoringCollection } from './server/telemetry_collection';
 
 export const xpackMain = kibana => {
   return new kibana.Plugin({
@@ -69,7 +68,6 @@ export const xpackMain = kibana => {
       }
 
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
-      registerMonitoringCollection();
 
       featuresPlugin.registerLegacyAPI({
         xpackInfo: setupXPackMain(server),

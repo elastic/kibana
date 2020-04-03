@@ -72,8 +72,8 @@ interface EmailConfig {
 }
 
 interface EmailSecrets {
-  user: string;
-  password: string;
+  user: string | null;
+  password: string | null;
 }
 
 export interface EmailActionConnector extends ActionConnector {

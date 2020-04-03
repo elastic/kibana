@@ -6,6 +6,6 @@
     "patterns": [
       "_sql/close"
     ],
-    "documentation": "Clear SQL cursor"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-pagination.html"
   }
 }

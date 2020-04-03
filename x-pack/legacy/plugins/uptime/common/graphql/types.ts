@@ -552,6 +552,8 @@ export interface GetMonitorStatesQueryArgs {
   filters?: string | null;
 
   statusFilter?: string | null;
+
+  pageSize: number;
 }
 
 // ====================================================

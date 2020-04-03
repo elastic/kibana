@@ -298,6 +298,14 @@
         ],
       },
       {
+        groupSlug: 'geojson',
+        groupName: 'geojson related packages',
+        packageNames: [
+          'geojson',
+          '@types/geojson',
+        ],
+      },
+      {
         groupSlug: 'getopts',
         groupName: 'getopts related packages',
         packageNames: [

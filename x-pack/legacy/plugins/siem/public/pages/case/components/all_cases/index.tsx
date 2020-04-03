@@ -26,6 +26,7 @@ import { useGetCases, UpdateCase } from '../../../../containers/case/use_get_cas
 import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
+import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { Panel } from '../../../../components/panel';
 import {
   UtilityBar,
@@ -35,18 +36,15 @@ import {
   UtilityBarText,
 } from '../../../../components/utility_bar';
 import { getConfigureCasesUrl, getCreateCaseUrl } from '../../../../components/link_to';
-
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { OpenClosedStats } from '../open_closed_stats';
+import { navTabs } from '../../../home/home_navigations';
 
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
-
-const CONFIGURE_CASES_URL = getConfigureCasesUrl();
-const CREATE_CASE_URL = getCreateCaseUrl();
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -78,6 +76,8 @@ const getSortField = (field: string): SortFieldCase => {
   return SortFieldCase.createdAt;
 };
 export const AllCases = React.memo(() => {
+  const urlSearch = useGetUrlSearch(navTabs.case);
+
   const {
     countClosedCases,
     countOpenCases,
@@ -276,12 +276,12 @@ export const AllCases = React.memo(() => {
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
-            <EuiButton href={CONFIGURE_CASES_URL} iconType="controlsHorizontal">
+            <EuiButton href={getConfigureCasesUrl(urlSearch)} iconType="controlsHorizontal">
               {i18n.CONFIGURE_CASES_BUTTON}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill href={CREATE_CASE_URL} iconType="plusInCircle">
+            <EuiButton fill href={getCreateCaseUrl(urlSearch)} iconType="plusInCircle">
               {i18n.CREATE_TITLE}
             </EuiButton>
           </EuiFlexItem>
@@ -342,7 +342,12 @@ export const AllCases = React.memo(() => {
                   titleSize="xs"
                   body={i18n.NO_CASES_BODY}
                   actions={
-                    <EuiButton fill size="s" href={CREATE_CASE_URL} iconType="plusInCircle">
+                    <EuiButton
+                      fill
+                      size="s"
+                      href={getCreateCaseUrl(urlSearch)}
+                      iconType="plusInCircle"
+                    >
                       {i18n.ADD_NEW_CASE}
                     </EuiButton>
                   }

@@ -9,6 +9,6 @@
     "patterns": [
       "_ml/datafeeds/{datafeed_id}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-delete-datafeed.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-delete-datafeed.html"
   }
 }

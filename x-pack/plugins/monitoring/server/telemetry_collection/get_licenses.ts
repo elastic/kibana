@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  StatsCollectionConfig,
-  LicenseGetter,
-} from 'src/legacy/core_plugins/telemetry/server/collection_manager';
 import { SearchResponse } from 'elasticsearch';
-import { ESLicense } from 'src/legacy/core_plugins/telemetry/server/telemetry_collection/get_local_license';
+import {
+  ESLicense,
+  LicenseGetter,
+  StatsCollectionConfig,
+} from 'src/plugins/telemetry_collection_manager/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
+import { CustomContext } from './get_all_stats';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.
  */
-export const getLicenses: LicenseGetter = async (clustersDetails, { server, callCluster }) => {
+export const getLicenses: LicenseGetter<CustomContext> = async (
+  clustersDetails,
+  { callCluster },
+  { maxBucketSize }
+) => {
   const clusterUuids = clustersDetails.map(({ clusterUuid }) => clusterUuid);
-  const response = await fetchLicenses(server, callCluster, clusterUuids);
+  const response = await fetchLicenses(callCluster, clusterUuids, maxBucketSize);
   return handleLicenses(response);
 };
 
@@ -31,14 +36,13 @@ export const getLicenses: LicenseGetter = async (clustersDetails, { server, call
  * Returns the response for the aggregations to fetch details for the product.
  */
 export function fetchLicenses(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
-  clusterUuids: string[]
+  clusterUuids: string[],
+  maxBucketSize: number
 ) {
-  const config = server.config();
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: maxBucketSize,
     ignoreUnavailable: true,
     filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
     body: {

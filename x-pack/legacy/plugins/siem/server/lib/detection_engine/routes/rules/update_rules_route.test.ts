@@ -13,6 +13,7 @@ import {
   getFindResultWithSingleHit,
   getFindResultStatusEmpty,
   nonRuleFindResult,
+  typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -86,6 +87,22 @@ describe('update_rules', () => {
       expect(response.body).toEqual({
         message: 'Test error',
         status_code: 500,
+      });
+    });
+
+    it('rejects the request if licensing is not adequate', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const request = requestMock.create({
+        method: 'put',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: typicalMlRulePayload(),
+      });
+
+      const response = await server.inject(request, context);
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: 'Your license does not support machine learning. Please upgrade your license.',
+        status_code: 400,
       });
     });
   });

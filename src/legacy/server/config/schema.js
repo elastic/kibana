@@ -133,8 +133,8 @@ export default () =>
           .keys({
             enabled: Joi.boolean().default(false),
             everyBytes: Joi.number()
-              // > 100KB
-              .greater(102399)
+              // > 1MB
+              .greater(1048576)
               // < 1GB
               .less(1073741825)
               // 10MB

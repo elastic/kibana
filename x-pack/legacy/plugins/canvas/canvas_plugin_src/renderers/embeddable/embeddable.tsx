@@ -82,8 +82,13 @@ const embeddable = () => ({
       ReactDOM.unmountComponentAtNode(domNode);
 
       const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
-        handlers.onEmbeddableInputChange(embeddableInputToExpression(updatedInput, embeddableType));
+        const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
+
+        if (updatedExpression) {
+          handlers.onEmbeddableInputChange(updatedExpression);
+        }
       });
+
       ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () => handlers.done());
 
       handlers.onResize(() => {

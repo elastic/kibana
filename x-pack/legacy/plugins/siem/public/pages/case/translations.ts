@@ -33,15 +33,13 @@ export const OPENED_ON = i18n.translate('xpack.siem.case.caseView.openedOn', {
 export const CLOSED_ON = i18n.translate('xpack.siem.case.caseView.closedOn', {
   defaultMessage: 'Closed on',
 });
-export const REOPEN_CASE = i18n.translate('xpack.siem.case.caseTable.reopenCase', {
-  defaultMessage: 'Reopen case',
-});
-export const CLOSE_CASE = i18n.translate('xpack.siem.case.caseTable.closeCase', {
-  defaultMessage: 'Close case',
+
+export const REPORTER = i18n.translate('xpack.siem.case.caseView.reporterLabel', {
+  defaultMessage: 'Reporter',
 });
 
-export const REPORTER = i18n.translate('xpack.siem.case.caseView.createdBy', {
-  defaultMessage: 'Reporter',
+export const PARTICIPANTS = i18n.translate('xpack.siem.case.caseView.particpantsLabel', {
+  defaultMessage: 'Participants',
 });
 
 export const CREATE_BC_TITLE = i18n.translate('xpack.siem.case.caseView.breadcrumb', {
@@ -90,6 +88,30 @@ export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase',
   defaultMessage: 'Create case',
 });
 
+export const CLOSED_CASE = i18n.translate('xpack.siem.case.caseView.closedCase', {
+  defaultMessage: 'Closed case',
+});
+
+export const CLOSE_CASE = i18n.translate('xpack.siem.case.caseView.closeCase', {
+  defaultMessage: 'Close case',
+});
+
+export const REOPEN_CASE = i18n.translate('xpack.siem.case.caseView.reopenCase', {
+  defaultMessage: 'Reopen case',
+});
+
+export const REOPENED_CASE = i18n.translate('xpack.siem.case.caseView.reopenedCase', {
+  defaultMessage: 'Reopened case',
+});
+
+export const CASE_NAME = i18n.translate('xpack.siem.case.caseView.caseName', {
+  defaultMessage: 'Case name',
+});
+
+export const TO = i18n.translate('xpack.siem.case.caseView.to', {
+  defaultMessage: 'to',
+});
+
 export const TAGS = i18n.translate('xpack.siem.case.caseView.tags', {
   defaultMessage: 'Tags',
 });
@@ -130,7 +152,7 @@ export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate(
 );
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.siem.case.configureCasesButton', {
-  defaultMessage: 'Edit third-party connection',
+  defaultMessage: 'Edit external connection',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {

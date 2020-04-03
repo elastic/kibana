@@ -158,4 +158,19 @@ export const schema: FormSchema = {
       },
     ],
   },
+  timeline: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
+      {
+        defaultMessage: 'Timeline template',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
+      {
+        defaultMessage:
+          'Select an existing timeline to use as a template when investigating generated signals.',
+      }
+    ),
+  },
 };

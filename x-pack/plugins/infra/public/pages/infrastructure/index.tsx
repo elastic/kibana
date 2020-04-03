@@ -91,7 +91,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <AlertDropdown />
+              <Route path={'/explorer'} component={AlertDropdown} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </AppNavigation>

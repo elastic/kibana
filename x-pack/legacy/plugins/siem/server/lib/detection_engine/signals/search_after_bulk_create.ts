@@ -5,7 +5,8 @@
  */
 
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { RuleTypeParams, RuleAlertAction } from '../types';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { RuleTypeParams } from '../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
