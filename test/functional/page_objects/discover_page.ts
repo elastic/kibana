@@ -245,7 +245,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldListItemVisualize(fieldName: string) {
-      const field = await testSubjects.find(`field-${fieldName}`);
+      const field = await testSubjects.find(`field-${fieldName}-showDetails`);
       const isActive = await field.elementHasClass('dscSidebarItem--active');
 
       if (!isActive) {

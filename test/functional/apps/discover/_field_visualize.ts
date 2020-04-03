@@ -32,9 +32,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/61714
-  // eslint-disable-next-line ban/ban
-  describe.only('discover field visualize button', () => {
+  describe('discover field visualize button', () => {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
