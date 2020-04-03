@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function migrateToKibana660(doc: Record<string, any>) {
-  if (!doc.attributes.hasOwnProperty('disabledFeatures')) {
-    doc.attributes.disabledFeatures = [];
-  }
-  return doc;
+// TODO: Move mappings type from Mappings editor here
+
+export interface Mappings {
+  [key: string]: any;
 }
