@@ -16,7 +16,7 @@ import {
   ResponseFacade,
   ServerFacade,
 } from '../../types';
-import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 
@@ -31,11 +31,11 @@ import { getRouteOptionsCsv } from './lib/route_config_factories';
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
-  config: ReportingConfig,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   parentLogger: Logger
 ) {
+  const config = reporting.getConfig();
   const routeOptions = getRouteOptionsCsv(config, plugins, parentLogger);
 
   /*

@@ -67,11 +67,11 @@ export function registerJobGenerationRoutes(
     return err;
   }
 
-  registerGenerateFromJobParams(config, server, plugins, handler, handleError, logger);
+  registerGenerateFromJobParams(reporting, server, plugins, handler, handleError, logger);
 
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(config, server, plugins, handler, handleError, logger);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, config, server, plugins, logger);
+    registerGenerateCsvFromSavedObject(reporting, server, plugins, handler, handleError, logger);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, server, plugins, logger);
   }
 }
