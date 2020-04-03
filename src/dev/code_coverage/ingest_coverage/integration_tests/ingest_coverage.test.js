@@ -145,10 +145,44 @@ describe('Ingesting Coverage to Cluster', () => {
             true
           );
         });
-        it('should have vcs info', () => {
-          const vcs = 'vcs';
-          const portion = mutableBothIndexesChunks.filter(x => x.includes(vcs))[0];
-          expect(portion).to.contain(vcs);
+        describe(`with provided vcs info file`, () => {
+          const filterZero = xs => included => xs.filter(x => x.includes(included))[0];
+          const filteredWith = filterZero(mutableBothIndexesChunks);
+          it('should have a vcs block', () => {
+            const vcs = 'vcs';
+            const portion = filteredWith(vcs);
+            expect(portion).to.contain(vcs);
+          });
+          it(`should have a branch`, () => {
+            const branch = `"branch":`;
+            const portion = filteredWith(branch);
+            expect(portion).to.contain(branch);
+            expect(portion).to.contain(`"origin/ingest-code-coverage"`);
+          });
+          it(`should have a sha`, () => {
+            const sha = `"sha":`;
+            const portion = filteredWith(sha);
+            expect(portion).to.contain(sha);
+            expect(portion).to.contain(`"f07b34f6206"`);
+          });
+          it(`should have a url to the sha`, () => {
+            const vcsUrl = `"vcsUrl":`;
+            const portion = filteredWith(vcsUrl);
+            expect(portion).to.contain(vcsUrl);
+            expect(portion).to.contain(`"https://github.com/elastic/kibana/commit/f07b34f6206"`);
+          });
+          it(`should have an author`, () => {
+            const author = `"author":`;
+            const portion = filteredWith(author);
+            expect(portion).to.contain(author);
+            expect(portion).to.contain(`"Tre' Seymour"`);
+          });
+          it(`should have a commit msg, truncated`, () => {
+            const commitMsg = `"commitMsg":`;
+            const portion = filteredWith(commitMsg);
+            expect(portion).to.contain(commitMsg);
+            expect(portion).to.contain(`"Lorem :) ipsum Tre' λ dolor sit amet, consectetur ..."`);
+          });
         });
       });
     });

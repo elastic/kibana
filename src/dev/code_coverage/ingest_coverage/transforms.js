@@ -106,14 +106,30 @@ export const ciRunUrl = obj => {
   };
 };
 
+const dropAfter = size => x => {
+  return x.slice(0, size);
+};
+
+const truncateCommitMsg = x => {
+  const size = 50;
+  const dropAfterSize = dropAfter(size);
+  const trunkd = x.length > 50 ? `${dropAfterSize(x)}...` : x;
+  return trunkd;
+};
+
 export const itemizeVcs = vcsInfo => obj => {
   const [branch, sha, author, commitMsg] = vcsInfo;
   return {
     ...obj,
-    vcs: { branch, sha, author, commitMsg },
+    vcs: {
+      branch,
+      sha,
+      author,
+      commitMsg: truncateCommitMsg(commitMsg),
+      vcsUrl: `https://github.com/elastic/kibana/commit/${sha}`,
+    },
   };
 };
-
 export const testRunner = obj => {
   const { jsonSummaryPath } = obj;
 
