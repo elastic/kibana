@@ -83,7 +83,7 @@ const defaultFilterProps: JobsFilters = {
 };
 
 export const MlPopover = React.memo(() => {
-  const [{ refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
+  const [{ isLoading, refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
@@ -192,7 +192,7 @@ export const MlPopover = React.memo(() => {
           )}
 
           <JobsTable
-            isLoading={isLoadingSiemJobs}
+            isLoading={isLoadingSiemJobs || isLoading}
             jobs={filteredJobs}
             onJobStateChange={handleJobStateChange}
           />
@@ -216,6 +216,7 @@ const enableDatafeed = async (
   submitTelemetry(job, enable);
 
   if (!job.isInstalled) {
+    dispatch({ type: 'loading' });
     try {
       await setupMlJob({
         configTemplate: job.moduleId,
@@ -223,8 +224,10 @@ const enableDatafeed = async (
         jobIdErrorFilter: [job.id],
         groups: job.groups,
       });
+      dispatch({ type: 'success' });
     } catch (error) {
       errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
+      dispatch({ type: 'failure' });
       dispatch({ type: 'refresh' });
       return;
     }
