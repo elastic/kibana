@@ -70,9 +70,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
   ) {
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
-      regionmapsConfig: core.injectedMetadata.getInjectedVar(
-        'regionmapsConfig'
-      ) as RegionMapsConfig,
+      regionmapsConfig: core.injectedMetadata.getInjectedVar('regionmap') as RegionMapsConfig,
       serviceSettings: mapsLegacy.serviceSettings,
       notificationService: core.notifications.toasts,
       ...(await __LEGACY.setup()),
