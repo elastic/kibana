@@ -17,7 +17,7 @@
  * under the License.
  */
 import fs from 'fs';
-import { dirname, resolve, sep } from 'path';
+import { dirname, relative, resolve } from 'path';
 
 import { REPO_ROOT } from '@kbn/dev-utils';
 
@@ -48,14 +48,14 @@ const getTestMetadataPath = () => {
 
 export class TestTracker {
   lifecycle: Lifecycle;
-  allSuites: Record<string, Record<string, TrackedSuite>> = {};
-  trackedSuites: Map<object, TrackedSuiteMetadata> = new Map<object, TrackedSuiteMetadata>();
+  finishedSuitesByConfig: Record<string, Record<string, TrackedSuite>> = {};
+  inProgressSuites: Map<object, TrackedSuiteMetadata> = new Map<object, TrackedSuiteMetadata>();
 
   getTracked(suite: object): TrackedSuiteMetadata {
-    if (!this.trackedSuites.has(suite)) {
-      this.trackedSuites.set(suite, { success: true } as TrackedSuiteMetadata);
+    if (!this.inProgressSuites.has(suite)) {
+      this.inProgressSuites.set(suite, { success: true } as TrackedSuiteMetadata);
     }
-    return this.trackedSuites.get(suite) || ({} as TrackedSuiteMetadata);
+    return this.inProgressSuites.get(suite) || ({} as TrackedSuiteMetadata);
   }
 
   constructor(lifecycle: Lifecycle) {
@@ -73,10 +73,14 @@ export class TestTracker {
       tracked.success = true;
     });
 
+    // If a test fails, we want to make sure all of the ancestors, all the way up to the root, get marked as failed
+    // This information is not available on the mocha objects without traversing all descendants of a given node
     const handleFailure = (error: any, test: any) => {
       let parent = test.parent;
-      for (let i = 0; i < 100 && parent; i++) {
-        if (this.trackedSuites.has(parent)) {
+
+      // Infinite loop protection, just in case
+      for (let i = 0; i < 500 && parent; i++) {
+        if (this.inProgressSuites.has(parent)) {
           this.getTracked(parent).success = false;
         }
         parent = parent.parent;
@@ -92,12 +96,14 @@ export class TestTracker {
       tracked.duration = tracked.endTime.getTime() - (tracked.startTime || new Date()).getTime();
       tracked.duration = Math.floor(tracked.duration / 1000);
 
-      const config = suite.ftrConfig.path.replace(REPO_ROOT + sep, '');
-      const file = suite.file.replace(REPO_ROOT + sep, '');
+      const config = relative(REPO_ROOT, suite.ftrConfig.path);
+      const file = relative(REPO_ROOT, suite.file);
 
-      // TODO should non-leaf suite (e.g. index files) still be included here? is it confusing?
-      this.allSuites[config] = this.allSuites[config] || {};
-      this.allSuites[config][file] = {
+      this.finishedSuitesByConfig[config] = this.finishedSuitesByConfig[config] || {};
+
+      // This will get called multiple times for a test file that has multiple describes in it or similar
+      // This is okay, because the last one that fires is always the root of the file, which is is the one we ultimately want
+      this.finishedSuitesByConfig[config][file] = {
         ...tracked,
         config,
         file,
@@ -105,19 +111,26 @@ export class TestTracker {
         title: suite.title,
         leafSuite: !!(
           (suite.tests && suite.tests.length) ||
-          (this.allSuites[config][file] && this.allSuites[config][file].leafSuite)
+          (this.finishedSuitesByConfig[config][file] &&
+            this.finishedSuitesByConfig[config][file].leafSuite)
         ),
       } as TrackedSuite;
     });
 
-    // TODO gate behind a CI env var or something
     lifecycle.cleanup.add(() => {
-      const flattened: TrackedSuite[] = [];
-      Object.values(this.allSuites).forEach((x: Record<string, TrackedSuite>) =>
-        Object.values(x).forEach((y: TrackedSuite) => flattened.push(y))
-      );
-      flattened.sort((a, b) => b.duration - a.duration);
-      fs.writeFileSync(getTestMetadataPath(), JSON.stringify(flattened, null, 2));
+      const suites = this.getAllFinishedSuites();
+
+      fs.writeFileSync(getTestMetadataPath(), JSON.stringify(suites, null, 2));
     });
+  }
+
+  getAllFinishedSuites() {
+    const flattened: TrackedSuite[] = [];
+    Object.values(this.finishedSuitesByConfig).forEach((byFile: Record<string, TrackedSuite>) =>
+      Object.values(byFile).forEach((suite: TrackedSuite) => flattened.push(suite))
+    );
+
+    flattened.sort((a, b) => b.duration - a.duration);
+    return flattened;
   }
 }
