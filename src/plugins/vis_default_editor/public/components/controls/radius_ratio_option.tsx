@@ -48,7 +48,7 @@ function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: Agg
     if (!editorStateParams.radiusRatio) {
       setStateParamValue(PARAM_NAME, DEFAULT_VALUE);
     }
-  }, []);
+  }, [editorStateParams.radiusRatio, setStateParamValue]);
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>

@@ -98,6 +98,7 @@ function FieldParamEditor({
     } else if (indexedField.options.length === 1) {
       setValue(indexedField.options[0].target);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSearchChange = useCallback(searchValue => setIsDirty(Boolean(searchValue)), []);

@@ -70,26 +70,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/expressions/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: [
-        'src/legacy/core_plugins/vis_default_editor/public/components/controls/**/*.{ts,tsx}',
-      ],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/ui/public/vis/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/es_ui_shared/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',

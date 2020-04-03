@@ -39,7 +39,7 @@ function OrderParamEditor({
 
   useEffect(() => {
     setValidity(isValid);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 
   // @ts-ignore
   return (
