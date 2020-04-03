@@ -192,6 +192,27 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
+      it('metadata api should return the endpoint based on the elastic agent id', async () => {
+        const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
+        const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            filter: `elastic.agent.id:${targetElasticAgentId}`,
+          })
+          .expect(200);
+        expect(body.total).to.eql(1);
+        const resultHostId: string = body.hosts[0].host.id;
+        const resultElasticAgentId: string = body.hosts[0].elastic.agent.id;
+        expect(resultHostId).to.eql(targetEndpointId);
+        expect(resultElasticAgentId).to.eql(targetElasticAgentId);
+        expect(body.hosts[0].event.created).to.eql(1579881969541);
+        expect(body.hosts.length).to.eql(1);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
+
       it('metadata api should return all hosts when filter is empty string', async () => {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
