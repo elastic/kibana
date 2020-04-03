@@ -39,7 +39,7 @@ export const createZoomWarningMsg = (function() {
         <div>
           <p>
             <FormattedMessage
-              id="common.ui.vis.kibanaMap.zoomWarning"
+              id="maps_legacy.kibanaMap.zoomWarning"
               defaultMessage="You've reached the maximum number of zoom
               levels. To zoom all the way in, upgrade to the
               {defaultDistribution} of Elasticsearch and Kibana. You'll get

@@ -39,7 +39,7 @@ function makeFitControl(fitContainer, kibanaMap) {
     onAdd: function(leafletMap) {
       this._leafletMap = leafletMap;
       const fitDatBoundsLabel = i18n.translate(
-        'common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel',
+        'maps_legacy.kibanaMap.leaflet.fitDataBoundsAriaLabel',
         { defaultMessage: 'Fit Data Bounds' }
       );
       $(this._fitContainer)
