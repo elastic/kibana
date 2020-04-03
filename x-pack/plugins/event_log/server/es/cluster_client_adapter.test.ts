@@ -226,10 +226,29 @@ describe('queryEventsBySavedObject', () => {
         query: {
           bool: {
             must: [
-              { term: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
               {
-                term: {
-                  'kibana.saved_objects.id.keyword': 'saved-object-id',
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.id': {
+                              value: 'saved-object-id',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
                 },
               },
             ],
@@ -290,10 +309,29 @@ describe('queryEventsBySavedObject', () => {
         query: {
           bool: {
             must: [
-              { term: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
               {
-                term: {
-                  'kibana.saved_objects.id.keyword': 'saved-object-id',
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.id': {
+                              value: 'saved-object-id',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
                 },
               },
               {
@@ -340,10 +378,29 @@ describe('queryEventsBySavedObject', () => {
         query: {
           bool: {
             must: [
-              { term: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
               {
-                term: {
-                  'kibana.saved_objects.id.keyword': 'saved-object-id',
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.id': {
+                              value: 'saved-object-id',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
                 },
               },
               {
