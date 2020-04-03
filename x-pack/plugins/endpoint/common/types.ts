@@ -257,6 +257,11 @@ export type HostMetadata = Immutable<{
   event: {
     created: number;
   };
+  elastic: {
+    agent: {
+      id: string;
+    };
+  };
   endpoint: {
     policy: {
       id: string;
