@@ -7,7 +7,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
 import { appStoreFactory } from '../store';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { EndpointPluginStartDependencies } from '../../../plugin';
@@ -22,7 +21,7 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 interface AppContextTestRender {
   store: ReturnType<typeof appStoreFactory>;
   history: ReturnType<typeof createMemoryHistory>;
-  coreStart: jest.Mocked<CoreStart>;
+  coreStart: ReturnType<typeof coreMock.createStart>;
   depsStart: EndpointPluginStartDependencies;
   /**
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the
@@ -43,10 +42,10 @@ interface AppContextTestRender {
  * for further customization.
  */
 export const createAppRootMockRenderer = (): AppContextTestRender => {
-  const store = appStoreFactory();
   const history = createMemoryHistory<never>();
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const depsStart = depsStartMock();
+  const store = appStoreFactory({ coreStart, depsStart });
   const AppWrapper: React.FunctionComponent<{ children: React.ReactElement }> = ({ children }) => (
     <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
       {children}
