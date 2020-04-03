@@ -33,6 +33,8 @@ export const CheckType = t.intersection([
   }),
 ]);
 
+export type Check = t.TypeOf<typeof CheckType>;
+
 export const StateType = t.intersection([
   t.partial({
     checks: t.array(CheckType),
@@ -60,22 +62,28 @@ export const StateType = t.intersection([
   }),
 ]);
 
+export const HistogramPointType = t.type({
+  timestamp: t.number,
+  up: t.number,
+  down: t.number,
+});
+
+export type HistogramPoint = t.TypeOf<typeof HistogramPointType>;
+
+export const HistogramType = t.type({
+  count: t.number,
+  points: t.array(HistogramPointType),
+});
+
+export type Histogram = t.TypeOf<typeof HistogramType>;
+
 export const MonitorSummaryType = t.intersection([
   t.type({
     monitor_id: t.string,
     state: StateType,
   }),
   t.partial({
-    histogram: t.type({
-      count: t.number,
-      points: t.array(
-        t.type({
-          timestamp: t.number,
-          up: t.number,
-          down: t.number,
-        })
-      ),
-    }),
+    histogram: HistogramType,
   }),
 ]);
 
@@ -93,3 +101,25 @@ export const MonitorSummaryResultType = t.intersection([
 ]);
 
 export type MonitorSummaryResult = t.TypeOf<typeof MonitorSummaryResultType>;
+
+export const FetchMonitorStatesQueryArgsType = t.intersection([
+  t.partial({
+    pagination: t.string,
+    filters: t.string,
+    statusFilter: t.string,
+  }),
+  t.type({
+    dateRangeStart: t.string,
+    dateRangeEnd: t.string,
+  }),
+]);
+
+export enum CursorDirection {
+  AFTER = 'AFTER',
+  BEFORE = 'BEFORE',
+}
+
+export enum SortOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
