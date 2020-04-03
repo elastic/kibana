@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useCallback } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   EuiForm,
   EuiButton,
@@ -76,7 +76,7 @@ export const CustomMetricForm = withTheme(
       } else if (aggregation && field) {
         const newMetric: SnapshotCustomMetricInput = {
           type: 'custom',
-          id: uuid.v1(),
+          id: uuidv1(),
           label,
           aggregation,
           field,

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 export const newMetricAggFn = () => {
   return {
-    id: uuid.v1(),
+    id: uuidv1(),
     type: 'count',
   };
 };

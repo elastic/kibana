@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { merge, Subscription } from 'rxjs';
 import {
   Embeddable,
@@ -197,7 +197,7 @@ export abstract class Container<
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
   ): PanelState<TEmbeddableInput> {
-    const embeddableId = partial.id || uuid.v4();
+    const embeddableId = partial.id || uuidv4();
 
     const explicitInput = this.createNewExplicitEmbeddableInput<TEmbeddableInput>(
       embeddableId,

@@ -6,7 +6,7 @@
 import Chance from 'chance'; // eslint-disable-line
 // @ts-ignore
 import request from 'request';
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { configBlockSchemas } from '../common/config_schemas';
 import { BeatTag } from '../common/domain_types';
 import { compose } from '../public/lib/compose/scripts';
@@ -120,8 +120,8 @@ const start = async (
               () =>
                 ({
                   type: configBlockSchemas[Math.floor(Math.random())].id,
-                  description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sint ista Graecorum; 
-Nihil ad rem! Ne sit sane; Quod quidem nobis non saepe contingit. 
+                  description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sint ista Graecorum;
+Nihil ad rem! Ne sit sane; Quod quidem nobis non saepe contingit.
 Duo Reges: constructio interrete. Itaque his sapiens semper vacabit.`.substring(
                     0,
                     Math.floor(Math.random() * (0 - 115 + 1))

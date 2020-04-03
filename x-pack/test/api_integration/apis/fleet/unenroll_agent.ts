@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { setupIngest } from './agents/services';
@@ -26,13 +26,13 @@ export default function(providerContext: FtrProviderContext) {
     beforeEach(async () => {
       const { body: accessAPIKeyBody } = await esClient.security.createApiKey({
         body: {
-          name: `test access api key: ${uuid.v4()}`,
+          name: `test access api key: ${uuidv4()}`,
         },
       });
       accessAPIKeyId = accessAPIKeyBody.id;
       const { body: outputAPIKeyBody } = await esClient.security.createApiKey({
         body: {
-          name: `test output api key: ${uuid.v4()}`,
+          name: `test output api key: ${uuidv4()}`,
         },
       });
       outputAPIKeyId = outputAPIKeyBody.id;

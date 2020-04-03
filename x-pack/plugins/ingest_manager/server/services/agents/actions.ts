@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Agent,
   AgentAction,
@@ -32,7 +32,7 @@ export async function updateAgentActions(
 
 export function createAgentAction(createdAt: Date, newAgentAction: NewAgentAction): AgentAction {
   const agentAction = {
-    id: uuid.v4(),
+    id: uuidv4(),
     created_at: createdAt.toISOString(),
   };
 

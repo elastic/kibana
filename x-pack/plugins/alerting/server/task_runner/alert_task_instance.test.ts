@@ -6,7 +6,7 @@
 
 import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manager/server';
 import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SanitizedAlert } from '../types';
 
 const alert: SanitizedAlert = {
@@ -35,7 +35,7 @@ describe('Alert Task Instance', () => {
   test(`validates that a TaskInstance has valid Alert Task State`, () => {
     const lastScheduledActionsDate = new Date();
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuidv4(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',
@@ -157,7 +157,7 @@ describe('Alert Task Instance', () => {
 
   test(`allows an initial empty state`, () => {
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuidv4(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',
@@ -180,7 +180,7 @@ describe('Alert Task Instance', () => {
 
   test(`validates that a TaskInstance has valid Params`, () => {
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuidv4(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',

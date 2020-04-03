@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -46,7 +46,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
         label={field.label}
         checked={field.value as boolean}
         onChange={field.onChange}
-        id={euiFieldProps.id || uuid()}
+        id={euiFieldProps.id || uuidv4()}
         data-test-subj="input"
         {...euiFieldProps}
       />

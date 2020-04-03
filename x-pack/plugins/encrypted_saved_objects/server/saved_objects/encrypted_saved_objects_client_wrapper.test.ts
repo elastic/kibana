@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('uuid', () => ({ v4: jest.fn().mockReturnValue('uuid-v4-id') }));
+jest.mock('uuid', () => ({ v4: () => 'uuid-v4-id' }));
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';

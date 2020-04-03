@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import {
   IndexPatternMapping,
@@ -102,7 +102,7 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
   return [
     {
       sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-      id: uuid.v4(),
+      id: uuidv4(),
       label: null,
       minZoom: 0,
       maxZoom: 24,
@@ -136,7 +136,7 @@ export const getSourceLayer = (
   layerDetails: LayerMappingDetails
 ) => ({
   sourceDescriptor: {
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
     geoField: layerDetails.geoField,
@@ -173,7 +173,7 @@ export const getSourceLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuidv4(),
   label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
   maxZoom: 24,
@@ -199,7 +199,7 @@ export const getDestinationLayer = (
   layerDetails: LayerMappingDetails
 ) => ({
   sourceDescriptor: {
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'ES_SEARCH',
     applyGlobalQuery: true,
     geoField: layerDetails.geoField,
@@ -236,7 +236,7 @@ export const getDestinationLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuidv4(),
   label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
   maxZoom: 24,
@@ -262,7 +262,7 @@ export const getLineLayer = (
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
     applyGlobalQuery: true,
-    id: uuid.v4(),
+    id: uuidv4(),
     indexPatternId,
     sourceGeoField: layerDetails.source.geoField,
     destGeoField: layerDetails.destination.geoField,
@@ -320,7 +320,7 @@ export const getLineLayer = (
       },
     },
   },
-  id: uuid.v4(),
+  id: uuidv4(),
   label: `${indexPatternTitle} | ${i18n.LINE_LAYER}`,
   minZoom: 0,
   maxZoom: 24,

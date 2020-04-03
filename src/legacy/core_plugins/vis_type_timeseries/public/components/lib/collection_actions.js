@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import _ from 'lodash';
 
-const newFn = () => ({ id: uuid.v1() });
+const newFn = () => ({ id: uuidv1() });
 
 export function handleChange(props, doc) {
   const { model, name } = props;

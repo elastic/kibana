@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { merge, flattenDeep } from 'lodash';
 
 const INDEX_NAME = 'heartbeat-8-generated-test';
@@ -83,7 +83,7 @@ export const makePing = async (
       },
       ip: '127.0.0.1',
       id: monitorId,
-      check_group: uuid.v4(),
+      check_group: uuidv4(),
       type: 'http',
       status: 'up',
     },
@@ -121,7 +121,7 @@ export const makeCheck = async (
 ) => {
   const cgFields = {
     monitor: {
-      check_group: uuid.v4(),
+      check_group: uuidv4(),
     },
   };
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { range } from 'lodash';
 import { AlertType } from '../../../../x-pack/plugins/alerting/server';
 import { DEFAULT_INSTANCES_TO_GENERATE } from '../../common/constants';
@@ -31,7 +31,7 @@ export const alertType: AlertType = {
     const count = (state.count ?? 0) + 1;
 
     range(instances)
-      .map(() => ({ id: uuid.v4() }))
+      .map(() => ({ id: uuidv4() }))
       .forEach((instance: { id: string }) => {
         services
           .alertInstanceFactory(instance.id)

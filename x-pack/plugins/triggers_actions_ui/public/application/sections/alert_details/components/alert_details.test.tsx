@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType } from '../../../../types';
@@ -101,7 +101,7 @@ describe('alert_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -149,13 +149,13 @@ describe('alert_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
           ...times(actionCount, () => ({
             group: 'default',
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             actionTypeId: '.email',
           })),
@@ -516,9 +516,9 @@ describe('mute button', () => {
 
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `alert-${uuidv4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',

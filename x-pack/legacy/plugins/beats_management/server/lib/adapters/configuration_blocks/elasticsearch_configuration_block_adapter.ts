@@ -5,7 +5,7 @@
  */
 
 import { flatten, get } from 'lodash';
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';

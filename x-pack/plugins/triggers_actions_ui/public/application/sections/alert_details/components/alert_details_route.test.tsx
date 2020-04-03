@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from 'kibana/public';
@@ -71,7 +71,7 @@ describe('getAlertData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: actionType.id,
           params: {},
         },
@@ -120,7 +120,7 @@ describe('getAlertData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: actionType.id,
           params: {},
         },
@@ -163,7 +163,7 @@ describe('getAlertData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: actionType.id,
           params: {},
         },
@@ -209,7 +209,7 @@ describe('getAlertData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: actionType.id,
           params: {},
         },
@@ -259,7 +259,7 @@ describe('getAlertData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: actionType.id,
           params: {},
         },
@@ -267,7 +267,7 @@ describe('getAlertData useEffect handler', () => {
     });
 
     const alertType = {
-      id: uuid.v4(),
+      id: uuidv4(),
       name: 'type name',
     };
 
@@ -312,13 +312,13 @@ describe('getAlertData useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: availableActionType.id,
           params: {},
         },
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: missingActionType.id,
           params: {},
         },
@@ -326,7 +326,7 @@ describe('getAlertData useEffect handler', () => {
     });
 
     const alertType = {
-      id: uuid.v4(),
+      id: uuidv4(),
       name: 'type name',
     };
 
@@ -387,9 +387,9 @@ function mockRouterProps(alert: Alert) {
 }
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `alert-${uuidv4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',

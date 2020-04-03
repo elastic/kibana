@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 import stats from 'stats-lite';
 import prettyMilliseconds from 'pretty-ms';
@@ -129,7 +129,7 @@ export default function TaskManagerPerformanceAPI(kibana) {
           if (taskInstance.params && taskInstance.params.trackExecutionTimeline) {
             modifiedInstance.state = modifiedInstance.state || {};
             modifiedInstance.state.perf = modifiedInstance.state.perf || {};
-            modifiedInstance.state.perf.id = uuid.v4().replace(/-/gi, '_');
+            modifiedInstance.state.perf.id = uuidv4().replace(/-/gi, '_');
             performance.mark(`perfTask_schedule_${modifiedInstance.state.perf.id}`);
           }
 

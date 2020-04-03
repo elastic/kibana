@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import rison from 'rison-node';
 import { parse, stringify } from 'query-string';
 import {
@@ -96,10 +96,10 @@ export function getMapsAppUrl(
     // @ts-ignore
     rison.encode_array([
       {
-        id: uuid(),
+        id: uuidv4(),
         label: indexPattern.title,
         sourceDescriptor: {
-          id: uuid(),
+          id: uuidv4(),
           type: 'ES_SEARCH',
           geoField: field.name,
           tooltipProperties: hasColumns ? columns : [],

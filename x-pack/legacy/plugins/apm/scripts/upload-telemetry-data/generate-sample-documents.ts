@@ -13,7 +13,7 @@ import {
   isPlainObject,
   flatten
 } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CollectTelemetryParams,
   collectDataTelemetry
@@ -79,7 +79,7 @@ export async function generateSampleDocuments(
 
   return flatten(
     range(0, opts.instances).map(instanceNo => {
-      const instanceId = uuid.v4();
+      const instanceId = uuidv4();
       const defaults = {
         cluster_uuid: instanceId,
         stack_stats: {

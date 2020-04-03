@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { VectorLayer } from '../../vector_layer';
@@ -40,7 +40,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
     return {
       type: ESPewPewSource.type,
-      id: uuid(),
+      id: uuidv4(),
       indexPatternId: indexPatternId,
       sourceGeoField,
       destGeoField,

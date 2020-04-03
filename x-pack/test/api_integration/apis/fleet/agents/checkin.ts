@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSupertestWithoutAuth } from './services';
@@ -24,7 +24,7 @@ export default function(providerContext: FtrProviderContext) {
 
       const { body: apiKeyBody } = await esClient.security.createApiKey({
         body: {
-          name: `test access api key: ${uuid.v4()}`,
+          name: `test access api key: ${uuidv4()}`,
         },
       });
       apiKey = apiKeyBody;

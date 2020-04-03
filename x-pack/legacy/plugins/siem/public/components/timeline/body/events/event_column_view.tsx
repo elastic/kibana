@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
@@ -47,7 +47,7 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-export const getNewNoteId = (): string => uuid.v4();
+export const getNewNoteId = (): string => uuidv4();
 
 const emptyNotes: string[] = [];
 

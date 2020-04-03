@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { filter } from 'rxjs/operators';
 
 import {
@@ -589,7 +589,7 @@ if (doc['task.runAt'].size()!=0) {
     });
 
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const claimOwnershipUntil = new Date(Date.now());
       const {
         args: {
@@ -618,7 +618,7 @@ if (doc['task.runAt'].size()!=0) {
     });
 
     test('it returns task objects', async () => {
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
       const tasks = [
@@ -959,7 +959,7 @@ if (doc['task.runAt'].size()!=0) {
 
   describe('task events', () => {
     function generateTasks() {
-      const taskManagerId = uuid.v1();
+      const taskManagerId = uuidv1();
       const runAt = new Date();
       const tasks = [
         {

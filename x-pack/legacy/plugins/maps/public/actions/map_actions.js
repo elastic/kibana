@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import {
   getLayerList,
   getLayerListRaw,
@@ -461,7 +461,7 @@ export function openOnClickTooltip(tooltipState) {
     openTooltips.push({
       ...tooltipState,
       isLocked: true,
-      id: uuid(),
+      id: uuidv4(),
     });
 
     dispatch({
@@ -489,7 +489,7 @@ export function openOnHoverTooltip(tooltipState) {
       {
         ...tooltipState,
         isLocked: false,
-        id: uuid(),
+        id: uuidv4(),
       },
     ],
   };

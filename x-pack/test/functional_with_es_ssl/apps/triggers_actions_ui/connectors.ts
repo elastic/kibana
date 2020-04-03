@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 function generateUniqueKey() {
-  return uuid.v4().replace(/-/g, '');
+  return uuidv4().replace(/-/g, '');
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

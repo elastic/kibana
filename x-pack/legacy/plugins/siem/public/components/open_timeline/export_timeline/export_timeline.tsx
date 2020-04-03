@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { GenericDownloader, ExportSelectedData } from '../../generic_downloader';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
@@ -25,7 +25,7 @@ const ExportTimeline: React.FC<{
       dispatchToaster({
         type: 'addToaster',
         toast: {
-          id: uuid.v4(),
+          id: uuidv4(),
           title: i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
           color: 'success',
           iconType: 'check',

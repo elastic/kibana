@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
@@ -2737,8 +2737,8 @@ describe('update()', () => {
     }
 
     test('updating the alert schedule should rerun the task immediately', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '10s' });
 
@@ -2768,8 +2768,8 @@ describe('update()', () => {
     });
 
     test('updating the alert without changing the schedule should not rerun the task', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '10s' });
 
@@ -2799,8 +2799,8 @@ describe('update()', () => {
     });
 
     test('updating the alert should not wait for the rerun the task to complete', async done => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 
@@ -2838,8 +2838,8 @@ describe('update()', () => {
     });
 
     test('logs when the rerun of an alerts underlying task fails', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 

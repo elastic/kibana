@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
@@ -96,7 +96,7 @@ export async function generateEnrollmentAPIKey(
     configId?: string;
   }
 ) {
-  const id = uuid.v4();
+  const id = uuidv4();
   const { name: providedKeyName } = data;
   const configId = data.configId ?? (await agentConfigService.getDefaultAgentConfigId(soClient));
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;

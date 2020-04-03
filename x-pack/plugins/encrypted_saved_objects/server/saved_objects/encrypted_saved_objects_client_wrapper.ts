@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   SavedObject,
   SavedObjectsBaseOptions,
@@ -32,7 +32,7 @@ interface EncryptedSavedObjectsClientOptions {
  * encrypted attributes.
  */
 function generateID() {
-  return uuid.v4();
+  return uuidv4();
 }
 
 export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientContract {

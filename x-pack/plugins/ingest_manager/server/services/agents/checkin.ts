@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Agent,
   AgentEvent,
@@ -53,7 +53,7 @@ export async function agentCheckin(
       config.outputs.default.api_key = agent.default_api_key || updateData.default_api_key;
 
       const configChangeAction: AgentAction = {
-        id: uuid.v4(),
+        id: uuidv4(),
         type: 'CONFIG_CHANGE',
         created_at: new Date().toISOString(),
         data: JSON.stringify({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isError } from 'lodash/fp';
 
 import { AppToast, ActionToaster } from './';
@@ -22,7 +22,7 @@ export const displayErrorToast = (
   errorTitle: string,
   errorMessages: string[],
   dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid.v4()
+  id: string = uuidv4()
 ): void => {
   const toast: AppToast = {
     id,
@@ -46,7 +46,7 @@ export const displayErrorToast = (
 export const displaySuccessToast = (
   title: string,
   dispatchToaster: React.Dispatch<ActionToaster>,
-  id: string = uuid.v4()
+  id: string = uuidv4()
 ): void => {
   const toast: AppToast = {
     id,
@@ -73,7 +73,7 @@ export type ErrorToToasterArgs = Partial<AppToast> & {
  * @param dispatchToaster provided by useStateToaster()
  */
 export const errorToToaster = ({
-  id = uuid.v4(),
+  id = uuidv4(),
   title,
   error,
   color = 'danger',

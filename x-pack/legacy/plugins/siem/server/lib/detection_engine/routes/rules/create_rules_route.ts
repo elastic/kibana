@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -117,7 +117,7 @@ export const createRulesRoute = (router: IRouter): void => {
           meta,
           machineLearningJobId,
           filters,
-          ruleId: ruleId ?? uuid.v4(),
+          ruleId: ruleId ?? uuidv4(),
           index,
           interval,
           maxSignals,

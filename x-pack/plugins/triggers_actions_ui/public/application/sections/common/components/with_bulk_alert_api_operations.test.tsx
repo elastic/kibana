@@ -5,7 +5,7 @@
  */
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withBulkAlertOperations, ComponentOpts } from './with_bulk_alert_api_operations';
 import * as alertApi from '../../../lib/alert_api';
 import { useAppDependencies } from '../../../app_context';
@@ -222,7 +222,7 @@ describe('with_bulk_alert_api_operations', () => {
     };
 
     const ExtendedComponent = withBulkAlertOperations(ComponentToExtend);
-    const alertId = uuid.v4();
+    const alertId = uuidv4();
     const component = mount(<ExtendedComponent alertId={alertId} />);
     component.find('button').simulate('click');
 
@@ -247,9 +247,9 @@ describe('with_bulk_alert_api_operations', () => {
 
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `alert-${uuidv4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',

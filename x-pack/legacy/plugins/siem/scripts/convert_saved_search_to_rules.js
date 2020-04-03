@@ -9,7 +9,7 @@ require('../../../../../src/setup_node_env');
 const fs = require('fs');
 const path = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies
-const uuid = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 
 /*
  * This script is used to parse a set of saved searches on a file system
@@ -152,7 +152,7 @@ async function main() {
         name: title,
         query,
         risk_score: RISK_SCORE,
-        rule_id: uuid.v4(),
+        rule_id: uuidv4(),
         severity: SEVERITY,
         to: TO,
         type: TYPE,

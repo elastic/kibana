@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { config } from '.';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
@@ -83,7 +83,7 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
 
 test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
-  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: uuidv4() })).not.toThrow();
   expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
     `"[uuid]: must be a valid uuid"`
   );

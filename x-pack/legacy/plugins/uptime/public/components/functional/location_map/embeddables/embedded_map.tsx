@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState, useContext, useRef } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import { npStart } from 'ui/new_platform';
 
@@ -59,7 +59,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   >(MAP_SAVED_OBJECT_TYPE);
 
   const input: MapEmbeddableInput = {
-    id: uuid.v4(),
+    id: uuidv4(),
     filters: [],
     hidePanelTitles: true,
     refreshConfig: {

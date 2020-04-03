@@ -15,7 +15,7 @@ import {
 import { createExtentFilter } from '../../elasticsearch_geo_utils';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
@@ -71,7 +71,7 @@ export class AbstractESSource extends AbstractVectorSource {
   cloneDescriptor() {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     return clonedDescriptor;
   }
 

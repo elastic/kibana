@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
@@ -109,7 +109,7 @@ export async function setupFleet(
 }
 
 function generateRandomPassword() {
-  return Buffer.from(uuid.v4()).toString('base64');
+  return Buffer.from(uuidv4()).toString('base64');
 }
 
 async function addPackageToConfig(

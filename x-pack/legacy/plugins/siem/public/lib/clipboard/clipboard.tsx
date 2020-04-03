@@ -7,7 +7,7 @@
 import { EuiGlobalToastListToast as Toast, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as i18n from './translations';
 import { useStateToaster } from '../../components/toasters';
@@ -25,7 +25,7 @@ interface GetSuccessToastParams {
 }
 
 const getSuccessToast = ({ titleSummary }: GetSuccessToastParams): Toast => ({
-  id: `copy-success-${uuid.v4()}`,
+  id: `copy-success-${uuidv4()}`,
   color: 'success',
   iconType: 'copyClipboard',
   title: `${i18n.COPIED} ${titleSummary} ${i18n.TO_THE_CLIPBOARD}`,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { createMemoryHistory } from 'history';
 
 const history = createMemoryHistory();
@@ -21,7 +21,7 @@ import { duplicateRulesAction, deleteRulesAction } from './actions';
 
 describe('AllRulesTable Columns', () => {
   describe('getActions', () => {
-    const rule = mockRule(uuid.v4());
+    const rule = mockRule(uuidv4());
     let results: string[] = [];
     const dispatch = jest.fn();
     const dispatchToaster = jest.fn();

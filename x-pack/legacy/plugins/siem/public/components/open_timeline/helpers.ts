@@ -7,7 +7,7 @@
 import ApolloClient from 'apollo-client';
 import { getOr, set, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
@@ -290,7 +290,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   }
 
   if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-    const getNewNoteId = (): string => uuid.v4();
+    const getNewNoteId = (): string => uuidv4();
     const newNote = createNote({ newNote: ruleNote, getNewNoteId });
     dispatch(dispatchUpdateNote({ note: newNote }));
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));

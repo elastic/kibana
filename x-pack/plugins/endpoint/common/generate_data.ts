@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import seedrandom from 'seedrandom';
 import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields } from './types';
 
@@ -433,6 +433,6 @@ export class EndpointDocGenerator {
   }
 
   private seededUUIDv4(): string {
-    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
+    return uuidv4({ random: [...this.randomNGenerator(255, 16)] });
   }
 }

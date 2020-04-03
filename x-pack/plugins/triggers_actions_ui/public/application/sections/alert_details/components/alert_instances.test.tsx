@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
 import { Alert, AlertTaskState, RawAlertInstance } from '../../../../types';
@@ -221,9 +221,9 @@ describe('alertInstanceToListItem', () => {
 
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `alert-${uuidv4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',

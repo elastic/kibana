@@ -6,7 +6,6 @@
 
 import { isArray, isObject, isString } from 'lodash';
 import mustache from 'mustache';
-import uuid from 'uuid';
 import * as rest from '../../../../../services/rest/watcher';
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import { esResponse } from './esResponse';
@@ -15,6 +14,7 @@ import { HttpSetup } from 'kibana/public';
 // disable html escaping since this is also disabled in watcher\s mustache implementation
 mustache.escape = value => value;
 
+jest.mock('uuid', () => ({ v4: () => 'mocked-uuid' }));
 jest.mock('../../../../../services/rest/callApi', () => ({
   callApi: () => Promise.resolve(null)
 }));
@@ -27,8 +27,6 @@ describe('createErrorGroupWatch', () => {
     .mockResolvedValue(undefined);
 
   beforeEach(async () => {
-    jest.spyOn(uuid, 'v4').mockReturnValue(Buffer.from('mocked-uuid'));
-
     createWatchResponse = await createErrorGroupWatch({
       http: {} as HttpSetup,
       emails: ['my@email.dk', 'mySecond@email.dk'],

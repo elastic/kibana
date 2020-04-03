@@ -13,7 +13,7 @@ import {
 } from '../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 import { ESSearchSource } from '../es_search_source';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { registerSource } from '../source_registry';
@@ -104,7 +104,7 @@ const viewIndexedData = (
       const filterByMapBounds = indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW;
       const source = new ESSearchSource(
         {
-          id: uuid(),
+          id: uuidv4(),
           indexPatternId,
           geoField,
           filterByMapBounds,

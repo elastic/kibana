@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   EuiFlexGroup,
@@ -52,7 +52,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
       ...joins,
       {
         right: {
-          id: uuid(),
+          id: uuidv4(),
           applyGlobalQuery: true,
         },
       },

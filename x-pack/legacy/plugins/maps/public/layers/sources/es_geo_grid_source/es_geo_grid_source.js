@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { HeatmapLayer } from '../../heatmap_layer';
@@ -50,7 +50,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
       type: ESGeoGridSource.type,
-      id: uuid(),
+      id: uuidv4(),
       indexPatternId: indexPatternId,
       geoField: geoField,
       requestType: requestType,

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -20,7 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Alert Details', function() {
     describe('Header', function() {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
 
@@ -149,7 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('View In App', function() {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
 
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
@@ -198,7 +198,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Alert Instances', function() {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let alert: any;
 
       before(async () => {
@@ -410,7 +410,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Alert Instance Pagination', function() {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let alert: any;
 
       before(async () => {

@@ -40,12 +40,7 @@ import sinon from 'sinon';
 jest.mock('../../store/inputs/actions');
 jest.mock('../../store/timeline/actions');
 jest.mock('../../store/app/actions');
-jest.mock('uuid', () => {
-  return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
-  };
-});
+jest.mock('uuid', () => ({ v4: () => 'uuid.v4()' }));
 
 describe('helpers', () => {
   let mockResults: OpenTimelineResult[];

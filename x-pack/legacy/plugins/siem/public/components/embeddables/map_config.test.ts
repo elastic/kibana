@@ -19,12 +19,7 @@ import {
   mockSourceLayer,
 } from './__mocks__/mock';
 
-jest.mock('uuid', () => {
-  return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
-  };
-});
+jest.mock('uuid', () => ({ v4: () => 'uuid.v4()' }));
 
 describe('map_config', () => {
   describe('#getLayerList', () => {

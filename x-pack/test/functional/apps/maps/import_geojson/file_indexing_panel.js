@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
@@ -28,7 +28,7 @@ export default function({ getService, getPageObjects }) {
     await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
     await PageObjects.maps.hasFilePickerLoadedFile(loadFileName);
 
-    const indexName = uuid();
+    const indexName = uuidv4();
     await PageObjects.maps.setIndexName(indexName);
     await PageObjects.maps.clickImportFileButton();
     return indexName;

@@ -34,8 +34,6 @@ const workpad = workpads[0];
 const now = new Date();
 const nowIso = now.toISOString();
 
-jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
-
 describe('PUT workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
   let clock: sinon.SinonFakeTimers;

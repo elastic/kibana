@@ -7,7 +7,7 @@
 import { onError, ErrorLink } from 'apollo-link-error';
 import { get, throttle, noop } from 'lodash/fp';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as i18n from './translations';
 
@@ -21,7 +21,7 @@ export const errorLinkHandler: ErrorLink.ErrorHandler = ({ graphQLErrors, networ
   if (graphQLErrors != null && store != null) {
     dispatch(
       appActions.addError({
-        id: uuid.v4(),
+        id: uuidv4(),
         title: i18n.DATA_FETCH_FAILURE,
         message: graphQLErrors.map(({ message }) => message),
       })
@@ -31,7 +31,7 @@ export const errorLinkHandler: ErrorLink.ErrorHandler = ({ graphQLErrors, networ
   if (networkError != null && store != null) {
     dispatch(
       appActions.addError({
-        id: uuid.v4(),
+        id: uuidv4(),
         title: i18n.NETWORK_FAILURE,
         message: [networkError.message],
       })

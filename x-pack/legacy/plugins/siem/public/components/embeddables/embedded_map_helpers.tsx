@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import minimatch from 'minimatch';
@@ -63,7 +63,7 @@ export const createEmbeddable = async (
 
   const input: MapEmbeddableInput = {
     title: i18n.MAP_TITLE,
-    id: uuid.v4(),
+    id: uuidv4(),
     filters,
     hidePanelTitles: true,
     query,

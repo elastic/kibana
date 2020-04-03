@@ -25,7 +25,7 @@ import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { IconSelect } from './icon_select/icon_select';
 import { YesNo } from './yes_no';
 import { QueryBarWrapper } from './query_bar_wrapper';
@@ -47,7 +47,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 function newAnnotation() {
   return {
-    id: uuid.v1(),
+    id: uuidv1(),
     color: '#F00',
     index_pattern: '*',
     time_field: '@timestamp',

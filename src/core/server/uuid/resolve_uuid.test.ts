@@ -25,10 +25,7 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { BehaviorSubject } from 'rxjs';
 import { Logger } from '../logging';
 
-jest.mock('uuid', () => ({
-  v4: () => 'NEW_UUID',
-}));
-
+jest.mock('uuid', () => ({ v4: () => 'NEW_UUID' }));
 jest.mock('./fs', () => ({
   readFile: jest.fn(() => Promise.resolve('')),
   writeFile: jest.fn(() => Promise.resolve('')),

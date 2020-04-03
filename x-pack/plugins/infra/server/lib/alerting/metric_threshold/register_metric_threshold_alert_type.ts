@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerting/server';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
@@ -16,7 +16,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
       'Cannot register metric threshold alert type.  Both the actions and alerting plugins need to be enabled.'
     );
   }
-  const alertUUID = uuid.v4();
+  const alertUUID = uuidv4();
 
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),

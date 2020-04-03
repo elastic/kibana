@@ -9,12 +9,6 @@ import { mockLayerList } from './__mocks__/mock';
 import { LocationPoint } from '../embedded_map';
 import { UptimeAppColors } from '../../../../../uptime_app';
 
-jest.mock('uuid', () => {
-  return {
-    v4: jest.fn(() => 'uuid.v4()'),
-  };
-});
-
 describe('map_config', () => {
   let upPoints: LocationPoint[];
   let downPoints: LocationPoint[];

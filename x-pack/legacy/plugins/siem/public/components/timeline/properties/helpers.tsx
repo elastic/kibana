@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 
@@ -189,7 +189,7 @@ interface NotesButtonProps {
   updateNote: UpdateNote;
 }
 
-const getNewNoteId = (): string => uuid.v4();
+const getNewNoteId = (): string => uuidv4();
 
 interface LargeNotesButtonProps {
   noteIds: string[];

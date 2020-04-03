@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
@@ -86,9 +86,9 @@ function waitForUseEffect() {
 
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `alert-${uuidv4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',

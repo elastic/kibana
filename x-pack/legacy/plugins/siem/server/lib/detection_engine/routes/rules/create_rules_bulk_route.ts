@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -88,7 +88,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               version,
               lists,
             } = payloadRule;
-            const ruleIdOrUuid = ruleId ?? uuid.v4();
+            const ruleIdOrUuid = ruleId ?? uuidv4();
             try {
               validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
 

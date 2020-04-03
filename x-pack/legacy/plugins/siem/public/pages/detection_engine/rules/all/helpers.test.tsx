@@ -6,14 +6,14 @@
 
 import { bucketRulesResponse, showRulesTable } from './helpers';
 import { mockRule, mockRuleError } from './__mocks__/mock';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Rule, RuleError } from '../../../../containers/detection_engine/rules';
 
 describe('AllRulesTable Helpers', () => {
-  const mockRule1: Readonly<Rule> = mockRule(uuid.v4());
-  const mockRule2: Readonly<Rule> = mockRule(uuid.v4());
-  const mockRuleError1: Readonly<RuleError> = mockRuleError(uuid.v4());
-  const mockRuleError2: Readonly<RuleError> = mockRuleError(uuid.v4());
+  const mockRule1: Readonly<Rule> = mockRule(uuidv4());
+  const mockRule2: Readonly<Rule> = mockRule(uuidv4());
+  const mockRuleError1: Readonly<RuleError> = mockRuleError(uuidv4());
+  const mockRuleError2: Readonly<RuleError> = mockRuleError(uuidv4());
 
   describe('bucketRulesResponse', () => {
     test('buckets empty response', () => {

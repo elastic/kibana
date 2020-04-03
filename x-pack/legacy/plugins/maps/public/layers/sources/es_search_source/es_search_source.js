@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
@@ -587,7 +587,7 @@ export const esDocumentsLayerWizardConfig = {
 
       const source = new ESSearchSource(
         {
-          id: uuid(),
+          id: uuidv4(),
           ...sourceConfig,
         },
         inspectorAdapters

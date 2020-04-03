@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 /**
  * This function returns a function to generate ids.
@@ -26,6 +26,6 @@ import uuid from 'uuid';
  * specify it, it generates a random id prefix.
  */
 export function htmlIdGenerator(idPrefix) {
-  const prefix = idPrefix || uuid.v1();
-  return suffix => `${prefix}_${suffix || uuid.v1()}`;
+  const prefix = idPrefix || uuidv1();
+  return suffix => `${prefix}_${suffix || uuidv1()}`;
 }

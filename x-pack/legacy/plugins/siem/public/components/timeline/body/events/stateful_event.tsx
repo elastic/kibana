@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields } from '../../../../containers/source';
@@ -61,7 +61,7 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-export const getNewNoteId = (): string => uuid.v4();
+export const getNewNoteId = (): string => uuidv4();
 
 const emptyDetails: DetailItem[] = [];
 

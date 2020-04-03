@@ -19,7 +19,7 @@
 
 /* eslint-disable @typescript-eslint/camelcase */
 
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsRawDoc, SavedObjectSanitizedDoc } from './types';
@@ -125,7 +125,7 @@ export class SavedObjectsSerializer {
   public generateRawId(namespace: string | undefined, type: string, id?: string) {
     const namespacePrefix =
       namespace && !this.registry.isNamespaceAgnostic(type) ? `${namespace}:` : '';
-    return `${namespacePrefix}${type}:${id || uuid.v1()}`;
+    return `${namespacePrefix}${type}:${id || uuidv1()}`;
   }
 
   private trimIdPrefix(namespace: string | undefined, type: string, id: string) {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   DataType,
@@ -32,7 +32,7 @@ import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
 export const getUniqueId = () => {
-  return uuid.v4();
+  return uuidv4();
 };
 
 const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {

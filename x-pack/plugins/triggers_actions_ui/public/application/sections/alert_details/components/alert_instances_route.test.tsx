@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { ToastsApi } from 'kibana/public';
 import { AlertInstancesRoute, getAlertState } from './alert_instances_route';
@@ -62,7 +62,7 @@ describe('getAlertState useEffect handler', () => {
       actions: [
         {
           group: '',
-          id: uuid.v4(),
+          id: uuidv4(),
           actionTypeId: actionType.id,
           params: {},
         },
@@ -102,9 +102,9 @@ function mockStateSetter() {
 
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `alert-${uuid.v4()}`,
+    name: `alert-${uuidv4()}`,
     tags: [],
     alertTypeId: '.noop',
     consumer: 'consumer',

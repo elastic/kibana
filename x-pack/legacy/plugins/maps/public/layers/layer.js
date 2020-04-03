@@ -13,7 +13,7 @@ import {
   MIN_ZOOM,
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util.js';
 import { i18n } from '@kbn/i18n';
@@ -40,7 +40,7 @@ export class AbstractLayer {
     const layerDescriptor = { ...options };
 
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
-    layerDescriptor.id = _.get(options, 'id', uuid());
+    layerDescriptor.id = _.get(options, 'id', uuidv4());
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', MIN_ZOOM);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', MAX_ZOOM);
@@ -60,14 +60,14 @@ export class AbstractLayer {
   async cloneDescriptor() {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach(joinDescriptor => {
         // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
+        joinDescriptor.right.id = uuidv4();
       });
     }
     return clonedDescriptor;

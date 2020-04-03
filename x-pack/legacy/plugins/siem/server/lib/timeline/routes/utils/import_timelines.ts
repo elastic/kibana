@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { has } from 'lodash/fp';
 import { createBulkErrorObject, BulkError } from '../../../detection_engine/routes/utils';
 import { PinnedEvent } from '../../../pinned_event/saved_object';
@@ -53,13 +53,13 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
   const { errors, timelinesAcc } = timelines.reduce(
     (acc, parsedTimeline) => {
       if (parsedTimeline instanceof Error) {
-        acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
+        acc.timelinesAcc.set(uuidv4(), parsedTimeline);
       } else {
         const { savedObjectId } = parsedTimeline;
         if (savedObjectId != null) {
           if (acc.timelinesAcc.has(savedObjectId) && !isOverwrite) {
             acc.errors.set(
-              uuid.v4(),
+              uuidv4(),
               createBulkErrorObject({
                 id: savedObjectId,
                 statusCode: 400,
@@ -69,7 +69,7 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
           }
           acc.timelinesAcc.set(savedObjectId, parsedTimeline);
         } else {
-          acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
+          acc.timelinesAcc.set(uuidv4(), parsedTimeline);
         }
       }
 

@@ -7,7 +7,7 @@
 import { AlertType } from '../common';
 import { httpServiceMock } from '../../../../src/core/public/mocks';
 import { loadAlert, loadAlertState, loadAlertType, loadAlertTypes } from './alert_api';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 const http = httpServiceMock.createStartContract();
 
@@ -88,7 +88,7 @@ describe('loadAlertType', () => {
 
 describe('loadAlert', () => {
   test('should call get API with base parameters', async () => {
-    const alertId = uuid.v4();
+    const alertId = uuidv4();
     const resolvedValue = {
       id: alertId,
       name: 'name',
@@ -113,7 +113,7 @@ describe('loadAlert', () => {
 
 describe('loadAlertState', () => {
   test('should call get API with base parameters', async () => {
-    const alertId = uuid.v4();
+    const alertId = uuidv4();
     const resolvedValue = {
       alertTypeState: {
         some: 'value',
@@ -130,7 +130,7 @@ describe('loadAlertState', () => {
   });
 
   test('should parse AlertInstances', async () => {
-    const alertId = uuid.v4();
+    const alertId = uuidv4();
     const resolvedValue = {
       alertTypeState: {
         some: 'value',
@@ -167,7 +167,7 @@ describe('loadAlertState', () => {
   });
 
   test('should handle empty response from api', async () => {
-    const alertId = uuid.v4();
+    const alertId = uuidv4();
     http.get.mockResolvedValueOnce('');
 
     expect(await loadAlertState({ http, alertId })).toEqual({});

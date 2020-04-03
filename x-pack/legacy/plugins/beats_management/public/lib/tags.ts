@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { BeatTag, CMBeat } from '../../common/domain_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
 import { ElasticsearchLib } from './elasticsearch';

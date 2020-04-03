@@ -5,7 +5,7 @@
  */
 
 import * as rt from 'io-ts';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export const tracingSpanRT = rt.type({
   duration: rt.number,
@@ -21,7 +21,7 @@ export type ActiveTrace = (endTime?: number) => TracingSpan;
 export const startTracingSpan = (name: string): ActiveTrace => {
   const initialState: TracingSpan = {
     duration: Number.POSITIVE_INFINITY,
-    id: uuid.v4(),
+    id: uuidv4(),
     name,
     start: Date.now(),
   };

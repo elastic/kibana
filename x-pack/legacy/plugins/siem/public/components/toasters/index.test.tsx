@@ -16,12 +16,7 @@ import {
   displayErrorToast,
 } from '.';
 
-jest.mock('uuid', () => {
-  return {
-    v1: jest.fn(() => '27261ae0-0bbb-11ea-b0ea-db767b07ea47'),
-    v4: jest.fn(() => '9e1f72a9-7c73-4b7f-a562-09940f7daf4a'),
-  };
-});
+jest.mock('uuid', () => ({ v4: () => '9e1f72a9-7c73-4b7f-a562-09940f7daf4a' }));
 
 const mockToast: AppToast = {
   color: 'danger',

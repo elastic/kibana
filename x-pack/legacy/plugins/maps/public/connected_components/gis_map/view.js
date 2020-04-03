@@ -17,14 +17,14 @@ import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../../src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 export class GisMap extends Component {
   state = {
     isInitialLoadRenderTimeoutComplete: false,
-    domId: uuid(),
+    domId: uuidv4(),
     geoFields: [],
   };
 

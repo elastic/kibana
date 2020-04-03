@@ -7,7 +7,7 @@
 import { EuiBasicTable, EuiContextMenuPanel, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   useRules,
@@ -256,7 +256,7 @@ export const AllRules = React.memo<AllRulesProps>(
             dispatchToaster({
               type: 'addToaster',
               toast: {
-                id: uuid.v4(),
+                id: uuidv4(),
                 title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
                 color: 'success',
                 iconType: 'check',

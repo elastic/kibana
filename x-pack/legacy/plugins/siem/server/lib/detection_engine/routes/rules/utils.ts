@@ -6,7 +6,7 @@
 
 import { pickBy, countBy } from 'lodash/fp';
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { PartialAlert, FindResult } from '../../../../../../../../plugins/alerting/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
@@ -271,13 +271,13 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
       if (parsedRule instanceof Error) {
-        acc.rulesAcc.set(uuid.v4(), parsedRule);
+        acc.rulesAcc.set(uuidv4(), parsedRule);
       } else {
         const { rule_id: ruleId } = parsedRule;
         if (ruleId != null) {
           if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
             acc.errors.set(
-              uuid.v4(),
+              uuidv4(),
               createBulkErrorObject({
                 ruleId,
                 statusCode: 400,
@@ -287,7 +287,7 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
           }
           acc.rulesAcc.set(ruleId, parsedRule);
         } else {
-          acc.rulesAcc.set(uuid.v4(), parsedRule);
+          acc.rulesAcc.set(uuidv4(), parsedRule);
         }
       }
 

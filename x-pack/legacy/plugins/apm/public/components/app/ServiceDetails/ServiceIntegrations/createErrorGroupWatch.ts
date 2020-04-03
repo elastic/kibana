@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import url from 'url';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { HttpSetup } from 'kibana/public';
 import {
   ERROR_CULPRIT,
@@ -64,7 +64,7 @@ export async function createErrorGroupWatch({
   timeRange,
   apmIndexPatternTitle
 }: Arguments) {
-  const id = `apm-${uuid.v4()}`;
+  const id = `apm-${uuidv4()}`;
 
   const slackUrlPath = getSlackPathUrl(slackUrl);
   const emailTemplate = i18n.translate(
