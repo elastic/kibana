@@ -146,7 +146,6 @@ export type ParameterName =
   /**
    * These parameters are internal to mappings editor
    */
-  | 'otherTypeName'
   | 'otherTypeJson';
 
 export interface Parameter {

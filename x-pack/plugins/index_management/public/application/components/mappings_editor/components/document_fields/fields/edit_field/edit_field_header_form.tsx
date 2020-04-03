@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { UseField, useFormContext, FormDataProvider, TextField } from '../../../../shared_imports';
+import { UseField, useFormContext, FormDataProvider } from '../../../../shared_imports';
 import { MainType, SubType, Field, ComboBoxOption } from '../../../../types';
 import {
   getFieldConfig,
@@ -17,7 +17,7 @@ import {
 } from '../../../../lib';
 import { TYPE_DEFINITION } from '../../../../constants';
 
-import { NameParameter, TypeParameter } from '../../field_parameters';
+import { NameParameter, TypeParameter, OtherTypeNameParameter } from '../../field_parameters';
 import { FieldDescriptionSection } from './field_description_section';
 
 interface Props {
@@ -83,17 +83,14 @@ export const EditFieldHeaderForm = React.memo(
           {/* Other type */}
           {type === 'other' && (
             <EuiFlexItem>
-              <UseField
-                path="subType"
-                config={getFieldConfig('otherTypeName')}
-                component={TextField}
-              />
+              <OtherTypeNameParameter />
             </EuiFlexItem>
           )}
 
-          {/* Field sub type (if any) */}
+          {/* Field sub type (if any) - will never be the case if we have an "other" type */}
           {hasSubType && (
             <EuiFlexItem>
+              {' '}
               <UseField
                 path="subType"
                 config={{

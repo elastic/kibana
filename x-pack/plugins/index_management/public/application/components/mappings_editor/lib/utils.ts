@@ -72,6 +72,9 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
   };
 };
 
+export const getTypeLabelFromType = (type: DataType) =>
+  TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
+
 export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig => {
   if (prop !== undefined) {
     if (

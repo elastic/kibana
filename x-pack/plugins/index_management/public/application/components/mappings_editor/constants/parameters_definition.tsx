@@ -185,26 +185,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     },
     schema: t.string,
   },
-  otherTypeName: {
-    fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.otherTypeNameFieldLabel', {
-        defaultMessage: 'Type Name',
-      }),
-      defaultValue: '',
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeNameIsRequiredErrorMessage',
-              {
-                defaultMessage: 'The type name is required.',
-              }
-            )
-          ),
-        },
-      ],
-    },
-  },
   otherTypeJson: {
     fieldConfig: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.otherTypeJsonFieldLabel', {

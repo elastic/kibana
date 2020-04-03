@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { useForm, Form, FormDataProvider, UseField, TextField } from '../../../../shared_imports';
+import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
 
 import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
 
@@ -31,15 +31,8 @@ import {
   filterTypesForMultiField,
   filterTypesForNonRootFields,
 } from '../../../../lib';
-import {
-  Field,
-  MainType,
-  SubType,
-  NormalizedFields,
-  ComboBoxOption,
-  DataType,
-} from '../../../../types';
-import { NameParameter, TypeParameter } from '../../field_parameters';
+import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
+import { NameParameter, TypeParameter, OtherTypeNameParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -163,9 +156,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     },
     [form, getSubTypeMeta]
   );
-
   const renderFormFields = useCallback(
     ({ type }) => {
+      const isOtherType = type === 'other';
       const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
 
       const docLink = documentationService.getTypeDocLink(type) as string;
@@ -187,16 +180,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
               />
             </EuiFlexItem>
             {/* Other type */}
-            {type === 'other' && (
+            {isOtherType && (
               <EuiFlexItem>
-                <UseField
-                  path="subType"
-                  config={getFieldConfig('otherTypeName')}
-                  component={TextField}
-                />
+                <OtherTypeNameParameter />
               </EuiFlexItem>
             )}
-            {/* Field sub type (if any) */}
+            {/* Field sub type (if any) - will never be the case if we have an "other" type */}
             {subTypeOptions && (
               <EuiFlexItem>
                 <UseField
