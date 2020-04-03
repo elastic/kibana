@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './layers/layer_wizard_registry';
+import './layers/sources/source_registry';
+import './layers/load_layer_wizards';
+
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';

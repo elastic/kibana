@@ -16,8 +16,6 @@ import { VectorLayer } from '../../../../../plugins/maps/public/layers/vector_la
 import { HeatmapLayer } from '../../../../../plugins/maps/public/layers/heatmap_layer';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BlendedVectorLayer } from '../../../../../plugins/maps/public/layers/blended_vector_layer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ALL_SOURCES } from '../../../../../plugins/maps/public/layers/sources/all_sources';
 import { getTimeFilter } from '../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
@@ -28,6 +26,7 @@ import {
 } from '../../../../../plugins/maps/public/reducers/util';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InnerJoin } from '../../../../../plugins/maps/public/layers/joins/inner_join';
+import { getSourceByType } from '../layers/sources/source_registry';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -56,13 +55,11 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
 }
 
 function createSourceInstance(sourceDescriptor, inspectorAdapters) {
-  const Source = ALL_SOURCES.find(Source => {
-    return Source.type === sourceDescriptor.type;
-  });
-  if (!Source) {
+  const source = getSourceByType(sourceDescriptor.type);
+  if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new Source(sourceDescriptor, inspectorAdapters);
+  return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
 }
 
 export const getOpenTooltips = ({ map }) => {

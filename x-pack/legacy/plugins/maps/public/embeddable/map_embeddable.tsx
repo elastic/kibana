@@ -130,6 +130,14 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
   }
 
+  setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
+    this._renderTooltipContent = renderTooltipContent;
+  };
+
+  setEventHandlers = (eventHandlers: EventHandlers) => {
+    this._eventHandlers = eventHandlers;
+  };
+
   getInspectorAdapters() {
     return getInspectorAdapters(this._store.getState());
   }
