@@ -25,6 +25,26 @@ import { orderXValues } from '../components/zero_injection/ordered_x_keys';
 import { labels } from '../components/labels/labels';
 import { getFormatService } from '../../services';
 
+// X axis and split series values in a data table can sometimes be objects,
+// e.g. when working with date ranges. d3 casts all ordinal values to strings
+// which is a problem for these objects because they just return `[object Object]`
+// and thus all map to the same value.
+// This little helper overwrites the toString method of an object and keeps it the
+// same otherwise - allowing d3 to correctly work with the values.
+class D3MappableObject {
+  constructor(data) {
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        this[key] = data[key];
+      }
+    }
+  }
+
+  toString() {
+    return JSON.stringify(this);
+  }
+}
+
 /**
  * Provides an API for pulling values off the data
  * and calculating values using the data
@@ -52,9 +72,14 @@ export class Data {
     const copyChart = data => {
       const newData = {};
       Object.keys(data).forEach(key => {
-        if (key !== 'series') {
-          newData[key] = data[key];
-        } else {
+        if (key === 'xAxisOrderedValues') {
+          newData[key] = data[key].map(val => {
+            if (typeof val === 'object') {
+              return new D3MappableObject(val);
+            }
+            return val;
+          });
+        } else if (key === 'series') {
           newData[key] = data[key].map(seri => {
             const converter = getFormatService().deserialize(seri.format);
             const zConverter = getFormatService().deserialize(seri.zFormat);
@@ -67,12 +92,17 @@ export class Data {
                 const newVal = _.clone(val);
                 newVal.extraMetrics = val.extraMetrics;
                 newVal.series = val.series || seri.label;
+                if (typeof newVal.x === 'object') {
+                  newVal.x = new D3MappableObject(newVal.x);
+                }
                 return newVal;
               }),
               yAxisFormatter: val => converter.convert(val),
               zAxisFormatter: val => zConverter.convert(val),
             };
           });
+        } else {
+          newData[key] = data[key];
         }
       });
 

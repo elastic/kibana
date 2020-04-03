@@ -167,10 +167,10 @@ export class VectorLayer extends AbstractLayer {
       features: visibleFeatures,
     });
     return {
-      min_lon: bbox[0],
-      min_lat: bbox[1],
-      max_lon: bbox[2],
-      max_lat: bbox[3],
+      minLon: bbox[0],
+      minLat: bbox[1],
+      maxLon: bbox[2],
+      maxLat: bbox[3],
     };
   }
 
