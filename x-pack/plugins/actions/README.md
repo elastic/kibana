@@ -180,7 +180,7 @@ No parameters.
 
 Return all actions from saved objects merged with predefined list.
 Use the [saved objects API for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html) with the proprties: `type: 'action'` and `perPage: 10000`.
-List of predefined connectors should be set up in Kibana.yaml.
+List of predefined actions should be set up in Kibana.yaml.
 
 ### `GET /api/action/{id}`: Get action
 

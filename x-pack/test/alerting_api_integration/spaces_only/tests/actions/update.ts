@@ -103,7 +103,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't update action from preconfigured list`, async () => {
       await supertest
-        .put(`${getUrlPrefix(Spaces.space1.id)}/api/action/my-slack1`)
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/action/custom-system-abc-connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action updated',
@@ -117,7 +117,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
-          message: `Preconfigured connector custom-system-abc-connector is not allowed to update.`,
+          message: `Preconfigured action custom-system-abc-connector is not allowed to update.`,
         });
     });
   });

@@ -69,6 +69,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAction.id,
+                isPreconfigured: false,
                 actionTypeId: 'test.index-record',
                 name: 'My action updated',
                 config: {
@@ -332,7 +333,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `Preconfigured connector custom-system-abc-connector is not allowed to update.`,
+                message: `Preconfigured action custom-system-abc-connector is not allowed to update.`,
               });
               break;
             default:

@@ -43,27 +43,14 @@ describe('loadActionTypes', () => {
 });
 
 describe('loadAllActions', () => {
-  test('should call find actions API', async () => {
-    const resolvedValue = {
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    };
-    http.get.mockResolvedValueOnce(resolvedValue);
+  test('should call getAll actions API', async () => {
+    http.get.mockResolvedValueOnce([]);
 
     const result = await loadAllActions({ http });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual([]);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/action/_getAll",
-        Object {
-          "query": Object {
-            "per_page": 10000,
-            "sort_field": "name.keyword",
-            "sort_order": "asc",
-          },
-        },
       ]
     `);
   });

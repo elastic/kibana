@@ -59,6 +59,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAction.id,
+                isPreconfigured: false,
                 actionTypeId: 'test.index-record',
                 name: 'My action',
                 config: {
@@ -132,7 +133,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
                 id: 'my-slack1',
                 actionTypeId: '.slack',
                 name: 'Slack #xyz',
-                description: 'Send a message to the #xyz channel',
+                isPreconfigured: true,
                 config: {
                   webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
                 },

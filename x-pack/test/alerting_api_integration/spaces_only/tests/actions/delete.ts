@@ -81,7 +81,11 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
       await supertest
         .delete(`${getUrlPrefix(Spaces.space1.id)}/api/action/my-slack1`)
         .set('kbn-xsrf', 'foo')
-        .expect(400, 'Preconfigured connector my-slack1 is not allowed to delete.');
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `Preconfigured action my-slack1 is not allowed to delete.`,
+        });
     });
   });
 }

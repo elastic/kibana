@@ -7,13 +7,13 @@
 import { KibanaResponseFactory } from '../../../../../../src/core/server';
 import { ErrorThatHandlesItsOwnResponse } from './types';
 
-export type PredefinedConnectorDisabledFrom = 'update' | 'delete';
+export type PreconfiguredActionDisabledFrom = 'update' | 'delete';
 
-export class PredefinedConnectorDisabledModificationError extends Error
+export class PreconfiguredActionDisabledModificationError extends Error
   implements ErrorThatHandlesItsOwnResponse {
-  public readonly disabledFrom: PredefinedConnectorDisabledFrom;
+  public readonly disabledFrom: PreconfiguredActionDisabledFrom;
 
-  constructor(message: string, disabledFrom: PredefinedConnectorDisabledFrom) {
+  constructor(message: string, disabledFrom: PreconfiguredActionDisabledFrom) {
     super(message);
     this.disabledFrom = disabledFrom;
   }

@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
 import { ActionResult, FindActionResult, RawAction, PreConfiguredAction } from './types';
-import { PredefinedConnectorDisabledModificationError } from './lib/errors/predefined_connector_disabled_modification';
+import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 100 or so.
@@ -41,7 +41,7 @@ interface ConstructorOptions {
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
-  preconfiguredConnectors: PreConfiguredAction[];
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 interface UpdateOptions {
@@ -54,20 +54,20 @@ export class ActionsClient {
   private readonly scopedClusterClient: IScopedClusterClient;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
-  private readonly preconfiguredConnectors: PreConfiguredAction[];
+  private readonly preconfiguredActions: PreConfiguredAction[];
 
   constructor({
     actionTypeRegistry,
     defaultKibanaIndex,
     scopedClusterClient,
     savedObjectsClient,
-    preconfiguredConnectors,
+    preconfiguredActions,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
     this.defaultKibanaIndex = defaultKibanaIndex;
-    this.preconfiguredConnectors = preconfiguredConnectors;
+    this.preconfiguredActions = preconfiguredActions;
   }
 
   /**
@@ -101,10 +101,13 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
-    if (this.preconfiguredConnectors.find(pConnector => pConnector.id === id) !== undefined) {
-      throw new PredefinedConnectorDisabledModificationError(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedConnectorUpdatedisabled', {
-          defaultMessage: 'Preconfigured connector {id} is not allowed to update.',
+    if (
+      this.preconfiguredActions.find(preconfiguredAction => preconfiguredAction.id === id) !==
+      undefined
+    ) {
+      throw new PreconfiguredActionDisabledModificationError(
+        i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdatedisabled', {
+          defaultMessage: 'Preconfigured action {id} is not allowed to update.',
           values: {
             id,
           },
@@ -141,15 +144,15 @@ export class ActionsClient {
    * Get an action
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
-    const preconfiguredConnector = this.preconfiguredConnectors.find(
-      pConnector => pConnector.id === id
+    const preconfiguredActionsList = this.preconfiguredActions.find(
+      preconfiguredAction => preconfiguredAction.id === id
     );
-    if (preconfiguredConnector !== undefined) {
+    if (preconfiguredActionsList !== undefined) {
       return {
         id,
-        actionTypeId: preconfiguredConnector.actionTypeId,
-        name: preconfiguredConnector.name,
-        config: preconfiguredConnector.config,
+        actionTypeId: preconfiguredActionsList.actionTypeId,
+        name: preconfiguredActionsList.name,
+        config: preconfiguredActionsList.config,
         isPreconfigured: true,
       };
     }
@@ -165,7 +168,7 @@ export class ActionsClient {
   }
 
   /**
-   * Get all actions connectors with preconfigured connectors
+   * Get all actions with preconfigured list
    */
   public async getAll(): Promise<FindActionResult[]> {
     const savedObjectsActions = (
@@ -177,11 +180,11 @@ export class ActionsClient {
 
     const mergedResult = [
       ...savedObjectsActions,
-      ...this.preconfiguredConnectors.map(preconfiguredConnector => ({
-        id: preconfiguredConnector.id,
-        actionTypeId: preconfiguredConnector.actionTypeId,
-        name: preconfiguredConnector.name,
-        config: preconfiguredConnector.config,
+      ...this.preconfiguredActions.map(preconfiguredAction => ({
+        id: preconfiguredAction.id,
+        actionTypeId: preconfiguredAction.actionTypeId,
+        name: preconfiguredAction.name,
+        config: preconfiguredAction.config,
         isPreconfigured: true,
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
@@ -196,10 +199,13 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
-    if (this.preconfiguredConnectors.find(pConnector => pConnector.id === id) !== undefined) {
-      throw new PredefinedConnectorDisabledModificationError(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedConnectorUpdatedisabled', {
-          defaultMessage: 'Preconfigured connector {id} is not allowed to delete.',
+    if (
+      this.preconfiguredActions.find(preconfiguredAction => preconfiguredAction.id === id) !==
+      undefined
+    ) {
+      throw new PreconfiguredActionDisabledModificationError(
+        i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdatedisabled', {
+          defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
           values: {
             id,
           },

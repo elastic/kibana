@@ -97,7 +97,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private readonly telemetryLogger: Logger;
-  private readonly preconfiguredConnectors: PreConfiguredAction[];
+  private readonly preconfiguredActions: PreConfiguredAction[];
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config
@@ -114,7 +114,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     this.logger = initContext.logger.get('actions');
     this.telemetryLogger = initContext.logger.get('telemetry');
-    this.preconfiguredConnectors = [];
+    this.preconfiguredActions = [];
   }
 
   public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
@@ -156,9 +156,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     const actionsConfig = (await this.config) as ActionsConfig;
     const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
 
-    this.preconfiguredConnectors.push(
+    this.preconfiguredActions.push(
       ...actionsConfig.preconfigured.map(
-        connector => ({ ...connector, isPreconfigured: true } as PreConfiguredAction)
+        preconfiguredAction =>
+          ({ ...preconfiguredAction, isPreconfigured: true } as PreConfiguredAction)
       )
     );
     const actionTypeRegistry = new ActionTypeRegistry({
@@ -233,7 +234,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       kibanaIndex,
       adminClient,
       isESOUsingEphemeralEncryptionKey,
-      preconfiguredConnectors,
+      preconfiguredActions,
     } = this;
 
     actionExecutor!.initialize({
@@ -279,7 +280,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           actionTypeRegistry: actionTypeRegistry!,
           defaultKibanaIndex: await kibanaIndex,
           scopedClusterClient: adminClient!.asScoped(request),
-          preconfiguredConnectors,
+          preconfiguredActions,
         });
       },
     };
@@ -302,7 +303,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionTypeRegistry,
       adminClient,
       isESOUsingEphemeralEncryptionKey,
-      preconfiguredConnectors,
+      preconfiguredActions,
     } = this;
     return async function actionsRouteHandlerContext(context, request) {
       return {
@@ -317,7 +318,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
             scopedClusterClient: adminClient!.asScoped(request),
-            preconfiguredConnectors,
+            preconfiguredActions,
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

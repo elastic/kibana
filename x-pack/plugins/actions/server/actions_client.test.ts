@@ -51,7 +51,7 @@ beforeEach(() => {
     savedObjectsClient,
     scopedClusterClient,
     defaultKibanaIndex,
-    preconfiguredConnectors: [],
+    preconfiguredActions: [],
   });
 });
 
@@ -229,7 +229,7 @@ describe('create()', () => {
       savedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
-      preconfiguredConnectors: [],
+      preconfiguredActions: [],
     });
 
     const savedObjectCreateResult = {
@@ -320,13 +320,13 @@ describe('get()', () => {
     `);
   });
 
-  test('return predefined connector with id', async () => {
+  test('return predefined action with id', async () => {
     actionsClient = new ActionsClient({
       actionTypeRegistry,
       savedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
-      preconfiguredConnectors: [
+      preconfiguredActions: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
@@ -367,6 +367,7 @@ describe('getAll()', () => {
           id: '1',
           type: 'type',
           attributes: {
+            name: 'test',
             config: {
               foo: 'bar',
             },
@@ -388,7 +389,7 @@ describe('getAll()', () => {
       savedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
-      preconfiguredConnectors: [
+      preconfiguredActions: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
@@ -406,6 +407,7 @@ describe('getAll()', () => {
       {
         id: '1',
         isPreconfigured: false,
+        name: 'test',
         config: {
           foo: 'bar',
         },
@@ -414,7 +416,6 @@ describe('getAll()', () => {
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
-        secrets: {},
         isPreconfigured: true,
         name: 'test',
         config: {

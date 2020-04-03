@@ -38,6 +38,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/action/${createdAction.id}`)
         .expect(200, {
           id: createdAction.id,
+          isPreconfigured: false,
           actionTypeId: 'test.index-record',
           name: 'My action',
           config: {
@@ -75,9 +76,9 @@ export default function getActionTests({ getService }: FtrProviderContext) {
     it('should handle get action request from preconfigured list', async () => {
       await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/action/my-slack1`).expect(200, {
         id: 'my-slack1',
+        isPreconfigured: true,
         actionTypeId: '.slack',
         name: 'Slack #xyz',
-        description: 'Send a message to the #xyz channel',
         config: {
           webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
         },

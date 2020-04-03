@@ -22,7 +22,7 @@ describe('config validation', () => {
     `);
   });
 
-  test('action with preconfigured connectors', () => {
+  test('action with preconfigured actions', () => {
     const config: Record<string, any> = {
       preconfigured: [
         {
