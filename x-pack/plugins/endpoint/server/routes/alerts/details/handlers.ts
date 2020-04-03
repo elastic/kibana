@@ -40,12 +40,17 @@ export const alertDetailsGetHandlerWrapper = function(
 
       const currentHostInfo = await getHostData(ctx, response._source.host.id);
 
+      let triageState = response._source.state?.active;
+      if (triageState === undefined) {
+        triageState = true;
+      }
+
       return res.ok({
         body: {
           id: response._id,
           ...response._source,
           state: {
-            active: response._source.state.active,
+            active: triageState,
             host_metadata: currentHostInfo,
           },
           next: await pagination.getNextUrl(),
