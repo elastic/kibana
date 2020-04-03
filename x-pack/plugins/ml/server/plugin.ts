@@ -85,7 +85,19 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         }),
         privileges: [
           {
-            id: 'ml',
+            id: 'ml_user',
+            privilege: {
+              app: [PLUGIN_ID, 'kibana'],
+              catalogue: [PLUGIN_ID],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          },
+          {
+            id: 'ml_admin',
             privilege: {
               app: [PLUGIN_ID, 'kibana'],
               catalogue: [PLUGIN_ID],
