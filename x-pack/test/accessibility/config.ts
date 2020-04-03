@@ -13,10 +13,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [
-      require.resolve('./apps/login_page'),
-      require.resolve('./apps/searchprofiler_editor'),
-    ],
+    testFiles: [require.resolve('./apps/login_page'), require.resolve('./apps/search_profiler')],
     pageObjects,
     services,
 

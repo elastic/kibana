@@ -4,22 +4,84 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import expect from '@kbn/expect';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security']);
+  const testSubjects = getService('testSubjects');
+  const aceEditor = getService('aceEditor');
   const a11y = getService('a11y');
-  const log = getService('log');
-  // const testSubjects = getService('testSubjects');
+  const flyout = getService('flyout');
 
-  describe('Dev tools search profiler', () => {
+  // this test is skipped due to https://github.com/elastic/kibana/issues/62531
+  describe.skip('Accessibility Search Profiler Editor', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('searchProfiler');
+      await a11y.testAppSnapshot();
+      expect(await testSubjects.exists('searchProfilerEditor')).to.be(true);
     });
 
-    it('Dev tools search profiler view', async () => {
-      log.debug('hello');
+    it('input the JSON in the aceeditor', async () => {
+      const input = {
+        query: {
+          bool: {
+            should: [
+              {
+                match: {
+                  name: 'fred',
+                },
+              },
+              {
+                terms: {
+                  name: ['sue', 'sally'],
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          stats: {
+            stats: {
+              field: 'price',
+            },
+          },
+        },
+      };
+
+      await aceEditor.setValue('searchProfilerEditor', JSON.stringify(input));
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on the profile button', async () => {
+      await testSubjects.click('profileButton');
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on the view details link', async () => {
+      const viewShardDetailslink = await testSubjects.findAll('viewShardDetails');
+      await viewShardDetailslink[0].click();
+      await a11y.testAppSnapshot();
+    });
+
+    it('close the fly out', async () => {
+      await flyout.ensureAllClosed();
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on the Aggregation Profile link', async () => {
+      await testSubjects.click('aggregationProfileTab');
+      await a11y.testAppSnapshot();
+    });
+
+    it('click on the view details link', async () => {
+      const viewShardDetailslink = await testSubjects.findAll('viewShardDetails');
+      await viewShardDetailslink[0].click();
+      await a11y.testAppSnapshot();
+    });
+
+    it('close the fly out', async () => {
+      await flyout.ensureAllClosed();
       await a11y.testAppSnapshot();
     });
   });
