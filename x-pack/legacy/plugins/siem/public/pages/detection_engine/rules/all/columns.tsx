@@ -48,7 +48,6 @@ export const getActions = (
     icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
-    enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
     description: i18n.DUPLICATE_RULE,
@@ -145,7 +144,6 @@ export const getColumns = ({
           </LocalizedDateTooltip>
         );
       },
-      sortable: true,
       truncateText: true,
       width: '20%',
     },
@@ -181,7 +179,7 @@ export const getColumns = ({
     },
     {
       align: 'center',
-      field: 'activate',
+      field: 'enabled',
       name: i18n.COLUMN_ACTIVATE,
       render: (value: Rule['enabled'], item: Rule) => (
         <RuleSwitch
@@ -284,7 +282,6 @@ export const getMonitoringColumns = (): RulesStatusesColumns[] => {
           </LocalizedDateTooltip>
         );
       },
-      sortable: true,
       truncateText: true,
       width: '20%',
     },

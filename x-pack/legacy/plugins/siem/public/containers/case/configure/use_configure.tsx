@@ -21,7 +21,11 @@ interface PersistCaseConfigure {
 export interface ReturnUseCaseConfigure {
   loading: boolean;
   refetchCaseConfigure: () => void;
-  persistCaseConfigure: ({ connectorId, closureType }: PersistCaseConfigure) => unknown;
+  persistCaseConfigure: ({
+    connectorId,
+    connectorName,
+    closureType,
+  }: PersistCaseConfigure) => unknown;
   persistLoading: boolean;
 }
 
@@ -97,18 +101,19 @@ export const useCaseConfigure = ({
       const saveCaseConfiguration = async () => {
         try {
           setPersistLoading(true);
+          const connectorObj = {
+            connector_id: connectorId,
+            connector_name: connectorName,
+            closure_type: closureType,
+          };
           const res =
             version.length === 0
-              ? await postCaseConfigure(
-                  {
-                    connector_id: connectorId,
-                    connector_name: connectorName,
-                    closure_type: closureType,
-                  },
-                  abortCtrl.signal
-                )
+              ? await postCaseConfigure(connectorObj, abortCtrl.signal)
               : await patchCaseConfigure(
-                  { connector_id: connectorId, closure_type: closureType, version },
+                  {
+                    ...connectorObj,
+                    version,
+                  },
                   abortCtrl.signal
                 );
           if (!didCancel) {

@@ -1,17 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PageView component should display body header custom element 1`] = `
-.c0 {
+.c0.endpoint--isListView {
   padding: 0;
 }
 
-.c0 .endpoint-header {
+.c0.endpoint--isListView .endpoint-header {
   padding: 24px;
 }
 
-.c0 .endpoint-page-content {
+.c0.endpoint--isListView .endpoint-page-content {
   border-left: none;
   border-right: none;
+}
+
+.c0.endpoint--isDetailsView .endpoint-page-content {
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 <Memo()
@@ -20,13 +26,16 @@ exports[`PageView component should display body header custom element 1`] = `
       body header
     </p>
   }
+  viewType="list"
 >
-  <Styled(EuiPage)>
+  <Styled(EuiPage)
+    className="endpoint--isListView"
+  >
     <EuiPage
-      className="c0"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -47,11 +56,11 @@ exports[`PageView component should display body header custom element 1`] = `
                       className="euiPageContentHeader euiPageContentHeader--responsive"
                     >
                       <EuiPageContentHeaderSection
-                        data-test-subj="pageViewBodyTitle"
+                        data-test-subj="pageViewBodyTitleArea"
                       >
                         <div
                           className="euiPageContentHeaderSection"
-                          data-test-subj="pageViewBodyTitle"
+                          data-test-subj="pageViewBodyTitleArea"
                         >
                           <p>
                             body header
@@ -82,28 +91,37 @@ exports[`PageView component should display body header custom element 1`] = `
 `;
 
 exports[`PageView component should display body header wrapped in EuiTitle 1`] = `
-.c0 {
+.c0.endpoint--isListView {
   padding: 0;
 }
 
-.c0 .endpoint-header {
+.c0.endpoint--isListView .endpoint-header {
   padding: 24px;
 }
 
-.c0 .endpoint-page-content {
+.c0.endpoint--isListView .endpoint-page-content {
   border-left: none;
   border-right: none;
 }
 
+.c0.endpoint--isDetailsView .endpoint-page-content {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 <Memo()
   bodyHeader="body header"
+  viewType="list"
 >
-  <Styled(EuiPage)>
+  <Styled(EuiPage)
+    className="endpoint--isListView"
+  >
     <EuiPage
-      className="c0"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -124,19 +142,22 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
                       className="euiPageContentHeader euiPageContentHeader--responsive"
                     >
                       <EuiPageContentHeaderSection
-                        data-test-subj="pageViewBodyTitle"
+                        data-test-subj="pageViewBodyTitleArea"
                       >
                         <div
                           className="euiPageContentHeaderSection"
-                          data-test-subj="pageViewBodyTitle"
+                          data-test-subj="pageViewBodyTitleArea"
                         >
-                          <EuiTitle>
-                            <h2
-                              className="euiTitle euiTitle--medium"
-                            >
-                              body header
-                            </h2>
-                          </EuiTitle>
+                          <Memo()>
+                            <EuiTitle>
+                              <h2
+                                className="euiTitle euiTitle--medium"
+                                data-test-subj="pageViewBodyTitle"
+                              >
+                                body header
+                              </h2>
+                            </EuiTitle>
+                          </Memo()>
                         </div>
                       </EuiPageContentHeaderSection>
                     </div>
@@ -163,29 +184,38 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
 `;
 
 exports[`PageView component should display header left and right 1`] = `
-.c0 {
+.c0.endpoint--isListView {
   padding: 0;
 }
 
-.c0 .endpoint-header {
+.c0.endpoint--isListView .endpoint-header {
   padding: 24px;
 }
 
-.c0 .endpoint-page-content {
+.c0.endpoint--isListView .endpoint-page-content {
   border-left: none;
   border-right: none;
+}
+
+.c0.endpoint--isDetailsView .endpoint-page-content {
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 <Memo()
   headerLeft="page title"
   headerRight="right side actions"
+  viewType="list"
 >
-  <Styled(EuiPage)>
+  <Styled(EuiPage)
+    className="endpoint--isListView"
+  >
     <EuiPage
-      className="c0"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -204,15 +234,18 @@ exports[`PageView component should display header left and right 1`] = `
                     className="euiPageHeaderSection"
                     data-test-subj="pageViewHeaderLeft"
                   >
-                    <EuiTitle
-                      size="l"
-                    >
-                      <h1
-                        className="euiTitle euiTitle--large"
+                    <Memo()>
+                      <EuiTitle
+                        size="l"
                       >
-                        page title
-                      </h1>
-                    </EuiTitle>
+                        <h1
+                          className="euiTitle euiTitle--large"
+                          data-test-subj="pageViewHeaderLeftTitle"
+                        >
+                          page title
+                        </h1>
+                      </EuiTitle>
+                    </Memo()>
                   </div>
                 </EuiPageHeaderSection>
                 <EuiPageHeaderSection
@@ -259,26 +292,36 @@ exports[`PageView component should display header left and right 1`] = `
 `;
 
 exports[`PageView component should display only body if not header props used 1`] = `
-.c0 {
+.c0.endpoint--isListView {
   padding: 0;
 }
 
-.c0 .endpoint-header {
+.c0.endpoint--isListView .endpoint-header {
   padding: 24px;
 }
 
-.c0 .endpoint-page-content {
+.c0.endpoint--isListView .endpoint-page-content {
   border-left: none;
   border-right: none;
 }
 
-<Memo()>
-  <Styled(EuiPage)>
+.c0.endpoint--isDetailsView .endpoint-page-content {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+<Memo()
+  viewType="list"
+>
+  <Styled(EuiPage)
+    className="endpoint--isListView"
+  >
     <EuiPage
-      className="c0"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -316,28 +359,37 @@ exports[`PageView component should display only body if not header props used 1`
 `;
 
 exports[`PageView component should display only header left 1`] = `
-.c0 {
+.c0.endpoint--isListView {
   padding: 0;
 }
 
-.c0 .endpoint-header {
+.c0.endpoint--isListView .endpoint-header {
   padding: 24px;
 }
 
-.c0 .endpoint-page-content {
+.c0.endpoint--isListView .endpoint-page-content {
   border-left: none;
   border-right: none;
 }
 
+.c0.endpoint--isDetailsView .endpoint-page-content {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 <Memo()
   headerLeft="page title"
+  viewType="list"
 >
-  <Styled(EuiPage)>
+  <Styled(EuiPage)
+    className="endpoint--isListView"
+  >
     <EuiPage
-      className="c0"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -356,15 +408,18 @@ exports[`PageView component should display only header left 1`] = `
                     className="euiPageHeaderSection"
                     data-test-subj="pageViewHeaderLeft"
                   >
-                    <EuiTitle
-                      size="l"
-                    >
-                      <h1
-                        className="euiTitle euiTitle--large"
+                    <Memo()>
+                      <EuiTitle
+                        size="l"
                       >
-                        page title
-                      </h1>
-                    </EuiTitle>
+                        <h1
+                          className="euiTitle euiTitle--large"
+                          data-test-subj="pageViewHeaderLeftTitle"
+                        >
+                          page title
+                        </h1>
+                      </EuiTitle>
+                    </Memo()>
                   </div>
                 </EuiPageHeaderSection>
               </div>
@@ -401,28 +456,37 @@ exports[`PageView component should display only header left 1`] = `
 `;
 
 exports[`PageView component should display only header right but include an empty left side 1`] = `
-.c0 {
+.c0.endpoint--isListView {
   padding: 0;
 }
 
-.c0 .endpoint-header {
+.c0.endpoint--isListView .endpoint-header {
   padding: 24px;
 }
 
-.c0 .endpoint-page-content {
+.c0.endpoint--isListView .endpoint-page-content {
   border-left: none;
   border-right: none;
 }
 
+.c0.endpoint--isDetailsView .endpoint-page-content {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 <Memo()
   headerRight="right side actions"
+  viewType="list"
 >
-  <Styled(EuiPage)>
+  <Styled(EuiPage)
+    className="endpoint--isListView"
+  >
     <EuiPage
-      className="c0"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main
@@ -486,17 +550,23 @@ exports[`PageView component should display only header right but include an empt
 `;
 
 exports[`PageView component should pass through EuiPage props 1`] = `
-.c0 {
+.c0.endpoint--isListView {
   padding: 0;
 }
 
-.c0 .endpoint-header {
+.c0.endpoint--isListView .endpoint-header {
   padding: 24px;
 }
 
-.c0 .endpoint-page-content {
+.c0.endpoint--isListView .endpoint-page-content {
   border-left: none;
   border-right: none;
+}
+
+.c0.endpoint--isDetailsView .endpoint-page-content {
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 <Memo()
@@ -504,6 +574,7 @@ exports[`PageView component should pass through EuiPage props 1`] = `
   className="test-class-name-here"
   data-test-subj="test-data-test-subj-here"
   restrictWidth="1000"
+  viewType="list"
 >
   <Styled(EuiPage)
     aria-label="test-aria-label-here"
@@ -563,17 +634,23 @@ exports[`PageView component should pass through EuiPage props 1`] = `
 `;
 
 exports[`PageView component should use custom element for header left and not wrap in EuiTitle 1`] = `
-.c0 {
+.c0.endpoint--isListView {
   padding: 0;
 }
 
-.c0 .endpoint-header {
+.c0.endpoint--isListView .endpoint-header {
   padding: 24px;
 }
 
-.c0 .endpoint-page-content {
+.c0.endpoint--isListView .endpoint-page-content {
   border-left: none;
   border-right: none;
+}
+
+.c0.endpoint--isDetailsView .endpoint-page-content {
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 <Memo()
@@ -582,13 +659,16 @@ exports[`PageView component should use custom element for header left and not wr
       title here
     </p>
   }
+  viewType="list"
 >
-  <Styled(EuiPage)>
+  <Styled(EuiPage)
+    className="endpoint--isListView"
+  >
     <EuiPage
-      className="c0"
+      className="c0 endpoint--isListView"
     >
       <div
-        className="euiPage c0"
+        className="euiPage c0 endpoint--isListView"
       >
         <EuiPageBody>
           <main

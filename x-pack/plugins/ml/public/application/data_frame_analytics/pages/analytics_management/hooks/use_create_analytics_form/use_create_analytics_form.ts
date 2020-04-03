@@ -9,7 +9,7 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { SimpleSavedObject } from 'kibana/public';
-import { isErrorResponse } from '../../../../../../../common/types/errors';
+import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
@@ -39,18 +39,6 @@ import {
 export interface CreateAnalyticsFormProps {
   actions: ActionDispatchers;
   state: State;
-}
-
-export function getErrorMessage(error: any) {
-  if (isErrorResponse(error)) {
-    return `${error.body.error}: ${error.body.message}`;
-  }
-
-  if (typeof error === 'object' && typeof error.message === 'string') {
-    return error.message;
-  }
-
-  return JSON.stringify(error);
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
@@ -149,6 +137,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
 
       const id = await newIndexPattern.create();
+
+      await mlContext.indexPatterns.clearCache();
 
       // id returns false if there's a duplicate index pattern.
       if (id === false) {
@@ -260,6 +250,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const openModal = async () => {
+    await mlContext.indexPatterns.clearCache();
     resetForm();
     await prepareFormValidation();
     dispatch({ type: ACTION.OPEN_MODAL });
