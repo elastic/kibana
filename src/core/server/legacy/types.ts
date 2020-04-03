@@ -98,6 +98,7 @@ export interface LegacyPluginSpec {
   getExpectedKibanaVersion: () => string;
   getConfigPrefix: () => string;
   getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
+  getPack: () => LegacyPluginPack;
 }
 
 /**
