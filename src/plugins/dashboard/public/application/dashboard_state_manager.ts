@@ -28,7 +28,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { migrateLegacyQuery } from '../../../kibana_legacy/public';
 
 import { ViewMode } from '../embeddable_plugin';
-import { getAppStateDefaults, migrateAppState } from './lib';
+import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';
 import {
@@ -176,6 +176,14 @@ export class DashboardStateManager {
           // sync state required state container to be able to handle null
           // overriding set() so it could handle null coming from url
           if (state) {
+            // Skip this update if current dashboardId in the url is different from what we have in the current instance of state manager
+            // As dashboard is driven by angular at the moment, the destroy cycle happens async,
+            // If the dashboardId has changed it means this instance
+            // is going to be destroyed soon and we shouldn't sync state anymore,
+            // as it could potentially trigger further url updates
+            const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
+            if (currentDashboardIdInUrl !== this.savedDashboard.id) return;
+
             this.stateContainer.set({
               ...this.stateDefaults,
               ...state,
@@ -204,6 +212,7 @@ export class DashboardStateManager {
 
   public handleDashboardContainerChanges(dashboardContainer: DashboardContainer) {
     let dirty = false;
+    let dirtyBecauseOfInitialStateMigration = false;
 
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
@@ -237,11 +246,20 @@ export class DashboardStateManager {
       ) {
         // A panel was changed
         dirty = true;
+
+        const oldVersion = savedDashboardPanelMap[panelState.explicitInput.id]?.version;
+        const newVersion = convertedPanelStateMap[panelState.explicitInput.id]?.version;
+        if (oldVersion && newVersion && oldVersion !== newVersion) {
+          dirtyBecauseOfInitialStateMigration = true;
+        }
       }
     });
 
     if (dirty) {
       this.stateContainer.transitions.set('panels', Object.values(convertedPanelStateMap));
+      if (dirtyBecauseOfInitialStateMigration) {
+        this.saveState({ replace: true });
+      }
     }
 
     if (input.isFullScreenMode !== this.getFullScreenMode()) {
@@ -500,7 +518,7 @@ export class DashboardStateManager {
    * @param timeFilter.setTime
    * @param timeFilter.setRefreshInterval
    */
-  public syncTimefilterWithDashboard(timeFilter: Timefilter) {
+  public syncTimefilterWithDashboardTime(timeFilter: Timefilter) {
     if (!this.getIsTimeSavedWithDashboard()) {
       throw new Error(
         i18n.translate('dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
@@ -514,6 +532,20 @@ export class DashboardStateManager {
         from: this.savedDashboard.timeFrom,
         to: this.savedDashboard.timeTo,
       });
+    }
+  }
+
+  /**
+   * Updates timeFilter to match the refreshInterval saved with the dashboard.
+   * @param timeFilter
+   */
+  public syncTimefilterWithDashboardRefreshInterval(timeFilter: Timefilter) {
+    if (!this.getIsTimeSavedWithDashboard()) {
+      throw new Error(
+        i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
+          defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
+        })
+      );
     }
 
     if (this.savedDashboard.refreshInterval) {
