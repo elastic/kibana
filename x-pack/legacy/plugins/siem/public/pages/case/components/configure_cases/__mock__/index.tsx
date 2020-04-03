@@ -8,6 +8,7 @@ import {
   Connector,
   CasesConfigurationMapping,
 } from '../../../../../containers/case/configure/types';
+import { State } from '../reducer';
 
 export const connectors: Connector[] = [
   {
@@ -86,3 +87,10 @@ export const mapping: CasesConfigurationMapping[] = [
 
 export const searchURL =
   '?timerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))';
+
+export const initialState: State = {
+  connectorId: 'none',
+  closureType: 'close-by-user',
+  mapping: null,
+  currentConfiguration: { connectorId: 'none', closureType: 'close-by-user' },
+};
