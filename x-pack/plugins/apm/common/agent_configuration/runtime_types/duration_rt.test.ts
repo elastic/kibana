@@ -25,7 +25,7 @@ describe('durationRt', () => {
   });
 
   describe('It should accept', () => {
-    ['1s', '2m', '3h'].map(input => {
+    ['1000ms', '2s', '3m'].map(input => {
       it(`${JSON.stringify(input)}`, () => {
         expect(isRight(durationRt.decode(input))).toBe(true);
       });
