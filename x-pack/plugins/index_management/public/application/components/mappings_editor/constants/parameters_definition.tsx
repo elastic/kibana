@@ -204,7 +204,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         },
       ],
     },
-    schema: t.string,
   },
   otherTypeJson: {
     fieldConfig: {
@@ -225,21 +224,32 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         },
         {
           validator: ({ value }: ValidationFuncArg<any, any>) => {
-            try {
-              const json = JSON.parse(value);
-              if (json.type) {
-                return {
-                  code: 'ERR_CUSTOM_TYPE_OVERRIDDEN',
-                  message: i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeJsonTypeFieldErrorMessage',
-                    {
-                      defaultMessage: 'Cannot override the "type" field.',
-                    }
-                  ),
-                };
-              }
-            } catch (e) {
-              // Swallow parse errors
+            const json = JSON.parse(value);
+            if (Array.isArray(json)) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeJsonArrayNotAllowedErrorMessage',
+                  {
+                    defaultMessage: 'Arrays are not allowed.',
+                  }
+                ),
+              };
+            }
+          },
+        },
+        {
+          validator: ({ value }: ValidationFuncArg<any, any>) => {
+            const json = JSON.parse(value);
+            if (json.type) {
+              return {
+                code: 'ERR_CUSTOM_TYPE_OVERRIDDEN',
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.validations.otherTypeJsonTypeFieldErrorMessage',
+                  {
+                    defaultMessage: 'Cannot override the "type" field.',
+                  }
+                ),
+              };
             }
           },
         },

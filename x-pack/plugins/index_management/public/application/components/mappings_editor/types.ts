@@ -169,7 +169,6 @@ interface FieldBasic {
 
   // other* exist together as a holder of types that the mappings editor does not yet know about but
   // enables the user to create mappings with them.
-  otherTypeName?: string;
   otherTypeJson?: GenericObject;
 }
 

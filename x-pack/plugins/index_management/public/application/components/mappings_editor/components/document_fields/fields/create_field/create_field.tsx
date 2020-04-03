@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
+import { useForm, Form, FormDataProvider, UseField, TextField } from '../../../../shared_imports';
 
 import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
 
@@ -39,7 +39,7 @@ import {
   ComboBoxOption,
   DataType,
 } from '../../../../types';
-import { NameParameter, TypeParameter, OtherTypeNameParameter } from '../../field_parameters';
+import { NameParameter, TypeParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -89,25 +89,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     if (isValid) {
       form.reset();
-
-      // The user may have selected an other data type and typed in a
-      // type we actually know about, so before creating the field, we convert the field
-      // type here.
-      const shouldConvertToKnownType = Boolean(
-        data.type === 'other' &&
-          data.otherTypeName &&
-          TYPE_DEFINITION[data.otherTypeName as DataType]
-      );
-
-      dispatch({
-        type: 'field.add',
-        value: shouldConvertToKnownType
-          ? {
-              ..._.omit(data, 'otherTypeJson'),
-              type: data.otherTypeName as DataType,
-            }
-          : data,
-      });
+      dispatch({ type: 'field.add', value: data });
 
       if (exitAfter) {
         cancel();
@@ -207,7 +189,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
             {/* Other type */}
             {type === 'other' && (
               <EuiFlexItem>
-                <OtherTypeNameParameter />
+                <UseField
+                  path="subType"
+                  config={getFieldConfig('otherTypeName')}
+                  component={TextField}
+                />
               </EuiFlexItem>
             )}
             {/* Field sub type (if any) */}

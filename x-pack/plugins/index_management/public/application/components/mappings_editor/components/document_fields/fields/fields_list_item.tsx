@@ -265,7 +265,7 @@ function FieldListItemComponent(
                         dataType: TYPE_DEFINITION[source.type].label,
                       },
                     })
-                  : TYPE_DEFINITION[source.type]?.label ?? TYPE_DEFINITION.other.label}
+                  : (TYPE_DEFINITION[source.type] ?? TYPE_DEFINITION.other).label}
               </EuiBadge>
             </EuiFlexItem>
 
