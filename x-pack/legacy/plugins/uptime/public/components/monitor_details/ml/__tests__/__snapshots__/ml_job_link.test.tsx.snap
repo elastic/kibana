@@ -3,7 +3,7 @@
 exports[`ML JobLink renders without errors 1`] = `
 <a
   class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
-  href="/app/ml#/explorer?_g=(ml:(jobIds:!(testMonitor_high_latency_by_geo)),refreshInterval:(pause:!t,value:0),time:(from:'',to:''))&_a=(mlExplorerFilter:(filterActive:!t,filteredFields:!(monitor.id,testMonitor)),mlExplorerSwimlane:(viewByFieldName:observer.geo.name))"
+  href="/app/ml#/explorer?_g=(ml:(jobIds:!(testmonitor_high_latency_by_geo)),refreshInterval:(pause:!t,value:0),time:(from:'',to:''))&_a=(mlExplorerFilter:(filterActive:!t,filteredFields:!(monitor.id,testMonitor)),mlExplorerSwimlane:(viewByFieldName:observer.geo.name))"
   rel="noopener noreferrer"
   target="_blank"
 >

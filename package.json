@@ -115,6 +115,7 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",
+    "@elastic/apm-rum": "^4.6.0",
     "@elastic/charts": "^18.1.1",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "7.7.1",
@@ -297,7 +298,7 @@
     "@kbn/utility-types": "1.0.0",
     "@microsoft/api-documenter": "7.7.2",
     "@microsoft/api-extractor": "7.7.0",
-    "@percy/agent": "^0.11.0",
+    "@percy/agent": "^0.26.0",
     "@testing-library/react": "^9.3.2",
     "@testing-library/react-hooks": "^3.2.1",
     "@types/angular": "^1.6.56",

@@ -20,8 +20,5 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     it('renders a container div for the embeddable', async function() {
       await testSubjects.existOrFail('resolverEmbeddableContainer');
     });
-    it('renders resolver', async function() {
-      await testSubjects.existOrFail('resolverEmbeddable');
-    });
   });
 }

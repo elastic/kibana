@@ -197,7 +197,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat*",
+        "index": "heartbeat-7*",
       }
     `);
   });
@@ -288,7 +288,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat*",
+        "index": "heartbeat-7*",
       }
     `);
   });
@@ -390,7 +390,7 @@ describe('getMonitorStatus', () => {
           },
           "size": 0,
         },
-        "index": "heartbeat*",
+        "index": "heartbeat-7*",
       }
     `);
 
