@@ -11,12 +11,14 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { initManagementSection } from './application/management';
 import { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
+import { registerFeature } from './register_feature';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -28,10 +30,14 @@ export interface MlSetupDependencies {
   management: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  home: HomePublicPluginSetup;
 }
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   setup(core: CoreSetup<MlStartDependencies, MlPluginStart>, pluginsSetup: MlSetupDependencies) {
+    const home = pluginsSetup.home;
+    const licensing = pluginsSetup.licensing;
+
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -49,10 +55,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             data: pluginsStart.data,
             share: pluginsStart.share,
             security: pluginsSetup.security,
-            licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
             usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
+            licensing,
+            home,
           },
           {
             element: params.element,
@@ -63,6 +70,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         );
       },
     });
+
+    registerFeature(licensing, home);
 
     initManagementSection(pluginsSetup, core);
     return {};
