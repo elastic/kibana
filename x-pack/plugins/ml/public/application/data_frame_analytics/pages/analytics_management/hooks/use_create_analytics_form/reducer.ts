@@ -102,6 +102,19 @@ const getSourceIndexString = (state: State) => {
   return '';
 };
 
+/**
+ * Validates num_top_feature_importance_values. Must be an integer >= 0.
+ */
+export const validateNumTopFeatureImportanceValues = (
+  numTopFeatureImportanceValues: any
+): boolean => {
+  return (
+    typeof numTopFeatureImportanceValues === 'number' &&
+    numTopFeatureImportanceValues >= NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN &&
+    Number.isInteger(numTopFeatureImportanceValues)
+  );
+};
+
 export const validateAdvancedEditor = (state: State): State => {
   const {
     jobIdEmpty,
@@ -205,19 +218,16 @@ export const validateAdvancedEditor = (state: State): State => {
     }
 
     const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
-    if (
-      numTopFeatureImportanceValues !== undefined &&
-      (isNaN(numTopFeatureImportanceValues) ||
-        typeof numTopFeatureImportanceValues !== 'number' ||
-        numTopFeatureImportanceValues < 0)
-    ) {
-      numTopFeatureImportanceValuesValid = false;
+    if (numTopFeatureImportanceValues !== undefined) {
+      numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+        numTopFeatureImportanceValues
+      );
       state.advancedEditorMessages.push({
         error: i18n.translate(
           'xpack.ml.dataframe.analytics.create.advancedEditorMessage.numTopFeatureImportanceValuesInvalid',
           {
             defaultMessage:
-              'The value for num_top_feature_importance_values must be a number of {min} or higher.',
+              'The value for num_top_feature_importance_values must be an integer of {min} or higher.',
             values: {
               min: 0,
             },
@@ -474,9 +484,9 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.numTopFeatureImportanceValues !== undefined) {
-        newFormState.numTopFeatureImportanceValuesValid =
-          (newFormState?.numTopFeatureImportanceValues ?? NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN) >=
-          NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN;
+        newFormState.numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+          newFormState?.numTopFeatureImportanceValues
+        );
       }
 
       return state.isAdvancedEditorEnabled

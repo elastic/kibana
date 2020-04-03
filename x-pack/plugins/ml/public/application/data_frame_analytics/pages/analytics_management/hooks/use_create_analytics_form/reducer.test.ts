@@ -9,7 +9,12 @@ import { merge } from 'lodash';
 import { ANALYSIS_CONFIG_TYPE, DataFrameAnalyticsConfig } from '../../../../common';
 
 import { ACTION } from './actions';
-import { reducer, validateAdvancedEditor, validateMinMML } from './reducer';
+import {
+  reducer,
+  validateAdvancedEditor,
+  validateMinMML,
+  validateNumTopFeatureImportanceValues,
+} from './reducer';
 import { getInitialState } from './state';
 
 type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
@@ -192,5 +197,26 @@ describe('validateMinMML', () => {
 
   test('should ignore empty parameters', () => {
     expect(validateMinMML((undefined as unknown) as string)('')).toEqual(null);
+  });
+});
+
+describe('validateNumTopFeatureImportanceValues()', () => {
+  test('should not allow below 0', () => {
+    expect(validateNumTopFeatureImportanceValues(-1)).toBe(false);
+  });
+
+  test('should not allow strings', () => {
+    expect(validateNumTopFeatureImportanceValues('1')).toBe(false);
+  });
+
+  test('should not allow floats', () => {
+    expect(validateNumTopFeatureImportanceValues(0.1)).toBe(false);
+    expect(validateNumTopFeatureImportanceValues(1.1)).toBe(false);
+    expect(validateNumTopFeatureImportanceValues(-1.1)).toBe(false);
+  });
+
+  test('should allow 0 and higher', () => {
+    expect(validateNumTopFeatureImportanceValues(0)).toBe(true);
+    expect(validateNumTopFeatureImportanceValues(1)).toBe(true);
   });
 });
