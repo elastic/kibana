@@ -36,6 +36,8 @@ describe('Detections', () => {
     });
 
     it('Closes and opens signals', () => {
+      const SIGNALS_TIMEOUT = 60000;
+
       waitForSignalsPanelToBeLoaded();
       waitForSignalsToBeLoaded();
 
@@ -60,7 +62,7 @@ describe('Detections', () => {
 
           const expectedNumberOfSignalsAfterClosing = +numberOfSignals - numberOfSignalsToBeClosed;
           cy.get(NUMBER_OF_SIGNALS)
-            .invoke('text')
+            .invoke('text', { timeout: SIGNALS_TIMEOUT })
             .should('eq', expectedNumberOfSignalsAfterClosing.toString());
           cy.get(SHOWING_SIGNALS)
             .invoke('text')
@@ -70,7 +72,7 @@ describe('Detections', () => {
           waitForSignals();
 
           cy.get(NUMBER_OF_SIGNALS)
-            .invoke('text')
+            .invoke('text', { timeout: SIGNALS_TIMEOUT })
             .should('eql', numberOfSignalsToBeClosed.toString());
           cy.get(SHOWING_SIGNALS)
             .invoke('text')
@@ -94,7 +96,7 @@ describe('Detections', () => {
 
           const expectedNumberOfClosedSignalsAfterOpened = 2;
           cy.get(NUMBER_OF_SIGNALS)
-            .invoke('text')
+            .invoke('text', { timeout: SIGNALS_TIMEOUT })
             .should('eql', expectedNumberOfClosedSignalsAfterOpened.toString());
           cy.get(SHOWING_SIGNALS)
             .invoke('text')
@@ -102,7 +104,10 @@ describe('Detections', () => {
               'eql',
               `Showing ${expectedNumberOfClosedSignalsAfterOpened.toString()} signals`
             );
-          cy.get(SIGNALS).should('have.length', expectedNumberOfClosedSignalsAfterOpened);
+          cy.get(SIGNALS, { timeout: SIGNALS_TIMEOUT }).should(
+            'have.length',
+            expectedNumberOfClosedSignalsAfterOpened
+          );
 
           goToOpenedSignals();
           waitForSignals();
@@ -114,7 +119,7 @@ describe('Detections', () => {
             .should('eql', `Showing ${expectedNumberOfOpenedSignals.toString()} signals`);
 
           cy.get('[data-test-subj="server-side-event-count"]')
-            .invoke('text')
+            .invoke('text', { timeout: SIGNALS_TIMEOUT })
             .should('eql', expectedNumberOfOpenedSignals.toString());
         });
     });
