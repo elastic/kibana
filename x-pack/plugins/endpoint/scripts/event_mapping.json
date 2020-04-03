@@ -2362,7 +2362,7 @@
         }
       },
       "refresh_interval": "5s",
-      "default_pipeline": "alert-pipeline"
+      "default_pipeline": "endpoint-event-pipeline"
     }
   }
 }

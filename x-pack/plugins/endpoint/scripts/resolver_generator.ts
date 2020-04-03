@@ -109,6 +109,8 @@ async function main() {
       default: false,
     },
   }).argv;
+  const pipelineName = 'endpoint-event-pipeline';
+  eventMapping.settings.index.default_pipeline = pipelineName;
   const clientOptions: ClientOptions = {
     node: argv.node,
   };
@@ -151,7 +153,7 @@ async function main() {
   };
   try {
     await client.ingest.putPipeline({
-      id: 'alert-pipeline',
+      id: pipelineName,
       body: pipeline,
     });
   } catch (err) {
