@@ -26,26 +26,6 @@ export const javaSettings: RawSettingDefinition[] = [
     includeAgents: ['java']
   },
 
-  // TRACE_METHODS_DURATION_THRESHOLD
-  {
-    key: 'trace_methods_duration_threshold',
-    type: 'integer',
-    label: i18n.translate(
-      'xpack.apm.agentConfig.traceMethodsDurationThreshold.label',
-      {
-        defaultMessage: 'Trace methods duration threshold'
-      }
-    ),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.traceMethodsDurationThreshold.description',
-      {
-        defaultMessage:
-          'If trace_methods config option is set, provides a threshold to limit spans based on duration. When set to a value greater than 0, spans representing methods traced based on trace_methods will be discarded by default.'
-      }
-    ),
-    includeAgents: ['java']
-  },
-
   /*
    * Circuit-Breaker
    **/
