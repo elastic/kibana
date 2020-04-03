@@ -15,7 +15,7 @@ import { uniquePidForProcess } from '../models/process_event';
  * Despite the name "generator", this function is entirely determinant
  * (i.e. it will return the same html id given the same prefix 'resolverNode'
  * and nodeId)
-*/
+ */
 const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
@@ -37,7 +37,7 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
      * This action has a process payload (instead of a processId), so we use
      * `uniquePidForProcess` and `resolverNodeIdGenerator` to resolve the determinant
      * html id of the node being brought into view.
-    */
+     */
     const processNodeId = resolverNodeIdGenerator(uniquePidForProcess(action.payload.process));
     return {
       ...uiState,
