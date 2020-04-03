@@ -20,7 +20,7 @@
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { nextTick } from 'test_utils/enzyme_helpers';
-import { isErrorEmbeddable, ViewMode, EmbeddableFactory } from '../embeddable_plugin';
+import { isErrorEmbeddable, ViewMode } from '../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
@@ -30,14 +30,12 @@ import {
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
 } from '../embeddable_plugin_test_samples';
+// eslint-disable-next-line
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 const options: DashboardContainerOptions = {
   application: {} as any,
-  embeddable: {
-    getTriggerCompatibleActions: (() => []) as any,
-    getEmbeddableFactories: (() => []) as any,
-    getEmbeddableFactory: undefined as any,
-  } as any,
+  embeddable: {} as any,
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
@@ -47,12 +45,12 @@ const options: DashboardContainerOptions = {
 };
 
 beforeEach(() => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
+    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
   );
-  options.embeddable.getEmbeddableFactory = (id: string) => embeddableFactories.get(id) as any;
+  options.embeddable = doStart();
 });
 
 test('DashboardContainer initializes embeddables', async done => {
