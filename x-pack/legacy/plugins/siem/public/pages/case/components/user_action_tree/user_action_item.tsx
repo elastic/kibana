@@ -21,6 +21,7 @@ import * as i18n from './translations';
 
 interface UserActionItemProps {
   createdAt: string;
+  'data-test-subj'?: string;
   disabled: boolean;
   id: string;
   isEditable: boolean;
@@ -112,6 +113,7 @@ const PushedInfoContainer = styled.div`
 export const UserActionItem = ({
   createdAt,
   disabled,
+  'data-test-subj': dataTestSubj,
   id,
   idToOutline,
   isEditable,
@@ -130,7 +132,7 @@ export const UserActionItem = ({
   username,
   updatedAt,
 }: UserActionItemProps) => (
-  <UserActionItemContainer gutterSize={'none'} direction="column">
+  <UserActionItemContainer data-test-subj={dataTestSubj} gutterSize={'none'} direction="column">
     <EuiFlexItem>
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>

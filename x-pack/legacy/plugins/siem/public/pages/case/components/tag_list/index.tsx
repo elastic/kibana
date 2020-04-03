@@ -61,9 +61,9 @@ export const TagList = React.memo(
           <EuiFlexItem grow={false}>
             <h4>{i18n.TAGS}</h4>
           </EuiFlexItem>
-          {isLoading && <EuiLoadingSpinner />}
+          {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
           {!isLoading && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
               <EuiButtonIcon
                 isDisabled={disabled}
                 aria-label={i18n.EDIT_TAGS_ARIA}

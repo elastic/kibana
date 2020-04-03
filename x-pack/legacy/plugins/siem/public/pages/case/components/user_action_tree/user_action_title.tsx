@@ -106,7 +106,6 @@ export const UserActionTitle = ({
       outlineComment(linkId);
     }
   }, [linkId, outlineComment]);
-
   return (
     <EuiText size="s" className="userAction__title" data-test-subj={`user-action-title`}>
       <EuiFlexGroup
@@ -173,7 +172,7 @@ export const UserActionTitle = ({
             </EuiFlexItem>
             {propertyActions.length > 0 && (
               <EuiFlexItem grow={false}>
-                {isLoading && <MySpinner />}
+                {isLoading && <MySpinner data-test-subj="user-action-title-loading" />}
                 {!isLoading && <PropertyActions propertyActions={propertyActions} />}
               </EuiFlexItem>
             )}

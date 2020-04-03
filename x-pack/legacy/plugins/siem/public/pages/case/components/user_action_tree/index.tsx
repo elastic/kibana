@@ -171,6 +171,7 @@ export const UserActionTree = React.memo(
       <>
         <UserActionItem
           createdAt={caseData.createdAt}
+          data-test-subj="description-action"
           disabled={!userCanCrud}
           id={DESCRIPTION_ID}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}

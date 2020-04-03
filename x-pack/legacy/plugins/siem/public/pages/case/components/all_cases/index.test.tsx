@@ -166,43 +166,6 @@ describe('AllCases', () => {
       expect(column.find('span').text()).toEqual(emptyTag);
     };
     getCasesColumns([], 'open').map((i, key) => i.name != null && checkIt(`${i.name}`, key));
-
-    // expect(
-    //   wrapper
-    //     .find(`a[data-test-subj="case-details-link"]`)
-    //     .first()
-    //     .text()
-    // ).toEqual(emptyTag);
-    // expect(
-    //   wrapper
-    //     .find(`a[data-test-subj="case-details-link"]`)
-    //     .first()
-    //     .text()
-    // ).toEqual(emptyTag);
-    // expect(
-    //   wrapper
-    //     .find(`span[data-test-subj="case-table-column-tags-0"]`)
-    //     .first()
-    //     .prop('title')
-    // ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
-    // expect(
-    //   wrapper
-    //     .find(`[data-test-subj="case-table-column-createdBy"]`)
-    //     .first()
-    //     .text()
-    // ).toEqual(useGetCasesMockState.data.cases[0].createdBy.username);
-    // expect(
-    //   wrapper
-    //     .find(`[data-test-subj="case-table-column-createdAt"]`)
-    //     .first()
-    //     .prop('value')
-    // ).toEqual(useGetCasesMockState.data.cases[0].createdAt);
-    // expect(
-    //   wrapper
-    //     .find(`[data-test-subj="case-table-case-count"]`)
-    //     .first()
-    //     .text()
-    // ).toEqual('Showing 10 cases');
   });
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
