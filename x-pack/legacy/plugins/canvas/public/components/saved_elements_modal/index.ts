@@ -41,7 +41,7 @@ const mapStateToProps = (state: State) => ({
   pageId: getSelectedPage(state),
 });
 
-const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   selectToplevelNodes: (nodes: PositionedElement[]) =>
     dispatch(
       selectToplevelNodes(
