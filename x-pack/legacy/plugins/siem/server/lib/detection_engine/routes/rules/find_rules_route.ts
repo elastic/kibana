@@ -15,6 +15,7 @@ import { findRulesSchema } from '../schemas/find_rules_schema';
 import { transformValidateFindAlerts } from './validate';
 import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 
 export const findRulesRoute = (router: IRouter) => {
   router.get(
@@ -32,10 +33,7 @@ export const findRulesRoute = (router: IRouter) => {
 
       try {
         const { query } = request;
-        if (!context.alerting) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-        const alertsClient = context.alerting.getAlertsClient();
+        const alertsClient = context.alerting?.getAlertsClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
         if (!alertsClient) {
@@ -65,7 +63,18 @@ export const findRulesRoute = (router: IRouter) => {
             return results;
           })
         );
-        const [validated, errors] = transformValidateFindAlerts(rules, ruleStatuses);
+        const ruleActions = await Promise.all(
+          rules.data.map(async rule => {
+            const results = await getRuleActionsSavedObject({
+              savedObjectsClient,
+              ruleAlertId: rule.id,
+            });
+
+            return results;
+          })
+        );
+
+        const [validated, errors] = transformValidateFindAlerts(rules, ruleActions, ruleStatuses);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

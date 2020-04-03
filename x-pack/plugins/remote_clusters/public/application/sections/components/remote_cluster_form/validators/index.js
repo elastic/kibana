@@ -8,3 +8,4 @@ export { validateName } from './validate_name';
 export { validateProxy } from './validate_proxy';
 export { validateSeeds } from './validate_seeds';
 export { validateSeed } from './validate_seed';
+export { validateServerName } from './validate_server_name';

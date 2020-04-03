@@ -140,7 +140,6 @@ export class VisualizePlugin implements Plugin {
           chrome: coreStart.chrome,
           data: dataStart,
           embeddable,
-          getBasePath: core.http.basePath.get,
           indexPatterns: dataStart.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
@@ -157,6 +156,7 @@ export class VisualizePlugin implements Plugin {
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           DefaultVisualizationEditor: DefaultEditorController,
+          createVisEmbeddableFromObject: visualizations.__LEGACY.createVisEmbeddableFromObject,
         };
         setServices(deps);
 
