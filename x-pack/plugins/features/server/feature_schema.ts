@@ -18,6 +18,7 @@ const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'managem
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const subFeaturePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
+const reservedFeaturePrrivilegePartRegex = /^(?!reserved_)[a-zA-Z0-9_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
 const managementSchema = Joi.object().pattern(
@@ -122,7 +123,9 @@ const schema = Joi.object({
     privileges: Joi.array()
       .items(
         Joi.object({
-          id: Joi.string().required(),
+          id: Joi.string()
+            .regex(reservedFeaturePrrivilegePartRegex)
+            .required(),
           privilege: privilegeSchema.required(),
         })
       )

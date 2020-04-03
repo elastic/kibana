@@ -946,7 +946,7 @@ describe('FeatureRegistry', () => {
         description: 'my reserved privileges',
         privileges: [
           {
-            id: 'reserved_1',
+            id: 'a_reserved_1',
             privilege: {
               savedObject: {
                 all: [],
@@ -957,7 +957,7 @@ describe('FeatureRegistry', () => {
             },
           },
           {
-            id: 'reserved_2',
+            id: 'a_reserved_2',
             privilege: {
               savedObject: {
                 all: [],
@@ -976,6 +976,36 @@ describe('FeatureRegistry', () => {
     const result = featureRegistry.getAll();
     expect(result).toHaveLength(1);
     expect(result[0].reserved?.privileges).toHaveLength(2);
+  });
+
+  it('does not allow reserved privilege ids to start with "reserved_"', () => {
+    const feature: FeatureConfig = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: null,
+      reserved: {
+        description: 'my reserved privileges',
+        privileges: [
+          {
+            id: 'reserved_1',
+            privilege: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+        ],
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"child \\"reserved\\" fails because [child \\"privileges\\" fails because [\\"privileges\\" at position 0 fails because [child \\"id\\" fails because [\\"id\\" with value \\"reserved_1\\" fails to match the required pattern: /^(?!reserved_)[a-zA-Z0-9_-]+$/]]]]"`
+    );
   });
 
   it('cannot register feature after getAll has been called', () => {
