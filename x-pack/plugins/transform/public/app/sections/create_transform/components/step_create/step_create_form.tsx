@@ -185,6 +185,8 @@ export const StepCreateForm: FC<Props> = React.memo(
 
         const id = await newIndexPattern.create();
 
+        await indexPatterns.clearCache();
+
         // id returns false if there's a duplicate index pattern.
         if (id === false) {
           toastNotifications.addDanger(

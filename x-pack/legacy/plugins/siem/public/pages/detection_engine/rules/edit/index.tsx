@@ -119,6 +119,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -140,6 +141,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -161,6 +163,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -203,6 +206,7 @@ const EditRulePageComponent: FC = () => {
       },
     ],
     [
+      rule,
       loading,
       initLoading,
       isLoading,
@@ -331,10 +335,11 @@ const EditRulePageComponent: FC = () => {
   }, [rule]);
 
   useEffect(() => {
-    setSelectedTab(tabs[0]);
-  }, []);
+    const tabIndex = rule?.immutable ? 3 : 0;
+    setSelectedTab(tabs[tabIndex]);
+  }, [rule]);
 
-  if (isSaved || (rule != null && rule.immutable)) {
+  if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
