@@ -338,27 +338,4 @@ describe('rule helpers', () => {
       expect(result).toEqual(aboutRuleDetailsData);
     });
   });
-
-  describe('userHasNoPermissions', () => {
-    test("returns false when user's CRUD operations are null", () => {
-      const result: boolean = userHasNoPermissions(null);
-      const userHasNoPermissionsExpectedResult = false;
-
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
-    });
-
-    test('returns true when user cannot CRUD', () => {
-      const result: boolean = userHasNoPermissions(false);
-      const userHasNoPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
-    });
-
-    test('returns false when user can CRUD', () => {
-      const result: boolean = userHasNoPermissions(true);
-      const userHasNoPermissionsExpectedResult = false;
-
-      expect(result).toEqual(userHasNoPermissionsExpectedResult);
-    });
-  });
 });
