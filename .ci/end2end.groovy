@@ -106,7 +106,7 @@ pipeline {
   post {
     always {
       dir("${BASE_DIR}"){
-        archiveArtifacts(allowEmptyArchive: true, artifacts: "${E2E_DIR}/kibana.log")
+        archiveArtifacts(allowEmptyArchive: true, artifacts: 'kibana.log')
       }
     }
   }
