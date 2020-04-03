@@ -161,6 +161,7 @@ signals index: \".siem-signals\"`;
           id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
         },
       ];
+
       savedObjectsClient.get.mockResolvedValue({
         id: 'id',
         type: 'type',
@@ -320,6 +321,18 @@ signals index: \".siem-signals\"`;
             id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
           },
         ];
+        payload = getPayload(
+          ruleAlert,
+          alertInstanceFactoryMock,
+          savedObjectsClient,
+          callClusterMock
+        );
+        savedObjectsClient.get.mockResolvedValue({
+          id: 'id',
+          type: 'type',
+          references: [],
+          attributes: ruleAlert,
+        });
         jobsSummaryMock.mockResolvedValue([]);
         (findMlSignals as jest.Mock).mockResolvedValue({
           hits: {
