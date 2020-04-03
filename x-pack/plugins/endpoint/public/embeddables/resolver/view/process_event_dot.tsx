@@ -148,13 +148,8 @@ export const ProcessEventDot = styled(
       const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
       const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
 
-      const isActiveDescendant = useMemo(() => {
-        return nodeId === activeDescendantId;
-      }, [activeDescendantId, nodeId]);
-
-      const isSelectedDescendant = useMemo(() => {
-        return nodeId === selectedDescendantId;
-      }, [selectedDescendantId, nodeId]);
+      const isActiveDescendant = nodeId === activeDescendantId;
+      const isSelectedDescendant = nodeId === selectedDescendantId;
 
       const dispatch = useResolverDispatch();
 
@@ -298,6 +293,10 @@ export const ProcessEventDot = styled(
   will-change: left, top, width, height;
   contain: strict;
 
+  //dasharray & dashoffset should be equal to "pull" the stroke back
+  //when it is transitioned.
+  //The value is tuned to look good when animated, but to preserve
+  //the effect, it should always be _at least_ the length of the stroke
   & .backing {
     stroke-dasharray: 500;
     stroke-dashoffset: 500;
