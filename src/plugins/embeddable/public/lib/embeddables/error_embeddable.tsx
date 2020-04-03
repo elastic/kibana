@@ -20,7 +20,7 @@
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { markdownFactory } from '../../../../kibana_react/public';
+import { Markdown } from '../../../../kibana_react/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
@@ -48,17 +48,16 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public render(dom: HTMLElement) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
     this.dom = dom;
-    const markdownRenderer = markdownFactory();
-    const renderedMarkdown = markdownRenderer(title);
     ReactDOM.render(
       // @ts-ignore
       <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
         <EuiText color="subdued" size="xs">
           <EuiIcon type="alert" color="danger" />
           <EuiSpacer size="s" />
-          <div /* eslint-disable-next-line react/no-danger */
-            dangerouslySetInnerHTML={{ __html: renderedMarkdown }}
-            data-test-subj="errorMessageDiv"
+          <Markdown
+            markdown={title}
+            openLinksInNewTab={true}
+            data-test-subj="errorMessageMarkdown"
           />
         </EuiText>
       </div>,

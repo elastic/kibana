@@ -29,13 +29,13 @@ test('ErrorEmbeddable renders an embeddable', async () => {
   expect(
     component.getDOMNode().querySelectorAll('[data-test-subj="embeddableStackError"]').length
   ).toBe(1);
-  expect(component.getDOMNode().querySelectorAll('[data-test-subj="errorMessageDiv"]').length).toBe(
-    1
-  );
+  expect(
+    component.getDOMNode().querySelectorAll('[data-test-subj="errorMessageMarkdown"]').length
+  ).toBe(1);
   expect(
     component
       .getDOMNode()
-      .querySelectorAll('[data-test-subj="errorMessageDiv"]')[0]
+      .querySelectorAll('[data-test-subj="errorMessageMarkdown"]')[0]
       .innerHTML.includes('some error occurred')
   ).toBe(true);
 });
@@ -47,13 +47,15 @@ test('ErrorEmbeddable renders an embeddable with markdown message', async () => 
   expect(
     component.getDOMNode().querySelectorAll('[data-test-subj="embeddableStackError"]').length
   ).toBe(1);
-  expect(component.getDOMNode().querySelectorAll('[data-test-subj="errorMessageDiv"]').length).toBe(
-    1
-  );
+  expect(
+    component.getDOMNode().querySelectorAll('[data-test-subj="errorMessageMarkdown"]').length
+  ).toBe(1);
   expect(
     component
       .getDOMNode()
-      .querySelectorAll('[data-test-subj="errorMessageDiv"]')[0]
-      .innerHTML.includes('<a href="http://localhost:5601/takeMeThere">some link</a>')
+      .querySelectorAll('[data-test-subj="errorMessageMarkdown"]')[0]
+      .innerHTML.includes(
+        '<a href="http://localhost:5601/takeMeThere" target="_blank" rel="noopener noreferrer">some link</a>'
+      )
   ).toBe(true);
 });

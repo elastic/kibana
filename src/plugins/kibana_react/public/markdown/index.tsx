@@ -19,4 +19,3 @@
 
 export { MarkdownSimple } from './markdown_simple';
 export { Markdown } from './markdown';
-export { markdownFactory } from './markdown';

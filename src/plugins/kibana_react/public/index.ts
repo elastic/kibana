@@ -27,7 +27,7 @@ export * from './table_list_view';
 export * from './split_panel';
 export { ValidatedDualRange } from './validated_range';
 export * from './notifications';
-export { Markdown, MarkdownSimple, markdownFactory } from './markdown';
+export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { useUrlTracker } from './use_url_tracker';
 export { toMountPoint } from './util';
