@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INDEX_NAMES = {
-  HEARTBEAT: 'heartbeat-8*',
+import { SavedObjectsClientProviderOptions } from 'src/core/server';
+
+export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
+  excludedWrappers: ['spaces'],
 };
