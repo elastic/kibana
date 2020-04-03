@@ -131,6 +131,8 @@ export class DashboardAppController {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
+    let showSearchBar = true;
+    let showQueryBar = true;
 
     let lastReloadRequestTime = 0;
     const dash = ($scope.dash = $route.current.locals.dash);
@@ -246,11 +248,11 @@ export class DashboardAppController {
       const isFullScreenMode = dashboardStateManager.getFullScreenMode();
       return {
         appName: 'dashboard',
-        config: isFullScreenMode ? undefined : $scope.topNavMenu,
+        config: $scope.isVisible ? $scope.topNavMenu : undefined,
         noPadding: isFullScreenMode,
-        showSearchBar: !isFullScreenMode,
-        showFilterBar: showFilterBar() && !isFullScreenMode,
-        showQueryBar: !isFullScreenMode,
+        showSearchBar,
+        showFilterBar: showFilterBar(),
+        showQueryBar,
         showSaveQuery: $scope.showSaveQuery,
         query: $scope.model.query,
         savedQuery: $scope.savedQuery,
@@ -824,7 +826,11 @@ export class DashboardAppController {
     const navActions: {
       [key: string]: NavAction;
     } = {};
-    navActions[TopNavIds.FULL_SCREEN] = () => dashboardStateManager.setFullScreenMode(true);
+    navActions[TopNavIds.FULL_SCREEN] = () => {
+      dashboardStateManager.setFullScreenMode(true);
+      showQueryBar = false;
+      updateNavBar();
+    };
     navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(ViewMode.VIEW);
     navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(ViewMode.EDIT);
     navActions[TopNavIds.SAVE] = () => {
@@ -978,6 +984,9 @@ export class DashboardAppController {
     const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
       $scope.$evalAsync(() => {
         $scope.isVisible = isVisible;
+        showSearchBar = isVisible || showFilterBar();
+        showQueryBar = !dashboardStateManager.getFullScreenMode() && isVisible;
+        updateNavBar();
       });
     });
 
