@@ -20,6 +20,9 @@ import {
   EuiPageContent,
   EuiText,
   EuiPageHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from './view/route_capture';
@@ -100,7 +103,13 @@ const IsAppUnavailable: React.FunctionComponent<{
   }, []);
 
   if (!hasIngestSetupFinished) {
-    return <Loading />;
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const errorText =
