@@ -19,6 +19,9 @@ test(`omits blacklisted headers`, async () => {
     'content-type': '',
     host: '',
     'transfer-encoding': '',
+    'proxy-connection': 'bananas',
+    'proxy-authorization': 'some-base64-encoded-thing',
+    trailer: 's are for trucks',
   };
 
   const filteredHeaders = await omitBlacklistedHeaders({
