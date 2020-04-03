@@ -20,21 +20,21 @@ import React from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { EuiText } from '@elastic/eui';
-import { EuiAvatar } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import { EuiFlexGrid } from '@elastic/eui';
-import { withEmbeddableSubscription } from '../../../../src/plugins/embeddable/public';
-import { TodoRefInput, TodoRefOutput, TodoRefEmbeddable } from './todo_ref_embeddable';
+import {
+  withEmbeddableSubscription,
+  EmbeddableOutput,
+} from '../../../../src/plugins/embeddable/public';
+import { NoteEmbeddable, NoteEmbeddableInput, NoteEmbeddableOutput } from './note_embeddable';
 
 interface Props {
-  embeddable: TodoRefEmbeddable;
-  input: TodoRefInput;
-  output: TodoRefOutput;
+  embeddable: NoteEmbeddable;
+  input: NoteEmbeddableInput;
+  output: EmbeddableOutput;
 }
 
 function wrapSearchTerms(task?: string, search?: string) {
-  if (!search) return task;
-  if (!task) return task;
+  if (!search || !task) return task;
   const parts = task.split(new RegExp(`(${search})`, 'g'));
   return parts.map((part, i) =>
     part === search ? (
@@ -47,40 +47,42 @@ function wrapSearchTerms(task?: string, search?: string) {
   );
 }
 
-export function TodoRefEmbeddableComponentInner({
-  input: { search },
-  output: { savedAttributes },
-}: Props) {
-  const icon = savedAttributes?.icon;
-  const title = savedAttributes?.title;
-  const task = savedAttributes?.task;
+export function NoteEmbeddableComponentInner({ input: { search }, embeddable }: Props) {
+  const from = embeddable.getFrom();
+  const to = embeddable.getTo();
+  const message = embeddable.getMessage();
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        {icon ? (
-          <EuiIcon type={icon} size="l" />
-        ) : (
-          <EuiAvatar name={title || task || ''} size="l" />
-        )}
-      </EuiFlexItem>
+    <EuiFlexGroup gutterSize="none">
       <EuiFlexItem>
-        <EuiFlexGrid columns={1}>
+        <EuiFlexGrid columns={1} gutterSize="none">
+          {to ? (
+            <EuiFlexItem>
+              <EuiText data-test-subj="noteEmbeddableTo">
+                <h3>{`${wrapSearchTerms(to, search)},`}</h3>
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem>
-            <EuiText data-test-subj="todoEmbeddableTitle">
-              <h3>{wrapSearchTerms(title || '', search)}</h3>
+            <EuiText data-test-subj="noteEmbeddableMessage">
+              {wrapSearchTerms(message ?? '', search)}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText data-test-subj="todoEmbeddableTask">{wrapSearchTerms(task, search)}</EuiText>
-          </EuiFlexItem>
+          {from ? (
+            <EuiFlexItem>
+              <EuiText data-test-subj="noteEmbeddableFrom">
+                <h3>{`- ${wrapSearchTerms(from, search)}`}</h3>
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGrid>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-export const TodoRefEmbeddableComponent = withEmbeddableSubscription<
-  TodoRefInput,
-  TodoRefOutput,
-  TodoRefEmbeddable
->(TodoRefEmbeddableComponentInner);
+export const NoteEmbeddableComponent = withEmbeddableSubscription<
+  NoteEmbeddableInput,
+  NoteEmbeddableOutput,
+  NoteEmbeddable,
+  {}
+>(NoteEmbeddableComponentInner);

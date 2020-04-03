@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { EmbeddableInput } from '..';
+import { EmbeddableInput, EmbeddableOutput } from '..';
 
 export interface SavedObjectEmbeddableInput extends EmbeddableInput {
   savedObjectId: string;
 }
+
+export type SavedObjectEmbeddableOutput = EmbeddableOutput;
 
 export function isSavedObjectEmbeddableInput(
   input: EmbeddableInput | SavedObjectEmbeddableInput

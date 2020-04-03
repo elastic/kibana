@@ -17,5 +17,12 @@
  * under the License.
  */
 
-export { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
-export { NoteSavedObjectAttributes, NOTE_SAVED_OBJECT } from './note_saved_object_attributes';
+import { SavedObjectAttributes } from '../../../src/core/types';
+
+export const NOTE_SAVED_OBJECT = 'note';
+
+export interface NoteSavedObjectAttributes extends SavedObjectAttributes {
+  to?: string;
+  from?: string;
+  message: string;
+}

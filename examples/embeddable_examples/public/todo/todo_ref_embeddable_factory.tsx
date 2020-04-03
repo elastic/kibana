@@ -18,7 +18,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract } from 'kibana/public';
-import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
+import { TodoSavedObjectAttributes } from '../../common';
 import {
   IContainer,
   EmbeddableStart,

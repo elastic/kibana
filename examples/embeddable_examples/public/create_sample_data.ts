@@ -18,9 +18,9 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
-import { TodoSavedObjectAttributes } from '../common';
+import { TodoSavedObjectAttributes, NOTE_SAVED_OBJECT, NoteSavedObjectAttributes } from '../common';
 
-export async function createSampleData(client: SavedObjectsClientContract) {
+export async function createSampleData(client: SavedObjectsClientContract, overwrite = true) {
   await client.create<TodoSavedObjectAttributes>(
     'todo',
     {
@@ -30,7 +30,20 @@ export async function createSampleData(client: SavedObjectsClientContract) {
     },
     {
       id: 'sample-todo-saved-object',
-      overwrite: true,
+      overwrite,
+    }
+  );
+
+  await client.create<NoteSavedObjectAttributes>(
+    NOTE_SAVED_OBJECT,
+    {
+      to: 'Sue',
+      from: 'Bob',
+      message: 'Remember to pick up more bleach.',
+    },
+    {
+      id: 'sample-note-saved-object',
+      overwrite,
     }
   );
 }

@@ -23,21 +23,14 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
+import { EmbeddableExamplesStart } from 'examples/embeddable_examples/public/plugin';
 import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
-import {
-  AppMountContext,
-  AppMountParameters,
-  CoreStart,
-  SavedObjectsStart,
-  IUiSettingsClient,
-  OverlayStart,
-} from '../../../src/core/public';
+import { AppMountContext, AppMountParameters, CoreStart } from '../../../src/core/public';
 import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
+import { SavedObjectEmbeddableExample } from './saved_object_embeddable_example';
 
 interface PageDef {
   title: string;
@@ -75,24 +68,14 @@ interface Props {
   basename: string;
   navigateToApp: CoreStart['application']['navigateToApp'];
   embeddableApi: EmbeddableStart;
-  uiActionsApi: UiActionsStart;
-  overlays: OverlayStart;
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  savedObject: SavedObjectsStart;
-  uiSettingsClient: IUiSettingsClient;
+  createSampleData: EmbeddableExamplesStart['createSampleData'];
 }
 
 const EmbeddableExplorerApp = ({
   basename,
   navigateToApp,
   embeddableApi,
-  inspector,
-  uiSettingsClient,
-  savedObject,
-  overlays,
-  uiActionsApi,
-  notifications,
+  createSampleData,
 }: Props) => {
   const pages: PageDef[] = [
     {
@@ -118,6 +101,16 @@ const EmbeddableExplorerApp = ({
       title: 'Dynamically adding children to a container',
       id: 'embeddablePanelExamplae',
       component: <EmbeddablePanelExample embeddableServices={embeddableApi} />,
+    },
+    {
+      title: 'Embeddables backed by saved objects',
+      id: 'savedObjectSection',
+      component: (
+        <SavedObjectEmbeddableExample
+          embeddableServices={embeddableApi}
+          createSampleData={createSampleData}
+        />
+      ),
     },
   ];
 

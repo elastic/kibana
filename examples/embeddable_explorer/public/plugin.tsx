@@ -38,17 +38,11 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        await depsStart.embeddableExamples.createSampleData();
         return renderApp(
           {
-            notifications: coreStart.notifications,
-            inspector: depsStart.inspector,
             embeddableApi: depsStart.embeddable,
-            uiActionsApi: depsStart.uiActions,
             basename: params.appBasePath,
-            uiSettingsClient: coreStart.uiSettings,
-            savedObject: coreStart.savedObjects,
-            overlays: coreStart.overlays,
+            createSampleData: depsStart.embeddableExamples.createSampleData,
             navigateToApp: coreStart.application.navigateToApp,
           },
           params.element

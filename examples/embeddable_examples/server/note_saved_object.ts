@@ -17,5 +17,25 @@
  * under the License.
  */
 
-export { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
-export { NoteSavedObjectAttributes, NOTE_SAVED_OBJECT } from './note_saved_object_attributes';
+import { SavedObjectsType } from 'kibana/server';
+import { NOTE_SAVED_OBJECT } from '../common';
+
+export const noteSavedObject: SavedObjectsType = {
+  name: NOTE_SAVED_OBJECT,
+  hidden: false,
+  namespaceAgnostic: true,
+  mappings: {
+    properties: {
+      message: {
+        type: 'text',
+      },
+      to: {
+        type: 'keyword',
+      },
+      from: {
+        type: 'keyword',
+      },
+    },
+  },
+  migrations: {},
+};

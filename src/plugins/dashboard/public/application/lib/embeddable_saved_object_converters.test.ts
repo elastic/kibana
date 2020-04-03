@@ -23,7 +23,6 @@ import {
 } from './embeddable_saved_object_converters';
 import { SavedDashboardPanel } from '../../types';
 import { DashboardPanelState } from '../embeddable';
-import { EmbeddableInput } from 'src/plugins/embeddable/public';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {

@@ -17,6 +17,10 @@
  * under the License.
  */
 
+import { EmbeddableExamplesPlugin } from './plugin';
+
+export const plugin = () => new EmbeddableExamplesPlugin();
+
 export {
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddable,
@@ -25,8 +29,11 @@ export {
 export { ListContainer, LIST_CONTAINER } from './list_container';
 export { TODO_EMBEDDABLE } from './todo';
 
-import { EmbeddableExamplesPlugin } from './plugin';
-
-export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
+export { EmbeddableExamplesStart } from './plugin';
+export {
+  SearchableListContainer,
+  SEARCHABLE_LIST_CONTAINER,
+  SearchableContainerInput,
+} from './searchable_list_container';
 export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
-export const plugin = () => new EmbeddableExamplesPlugin();
+export { NOTE_EMBEDDABLE, NoteEmbeddableInput, NoteEmbeddableOutput, NoteEmbeddable } from './note';

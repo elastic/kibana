@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectEmbeddableInput } from 'src/plugins/embeddable/public';
-import { PanelState, EmbeddableInput } from '../embeddable_plugin';
+import { PanelState, EmbeddableInput, SavedObjectEmbeddableInput } from '../../embeddable_plugin';
 export type PanelId = string;
 export type SavedObjectId = string;
 

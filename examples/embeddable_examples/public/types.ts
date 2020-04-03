@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
-export { NoteSavedObjectAttributes, NOTE_SAVED_OBJECT } from './note_saved_object_attributes';
+import { SavedObjectAttributes } from 'kibana/public';
+
+export interface TodoSavedObjectAttributes extends SavedObjectAttributes {
+  task: string;
+  icon?: string;
+  title?: string;
+}

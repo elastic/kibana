@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { TodoSavedObjectAttributes } from './todo_saved_object_attributes';
-export { NoteSavedObjectAttributes, NOTE_SAVED_OBJECT } from './note_saved_object_attributes';
+export * from './note_embeddable';
+export * from './note_embeddable_factory';
+export * from './edit_note_action';
