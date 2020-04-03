@@ -70,8 +70,6 @@ describe('<MappingsEditor />', () => {
         component,
       } = testBed;
 
-      const updatedValueTemplates = [{ after: 'bar' }];
-
       await act(async () => {
         await selectTab('templates');
       });
@@ -80,6 +78,8 @@ describe('<MappingsEditor />', () => {
       expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
 
       // Update the dynamic templates editor value
+      const updatedValueTemplates = [{ after: 'bar' }];
+
       await act(async () => {
         await updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
         await nextTick();
