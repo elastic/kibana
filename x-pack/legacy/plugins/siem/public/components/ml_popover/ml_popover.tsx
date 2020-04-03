@@ -22,7 +22,7 @@ import { JobsTable } from './jobs_table/jobs_table';
 import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
 import * as i18n from './translations';
-import { JobsFilters, JobSummary, SiemJob } from './types';
+import { JobsFilters, SiemJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
 import { useMlCapabilities } from './hooks/use_ml_capabilities';
 
