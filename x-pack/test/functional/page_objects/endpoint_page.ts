@@ -70,6 +70,13 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async waitForVisibleTextToChange(dataTestSubj: string, currentText: string) {
+      await retry.waitForWithTimeout('visible text to change', 2000, async () => {
+        const detailFlyoutTitle = await testSubjects.getVisibleText(dataTestSubj);
+        return detailFlyoutTitle !== currentText;
+      });
+    },
+
     async hostFlyoutDescriptionKeys(dataTestSubj: string) {
       await testSubjects.exists(dataTestSubj);
       const detailsData: WebElementWrapper = await testSubjects.find(dataTestSubj);

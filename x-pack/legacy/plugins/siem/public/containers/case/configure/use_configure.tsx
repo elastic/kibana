@@ -7,8 +7,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
-import { useStateToaster, errorToToaster } from '../../../components/toasters';
-import * as i18n from '../translations';
+import { useStateToaster, errorToToaster, displaySuccessToast } from '../../../components/toasters';
+import * as i18n from './translations';
 import { ClosureType } from './types';
 import { CurrentConfiguration } from '../../../pages/case/components/configure_cases/reducer';
 
@@ -21,7 +21,11 @@ interface PersistCaseConfigure {
 export interface ReturnUseCaseConfigure {
   loading: boolean;
   refetchCaseConfigure: () => void;
-  persistCaseConfigure: ({ connectorId, closureType }: PersistCaseConfigure) => unknown;
+  persistCaseConfigure: ({
+    connectorId,
+    connectorName,
+    closureType,
+  }: PersistCaseConfigure) => unknown;
   persistLoading: boolean;
 }
 
@@ -97,18 +101,19 @@ export const useCaseConfigure = ({
       const saveCaseConfiguration = async () => {
         try {
           setPersistLoading(true);
+          const connectorObj = {
+            connector_id: connectorId,
+            connector_name: connectorName,
+            closure_type: closureType,
+          };
           const res =
             version.length === 0
-              ? await postCaseConfigure(
-                  {
-                    connector_id: connectorId,
-                    connector_name: connectorName,
-                    closure_type: closureType,
-                  },
-                  abortCtrl.signal
-                )
+              ? await postCaseConfigure(connectorObj, abortCtrl.signal)
               : await patchCaseConfigure(
-                  { connector_id: connectorId, closure_type: closureType, version },
+                  {
+                    ...connectorObj,
+                    version,
+                  },
                   abortCtrl.signal
                 );
           if (!didCancel) {
@@ -124,6 +129,8 @@ export const useCaseConfigure = ({
                 closureType: res.closureType,
               });
             }
+
+            displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
           }
         } catch (error) {
           if (!didCancel) {

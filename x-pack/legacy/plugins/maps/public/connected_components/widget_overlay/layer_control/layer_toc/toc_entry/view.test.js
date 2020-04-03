@@ -15,9 +15,6 @@ const mockLayer = {
   getId: () => {
     return LAYER_ID;
   },
-  hasLegendDetails: async () => {
-    return true;
-  },
   renderLegendDetails: () => {
     return <div>TOC details mock</div>;
   },
@@ -75,6 +72,34 @@ describe('TOCEntry', () => {
 
     test('should display layer details when isLegendDetailsOpen is true', async () => {
       const component = shallowWithIntl(<TOCEntry {...defaultProps} isLegendDetailsOpen={true} />);
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('Should shade background when selected layer', async () => {
+      const component = shallowWithIntl(<TOCEntry {...defaultProps} selectedLayer={mockLayer} />);
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('Should shade background when not selected layer', async () => {
+      const differentLayer = Object.create(mockLayer);
+      differentLayer.getId = () => {
+        return 'foobar';
+      };
+      const component = shallowWithIntl(
+        <TOCEntry {...defaultProps} selectedLayer={differentLayer} />
+      );
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
