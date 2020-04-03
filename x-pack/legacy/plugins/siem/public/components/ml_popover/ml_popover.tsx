@@ -34,15 +34,10 @@ PopoverContentsDiv.displayName = 'PopoverContentsDiv';
 
 interface State {
   isLoading: boolean;
-  jobs: JobSummary[];
   refreshToggle: boolean;
 }
 
-type Action =
-  | { type: 'refresh' }
-  | { type: 'loading' }
-  | { type: 'success'; results: JobSummary[] }
-  | { type: 'failure' };
+type Action = { type: 'refresh' } | { type: 'loading' } | { type: 'success' } | { type: 'failure' };
 
 function mlPopoverReducer(state: State, action: Action): State {
   switch (action.type) {
@@ -62,14 +57,12 @@ function mlPopoverReducer(state: State, action: Action): State {
       return {
         ...state,
         isLoading: false,
-        jobs: action.results,
       };
     }
     case 'failure': {
       return {
         ...state,
         isLoading: false,
-        jobs: [],
       };
     }
     default:
@@ -79,7 +72,6 @@ function mlPopoverReducer(state: State, action: Action): State {
 
 const initialState: State = {
   isLoading: false,
-  jobs: [],
   refreshToggle: true,
 };
 
