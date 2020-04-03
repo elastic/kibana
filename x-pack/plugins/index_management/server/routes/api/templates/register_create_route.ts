@@ -7,8 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { Template, TemplateEs } from '../../../../common/types';
-import { serializeTemplate } from '../../../../common/lib';
+import { TemplateDeserialized } from '../../../../common';
+import { serializeV1Template } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
@@ -23,9 +23,19 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
     { path: addBasePath('/templates'), validate: { body: bodySchema, query: querySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
-      const template = req.body as Template;
       const { include_type_name } = req.query as TypeOf<typeof querySchema>;
-      const serializedTemplate = serializeTemplate(template) as TemplateEs;
+      const template = req.body as TemplateDeserialized;
+      const {
+        _kbnMeta: { formatVersion },
+      } = template;
+
+      if (formatVersion !== 1) {
+        return res.badRequest({ body: 'Only index template version 1 can be created.' });
+      }
+
+      // For now we format to V1 index templates.
+      // When the V2 API is ready we will only create V2 template format.
+      const serializedTemplate = serializeV1Template(template);
 
       const {
         name,
