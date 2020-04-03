@@ -118,7 +118,7 @@ declare module '../../../plugins/ui_actions/public' {
   }
 }
 
-export class DashboardEmbeddableContainerPublicPlugin
+export class DashboardPlugin
   implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
   constructor(private initializerContext: PluginInitializerContext) {}
 

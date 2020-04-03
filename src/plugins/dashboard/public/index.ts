@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
+import { DashboardPlugin } from './plugin';
 
 /**
  * These types can probably be internal once all of dashboard app is migrated into this plugin. Right
@@ -56,11 +56,8 @@ export {
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
 export { DashboardStart } from './plugin';
-
-export { DashboardEmbeddableContainerPublicPlugin as Plugin };
-
 export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+  return new DashboardPlugin(initializerContext);
 }

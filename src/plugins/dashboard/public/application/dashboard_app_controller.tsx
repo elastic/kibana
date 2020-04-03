@@ -52,6 +52,7 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
+  ContainerOutput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
