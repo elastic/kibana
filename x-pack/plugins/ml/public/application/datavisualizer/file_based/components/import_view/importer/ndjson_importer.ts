@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Importer } from './importer';
+import { Importer, ImportConfig } from './importer';
 
 export class NdjsonImporter extends Importer {
-  constructor(results, settings) {
+  constructor(results: any, settings: ImportConfig) {
     super(settings);
   }
 
-  read(json) {
+  read(json: string) {
     try {
       const splitJson = json.split(/}\s*\n/);
 
-      const ndjson = [];
+      const ndjson: any[] = [];
       for (let i = 0; i < splitJson.length; i++) {
         if (splitJson[i] !== '') {
           // note the extra } at the end of the line, adding back
@@ -24,7 +24,7 @@ export class NdjsonImporter extends Importer {
         }
       }
 
-      this.docArray = ndjson;
+      this._docArray = ndjson;
 
       return {
         success: true,

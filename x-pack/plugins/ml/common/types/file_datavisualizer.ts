@@ -4,6 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface InputOverrides {
+  [key: string]: string;
+}
+
+export type FormattedOverrides = InputOverrides & {
+  column_names: string[];
+  has_header_row: boolean;
+  should_trim_fields: boolean;
+};
+
+export interface AnalysisResult {
+  results: FindFileStructureResponse;
+  overrides?: FormattedOverrides;
+}
+
 export interface FindFileStructureResponse {
   charset: string;
   has_header_row: boolean;
@@ -34,4 +49,42 @@ export interface FindFileStructureResponse {
   java_timestamp_formats?: string[];
   joda_timestamp_formats?: string[];
   timestamp_field?: string;
+  should_trim_fields?: boolean;
+}
+
+export interface ImportResponse {
+  success: boolean;
+  id: string;
+  index?: string;
+  pipelineId?: string;
+  docCount: number;
+  failures: ImportFailure[];
+  error?: any;
+  ingestError?: boolean;
+}
+
+export interface ImportFailure {
+  item: number;
+  reason: string;
+  doc: Doc;
+}
+
+export interface Doc {
+  message: string;
+}
+
+export interface Settings {
+  pipeline?: string;
+  index: string;
+  body: any[];
+  [key: string]: any;
+}
+
+export interface Mappings {
+  [key: string]: any;
+}
+
+export interface IngestPipeline {
+  id: string;
+  pipeline: any;
 }

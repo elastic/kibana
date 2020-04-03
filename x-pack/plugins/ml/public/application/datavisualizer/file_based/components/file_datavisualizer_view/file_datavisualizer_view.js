@@ -131,7 +131,7 @@ export class FileDataVisualizerView extends Component {
       console.log('overrides', overrides);
       const { analyzeFile } = ml.fileDatavisualizer;
       const resp = await analyzeFile(lessData, overrides);
-      const serverSettings = processResults(resp.results);
+      const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;
 
       this.previousOverrides = this.overrides;
