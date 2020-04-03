@@ -9,11 +9,9 @@ import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { PLUGIN } from '../common/constants';
-import { AppDependencies } from './application';
+
 import { ClientConfigType } from './types';
 
-import { breadcrumbService, docTitleService } from './application/services/navigation';
-import { documentationLinksService } from './application/services/documentation';
 import { httpService, setUiMetricService } from './application/services/http';
 import { textService } from './application/services/text';
 import { UiMetricService } from './application/services';
@@ -34,7 +32,7 @@ export class SnapshotRestoreUIPlugin {
 
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): void {
     const config = this.initializerContext.config.get<ClientConfigType>();
-    const { http, getStartServices } = coreSetup;
+    const { http } = coreSetup;
     const { management, usageCollection } = plugins;
 
     // Initialize services
@@ -48,29 +46,12 @@ export class SnapshotRestoreUIPlugin {
         defaultMessage: 'Snapshot and Restore',
       }),
       order: 7,
-      mount: async ({ element, setBreadcrumbs }) => {
-        const [core] = await getStartServices();
-        const {
-          docLinks,
-          chrome: { docTitle },
-        } = core;
-
-        docTitleService.setup(docTitle.change);
-        breadcrumbService.setup(setBreadcrumbs);
-        documentationLinksService.setup(docLinks);
-
-        const appDependencies: AppDependencies = {
-          core,
-          config,
-          services: {
-            httpService,
-            uiMetricService: this.uiMetricService,
-            i18n,
-          },
+      mount: async params => {
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const services = {
+          uiMetricService: this.uiMetricService,
         };
-
-        const { renderApp } = await import('./application');
-        return renderApp(element, appDependencies);
+        return await mountManagementSection(coreSetup, services, config, params);
       },
     });
   }
