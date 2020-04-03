@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NotificationExecutorOptions } from './types';
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 interface GetSignalsCount {
@@ -12,7 +12,11 @@ interface GetSignalsCount {
   to: string;
   ruleId: string;
   index: string;
-  callCluster: NotificationExecutorOptions['services']['callCluster'];
+  callCluster: AlertServices['callCluster'];
+}
+
+interface CountResult {
+  count: number;
 }
 
 export const getSignalsCount = async ({
@@ -21,7 +25,7 @@ export const getSignalsCount = async ({
   ruleId,
   index,
   callCluster,
-}: GetSignalsCount): Promise<string> => {
+}: GetSignalsCount): Promise<number> => {
   const query = buildSignalsSearchQuery({
     index,
     ruleId,
@@ -29,7 +33,7 @@ export const getSignalsCount = async ({
     from,
   });
 
-  const result = await callCluster('count', query);
+  const result: CountResult = await callCluster('count', query);
 
   return result.count;
 };

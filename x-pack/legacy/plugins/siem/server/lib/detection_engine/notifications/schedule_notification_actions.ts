@@ -15,7 +15,7 @@ type NotificationRuleTypeParams = RuleTypeParams & {
 
 interface ScheduleNotificationActions {
   alertInstance: AlertInstance;
-  signalsCount: string;
+  signalsCount: string | number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
 }

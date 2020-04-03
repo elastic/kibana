@@ -19,7 +19,7 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns, makeFloatString } from './utils';
+import { getGapBetweenRuns, makeFloatString, parseScheduleDates } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
@@ -28,7 +28,7 @@ import { scheduleNotificationActions } from '../notifications/schedule_notificat
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
-import { parseDateRanges, getNotificationResultsLink } from '../notifications/utils';
+import { getNotificationResultsLink } from '../notifications/utils';
 
 export const signalRulesAlertType = ({
   logger,
@@ -159,7 +159,7 @@ export const signalRulesAlertType = ({
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
           }
 
-          const { success, bulkCreateDuration } = await bulkCreateMlSignals({
+          const { success, bulkCreateDuration, createdItemsCount } = await bulkCreateMlSignals({
             actions,
             throttle,
             someResult: anomalyResults,
@@ -178,6 +178,7 @@ export const signalRulesAlertType = ({
             tags,
           });
           result.success = success;
+          result.createdSignalsCount = createdItemsCount;
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
@@ -248,10 +249,12 @@ export const signalRulesAlertType = ({
               id: savedObject.id,
             };
 
-            const { fromInMs, toInMs } = parseDateRanges(`now-${interval}`, 'now');
+            const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
+            const toInMs = parseScheduleDates('now')?.format('x');
+
             const resultsLink = getNotificationResultsLink({
-              from: fromInMs,
-              to: toInMs,
+              from: fromInMs!,
+              to: toInMs!,
               id: savedObject.id,
               kibanaSiemAppUrl: meta?.kibanaSiemAppUrl as string,
             });
@@ -264,7 +267,7 @@ export const signalRulesAlertType = ({
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,
-                signalsCount: `${result.createdSignalsCount}`,
+                signalsCount: result.createdSignalsCount,
                 resultsLink,
                 ruleParams: notificationRuleParams,
               });
