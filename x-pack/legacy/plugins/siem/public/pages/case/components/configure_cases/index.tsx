@@ -298,7 +298,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
                     iconType="cross"
                     isDisabled={isLoadingAny}
                     isLoading={persistLoading}
-                    aria-label="Cancel"
+                    aria-label={i18n.CANCEL}
                     href={getCaseUrl(search)}
                   >
                     {i18n.CANCEL}
@@ -309,7 +309,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
                     fill
                     color="secondary"
                     iconType="save"
-                    aria-label="Save"
+                    aria-label={i18n.SAVE_CHANGES}
                     isDisabled={isLoadingAny}
                     isLoading={persistLoading}
                     onClick={handleSubmit}

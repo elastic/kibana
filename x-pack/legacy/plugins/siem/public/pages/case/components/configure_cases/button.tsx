@@ -31,6 +31,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
         href={getConfigureCasesUrl(urlSearch)}
         iconType="controlsHorizontal"
         isDisabled={isDisabled}
+        aria-label={label}
       >
         {label}
       </EuiButton>
