@@ -9,7 +9,7 @@ import { oncePerServer } from './once_per_server';
 import { ServerFacade } from '../../types';
 
 function cryptoFn(server: ServerFacade) {
-  const encryptionKey = server.config().get('xpack.reporting.encryptionKey');
+  const encryptionKey = server.config().get('xpack.reporting.encryptionKey') as string;
   return nodeCrypto({ encryptionKey });
 }
 
