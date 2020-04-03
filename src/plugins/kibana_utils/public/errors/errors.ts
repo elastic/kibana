@@ -48,6 +48,7 @@ export class SavedObjectNotFound extends KbnError {
     let message = `Could not locate that ${type}${idMsg}`;
 
     if (link) {
+      // message += `<a href=${link}>click here to re-create it</a>`
       message += `, [click here to re-create it](${link})`;
     }
 
