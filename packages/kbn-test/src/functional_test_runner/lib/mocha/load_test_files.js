@@ -31,7 +31,15 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
  */
-export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, updateBaselines }) => {
+export const loadTestFiles = ({
+  config,
+  mocha,
+  log,
+  lifecycle,
+  providers,
+  paths,
+  updateBaselines,
+}) => {
   const innerLoadTestFile = path => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
@@ -55,7 +63,7 @@ export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, updateB
     loadTracer(provider, `testProvider[${path}]`, () => {
       // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
 
-      const context = decorateMochaUi(lifecycle, global);
+      const context = decorateMochaUi(lifecycle, global, config);
       mocha.suite.emit('pre-require', context, path, mocha);
 
       const returnVal = provider({

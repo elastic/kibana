@@ -30,11 +30,13 @@ import {
   setupMocha,
   runTests,
   Config,
+  TestTracker,
 } from './lib';
 
 export class FunctionalTestRunner {
   public readonly lifecycle = new Lifecycle();
   public readonly failureMetadata = new FailureMetadata(this.lifecycle);
+  public readonly testTracker = new TestTracker(this.lifecycle);
   private closed = false;
 
   constructor(
