@@ -27,6 +27,7 @@ import {
   getHttp,
   getTimeFilter,
   getCapabilities,
+  getUiActions,
 } from '../services';
 
 export const createVisEmbeddableFromObject = async (
@@ -58,6 +59,7 @@ export const createVisEmbeddableFromObject = async (
         indexPatterns,
         editUrl,
         editable,
+        uiActions: getUiActions(),
       },
       input,
       parent
