@@ -47,7 +47,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const { refresh } = useRefreshAnalyticsList();
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
-  const { createIndexPattern, destinationIndex, jobId } = form;
+  const { createIndexPattern, jobId } = form;
+  let { destinationIndex } = form;
 
   const addRequestMessage = (requestMessage: FormMessage) =>
     dispatch({ type: ACTION.ADD_REQUEST_MESSAGE, requestMessage });
@@ -93,6 +94,12 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const analyticsJobConfig = isAdvancedEditorEnabled
       ? jobConfig
       : getJobConfigFromFormState(form);
+
+    if (isAdvancedEditorEnabled) {
+      destinationIndex = Array.isArray(analyticsJobConfig.dest?.index)
+        ? analyticsJobConfig.dest?.index[0]
+        : analyticsJobConfig.dest?.index;
+    }
 
     try {
       await ml.dataFrameAnalytics.createDataFrameAnalytics(jobId, analyticsJobConfig);
