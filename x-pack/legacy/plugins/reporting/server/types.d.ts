@@ -17,7 +17,6 @@ export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
   security: SecurityPluginSetup;
   usageCollection: UsageCollectionSetup;
-  reporting: { config: ReportingConfig };
   __LEGACY: LegacySetup;
 }
 

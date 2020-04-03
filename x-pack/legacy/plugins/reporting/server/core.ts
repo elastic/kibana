@@ -20,7 +20,7 @@ import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { PLUGIN_ID } from '../common/constants';
 import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions, ServerFacade } from '../types';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { ReportingConfigType } from './config';
+import { ReportingConfig, ReportingConfigType } from './config';
 import { checkLicenseFactory, getExportTypesRegistry, LevelLogger } from './lib';
 import { registerRoutes } from './routes';
 import { ReportingSetupDeps } from './types';
@@ -36,52 +36,7 @@ interface ReportingInternalStart {
   uiSettings: UiSettingsServiceStart;
 }
 
-// make config.get() aware of the value type it returns
-interface Config<BaseType> {
-  get<Key1 extends keyof BaseType>(key1: Key1): BaseType[Key1];
-  get<Key1 extends keyof BaseType, Key2 extends keyof BaseType[Key1]>(
-    key1: Key1,
-    key2: Key2
-  ): BaseType[Key1][Key2];
-  get<
-    Key1 extends keyof BaseType,
-    Key2 extends keyof BaseType[Key1],
-    Key3 extends keyof BaseType[Key1][Key2]
-  >(
-    key1: Key1,
-    key2: Key2,
-    key3: Key3
-  ): BaseType[Key1][Key2][Key3];
-  get<
-    Key1 extends keyof BaseType,
-    Key2 extends keyof BaseType[Key1],
-    Key3 extends keyof BaseType[Key1][Key2],
-    Key4 extends keyof BaseType[Key1][Key2][Key3]
-  >(
-    key1: Key1,
-    key2: Key2,
-    key3: Key3,
-    key4: Key4
-  ): BaseType[Key1][Key2][Key3][Key4];
-}
-
-interface KbnServerConfigType {
-  path: { data: string };
-  server: {
-    basePath: string;
-    host: string;
-    name: string;
-    port: number;
-    protocol: string;
-    uuid: string;
-  };
-}
-
-export { ReportingConfigType };
-
-export interface ReportingConfig extends Config<ReportingConfigType> {
-  kbnConfig: Config<KbnServerConfigType>;
-}
+export { ReportingConfig, ReportingConfigType };
 
 export class ReportingCore {
   private pluginSetupDeps?: ReportingInternalSetup;

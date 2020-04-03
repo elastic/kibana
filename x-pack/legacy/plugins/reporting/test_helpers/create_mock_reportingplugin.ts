@@ -20,17 +20,10 @@ import { ReportingPlugin, ReportingCore, ReportingConfig } from '../server';
 import { ReportingSetupDeps, ReportingStartDeps } from '../server/types';
 
 const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
-  const configGetStub = jest.fn();
   return {
     elasticsearch: setupMock.elasticsearch,
     security: setupMock.security,
     usageCollection: {} as any,
-    reporting: {
-      config: {
-        get: configGetStub,
-        kbnConfig: { get: configGetStub },
-      },
-    },
     __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
   };
 };
