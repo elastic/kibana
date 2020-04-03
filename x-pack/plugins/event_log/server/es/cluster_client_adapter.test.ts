@@ -208,7 +208,7 @@ describe('queryEventsBySavedObject', () => {
       'index-name',
       'saved-object-type',
       'saved-object-id',
-      { page: 10, per_page: 10 }
+      { page: 10, per_page: 10, start: undefined, end: undefined }
     );
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
       index: 'index-name',
@@ -240,7 +240,7 @@ describe('queryEventsBySavedObject', () => {
 
     const start = moment()
       .subtract(1, 'days')
-      .toDate();
+      .toISOString();
 
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
@@ -265,7 +265,7 @@ describe('queryEventsBySavedObject', () => {
               {
                 range: {
                   'event.start': {
-                    gte: start.toISOString(),
+                    gte: start,
                   },
                 },
               },
@@ -285,10 +285,10 @@ describe('queryEventsBySavedObject', () => {
 
     const start = moment()
       .subtract(1, 'days')
-      .toDate();
+      .toISOString();
     const end = moment()
       .add(1, 'days')
-      .toDate();
+      .toISOString();
 
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
@@ -313,14 +313,14 @@ describe('queryEventsBySavedObject', () => {
               {
                 range: {
                   'event.start': {
-                    gte: start.toISOString(),
+                    gte: start,
                   },
                 },
               },
               {
                 range: {
                   'event.end': {
-                    lte: end.toISOString(),
+                    lte: end,
                   },
                 },
               },

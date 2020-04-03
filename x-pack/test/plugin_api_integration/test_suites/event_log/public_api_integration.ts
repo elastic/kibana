@@ -48,7 +48,6 @@ export default function({ getService }: FtrProviderContext) {
       await logTestEvent(id, firstExpectedEvent);
       await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
 
-      log.debug(`Query with default pagination`);
       await retry.try(async () => {
         const { body: foundEvents } = await supertest
           .get(`/api/event_log/event_log_test/${id}/_find`)
@@ -63,7 +62,6 @@ export default function({ getService }: FtrProviderContext) {
         3
       );
 
-      log.debug(`Query with per_page pagination`);
       const { body: firstPage } = await supertest
         .get(`/api/event_log/event_log_test/${id}/_find?per_page=3`)
         .set('kbn-xsrf', 'foo')
@@ -72,7 +70,6 @@ export default function({ getService }: FtrProviderContext) {
       expect(firstPage.length).to.be(3);
       assertEventsFromApiMatchCreatedEvents(firstPage, expectedFirstPage);
 
-      log.debug(`Query with all pagination params`);
       const { body: secondPage } = await supertest
         .get(`/api/event_log/event_log_test/${id}/_find?per_page=3&page=2`)
         .set('kbn-xsrf', 'foo')

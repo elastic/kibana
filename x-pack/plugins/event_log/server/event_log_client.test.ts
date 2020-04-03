@@ -160,10 +160,10 @@ describe('EventLogStart', () => {
 
       const start = moment()
         .subtract(1, 'days')
-        .toDate();
+        .toISOString();
       const end = moment()
         .add(1, 'days')
-        .toDate();
+        .toISOString();
 
       expect(
         await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
@@ -183,6 +183,54 @@ describe('EventLogStart', () => {
           end,
         }
       );
+    });
+
+    test('validates that the start date is valid', async () => {
+      const esContext = contextMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const eventLogClient = new EventLogClient({
+        esContext,
+        savedObjectsClient,
+      });
+
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'saved-object-id',
+        type: 'saved-object-type',
+        attributes: {},
+        references: [],
+      });
+
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue([]);
+
+      expect(
+        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+          start: 'not a date string',
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: [start]: Invalid Date]`);
+    });
+
+    test('validates that the end date is valid', async () => {
+      const esContext = contextMock.create();
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const eventLogClient = new EventLogClient({
+        esContext,
+        savedObjectsClient,
+      });
+
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'saved-object-id',
+        type: 'saved-object-type',
+        attributes: {},
+        references: [],
+      });
+
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue([]);
+
+      expect(
+        eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
+          end: 'not a date string',
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: [end]: Invalid Date]`);
     });
   });
 });
