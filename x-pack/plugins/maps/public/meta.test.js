@@ -9,39 +9,24 @@ import { getEMSClient } from './meta';
 
 jest.mock('@elastic/ems-client');
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: () => {
-    return '<basepath>';
-  },
-  getInjected(key) {
-    if (key === 'proxyElasticMapsServiceInMaps') {
-      return false;
-    } else if (key === 'isEmsEnabled') {
-      return true;
-    } else if (key === 'emsFileApiUrl') {
-      return 'https://file-api';
-    } else if (key === 'emsTileApiUrl') {
-      return 'https://tile-api';
-    }
-  },
-  getUiSettingsClient: () => {
-    return {
-      get: () => {
-        return '';
-      },
-    };
-  },
-}));
-
-jest.mock('./kibana_services', () => {
-  return {
-    getLicenseId() {
-      return 'foobarlicenseid';
-    },
-  };
-});
-
 describe('default use without proxy', () => {
+  beforeEach(() => {
+    require('./kibana_services').getInjectedVarFunc = () => key => {
+      if (key === 'proxyElasticMapsServiceInMaps') {
+        return false;
+      } else if (key === 'isEmsEnabled') {
+        return true;
+      } else if (key === 'emsFileApiUrl') {
+        return 'https://file-api';
+      } else if (key === 'emsTileApiUrl') {
+        return 'https://tile-api';
+      }
+    };
+    require('./kibana_services').getLicenseId = () => {
+      return 'foobarlicenseid';
+    };
+  });
+
   it('should construct EMSClient with absolute file and tile API urls', async () => {
     getEMSClient();
     const mockEmsClientCall = EMSClient.mock.calls[0];

@@ -26,7 +26,8 @@ import {
 } from '../../../../../plugins/maps/public/reducers/util';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InnerJoin } from '../../../../../plugins/maps/public/layers/joins/inner_join';
-import { getSourceByType } from '../layers/sources/source_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getSourceByType } from '../../../../../plugins/maps/public/layers/sources/source_registry';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
