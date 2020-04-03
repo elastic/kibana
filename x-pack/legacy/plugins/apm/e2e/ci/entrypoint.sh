@@ -7,7 +7,7 @@ if [ -z "${kibana}" ] ; then
   kibana=127.0.0.1
 fi
 
-export CYPRESS_BASE_URL=http://${kibana}:5601
+export CYPRESS_BASE_URL=http://${kibana}:5701
 
 ## To avoid issues with the home and caching artifacts
 export HOME=/tmp

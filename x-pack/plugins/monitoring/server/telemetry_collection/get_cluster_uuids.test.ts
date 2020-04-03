@@ -13,17 +13,6 @@ import {
 
 describe('get_cluster_uuids', () => {
   const callCluster = sinon.stub();
-  const size = 123;
-  const server = {
-    config: sinon.stub().returns({
-      get: sinon
-        .stub()
-        .withArgs('xpack.monitoring.elasticsearch.index_pattern')
-        .returns('.monitoring-es-N-*')
-        .withArgs('xpack.monitoring.max_bucket_size')
-        .returns(size),
-    }),
-  };
   const response = {
     aggregations: {
       cluster_uuids: {
@@ -41,7 +30,9 @@ describe('get_cluster_uuids', () => {
     it('returns cluster UUIDs', async () => {
       callCluster.withArgs('search').returns(Promise.resolve(response));
       expect(
-        await getClusterUuids({ server, callCluster, start, end, usageCollection: {} as any })
+        await getClusterUuids({ callCluster, start, end, usageCollection: {} as any }, {
+          maxBucketSize: 1,
+        } as any)
       ).toStrictEqual(expectedUuids);
     });
   });
@@ -50,7 +41,9 @@ describe('get_cluster_uuids', () => {
     it('searches for clusters', async () => {
       callCluster.returns(Promise.resolve(response));
       expect(
-        await fetchClusterUuids({ server, callCluster, start, end, usageCollection: {} as any })
+        await fetchClusterUuids({ callCluster, start, end, usageCollection: {} as any }, {
+          maxBucketSize: 1,
+        } as any)
       ).toStrictEqual(response);
     });
   });

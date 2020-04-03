@@ -29,7 +29,6 @@ import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plu
 import { LicensingPluginSetup } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   addAppRedirectMessageToUrl,
@@ -87,15 +86,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
     }
   });
 
-  const savedWorkspaceLoader = createSavedWorkspacesLoader({
-    chrome: deps.coreStart.chrome,
-    indexPatterns: deps.data.indexPatterns,
-    overlays: deps.coreStart.overlays,
-    savedObjectsClient: deps.coreStart.savedObjects.client,
-    basePath: deps.coreStart.http.basePath,
-  });
-
-  initGraphApp(graphAngularModule, { ...deps, savedWorkspaceLoader });
+  initGraphApp(graphAngularModule, deps);
   const $injector = mountGraphApp(appBasePath, element);
   return () => {
     licenseSubscription.unsubscribe();

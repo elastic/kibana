@@ -10,6 +10,7 @@ exports[`Markdown markdown links it renders the expected content containing a li
   rawSourcePos={false}
   renderers={
     Object {
+      "blockquote": [Function],
       "link": [Function],
       "root": [Function],
       "table": [Function],
@@ -35,6 +36,7 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
   rawSourcePos={false}
   renderers={
     Object {
+      "blockquote": [Function],
       "link": [Function],
       "root": [Function],
       "table": [Function],

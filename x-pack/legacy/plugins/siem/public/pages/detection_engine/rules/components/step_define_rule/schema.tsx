@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import { esKuery } from '../../../../../../../../../../src/plugins/data/public';
+import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
 import { FieldValueQueryBar } from '../query_bar';
 import {
   ERROR_CODE,
@@ -19,7 +20,6 @@ import {
   ValidationFunc,
 } from '../../../../../shared_imports';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
-import { isMlRule } from '../../helpers';
 
 export const schema: FormSchema = {
   index: {
@@ -157,5 +157,20 @@ export const schema: FormSchema = {
         },
       },
     ],
+  },
+  timeline: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
+      {
+        defaultMessage: 'Timeline template',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
+      {
+        defaultMessage:
+          'Select an existing timeline to use as a template when investigating generated signals.',
+      }
+    ),
   },
 };

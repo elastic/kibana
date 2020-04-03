@@ -6,9 +6,9 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart, AppMountParameters } from 'kibana/public';
+import { CoreStart, AppMountParameters, ScopedHistory } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { Route, Switch, BrowserRouter } from 'react-router-dom';
+import { Route, Switch, Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { useObservable } from 'react-use';
@@ -29,12 +29,11 @@ import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_compon
 export function renderApp(
   coreStart: CoreStart,
   depsStart: EndpointPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
+  { element, history }: AppMountParameters
 ) {
-  coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory({ coreStart, depsStart });
   ReactDOM.render(
-    <AppRoot basename={appBasePath} store={store} coreStart={coreStart} depsStart={depsStart} />,
+    <AppRoot history={history} store={store} coreStart={coreStart} depsStart={depsStart} />,
     element
   );
   return () => {
@@ -43,7 +42,7 @@ export function renderApp(
 }
 
 interface RouterProps {
-  basename: string;
+  history: ScopedHistory;
   store: Store;
   coreStart: CoreStart;
   depsStart: EndpointPluginStartDependencies;
@@ -51,7 +50,7 @@ interface RouterProps {
 
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
   ({
-    basename,
+    history,
     store,
     coreStart: { http, notifications, uiSettings, application },
     depsStart: { data },
@@ -63,9 +62,9 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
         <I18nProvider>
           <KibanaContextProvider services={{ http, notifications, application, data }}>
             <EuiThemeProvider darkMode={isDarkMode}>
-              <BrowserRouter basename={basename}>
+              <Router history={history}>
                 <RouteCapture>
-                  <HeaderNavigation basename={basename} />
+                  <HeaderNavigation />
                   <Switch>
                     <Route
                       exact
@@ -93,7 +92,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
                     />
                   </Switch>
                 </RouteCapture>
-              </BrowserRouter>
+              </Router>
             </EuiThemeProvider>
           </KibanaContextProvider>
         </I18nProvider>

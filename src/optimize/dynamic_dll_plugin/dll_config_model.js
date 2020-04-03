@@ -29,6 +29,7 @@ import { DisallowedSyntaxPlugin } from '@kbn/optimizer';
 function generateDLL(config) {
   const {
     dllAlias,
+    dllValidateSyntax,
     dllNoParseRules,
     dllContext,
     dllEntry,
@@ -44,6 +45,22 @@ function generateDLL(config) {
 
   const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
   const BABEL_EXCLUDE_RE = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
+
+  /**
+   * Wrap plugin loading in a function so that we can require
+   * `@kbn/optimizer` only when absolutely necessary since we
+   * don't ship this package in the distributable but this code
+   * is still shipped, though it's not used.
+   */
+  const getValidateSyntaxPlugins = () => {
+    if (!dllValidateSyntax) {
+      return [];
+    }
+
+    // only require @kbn/optimizer
+    const { DisallowedSyntaxPlugin } = require('@kbn/optimizer');
+    return [new DisallowedSyntaxPlugin()];
+  };
 
   return {
     entry: dllEntry,
@@ -141,7 +158,7 @@ function generateDLL(config) {
       new MiniCssExtractPlugin({
         filename: dllStyleFilename,
       }),
-      new DisallowedSyntaxPlugin(),
+      ...getValidateSyntaxPlugins(),
     ],
     // Single runtime for the dll bundles which assures that common transient dependencies won't be evaluated twice.
     // The module cache will be shared, even when module code may be duplicated across chunks.
@@ -165,6 +182,7 @@ function generateDLL(config) {
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
   const dllAlias = rawConfig.uiBundles.getAliases();
+  const dllValidateSyntax = rawConfig.uiBundles.shouldValidateSyntaxOfNodeModules();
   const dllNoParseRules = rawConfig.uiBundles.getWebpackNoParseRules();
   const dllDevMode = rawConfig.uiBundles.isDevMode();
   const dllContext = rawConfig.context;
@@ -197,6 +215,7 @@ function extendRawConfig(rawConfig) {
   // Export dll config map
   return {
     dllAlias,
+    dllValidateSyntax,
     dllNoParseRules,
     dllDevMode,
     dllContext,

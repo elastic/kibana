@@ -338,6 +338,115 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    describe('global dashboard read-only with url_create privileges', () => {
+      before(async () => {
+        await security.role.create('global_dashboard_read_url_create_role', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                dashboard: ['read', 'url_create'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('global_dashboard_read_url_create_user', {
+          password: 'global_dashboard_read_url_create_user-password',
+          roles: ['global_dashboard_read_url_create_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'global_dashboard_read_url_create_user',
+          'global_dashboard_read_url_create_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+      });
+
+      after(async () => {
+        await security.role.delete('global_dashboard_read_url_create_role');
+        await security.user.delete('global_dashboard_read_url_create_user');
+      });
+
+      it('shows dashboard navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Dashboard', 'Management']);
+      });
+
+      it(`landing page doesn't show "Create new Dashboard" button`, async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          DashboardConstants.LANDING_PAGE_PATH,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
+        await testSubjects.missingOrFail('newItemButton');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
+      });
+
+      it(`create new dashboard redirects to the home page`, async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'kibana',
+          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await testSubjects.existOrFail('homeApp', { timeout: 20000 });
+      });
+
+      it(`can view existing Dashboard`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
+      });
+
+      it(`Permalinks shows create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlExistOrFail();
+      });
+
+      it('allows loading a saved query via the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        const queryString = await queryBar.getQueryString();
+        expect(queryString).to.eql('response:200');
+      });
+
+      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+        await savedQueryManagementComponent.saveNewQueryMissingOrFail();
+      });
+
+      it('does not allow saving changes to saved query from the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await queryBar.setQuery('response:404');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
+      });
+
+      it('does not allow deleting a saved query from the saved query management component', async () => {
+        await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
+      });
+
+      it('allows clearing the currently loaded saved query', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+      });
+    });
+
     describe('no dashboard privileges', () => {
       before(async () => {
         await security.role.create('no_dashboard_privileges_role', {

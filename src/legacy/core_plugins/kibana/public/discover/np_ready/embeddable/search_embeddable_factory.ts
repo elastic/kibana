@@ -22,9 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
+  EmbeddableFactoryDefinition,
   Container,
+  ErrorEmbeddable,
 } from '../../../../../../../plugins/embeddable/public';
 
 import { TimeRange } from '../../../../../../../plugins/data/public';
@@ -37,28 +37,23 @@ interface StartServices {
   isEditable: () => boolean;
 }
 
-export class SearchEmbeddableFactory extends EmbeddableFactory<
-  SearchInput,
-  SearchOutput,
-  SearchEmbeddable
-> {
+export class SearchEmbeddableFactory
+  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private $injector: auto.IInjectorService | null;
   private getInjector: () => Promise<auto.IInjectorService> | null;
+  public readonly savedObjectMetaData = {
+    name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+      defaultMessage: 'Saved search',
+    }),
+    type: 'search',
+    getIconForSavedObject: () => 'search',
+  };
 
   constructor(
     private getStartServices: () => Promise<StartServices>,
     getInjector: () => Promise<auto.IInjectorService>
   ) {
-    super({
-      savedObjectMetaData: {
-        name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
-          defaultMessage: 'Saved search',
-        }),
-        type: 'search',
-        getIconForSavedObject: () => 'search',
-      },
-    });
     this.$injector = null;
     this.getInjector = getInjector;
   }
@@ -67,9 +62,9 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     return false;
   }
 
-  public async isEditable() {
+  public isEditable = async () => {
     return (await this.getStartServices()).isEditable();
-  }
+  };
 
   public getDisplayName() {
     return i18n.translate('kbn.embeddable.search.displayName', {
@@ -77,11 +72,11 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     });
   }
 
-  public async createFromSavedObject(
+  public createFromSavedObject = async (
     savedObjectId: string,
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
-  ): Promise<SearchEmbeddable | ErrorEmbeddable> {
+  ): Promise<SearchEmbeddable | ErrorEmbeddable> => {
     if (!this.$injector) {
       this.$injector = await this.getInjector();
     }
@@ -115,7 +110,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
     }
-  }
+  };
 
   public async create(input: SearchInput) {
     return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);

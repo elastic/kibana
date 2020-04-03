@@ -7,7 +7,10 @@
 import { OpenTimelineResult } from '../components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../graphql/types';
 import { allTimelinesQuery } from '../containers/timeline/all/index.gql_query';
-
+import { CreateTimelineProps } from '../pages/detection_engine/components/signals/types';
+import { TimelineModel } from '../store/timeline/model';
+import { timelineDefaults } from '../store/timeline/defaults';
+import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 export interface MockedProvidedQuery {
   request: {
     query: GetAllTimeline.Query;
@@ -2006,3 +2009,196 @@ export const mockTimelineResults: OpenTimelineResult[] = [
     updatedBy: 'karen',
   },
 ];
+
+export const mockTimelineModel: TimelineModel = {
+  columns: [
+    {
+      columnHeaderType: 'not-filtered',
+      id: '@timestamp',
+      width: 190,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'message',
+      width: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'event.category',
+      width: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'host.name',
+      width: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'source.ip',
+      width: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'destination.ip',
+      width: 180,
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'user.name',
+      width: 180,
+    },
+  ],
+  dataProviders: [],
+  dateRange: {
+    end: 1584539558929,
+    start: 1584539198929,
+  },
+  deletedEventIds: [],
+  description: 'This is a sample rule description',
+  eventIdToNoteIds: {},
+  eventType: 'all',
+  filters: [
+    {
+      $state: {
+        store: FilterStateStore.APP_STATE,
+      },
+      meta: {
+        alias: null,
+        disabled: true,
+        key: 'host.name',
+        negate: false,
+        params: '"{"query":"placeholder"}"',
+        type: 'phrase',
+      },
+      query: '"{"match_phrase":{"host.name":"placeholder"}}"',
+    },
+  ],
+  highlightedDropAndProviderId: '',
+  historyIds: [],
+  id: 'ef579e40-jibber-jabber',
+  isFavorite: false,
+  isLive: false,
+  isLoading: false,
+  isSaving: false,
+  isSelectAllChecked: false,
+  kqlMode: 'filter',
+  kqlQuery: {
+    filterQuery: null,
+    filterQueryDraft: null,
+  },
+  itemsPerPage: 25,
+  itemsPerPageOptions: [10, 25, 50, 100],
+  loadingEventIds: [],
+  noteIds: [],
+  pinnedEventIds: {},
+  pinnedEventsSaveObject: {},
+  savedObjectId: 'ef579e40-jibber-jabber',
+  selectedEventIds: {},
+  show: false,
+  showCheckboxes: false,
+  showRowRenderers: true,
+  sort: {
+    columnId: '@timestamp',
+    sortDirection: Direction.desc,
+  },
+  title: 'Test rule',
+  version: '1',
+  width: 1100,
+};
+
+export const mockTimelineResult: TimelineResult = {
+  savedObjectId: 'ef579e40-jibber-jabber',
+  columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+  dateRange: { start: 1584539198929, end: 1584539558929 },
+  description: 'This is a sample rule description',
+  eventType: 'all',
+  filters: [
+    {
+      meta: {
+        key: 'host.name',
+        negate: false,
+        params: '"{"query":"placeholder"}"',
+        type: 'phrase',
+      },
+      query: '"{"match_phrase":{"host.name":"placeholder"}}"',
+    },
+  ],
+  kqlMode: 'filter',
+  title: 'Test rule',
+  savedQueryId: null,
+  sort: { columnId: '@timestamp', sortDirection: 'desc' },
+  version: '1',
+};
+
+export const mockTimelineApolloResult = {
+  data: {
+    getOneTimeline: mockTimelineResult,
+  },
+  loading: false,
+  networkStatus: 7,
+  stale: false,
+};
+
+export const defaultTimelineProps: CreateTimelineProps = {
+  from: 1541444305937,
+  timeline: {
+    columns: [
+      { columnHeaderType: 'not-filtered', id: '@timestamp', width: 190 },
+      { columnHeaderType: 'not-filtered', id: 'message', width: 180 },
+      { columnHeaderType: 'not-filtered', id: 'event.category', width: 180 },
+      { columnHeaderType: 'not-filtered', id: 'event.action', width: 180 },
+      { columnHeaderType: 'not-filtered', id: 'host.name', width: 180 },
+      { columnHeaderType: 'not-filtered', id: 'source.ip', width: 180 },
+      { columnHeaderType: 'not-filtered', id: 'destination.ip', width: 180 },
+      { columnHeaderType: 'not-filtered', id: 'user.name', width: 180 },
+    ],
+    dataProviders: [
+      {
+        and: [],
+        enabled: true,
+        excluded: false,
+        id:
+          'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-1',
+        kqlQuery: '',
+        name: '1',
+        queryMatch: { field: '_id', operator: ':', value: '1' },
+      },
+    ],
+    dateRange: { end: 1541444605937, start: 1541444305937 },
+    deletedEventIds: [],
+    description: '',
+    eventIdToNoteIds: {},
+    eventType: 'all',
+    filters: [],
+    highlightedDropAndProviderId: '',
+    historyIds: [],
+    id: 'timeline-1',
+    isFavorite: false,
+    isLive: false,
+    isLoading: false,
+    isSaving: false,
+    isSelectAllChecked: false,
+    itemsPerPage: 25,
+    itemsPerPageOptions: [10, 25, 50, 100],
+    kqlMode: 'filter',
+    kqlQuery: {
+      filterQuery: { kuery: { expression: '', kind: 'kuery' }, serializedQuery: '' },
+      filterQueryDraft: { expression: '', kind: 'kuery' },
+    },
+    loadingEventIds: [],
+    noteIds: [],
+    pinnedEventIds: {},
+    pinnedEventsSaveObject: {},
+    savedObjectId: null,
+    selectedEventIds: {},
+    show: false,
+    showCheckboxes: false,
+    showRowRenderers: true,
+    sort: { columnId: '@timestamp', sortDirection: Direction.desc },
+    title: '',
+    version: null,
+    width: 1100,
+  },
+  to: 1541444605937,
+  ruleNote: '# this is some markdown documentation',
+};

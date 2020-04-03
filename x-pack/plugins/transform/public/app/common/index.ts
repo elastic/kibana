@@ -5,7 +5,7 @@
  */
 
 export { AggName, isAggName } from './aggregations';
-export { euiDataGridStyle, euiDataGridToolbarSettings } from './data_grid';
+export { euiDataGridStyle, euiDataGridToolbarSettings, INIT_MAX_COLUMNS } from './data_grid';
 export {
   getDefaultSelectableFields,
   getFlattenedFields,
@@ -40,6 +40,8 @@ export { GetTransformsResponse, PreviewData, PreviewMappings } from './pivot_pre
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigPercentiles,
+  PERCENTILES_AGG_DEFAULT_PERCENTS,
   PivotAgg,
   PivotAggDict,
   PivotAggsConfig,

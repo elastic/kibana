@@ -8,12 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { ILicense } from '../../licensing/public';
 import {
   AGENT_NAME,
-  DESTINATION_ADDRESS,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME,
   SPAN_SUBTYPE,
-  SPAN_TYPE
+  SPAN_TYPE,
+  SPAN_DESTINATION_SERVICE_RESOURCE
 } from './elasticsearch_fieldnames';
 
 export interface ServiceConnectionNode {
@@ -23,7 +23,7 @@ export interface ServiceConnectionNode {
   [AGENT_NAME]: string;
 }
 export interface ExternalConnectionNode {
-  [DESTINATION_ADDRESS]: string;
+  [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
   [SPAN_TYPE]: string;
   [SPAN_SUBTYPE]: string;
 }
@@ -45,10 +45,7 @@ export interface ServiceNodeMetrics {
 }
 
 export function isValidPlatinumLicense(license: ILicense) {
-  return (
-    license.isActive &&
-    (license.type === 'platinum' || license.type === 'trial')
-  );
+  return license.isActive && license.hasAtLeast('platinum');
 }
 
 export const invalidLicenseMessage = i18n.translate(

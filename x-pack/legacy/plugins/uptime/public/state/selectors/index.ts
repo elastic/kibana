@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createSelector } from 'reselect';
 import { AppState } from '../../state';
 
 // UI Selectors
@@ -21,13 +22,7 @@ export const monitorLocationsSelector = (state: AppState, monitorId: string) => 
   return state.monitor.monitorLocationsList?.get(monitorId);
 };
 
-export const selectSelectedMonitor = (state: AppState) => {
-  return state.monitorStatus.monitor;
-};
-
-export const selectMonitorStatus = (state: AppState) => {
-  return state.monitorStatus.status;
-};
+export const monitorStatusSelector = (state: AppState) => state.monitorStatus.status;
 
 export const selectDynamicSettings = (state: AppState) => {
   return state.dynamicSettings;
@@ -46,6 +41,36 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
   };
 };
 
+const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
+
+export const hasMLFeatureAvailable = createSelector(
+  mlCapabilitiesSelector,
+  mlCapabilities =>
+    mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
+);
+
+export const canCreateMLJobSelector = createSelector(
+  mlCapabilitiesSelector,
+  mlCapabilities => mlCapabilities?.capabilities.canCreateJob
+);
+
+export const canDeleteMLJobSelector = createSelector(
+  mlCapabilitiesSelector,
+  mlCapabilities => mlCapabilities?.capabilities.canDeleteJob
+);
+
+export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;
+
+export const hasNewMLJobSelector = ({ ml }: AppState) => ml.createJob;
+
+export const isMLJobCreatingSelector = ({ ml }: AppState) => ml.createJob.loading;
+
+export const isMLJobDeletingSelector = ({ ml }: AppState) => ml.deleteJob.loading;
+
+export const isMLJobDeletedSelector = ({ ml }: AppState) => ml.deleteJob;
+
+export const anomaliesSelector = ({ ml }: AppState) => ml.anomalies.data;
+
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
 };
@@ -60,5 +85,5 @@ export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: 
 });
 
 export const indexStatusSelector = ({ indexStatus }: AppState) => {
-  return indexStatus;
+  return indexStatus.indexStatus;
 };

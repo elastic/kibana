@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { ServiceNodeMetrics } from '.';
-import { MockApmPluginContextWrapper } from '../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
 describe('ServiceNodeMetrics', () => {
   describe('render', () => {

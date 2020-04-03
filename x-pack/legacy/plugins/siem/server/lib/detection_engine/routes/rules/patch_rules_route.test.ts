@@ -13,6 +13,7 @@ import {
   typicalPayload,
   getFindResultWithSingleHit,
   nonRuleFindResult,
+  typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
@@ -34,6 +35,7 @@ describe('patch_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
+    clients.alertsClient.get.mockResolvedValue(getResult()); // existing rule
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.alertsClient.update.mockResolvedValue(getResult()); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful transform
@@ -108,6 +110,22 @@ describe('patch_rules', () => {
           }),
         })
       );
+    });
+
+    it('rejects patching a rule to ML if licensing is not platinum', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: typicalMlRulePayload(),
+      });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(400);
+      expect(response.body).toEqual({
+        message: 'Your license does not support machine learning. Please upgrade your license.',
+        status_code: 400,
+      });
     });
   });
 

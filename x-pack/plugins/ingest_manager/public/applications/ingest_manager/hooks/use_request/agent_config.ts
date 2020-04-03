@@ -32,6 +32,13 @@ export const useGetOneAgentConfig = (agentConfigId: string) => {
   });
 };
 
+export const useGetOneAgentConfigFull = (agentConfigId: string) => {
+  return useRequest({
+    path: agentConfigRouteService.getInfoFullPath(agentConfigId),
+    method: 'get',
+  });
+};
+
 export const sendGetOneAgentConfig = (agentConfigId: string) => {
   return sendRequest<GetOneAgentConfigResponse>({
     path: agentConfigRouteService.getInfoPath(agentConfigId),

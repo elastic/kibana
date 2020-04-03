@@ -138,19 +138,19 @@ export class Timeline {
     timeline: SavedTimeline
   ): Promise<ResponseTimeline> {
     const savedObjectsClient = request.context.core.savedObjects.client;
-
     try {
       if (timelineId == null) {
         // Create new timeline
+        const newTimeline = convertSavedObjectToSavedTimeline(
+          await savedObjectsClient.create(
+            timelineSavedObjectType,
+            pickSavedTimeline(timelineId, timeline, request.user)
+          )
+        );
         return {
           code: 200,
           message: 'success',
-          timeline: convertSavedObjectToSavedTimeline(
-            await savedObjectsClient.create(
-              timelineSavedObjectType,
-              pickSavedTimeline(timelineId, timeline, request.user)
-            )
-          ),
+          timeline: newTimeline,
         };
       }
       // Update Timeline
@@ -162,6 +162,7 @@ export class Timeline {
           version: version || undefined,
         }
       );
+
       return {
         code: 200,
         message: 'success',

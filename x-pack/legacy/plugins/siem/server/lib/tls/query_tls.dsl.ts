@@ -12,41 +12,36 @@ import { TlsSortField, Direction, TlsFields } from '../../graphql/types';
 const getAggs = (querySize: number, sort: TlsSortField) => ({
   count: {
     cardinality: {
-      field: 'tls.server_certificate.fingerprint.sha1',
+      field: 'tls.server.hash.sha1',
     },
   },
   sha1: {
     terms: {
-      field: 'tls.server_certificate.fingerprint.sha1',
+      field: 'tls.server.hash.sha1',
       size: querySize,
       order: {
         ...getQueryOrder(sort),
       },
     },
     aggs: {
-      issuer_names: {
+      issuers: {
         terms: {
-          field: 'tls.server_certificate.issuer.common_name',
+          field: 'tls.server.issuer',
         },
       },
-      common_names: {
+      subjects: {
         terms: {
-          field: 'tls.server_certificate.subject.common_name',
-        },
-      },
-      alternative_names: {
-        terms: {
-          field: 'tls.server_certificate.alternative_names',
+          field: 'tls.server.subject',
         },
       },
       not_after: {
         terms: {
-          field: 'tls.server_certificate.not_after',
+          field: 'tls.server.not_after',
         },
       },
       ja3: {
         terms: {
-          field: 'tls.fingerprints.ja3.hash',
+          field: 'tls.server.ja3s',
         },
       },
     },

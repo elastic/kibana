@@ -60,8 +60,7 @@ export default function({ getService, getPageObjects }) {
     it('should create shakespeare index pattern', async function() {
       log.debug('Create shakespeare index pattern');
       await PageObjects.settings.createIndexPattern('shakes', null);
-      const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
+      const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('shakes*');
     });
 

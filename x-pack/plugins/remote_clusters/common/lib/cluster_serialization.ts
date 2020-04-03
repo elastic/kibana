@@ -6,7 +6,8 @@
 
 import { PROXY_MODE } from '../constants';
 
-export interface ClusterEs {
+// Values returned from ES GET /_remote/info
+export interface ClusterInfoEs {
   seeds?: string[];
   mode?: 'proxy' | 'sniff';
   connected?: boolean;
@@ -18,9 +19,10 @@ export interface ClusterEs {
     ping_schedule?: string;
     compress?: boolean;
   };
-  address?: string;
-  max_socket_connections?: number;
-  num_sockets_connected?: number;
+  proxy_address?: string;
+  max_proxy_socket_connections?: number;
+  num_proxy_sockets_connected?: number;
+  server_name?: string;
 }
 
 export interface Cluster {
@@ -41,19 +43,23 @@ export interface Cluster {
   connectedSocketsCount?: number;
   hasDeprecatedProxySetting?: boolean;
 }
-export interface ClusterPayload {
+
+interface ClusterPayloadEs {
+  skip_unavailable?: boolean | null;
+  mode?: 'sniff' | 'proxy' | null;
+  proxy_address?: string | null;
+  proxy_socket_connections?: number | null;
+  server_name?: string | null;
+  seeds?: string[] | null;
+  node_connections?: number | null;
+  proxy?: null;
+}
+// Payload expected from ES PUT /_cluster/settings
+export interface ClusterSettingsPayloadEs {
   persistent: {
     cluster: {
       remote: {
-        [key: string]: {
-          skip_unavailable?: boolean | null;
-          mode?: 'sniff' | 'proxy' | null;
-          proxy_address?: string | null;
-          proxy_socket_connections?: number | null;
-          server_name?: string | null;
-          seeds?: string[] | null;
-          node_connections?: number | null;
-        };
+        [key: string]: ClusterPayloadEs;
       };
     };
   };
@@ -61,8 +67,9 @@ export interface ClusterPayload {
 
 export function deserializeCluster(
   name: string,
-  esClusterObject: ClusterEs,
-  deprecatedProxyAddress?: string | undefined
+  esClusterObject: ClusterInfoEs,
+  deprecatedProxyAddress?: string | undefined,
+  isCloudEnabled?: boolean | undefined
 ): Cluster {
   if (!name || !esClusterObject || typeof esClusterObject !== 'object') {
     throw new Error('Unable to deserialize cluster');
@@ -77,9 +84,10 @@ export function deserializeCluster(
     initial_connect_timeout: initialConnectTimeout,
     skip_unavailable: skipUnavailable,
     transport,
-    address: proxyAddress,
-    max_socket_connections: proxySocketConnections,
-    num_sockets_connected: connectedSocketsCount,
+    proxy_address: proxyAddress,
+    max_proxy_socket_connections: proxySocketConnections,
+    num_proxy_sockets_connected: connectedSocketsCount,
+    server_name: serverName,
   } = esClusterObject;
 
   let deserializedClusterObject: Cluster = {
@@ -94,6 +102,7 @@ export function deserializeCluster(
     proxyAddress,
     proxySocketConnections,
     connectedSocketsCount,
+    serverName,
   };
 
   if (transport) {
@@ -109,12 +118,16 @@ export function deserializeCluster(
   // If a user has a remote cluster with the deprecated proxy setting,
   // we transform the data to support the new implementation and also flag the deprecation
   if (deprecatedProxyAddress) {
+    // Cloud-specific logic: Create default server name, since field doesn't exist in deprecated implementation
+    const defaultServerName = deprecatedProxyAddress.split(':')[0];
+
     deserializedClusterObject = {
       ...deserializedClusterObject,
       proxyAddress: deprecatedProxyAddress,
       seeds: undefined,
       hasDeprecatedProxySetting: true,
       mode: PROXY_MODE,
+      serverName: isCloudEnabled ? defaultServerName : undefined,
     };
   }
 
@@ -128,7 +141,7 @@ export function deserializeCluster(
   return deserializedClusterObject;
 }
 
-export function serializeCluster(deserializedClusterObject: Cluster): ClusterPayload {
+export function serializeCluster(deserializedClusterObject: Cluster): ClusterSettingsPayloadEs {
   if (!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
     throw new Error('Unable to serialize cluster');
   }
@@ -142,22 +155,31 @@ export function serializeCluster(deserializedClusterObject: Cluster): ClusterPay
     proxyAddress,
     proxySocketConnections,
     serverName,
+    hasDeprecatedProxySetting,
   } = deserializedClusterObject;
+
+  const clusterData: ClusterPayloadEs = {
+    skip_unavailable: typeof skipUnavailable === 'boolean' ? skipUnavailable : null,
+    mode: mode || null,
+    proxy_address: proxyAddress || null,
+    proxy_socket_connections: proxySocketConnections || null,
+    server_name: serverName || null,
+    seeds: seeds || null,
+    node_connections: nodeConnections || null,
+  };
+
+  // This is only applicable in edit mode
+  // In order to "upgrade" an existing remote cluster to use the new proxy mode settings, we need to set the old proxy setting to null
+  if (hasDeprecatedProxySetting) {
+    clusterData.proxy = null;
+  }
 
   return {
     // Background on why we only save as persistent settings detailed here: https://github.com/elastic/kibana/pull/26067#issuecomment-441848124
     persistent: {
       cluster: {
         remote: {
-          [name]: {
-            skip_unavailable: skipUnavailable !== undefined ? skipUnavailable : null,
-            mode: mode ?? null,
-            proxy_address: proxyAddress ?? null,
-            proxy_socket_connections: proxySocketConnections ?? null,
-            server_name: serverName ?? null,
-            seeds: seeds ?? null,
-            node_connections: nodeConnections ?? null,
-          },
+          [name]: clusterData,
         },
       },
     },

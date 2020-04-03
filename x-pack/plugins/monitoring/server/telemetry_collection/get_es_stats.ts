@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StatsCollectionConfig } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
 import { SearchResponse } from 'elasticsearch';
+import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
@@ -16,11 +16,11 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  */
 export async function getElasticsearchStats(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
-  clusterUuids: string[]
+  clusterUuids: string[],
+  maxBucketSize: number
 ) {
-  const response = await fetchElasticsearchStats(server, callCluster, clusterUuids);
+  const response = await fetchElasticsearchStats(callCluster, clusterUuids, maxBucketSize);
   return handleElasticsearchStats(response);
 }
 
@@ -34,14 +34,13 @@ export async function getElasticsearchStats(
  * Returns the response for the aggregations to fetch details for the product.
  */
 export function fetchElasticsearchStats(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
-  clusterUuids: string[]
+  clusterUuids: string[],
+  maxBucketSize: number
 ) {
-  const config = server.config();
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: maxBucketSize,
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',

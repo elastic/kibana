@@ -41,9 +41,17 @@ const steps = 5;
 function doZoom(cy: cytoscape.Core | undefined, increment: number) {
   if (cy) {
     const level = cy.zoom() + increment;
+    // @ts-ignore `.position()` _does_ work on a NodeCollection. It returns the position of the first element in the collection.
+    const primaryCenter = cy.nodes('.primary').position();
+    const { x1, y1, w, h } = cy.nodes().boundingBox({});
+    const graphCenter = { x: x1 + w / 2, y: y1 + h / 2 };
+
     cy.animate({
       duration,
-      zoom: { level, position: cy.$('.primary').position() }
+      zoom: {
+        level,
+        position: primaryCenter || graphCenter
+      }
     });
   }
 }

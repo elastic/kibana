@@ -1,0 +1,18 @@
+{
+  "ml.flush_job": {
+    "url_params": {
+      "calc_interim": "__flag__",
+      "start": "",
+      "end": "",
+      "advance_time": "",
+      "skip_time": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/_flush"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-flush-job.html"
+  }
+}

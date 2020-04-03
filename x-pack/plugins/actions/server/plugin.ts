@@ -175,7 +175,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
+      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
         registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeActionsTelemetry(

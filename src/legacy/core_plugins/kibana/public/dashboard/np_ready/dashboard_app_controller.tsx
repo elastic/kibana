@@ -36,6 +36,7 @@ import {
   IndexPattern,
   IndexPatternsContract,
   Query,
+  QueryState,
   SavedQuery,
   syncQueryStateWithUrl,
 } from '../../../../../../plugins/data/public';
@@ -48,7 +49,6 @@ import {
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
-  DashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
 } from '../../../../../../plugins/dashboard/public';
@@ -58,7 +58,8 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
-} from '../../../../embeddable_api/public/np_ready/public';
+  ContainerOutput,
+} from '../../../../../../plugins/embeddable/public';
 import { NavAction, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
@@ -132,13 +133,6 @@ export class DashboardAppController {
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
 
-    // starts syncing `_g` portion of url with query services
-    // note: dashboard_state_manager.ts syncs `_a` portion of url
-    const {
-      stop: stopSyncingQueryServiceStateWithUrl,
-      hasInheritedQueryFromUrl: hasInheritedGlobalStateFromUrl,
-    } = syncQueryStateWithUrl(queryService, kbnUrlStateStorage);
-
     let lastReloadRequestTime = 0;
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
@@ -170,9 +164,24 @@ export class DashboardAppController {
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalStateFromUrl) {
-      dashboardStateManager.syncTimefilterWithDashboard(timefilter);
+    if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+      const initialGlobalStateInUrl = kbnUrlStateStorage.get<QueryState>('_g');
+      if (!initialGlobalStateInUrl?.time) {
+        dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+      }
+      if (!initialGlobalStateInUrl?.refreshInterval) {
+        dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
+      }
     }
+
+    // starts syncing `_g` portion of url with query services
+    // note: dashboard_state_manager.ts syncs `_a` portion of url
+    // it is important to start this syncing after `dashboardStateManager.syncTimefilterWithDashboard(timefilter);` above is run,
+    // otherwise it will case redundant browser history record
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+      queryService,
+      kbnUrlStateStorage
+    );
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const getShouldShowEditHelp = () =>
@@ -307,83 +316,92 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = embeddable.getEmbeddableFactory(
-      DASHBOARD_CONTAINER_TYPE
-    ) as DashboardContainerFactory;
-    dashboardFactory
-      .create(getDashboardInput())
-      .then((container: DashboardContainer | ErrorEmbeddable) => {
-        if (!isErrorEmbeddable(container)) {
-          dashboardContainer = container;
+    const dashboardFactory = embeddable.getEmbeddableFactory<
+      DashboardContainerInput,
+      ContainerOutput,
+      DashboardContainer
+    >(DASHBOARD_CONTAINER_TYPE);
 
-          dashboardContainer.renderEmpty = () => {
-            const shouldShowEditHelp = getShouldShowEditHelp();
-            const shouldShowViewHelp = getShouldShowViewHelp();
-            const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState();
-            const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
-            return isEmptyState ? (
-              <DashboardEmptyScreen
-                {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode)}
-              />
-            ) : null;
-          };
+    if (dashboardFactory) {
+      dashboardFactory
+        .create(getDashboardInput())
+        .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
+          if (container && !isErrorEmbeddable(container)) {
+            dashboardContainer = container;
 
-          updateIndexPatterns(dashboardContainer);
+            dashboardContainer.renderEmpty = () => {
+              const shouldShowEditHelp = getShouldShowEditHelp();
+              const shouldShowViewHelp = getShouldShowViewHelp();
+              const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState();
+              const isEmptyState =
+                shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
+              return isEmptyState ? (
+                <DashboardEmptyScreen
+                  {...getEmptyScreenProps(shouldShowEditHelp, isEmptyInReadOnlyMode)}
+                />
+              ) : null;
+            };
 
-          outputSubscription = dashboardContainer.getOutput$().subscribe(() => {
             updateIndexPatterns(dashboardContainer);
-          });
 
-          inputSubscription = dashboardContainer.getInput$().subscribe(() => {
-            let dirty = false;
-
-            // This has to be first because handleDashboardContainerChanges causes
-            // appState.save which will cause refreshDashboardContainer to be called.
-
-            if (
-              !esFilters.compareFilters(
-                container.getInput().filters,
-                queryFilter.getFilters(),
-                esFilters.COMPARE_ALL_OPTIONS
-              )
-            ) {
-              // Add filters modifies the object passed to it, hence the clone deep.
-              queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
-
-              dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
-              dirty = true;
-            }
-
-            dashboardStateManager.handleDashboardContainerChanges(container);
-            $scope.$evalAsync(() => {
-              if (dirty) {
-                updateState();
-              }
+            outputSubscription = dashboardContainer.getOutput$().subscribe(() => {
+              updateIndexPatterns(dashboardContainer);
             });
-          });
 
-          dashboardStateManager.registerChangeListener(() => {
-            // we aren't checking dirty state because there are changes the container needs to know about
-            // that won't make the dashboard "dirty" - like a view mode change.
-            refreshDashboardContainer();
-          });
+            inputSubscription = dashboardContainer.getInput$().subscribe(() => {
+              let dirty = false;
 
-          // This code needs to be replaced with a better mechanism for adding new embeddables of
-          // any type from the add panel. Likely this will happen via creating a visualization "inline",
-          // without navigating away from the UX.
-          if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
-            const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
-            const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
-            container.addSavedObjectEmbeddable(type, id);
-            removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
-            removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
+              // This has to be first because handleDashboardContainerChanges causes
+              // appState.save which will cause refreshDashboardContainer to be called.
+
+              if (
+                !esFilters.compareFilters(
+                  container.getInput().filters,
+                  queryFilter.getFilters(),
+                  esFilters.COMPARE_ALL_OPTIONS
+                )
+              ) {
+                // Add filters modifies the object passed to it, hence the clone deep.
+                queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
+
+                dashboardStateManager.applyFilters(
+                  $scope.model.query,
+                  container.getInput().filters
+                );
+                dirty = true;
+              }
+
+              dashboardStateManager.handleDashboardContainerChanges(container);
+              $scope.$evalAsync(() => {
+                if (dirty) {
+                  updateState();
+                }
+              });
+            });
+
+            dashboardStateManager.registerChangeListener(() => {
+              // we aren't checking dirty state because there are changes the container needs to know about
+              // that won't make the dashboard "dirty" - like a view mode change.
+              refreshDashboardContainer();
+            });
+
+            // This code needs to be replaced with a better mechanism for adding new embeddables of
+            // any type from the add panel. Likely this will happen via creating a visualization "inline",
+            // without navigating away from the UX.
+            if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
+              const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
+              const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
+              container.addSavedObjectEmbeddable(type, id);
+              removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
+              removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
+            }
           }
-        }
 
-        if (dashboardDom) {
-          container.render(dashboardDom);
-        }
-      });
+          if (dashboardDom && container) {
+            container.render(dashboardDom);
+          }
+        });
+    }
 
     // Part of the exposed plugin API - do not remove without careful consideration.
     this.appStatus = {
@@ -643,6 +661,14 @@ export class DashboardAppController {
         // This is only necessary for new dashboards, which will default to Edit mode.
         updateViewMode(ViewMode.VIEW);
 
+        // We need to do a hard reset of the timepicker. appState will not reload like
+        // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
+        // reload will cause it not to sync.
+        if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+          dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+          dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
+        }
+
         // Angular's $location skips this update because of history updates from syncState which happen simultaneously
         // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
         // the update is considered outdated and angular skips it
@@ -650,19 +676,6 @@ export class DashboardAppController {
         dashboardStateManager.changeDashboardUrl(
           dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
         );
-
-        // We need to do a hard reset of the timepicker. appState will not reload like
-        // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
-        // reload will cause it not to sync.
-        if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-          // have to use $evalAsync here until '_g' is migrated from $location to state sync utility ('history')
-          // When state sync utility changes url, angular's $location is missing it's own updates which happen during the same digest cycle
-          // temporary solution is to delay $location updates to next digest cycle
-          // unfortunately, these causes 2 browser history entries, but this is temporary and will be fixed after migrating '_g' to state_sync utilities
-          $scope.$evalAsync(() => {
-            dashboardStateManager.syncTimefilterWithDashboard(timefilter);
-          });
-        }
       }
 
       overlays
@@ -754,7 +767,7 @@ export class DashboardAppController {
        * When de-angularizing this code, please call the underlaying action function
        * directly and not via the top nav object.
        **/
-      navActions[TopNavIds.ADD]();
+      navActions[TopNavIds.ADD_EXISTING]();
     };
     $scope.enterEditMode = () => {
       dashboardStateManager.setFullScreenMode(false);
@@ -847,7 +860,8 @@ export class DashboardAppController {
 
       showCloneModal(onClone, currentTitle);
     };
-    navActions[TopNavIds.ADD] = () => {
+
+    navActions[TopNavIds.ADD_EXISTING] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
@@ -889,7 +903,8 @@ export class DashboardAppController {
       share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
-        allowShortUrl: !dashboardConfig.getHideWriteControls(),
+        allowShortUrl:
+          !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
         shareableUrl: unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',

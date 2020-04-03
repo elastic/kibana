@@ -5,6 +5,8 @@
  */
 
 import { buildOSSFeatures } from './oss_features';
+import { featurePrivilegeIterator } from '../../security/server/authorization';
+import { Feature } from '.';
 
 describe('buildOSSFeatures', () => {
   it('returns features including timelion', () => {
@@ -38,5 +40,18 @@ Array [
   "savedObjectsManagement",
 ]
 `);
+  });
+
+  const features = buildOSSFeatures({ savedObjectTypes: ['foo', 'bar'], includeTimelion: true });
+  features.forEach(featureConfig => {
+    it(`returns the ${featureConfig.id} feature augmented with appropriate sub feature privileges`, () => {
+      const privileges = [];
+      for (const featurePrivilege of featurePrivilegeIterator(new Feature(featureConfig), {
+        augmentWithSubFeaturePrivileges: true,
+      })) {
+        privileges.push(featurePrivilege);
+      }
+      expect(privileges).toMatchSnapshot();
+    });
   });
 });

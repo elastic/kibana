@@ -1,6 +1,7 @@
 {
   "delete_by_query": {
     "url_params": {
+      "analyzer": "",
       "analyze_wildcard": "__flag__",
       "default_operator": [
         "AND",
@@ -17,6 +18,7 @@
       "expand_wildcards": [
         "open",
         "closed",
+        "hidden",
         "none",
         "all"
       ],
