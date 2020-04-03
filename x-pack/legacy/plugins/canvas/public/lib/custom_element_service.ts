@@ -25,7 +25,7 @@ export const get = (customElementId: string): Promise<CustomElement> =>
     .get(`${getApiPath()}/${customElementId}`)
     .then(({ data: element }: { data: CustomElement }) => element);
 
-export const update = (id: string, element: CustomElement): AxiosPromise =>
+export const update = (id: string, element: Partial<CustomElement>): AxiosPromise =>
   fetch.put(`${getApiPath()}/${id}`, element);
 
 export const remove = (id: string): AxiosPromise => fetch.delete(`${getApiPath()}/${id}`);

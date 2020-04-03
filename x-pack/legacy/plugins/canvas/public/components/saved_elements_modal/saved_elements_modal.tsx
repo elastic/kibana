@@ -1,0 +1,212 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Fragment, ChangeEvent, FunctionComponent, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import {
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiSpacer,
+  EuiOverlayMask,
+  EuiButton,
+} from '@elastic/eui';
+import { map, sortBy } from 'lodash';
+import { ConfirmModal } from '../confirm_modal/confirm_modal';
+import { CustomElementModal } from '../custom_element_modal';
+import { ComponentStrings } from '../../../i18n';
+import { ElementGrid } from './element_grid';
+import { CustomElement } from '../../../types';
+
+const { SavedElementsModal: strings } = ComponentStrings;
+
+export interface Props {
+  /**
+   * Adds the custom element to the workpad
+   */
+  addCustomElement: (customElement: CustomElement) => void;
+  /**
+   * Queries ES for custom element saved objects
+   */
+  findCustomElements: (text: string) => Promise<CustomElement[]>;
+  /**
+   * Handler invoked when the modal closes
+   */
+  onClose: () => void;
+  /**
+   * Deletes the custom element
+   */
+  removeCustomElement: (id: string) => void;
+  /**
+   * Saved edits to the custom element
+   */
+  updateCustomElement: (id: string, name: string, description: string, image: string) => void;
+}
+
+export const SavedElementsModal: FunctionComponent<Props> = ({
+  addCustomElement,
+  findCustomElements,
+  onClose,
+  removeCustomElement,
+  updateCustomElement,
+}) => {
+  const [filterText, setFilterText] = useState('');
+  const [customElements, setCustomElements] = useState<CustomElement[]>([]);
+  const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
+  const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);
+
+  // Retrieves and sets custom element saved objects from ES
+  const fetchCustomElements = () =>
+    findCustomElements(filterText).then((elements: CustomElement[]) => {
+      setCustomElements(elements);
+    });
+
+  useEffect(() => {
+    fetchCustomElements();
+  });
+
+  const showEditModal = (element: CustomElement) => setElementToEdit(element);
+  const hideEditModal = () => setElementToEdit(null);
+
+  const handleEdit = async (name: string, description: string, image: string) => {
+    if (elementToEdit) {
+      await updateCustomElement(elementToEdit.id, name, description, image);
+      await fetchCustomElements();
+    }
+    hideEditModal();
+  };
+
+  const showDeleteModal = (element: CustomElement) => setElementToDelete(element);
+  const hideDeleteModal = () => setElementToDelete(null);
+
+  const handleDelete = async () => {
+    if (elementToDelete) {
+      await removeCustomElement(elementToDelete.id);
+      await fetchCustomElements();
+    }
+    hideDeleteModal();
+  };
+
+  const renderEditModal = () => {
+    if (!elementToEdit) {
+      return null;
+    }
+
+    return (
+      <EuiOverlayMask>
+        <CustomElementModal
+          title={strings.getEditElementTitle()}
+          name={elementToEdit.displayName}
+          description={elementToEdit.help}
+          image={elementToEdit.image}
+          onSave={handleEdit}
+          onCancel={hideEditModal}
+        />
+      </EuiOverlayMask>
+    );
+  };
+
+  const renderDeleteModal = () => {
+    if (!elementToDelete) {
+      return null;
+    }
+
+    return (
+      <ConfirmModal
+        isOpen
+        title={strings.getDeleteElementTitle(elementToDelete.displayName)}
+        message={strings.getDeleteElementDescription()}
+        confirmButtonText={strings.getDeleteButtonLabel()}
+        cancelButtonText={strings.getCancelButtonLabel()}
+        onConfirm={handleDelete}
+        onCancel={hideDeleteModal}
+      />
+    );
+  };
+
+  const sortElements = (elements: CustomElement[]): CustomElement[] =>
+    sortBy(
+      map(elements, (element, name) => ({ name, ...element })),
+      'displayName'
+    );
+
+  const onSearch = (e: ChangeEvent<HTMLInputElement>) => setFilterText(e.target.value);
+
+  let customElementContent = (
+    <EuiEmptyPrompt
+      iconType="vector"
+      title={<h2>{strings.getAddNewElementTitle()}</h2>}
+      body={<p>{strings.getAddNewElementDescription()}</p>}
+      titleSize="s"
+    />
+  );
+
+  if (customElements.length) {
+    customElementContent = (
+      <ElementGrid
+        elements={sortElements(customElements)}
+        filterText={filterText}
+        onClick={addCustomElement}
+        onEdit={showEditModal}
+        onDelete={showDeleteModal}
+      />
+    );
+  }
+
+  return (
+    <Fragment>
+      <EuiOverlayMask>
+        <EuiModal
+          onClose={onClose}
+          className="canvasModal--fixedSize"
+          maxWidth="1000px"
+          initialFocus=".canvasElements__filter input"
+        >
+          <EuiModalHeader className="canvasAssetManager__modalHeader">
+            <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
+              {strings.getModalTitle()}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody style={{ paddingRight: '1px' }}>
+            <EuiFieldSearch
+              fullWidth
+              value={filterText}
+              placeholder={strings.getFindElementPlaceholder()}
+              onChange={onSearch}
+            />
+            <EuiSpacer />
+            {customElementContent}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton
+              size="s"
+              onClick={onClose}
+              data-test-subj="saved-elements-modal-close-button"
+            >
+              {strings.getSavedElementsModalCloseButtonLabel()}
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiOverlayMask>
+
+      {renderDeleteModal()}
+      {renderEditModal()}
+    </Fragment>
+  );
+};
+
+SavedElementsModal.propTypes = {
+  addCustomElement: PropTypes.func.isRequired,
+  findCustomElements: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+  removeCustomElement: PropTypes.func.isRequired,
+  updateCustomElement: PropTypes.func.isRequired,
+};

@@ -1310,7 +1310,7 @@ export const ComponentStrings = {
         defaultMessage: 'Enter fullscreen mode',
       }),
     getHideEditModeLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.hideEditModeLabel', {
         defaultMessage: 'Hide editing controls',
       }),
     getRefreshMenuItemLabel: () =>

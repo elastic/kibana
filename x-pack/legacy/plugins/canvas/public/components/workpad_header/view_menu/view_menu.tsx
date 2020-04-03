@@ -12,12 +12,10 @@ import {
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { CanvasWorkpadBoundingBox } from '../../../../types';
 import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../../../common/lib';
 import { Popover, ClosePopoverFn } from '../../popover';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ComponentStrings } from '../../../../i18n/components';
-import { getFitZoomScale } from './get_fit_zoom_scale';
 
 const { WorkpadHeaderViewMenu: strings } = ComponentStrings;
 
@@ -64,16 +62,16 @@ export interface Props {
 }
 
 export const ViewMenu: FunctionComponent<Props> = ({
+  doRefresh,
+  enterFullscreen,
+  fitToWindow,
   isWriteable,
-  zoomScale,
-  zoomIn,
-  zoomOut,
   resetZoom,
   setZoomScale,
   toggleWriteable,
-  enterFullscreen,
-  doRefresh,
-  fitToWindow,
+  zoomIn,
+  zoomOut,
+  zoomScale,
 }) => {
   const viewControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty size="xs" aria-label={strings.getViewMenuLabel()} onClick={togglePopover}>
