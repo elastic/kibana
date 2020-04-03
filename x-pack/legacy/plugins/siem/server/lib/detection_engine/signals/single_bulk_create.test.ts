@@ -177,7 +177,7 @@ describe('singleBulkCreate', () => {
         },
       ],
     });
-    const { success } = await singleBulkCreate({
+    const { success, createdItemsCount } = await singleBulkCreate({
       someResult: sampleDocSearchResultsNoSortIdNoVersion(),
       ruleParams: sampleParams,
       services: mockService,
@@ -196,12 +196,13 @@ describe('singleBulkCreate', () => {
       throttle: 'no_actions',
     });
     expect(success).toEqual(true);
+    expect(createdItemsCount).toEqual(0);
   });
 
   test('create unsuccessful bulk create due to empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValue(false);
-    const { success } = await singleBulkCreate({
+    const { success, createdItemsCount } = await singleBulkCreate({
       someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
@@ -220,13 +221,14 @@ describe('singleBulkCreate', () => {
       throttle: 'no_actions',
     });
     expect(success).toEqual(true);
+    expect(createdItemsCount).toEqual(0);
   });
 
   test('create successful bulk create when bulk create has duplicate errors', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockReturnValue(sampleBulkCreateDuplicateResult);
-    const { success } = await singleBulkCreate({
+    const { success, createdItemsCount } = await singleBulkCreate({
       someResult: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
@@ -247,13 +249,14 @@ describe('singleBulkCreate', () => {
 
     expect(mockLogger.error).not.toHaveBeenCalled();
     expect(success).toEqual(true);
+    expect(createdItemsCount).toEqual(1);
   });
 
   test('create successful bulk create when bulk create has multiple error statuses', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockReturnValue(sampleBulkCreateErrorResult);
-    const { success } = await singleBulkCreate({
+    const { success, createdItemsCount } = await singleBulkCreate({
       someResult: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
@@ -274,6 +277,7 @@ describe('singleBulkCreate', () => {
 
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(true);
+    expect(createdItemsCount).toEqual(1);
   });
 
   test('filter duplicate rules will return an empty array given an empty array', () => {
