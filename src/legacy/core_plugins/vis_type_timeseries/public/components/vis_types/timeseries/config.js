@@ -53,7 +53,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
     point_size: '',
     value_template: '{{value}}',
     offset_time: '',
-    split_color_mode: 'rainbow',
+    split_color_mode: 'kibana',
     axis_min: '',
     axis_max: '',
     stacked: STACKED_OPTIONS.NONE,
@@ -138,6 +138,13 @@ export const TimeseriesConfig = injectI18n(function(props) {
   });
 
   const splitColorOptions = [
+    {
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.defaultPaletteLabel',
+        defaultMessage: 'Default palette',
+      }),
+      value: 'kibana',
+    },
     {
       label: intl.formatMessage({
         id: 'visTypeTimeseries.timeSeries.rainbowLabel',
