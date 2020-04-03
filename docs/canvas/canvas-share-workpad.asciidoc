@@ -76,7 +76,7 @@ After you've added the workpad to your website, you can change the autoplay and 
 
 To change the autoplay settings:
 
-. In the lower right corner of the shareable workpad, click the settings icon.
+. Click the settings icon.
 
 . Click *Auto Play*, then change the settings.
 +
@@ -85,7 +85,7 @@ image::images/canvas_share_autoplay_480.gif[Autoplay settings]
 
 To change the toolbar settings:
 
-. In the lower right corner, click the settings icon.
+. Click the settings icon.
 
 . Click *Toolbar*, then change the settings.
 +
