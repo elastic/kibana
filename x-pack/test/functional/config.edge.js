@@ -11,7 +11,7 @@ export default async function({ readConfigFile }) {
     ...chromeConfig.getAll(),
 
     browser: {
-      type: 'edge',
+      type: 'msedge',
     },
 
     junit: {

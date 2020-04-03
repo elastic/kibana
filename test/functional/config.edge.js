@@ -24,7 +24,7 @@ export default async function({ readConfigFile }) {
     ...defaultConfig.getAll(),
 
     browser: {
-      type: 'edge',
+      type: 'msedge',
     },
 
     junit: {

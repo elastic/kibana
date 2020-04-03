@@ -77,7 +77,7 @@ async function attemptToCreateCommand(
 
   const buildDriverInstance = async () => {
     switch (browserType) {
-      case 'edge': {
+      case 'msedge': {
         if (edgePaths && edgePaths.browserPath && edgePaths.driverPath) {
           const edgeOptions = new edge.Options();
           if (headlessBrowser === '1') {
@@ -95,7 +95,18 @@ async function attemptToCreateCommand(
             .build();
           return {
             session,
-            consoleLog$: Rx.EMPTY,
+            consoleLog$: pollForLogEntry$(
+              session,
+              logging.Type.BROWSER,
+              logPollingMs,
+              lifecycle.cleanup.after$
+            ).pipe(
+              takeUntil(lifecycle.cleanup.after$),
+              map(({ message, level: { name: level } }) => ({
+                message: message.replace(/\\n/g, '\n'),
+                level,
+              }))
+            ),
           };
         } else {
           throw new Error(
