@@ -15,7 +15,7 @@ export function getAlertType(): AlertTypeModel {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.alertFlyout.alertName', {
-      defaultMessage: 'Metric Threshold',
+      defaultMessage: 'Metric threshold',
     }),
     iconClass: 'bell',
     alertParamsExpression: Expressions,
