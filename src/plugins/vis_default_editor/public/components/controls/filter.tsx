@@ -21,7 +21,7 @@ import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, Query, QueryStringInput } from 'src/plugins/data/public';
+import { IAggConfig, Query, QueryStringInput } from '../../../../data/public';
 
 interface FilterRowProps {
   id: string;

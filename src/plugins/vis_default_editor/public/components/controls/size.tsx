@@ -48,7 +48,7 @@ function SizeParamEditor({
 
   useEffect(() => {
     setValidity(isValid);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 
   return (
     <EuiFormRow

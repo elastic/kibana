@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useCallback } from 'react';
 import { isEmpty, isEqual, mapValues, omit, pick } from 'lodash';
 import {
   EuiButtonIcon,
@@ -102,10 +102,13 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
   );
   const hasInvalidValues = models.some(config.hasInvalidValuesFn);
 
-  const updateValues = (modelList: InputModel[]) => {
-    setModels(modelList);
-    onChange(modelList.map(config.onChangeFn));
-  };
+  const updateValues = useCallback(
+    (modelList: InputModel[]) => {
+      setModels(modelList);
+      onChange(modelList.map(config.onChangeFn));
+    },
+    [config.onChangeFn, onChange]
+  );
   const onChangeValue = (index: number, value: string, modelName: string) => {
     const { model, isInvalid } = validateValue(value, config);
     updateValues(
@@ -143,11 +146,11 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
         } as InputModel,
       ]);
     }
-  }, []);
+  }, [config.defaultValue, list.length, updateValues]);
 
   useEffect(() => {
     setValidity(!hasInvalidValues);
-  }, [hasInvalidValues]);
+  }, [hasInvalidValues, setValidity]);
 
   useEffect(() => {
     // responsible for discarding changes
@@ -171,7 +174,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
         )
       );
     }
-  }, [list]);
+  }, [config, list, models]);
 
   return (
     <>

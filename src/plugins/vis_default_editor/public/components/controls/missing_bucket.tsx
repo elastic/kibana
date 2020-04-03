@@ -26,13 +26,13 @@ import { AggParamEditorProps } from '../agg_param_props';
 
 function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
   const fieldTypeIsNotString = !search.aggs.isStringType(props.agg);
+  const { setValue } = props;
 
   useEffect(() => {
     if (fieldTypeIsNotString) {
-      props.setValue(false);
+      setValue(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldTypeIsNotString]);
+  }, [fieldTypeIsNotString, setValue]);
 
   return (
     <SwitchParamEditor

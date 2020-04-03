@@ -61,7 +61,7 @@ function NumberIntervalParamEditor({
 
   useEffect(() => {
     setValidity(isValid);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 
   const onChange = useCallback(
     ({ target }: React.ChangeEvent<HTMLInputElement>) =>

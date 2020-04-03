@@ -23,7 +23,7 @@ import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { search, AggParamOption } from '../../../../../../plugins/data/public';
+import { search, AggParamOption } from '../../../../data/public';
 import { AggParamEditorProps } from '../agg_param_props';
 const { parseEsInterval, InvalidEsCalendarIntervalError } = search.aggs;
 
@@ -161,7 +161,7 @@ function TimeIntervalParamEditor({
 
   useEffect(() => {
     setValidity(isValid);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 
   return (
     <EuiFormRow

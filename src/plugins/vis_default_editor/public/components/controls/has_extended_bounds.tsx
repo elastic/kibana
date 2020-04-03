@@ -27,10 +27,10 @@ import { AggParamEditorProps } from '../agg_param_props';
 const { isType } = search.aggs;
 
 function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
+  const { agg, setValue, value } = props;
   useEffect(() => {
-    props.setValue(props.value && props.agg.params.min_doc_count);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.agg.params.min_doc_count]);
+    setValue(value && agg.params.min_doc_count);
+  }, [agg.params.min_doc_count, setValue, value]);
 
   return (
     <SwitchParamEditor

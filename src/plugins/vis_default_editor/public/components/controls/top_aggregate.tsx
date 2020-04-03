@@ -83,7 +83,7 @@ export function TopAggregateParamEditor({
 
   useEffect(() => {
     setValidity(isValid);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -102,7 +102,7 @@ export function TopAggregateParamEditor({
     if (filteredOptions.length === 1) {
       setValue(aggParam.options.find(opt => opt.value === filteredOptions[0].value));
     }
-  }, [fieldType]);
+  }, [aggParam.options, fieldType, filteredOptions, setValue, value]);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (event.target.value === emptyValue.value) {

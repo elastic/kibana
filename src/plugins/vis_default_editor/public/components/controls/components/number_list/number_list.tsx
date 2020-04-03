@@ -79,7 +79,7 @@ function NumberList({
     if (!numberArray.length) {
       onChange([models[0].value as number]);
     }
-  }, []);
+  }, [models, numberArray.length, onChange]);
 
   const isValid = !hasInvalidValues(models);
   useValidation(setValidity, isValid);
@@ -109,7 +109,7 @@ function NumberList({
         })
       );
     },
-    [numberRange, models, onUpdate]
+    [models, onUpdate]
   );
 
   // Add an item to the end of the list

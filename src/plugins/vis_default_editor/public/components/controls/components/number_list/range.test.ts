@@ -108,7 +108,6 @@ describe('Range parsing utility', () => {
   };
 
   forOwn(tests, (spec, str: any) => {
-    // eslint-disable-next-line jest/valid-describe
     describe(str, () => {
       const range = parseRange(str);
 

@@ -22,7 +22,7 @@ import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { InputList, InputListConfig, InputObject, InputModel, InputItem } from './input_list';
-import { search } from '../../../../../../../plugins/data/public';
+import { search } from '../../../../../data/public';
 
 const EMPTY_STRING = '';
 

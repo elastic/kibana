@@ -35,7 +35,7 @@ function StringParamEditor({
 
   useEffect(() => {
     setValidity(isValid);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 
   const onChange = useCallback(ev => setValue(ev.target.value), [setValue]);
 

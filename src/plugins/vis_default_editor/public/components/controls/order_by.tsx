@@ -28,7 +28,7 @@ import {
   useValidation,
 } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
-import { search } from '../../../../../../plugins/data/public';
+import { search } from '../../../../data/public';
 
 const { termsAggFilter } = search.aggs;
 const DEFAULT_VALUE = '_key';
@@ -70,7 +70,7 @@ function OrderByParamEditor({
 
       setValue(respAgg.id);
     }
-  }, []);
+  }, [metricAggs, setValue, value]);
 
   useFallbackMetric(setValue, termsAggFilter, metricAggs, value, DEFAULT_VALUE);
 

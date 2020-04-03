@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';

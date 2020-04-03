@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useCallback, useState, useEffect } from 'react';
 import {
   htmlIdGenerator,
   EuiButtonIcon,
@@ -76,37 +76,25 @@ function RangesParamEditor({
   validateRange,
 }: RangesParamEditorProps) {
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
+  const updateRanges = useCallback(
+    (rangeValues: RangeValuesModel[]) => {
+      // do not set internal id parameter into saved object
+      setValue(rangeValues.map(range => omit(range, 'id')));
+      setRanges(rangeValues);
 
-  // set up an initial range when there is no default range
-  useEffect(() => {
-    if (!value.length) {
-      onAddRange();
-    }
-  }, []);
-
-  useEffect(() => {
-    // responsible for discarding changes
-    if (
-      value.length !== ranges.length ||
-      value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
-    ) {
-      setRanges(value.map(range => ({ ...range, id: generateId() })));
-    }
-  }, [value]);
-
-  const updateRanges = (rangeValues: RangeValuesModel[]) => {
-    // do not set internal id parameter into saved object
-    setValue(rangeValues.map(range => omit(range, 'id')));
-    setRanges(rangeValues);
-
-    if (setTouched) {
-      setTouched(true);
-    }
-  };
-  const onAddRange = () =>
-    addRangeValues
-      ? updateRanges([...ranges, { ...addRangeValues(), id: generateId() }])
-      : updateRanges([...ranges, { id: generateId() }]);
+      if (setTouched) {
+        setTouched(true);
+      }
+    },
+    [setTouched, setValue]
+  );
+  const onAddRange = useCallback(
+    () =>
+      addRangeValues
+        ? updateRanges([...ranges, { ...addRangeValues(), id: generateId() }])
+        : updateRanges([...ranges, { id: generateId() }]),
+    [addRangeValues, ranges, updateRanges]
+  );
   const onRemoveRange = (id: string) => updateRanges(ranges.filter(range => range.id !== id));
   const onChangeRange = (id: string, key: string, newValue: string) =>
     updateRanges(
@@ -119,6 +107,23 @@ function RangesParamEditor({
           : range
       )
     );
+
+  // set up an initial range when there is no default range
+  useEffect(() => {
+    if (!value.length) {
+      onAddRange();
+    }
+  }, [onAddRange, value.length]);
+
+  useEffect(() => {
+    // responsible for discarding changes
+    if (
+      value.length !== ranges.length ||
+      value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
+    ) {
+      setRanges(value.map(range => ({ ...range, id: generateId() })));
+    }
+  }, [ranges, value]);
 
   const hasInvalidRange =
     validateRange &&

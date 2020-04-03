@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import {
   htmlIdGenerator,
   EuiButtonIcon,
@@ -72,6 +72,20 @@ function DateRangesParamEditor({
     ({ from, to }) => (!from && !to) || !validateDateMath(from) || !validateDateMath(to)
   );
 
+  const updateRanges = useCallback(
+    (rangeValues: DateRangeValuesModel[]) => {
+      // do not set internal id parameter into saved object
+      setValue(rangeValues.map(range => omit(range, 'id')));
+      setRanges(rangeValues);
+    },
+    [setValue]
+  );
+
+  const onAddRange = useCallback(() => updateRanges([...ranges, { id: generateId() }]), [
+    ranges,
+    updateRanges,
+  ]);
+
   // set up an initial range when there is no default range
   useEffect(() => {
     if (!value.length) {
@@ -93,18 +107,6 @@ function DateRangesParamEditor({
     setValidity(!hasInvalidRange);
   }, [hasInvalidRange, setValidity]);
 
-  const updateRanges = useCallback(
-    (rangeValues: DateRangeValuesModel[]) => {
-      // do not set internal id parameter into saved object
-      setValue(rangeValues.map(range => omit(range, 'id')));
-      setRanges(rangeValues);
-    },
-    [setValue]
-  );
-  const onAddRange = useCallback(() => updateRanges([...ranges, { id: generateId() }]), [
-    ranges,
-    updateRanges,
-  ]);
   const onRemoveRange = (id: string) => updateRanges(ranges.filter(range => range.id !== id));
   const onChangeRange = (id: string, key: string, newValue: string) =>
     updateRanges(
