@@ -169,7 +169,7 @@ export class KibanaTelemetryAdapter {
     this.collector[bucket].monitor_name_stats = {
       min_length: monitorNameStats?.min_length ?? 0,
       max_length: monitorNameStats?.max_length ?? 0,
-      avg_length: +monitorNameStats?.avg_length.toFixed(2),
+      avg_length: +(monitorNameStats?.avg_length.toFixed(2) ?? 0),
     };
 
     this.collector[bucket].observer_location_name_stats = {
