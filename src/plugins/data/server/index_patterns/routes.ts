@@ -71,7 +71,8 @@ export function registerRoutes(http: HttpServiceSetup) {
         });
       } catch (error) {
         if (
-          !!error.isBoom &&
+          typeof error === 'object' &&
+          !!error?.isBoom &&
           !!error?.output?.payload &&
           typeof error?.output?.payload === 'object'
         ) {
