@@ -233,6 +233,17 @@ export const validateAdvancedEditor = (state: State): State => {
       ),
       message: '',
     });
+  } else if (destinationIndexPatternTitleExists && !createIndexPattern) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.destinationIndexNameExistsWarn',
+        {
+          defaultMessage:
+            'An index with this destination index name already exists. Be aware that running this analytics job will modify this destination index.',
+        }
+      ),
+      message: '',
+    });
   } else if (!destinationIndexNameValid) {
     state.advancedEditorMessages.push({
       error: i18n.translate(
@@ -275,6 +286,8 @@ export const validateAdvancedEditor = (state: State): State => {
       message: '',
     });
   }
+
+  state.form.destinationIndexPatternTitleExists = destinationIndexPatternTitleExists;
 
   state.isValid =
     maxDistinctValuesError === undefined &&
