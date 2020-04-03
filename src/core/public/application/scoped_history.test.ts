@@ -268,8 +268,18 @@ describe('ScopedHistory', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
       const h = new ScopedHistory(gh, '/app/wow');
-      expect(h.createHref({ pathname: '' })).toEqual(`/`);
+      expect(h.createHref({ pathname: '' })).toEqual(`/app/wow`);
       expect(h.createHref({ pathname: '/new-page', search: '?alpha=true' })).toEqual(
+        `/app/wow/new-page?alpha=true`
+      );
+    });
+
+    it('skips the scoped history path when `prependBasePath` is false', () => {
+      const gh = createMemoryHistory();
+      gh.push('/app/wow');
+      const h = new ScopedHistory(gh, '/app/wow');
+      expect(h.createHref({ pathname: '' }, false)).toEqual(`/`);
+      expect(h.createHref({ pathname: '/new-page', search: '?alpha=true' }, false)).toEqual(
         `/new-page?alpha=true`
       );
     });

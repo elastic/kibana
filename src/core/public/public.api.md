@@ -1195,7 +1195,7 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     constructor(parentHistory: History, basePath: string);
     get action(): Action;
     block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
-    createHref: (location: LocationDescriptorObject<HistoryLocationState>) => string;
+    createHref: (location: LocationDescriptorObject<HistoryLocationState>, prependBasePath?: boolean) => string;
     createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;

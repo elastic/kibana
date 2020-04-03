@@ -219,12 +219,19 @@ export class ScopedHistory<HistoryLocationState = unknown>
 
   /**
    * Creates an href (string) to the location.
+   * If `prependBasePath` is true (default), it will prepend the location's path with the scoped history basePath.
    *
    * @param location
+   * @param prependBasePath
    */
-  public createHref = (location: LocationDescriptorObject<HistoryLocationState>): Href => {
+  public createHref = (
+    location: LocationDescriptorObject<HistoryLocationState>,
+    prependBasePath: boolean = true
+  ): Href => {
     this.verifyActive();
-    return this.parentHistory.createHref(location);
+    return this.parentHistory.createHref(
+      prependBasePath ? this.prependBasePath(location) : location
+    );
   };
 
   private prependBasePath(path: Path): Path;
