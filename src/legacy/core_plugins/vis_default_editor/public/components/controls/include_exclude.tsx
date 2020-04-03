@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isArray } from 'lodash';
@@ -35,46 +35,72 @@ import {
 import { useValidation } from './utils';
 const { isNumberType } = search.aggs;
 
-export function IncludeExcludeParamEditor(
-  props: AggParamEditorProps<string | Array<number | undefined>>
-) {
-  const generateId = htmlIdGenerator();
+const generateId = htmlIdGenerator();
+
+export function IncludeExcludeParamEditor({
+  agg,
+  aggParam,
+  value,
+  setValue,
+  setValidity,
+  showValidation,
+  setTouched,
+  editorConfig,
+  formIsTouched,
+  metricAggs,
+  schemas,
+  state,
+}: AggParamEditorProps<string | Array<number | undefined>>) {
   const [numbers, setNumbers] = useState(
-    getInitModelList(
-      props.value && isArray(props.value) ? (props.value as Array<number | undefined>) : [undefined]
-    )
+    getInitModelList(value && isArray(value) ? (value as Array<number | undefined>) : [undefined])
   );
   const numberRange = useMemo(() => getRange('[-Infinity,Infinity]'), []);
   const [isValid, setIsValid] = useState(true);
 
-  const setValidity = useCallback(
+  useEffect(() => {
+    if (
+      isArray(value) &&
+      (value?.length !== numbers.length ||
+        !(value as number[]).every((numberValue, index) => numberValue === numbers[index].value))
+    ) {
+      setNumbers(
+        value.map(
+          numberValue =>
+            ({
+              id: generateId(),
+              value: numberValue,
+              isInvalid: false,
+            } as NumberRowModel)
+        )
+      );
+    }
+  }, [value]);
+
+  const setNumbersValidity = useCallback(
     (isListValid: boolean) => {
       setIsValid(isListValid);
-      props.setValidity(isListValid);
+      setValidity(isListValid);
     },
-    [props.setValidity]
+    [setValidity]
   );
 
-  useValidation(setValidity, !hasInvalidValues(numbers));
+  useValidation(setNumbersValidity, !hasInvalidValues(numbers));
 
   const onUpdate = useCallback((numberList: NumberRowModel[]) => {
     setNumbers(numberList);
-    props.setValue(
-      numberList.map(({ value }) => value).filter(value => value !== EMPTY_STRING) as number[]
-    );
+    setValue(numberList.map(({ value: numberValue }) => numberValue) as number[]);
   }, []);
 
   const onChangeValue = useCallback(
-    ({ id, value }: { id: string; value: string }) => {
-      const parsedValue = parse(value);
-
+    (numberField: { id: string; value: string; isInvalid: boolean }) => {
       onUpdate(
         numbers.map(number =>
-          number.id === id
+          number.id === numberField.id
             ? {
-                id,
-                value: parsedValue,
-                isInvalid: value !== EMPTY_STRING && isNaN(parseFloat(value)),
+                id: numberField.id,
+                value: parse(numberField.value),
+                isInvalid:
+                  numberField.value !== EMPTY_STRING && isNaN(parseFloat(numberField.value)),
               }
             : number
         )
@@ -97,20 +123,17 @@ export function IncludeExcludeParamEditor(
   }, [numbers, numberRange, onUpdate]);
 
   const onDelete = useCallback(
-    (id: string) => {
-      const newArray = numbers.filter(model => model.id !== id);
-      onUpdate(newArray);
-    },
+    (id: string) => onUpdate(numbers.filter(number => number.id !== id)),
     [numbers, onUpdate]
   );
 
-  return isNumberType(props.agg) ? (
+  return isNumberType(agg) ? (
     <EuiFormRow
-      id={`${props.aggParam.name}-${props.agg.id}}`}
-      label={props.aggParam.displayName || props.aggParam.name}
+      id={`${aggParam.name}-${agg.id}}`}
+      label={aggParam.displayName || aggParam.name}
       fullWidth={true}
       compressed
-      isInvalid={props.showValidation ? !isValid : false}
+      isInvalid={showValidation ? !isValid : false}
     >
       <>
         {numbers.map((number, arrayIndex) => (
@@ -119,11 +142,11 @@ export function IncludeExcludeParamEditor(
               isInvalid={number.isInvalid}
               disableDelete={numbers.length === 1}
               model={number}
-              labelledbyId={`${props.aggParam.name}-${props.agg.id}-legend`}
+              labelledbyId={`${aggParam.name}-${agg.id}-legend`}
               range={numberRange}
               onDelete={onDelete}
               onChange={onChangeValue}
-              onBlur={props.setTouched}
+              onBlur={setTouched}
               autoFocus={numbers.length !== 1 && arrayIndex === numbers.length - 1}
             />
             {numbers.length - 1 !== arrayIndex && <EuiSpacer size="s" />}
@@ -141,6 +164,19 @@ export function IncludeExcludeParamEditor(
       </>
     </EuiFormRow>
   ) : (
-    <StringParamEditor {...props} value={props.value as string | undefined} />
+    <StringParamEditor
+      agg={agg}
+      aggParam={aggParam}
+      showValidation={showValidation}
+      value={value as string | undefined}
+      setValidity={setValidity}
+      setValue={setValue}
+      setTouched={setTouched}
+      editorConfig={editorConfig}
+      formIsTouched={formIsTouched}
+      metricAggs={metricAggs}
+      schemas={schemas}
+      state={state}
+    />
   );
 }
