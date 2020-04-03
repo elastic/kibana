@@ -284,7 +284,7 @@ signals index: \".siem-signals\"`;
         expect(ruleStatusService.success).toHaveBeenCalled();
       });
 
-      it('should should call ruleStatusService.success if signals were created without an errors', async () => {
+      it('should should call ruleStatusService.success if signals were created', async () => {
         const ruleAlert = getMlResult();
         payload = getPayload(
           ruleAlert,
@@ -305,6 +305,40 @@ signals index: \".siem-signals\"`;
         });
         await alert.executor(payload);
         expect(ruleStatusService.success).toHaveBeenCalled();
+      });
+
+      it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
+        const ruleAlert = getMlResult();
+        ruleAlert.actions = [
+          {
+            actionTypeId: '.slack',
+            params: {
+              message:
+                'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
+            },
+            group: 'default',
+            id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+          },
+        ];
+        jobsSummaryMock.mockResolvedValue([]);
+        (findMlSignals as jest.Mock).mockResolvedValue({
+          hits: {
+            hits: [{}],
+          },
+        });
+        (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
+          success: true,
+          bulkCreateDuration: 1,
+          createdItemsCount: 1,
+        });
+
+        await alert.executor(payload);
+
+        expect(scheduleNotificationActions).toHaveBeenCalledWith(
+          expect.objectContaining({
+            signalsCount: 1,
+          })
+        );
       });
     });
   });
@@ -328,6 +362,14 @@ signals index: \".siem-signals\"`;
 
     it('when error was thrown', async () => {
       (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({});
+      await alert.executor(payload);
+      expect(logger.error).toHaveBeenCalled();
+      expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');
+      expect(ruleStatusService.error).toHaveBeenCalled();
+    });
+
+    it('and call ruleStatusService with the default message', async () => {
+      (searchAfterAndBulkCreate as jest.Mock).mockRejectedValue({});
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');
