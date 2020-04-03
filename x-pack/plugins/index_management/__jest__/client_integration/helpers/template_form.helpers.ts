@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
-import { Template } from '../../../common/types';
+import { TemplateDeserialized } from '../../../common';
 import { nextTick } from './index';
 
 interface MappingField {
@@ -62,8 +62,8 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     indexPatterns,
     order,
     version,
-  }: Partial<Template> = {}) => {
-    const { form, find, component } = testBed;
+  }: Partial<TemplateDeserialized> = {}) => {
+    const { form, find, waitFor } = testBed;
 
     if (name) {
       form.setInputValue('nameField.input', name);
@@ -88,12 +88,11 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     }
 
     clickNextButton();
-    await nextTick();
-    component.update();
+    await waitFor('stepSettings');
   };
 
   const completeStepTwo = async (settings?: string) => {
-    const { find, component } = testBed;
+    const { find, component, waitFor } = testBed;
 
     if (settings) {
       find('mockCodeEditor').simulate('change', {
@@ -104,42 +103,41 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     }
 
     clickNextButton();
-    await nextTick();
-    component.update();
+    await waitFor('stepMappings');
   };
 
   const completeStepThree = async (mappingFields?: MappingField[]) => {
-    const { component } = testBed;
+    const { waitFor } = testBed;
 
     if (mappingFields) {
       for (const field of mappingFields) {
         const { name, type } = field;
         await addMappingField(name, type);
       }
-    } else {
-      await nextTick();
     }
 
-    await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
     clickNextButton();
-    await nextTick(50);
-    component.update();
+    await waitFor('stepAliases');
   };
 
-  const completeStepFour = async (aliases?: string) => {
-    const { find, component } = testBed;
+  const completeStepFour = async (aliases?: string, waitForNextStep = true) => {
+    const { find, component, waitFor } = testBed;
 
     if (aliases) {
       find('mockCodeEditor').simulate('change', {
         jsonString: aliases,
       }); // Using mocked EuiCodeEditor
-      await nextTick(50);
+      await nextTick();
       component.update();
     }
 
     clickNextButton();
-    await nextTick(50);
-    component.update();
+
+    if (waitForNextStep) {
+      await waitFor('summaryTab');
+    } else {
+      component.update();
+    }
   };
 
   const selectSummaryTab = (tab: 'summary' | 'request') => {
