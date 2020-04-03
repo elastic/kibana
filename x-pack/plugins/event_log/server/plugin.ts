@@ -28,7 +28,7 @@ import {
 import { findRoute } from './routes';
 import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
-import { EventLogClientService } from './event_log_client_service';
+import { EventLogClientService } from './event_log_start_service';
 
 export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 

@@ -17,6 +17,13 @@ export interface ConstructorOpts {
   clusterClient: EsClusterClient;
 }
 
+export interface QueryEventsBySavedObjectResult {
+  page: number;
+  per_page: number;
+  total: number;
+  data: IEvent[];
+}
+
 export class ClusterClientAdapter {
   private readonly logger: Logger;
   private readonly clusterClient: EsClusterClient;
@@ -114,20 +121,20 @@ export class ClusterClientAdapter {
     index: string,
     type: string,
     id: string,
-    { page, per_page: size, start, end }: Partial<FindOptionsType>
-  ): Promise<any[]> {
+    { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
+  ): Promise<QueryEventsBySavedObjectResult> {
     try {
       const {
-        hits: { hits },
+        hits: {
+          hits,
+          total: { value: total },
+        },
       } = await this.callEs('search', {
         index,
         body: {
-          ...(size && page
-            ? {
-                size,
-                from: (page - 1) * size,
-              }
-            : {}),
+          size: perPage,
+          from: (page - 1) * perPage,
+          sort: { [sort_field]: { order: sort_order } },
           query: {
             bool: {
               must: reject(
@@ -159,7 +166,12 @@ export class ClusterClientAdapter {
           },
         },
       });
-      return hits.map((hit: any) => hit._source) as IEvent[];
+      return {
+        page,
+        per_page: perPage,
+        total,
+        data: hits.map((hit: any) => hit._source) as IEvent[],
+      };
     } catch (err) {
       throw new Error(
         `querying for Event Log by for type "${type}" and id "${id}" failed with: ${err.message}`

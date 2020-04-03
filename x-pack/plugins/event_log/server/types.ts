@@ -11,6 +11,7 @@ export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/
 import { KibanaRequest } from 'kibana/server';
 import { IEvent } from '../generated/schemas';
 import { FindOptionsType } from './event_log_client';
+import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -50,7 +51,7 @@ export interface IEventLogClient {
     type: string,
     id: string,
     options?: Partial<FindOptionsType>
-  ): Promise<IEvent[]>;
+  ): Promise<QueryEventsBySavedObjectResult>;
 }
 
 export interface IEventLogger {

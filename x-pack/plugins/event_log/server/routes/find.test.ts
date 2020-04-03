@@ -26,7 +26,13 @@ describe('find', () => {
     expect(config.path).toMatchInlineSnapshot(`"/api/event_log/{type}/{id}/_find"`);
 
     const events = [fakeEvent(), fakeEvent()];
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(events);
+    const result = {
+      page: 0,
+      per_page: 10,
+      total: events.length,
+      data: events,
+    };
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce(result);
 
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
@@ -45,7 +51,7 @@ describe('find', () => {
     expect(id).toEqual(`1`);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: events,
+      body: result,
     });
   });
 
@@ -55,7 +61,12 @@ describe('find', () => {
     findRoute(router);
 
     const [, handler] = router.get.mock.calls[0];
-    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce([]);
+    eventLogClient.findEventsBySavedObject.mockResolvedValueOnce({
+      page: 0,
+      per_page: 10,
+      total: 0,
+      data: [],
+    });
 
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
@@ -76,7 +87,12 @@ describe('find', () => {
     expect(options).toMatchObject({});
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: [],
+      body: {
+        page: 0,
+        per_page: 10,
+        total: 0,
+        data: [],
+      },
     });
   });
 });

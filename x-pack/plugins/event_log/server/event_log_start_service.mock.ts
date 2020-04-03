@@ -6,13 +6,13 @@
 
 import { IEventLogClientService } from './types';
 
-const createEventLogStartMock = () => {
+const createEventLogServiceMock = () => {
   const mock: jest.Mocked<IEventLogClientService> = {
     getClient: jest.fn(),
   };
   return mock;
 };
 
-export const eventLogStartMock = {
-  create: createEventLogStartMock,
+export const eventLogStartServiceMock = {
+  create: createEventLogServiceMock,
 };

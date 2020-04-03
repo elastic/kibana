@@ -8,6 +8,7 @@ import { ClusterClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import moment from 'moment';
+import { findOptionsSchema } from '../event_log_client';
 
 type EsClusterClient = Pick<jest.Mocked<ClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
@@ -198,23 +199,30 @@ describe('createIndex', () => {
 });
 
 describe('queryEventsBySavedObject', () => {
+  const DEFAULT_OPTIONS = findOptionsSchema.validate({});
+
   test('should call cluster with proper arguments', async () => {
     clusterClient.callAsInternalUser.mockResolvedValue({
       hits: {
         hits: [],
+        total: { value: 0 },
       },
     });
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
       'saved-object-type',
       'saved-object-id',
-      { page: 10, per_page: 10, start: undefined, end: undefined }
+      DEFAULT_OPTIONS
     );
-    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
+
+    const [method, query] = clusterClient.callAsInternalUser.mock.calls[0];
+    expect(method).toEqual('search');
+    expect(query).toMatchObject({
       index: 'index-name',
       body: {
-        from: 90,
+        from: 0,
         size: 10,
+        sort: { 'event.start': { order: 'asc' } },
         query: {
           bool: {
             must: [
@@ -231,10 +239,35 @@ describe('queryEventsBySavedObject', () => {
     });
   });
 
+  test('should call cluster with sort', async () => {
+    clusterClient.callAsInternalUser.mockResolvedValue({
+      hits: {
+        hits: [],
+        total: { value: 0 },
+      },
+    });
+    await clusterClientAdapter.queryEventsBySavedObject(
+      'index-name',
+      'saved-object-type',
+      'saved-object-id',
+      { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' }
+    );
+
+    const [method, query] = clusterClient.callAsInternalUser.mock.calls[0];
+    expect(method).toEqual('search');
+    expect(query).toMatchObject({
+      index: 'index-name',
+      body: {
+        sort: { 'event.end': { order: 'desc' } },
+      },
+    });
+  });
+
   test('supports open ended date', async () => {
     clusterClient.callAsInternalUser.mockResolvedValue({
       hits: {
         hits: [],
+        total: { value: 0 },
       },
     });
 
@@ -246,13 +279,14 @@ describe('queryEventsBySavedObject', () => {
       'index-name',
       'saved-object-type',
       'saved-object-id',
-      { page: 10, per_page: 10, start }
+      { ...DEFAULT_OPTIONS, start }
     );
-    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
+
+    const [method, query] = clusterClient.callAsInternalUser.mock.calls[0];
+    expect(method).toEqual('search');
+    expect(query).toMatchObject({
       index: 'index-name',
       body: {
-        from: 90,
-        size: 10,
         query: {
           bool: {
             must: [
@@ -280,6 +314,7 @@ describe('queryEventsBySavedObject', () => {
     clusterClient.callAsInternalUser.mockResolvedValue({
       hits: {
         hits: [],
+        total: { value: 0 },
       },
     });
 
@@ -294,13 +329,14 @@ describe('queryEventsBySavedObject', () => {
       'index-name',
       'saved-object-type',
       'saved-object-id',
-      { page: 10, per_page: 10, start, end }
+      { ...DEFAULT_OPTIONS, start, end }
     );
-    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('search', {
+
+    const [method, query] = clusterClient.callAsInternalUser.mock.calls[0];
+    expect(method).toEqual('search');
+    expect(query).toMatchObject({
       index: 'index-name',
       body: {
-        from: 90,
-        size: 10,
         query: {
           bool: {
             must: [

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventLogClientService } from './event_log_client_service';
+import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
 import { KibanaRequest } from 'kibana/server';
 import { savedObjectsServiceMock } from 'src/core/server/saved_objects/saved_objects_service.mock';

@@ -93,11 +93,17 @@ describe('EventLogStart', () => {
         }),
       ];
 
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(expectedEvents);
+      const result = {
+        page: 0,
+        per_page: 10,
+        total: expectedEvents.length,
+        data: expectedEvents,
+      };
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
 
       expect(
         await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id')
-      ).toEqual(expectedEvents);
+      ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
         esContext.esNames.alias,
@@ -106,6 +112,8 @@ describe('EventLogStart', () => {
         {
           page: 1,
           per_page: 10,
+          sort_field: 'event.start',
+          sort_order: 'asc',
         }
       );
     });
@@ -156,7 +164,13 @@ describe('EventLogStart', () => {
         }),
       ];
 
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(expectedEvents);
+      const result = {
+        page: 0,
+        per_page: 10,
+        total: expectedEvents.length,
+        data: expectedEvents,
+      };
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
 
       const start = moment()
         .subtract(1, 'days')
@@ -170,7 +184,7 @@ describe('EventLogStart', () => {
           start,
           end,
         })
-      ).toEqual(expectedEvents);
+      ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
         esContext.esNames.alias,
@@ -179,6 +193,8 @@ describe('EventLogStart', () => {
         {
           page: 1,
           per_page: 10,
+          sort_field: 'event.start',
+          sort_order: 'asc',
           start,
           end,
         }
@@ -200,7 +216,12 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue([]);
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        data: [],
+      });
 
       expect(
         eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
@@ -224,7 +245,12 @@ describe('EventLogStart', () => {
         references: [],
       });
 
-      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue([]);
+      esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        data: [],
+      });
 
       expect(
         eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge, omit, times, chunk } from 'lodash';
+import { merge, omit, times, chunk, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import expect from '@kbn/expect/expect.js';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { IValidatedEvent } from '../../../../plugins/event_log/server/types';
@@ -29,30 +29,32 @@ export default function({ getService }: FtrProviderContext) {
       await logTestEvent(id, expectedEvents[1]);
 
       await retry.try(async () => {
-        const { body: foundEvents } = await supertest
-          .get(`/api/event_log/event_log_test/${id}/_find`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
+        const {
+          body: { data, total },
+        } = await findEvents(id, {});
 
-        expect(foundEvents.length).to.be(2);
+        expect(data.length).to.be(2);
+        expect(total).to.be(2);
 
-        assertEventsFromApiMatchCreatedEvents(foundEvents, expectedEvents);
+        assertEventsFromApiMatchCreatedEvents(data, expectedEvents);
       });
     });
 
     it('should support pagination for events', async () => {
       const id = uuid.v4();
 
-      const [firstExpectedEvent, ...expectedEvents] = times(6, () => fakeEvent(id));
+      const timestamp = moment();
+      const [firstExpectedEvent, ...expectedEvents] = times(6, () =>
+        fakeEvent(id, fakeEventTiming(timestamp.add(1, 's')))
+      );
       // run one first to create the SO and avoid clashes
       await logTestEvent(id, firstExpectedEvent);
       await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
 
       await retry.try(async () => {
-        const { body: foundEvents } = await supertest
-          .get(`/api/event_log/event_log_test/${id}/_find`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
+        const {
+          body: { data: foundEvents },
+        } = await findEvents(id, {});
 
         expect(foundEvents.length).to.be(6);
       });
@@ -62,84 +64,126 @@ export default function({ getService }: FtrProviderContext) {
         3
       );
 
-      const { body: firstPage } = await supertest
-        .get(`/api/event_log/event_log_test/${id}/_find?per_page=3`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+      const {
+        body: { data: firstPage },
+      } = await findEvents(id, { per_page: 3 });
 
       expect(firstPage.length).to.be(3);
       assertEventsFromApiMatchCreatedEvents(firstPage, expectedFirstPage);
 
-      const { body: secondPage } = await supertest
-        .get(`/api/event_log/event_log_test/${id}/_find?per_page=3&page=2`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+      const {
+        body: { data: secondPage },
+      } = await findEvents(id, { per_page: 3, page: 2 });
 
       expect(secondPage.length).to.be(3);
       assertEventsFromApiMatchCreatedEvents(secondPage, expectedSecondPage);
     });
 
+    it('should support sorting by event end', async () => {
+      const id = uuid.v4();
+
+      const timestamp = moment();
+      const [firstExpectedEvent, ...expectedEvents] = times(6, () =>
+        fakeEvent(id, fakeEventTiming(timestamp.add(1, 's')))
+      );
+      // run one first to create the SO and avoid clashes
+      await logTestEvent(id, firstExpectedEvent);
+      await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
+
+      await retry.try(async () => {
+        const {
+          body: { data: foundEvents },
+        } = await findEvents(id, { sort_field: 'event.end', sort_order: 'desc' });
+
+        expect(foundEvents.length).to.be(6);
+        assertEventsFromApiMatchCreatedEvents(
+          foundEvents,
+          [firstExpectedEvent, ...expectedEvents].reverse()
+        );
+      });
+    });
+
     it('should support date ranges for events', async () => {
       const id = uuid.v4();
 
-      const firstEvent = fakeEvent(id);
+      const timestamp = moment();
+
+      const firstEvent = fakeEvent(id, fakeEventTiming(timestamp));
       await logTestEvent(id, firstEvent);
       await delay(100);
 
-      const start = moment().toISOString();
-      const expectedEvents = times(6, () => fakeEvent(id));
+      const start = timestamp.add(1, 's').toISOString();
+
+      const expectedEvents = times(6, () => fakeEvent(id, fakeEventTiming(timestamp.add(1, 's'))));
       await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
 
-      const end = moment().toISOString();
+      const end = timestamp.add(1, 's').toISOString();
 
       await delay(100);
-      const lastEvent = fakeEvent(id);
+      const lastEvent = fakeEvent(id, fakeEventTiming(timestamp.add(1, 's')));
       await logTestEvent(id, lastEvent);
 
       await retry.try(async () => {
-        const { body: foundEvents } = await supertest
-          .get(`/api/event_log/event_log_test/${id}/_find`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
+        const {
+          body: { data: foundEvents, total },
+        } = await findEvents(id, {});
 
         expect(foundEvents.length).to.be(8);
+        expect(total).to.be(8);
       });
 
-      const { body: events } = await supertest
-        .get(`/api/event_log/event_log_test/${id}/_find?start=${start}&end=${end}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+      const {
+        body: { data: eventsWithinRange },
+      } = await findEvents(id, { start, end });
 
-      expect(events.length).to.be(expectedEvents.length);
-      assertEventsFromApiMatchCreatedEvents(events, expectedEvents);
+      expect(eventsWithinRange.length).to.be(expectedEvents.length);
+      assertEventsFromApiMatchCreatedEvents(eventsWithinRange, expectedEvents);
 
-      const { body: eventsFrom } = await supertest
-        .get(`/api/event_log/event_log_test/${id}/_find?start=${start}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+      const {
+        body: { data: eventsFrom },
+      } = await findEvents(id, { start });
 
       expect(eventsFrom.length).to.be(expectedEvents.length + 1);
       assertEventsFromApiMatchCreatedEvents(eventsFrom, [...expectedEvents, lastEvent]);
 
-      const { body: eventsUntil } = await supertest
-        .get(`/api/event_log/event_log_test/${id}/_find?end=${end}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+      const {
+        body: { data: eventsUntil },
+      } = await findEvents(id, { end });
 
       expect(eventsUntil.length).to.be(expectedEvents.length + 1);
       assertEventsFromApiMatchCreatedEvents(eventsUntil, [firstEvent, ...expectedEvents]);
     });
   });
 
+  async function findEvents(id: string, query: Record<string, any> = {}) {
+    const uri = `/api/event_log/event_log_test/${id}/_find${
+      isEmpty(query)
+        ? ''
+        : `?${Object.entries(query)
+            .map(([key, val]) => `${key}=${val}`)
+            .join('&')}`
+    }`;
+    log.debug(`calling ${uri}`);
+    return await supertest
+      .get(uri)
+      .set('kbn-xsrf', 'foo')
+      .expect(200);
+  }
+
   function assertEventsFromApiMatchCreatedEvents(
     foundEvents: IValidatedEvent[],
     expectedEvents: IEvent[]
   ) {
-    foundEvents.forEach((foundEvent: IValidatedEvent, index: number) => {
-      expect(foundEvent!.event).to.eql(expectedEvents[index]!.event);
-      expect(omit(foundEvent!.kibana ?? {}, 'server_uuid')).to.eql(expectedEvents[index]!.kibana);
-      expect(foundEvent!.message).to.eql(expectedEvents[index]!.message);
-    });
+    try {
+      foundEvents.forEach((foundEvent: IValidatedEvent, index: number) => {
+        expect(foundEvent!.event).to.eql(expectedEvents[index]!.event);
+        expect(omit(foundEvent!.kibana ?? {}, 'server_uuid')).to.eql(expectedEvents[index]!.kibana);
+        expect(foundEvent!.message).to.eql(expectedEvents[index]!.message);
+      });
+    } catch (ex) {
+      log.debug(`failed to match ${JSON.stringify({ foundEvents, expectedEvents })}`);
+      throw ex;
+    }
   }
 
   async function logTestEvent(id: string, event: IEvent) {
@@ -151,14 +195,28 @@ export default function({ getService }: FtrProviderContext) {
       .expect(200);
   }
 
+  function fakeEventTiming(start: Moment): Partial<IEvent> {
+    return {
+      event: {
+        start: start.toISOString(),
+        end: start
+          .clone()
+          .add(500, 'milliseconds')
+          .toISOString(),
+      },
+    };
+  }
+
   function fakeEvent(id: string, overrides: Partial<IEvent> = {}): IEvent {
+    const start = moment().toISOString();
+    const end = moment().toISOString();
     return merge(
       {
         event: {
           provider: 'event_log_fixture',
           action: 'test',
-          start: moment().toISOString(),
-          end: moment().toISOString(),
+          start,
+          end,
           duration: 1000000,
         },
         kibana: {
