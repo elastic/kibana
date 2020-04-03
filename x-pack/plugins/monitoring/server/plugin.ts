@@ -224,7 +224,7 @@ export class Plugin {
       this.monitoringCore = this.getLegacyShim(
         config,
         legacyConfig,
-        core.getStartServices as () => Promise<[CoreStart, PluginsStart]>,
+        core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         this.licenseService,
         this.cluster
       );
@@ -293,7 +293,7 @@ export class Plugin {
   getLegacyShim(
     config: MonitoringConfig,
     legacyConfig: any,
-    getCoreServices: () => Promise<[CoreStart, PluginsStart]>,
+    getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
     cluster: ICustomClusterClient
   ): MonitoringCore {

@@ -226,15 +226,19 @@ describe('handleUpdateIncident', () => {
     const res = await handleUpdateIncident({
       incidentId: '123',
       serviceNow,
-      params,
+      params: {
+        ...params,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
+      },
       comments: [],
       mapping: finalMapping,
     });
 
     expect(serviceNow.updateIncident).toHaveBeenCalled();
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
-      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
-      description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      short_description: 'a title (updated at 2020-03-15T08:34:53.450Z by Another User)',
+      description: 'a description (updated at 2020-03-15T08:34:53.450Z by Another User)',
     });
     expect(serviceNow.updateIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
@@ -256,7 +260,11 @@ describe('handleUpdateIncident', () => {
     const res = await handleUpdateIncident({
       incidentId: '123',
       serviceNow,
-      params,
+      params: {
+        ...params,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
+      },
       comments: [
         {
           comment: 'first comment',
@@ -278,10 +286,10 @@ describe('handleUpdateIncident', () => {
             fullName: 'Elastic User',
             username: 'elastic',
           },
-          updatedAt: '2020-03-13T08:34:53.450Z',
+          updatedAt: '2020-03-16T08:34:53.450Z',
           updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
+            fullName: 'Another User',
+            username: 'anotherUser',
           },
           version: 'WzU3LDFd',
         },
@@ -291,8 +299,8 @@ describe('handleUpdateIncident', () => {
 
     expect(serviceNow.updateIncident).toHaveBeenCalled();
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
-      description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
-      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      description: 'a description (updated at 2020-03-15T08:34:53.450Z by Another User)',
+      short_description: 'a title (updated at 2020-03-15T08:34:53.450Z by Another User)',
     });
     expect(serviceNow.updateIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).toHaveBeenCalled();
@@ -312,17 +320,17 @@ describe('handleUpdateIncident', () => {
           version: 'WzU3LDFd',
         },
         {
-          comment: 'second comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
+          comment: 'second comment (added at 2020-03-16T08:34:53.450Z by Another User)',
           commentId: '789',
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
             fullName: 'Elastic User',
             username: 'elastic',
           },
-          updatedAt: '2020-03-13T08:34:53.450Z',
+          updatedAt: '2020-03-16T08:34:53.450Z',
           updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
+            fullName: 'Another User',
+            username: 'anotherUser',
           },
           version: 'WzU3LDFd',
         },

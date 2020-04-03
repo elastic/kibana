@@ -4,79 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  convertFiltersToArray,
-  convertFiltersToObject,
   getSelectOptions,
   replaceTemplateVariables
 } from '../CustomLinkFlyout/helper';
-import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 
 describe('Custom link helper', () => {
-  describe('convertFiltersToArray', () => {
-    it('returns array of tuple when custom link not defined', () => {
-      expect(convertFiltersToArray()).toEqual([['', '']]);
-    });
-    it('returns filters as array', () => {
-      expect(
-        convertFiltersToArray({
-          'service.name': 'foo',
-          'transaction.type': 'bar'
-        } as CustomLink)
-      ).toEqual([
-        ['service.name', 'foo'],
-        ['transaction.type', 'bar']
-      ]);
-    });
-    it('returns empty when no filter is added', () => {
-      expect(
-        convertFiltersToArray({
-          label: 'foo',
-          url: 'bar'
-        } as CustomLink)
-      ).toEqual([['', '']]);
-    });
-  });
-
-  describe('convertFiltersToObject', () => {
-    it('returns undefined when any filter is added', () => {
-      expect(convertFiltersToObject([['', '']])).toBeUndefined();
-    });
-    it('removes uncompleted filters', () => {
-      expect(
-        convertFiltersToObject([
-          ['service.name', ''],
-          ['', 'foo'],
-          ['transaction.type', 'bar']
-        ])
-      ).toEqual({ 'transaction.type': ['bar'] });
-    });
-    it('splits the value by comma', () => {
-      expect(
-        convertFiltersToObject([
-          ['service.name', 'foo'],
-          ['service.environment', 'foo, bar'],
-          ['transaction.type', 'foo, '],
-          ['transaction.name', 'foo,']
-        ])
-      ).toEqual({
-        'service.name': ['foo'],
-        'service.environment': ['foo', 'bar'],
-        'transaction.type': ['foo'],
-        'transaction.name': ['foo']
-      });
-    });
-  });
-
   describe('getSelectOptions', () => {
     it('returns all available options when no filters were selected', () => {
       expect(
         getSelectOptions(
           [
-            ['', ''],
-            ['', ''],
-            ['', ''],
-            ['', '']
+            { key: '', value: '' },
+            { key: '', value: '' },
+            { key: '', value: '' },
+            { key: '', value: '' }
           ],
           ''
         )
@@ -92,10 +34,10 @@ describe('Custom link helper', () => {
       expect(
         getSelectOptions(
           [
-            ['service.name', 'foo'],
-            ['', ''],
-            ['', ''],
-            ['', '']
+            { key: 'service.name', value: 'foo' },
+            { key: '', value: '' },
+            { key: '', value: '' },
+            { key: '', value: '' }
           ],
           ''
         )
@@ -110,10 +52,10 @@ describe('Custom link helper', () => {
       expect(
         getSelectOptions(
           [
-            ['service.name', 'foo'],
-            ['transaction.name', 'bar'],
-            ['', ''],
-            ['', '']
+            { key: 'service.name', value: 'foo' },
+            { key: 'transaction.name', value: 'bar' },
+            { key: '', value: '' },
+            { key: '', value: '' }
           ],
           'transaction.name'
         )
@@ -128,10 +70,10 @@ describe('Custom link helper', () => {
       expect(
         getSelectOptions(
           [
-            ['service.name', 'foo'],
-            ['transaction.name', 'bar'],
-            ['service.environment', 'baz'],
-            ['transaction.type', 'qux']
+            { key: 'service.name', value: 'foo' },
+            { key: 'transaction.name', value: 'bar' },
+            { key: 'service.environment', value: 'baz' },
+            { key: 'transaction.type', value: 'qux' }
           ],
           ''
         )

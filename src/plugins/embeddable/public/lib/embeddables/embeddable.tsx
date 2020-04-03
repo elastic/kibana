@@ -215,6 +215,9 @@ export abstract class Embeddable<
       this.storageSubscription.unsubscribe();
     }
 
+    this.input$.complete();
+    this.output$.complete();
+
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }

@@ -96,7 +96,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
       },
       icon: {
         options: {
-          value: 'airfield',
+          value: 'marker',
         },
         type: 'STATIC',
       },

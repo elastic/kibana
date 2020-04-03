@@ -76,6 +76,7 @@ export const FilterPopoverComponent = ({
           numFilters={options.length}
           hasActiveFilters={selectedOptions.length > 0}
           numActiveFilters={selectedOptions.length}
+          aria-label={buttonLabel}
         >
           {buttonLabel}
         </EuiFilterButton>

@@ -66,7 +66,10 @@ export const allRulesReducer = (
         tableRef.current != null &&
         tableRef.current.changeSelection != null
       ) {
-        tableRef.current.changeSelection([]);
+        // for future devs: eui basic table is not giving us a prop to set the value, so
+        // we are using the ref in setTimeout to reset on the next loop so that we
+        // do not get a warning telling us we are trying to update during a render
+        window.setTimeout(() => tableRef?.current?.changeSelection([]), 0);
       }
 
       return {

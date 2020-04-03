@@ -14,6 +14,7 @@ module.exports = {
       {
         test: /\.ts$/,
         exclude: [/node_modules/],
+        include: [/e2e\/cypress/],
         use: [
           {
             loader: 'ts-loader'

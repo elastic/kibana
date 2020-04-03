@@ -1,5 +1,5 @@
 {
-  "configPath": ["xpack"],
+  "configPath": ["xpack", "uptime"],
   "id": "uptime",
   "kibanaVersion": "kibana",
   "requiredPlugins": ["alerting", "features", "licensing", "usageCollection"],

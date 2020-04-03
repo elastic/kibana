@@ -18,6 +18,10 @@ import {
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
+import {
+  KibanaDatatable,
+  KibanaDatatableRow,
+} from '../../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
@@ -26,52 +30,61 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 const executeTriggerActions = jest.fn();
 
+const createSampleDatatableWithRows = (rows: KibanaDatatableRow[]): KibanaDatatable => ({
+  type: 'kibana_datatable',
+  columns: [
+    {
+      id: 'a',
+      name: 'a',
+      formatHint: { id: 'number', params: { pattern: '0,0.000' } },
+    },
+    { id: 'b', name: 'b', formatHint: { id: 'number', params: { pattern: '000,0' } } },
+    {
+      id: 'c',
+      name: 'c',
+      formatHint: { id: 'string' },
+      meta: { type: 'date-histogram', aggConfigParams: { interval: '10s' } },
+    },
+    { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
+  ],
+  rows,
+});
+
+const sampleLayer: LayerArgs = {
+  layerId: 'first',
+  seriesType: 'line',
+  xAccessor: 'c',
+  accessors: ['a', 'b'],
+  splitAccessor: 'd',
+  columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+  xScaleType: 'ordinal',
+  yScaleType: 'linear',
+  isHistogram: false,
+};
+
+const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
+  xTitle: '',
+  yTitle: '',
+  legend: {
+    type: 'lens_xy_legendConfig',
+    isVisible: false,
+    position: Position.Top,
+  },
+  layers,
+});
+
 function sampleArgs() {
   const data: LensMultiTable = {
     type: 'lens_multitable',
     tables: {
-      first: {
-        type: 'kibana_datatable',
-        columns: [
-          {
-            id: 'a',
-            name: 'a',
-            formatHint: { id: 'number', params: { pattern: '0,0.000' } },
-          },
-          { id: 'b', name: 'b', formatHint: { id: 'number', params: { pattern: '000,0' } } },
-          { id: 'c', name: 'c', formatHint: { id: 'string' } },
-          { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
-        ],
-        rows: [
-          { a: 1, b: 2, c: 'I', d: 'Foo' },
-          { a: 1, b: 5, c: 'J', d: 'Bar' },
-        ],
-      },
+      first: createSampleDatatableWithRows([
+        { a: 1, b: 2, c: 'I', d: 'Foo' },
+        { a: 1, b: 5, c: 'J', d: 'Bar' },
+      ]),
     },
   };
 
-  const args: XYArgs = {
-    xTitle: '',
-    yTitle: '',
-    legend: {
-      type: 'lens_xy_legendConfig',
-      isVisible: false,
-      position: Position.Top,
-    },
-    layers: [
-      {
-        layerId: 'first',
-        seriesType: 'line',
-        xAccessor: 'c',
-        accessors: ['a', 'b'],
-        splitAccessor: 'd',
-        columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
-        xScaleType: 'ordinal',
-        yScaleType: 'linear',
-        isHistogram: false,
-      },
-    ],
-  };
+  const args: XYArgs = createArgsWithLayers();
 
   return { data, args };
 }
@@ -153,34 +166,205 @@ describe('xy_expression', () => {
       expect(component.find(LineSeries)).toHaveLength(1);
     });
 
-    test('it uses the full date range', () => {
-      const { data, args } = sampleArgs();
+    describe('date range', () => {
+      const timeSampleLayer: LayerArgs = {
+        layerId: 'first',
+        seriesType: 'line',
+        xAccessor: 'c',
+        accessors: ['a', 'b'],
+        splitAccessor: 'd',
+        columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+        xScaleType: 'time',
+        yScaleType: 'linear',
+        isHistogram: false,
+      };
+      const multiLayerArgs = createArgsWithLayers([
+        timeSampleLayer,
+        {
+          ...timeSampleLayer,
+          layerId: 'second',
+          seriesType: 'bar',
+          xScaleType: 'time',
+        },
+      ]);
+      test('it uses the full date range', () => {
+        const { data, args } = sampleArgs();
 
-      const component = shallow(
-        <XYChart
-          data={{
-            ...data,
-            dateRange: {
-              fromDate: new Date('2019-01-02T05:00:00.000Z'),
-              toDate: new Date('2019-01-03T05:00:00.000Z'),
-            },
-          }}
-          args={{
-            ...args,
-            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'time' }],
-          }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartTheme={{}}
-          executeTriggerActions={executeTriggerActions}
-        />
-      );
-      expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
+        const component = shallow(
+          <XYChart
+            data={{
+              ...data,
+              dateRange: {
+                fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                toDate: new Date('2019-01-03T05:00:00.000Z'),
+              },
+            }}
+            args={{
+              ...args,
+              layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'time' }],
+            }}
+            formatFactory={getFormatSpy}
+            timeZone="UTC"
+            chartTheme={{}}
+            executeTriggerActions={executeTriggerActions}
+          />
+        );
+        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
+          Object {
+            "max": 1546491600000,
+            "min": 1546405200000,
+            "minInterval": undefined,
+          }
+        `);
+      });
+
+      test('it generates correct xDomain for a layer with single value and a layer with no data (1-0) ', () => {
+        const data: LensMultiTable = {
+          type: 'lens_multitable',
+          tables: {
+            first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
+            second: createSampleDatatableWithRows([]),
+          },
+        };
+
+        const component = shallow(
+          <XYChart
+            data={{
+              ...data,
+              dateRange: {
+                fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                toDate: new Date('2019-01-03T05:00:00.000Z'),
+              },
+            }}
+            args={multiLayerArgs}
+            formatFactory={getFormatSpy}
+            timeZone="UTC"
+            chartTheme={{}}
+            executeTriggerActions={executeTriggerActions}
+          />
+        );
+
+        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
+          Object {
+            "max": 1546491600000,
+            "min": 1546405200000,
+            "minInterval": 10000,
+          }
+        `);
+      });
+
+      test('it generates correct xDomain for two layers with single value(1-1)', () => {
+        const data: LensMultiTable = {
+          type: 'lens_multitable',
+          tables: {
+            first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
+            second: createSampleDatatableWithRows([{ a: 10, b: 5, c: 'J', d: 'Bar' }]),
+          },
+        };
+        const component = shallow(
+          <XYChart
+            data={{
+              ...data,
+              dateRange: {
+                fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                toDate: new Date('2019-01-03T05:00:00.000Z'),
+              },
+            }}
+            args={multiLayerArgs}
+            formatFactory={getFormatSpy}
+            timeZone="UTC"
+            chartTheme={{}}
+            executeTriggerActions={executeTriggerActions}
+          />
+        );
+
+        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
         Object {
           "max": 1546491600000,
           "min": 1546405200000,
+          "minInterval": 10000,
         }
       `);
+      });
+      test('it generates correct xDomain for a layer with single value and layer with multiple value data (1-n)', () => {
+        const data: LensMultiTable = {
+          type: 'lens_multitable',
+          tables: {
+            first: createSampleDatatableWithRows([{ a: 1, b: 2, c: 'I', d: 'Foo' }]),
+            second: createSampleDatatableWithRows([
+              { a: 10, b: 5, c: 'J', d: 'Bar' },
+              { a: 8, b: 5, c: 'K', d: 'Buzz' },
+            ]),
+          },
+        };
+        const component = shallow(
+          <XYChart
+            data={{
+              ...data,
+              dateRange: {
+                fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                toDate: new Date('2019-01-03T05:00:00.000Z'),
+              },
+            }}
+            args={multiLayerArgs}
+            formatFactory={getFormatSpy}
+            timeZone="UTC"
+            chartTheme={{}}
+            executeTriggerActions={executeTriggerActions}
+          />
+        );
+
+        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
+          Object {
+            "max": 1546491600000,
+            "min": 1546405200000,
+            "minInterval": undefined,
+          }
+        `);
+      });
+
+      test('it generates correct xDomain for 2 layers with multiple value data (n-n)', () => {
+        const data: LensMultiTable = {
+          type: 'lens_multitable',
+          tables: {
+            first: createSampleDatatableWithRows([
+              { a: 1, b: 2, c: 'I', d: 'Foo' },
+              { a: 8, b: 5, c: 'K', d: 'Buzz' },
+              { a: 9, b: 7, c: 'L', d: 'Bar' },
+              { a: 10, b: 2, c: 'G', d: 'Bear' },
+            ]),
+            second: createSampleDatatableWithRows([
+              { a: 10, b: 5, c: 'J', d: 'Bar' },
+              { a: 8, b: 4, c: 'K', d: 'Fi' },
+              { a: 1, b: 8, c: 'O', d: 'Pi' },
+            ]),
+          },
+        };
+        const component = shallow(
+          <XYChart
+            data={{
+              ...data,
+              dateRange: {
+                fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                toDate: new Date('2019-01-03T05:00:00.000Z'),
+              },
+            }}
+            args={multiLayerArgs}
+            formatFactory={getFormatSpy}
+            timeZone="UTC"
+            chartTheme={{}}
+            executeTriggerActions={executeTriggerActions}
+          />
+        );
+
+        expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
+        Object {
+          "max": 1546491600000,
+          "min": 1546405200000,
+          "minInterval": undefined,
+        }
+      `);
+      });
     });
 
     test('it does not use date range if the x is not a time scale', () => {

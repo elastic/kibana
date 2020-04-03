@@ -12,7 +12,7 @@ import { EuiButtonIcon, EuiColorPicker, EuiFlexGroup, EuiFlexItem, EuiFormRow } 
 
 function getColorStopRow({ index, errors, stopInput, onColorChange, color, deleteButton, onAdd }) {
   const colorPickerButtons = (
-    <div className="mapColorStop__icons">
+    <div>
       {deleteButton}
       <EuiButtonIcon
         iconType="plusInCircle"

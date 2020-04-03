@@ -12,7 +12,7 @@
 
 type Capabilities = Record<string, any>;
 
-const apps = ['apm', 'siem'];
+const apps = ['apm', 'siem', 'uptime', 'infrastructure'];
 
 function hasCapability(capabilities: Capabilities, capability: string) {
   return apps.some(app => capabilities[app]?.[capability]);
