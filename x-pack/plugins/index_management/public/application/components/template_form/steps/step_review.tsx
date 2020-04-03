@@ -172,7 +172,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
   );
 
   const RequestTab = () => {
-    const includeTypeName = doMappingsHaveType(template.mappings);
+    const includeTypeName = doMappingsHaveType(template!.template.mappings);
     const endpoint = `PUT _template/${name || '<templateName>'}${
       includeTypeName ? '?include_type_name' : ''
     }`;
