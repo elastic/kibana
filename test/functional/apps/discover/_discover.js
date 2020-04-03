@@ -30,6 +30,23 @@ export default function({ getService, getPageObjects }) {
     defaultIndex: 'logstash-*',
   };
 
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('discover test visualize', function describeIndexVisualizeTests() {
+    before(async function() {
+      await esArchiver.load('discover');
+      // and load a set of makelogs data
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.uiSettings.replace(defaultSettings);
+    });
+
+    it(`shows visualize button`, async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.clickFieldListItem('bytes');
+      await PageObjects.discover.expectFieldListItemVisualize('bytes');
+    });
+  });
+
   describe('discover test', function describeIndexTests() {
     before(async function() {
       log.debug('load kibana index with default index pattern');
