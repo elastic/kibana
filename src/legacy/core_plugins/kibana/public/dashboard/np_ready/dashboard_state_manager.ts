@@ -163,9 +163,6 @@ export class DashboardStateManager {
       this.changeListeners.forEach(listener => listener({ dirty: this.isDirty }));
     });
 
-    // make sure url ('_a') matches initial state
-    this.kbnUrlStateStorage.set(this.STATE_STORAGE_KEY, initialState, { replace: true });
-
     // setup state syncing utils. state container will be synced with url into `this.STATE_STORAGE_KEY` query param
     this.stateSyncRef = syncState<DashboardAppState>({
       storageKey: this.STATE_STORAGE_KEY,
@@ -200,8 +197,10 @@ export class DashboardStateManager {
       },
       stateStorage: this.kbnUrlStateStorage,
     });
+  }
 
-    // actually start syncing state with container
+  public startStateSyncing() {
+    this.saveState({ replace: true });
     this.stateSyncRef.start();
   }
 
@@ -591,7 +590,7 @@ export class DashboardStateManager {
    */
   public applyFilters(query: Query, filters: Filter[]) {
     this.savedDashboard.searchSource.setField('query', query);
-    this.savedDashboard.searchSource.setField('filter', filters);
+    this.savedDashboard.searchSource.setField('filter', FilterUtils.ensureUnpinned(filters));
     this.stateContainer.transitions.set('query', query);
   }
 

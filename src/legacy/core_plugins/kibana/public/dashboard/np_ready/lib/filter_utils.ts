@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { Filter } from '../../../../../../../plugins/data/public';
+import { esFilters, Filter, FilterManager } from '../../../../../../../plugins/data/public';
 
 /**
  * @typedef {Object} QueryFilter
@@ -75,5 +75,27 @@ export class FilterUtils {
       }
       return f;
     });
+  }
+
+  /**
+   * Returns new app filters array with removed filters which exist in globalFilters
+   * @param appFilters
+   * @param globalFilters
+   */
+  public static removeGlobalFromAppFilters(appFilters: Filter[], globalFilters: Filter[]) {
+    return appFilters.filter(
+      appFilter =>
+        !globalFilters.some(globalFilter => esFilters.compareFilters(globalFilter, appFilter))
+    );
+  }
+
+  /**
+   * Given array of filters, returns new array where all filters are in unnpined state
+   * @param filters
+   */
+  public static ensureUnpinned(filters: Filter[]): Filter[] {
+    const newFilters = [...filters];
+    FilterManager.setFiltersStore(newFilters, esFilters.FilterStateStore.APP_STATE, true);
+    return newFilters;
   }
 }

@@ -65,7 +65,7 @@ import { NavAction, SavedDashboardPanel } from './types';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { saveDashboard } from './lib';
+import { saveDashboard, FilterUtils } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { createDashboardEditUrl, DashboardConstants } from './dashboard_constants';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
@@ -148,14 +148,27 @@ export class DashboardAppController {
     });
 
     // sync initial app filters from state to filterManager
-    filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
+    // if there is an existing similar global filter, then leave it as global
+    filterManager.setAppFilters(
+      FilterUtils.removeGlobalFromAppFilters(
+        _.cloneDeep(dashboardStateManager.appState.filters),
+        filterManager.getGlobalFilters()
+      )
+    );
     // setup syncing of app filters between appState and filterManager
     const stopSyncingAppFilters = connectToQueryState(
       queryService,
       {
         set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
         get: () => ({ filters: dashboardStateManager.appState.filters }),
-        state$: dashboardStateManager.appState$.pipe(map(state => ({ filters: state.filters }))),
+        state$: dashboardStateManager.appState$.pipe(
+          map(state => ({
+            filters: FilterUtils.removeGlobalFromAppFilters(
+              state.filters,
+              filterManager.getGlobalFilters()
+            ),
+          }))
+        ),
       },
       {
         filters: esFilters.FilterStateStore.APP_STATE,
@@ -175,13 +188,16 @@ export class DashboardAppController {
     }
 
     // starts syncing `_g` portion of url with query services
-    // note: dashboard_state_manager.ts syncs `_a` portion of url
     // it is important to start this syncing after `dashboardStateManager.syncTimefilterWithDashboard(timefilter);` above is run,
-    // otherwise it will case redundant browser history record
+    // otherwise it will case redundant browser history records
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       queryService,
       kbnUrlStateStorage
     );
+
+    // starts syncing `_a` portion of url
+    dashboardStateManager.startStateSyncing();
+
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const getShouldShowEditHelp = () =>

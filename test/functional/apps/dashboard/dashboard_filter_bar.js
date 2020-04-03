@@ -129,6 +129,30 @@ export default function({ getService, getPageObjects }) {
 
         await pieChart.expectPieSliceCount(1);
       });
+
+      it("saving with pinned filter doesn't unpinns them", async () => {
+        const filterKey = 'bytes';
+        await filterBar.toggleFilterPinned(filterKey);
+        await PageObjects.dashboard.switchToEditMode();
+        await PageObjects.dashboard.saveDashboard('with filters');
+        expect(await filterBar.isFilterPinned(filterKey)).to.be(true);
+      });
+
+      it("navigating to the dashboard with global filters doesn't unpinns them", async () => {
+        await PageObjects.dashboard.preserveCrossAppState();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('with filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await filterBar.isFilterPinned('bytes')).to.be(true);
+      });
+
+      it('filter which was saved when it was in pinned state is actually unpinned', async () => {
+        await filterBar.removeFilter('bytes');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('with filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await filterBar.isFilterPinned('bytes')).to.be(false);
+      });
     });
 
     describe('saved search filtering', function() {
