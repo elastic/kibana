@@ -91,12 +91,12 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     resetRequestMessages();
     setIsModalButtonDisabled(true);
 
-    const analyticsJobConfig = isAdvancedEditorEnabled
+    const analyticsJobConfig = (isAdvancedEditorEnabled
       ? jobConfig
-      : getJobConfigFromFormState(form);
+      : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
 
     if (isAdvancedEditorEnabled) {
-      destinationIndex = analyticsJobConfig.dest?.index as string;
+      destinationIndex = analyticsJobConfig.dest.index;
     }
 
     try {
