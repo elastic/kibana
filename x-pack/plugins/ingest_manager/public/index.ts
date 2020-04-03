@@ -6,7 +6,7 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { IngestManagerPlugin } from './plugin';
 
-export { IngestManagerSetup } from './plugin';
+export { IngestManagerStart } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

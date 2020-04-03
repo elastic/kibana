@@ -22,10 +22,12 @@ import { IngestManagerConfigType, CreateFleetSetupResponse } from '../common/typ
 
 export { IngestManagerConfigType } from '../common/types';
 
+export type IngestManagerSetup = void;
+
 /**
- * Describes public IngestManager plugin contract returned at the `setup` stage.
+ * Describes public IngestManager plugin contract returned at the `start` stage.
  */
-export interface IngestManagerSetup {
+export interface IngestManagerStart {
   /**
    * Setup initializes the Ingest Manager
    */
@@ -35,8 +37,6 @@ export interface IngestManagerSetup {
    */
   isInitialized: () => Promise<SendRequestResponse<CreateFleetSetupResponse, Error>>;
 }
-
-export type IngestManagerStart = void;
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -56,10 +56,7 @@ export class IngestManagerPlugin
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
   }
 
-  public async setup(
-    core: CoreSetup,
-    deps: IngestManagerSetupDeps
-  ): Promise<RecursiveReadonly<IngestManagerSetup>> {
+  public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
     setHttpClient(core.http);
 
@@ -79,13 +76,14 @@ export class IngestManagerPlugin
         return renderApp(coreStart, params, deps, startDeps, config);
       },
     });
+  }
+
+  public async start(core: CoreStart): Promise<RecursiveReadonly<IngestManagerStart>> {
     return deepFreeze({
       setup: sendSetup,
       isInitialized: sendIsInitialized,
     });
   }
-
-  public start(core: CoreStart) {}
 
   public stop() {}
 }

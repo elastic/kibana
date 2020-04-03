@@ -9,17 +9,17 @@ import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
-import { IngestManagerSetup } from '../../ingest_manager/public';
+import { IngestManagerStart } from '../../ingest_manager/public';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
 export interface EndpointPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   data: DataPublicPluginStart;
-  ingestManager: IngestManagerSetup;
 }
 export interface EndpointPluginStartDependencies {
   data: DataPublicPluginStart;
+  ingestManager: IngestManagerStart;
 }
 
 /**
@@ -54,7 +54,7 @@ export class EndpointPlugin
         const [coreStart, depsStart] = await core.getStartServices();
 
         const { renderApp } = await import('./applications/endpoint');
-        return renderApp(coreStart, depsStart, plugins.ingestManager, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
 
