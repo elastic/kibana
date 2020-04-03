@@ -30,17 +30,15 @@
 ### Creating a Map embeddable from state
 ```
 const factory = new MapEmbeddableFactory();
-const state = {
-  layerList: [],  // where layerList is same as saved object layerListJSON property (unstringified)
-  title: 'my map',
-}
 const input = {
   hideFilterActions: true,
   isLayerTOCOpen: false,
   openTOCDetails: ['tfi3f', 'edh66'],
   mapCenter: { lat: 0.0, lon: 0.0, zoom: 7 }
 }
-const mapEmbeddable = await factory.createFromState(state, input, parent);
+const mapEmbeddable = await factory.create(input, parent);
+// where layerList is same as saved object layerListJSON property (unstringified))
+mapEmbeddable.setLayerList([]);
 ```
 
 #### Customize tooltip
@@ -62,7 +60,9 @@ const renderTooltipContent = ({ addFilters, closeTooltip, features, isLocked, lo
   return <div>Custom tooltip content</div>;
 }
 
-const mapEmbeddable = await factory.createFromState(state, input, parent, renderTooltipContent);
+const mapEmbeddable = await factory.create(input, parent)
+mapEmbeddable.setLayerList(layerList);
+mapEmbeddable.setRenderTooltipContent(renderTooltipContent);
 ```
 
 
@@ -80,7 +80,10 @@ const eventHandlers = {
   },
 }
 
-const mapEmbeddable = await factory.createFromState(state, input, parent, renderTooltipContent, eventHandlers);
+const mapEmbeddable = await factory.create(input, parent);
+mapEmbeddable.setLayerList(layerList);
+mapEmbeddable.setRenderTooltipContent(renderTooltipContent);
+mapEmbeddable.setEventHandlers(eventHandlers);
 ```
 
 
@@ -90,55 +93,13 @@ Geojson sources will not update unless you modify `__featureCollection` property
 
 ```
 const factory = new MapEmbeddableFactory();
-const state = {
-  layerList: [
-    {
-      'id': 'gaxya',
-      'label': 'My geospatial data',
-      'minZoom': 0,
-      'maxZoom': 24,
-      'alpha': 1,
-      'sourceDescriptor': {
-        'id': 'b7486',
-        'type': 'GEOJSON_FILE',
-        '__featureCollection': {
-          "type": "FeatureCollection",
-          "features": [
-            {
-              "type": "Feature",
-              "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                  [
-                    [0, 0], [10, 10], [10, 0], [0, 0]
-                  ]
-                ]
-              },
-              "properties": {
-                "name": "null island",
-                "another_prop": "something else interesting"
-              }
-            }
-          ]
-        }
-      },
-      'visible': true,
-      'style': {
-        'type': 'VECTOR',
-        'properties': {}
-      },
-      'type': 'VECTOR'
-    }
-  ],
-  title: 'my map',
-}
 const input = {
   hideFilterActions: true,
   isLayerTOCOpen: false,
   openTOCDetails: ['tfi3f', 'edh66'],
   mapCenter: { lat: 0.0, lon: 0.0, zoom: 7 }
 }
-const mapEmbeddable = await factory.createFromState(state, input, parent);
+const mapEmbeddable = await factory.create(input, parent);
 
 mapEmbeddable.setLayerList([
   {

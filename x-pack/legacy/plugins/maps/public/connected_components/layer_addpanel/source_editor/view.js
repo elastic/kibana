@@ -5,28 +5,20 @@
  */
 
 import React, { Fragment } from 'react';
-import { ALL_SOURCES } from '../../../layers/sources/all_sources';
 import { EuiSpacer, EuiPanel, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SourceEditor = ({
   clearSource,
-  sourceType,
+  layerWizard,
   isIndexingTriggered,
   inspectorAdapters,
   previewLayer,
 }) => {
-  const editorProperties = {
-    onPreviewSource: previewLayer,
-    inspectorAdapters,
-  };
-  const Source = ALL_SOURCES.find(Source => {
-    return Source.type === sourceType;
-  });
-  if (!Source) {
-    throw new Error(`Unexpected source type: ${sourceType}`);
+  if (!layerWizard) {
+    return null;
   }
-  const editor = Source.renderEditor(editorProperties);
+
   return (
     <Fragment>
       {isIndexingTriggered ? null : (
@@ -40,7 +32,9 @@ export const SourceEditor = ({
           <EuiSpacer size="s" />
         </Fragment>
       )}
-      <EuiPanel>{editor}</EuiPanel>
+      <EuiPanel>
+        {layerWizard.renderWizard({ onPreviewSource: previewLayer, inspectorAdapters })}
+      </EuiPanel>
     </Fragment>
   );
 };
