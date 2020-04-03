@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
-import { componentHelpers } from './helpers';
+import { componentHelpers, MappingsEditorTestBed, nextTick } from './helpers';
 
 const { setup } = componentHelpers.mappingsEditor;
 const mockOnUpdate = () => undefined;
@@ -50,6 +51,52 @@ describe('<MappingsEditor />', () => {
       expect(exists('mappingsEditor')).toBe(true);
       expect(exists('mappingTypesDetectedCallout')).toBe(false);
       expect(exists('documentFields')).toBe(true);
+    });
+  });
+
+  describe('dynamic templates', () => {
+    const defaultMappings = {
+      dynamic_templates: [{ before: 'foo' }],
+    };
+    let testBed: MappingsEditorTestBed;
+
+    beforeEach(async () => {
+      testBed = await setup({ defaultValue: defaultMappings, onUpdate() {} });
+    });
+
+    test('should keep the changes made when switching tab', async () => {
+      const {
+        actions: { selectTab, updateJsonEditor, getJsonEditorValue },
+        component,
+      } = testBed;
+
+      const updatedValueTemplates = [{ after: 'bar' }];
+
+      await act(async () => {
+        await selectTab('templates');
+      });
+
+      let templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
+
+      // Update the dynamic templates editor value
+      await act(async () => {
+        await updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
+        await nextTick();
+        component.update();
+      });
+
+      templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual(updatedValueTemplates);
+
+      // Switch to advanced settings tab and then come back
+      await act(async () => {
+        await selectTab('advanced');
+        await selectTab('templates');
+      });
+
+      templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual(updatedValueTemplates);
     });
   });
 });
