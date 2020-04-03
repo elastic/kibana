@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import pRetry from 'p-retry';
 import { IClusterClient, Logger } from 'src/core/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
 export type Mappings =
   | {
-      dynamic?: boolean;
+      dynamic?: boolean | 'strict';
       properties: Record<string, Mappings>;
+      dynamic_templates?: any[];
     }
   | {
       type: string;
@@ -18,6 +19,7 @@ export type Mappings =
       scaling_factor?: number;
       ignore_malformed?: boolean;
       coerce?: boolean;
+      fields?: Record<string, Mappings>;
     };
 
 export async function createOrUpdateIndex({
@@ -32,27 +34,39 @@ export async function createOrUpdateIndex({
   logger: Logger;
 }) {
   try {
-    const { callAsInternalUser } = esClient;
-    const indexExists = await callAsInternalUser('indices.exists', { index });
-    const result = indexExists
-      ? await updateExistingIndex({
-          index,
-          callAsInternalUser,
-          mappings
-        })
-      : await createNewIndex({
-          index,
-          callAsInternalUser,
-          mappings
-        });
+    /*
+     * In some cases we could be trying to create an index before ES is ready.
+     * When this happens, we retry creating the index with exponential backoff.
+     * We use retry's default formula, meaning that the first retry happens after 2s,
+     * the 5th after 32s, and the final attempt after around 17m. If the final attempt fails,
+     * the error is logged to the console.
+     * See https://github.com/sindresorhus/p-retry and https://github.com/tim-kos/node-retry.
+     */
+    await pRetry(async () => {
+      const { callAsInternalUser } = esClient;
+      const indexExists = await callAsInternalUser('indices.exists', { index });
+      const result = indexExists
+        ? await updateExistingIndex({
+            index,
+            callAsInternalUser,
+            mappings
+          })
+        : await createNewIndex({
+            index,
+            callAsInternalUser,
+            mappings
+          });
 
-    if (!result.acknowledged) {
-      const resultError =
-        result && result.error && JSON.stringify(result.error);
-      throw new Error(resultError);
-    }
+      if (!result.acknowledged) {
+        const resultError =
+          result && result.error && JSON.stringify(result.error);
+        throw new Error(resultError);
+      }
+    });
   } catch (e) {
-    logger.error(`Could not create APM index: '${index}'. Error: ${e.message}`);
+    logger.error(
+      `Could not create APM index: '${index}'. Error: ${e.message}.`
+    );
   }
 }
 

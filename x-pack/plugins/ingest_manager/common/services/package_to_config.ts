@@ -88,10 +88,14 @@ export const packageToConfigDatasource = (
   packageInfo: PackageInfo,
   configId: string,
   outputId: string,
-  datasourceName?: string
+  datasourceName?: string,
+  namespace?: string,
+  description?: string
 ): NewDatasource => {
   return {
     name: datasourceName || `${packageInfo.name}-1`,
+    namespace,
+    description,
     package: {
       name: packageInfo.name,
       title: packageInfo.title,

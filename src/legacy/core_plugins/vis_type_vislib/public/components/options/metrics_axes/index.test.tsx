@@ -94,7 +94,7 @@ describe('MetricsAxisOptions component', () => {
           type: ChartTypes.AREA,
           schemas: { metrics: [{ name: 'metric' }] },
         },
-        setVisType: jest.fn(),
+        setState: jest.fn(),
       },
       stateParams: {
         valueAxes: [axis],
@@ -145,7 +145,7 @@ describe('MetricsAxisOptions component', () => {
         },
       });
 
-      expect(defaultProps.vis.setVisType).toHaveBeenLastCalledWith(ChartTypes.LINE);
+      expect(defaultProps.vis.setState).toHaveBeenLastCalledWith({ type: ChartTypes.LINE });
     });
 
     it('should set histogram visType when multiple seriesParam', () => {
@@ -159,7 +159,7 @@ describe('MetricsAxisOptions component', () => {
         },
       });
 
-      expect(defaultProps.vis.setVisType).toHaveBeenLastCalledWith(ChartTypes.HISTOGRAM);
+      expect(defaultProps.vis.setState).toHaveBeenLastCalledWith({ type: ChartTypes.HISTOGRAM });
     });
   });
 

@@ -29,7 +29,7 @@ import { Ping, PingResults } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { pingsQuery } from '../../../queries';
-import { LocationName } from './../location_name';
+import { LocationName } from './location_name';
 import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
 
@@ -41,7 +41,9 @@ interface PingListProps {
   onSelectedStatusChange: (status: string | undefined) => void;
   onSelectedLocationChange: (location: any) => void;
   onPageCountChange: (itemCount: number) => void;
+  onPageIndexChange: (index: number) => void;
   pageSize: number;
+  pageIndex: number;
   selectedOption: string;
   selectedLocation: string | undefined;
 }
@@ -78,8 +80,10 @@ export const PingListComponent = ({
   data,
   loading,
   onPageCountChange,
+  onPageIndexChange,
   onSelectedLocationChange,
   onSelectedStatusChange,
+  pageIndex,
   pageSize,
   selectedOption,
   selectedLocation,
@@ -232,15 +236,11 @@ export const PingListComponent = ({
   ];
 
   const pagination: Pagination = {
-    initialPageSize: 20,
-    pageIndex: 0,
+    initialPageSize: 25,
+    pageIndex,
     pageSize,
-    pageSizeOptions: [5, 10, 20, 50, 100],
-    /**
-     * we're not currently supporting pagination in this component
-     * so the first page is the only page
-     */
-    totalItemCount: pageSize,
+    pageSizeOptions: [10, 25, 50, 100],
+    totalItemCount: data?.allPings?.total ?? pageSize,
   };
 
   return (
@@ -323,9 +323,10 @@ export const PingListComponent = ({
           itemId="id"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           pagination={pagination}
-          onChange={(criteria: CriteriaWithPagination<Ping>) =>
-            onPageCountChange(criteria.page!.size)
-          }
+          onChange={(criteria: CriteriaWithPagination<Ping>) => {
+            onPageCountChange(criteria.page!.size);
+            onPageIndexChange(criteria.page!.index);
+          }}
         />
       </EuiPanel>
     </Fragment>

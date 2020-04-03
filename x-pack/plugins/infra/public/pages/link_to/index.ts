@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LinkToPage } from './link_to';
+export { LinkToLogsPage } from './link_to_logs';
+export { LinkToMetricsPage } from './link_to_metrics';
 export { getNodeLogsUrl, RedirectToNodeLogs } from './redirect_to_node_logs';
 export { getNodeDetailUrl, RedirectToNodeDetail } from './redirect_to_node_detail';

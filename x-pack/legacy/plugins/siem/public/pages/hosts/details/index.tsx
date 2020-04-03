@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
@@ -15,7 +15,7 @@ import { LastEventTime } from '../../../components/last_event_time';
 import { AnomalyTableProvider } from '../../../components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../components/ml/criteria/host_to_criteria';
 import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../../../components/ml/permissions/ml_capabilities_provider';
+import { useMlCapabilities } from '../../../components/ml_popover/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { SiemNavigation } from '../../../components/navigation';
 import { KpiHostsComponent } from '../../../components/page/hosts';
@@ -62,7 +62,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
     useEffect(() => {
       setHostDetailsTablesActivePageToZero();
     }, [setHostDetailsTablesActivePageToZero, detailName]);
-    const capabilities = useContext(MlCapabilitiesContext);
+    const capabilities = useMlCapabilities();
     const kibana = useKibana();
     const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
       detailName,

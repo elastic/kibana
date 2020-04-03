@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { parse } from 'query-string';
 
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
@@ -93,9 +94,8 @@ export function initDashboardApp(app, deps) {
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
-        controller($injector, $location, $scope, kbnUrlStateStorage) {
+        controller($scope, kbnUrlStateStorage, history) {
           const service = deps.savedDashboards;
-          const kbnUrl = $injector.get('kbnUrl');
           const dashboardConfig = deps.dashboardConfig;
 
           // syncs `_g` portion of url with query services
@@ -106,13 +106,13 @@ export function initDashboardApp(app, deps) {
 
           $scope.listingLimit = deps.uiSettings.get('savedObjects:listingLimit');
           $scope.create = () => {
-            kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
+            history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
           $scope.find = search => {
             return service.find(search, $scope.listingLimit);
           };
           $scope.editItem = ({ id }) => {
-            kbnUrl.redirect(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
+            history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
           };
           $scope.getViewUrl = ({ id }) => {
             return deps.addBasePath(`#${createDashboardEditUrl(id)}`);
@@ -121,7 +121,7 @@ export function initDashboardApp(app, deps) {
             return service.delete(dashboards.map(d => d.id));
           };
           $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
-          $scope.initialFilter = $location.search().filter || EMPTY_FILTER;
+          $scope.initialFilter = parse(history.location.search).filter || EMPTY_FILTER;
           deps.chrome.setBreadcrumbs([
             {
               text: i18n.translate('kbn.dashboard.dashboardBreadcrumbsTitle', {
@@ -191,7 +191,7 @@ export function initDashboardApp(app, deps) {
         template: dashboardTemplate,
         controller: createNewDashboardCtrl,
         resolve: {
-          dash: function($route, kbnUrl, history) {
+          dash: function($route, history) {
             const id = $route.current.params.id;
 
             return ensureDefaultIndexPattern(deps.core, deps.data, history)
@@ -208,7 +208,7 @@ export function initDashboardApp(app, deps) {
                 // A corrupt dashboard was detected (e.g. with invalid JSON properties)
                 if (error instanceof InvalidJSONProperty) {
                   deps.core.notifications.toasts.addDanger(error.message);
-                  kbnUrl.redirect(DashboardConstants.LANDING_PAGE_PATH);
+                  history.push(DashboardConstants.LANDING_PAGE_PATH);
                   return;
                 }
 

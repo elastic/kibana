@@ -20,12 +20,12 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { Schema } from '../schemas';
+import { ISchemas, Schemas } from '../schemas';
+import { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -47,6 +47,7 @@ jest.mock('./agg_add', () => ({
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggGroupProps;
   let aggs: IAggConfigs;
+  let schemas: ISchemas;
   let setTouched: jest.Mock;
   let setValidity: jest.Mock;
   let reorderAggs: jest.Mock;
@@ -55,6 +56,18 @@ describe('DefaultEditorAgg component', () => {
     setTouched = jest.fn();
     setValidity = jest.fn();
     reorderAggs = jest.fn();
+    schemas = new Schemas([
+      {
+        name: 'metrics',
+        group: 'metrics',
+        max: 1,
+      },
+      {
+        name: 'buckets',
+        group: 'buckets',
+        max: 1,
+      },
+    ]);
 
     aggs = {
       aggs: [
@@ -93,20 +106,9 @@ describe('DefaultEditorAgg component', () => {
       metricAggs: [],
       groupName: 'metrics',
       state: {
-        aggs,
-      } as VisState,
-      schemas: [
-        {
-          name: 'metrics',
-          group: 'metrics',
-          max: 1,
-        } as Schema,
-        {
-          name: 'buckets',
-          group: 'buckets',
-          max: 1,
-        } as Schema,
-      ],
+        data: { aggs },
+      } as EditorVisState,
+      schemas: schemas.metrics,
       setTouched,
       setValidity,
       reorderAggs,
@@ -133,6 +135,7 @@ describe('DefaultEditorAgg component', () => {
 
   it('should last bucket has truthy isLastBucket prop', () => {
     defaultProps.groupName = 'buckets';
+    defaultProps.schemas = schemas.buckets;
     const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
     const lastAgg = comp.find(DefaultEditorAgg).last();
 
@@ -147,13 +150,15 @@ describe('DefaultEditorAgg component', () => {
     });
 
     expect(reorderAggs).toHaveBeenCalledWith(
-      defaultProps.state.aggs.aggs[0],
-      defaultProps.state.aggs.aggs[1]
+      defaultProps.state.data.aggs!.aggs[0],
+      defaultProps.state.data.aggs!.aggs[1]
     );
   });
 
   it('should show add button when schemas count is less than max', () => {
     defaultProps.groupName = 'buckets';
+    defaultProps.schemas = schemas.buckets;
+    defaultProps.schemas[0].max = 2;
     const comp = shallow(<DefaultEditorAggGroup {...defaultProps} />);
 
     expect(comp.find(DefaultEditorAggAdd).exists()).toBeTruthy();

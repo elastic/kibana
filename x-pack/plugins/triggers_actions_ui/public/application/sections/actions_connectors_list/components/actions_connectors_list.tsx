@@ -16,14 +16,16 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
-import { loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
+import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
-import { DeleteConnectorsModal } from '../../../components/delete_connectors_modal';
+import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
@@ -114,7 +116,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionsMessage',
           {
-            defaultMessage: 'Unable to load actions',
+            defaultMessage: 'Unable to load connectors',
           }
         ),
       });
@@ -213,11 +215,11 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           description: canDelete
             ? i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
-                { defaultMessage: 'Delete this action' }
+                { defaultMessage: 'Delete this connector' }
               )
             : i18n.translate(
                 'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
-                { defaultMessage: 'Unable to delete actions' }
+                { defaultMessage: 'Unable to delete connectors' }
               ),
           type: 'icon',
           icon: 'trash',
@@ -290,13 +292,13 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                       ? undefined
                       : i18n.translate(
                           'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
-                          { defaultMessage: 'Unable to delete actions' }
+                          { defaultMessage: 'Unable to delete connectors' }
                         )
                   }
                 >
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
-                    defaultMessage="Delete ({count})"
+                    defaultMessage="Delete {count}"
                     values={{
                       count: selectedItems.length,
                     }}
@@ -378,33 +380,45 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   return (
     <section data-test-subj="actionsList">
-      <DeleteConnectorsModal
-        callback={(deleted?: string[]) => {
-          if (deleted) {
-            if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
-              const updatedActions = actions.filter(
-                action => action.id && !connectorsToDelete.includes(action.id)
-              );
-              setActions(updatedActions);
-              setSelectedItems([]);
-            } else {
-              toastNotifications.addDanger({
-                title: i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.failedToDeleteActionsMessage',
-                  { defaultMessage: 'Failed to delete action(s)' }
-                ),
-              });
-              // Refresh the actions from the server, some actions may have beend deleted
-              loadActions();
-            }
+      <DeleteModalConfirmation
+        onDeleted={(deleted: string[]) => {
+          if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
+            const updatedActions = actions.filter(
+              action => action.id && !connectorsToDelete.includes(action.id)
+            );
+            setActions(updatedActions);
+            setSelectedItems([]);
           }
           setConnectorsToDelete([]);
         }}
-        connectorsToDelete={connectorsToDelete}
+        onErrors={async () => {
+          // Refresh the actions from the server, some actions may have beend deleted
+          await loadActions();
+          setConnectorsToDelete([]);
+        }}
+        onCancel={async () => {
+          setConnectorsToDelete([]);
+        }}
+        apiDeleteCall={deleteActions}
+        idsToDelete={connectorsToDelete}
+        singleTitle={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.singleTitle',
+          { defaultMessage: 'connector' }
+        )}
+        multipleTitle={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle',
+          { defaultMessage: 'connectors' }
+        )}
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && <EuiLoadingSpinner size="xl" />}
+      {(isLoadingActions || isLoadingActionTypes) && (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {data.length !== 0 && table}
       {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && emptyPrompt}
       {data.length === 0 && !canSave && noPermissionPrompt}

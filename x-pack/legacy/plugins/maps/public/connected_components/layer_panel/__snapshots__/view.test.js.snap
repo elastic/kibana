@@ -61,6 +61,7 @@ exports[`LayerPanel is rendered 1`] = `
         className="mapLayerPanel__sourceDetails"
       >
         <EuiAccordion
+          arrowDisplay="left"
           buttonContent="Source details"
           id="accordion1"
           initialIsOpen={false}

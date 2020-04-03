@@ -23,6 +23,7 @@
 |  Function | Description |
 |  --- | --- |
 |  [getDefaultSearchParams(config)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
+|  [getTotalLoaded({ total, failed, successful })](./kibana-plugin-plugins-data-server.gettotalloaded.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
@@ -60,6 +61,7 @@
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
+|  [search](./kibana-plugin-plugins-data-server.search.md) |  |
 
 ## Type Aliases
 
@@ -69,5 +71,6 @@
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [ISearch](./kibana-plugin-plugins-data-server.isearch.md) |  |
 |  [ISearchCancel](./kibana-plugin-plugins-data-server.isearchcancel.md) |  |
+|  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [TSearchStrategyProvider](./kibana-plugin-plugins-data-server.tsearchstrategyprovider.md) | Search strategy provider creates an instance of a search strategy with the request handler context bound to it. This way every search strategy can use whatever information they require from the request context. |
 

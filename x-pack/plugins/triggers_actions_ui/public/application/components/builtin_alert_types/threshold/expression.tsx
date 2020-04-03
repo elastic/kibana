@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
-  EuiFormLabel,
   EuiExpression,
   EuiPopover,
   EuiPopoverTitle,
@@ -23,6 +22,8 @@ import {
   EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
+import { EuiSteps } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import {
   firstFieldOption,
   getIndexPatterns,
@@ -144,6 +145,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     }
   };
 
+  const closeIndexPopover = () => {
+    setIndexPopoverOpen(false);
+    if (timeField === undefined) {
+      setAlertParams('timeField', '');
+    }
+  };
+
   useEffect(() => {
     const indexPatternsFunction = async () => {
       setIndexPatterns(await getIndexPatterns());
@@ -213,6 +221,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                     timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
                     groupBy: DEFAULT_VALUES.GROUP_BY,
                     threshold: DEFAULT_VALUES.THRESHOLD,
+                    timeField: '',
                   });
                   return;
                 }
@@ -271,6 +280,160 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     </Fragment>
   );
 
+  const firstSetOfSteps = [
+    {
+      title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.selectIndex', {
+        defaultMessage: 'Select an index.',
+      }),
+      children: (
+        <>
+          <EuiFlexGroup wrap>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                id="indexPopover"
+                button={
+                  <EuiExpression
+                    data-test-subj="selectIndexExpression"
+                    description={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
+                      {
+                        defaultMessage: 'index',
+                      }
+                    )}
+                    value={index && index.length > 0 ? index.join(' ') : firstFieldOption.text}
+                    isActive={indexPopoverOpen}
+                    onClick={() => {
+                      setIndexPopoverOpen(true);
+                    }}
+                    color={index && index.length > 0 && timeField !== '' ? 'secondary' : 'danger'}
+                  />
+                }
+                isOpen={indexPopoverOpen}
+                closePopover={closeIndexPopover}
+                ownFocus
+                withTitle
+                anchorPosition="downLeft"
+                zIndex={8000}
+              >
+                <div style={{ width: '450px' }}>
+                  <EuiPopoverTitle>
+                    <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexItem>
+                        {i18n.translate(
+                          'xpack.triggersActionsUI.sections.alertAdd.threshold.indexButtonLabel',
+                          {
+                            defaultMessage: 'index',
+                          }
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="cross"
+                          color="danger"
+                          aria-label={i18n.translate(
+                            'xpack.triggersActionsUI.sections.alertAdd.threshold.closeIndexPopoverLabel',
+                            {
+                              defaultMessage: 'Close',
+                            }
+                          )}
+                          onClick={closeIndexPopover}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPopoverTitle>
+
+                  {indexPopover}
+                </div>
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <WhenExpression
+                aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+                onChangeSelectedAggType={(selectedAggType: string) =>
+                  setAlertParams('aggType', selectedAggType)
+                }
+              />
+            </EuiFlexItem>
+            {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
+              <EuiFlexItem grow={false}>
+                <OfExpression
+                  aggField={aggField}
+                  fields={esFields}
+                  aggType={aggType}
+                  errors={errors}
+                  onChangeSelectedAggField={(selectedAggField?: string) =>
+                    setAlertParams('aggField', selectedAggField)
+                  }
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <GroupByExpression
+                groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
+                termField={termField}
+                termSize={termSize}
+                errors={errors}
+                fields={esFields}
+                onChangeSelectedGroupBy={selectedGroupBy =>
+                  setAlertParams('groupBy', selectedGroupBy)
+                }
+                onChangeSelectedTermField={selectedTermField =>
+                  setAlertParams('termField', selectedTermField)
+                }
+                onChangeSelectedTermSize={selectedTermSize =>
+                  setAlertParams('termSize', selectedTermSize)
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.conditionPrompt', {
+        defaultMessage: 'Define the condition.',
+      }),
+      children: (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <ThresholdExpression
+                thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+                threshold={threshold}
+                errors={errors}
+                popupPosition={'upLeft'}
+                onChangeSelectedThreshold={selectedThresholds =>
+                  setAlertParams('threshold', selectedThresholds)
+                }
+                onChangeSelectedThresholdComparator={selectedThresholdComparator =>
+                  setAlertParams('thresholdComparator', selectedThresholdComparator)
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ForLastExpression
+                popupPosition={'upLeft'}
+                timeWindowSize={timeWindowSize}
+                timeWindowUnit={timeWindowUnit}
+                errors={errors}
+                onChangeWindowSize={(selectedWindowSize: any) =>
+                  setAlertParams('timeWindowSize', selectedWindowSize)
+                }
+                onChangeWindowUnit={(selectedWindowUnit: any) =>
+                  setAlertParams('timeWindowUnit', selectedWindowUnit)
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ),
+    },
+  ];
+
   return (
     <Fragment>
       {hasExpressionErrors ? (
@@ -281,136 +444,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </Fragment>
       ) : null}
       <EuiSpacer size="l" />
-      <EuiFormLabel>
-        <FormattedMessage
-          defaultMessage="Select Index to query:"
-          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
-        />
-      </EuiFormLabel>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup wrap>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="indexPopover"
-            button={
-              <EuiExpression
-                data-test-subj="selectIndexExpression"
-                description={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
-                  {
-                    defaultMessage: 'index',
-                  }
-                )}
-                value={index ? index.join(' ') : firstFieldOption.text}
-                isActive={indexPopoverOpen}
-                onClick={() => {
-                  setIndexPopoverOpen(true);
-                }}
-                color={index ? 'secondary' : 'danger'}
-              />
-            }
-            isOpen={indexPopoverOpen}
-            closePopover={() => {
-              setIndexPopoverOpen(false);
-            }}
-            ownFocus
-            withTitle
-            anchorPosition="downLeft"
-            zIndex={8000}
-          >
-            <div style={{ width: '450px' }}>
-              <EuiPopoverTitle>
-                {i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.indexButtonLabel',
-                  {
-                    defaultMessage: 'index',
-                  }
-                )}
-              </EuiPopoverTitle>
-              {indexPopover}
-            </div>
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <WhenExpression
-            aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-            onChangeSelectedAggType={(selectedAggType: string) =>
-              setAlertParams('aggType', selectedAggType)
-            }
-          />
-        </EuiFlexItem>
-        {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
-          <EuiFlexItem grow={false}>
-            <OfExpression
-              aggField={aggField}
-              fields={esFields}
-              aggType={aggType}
-              errors={errors}
-              onChangeSelectedAggField={(selectedAggField?: string) =>
-                setAlertParams('aggField', selectedAggField)
-              }
-            />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <GroupByExpression
-            groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
-            termField={termField}
-            termSize={termSize}
-            errors={errors}
-            fields={esFields}
-            onChangeSelectedGroupBy={selectedGroupBy => setAlertParams('groupBy', selectedGroupBy)}
-            onChangeSelectedTermField={selectedTermField =>
-              setAlertParams('termField', selectedTermField)
-            }
-            onChangeSelectedTermSize={selectedTermSize =>
-              setAlertParams('termSize', selectedTermSize)
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xl" />
-      <EuiFormLabel>
-        <FormattedMessage
-          defaultMessage="Define the alert condition:"
-          id="xpack.triggersActionsUI.sections.alertAdd.conditionPrompt"
-        />
-      </EuiFormLabel>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <ThresholdExpression
-            thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
-            threshold={threshold}
-            errors={errors}
-            popupPosition={'upLeft'}
-            onChangeSelectedThreshold={selectedThresholds =>
-              setAlertParams('threshold', selectedThresholds)
-            }
-            onChangeSelectedThresholdComparator={selectedThresholdComparator =>
-              setAlertParams('thresholdComparator', selectedThresholdComparator)
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ForLastExpression
-            popupPosition={'upLeft'}
-            timeWindowSize={timeWindowSize}
-            timeWindowUnit={timeWindowUnit}
-            errors={errors}
-            onChangeWindowSize={(selectedWindowSize: any) =>
-              setAlertParams('timeWindowSize', selectedWindowSize)
-            }
-            onChangeWindowUnit={(selectedWindowUnit: any) =>
-              setAlertParams('timeWindowUnit', selectedWindowUnit)
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSteps steps={firstSetOfSteps} />
       <EuiSpacer size="l" />
       <div className="actAlertVisualization__chart">
         {canShowVizualization ? (
@@ -422,7 +456,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                 <EuiText color="subdued">
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.alertAdd.previewAlertVisualizationDescription"
-                    defaultMessage="Complete the expression above to generate a preview"
+                    defaultMessage="Complete the expression to generate a preview."
                   />
                 </EuiText>
               }

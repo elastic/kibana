@@ -11,6 +11,7 @@ import { getOtherCategoryLabel } from '../../style_util';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
+import { PREFERRED_ICONS } from '../../symbol_utils';
 
 function isDuplicateStop(targetStop, iconStops) {
   const stops = iconStops.filter(({ stop }) => {
@@ -19,9 +20,31 @@ function isDuplicateStop(targetStop, iconStops) {
   return stops.length > 1;
 }
 
+export function getFirstUnusedSymbol(symbolOptions, iconStops) {
+  const firstUnusedPreferredIconId = PREFERRED_ICONS.find(iconId => {
+    const isSymbolBeingUsed = iconStops.some(({ icon }) => {
+      return icon === iconId;
+    });
+    return !isSymbolBeingUsed;
+  });
+
+  if (firstUnusedPreferredIconId) {
+    return firstUnusedPreferredIconId;
+  }
+
+  const firstUnusedSymbol = symbolOptions.find(({ value }) => {
+    const isSymbolBeingUsed = iconStops.some(({ icon }) => {
+      return icon === value;
+    });
+    return !isSymbolBeingUsed;
+  });
+
+  return firstUnusedSymbol ? firstUnusedSymbol.value : DEFAULT_ICON;
+}
+
 const DEFAULT_ICON_STOPS = [
-  { stop: null, icon: DEFAULT_ICON }, //first stop is the "other" color
-  { stop: '', icon: DEFAULT_ICON },
+  { stop: null, icon: PREFERRED_ICONS[0] }, //first stop is the "other" color
+  { stop: '', icon: PREFERRED_ICONS[1] },
 ];
 
 export function IconStops({
@@ -58,7 +81,7 @@ export function IconStops({
           ...iconStops.slice(0, index + 1),
           {
             stop: '',
-            icon: DEFAULT_ICON,
+            icon: getFirstUnusedSymbol(symbolOptions, iconStops),
           },
           ...iconStops.slice(index + 1),
         ],
@@ -66,12 +89,12 @@ export function IconStops({
     };
     const onRemove = () => {
       onChange({
-        iconStops: [...iconStops.slice(0, index), ...iconStops.slice(index + 1)],
+        customMapStops: [...iconStops.slice(0, index), ...iconStops.slice(index + 1)],
       });
     };
 
     let deleteButton;
-    if (index > 0) {
+    if (iconStops.length > 2 && index !== 0) {
       deleteButton = (
         <EuiButtonIcon
           iconType="trash"
@@ -86,6 +109,19 @@ export function IconStops({
         />
       );
     }
+
+    const iconStopButtons = (
+      <div>
+        {deleteButton}
+        <EuiButtonIcon
+          iconType="plusInCircle"
+          color="primary"
+          aria-label="Add"
+          title="Add"
+          onClick={onAdd}
+        />
+      </div>
+    );
 
     const errors = [];
     // TODO check for duplicate values and add error messages here
@@ -116,29 +152,20 @@ export function IconStops({
         error={errors}
         display="rowCompressed"
       >
-        <div>
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-            <EuiFlexItem>{stopInput}</EuiFlexItem>
-            <EuiFlexItem>
-              <IconSelect
-                isDarkMode={isDarkMode}
-                onChange={onIconSelect}
-                symbolOptions={symbolOptions}
-                value={icon}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <div className="mapColorStop__icons">
-            {deleteButton}
-            <EuiButtonIcon
-              iconType="plusInCircle"
-              color="primary"
-              aria-label="Add"
-              title="Add"
-              onClick={onAdd}
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+            {stopInput}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <IconSelect
+              isDarkMode={isDarkMode}
+              onChange={onIconSelect}
+              symbolOptions={symbolOptions}
+              value={icon}
+              append={iconStopButtons}
             />
-          </div>
-        </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     );
   });

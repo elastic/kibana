@@ -8,8 +8,10 @@ import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
-type GetUrlParams = () => UptimeUrlParams;
-type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolean }) => void;
+export type GetUrlParams = () => UptimeUrlParams;
+export type UpdateUrlParams = (updatedParams: {
+  [key: string]: string | number | boolean | undefined;
+}) => void;
 
 export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 

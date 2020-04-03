@@ -25,15 +25,15 @@ const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
 const authStackByOptions: MatrixHistogramOption[] = [
   {
-    text: 'event.type',
-    value: 'event.type',
+    text: 'event.outcome',
+    value: 'event.outcome',
   },
 ];
-const DEFAULT_STACK_BY = 'event.type';
+const DEFAULT_STACK_BY = 'event.outcome';
 
 enum AuthMatrixDataGroup {
-  authSuccess = 'authentication_success',
-  authFailure = 'authentication_failure',
+  authSuccess = 'success',
+  authFailure = 'failure',
 }
 
 export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {

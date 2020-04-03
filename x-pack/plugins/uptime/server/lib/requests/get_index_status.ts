@@ -5,14 +5,16 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 import { StatesIndexStatus } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
-export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({ callES }) => {
+export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
+  callES,
+  dynamicSettings,
+}) => {
   const {
     _shards: { total },
     count,
-  } = await callES('count', { index: INDEX_NAMES.HEARTBEAT });
+  } = await callES('count', { index: dynamicSettings.heartbeatIndices });
   return {
     indexExists: total > 0,
     docCount: count,

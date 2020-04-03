@@ -13,11 +13,10 @@ export const tlsSchema = gql`
   type TlsNode {
     _id: String
     timestamp: Date
-    alternativeNames: [String!]
     notAfter: [String!]
-    commonNames: [String!]
+    subjects: [String!]
     ja3: [String!]
-    issuerNames: [String!]
+    issuers: [String!]
   }
   input TlsSortField {
     field: TlsFields!

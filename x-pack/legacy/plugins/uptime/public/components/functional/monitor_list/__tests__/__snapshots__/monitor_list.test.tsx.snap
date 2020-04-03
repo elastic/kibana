@@ -80,25 +80,42 @@ exports[`MonitorList component renders a no items message when no data is provid
       size="m"
     />
     <EuiFlexGroup
+      justifyContent="spaceBetween"
       responsive={false}
     >
       <EuiFlexItem
         grow={false}
       >
-        <OverviewPageLink
-          dataTestSubj="xpack.uptime.monitorList.prevButton"
-          direction="prev"
-          pagination=""
+        <MonitorListPageSizeSelect
+          setSize={[MockFunction]}
+          size={25}
         />
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
-        <OverviewPageLink
-          dataTestSubj="xpack.uptime.monitorList.nextButton"
-          direction="next"
-          pagination=""
-        />
+        <EuiFlexGroup
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.prevButton"
+              direction="prev"
+              pagination=""
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.nextButton"
+              direction="next"
+              pagination=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
@@ -108,6 +125,10 @@ exports[`MonitorList component renders a no items message when no data is provid
 exports[`MonitorList component renders the monitor list 1`] = `
 .c1 {
   padding-left: 17px;
+}
+
+.c3 {
+  padding-top: 12px;
 }
 
 .c2 {
@@ -224,7 +245,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 </span>
               </div>
             </th>
-            <th
+            <td
               class="euiTableHeaderCell"
               data-test-subj="tableHeaderCell_monitor_id_4"
               role="columnheader"
@@ -238,7 +259,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiTableCellContent__text"
                 />
               </div>
-            </th>
+            </td>
           </tr>
         </thead>
         <tbody>
@@ -570,41 +591,81 @@ exports[`MonitorList component renders the monitor list 1`] = `
     class="euiSpacer euiSpacer--m"
   />
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <button
-        aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-        class="euiButtonIcon euiButtonIcon--text"
-        data-test-subj="xpack.uptime.monitorList.prevButton"
-        disabled=""
-        type="button"
+      <div
+        class="euiPopover euiPopover--anchorUpLeft"
       >
         <div
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          data-euiicon-type="arrowLeft"
-        />
-      </button>
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight"
+            data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content"
+            >
+              <div
+                aria-hidden="true"
+                class="euiButtonEmpty__icon"
+                data-euiicon-type="arrowDown"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Rows per page: 25
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <button
-        aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-        class="euiButtonIcon euiButtonIcon--text"
-        data-test-subj="xpack.uptime.monitorList.nextButton"
-        disabled=""
-        type="button"
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
       >
         <div
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          data-euiicon-type="arrowRight"
-        />
-      </button>
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
+            class="euiButtonIcon euiButtonIcon--text c3"
+            data-test-subj="xpack.uptime.monitorList.prevButton"
+            disabled=""
+            type="button"
+          >
+            <div
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              data-euiicon-type="arrowLeft"
+            />
+          </button>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
+            class="euiButtonIcon euiButtonIcon--text c3"
+            data-test-subj="xpack.uptime.monitorList.nextButton"
+            disabled=""
+            type="button"
+          >
+            <div
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              data-euiicon-type="arrowRight"
+            />
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -752,25 +813,42 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
       size="m"
     />
     <EuiFlexGroup
+      justifyContent="spaceBetween"
       responsive={false}
     >
       <EuiFlexItem
         grow={false}
       >
-        <OverviewPageLink
-          dataTestSubj="xpack.uptime.monitorList.prevButton"
-          direction="prev"
-          pagination=""
+        <MonitorListPageSizeSelect
+          setSize={[MockFunction]}
+          size={25}
         />
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
-        <OverviewPageLink
-          dataTestSubj="xpack.uptime.monitorList.nextButton"
-          direction="next"
-          pagination=""
-        />
+        <EuiFlexGroup
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.prevButton"
+              direction="prev"
+              pagination=""
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <OverviewPageLink
+              dataTestSubj="xpack.uptime.monitorList.nextButton"
+              direction="next"
+              pagination=""
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

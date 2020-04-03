@@ -16,6 +16,7 @@ import { AlertType } from '../../../../../alerting/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
+import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -43,7 +44,7 @@ const bootstrapDependencies = (customRequests?: any) => {
  */
 const mockOptions = (
   params = { numTimes: 5, locations: [], timerange: { from: 'now-15m', to: 'now' } },
-  services = { callCluster: 'mockESFunction' },
+  services = { callCluster: 'mockESFunction', savedObjectsClient: mockSavedObjectsClient },
   state = {}
 ): any => ({
   params,
@@ -51,7 +52,18 @@ const mockOptions = (
   state,
 });
 
+const mockSavedObjectsClient = { get: jest.fn() };
+mockSavedObjectsClient.get.mockReturnValue(defaultDynamicSettings);
+
 describe('status check alert', () => {
+  let toISOStringSpy: jest.SpyInstance<string, []>;
+  beforeEach(() => {
+    toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   describe('executor', () => {
     it('does not trigger when there are no monitors down', async () => {
       expect.assertions(4);
@@ -69,6 +81,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "callES": "mockESFunction",
+            "dynamicSettings": undefined,
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
@@ -81,6 +94,7 @@ describe('status check alert', () => {
     });
 
     it('triggers when monitors are down and provides expected state', async () => {
+      toISOStringSpy.mockImplementation(() => 'foo date string');
       const mockGetter = jest.fn();
       mockGetter.mockReturnValue([
         {
@@ -118,6 +132,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "callES": "mockESFunction",
+            "dynamicSettings": undefined,
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
@@ -131,6 +146,13 @@ describe('status check alert', () => {
       expect(mockReplaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "currentTriggerStarted": "foo date string",
+            "firstCheckedAt": "foo date string",
+            "firstTriggeredAt": "foo date string",
+            "isTriggered": true,
+            "lastCheckedAt": "foo date string",
+            "lastResolvedAt": undefined,
+            "lastTriggeredAt": "foo date string",
             "monitors": Array [
               Object {
                 "count": 234,
@@ -153,11 +175,8 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
-            "completeIdList": "first from fairbanks; first from harrisburg; ",
+            "downMonitorsWithGeo": "first from fairbanks; first from harrisburg; ",
             "message": "Down monitor: first",
-            "server": Object {
-              "route": Object {},
-            },
           },
         ]
       `);
@@ -296,7 +315,7 @@ describe('status check alert', () => {
 
     it('contains the expected static fields like id, name, etc.', () => {
       expect(alert.id).toBe('xpack.uptime.alerts.monitorStatus');
-      expect(alert.name).toBe('Uptime Monitor Status');
+      expect(alert.name).toBe('Uptime monitor status');
       expect(alert.defaultActionGroupId).toBe('xpack.uptime.alerts.actionGroups.monitorStatus');
       expect(alert.actionGroups).toMatchInlineSnapshot(`
         Array [
@@ -549,7 +568,7 @@ describe('status check alert', () => {
       ];
     });
 
-    it('creates a set of unique IDs from a list of composite-unique objects', () => {
+    it('creates a set of unique IDs from a list of composite unique objects', () => {
       expect(uniqueMonitorIds(items)).toEqual(
         new Set<string>(['first', 'second', 'third', 'fourth', 'fifth'])
       );

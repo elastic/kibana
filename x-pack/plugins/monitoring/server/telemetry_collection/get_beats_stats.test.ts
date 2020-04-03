@@ -22,18 +22,16 @@ describe('Get Beats Stats', () => {
     const clusterUuids = ['aCluster', 'bCluster', 'cCluster'];
     const start = 100;
     const end = 200;
-    let server = { config: () => ({ get: sinon.stub() }) };
     let callCluster = sinon.stub();
 
     beforeEach(() => {
       const getStub = { get: sinon.stub() };
       getStub.get.withArgs('xpack.monitoring.beats.index_pattern').returns('beats-indices-*');
-      server = { config: () => getStub };
       callCluster = sinon.stub();
     });
 
     it('should set `from: 0, to: 10000` in the query', async () => {
-      await fetchBeatsStats(server, callCluster, clusterUuids, start, end, {} as any);
+      await fetchBeatsStats(callCluster, clusterUuids, start, end, {} as any);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 
@@ -43,7 +41,7 @@ describe('Get Beats Stats', () => {
     });
 
     it('should set `from: 10000, from: 10000` in the query', async () => {
-      await fetchBeatsStats(server, callCluster, clusterUuids, start, end, { page: 1 } as any);
+      await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 1 } as any);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 
@@ -53,7 +51,7 @@ describe('Get Beats Stats', () => {
     });
 
     it('should set `from: 20000, from: 10000` in the query', async () => {
-      await fetchBeatsStats(server, callCluster, clusterUuids, start, end, { page: 2 } as any);
+      await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 2 } as any);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 

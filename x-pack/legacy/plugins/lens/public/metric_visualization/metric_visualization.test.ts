@@ -72,6 +72,46 @@ describe('metric_visualization', () => {
     });
   });
 
+  describe('#getConfiguration', () => {
+    it('can add a metric when there is no accessor', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: undefined,
+            layerId: 'l1',
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            supportsMoreColumns: true,
+          }),
+        ],
+      });
+    });
+
+    it('is not allowed to add a metric once one accessor is set', () => {
+      expect(
+        metricVisualization.getConfiguration({
+          state: {
+            accessor: 'a',
+            layerId: 'l1',
+          },
+          layerId: 'l1',
+          frame: mockFrame(),
+        })
+      ).toEqual({
+        groups: [
+          expect.objectContaining({
+            supportsMoreColumns: false,
+          }),
+        ],
+      });
+    });
+  });
+
   describe('#setDimension', () => {
     it('sets the accessor', () => {
       expect(

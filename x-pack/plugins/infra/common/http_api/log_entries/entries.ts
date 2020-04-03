@@ -78,6 +78,11 @@ export const logEntryRT = rt.type({
   id: rt.string,
   cursor: logEntriesCursorRT,
   columns: rt.array(logColumnRT),
+  context: rt.partial({
+    'log.file.path': rt.string,
+    'host.name': rt.string,
+    'container.id': rt.string,
+  }),
 });
 
 export type LogMessageConstantPart = rt.TypeOf<typeof logMessageConstantPartRT>;

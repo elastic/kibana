@@ -24,19 +24,13 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 
-jest.mock('../doc_viewer/doc_viewer', () => ({
-  DocViewer: () => null,
-}));
-
 jest.mock('../../../kibana_services', () => {
   return {
     getServices: () => ({
       metadata: {
         branch: 'test',
       },
-      getDocViewsSorted: () => {
-        return [];
-      },
+      DocViewer: () => null,
     }),
   };
 });

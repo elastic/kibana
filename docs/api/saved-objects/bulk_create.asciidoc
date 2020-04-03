@@ -9,9 +9,9 @@ experimental[] Create multiple {kib} saved objects.
 [[saved-objects-api-bulk-create-request]]
 ==== Request
 
-`POST /api/saved_objects/_bulk_create`
+`POST <kibana host>:<port>/api/saved_objects/_bulk_create`
 
-`POST /s/<space_id>/api/saved_objects/_bulk_create`
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_bulk_create`
 
 
 [[saved-objects-api-bulk-create-path-params]]
@@ -63,9 +63,9 @@ Saved objects that are unable to persist are replaced with an error object.
 
 Create an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/_bulk_create
+$ curl -X POST "localhost:5601/api/saved_objects/_bulk_create"
 [
   {
     "type": "index-pattern",
@@ -87,7 +87,7 @@ POST api/saved_objects/_bulk_create
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "saved_objects": [

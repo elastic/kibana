@@ -193,6 +193,7 @@ Array [
                       >
                         <input
                           accept="image/*"
+                          aria-describedby="generated-id-filePicker__prompt"
                           className="euiFilePicker__input"
                           id="generated-id"
                           onBlur={[Function]}
@@ -205,6 +206,7 @@ Array [
                         />
                         <div
                           className="euiFilePicker__prompt"
+                          id="generated-id-filePicker__prompt"
                         >
                           <div
                             aria-hidden="true"
@@ -541,6 +543,7 @@ Array [
                       >
                         <input
                           accept="image/*"
+                          aria-describedby="generated-id-filePicker__prompt"
                           className="euiFilePicker__input"
                           id="generated-id"
                           onBlur={[Function]}
@@ -553,6 +556,7 @@ Array [
                         />
                         <div
                           className="euiFilePicker__prompt"
+                          id="generated-id-filePicker__prompt"
                         >
                           <div
                             aria-hidden="true"
@@ -890,6 +894,7 @@ Array [
                       >
                         <input
                           accept="image/*"
+                          aria-describedby="generated-id-filePicker__prompt"
                           className="euiFilePicker__input"
                           id="generated-id"
                           onBlur={[Function]}
@@ -902,6 +907,7 @@ Array [
                         />
                         <div
                           className="euiFilePicker__prompt"
+                          id="generated-id-filePicker__prompt"
                         >
                           <div
                             aria-hidden="true"
@@ -1237,6 +1243,7 @@ Array [
                       >
                         <input
                           accept="image/*"
+                          aria-describedby="generated-id-filePicker__prompt"
                           className="euiFilePicker__input"
                           id="generated-id"
                           onBlur={[Function]}
@@ -1249,6 +1256,7 @@ Array [
                         />
                         <div
                           className="euiFilePicker__prompt"
+                          id="generated-id-filePicker__prompt"
                         >
                           <div
                             aria-hidden="true"

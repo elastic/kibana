@@ -17,7 +17,7 @@
  * under the License.
  */
 import { omit } from 'lodash';
-import { DashboardPanelState } from 'src/plugins/dashboard/public';
+import { DashboardPanelState } from '../../../../../../../plugins/dashboard/public';
 import { SavedDashboardPanel } from '../types';
 
 export function convertSavedDashboardPanelToPanelState(

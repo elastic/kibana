@@ -20,6 +20,7 @@ import {
 import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -27,6 +28,7 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
+import { SiemPageName } from '../../../pages/home/types';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -110,6 +112,41 @@ export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) =
   </EuiToolTip>
 ));
 Name.displayName = 'Name';
+
+interface NewCaseProps {
+  onClosePopover: () => void;
+  timelineId: string;
+  timelineTitle: string;
+}
+
+export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, timelineTitle }) => {
+  const history = useHistory();
+  const handleClick = useCallback(() => {
+    onClosePopover();
+    history.push({
+      pathname: `/${SiemPageName.case}/create`,
+      state: {
+        insertTimeline: {
+          timelineId,
+          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+        },
+      },
+    });
+  }, [onClosePopover, history, timelineId, timelineTitle]);
+
+  return (
+    <EuiButtonEmpty
+      data-test-subj="attach-timeline-case"
+      color="text"
+      iconSide="left"
+      iconType="paperClip"
+      onClick={handleClick}
+    >
+      {i18n.ATTACH_TIMELINE_TO_NEW_CASE}
+    </EuiButtonEmpty>
+  );
+});
+NewCase.displayName = 'NewCase';
 
 interface NewTimelineProps {
   createTimeline: CreateTimeline;

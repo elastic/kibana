@@ -54,7 +54,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     }
     vis={
       Object {
-        "setVisType": [MockFunction],
+        "setState": [MockFunction],
         "type": Object {
           "schemas": Object {
             "metrics": Array [
@@ -126,7 +126,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     }
     vis={
       Object {
-        "setVisType": [MockFunction],
+        "setState": [MockFunction],
         "type": Object {
           "schemas": Object {
             "metrics": Array [
@@ -169,7 +169,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     setCategoryAxis={[Function]}
     vis={
       Object {
-        "setVisType": [MockFunction],
+        "setState": [MockFunction],
         "type": Object {
           "schemas": Object {
             "metrics": Array [

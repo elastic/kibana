@@ -9,14 +9,16 @@ import * as Registry from '../registry';
 import { cacheHas } from '../registry/cache';
 
 // paths from RegistryPackage are routes to the assets on EPR
-// e.g. `/package/nginx-1.2.0/dataset/access/fields/fields.yml`
+// e.g. `/package/nginx/1.2.0/dataset/access/fields/fields.yml`
 // paths for ArchiveEntry are routes to the assets in the archive
 // e.g. `nginx-1.2.0/dataset/access/fields/fields.yml`
 // RegistryPackage paths have a `/package/` prefix compared to ArchiveEntry paths
+// and different package and version structure
 const EPR_PATH_PREFIX = '/package';
 function registryPathToArchivePath(registryPath: RegistryPackage['path']): string {
-  const archivePath = registryPath.replace(`${EPR_PATH_PREFIX}/`, '');
-  return archivePath;
+  const path = registryPath.replace(`${EPR_PATH_PREFIX}/`, '');
+  const [pkgName, pkgVersion] = path.split('/');
+  return path.replace(`${pkgName}/${pkgVersion}`, `${pkgName}-${pkgVersion}`);
 }
 
 export function getAssets(
@@ -35,8 +37,7 @@ export function getAssets(
 
     // if dataset, filter for them
     if (datasetName) {
-      // TODO: Filter for dataset path
-      const comparePath = `${EPR_PATH_PREFIX}/${packageInfo.name}-${packageInfo.version}/dataset/${datasetName}`;
+      const comparePath = `${packageInfo.path}/dataset/${datasetName}/`;
       if (!path.includes(comparePath)) {
         continue;
       }

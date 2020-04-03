@@ -134,6 +134,12 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
               <EuiButtonIcon
                 onClick={() => setIsVariablesPopoverOpen(true)}
                 iconType="indexOpen"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.addVariableTitle',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
                 aria-label={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.addVariablePopoverButton',
                   {

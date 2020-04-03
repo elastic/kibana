@@ -46,7 +46,11 @@ export function TopNavMenu(props: TopNavMenuProps) {
     if (!config) return;
     return config.map((menuItem: TopNavMenuData, i: number) => {
       return (
-        <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
+        <EuiFlexItem
+          grow={false}
+          key={`nav-menu-${i}`}
+          className={menuItem.emphasize ? 'kbnTopNavItemEmphasized' : ''}
+        >
           <TopNavMenuItem {...menuItem} />
         </EuiFlexItem>
       );
@@ -66,6 +70,7 @@ export function TopNavMenu(props: TopNavMenuProps) {
         <EuiFlexGroup
           data-test-subj="top-nav"
           justifyContent="flexStart"
+          alignItems="center"
           gutterSize="none"
           className="kbnTopNavMenu"
           responsive={false}
