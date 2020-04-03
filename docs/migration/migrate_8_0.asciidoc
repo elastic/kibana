@@ -141,4 +141,13 @@ access level.
 been deprecated with warnings that have been logged throughout 7.x. Please use Kibana UI to re-generate the
 POST URL snippets if you depend on these for automated PDF reports.
 
+[float]
+=== Configurations starting with `xpack.telemetry` are no longer valid
+
+*Details:*
+The `xpack.` prefix has been removed for all telemetry configurations.
+
+*Impact:*
+For any configurations beginning with `xpack.telemetry`, remove the `xpack` prefix. Use {kibana-ref}/telemetry-settings-kbn.html#telemetry-general-settings[`telemetry.enabled`] instead.
+
 // end::notable-breaking-changes[]

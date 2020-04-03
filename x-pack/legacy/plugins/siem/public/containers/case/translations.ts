@@ -63,3 +63,10 @@ export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = i18n.translate(
     defaultMessage: 'Successfully sent to ServiceNow',
   }
 );
+
+export const ERROR_PUSH_TO_SERVICE = i18n.translate(
+  'xpack.siem.case.configure.errorPushingToService',
+  {
+    defaultMessage: 'Error pushing to service',
+  }
+);
