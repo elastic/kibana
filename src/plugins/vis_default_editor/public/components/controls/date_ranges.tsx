@@ -133,7 +133,7 @@ function DateRangesParamEditor({
         </EuiText>
         <EuiSpacer size="s" />
 
-        {ranges.map(({ from, to, id }) => {
+        {ranges.map(({ from, to, id }, index) => {
           const deleteBtnTitle = i18n.translate(
             'visDefaultEditor.controls.dateRanges.removeRangeButtonAriaLabel',
             {
@@ -162,6 +162,7 @@ function DateRangesParamEditor({
                     placeholder={FROM_PLACEHOLDER}
                     value={from || ''}
                     onChange={ev => onChangeRange(id, 'from', ev.target.value)}
+                    data-test-subj={`visEditorDateRange${index}__from`}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -176,6 +177,7 @@ function DateRangesParamEditor({
                         description: 'End of a date range, e.g. From 2018-02-26 *To* 2018-02-28',
                       }
                     )}
+                    data-test-subj={`visEditorDateRange${index}__to`}
                     compressed
                     fullWidth={true}
                     isInvalid={areBothEmpty || !validateDateMath(to)}
@@ -211,7 +213,12 @@ function DateRangesParamEditor({
 
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
+          <EuiButtonEmpty
+            iconType="plusInCircleFilled"
+            onClick={onAddRange}
+            size="xs"
+            data-test-subj="visEditorAddDateRange"
+          >
             <FormattedMessage
               id="visDefaultEditor.controls.dateRanges.addRangeButtonLabel"
               defaultMessage="Add range"

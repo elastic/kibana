@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INDEX_NAMES = {
-  HEARTBEAT: 'heartbeat-8*',
-};
+// TODO: Move mappings type from Mappings editor here
+
+export interface Mappings {
+  [key: string]: any;
+}

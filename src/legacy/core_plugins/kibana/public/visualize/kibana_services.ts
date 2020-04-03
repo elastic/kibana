@@ -61,6 +61,7 @@ export interface VisualizeKibanaServices {
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
   DefaultVisualizationEditor: typeof DefaultEditorController;
+  createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
 }
 
 let services: VisualizeKibanaServices | null = null;
