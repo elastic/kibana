@@ -38,8 +38,8 @@ export interface PingHistogramComponentProps {
 }
 
 interface BarPoint {
-  x: number | null | undefined;
-  y: number | null | undefined;
+  x?: number;
+  y?: number;
   type: string;
 }
 
