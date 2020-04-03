@@ -44,8 +44,6 @@ import {
   RawSavedDashboardPanel620,
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
-} from './types';
-import {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_PANEL_HEIGHT,
 } from '../../../../../../plugins/dashboard/public';

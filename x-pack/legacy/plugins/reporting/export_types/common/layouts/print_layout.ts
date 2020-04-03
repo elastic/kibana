@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import path from 'path';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
-import { HeadlessChromiumDriver } from '../../../server/browsers';
 import { LevelLogger } from '../../../server/lib';
-import { ReportingConfigType } from '../../../server/core';
+import { HeadlessChromiumDriver } from '../../../server/browsers';
+import { ServerFacade } from '../../../types';
 import { LayoutTypes } from '../constants';
 import { getDefaultLayoutSelectors, Layout, LayoutSelectorDictionary, Size } from './layout';
 import { CaptureConfig } from './types';
@@ -21,9 +20,9 @@ export class PrintLayout extends Layout {
   public readonly groupCount = 2;
   private captureConfig: CaptureConfig;
 
-  constructor(captureConfig: ReportingConfigType['capture']) {
+  constructor(server: ServerFacade) {
     super(LayoutTypes.PRINT);
-    this.captureConfig = captureConfig;
+    this.captureConfig = server.config().get('xpack.reporting.capture');
   }
 
   public getCssOverridesPath() {

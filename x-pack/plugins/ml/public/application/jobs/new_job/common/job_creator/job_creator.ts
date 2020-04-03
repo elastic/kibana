@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -57,6 +58,9 @@ export class JobCreator {
     stop: boolean;
   } = { stop: false };
 
+  protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
+  public wizardInitialized$ = this._wizardInitialized$.asObservable();
+
   constructor(
     indexPattern: IndexPattern,
     savedSearch: SavedSearchSavedObject | null,
@@ -81,6 +85,10 @@ export class JobCreator {
 
   public get type(): JOB_TYPE {
     return this._type;
+  }
+
+  public get indexPatternTitle(): string {
+    return this._indexPatternTitle;
   }
 
   protected _addDetector(detector: Detector, agg: Aggregation, field: Field) {

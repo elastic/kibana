@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Browser } from 'puppeteer';
 import { BROWSER_TYPE } from '../../../common/constants';
-import { Logger } from '../../../types';
+import { ServerFacade, Logger } from '../../../types';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 
 /*
@@ -14,6 +13,7 @@ import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_fa
  * to the locally running Kibana instance.
  */
 export const validateBrowser = async (
+  server: ServerFacade,
   browserFactory: HeadlessChromiumDriverFactory,
   logger: Logger
 ) => {

@@ -11,6 +11,7 @@ import {
   IScopedClusterClient,
   Logger,
   PluginInitializerContext,
+  ICustomClusterClient,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
@@ -49,10 +50,12 @@ declare module 'kibana/server' {
   }
 }
 
-export type MlSetupContract = SharedServices;
-export type MlStartContract = void;
+export interface MlPluginSetup extends SharedServices {
+  mlClient: ICustomClusterClient;
+}
+export type MlPluginStart = void;
 
-export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, PluginsSetup> {
+export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
   private log: Logger;
   private version: string;
   private mlLicense: MlServerLicense;
@@ -63,19 +66,22 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
     this.mlLicense = new MlServerLicense();
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlSetupContract {
+  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
     plugins.features.registerFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
       icon: PLUGIN_ICON,
+      order: 500,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],
-      privileges: {},
+      privileges: null,
       reserved: {
         privilege: {
+          app: [PLUGIN_ID, 'kibana'],
+          catalogue: [PLUGIN_ID],
           savedObject: {
             all: [],
             read: [],
@@ -132,10 +138,13 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
+    return {
+      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud),
+      mlClient,
+    };
   }
 
-  public start(): MlStartContract {}
+  public start(): MlPluginStart {}
 
   public stop() {
     this.mlLicense.unsubscribe();

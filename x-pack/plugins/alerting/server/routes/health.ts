@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { AlertingFrameworkHealth } from '../types';
+
+interface XPackUsageSecurity {
+  security?: {
+    enabled?: boolean;
+    ssl?: {
+      http?: {
+        enabled?: boolean;
+      };
+    };
+  };
+}
+
+export function healthRoute(router: IRouter, licenseState: LicenseState) {
+  router.get(
+    {
+      path: '/api/alert/_health',
+      validate: false,
+    },
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      try {
+        const {
+          security: {
+            enabled: isSecurityEnabled = false,
+            ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
+          } = {},
+        }: XPackUsageSecurity = await context.core.elasticsearch.adminClient
+          // `transport.request` is potentially unsafe when combined with untrusted user input.
+          // Do not augment with such input.
+          .callAsInternalUser('transport.request', {
+            method: 'GET',
+            path: '/_xpack/usage',
+          });
+
+        const frameworkHealth: AlertingFrameworkHealth = {
+          isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
+        };
+
+        return res.ok({
+          body: frameworkHealth,
+        });
+      } catch (error) {
+        return res.badRequest({ body: error });
+      }
+    })
+  );
+}

@@ -13,21 +13,6 @@ import { RawSettingDefinition } from './types';
  * Settings added here will show up in the UI and will be validated on the client and server
  */
 export const generalSettings: RawSettingDefinition[] = [
-  // Active
-  {
-    key: 'active',
-    type: 'boolean',
-    defaultValue: 'true',
-    label: i18n.translate('xpack.apm.agentConfig.active.label', {
-      defaultMessage: 'Active'
-    }),
-    description: i18n.translate('xpack.apm.agentConfig.active.description', {
-      defaultMessage:
-        'A boolean specifying if the agent should be active or not.\nWhen active, the agent instruments incoming HTTP requests, tracks errors and collects and sends metrics.\nWhen inactive, the agent works as a noop, not collecting data and not communicating with the APM Server.\nAs this is a reversible switch, agent threads are not being killed when inactivated, but they will be \nmostly idle in this state, so the overhead should be negligible.\n\nYou can use this setting to dynamically disable Elastic APM at runtime.'
-    }),
-    excludeAgents: ['js-base', 'rum-js', 'python', 'dotnet']
-  },
-
   // API Request Size
   {
     key: 'api_request_size',
@@ -40,10 +25,10 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.apiRequestSize.description',
       {
         defaultMessage:
-          'The maximum total compressed size of the request body which is sent to the APM server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
+          'The maximum total compressed size of the request body which is sent to the APM Server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet']
+    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs']
   },
 
   // API Request Time
@@ -61,7 +46,32 @@ export const generalSettings: RawSettingDefinition[] = [
           "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting."
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet']
+    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs']
+  },
+
+  // Capture body
+  {
+    key: 'capture_body',
+    validation: captureBodyRt,
+    type: 'select',
+    defaultValue: 'off',
+    label: i18n.translate('xpack.apm.agentConfig.captureBody.label', {
+      defaultMessage: 'Capture body'
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.captureBody.description',
+      {
+        defaultMessage:
+          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables).'
+      }
+    ),
+    options: [
+      { text: 'off' },
+      { text: 'errors' },
+      { text: 'transactions' },
+      { text: 'all' }
+    ],
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // Capture headers
@@ -79,32 +89,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
       }
     ),
-    excludeAgents: ['js-base', 'rum-js']
-  },
-
-  // Capture body
-  {
-    key: 'capture_body',
-    validation: captureBodyRt,
-    type: 'select',
-    defaultValue: 'off',
-    label: i18n.translate('xpack.apm.agentConfig.captureBody.label', {
-      defaultMessage: 'Capture body'
-    }),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.captureBody.description',
-      {
-        defaultMessage:
-          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "off".'
-      }
-    ),
-    options: [
-      { text: 'off' },
-      { text: 'errors' },
-      { text: 'transactions' },
-      { text: 'all' }
-    ],
-    excludeAgents: ['js-base', 'rum-js', 'dotnet']
+    excludeAgents: ['js-base', 'rum-js', 'nodejs']
   },
 
   // LOG_LEVEL
@@ -118,7 +103,22 @@ export const generalSettings: RawSettingDefinition[] = [
     description: i18n.translate('xpack.apm.agentConfig.logLevel.description', {
       defaultMessage: 'Sets the logging level for the agent'
     }),
-    excludeAgents: ['js-base', 'rum-js', 'python']
+    includeAgents: ['dotnet', 'ruby']
+  },
+
+  // Recording
+  {
+    key: 'recording',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate('xpack.apm.agentConfig.recording.label', {
+      defaultMessage: 'Recording'
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.recording.description', {
+      defaultMessage:
+        'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When inactive, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when inactivated, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.'
+    }),
+    excludeAgents: ['nodejs']
   },
 
   // SERVER_TIMEOUT
@@ -133,10 +133,10 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.serverTimeout.description',
       {
         defaultMessage:
-          'If a request to the APM server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM server times out.'
+          'If a request to the APM Server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM Server times out.'
       }
     ),
-    includeAgents: ['nodejs', 'java', 'go']
+    includeAgents: ['java']
   },
 
   // SPAN_FRAMES_MIN_DURATION
@@ -172,24 +172,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.'
       }
     ),
-    includeAgents: ['nodejs', 'java', 'dotnet', 'go']
-  },
-
-  // Transaction sample rate
-  {
-    key: 'transaction_sample_rate',
-    type: 'float',
-    defaultValue: '1.0',
-    label: i18n.translate('xpack.apm.agentConfig.transactionSampleRate.label', {
-      defaultMessage: 'Transaction sample rate'
-    }),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.transactionSampleRate.description',
-      {
-        defaultMessage:
-          'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but no context information, labels, or spans.'
-      }
-    )
+    includeAgents: ['java', 'dotnet', 'go']
   },
 
   // Transaction max spans
@@ -209,11 +192,28 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.transactionMaxSpans.description',
       {
         defaultMessage:
-          'Limits the amount of spans that are recorded per transaction. Default is 500.'
+          'Limits the amount of spans that are recorded per transaction.'
       }
     ),
     min: 0,
     max: 32000,
     excludeAgents: ['js-base', 'rum-js']
+  },
+
+  // Transaction sample rate
+  {
+    key: 'transaction_sample_rate',
+    type: 'float',
+    defaultValue: '1.0',
+    label: i18n.translate('xpack.apm.agentConfig.transactionSampleRate.label', {
+      defaultMessage: 'Transaction sample rate'
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.transactionSampleRate.description',
+      {
+        defaultMessage:
+          'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but no context information, labels, or spans.'
+      }
+    )
   }
 ];

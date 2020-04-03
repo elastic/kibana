@@ -13,6 +13,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import { debounce } from 'lodash';
 import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
 import { AGENT_NAME } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import {
@@ -20,6 +21,7 @@ import {
   cytoscapeOptions,
   nodeHeight
 } from './cytoscapeOptions';
+import { useUiTracker } from '../../../../../../../plugins/observability/public';
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
   undefined
@@ -117,6 +119,8 @@ export function Cytoscape({
   // is required and can trigger rendering when changed.
   const divStyle = { ...style, height };
 
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+
   // Trigger a custom "data" event when data changes
   useEffect(() => {
     if (cy && elements.length > 0) {
@@ -168,7 +172,13 @@ export function Cytoscape({
         }
       });
     };
+    // debounce hover tracking so it doesn't spam telemetry with redundant events
+    const trackNodeEdgeHover = debounce(
+      () => trackApmEvent({ metric: 'service_map_node_or_edge_hover' }),
+      1000
+    );
     const mouseoverHandler: cytoscape.EventHandler = event => {
+      trackNodeEdgeHover();
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };
@@ -177,6 +187,7 @@ export function Cytoscape({
       event.target.connectedEdges().removeClass('nodeHover');
     };
     const selectHandler: cytoscape.EventHandler = event => {
+      trackApmEvent({ metric: 'service_map_node_select' });
       resetConnectedEdgeStyle(event.target);
     };
     const unselectHandler: cytoscape.EventHandler = event => {
@@ -215,7 +226,7 @@ export function Cytoscape({
         cy.removeListener('unselect', 'node', unselectHandler);
       }
     };
-  }, [cy, height, serviceName, width]);
+  }, [cy, height, serviceName, trackApmEvent, width]);
 
   return (
     <CytoscapeContext.Provider value={cy}>

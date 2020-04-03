@@ -4,20 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SyntheticEvent, useCallback, useEffect, useMemo } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
-  EuiBasicTable,
-  EuiText,
-  EuiTableFieldDataColumnType,
-  EuiLink,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiBasicTable, EuiText, EuiTableFieldDataColumnType, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
@@ -35,6 +23,8 @@ import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { PageView } from '../../components/page_view';
+import { LinkToApp } from '../../components/link_to_app';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -145,18 +135,13 @@ export const PolicyList = React.memo(() => {
         }),
         render(version: string) {
           return (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink
+            <LinkToApp
+              appId="ingestManager"
+              appPath={`#/configs/${version}`}
               href={`${services.application.getUrlForApp('ingestManager')}#/configs/${version}`}
-              onClick={(ev: SyntheticEvent) => {
-                ev.preventDefault();
-                services.application.navigateToApp('ingestManager', {
-                  path: `#/configs/${version}`,
-                });
-              }}
             >
               {version}
-            </EuiLink>
+            </LinkToApp>
           );
         },
       },
@@ -165,42 +150,30 @@ export const PolicyList = React.memo(() => {
   );
 
   return (
-    <EuiPage data-test-subj="policyListPage">
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle size="l">
-                <h1 data-test-subj="policyViewTitle">
-                  <FormattedMessage
-                    id="xpack.endpoint.policyList.viewTitle"
-                    defaultMessage="Policies"
-                  />
-                </h1>
-              </EuiTitle>
-              <h2>
-                <EuiText color="subdued" data-test-subj="policyTotalCount" size="s">
-                  <FormattedMessage
-                    id="xpack.endpoint.policyList.viewTitleTotalCount"
-                    defaultMessage="{totalItemCount} Policies"
-                    values={{ totalItemCount }}
-                  />
-                </EuiText>
-              </h2>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <EuiBasicTable
-              items={policyItems}
-              columns={columns}
-              loading={loading}
-              pagination={paginationSetup}
-              onChange={handleTableChange}
-              data-test-subj="policyTable"
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <PageView
+      viewType="list"
+      data-test-subj="policyListPage"
+      headerLeft={i18n.translate('xpack.endpoint.policyList.viewTitle', {
+        defaultMessage: 'Policies',
+      })}
+      bodyHeader={
+        <EuiText color="subdued" data-test-subj="policyTotalCount">
+          <FormattedMessage
+            id="xpack.endpoint.policyList.viewTitleTotalCount"
+            defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
+            values={{ totalItemCount }}
+          />
+        </EuiText>
+      }
+    >
+      <EuiBasicTable
+        items={policyItems}
+        columns={columns}
+        loading={loading}
+        pagination={paginationSetup}
+        onChange={handleTableChange}
+        data-test-subj="policyTable"
+      />
+    </PageView>
   );
 });

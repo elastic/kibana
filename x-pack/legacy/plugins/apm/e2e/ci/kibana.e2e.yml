@@ -1,0 +1,31 @@
+# Kibana
+server.port: 5701
+xpack.security.encryptionKey: 'something_at_least_32_characters'
+csp.strict: false
+logging.verbose: true
+
+# Elasticsearch
+# Started via apm-integration-testing
+# ./scripts/compose.py start master --no-kibana --elasticsearch-port 9201 --apm-server-port 8201
+elasticsearch.hosts: http://localhost:9201
+elasticsearch.username: 'kibana_system_user'
+elasticsearch.password: 'changeme'
+
+# APM index pattern
+apm_oss.indexPattern: apm-*
+
+# APM Indices
+apm_oss.errorIndices: apm-*-error*
+apm_oss.sourcemapIndices: apm-*-sourcemap
+apm_oss.transactionIndices: apm-*-transaction*
+apm_oss.spanIndices: apm-*-span*
+apm_oss.metricsIndices: apm-*-metric*
+apm_oss.onboardingIndices: apm-*-onboarding*
+
+# APM options
+xpack.apm.enabled: true
+xpack.apm.serviceMapEnabled: false
+xpack.apm.autocreateApmIndexPattern: true
+xpack.apm.ui.enabled: true
+xpack.apm.ui.transactionGroupBucketSize: 100
+xpack.apm.ui.maxTraceItems: 1000

@@ -94,7 +94,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
           groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
           layerId: props.state.layerId,
           accessors: props.state.accessor ? [props.state.accessor] : [],
-          supportsMoreColumns: false,
+          supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
         },
       ],

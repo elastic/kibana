@@ -52,7 +52,7 @@ number and the action performed on the traffic (allow/deny).. \
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iptables.html',
       },
     }),
-    // euiIconType: 'logoUbiquiti',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/ubiquiti.svg',
     artifacts: {
       dashboards: [],
       application: {

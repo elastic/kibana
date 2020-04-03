@@ -19,7 +19,7 @@
 
 import { CreateSection, RegisterManagementAppArgs } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
-import { CoreSetup } from '../../../core/public';
+import { StartServicesAccessor } from '../../../core/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { ManagementApp } from './management_app';
@@ -34,14 +34,14 @@ export class ManagementSection {
   private readonly getSections: () => ManagementSection[];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
   private readonly getLegacyManagementSection: () => LegacyManagementSection;
-  private readonly getStartServices: CoreSetup['getStartServices'];
+  private readonly getStartServices: StartServicesAccessor;
 
   constructor(
     { id, title, order = 100, euiIconType, icon }: CreateSection,
     getSections: () => ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSection: () => ManagementSection,
-    getStartServices: CoreSetup['getStartServices']
+    getStartServices: StartServicesAccessor
   ) {
     this.id = id;
     this.title = title;

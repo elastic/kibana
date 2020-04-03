@@ -14,10 +14,11 @@ import {
   EuiText,
   EuiHealth,
 } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
-import { Rule } from '../../../../containers/detection_engine/rules';
+import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { FormattedDate } from '../../../../components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../components/link_to/redirect_to_detection_engine';
@@ -34,6 +35,7 @@ import {
   exportRulesAction,
 } from './actions';
 import { Action } from './reducer';
+import { LocalizedDateTooltip } from '../../../../components/localized_date_tooltip';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -46,7 +48,6 @@ export const getActions = (
     icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
-    enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
     description: i18n.DUPLICATE_RULE,
@@ -65,6 +66,7 @@ export const getActions = (
     enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
+    'data-test-subj': 'deleteRuleAction',
     description: i18n.DELETE_RULE,
     icon: 'trash',
     name: i18n.DELETE_RULE,
@@ -75,7 +77,12 @@ export const getActions = (
   },
 ];
 
+export type RuleStatusRowItemType = RuleStatus & {
+  name: string;
+  id: string;
+};
 type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
 
 interface GetColumns {
   dispatch: React.Dispatch<Action>;
@@ -132,10 +139,11 @@ export const getColumns = ({
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <FormattedDate value={value} fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} />
+          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
+            <FormattedRelative value={value} />
+          </LocalizedDateTooltip>
         );
       },
-      sortable: true,
       truncateText: true,
       width: '20%',
     },
@@ -171,7 +179,7 @@ export const getColumns = ({
     },
     {
       align: 'center',
-      field: 'activate',
+      field: 'enabled',
       name: i18n.COLUMN_ACTIVATE,
       render: (value: Rule['enabled'], item: Rule) => (
         <RuleSwitch
@@ -195,4 +203,114 @@ export const getColumns = ({
   ];
 
   return hasNoPermissions ? cols : [...cols, ...actions];
+};
+
+export const getMonitoringColumns = (): RulesStatusesColumns[] => {
+  const cols: RulesStatusesColumns[] = [
+    {
+      field: 'name',
+      name: i18n.COLUMN_RULE,
+      render: (value: RuleStatus['current_status']['status'], item: RuleStatusRowItemType) => {
+        return (
+          <EuiLink data-test-subj="ruleName" href={getRuleDetailsUrl(item.id)}>
+            {value}
+          </EuiLink>
+        );
+      },
+      truncateText: true,
+      width: '24%',
+    },
+    {
+      field: 'current_status.bulk_create_time_durations',
+      name: i18n.COLUMN_INDEXING_TIMES,
+      render: (value: RuleStatus['current_status']['bulk_create_time_durations']) => (
+        <EuiText data-test-subj="bulk_create_time_durations" size="s">
+          {value != null && value.length > 0
+            ? Math.max(...value?.map(item => Number.parseFloat(item)))
+            : null}
+        </EuiText>
+      ),
+      truncateText: true,
+      width: '14%',
+    },
+    {
+      field: 'current_status.search_after_time_durations',
+      name: i18n.COLUMN_QUERY_TIMES,
+      render: (value: RuleStatus['current_status']['search_after_time_durations']) => (
+        <EuiText data-test-subj="search_after_time_durations" size="s">
+          {value != null && value.length > 0
+            ? Math.max(...value?.map(item => Number.parseFloat(item)))
+            : null}
+        </EuiText>
+      ),
+      truncateText: true,
+      width: '14%',
+    },
+    {
+      field: 'current_status.gap',
+      name: i18n.COLUMN_GAP,
+      render: (value: RuleStatus['current_status']['gap']) => (
+        <EuiText data-test-subj="gap" size="s">
+          {value}
+        </EuiText>
+      ),
+      truncateText: true,
+      width: '14%',
+    },
+    {
+      field: 'current_status.last_look_back_date',
+      name: i18n.COLUMN_LAST_LOOKBACK_DATE,
+      render: (value: RuleStatus['current_status']['last_look_back_date']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <FormattedDate value={value} fieldName={'last look back date'} />
+        );
+      },
+      truncateText: true,
+      width: '16%',
+    },
+    {
+      field: 'current_status.status_date',
+      name: i18n.COLUMN_LAST_COMPLETE_RUN,
+      render: (value: RuleStatus['current_status']['status_date']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} date={new Date(value)}>
+            <FormattedRelative value={value} />
+          </LocalizedDateTooltip>
+        );
+      },
+      truncateText: true,
+      width: '20%',
+    },
+    {
+      field: 'current_status.status',
+      name: i18n.COLUMN_LAST_RESPONSE,
+      render: (value: RuleStatus['current_status']['status']) => {
+        return (
+          <>
+            <EuiHealth color={getStatusColor(value ?? null)}>
+              {value ?? getEmptyTagValue()}
+            </EuiHealth>
+          </>
+        );
+      },
+      width: '16%',
+      truncateText: true,
+    },
+    {
+      field: 'activate',
+      name: i18n.COLUMN_ACTIVATE,
+      render: (value: Rule['enabled']) => (
+        <EuiText data-test-subj="search_after_time_durations" size="s">
+          {value ? i18n.ACTIVE : i18n.INACTIVE}
+        </EuiText>
+      ),
+      width: '95px',
+    },
+  ];
+
+  return cols;
 };

@@ -5,7 +5,6 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetMonitorStatusParams {
   filters?: string;
@@ -51,7 +50,7 @@ const getLocationClause = (locations: string[]) => ({
 export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
-> = async ({ callES, filters, locations, numTimes, timerange: { from, to } }) => {
+> = async ({ callES, dynamicSettings, filters, locations, numTimes, timerange: { from, to } }) => {
   const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
   let afterKey: MonitorStatusKey | undefined;
 
@@ -60,7 +59,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     // multiple status types for this alert, and this will become a parameter
     const STATUS = 'down';
     const esParams: any = {
-      index: INDEX_NAMES.HEARTBEAT,
+      index: dynamicSettings.heartbeatIndices,
       body: {
         query: {
           bool: {

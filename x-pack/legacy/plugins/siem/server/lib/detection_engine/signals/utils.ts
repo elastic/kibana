@@ -89,3 +89,5 @@ export const getGapBetweenRuns = ({
   const drift = diff.subtract(intervalDuration);
   return drift.subtract(driftTolerance);
 };
+
+export const makeFloatString = (num: number): string => Number(num).toFixed(2);

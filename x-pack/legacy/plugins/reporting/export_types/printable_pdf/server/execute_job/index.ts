@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
+import {
+  ESQueueWorkerExecuteFn,
+  ExecuteJobFactory,
+  JobDocOutput,
+  Logger,
+  ServerFacade,
+} from '../../../../types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
@@ -23,25 +30,23 @@ type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger
 ) {
-  const config = await reporting.getConfig();
-  const captureConfig = config.get('capture');
-  const encryptionKey = config.get('encryptionKey');
-
   const browserDriverFactory = await reporting.getBrowserDriverFactory();
-  const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
+  const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
   return function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
+      mergeMap(() => decryptJobHeaders({ server, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => getCustomLogo({ reporting, config, job, conditionalHeaders })),
+      map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
+      mergeMap(conditionalHeaders => getCustomLogo({ reporting, server, job, conditionalHeaders })),
       mergeMap(({ logo, conditionalHeaders }) => {
-        const urls = getFullUrls({ config, job });
+        const urls = getFullUrls({ server, job });
 
         const { browserTimezone, layout, title } = job;
         return generatePdfObservable(
