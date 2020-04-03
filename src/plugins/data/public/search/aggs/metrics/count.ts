@@ -28,26 +28,31 @@ export interface CountMetricAggDependencies {
 }
 
 export const getCountMetricAgg = ({ getInternalStartServices }: CountMetricAggDependencies) =>
-  new MetricAggType({
-    name: METRIC_TYPES.COUNT,
-    title: i18n.translate('data.search.aggs.metrics.countTitle', {
-      defaultMessage: 'Count',
-    }),
-    hasNoDsl: true,
-    makeLabel() {
-      return i18n.translate('data.search.aggs.metrics.countLabel', {
+  new MetricAggType(
+    {
+      name: METRIC_TYPES.COUNT,
+      title: i18n.translate('data.search.aggs.metrics.countTitle', {
         defaultMessage: 'Count',
-      });
-    },
-    getFormat() {
-      const { fieldFormats } = getInternalStartServices();
+      }),
+      hasNoDsl: true,
+      makeLabel() {
+        return i18n.translate('data.search.aggs.metrics.countLabel', {
+          defaultMessage: 'Count',
+        });
+      },
+      getFormat() {
+        const { fieldFormats } = getInternalStartServices();
 
-      return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+        return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+      },
+      getValue(agg, bucket) {
+        return bucket.doc_count;
+      },
+      isScalable() {
+        return true;
+      },
     },
-    getValue(agg, bucket) {
-      return bucket.doc_count;
-    },
-    isScalable() {
-      return true;
-    },
-  });
+    {
+      getInternalStartServices,
+    }
+  );

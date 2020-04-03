@@ -64,8 +64,7 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
   constructor(
     config: MetricAggTypeConfig<TMetricAggConfig>,
-    // todo: '?' should be removed when PR will be ready to merge
-    dependencies?: MetricAggTypeDependencies
+    dependencies: MetricAggTypeDependencies
   ) {
     super(config, dependencies);
 
@@ -87,11 +86,9 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
     this.getFormat =
       config.getFormat ||
       (agg => {
-        const fieldFormatsService = getFieldFormats();
+        const { fieldFormats } = dependencies.getInternalStartServices();
         const field = agg.getField();
-        return field
-          ? field.format
-          : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+        return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       });
 
     this.subtype =

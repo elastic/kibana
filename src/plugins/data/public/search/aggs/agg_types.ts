@@ -21,22 +21,22 @@ import { IUiSettingsClient, NotificationsSetup } from 'src/core/public';
 import { QuerySetup } from '../../query/query_service';
 
 import { getCountMetricAgg } from './metrics/count';
-import { avgMetricAgg } from './metrics/avg';
-import { sumMetricAgg } from './metrics/sum';
-import { medianMetricAgg } from './metrics/median';
-import { minMetricAgg } from './metrics/min';
-import { maxMetricAgg } from './metrics/max';
-import { topHitMetricAgg } from './metrics/top_hit';
-import { stdDeviationMetricAgg } from './metrics/std_deviation';
+import { getAvgMetricAgg } from './metrics/avg';
+import { getSumMetricAgg } from './metrics/sum';
+import { getMedianMetricAgg } from './metrics/median';
+import { getMinMetricAgg } from './metrics/min';
+import { getMaxMetricAgg } from './metrics/max';
+import { getTopHitMetricAgg } from './metrics/top_hit';
+import { getStdDeviationMetricAgg } from './metrics/std_deviation';
 import { getCardinalityMetricAgg } from './metrics/cardinality';
-import { percentilesMetricAgg } from './metrics/percentiles';
-import { geoBoundsMetricAgg } from './metrics/geo_bounds';
-import { geoCentroidMetricAgg } from './metrics/geo_centroid';
-import { percentileRanksMetricAgg } from './metrics/percentile_ranks';
-import { derivativeMetricAgg } from './metrics/derivative';
-import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
-import { movingAvgMetricAgg } from './metrics/moving_avg';
-import { serialDiffMetricAgg } from './metrics/serial_diff';
+import { getPercentilesMetricAgg } from './metrics/percentiles';
+import { getGeoBoundsMetricAgg } from './metrics/geo_bounds';
+import { getGeoCentroidMetricAgg } from './metrics/geo_centroid';
+import { getPercentileRanksMetricAgg } from './metrics/percentile_ranks';
+import { getDerivativeMetricAgg } from './metrics/derivative';
+import { getCumulativeSumMetricAgg } from './metrics/cumulative_sum';
+import { getMovingAvgMetricAgg } from './metrics/moving_avg';
+import { getSerialDiffMetricAgg } from './metrics/serial_diff';
 import { getDateHistogramBucketAgg } from './buckets/date_histogram';
 import { getHistogramBucketAgg } from './buckets/histogram';
 import { getRangeBucketAgg } from './buckets/range';
@@ -48,10 +48,10 @@ import { getFiltersBucketAgg } from './buckets/filters';
 import { getSignificantTermsBucketAgg } from './buckets/significant_terms';
 import { getGeoHashBucketAgg } from './buckets/geo_hash';
 import { getGeoTitleBucketAgg } from './buckets/geo_tile';
-import { bucketSumMetricAgg } from './metrics/bucket_sum';
-import { bucketAvgMetricAgg } from './metrics/bucket_avg';
-import { bucketMinMetricAgg } from './metrics/bucket_min';
-import { bucketMaxMetricAgg } from './metrics/bucket_max';
+import { getBucketSumMetricAgg } from './metrics/bucket_sum';
+import { getBucketAvgMetricAgg } from './metrics/bucket_avg';
+import { getBucketMinMetricAgg } from './metrics/bucket_min';
+import { getBucketMaxMetricAgg } from './metrics/bucket_max';
 
 import { GetInternalStartServicesFn } from '../../types';
 
@@ -70,26 +70,26 @@ export const getAggTypes = ({
 }: AggTypesDependencies) => ({
   metrics: [
     getCountMetricAgg({ getInternalStartServices }),
-    avgMetricAgg,
-    sumMetricAgg,
-    medianMetricAgg,
-    minMetricAgg,
-    maxMetricAgg,
-    stdDeviationMetricAgg,
+    getAvgMetricAgg({ getInternalStartServices }),
+    getSumMetricAgg({ getInternalStartServices }),
+    getMedianMetricAgg({ getInternalStartServices }),
+    getMinMetricAgg({ getInternalStartServices }),
+    getMaxMetricAgg({ getInternalStartServices }),
+    getStdDeviationMetricAgg({ getInternalStartServices }),
     getCardinalityMetricAgg({ getInternalStartServices }),
-    percentilesMetricAgg,
-    percentileRanksMetricAgg,
-    topHitMetricAgg,
-    derivativeMetricAgg,
-    cumulativeSumMetricAgg,
-    movingAvgMetricAgg,
-    serialDiffMetricAgg,
-    bucketAvgMetricAgg,
-    bucketSumMetricAgg,
-    bucketMinMetricAgg,
-    bucketMaxMetricAgg,
-    geoBoundsMetricAgg,
-    geoCentroidMetricAgg,
+    getPercentilesMetricAgg({ getInternalStartServices }),
+    getPercentileRanksMetricAgg({ getInternalStartServices }),
+    getTopHitMetricAgg({ getInternalStartServices }),
+    getDerivativeMetricAgg({ getInternalStartServices }),
+    getCumulativeSumMetricAgg({ getInternalStartServices }),
+    getMovingAvgMetricAgg({ getInternalStartServices }),
+    getSerialDiffMetricAgg({ getInternalStartServices }),
+    getBucketAvgMetricAgg({ getInternalStartServices }),
+    getBucketSumMetricAgg({ getInternalStartServices }),
+    getBucketMinMetricAgg({ getInternalStartServices }),
+    getBucketMaxMetricAgg({ getInternalStartServices }),
+    getGeoBoundsMetricAgg({ getInternalStartServices }),
+    getGeoCentroidMetricAgg({ getInternalStartServices }),
   ],
   buckets: [
     getDateHistogramBucketAgg({ uiSettings, query, getInternalStartServices }),
