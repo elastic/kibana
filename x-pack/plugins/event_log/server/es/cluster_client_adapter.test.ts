@@ -218,9 +218,9 @@ describe('queryEventsBySavedObject', () => {
         query: {
           bool: {
             must: [
-              { match: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
+              { term: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
               {
-                match: {
+                term: {
                   'kibana.saved_objects.id.keyword': 'saved-object-id',
                 },
               },
@@ -256,9 +256,9 @@ describe('queryEventsBySavedObject', () => {
         query: {
           bool: {
             must: [
-              { match: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
+              { term: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
               {
-                match: {
+                term: {
                   'kibana.saved_objects.id.keyword': 'saved-object-id',
                 },
               },
@@ -304,9 +304,9 @@ describe('queryEventsBySavedObject', () => {
         query: {
           bool: {
             must: [
-              { match: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
+              { term: { 'kibana.saved_objects.type.keyword': 'saved-object-type' } },
               {
-                match: {
+                term: {
                   'kibana.saved_objects.id.keyword': 'saved-object-id',
                 },
               },

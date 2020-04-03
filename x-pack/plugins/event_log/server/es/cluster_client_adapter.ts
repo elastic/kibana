@@ -132,9 +132,9 @@ export class ClusterClientAdapter {
             bool: {
               must: reject(
                 [
-                  { match: { 'kibana.saved_objects.type.keyword': type } },
+                  { term: { 'kibana.saved_objects.type.keyword': type } },
                   {
-                    match: {
+                    term: {
                       'kibana.saved_objects.id.keyword': id,
                     },
                   },

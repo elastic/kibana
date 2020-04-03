@@ -17,7 +17,6 @@ beforeEach(() => {
 
 describe('find', () => {
   it('finds events with proper parameters', async () => {
-    // const licenseState = mockLicenseState();
     const router: RouterMock = mockRouter.create();
 
     findRoute(router);
@@ -51,7 +50,6 @@ describe('find', () => {
   });
 
   it('supports optional pagination parameters', async () => {
-    // const licenseState = mockLicenseState();
     const router: RouterMock = mockRouter.create();
 
     findRoute(router);
