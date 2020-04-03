@@ -103,7 +103,7 @@ test('calls actionsPlugin.execute per selected action', async () => {
               },
             ],
           },
-          "message": "alert: test:1: name-of-alert instanceId: 2 scheduled actionGroup: default action: test:1",
+          "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
         },
       ],
     ]

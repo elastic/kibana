@@ -170,7 +170,7 @@ export class TaskRunner {
 
     const originalAlertInstanceIds = Object.keys(alertInstances);
     const eventLogger = this.context.eventLogger;
-    const alertLabel = `${this.alertType.id}:${alertId}: ${name}`;
+    const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
       kibana: { namespace, saved_objects: [{ type: 'alert', id: alertId }] },
@@ -363,12 +363,12 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
 
   for (const id of newIds) {
-    const message = `${params.alertLabel} created new instance: ${id}`;
+    const message = `${params.alertLabel} created new instance: '${id}'`;
     logInstanceEvent(id, EVENT_LOG_ACTIONS.newInstance, message);
   }
 
   for (const id of resolvedIds) {
-    const message = `${params.alertLabel} resolved instance: ${id}`;
+    const message = `${params.alertLabel} resolved instance: '${id}'`;
     logInstanceEvent(id, EVENT_LOG_ACTIONS.resolvedInstance, message);
   }
 

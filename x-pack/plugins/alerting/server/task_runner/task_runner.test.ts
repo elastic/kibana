@@ -177,7 +177,7 @@ describe('Task Runner', () => {
             },
           ],
         },
-        "message": "alert executed: test:1: alert-name",
+        "message": "alert executed: test:1: 'alert-name'",
       }
     `);
   });
@@ -237,7 +237,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "alert executed: test:1: alert-name",
+            "message": "alert executed: test:1: 'alert-name'",
           },
         ],
         Array [
@@ -257,7 +257,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: alert-name created new instance: 1",
+            "message": "test:1: 'alert-name' created new instance: '1'",
           },
         ],
         Array [
@@ -281,7 +281,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "alert: test:1: alert-name instanceId: 1 scheduled actionGroup: default action: undefined:1",
+            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: undefined:1",
           },
         ],
       ]
@@ -352,7 +352,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "alert executed: test:1: alert-name",
+            "message": "alert executed: test:1: 'alert-name'",
           },
         ],
         Array [
@@ -372,7 +372,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: alert-name resolved instance: 2",
+            "message": "test:1: 'alert-name' resolved instance: '2'",
           },
         ],
       ]
@@ -568,7 +568,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "alert execution failure: test:1: alert-name",
+            "message": "alert execution failure: test:1: 'alert-name'",
           },
         ],
       ]

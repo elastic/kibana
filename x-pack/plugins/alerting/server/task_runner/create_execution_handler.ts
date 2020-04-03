@@ -68,7 +68,7 @@ export function createExecutionHandler({
         };
       });
 
-    const alertLabel = `${alertType.id}:${alertId}: ${alertName}`;
+    const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
     for (const action of actions) {
       if (!actionsPlugin.isActionTypeEnabled(action.actionTypeId)) {
@@ -101,7 +101,7 @@ export function createExecutionHandler({
         },
       };
 
-      event.message = `alert: ${alertLabel} instanceId: ${alertInstanceId} scheduled actionGroup: ${actionGroup} action: ${actionLabel}`;
+      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled actionGroup: '${actionGroup}' action: ${actionLabel}`;
       eventLogger.logEvent(event);
     }
   };
