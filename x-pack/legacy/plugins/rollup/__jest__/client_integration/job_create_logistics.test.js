@@ -11,7 +11,7 @@ import {
   WEEK,
   MONTH,
   YEAR,
-} from '../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+} from '../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import { setHttp } from '../../public/crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
