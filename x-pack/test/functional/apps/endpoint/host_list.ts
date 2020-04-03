@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'endpoint', 'header']);
+  const pageObjects = getPageObjects(['common', 'endpoint']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
@@ -18,7 +18,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('endpoint/metadata/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('finds title', async () => {
@@ -69,7 +68,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'xxxx',
         ],
       ];
-      await pageObjects.header.waitUntilLoadingHasFinished();
       const tableData = await pageObjects.endpoint.getEndpointAppTableData('hostListTable');
       expect(tableData).to.eql(expectedData);
     });
@@ -116,7 +114,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // clear out the data and reload the page
         await esArchiver.unload('endpoint/metadata/api_feature');
         await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
-        await pageObjects.header.waitUntilLoadingHasFinished();
       });
       after(async () => {
         // reload the data so the other tests continue to pass
@@ -138,7 +135,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           '/hosts',
           'selected_host=fc0ff548-feba-41b6-8367-65e8790d0eaf'
         );
-        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('shows a flyout', async () => {
