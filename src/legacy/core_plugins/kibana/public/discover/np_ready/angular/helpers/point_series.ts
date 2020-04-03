@@ -19,7 +19,9 @@
 
 import { uniq } from 'lodash';
 import moment, { Duration } from 'moment';
+import { Unit } from '@elastic/datemath';
 
+import { SerializedFieldFormat } from '../../../../../../../../plugins/expressions/common/types';
 import { getSeries } from './_get_series';
 import { getAspects } from './_get_aspects';
 import { Serie } from './_add_to_siri';
@@ -30,7 +32,7 @@ export interface Column {
 }
 
 export interface Row {
-  [key: string]: number | string;
+  [key: string]: number;
 }
 
 export interface Table {
@@ -45,11 +47,11 @@ export interface Table {
   };
 }
 
-interface DateParams {
+interface HistogramParams {
   date: true;
   interval: Duration;
   intervalESValue: number;
-  intervalESUnit: string;
+  intervalESUnit: Unit;
   format: string;
   bounds?: {
     min: string | number;
@@ -57,12 +59,9 @@ interface DateParams {
   };
 }
 export interface Dimension {
-  accessor: number;
-  format: {
-    id?: string;
-    params?: { pattern?: string; [key: string]: any };
-  };
-  params?: DateParams;
+  accessor: 0 | 1;
+  format: SerializedFieldFormat<{ pattern: string }>;
+  params?: HistogramParams;
 }
 
 export interface Dimensions {
@@ -82,7 +81,7 @@ export interface Aspects {
 }
 interface Ordered {
   date: true;
-  interval: Duration;
+  interval: Duration | number;
   intervalESUnit: string;
   intervalESValue: number;
   min?: number;
@@ -91,9 +90,9 @@ interface Ordered {
 export interface Chart {
   aspects: Aspects;
   series: Serie[];
-  xAxisOrderedValues?: Array<string | number>;
-  xAxisFormat?: Dimension['format'];
-  xAxisLabel?: Column['name'];
+  xAxisOrderedValues: number[];
+  xAxisFormat: Dimension['format'];
+  xAxisLabel: Column['name'];
   yAxisLabel?: Column['name'];
   ordered: Ordered;
 }
@@ -108,12 +107,12 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   chart.xAxisFormat = format;
   chart.xAxisLabel = title;
 
-  const { intervalESUnit, intervalESValue, interval, bounds } = params as DateParams;
+  const { intervalESUnit, intervalESValue, interval, bounds } = params as HistogramParams;
   chart.ordered = {
+    date: true,
     interval: moment.duration(interval),
     intervalESUnit,
     intervalESValue,
-    date: true,
   };
 
   if (bounds) {
@@ -125,8 +124,7 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
       : (bounds.max as number);
   }
 
-  const { y } = chart.aspects;
-  chart.yAxisLabel = y.length > 1 ? '' : y[0].title;
+  chart.yAxisLabel = chart.aspects.y && chart.aspects.y[0].title;
 
   chart.series = getSeries(table, chart);
 

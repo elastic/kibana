@@ -24,7 +24,7 @@ import { Table, Dimensions, Aspects } from './point_series';
  * they represent.
  *
  * @return {object} - an object with a key for each aspect (see map). The values
- *                    may be undefined, a single aspect, or an array of aspects.
+ *                    may be undefined or an array of aspects.
  */
 export function getAspects(table: Table, dimensions: Dimensions) {
   const aspects: Aspects = {} as Aspects;

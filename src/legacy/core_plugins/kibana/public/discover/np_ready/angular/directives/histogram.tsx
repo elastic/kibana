@@ -46,9 +46,10 @@ import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription } from 'rxjs';
 import { getServices } from '../../../kibana_services';
+import { Chart as IChart } from '../helpers/point_series';
 
 export interface DiscoverHistogramProps {
-  chartData: any;
+  chartData: IChart;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
 }
 
@@ -163,7 +164,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   };
 
   public formatXValue = (val: string) => {
-    const xAxisFormat = this.props.chartData.xAxisFormat.params.pattern;
+    const xAxisFormat = this.props.chartData.xAxisFormat.params!.pattern;
 
     return moment(val).format(xAxisFormat);
   };
@@ -219,14 +220,15 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
      * see https://github.com/elastic/kibana/issues/27410
      * TODO: Once the Discover query has been update, we should change the below to use the new field
      */
-    const { intervalESValue, intervalESUnit, interval: xInterval } = chartData.ordered;
+    const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
+    const xInterval = interval as number;
 
     const xValues = chartData.xAxisOrderedValues;
     const lastXValue = xValues[xValues.length - 1];
 
     const domain = chartData.ordered;
-    const domainStart = domain.min.valueOf();
-    const domainEnd = domain.max.valueOf();
+    const domainStart = domain.min!.valueOf();
+    const domainEnd = domain.max!.valueOf();
 
     const domainMin = data[0].x > domainStart ? domainStart : data[0].x;
     const domainMax = domainEnd - xInterval > lastXValue ? domainEnd - xInterval : lastXValue;

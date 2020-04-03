@@ -27,7 +27,7 @@ interface Raw {
   value: RowValue;
 }
 export interface Point {
-  x: RowValue | '_all';
+  x: RowValue;
   y: RowValue;
   extraMetrics: [];
   xRaw: Raw;
