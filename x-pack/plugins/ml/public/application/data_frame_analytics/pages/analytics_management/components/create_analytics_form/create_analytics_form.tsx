@@ -42,6 +42,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
   DfAnalyticsExplainResponse,
   FieldSelectionItem,
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
@@ -663,30 +664,37 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                       'Specify the maximum number of feature importance values per document to return.',
                   }
                 )}
-                error={
-                  numTopFeatureImportanceValuesValid &&
-                  !sourceIndexNameEmpty && [
-                    i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesErrorText',
-                      {
-                        defaultMessage: 'Invalid maximum number of feature importance values.',
-                      }
-                    ),
-                  ]
-                }
+                isInvalid={numTopFeatureImportanceValuesValid === false}
+                error={[
+                  ...(numTopFeatureImportanceValuesValid === false
+                    ? [
+                        <Fragment>
+                          {i18n.translate(
+                            'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesErrorText',
+                            {
+                              defaultMessage:
+                                'Invalid maximum number of feature importance values.',
+                            }
+                          )}
+                        </Fragment>,
+                      ]
+                    : []),
+                ]}
               >
                 <EuiFieldNumber
-                  disabled={false}
-                  value={numTopFeatureImportanceValues}
-                  onChange={e => setFormState({ numTopFeatureImportanceValues: +e.target.value })}
                   aria-label={i18n.translate(
                     'xpack.ml.dataframe.analytics.create.numTopFeatureImportanceValuesInputAriaLabel',
                     {
                       defaultMessage: 'Maximum number of feature importance values per document.',
                     }
                   )}
-                  isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
                   data-test-subj="mlAnalyticsCreateJobFlyoutnumTopFeatureImportanceValuesInput"
+                  disabled={false}
+                  isInvalid={numTopFeatureImportanceValuesValid === false}
+                  min={NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN}
+                  onChange={e => setFormState({ numTopFeatureImportanceValues: +e.target.value })}
+                  step={1}
+                  value={numTopFeatureImportanceValues}
                 />
               </EuiFormRow>
             </Fragment>

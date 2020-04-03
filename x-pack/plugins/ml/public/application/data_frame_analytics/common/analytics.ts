@@ -67,6 +67,8 @@ export const SEARCH_SIZE = 1000;
 export const TRAINING_PERCENT_MIN = 1;
 export const TRAINING_PERCENT_MAX = 100;
 
+export const NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN = 0;
+
 export const defaultSearchQuery = {
   match_all: {},
 };
@@ -154,7 +156,7 @@ type AnalysisConfig =
   | ClassificationAnalysis
   | GenericAnalysis;
 
-export const getAnalysisType = (analysis: AnalysisConfig) => {
+export const getAnalysisType = (analysis: AnalysisConfig): string => {
   const keys = Object.keys(analysis);
 
   if (keys.length === 1) {
@@ -164,7 +166,11 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
   return 'unknown';
 };
 
-export const getDependentVar = (analysis: AnalysisConfig) => {
+export const getDependentVar = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['dependent_variable']
+  | ClassificationAnalysis['classification']['dependent_variable'] => {
   let depVar = '';
 
   if (isRegressionAnalysis(analysis)) {
@@ -177,7 +183,11 @@ export const getDependentVar = (analysis: AnalysisConfig) => {
   return depVar;
 };
 
-export const getTrainingPercent = (analysis: AnalysisConfig) => {
+export const getTrainingPercent = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['training_percent']
+  | ClassificationAnalysis['classification']['training_percent'] => {
   let trainingPercent;
 
   if (isRegressionAnalysis(analysis)) {
@@ -190,7 +200,11 @@ export const getTrainingPercent = (analysis: AnalysisConfig) => {
   return trainingPercent;
 };
 
-export const getPredictionFieldName = (analysis: AnalysisConfig) => {
+export const getPredictionFieldName = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['prediction_field_name']
+  | ClassificationAnalysis['classification']['prediction_field_name'] => {
   // If undefined will be defaulted to dependent_variable when config is created
   let predictionFieldName;
   if (isRegressionAnalysis(analysis) && analysis.regression.prediction_field_name !== undefined) {
@@ -204,9 +218,12 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
   return predictionFieldName;
 };
 
-export const getNumTopFeatureImportanceValues = (analysis: AnalysisConfig) => {
-  // If undefined will be defaulted to dependent_variable when config is created
-  let numTopFeatureImportanceValues = 0;
+export const getNumTopFeatureImportanceValues = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['num_top_feature_importance_values']
+  | ClassificationAnalysis['classification']['num_top_feature_importance_values'] => {
+  let numTopFeatureImportanceValues;
   if (
     isRegressionAnalysis(analysis) &&
     analysis.regression.num_top_feature_importance_values !== undefined

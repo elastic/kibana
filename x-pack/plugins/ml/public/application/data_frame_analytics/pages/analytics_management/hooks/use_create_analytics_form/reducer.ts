@@ -36,6 +36,7 @@ import {
   isRegressionAnalysis,
   isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
@@ -474,7 +475,8 @@ export function reducer(state: State, action: Action): State {
 
       if (action.payload.numTopFeatureImportanceValues !== undefined) {
         newFormState.numTopFeatureImportanceValuesValid =
-          (newFormState?.numTopFeatureImportanceValues ?? 0) > 0;
+          (newFormState?.numTopFeatureImportanceValues ?? NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN) >=
+          NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN;
       }
 
       return state.isAdvancedEditorEnabled
