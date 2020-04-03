@@ -34,7 +34,6 @@ import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
 import { IngestManagerSetup } from '../../../../ingest_manager/public';
-import { Loading } from './components/loading';
 import { HeaderNavigation } from './components/header_nav';
 
 /**
