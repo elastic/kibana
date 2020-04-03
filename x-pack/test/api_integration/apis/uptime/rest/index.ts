@@ -36,7 +36,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       }
     });
 
-    describe.only('with generated data', () => {
+    describe('with generated data', () => {
       before('load heartbeat data', async () => await esArchiver.load('uptime/blank'));
       after('unload', async () => await esArchiver.unload('uptime/blank'));
 
