@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as yargs from 'yargs';
+import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { EndpointDocGenerator } from '../common/generate_data';
+import { EndpointDocGenerator, Event } from '../common/generate_data';
 import { default as mapping } from './mapping.json';
 
 main();
@@ -137,14 +138,24 @@ async function main() {
     // eslint-disable-next-line no-console
     console.log('No seed supplied, using random seed: ' + seed);
   }
-  const generator = new EndpointDocGenerator(seed);
+  const random = seedrandom(seed);
   for (let i = 0; i < argv.numHosts; i++) {
-    await client.index({
-      index: argv.metadataIndex,
-      body: generator.generateHostMetadata(),
-    });
+    const generator = new EndpointDocGenerator(random);
+    const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
+    const numMetadataDocs = 5;
+    const timestamp = new Date().getTime();
+    for (let j = 0; j < numMetadataDocs; j++) {
+      generator.updateHostData();
+      await client.index({
+        index: argv.metadataIndex,
+        body: generator.generateHostMetadata(
+          timestamp - timeBetweenDocs * (numMetadataDocs - j - 1)
+        ),
+      });
+    }
+
     for (let j = 0; j < argv.alertsPerHost; j++) {
-      const resolverDocs = generator.generateFullResolverTree(
+      const resolverDocGenerator = generator.fullResolverTreeGenerator(
         argv.ancestors,
         argv.generations,
         argv.children,
@@ -152,15 +163,23 @@ async function main() {
         argv.percentWithRelated,
         argv.percentTerminated
       );
-      const body = resolverDocs.reduce(
-        (array: Array<Record<string, any>>, doc) => (
-          array.push({ index: { _index: argv.eventIndex } }, doc), array
-        ),
-        []
-      );
-
-      await client.bulk({ body });
+      let result = resolverDocGenerator.next();
+      while (!result.done) {
+        let k = 0;
+        const resolverDocs: Event[] = [];
+        while (k < 1000 && !result.done) {
+          resolverDocs.push(result.value);
+          result = resolverDocGenerator.next();
+          k++;
+        }
+        const body = resolverDocs.reduce(
+          (array: Array<Record<string, any>>, doc) => (
+            array.push({ index: { _index: argv.eventIndex } }, doc), array
+          ),
+          []
+        );
+        await client.bulk({ body });
+      }
     }
-    generator.randomizeHostData();
   }
 }
