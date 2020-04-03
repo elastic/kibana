@@ -59,7 +59,7 @@ const usePackageIcon = (packageName: string, version?: string, icons?: Package['
     }
 
     // Use API to see if package has icons defined
-    if (!icons && version !== undefined) {
+    if (!icons && version) {
       fromPackageInfo(pkgKey)
         .catch(() => undefined) // ignore API errors
         .then(fromInput);

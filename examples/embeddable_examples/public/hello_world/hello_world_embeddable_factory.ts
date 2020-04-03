@@ -21,11 +21,11 @@ import { i18n } from '@kbn/i18n';
 import {
   IContainer,
   EmbeddableInput,
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
 } from '../../../../src/plugins/embeddable/public';
 import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from './hello_world_embeddable';
 
-export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
+export class HelloWorldEmbeddableFactory implements EmbeddableFactoryDefinition {
   public readonly type = HELLO_WORLD_EMBEDDABLE;
 
   /**

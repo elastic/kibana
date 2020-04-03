@@ -168,12 +168,6 @@ Array [
     "validationName": "numberFloatRt",
   },
   Object {
-    "key": "trace_methods_duration_threshold",
-    "type": "integer",
-    "validationError": "Must be an integer",
-    "validationName": "integerRt",
-  },
-  Object {
     "key": "transaction_max_spans",
     "max": 32000,
     "min": 0,
