@@ -860,7 +860,7 @@ export class RemoteClusterForm extends Component {
       <Fragment>
         {this.renderSaveErrorFeedback()}
 
-        <EuiForm>
+        <EuiForm data-test-subj="remoteClusterForm">
           <EuiDescribedFormGroup
             title={
               <EuiTitle size="s">

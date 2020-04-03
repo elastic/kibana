@@ -19,6 +19,7 @@ describe('Edit Remote cluster', () => {
   let component;
   let find;
   let exists;
+  let waitFor;
 
   beforeAll(() => {
     ({ server, httpRequestsMockHelpers } = setupEnvironment());
@@ -31,11 +32,10 @@ describe('Edit Remote cluster', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadRemoteClustersResponse([REMOTE_CLUSTER_EDIT]);
 
-    ({ component, find, exists } = setup());
+    ({ component, find, exists, waitFor } = setup());
 
     await act(async () => {
-      await nextTick(100); // We need to wait next tick for the mock server response to kick in
-      component.update();
+      await waitFor('remoteClusterForm');
     });
   });
 
@@ -53,7 +53,7 @@ describe('Edit Remote cluster', () => {
    * the "create" remote cluster, we won't test it again but simply make sure that
    * the form component is indeed shared between the 2 app sections.
    */
-  test('should use the same Form component as the "<RemoteClusterEdit />" component', async () => {
+  test('should use the same Form component as the "<RemoteClusterAdd />" component', async () => {
     const { component: addRemoteClusterComponent } = setupRemoteClustersAdd();
 
     await act(async () => {

@@ -77,6 +77,7 @@ describe('<RemoteClusterList />', () => {
     let actions;
     let tableCellsValues;
     let rows;
+    let waitFor;
 
     // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
     // in the table list that is rendered. As the table orders alphabetically by index name
@@ -110,11 +111,10 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       // Mount the component
-      ({ component, find, exists, table, actions } = setup());
+      ({ component, find, exists, table, actions, waitFor } = setup());
 
       await act(async () => {
-        await nextTick(100); // Make sure that the Http request is fulfilled
-        component.update();
+        await waitFor('remoteClusterListTable');
       });
 
       // Read the remote clusters list table
