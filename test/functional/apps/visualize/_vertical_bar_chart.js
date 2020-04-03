@@ -54,6 +54,25 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
+    describe('bar charts range on x axis', () => {
+      it('should individual bars for each configured range', async function() {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVerticalBarChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Aggregation = Date Range');
+        await PageObjects.visEditor.selectAggregation('Date Range');
+        log.debug('Field = @timestamp');
+        await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.clickAddDateRange();
+        await PageObjects.visEditor.setDateRangeByIndex('1', 'now-2w/w', 'now-1w/w');
+        await PageObjects.visEditor.clickGo();
+        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
+        expect(bottomLabels.length).to.be(2);
+      });
+    });
+
     // FLAKY: https://github.com/elastic/kibana/issues/22322
     describe.skip('vertical bar chart flaky part', function() {
       const vizName1 = 'Visualization VerticalBarChart';

@@ -41,7 +41,7 @@ export const signalRulesAlertType = ({
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
-    name: 'SIEM Signals',
+    name: 'SIEM signal',
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     validate: {
@@ -126,7 +126,7 @@ export const signalRulesAlertType = ({
                 'Machine learning rule is missing job id and/or anomaly threshold:',
                 `job id: "${machineLearningJobId}"`,
                 `anomaly threshold: "${anomalyThreshold}"`,
-              ].join('\n')
+              ].join(' ')
             );
           }
 
