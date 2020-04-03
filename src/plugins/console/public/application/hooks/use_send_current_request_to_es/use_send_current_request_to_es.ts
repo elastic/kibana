@@ -39,7 +39,7 @@ export const useSendCurrentRequestToES = () => {
       const requests = await editor.getRequestsInRange();
       if (!requests.length) {
         notifications.toasts.add(
-          i18n.translate('console.notification.error.noReqeustSelectedTitle', {
+          i18n.translate('console.notification.error.noRequestSelectedTitle', {
             defaultMessage:
               'No request selected. Select a request by placing the cursor inside it.',
           })
