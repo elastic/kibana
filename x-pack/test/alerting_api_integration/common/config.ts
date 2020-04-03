@@ -82,7 +82,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               id: 'my-slack1',
               actionTypeId: '.slack',
               name: 'Slack #xyz',
-              description: 'Send a message to the #xyz channel',
               config: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
               },
@@ -90,7 +89,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             {
               id: 'custom-system-abc-connector',
               actionTypeId: 'system-abc-action-type',
-              description: 'Send a notification to system ABC',
               name: 'System ABC',
               config: {
                 xyzConfig1: 'value1',

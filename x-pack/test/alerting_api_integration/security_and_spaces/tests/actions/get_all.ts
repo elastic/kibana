@@ -60,6 +60,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql([
                 {
                   id: createdAction.id,
+                  isPreconfigured: false,
                   name: 'My action',
                   actionTypeId: 'test.index-record',
                   config: {
@@ -69,9 +70,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 },
                 {
                   id: 'my-slack1',
+                  isPreconfigured: true,
                   actionTypeId: '.slack',
                   name: 'Slack #xyz',
-                  description: 'Send a message to the #xyz channel',
                   config: {
                     webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
                   },
@@ -79,8 +80,8 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 },
                 {
                   id: 'custom-system-abc-connector',
+                  isPreconfigured: true,
                   actionTypeId: 'system-abc-action-type',
-                  description: 'Send a notification to system ABC',
                   name: 'System ABC',
                   config: {
                     xyzConfig1: 'value1',
@@ -158,6 +159,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql([
                 {
                   id: createdAction.id,
+                  isPreconfigured: false,
                   name: 'My action',
                   actionTypeId: 'test.index-record',
                   config: {
@@ -167,9 +169,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 },
                 {
                   id: 'my-slack1',
+                  isPreconfigured: true,
                   actionTypeId: '.slack',
                   name: 'Slack #xyz',
-                  description: 'Send a message to the #xyz channel',
                   config: {
                     webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
                   },
@@ -177,8 +179,8 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 },
                 {
                   id: 'custom-system-abc-connector',
+                  isPreconfigured: true,
                   actionTypeId: 'system-abc-action-type',
-                  description: 'Send a notification to system ABC',
                   name: 'System ABC',
                   config: {
                     xyzConfig1: 'value1',
@@ -232,9 +234,9 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql([
                 {
                   id: 'my-slack1',
+                  isPreconfigured: true,
                   actionTypeId: '.slack',
                   name: 'Slack #xyz',
-                  description: 'Send a message to the #xyz channel',
                   config: {
                     webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
                   },
@@ -242,8 +244,8 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 },
                 {
                   id: 'custom-system-abc-connector',
+                  isPreconfigured: true,
                   actionTypeId: 'system-abc-action-type',
-                  description: 'Send a notification to system ABC',
                   name: 'System ABC',
                   config: {
                     xyzConfig1: 'value1',

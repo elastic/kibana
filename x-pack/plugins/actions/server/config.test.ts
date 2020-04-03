@@ -29,7 +29,6 @@ describe('config validation', () => {
           id: 'my-slack1',
           actionTypeId: '.slack',
           name: 'Slack #xyz',
-          description: 'Send a message to the #xyz channel',
           config: {
             webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
           },
@@ -48,7 +47,6 @@ describe('config validation', () => {
             "config": Object {
               "webhookUrl": "https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz",
             },
-            "description": "Send a message to the #xyz channel",
             "id": "my-slack1",
             "name": "Slack #xyz",
             "secrets": Object {},

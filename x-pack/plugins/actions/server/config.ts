@@ -26,7 +26,6 @@ export const configSchema = schema.object({
       id: schema.string(),
       name: schema.string(),
       actionTypeId: schema.string(),
-      description: schema.nullable(schema.string()),
       config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
       secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
     }),

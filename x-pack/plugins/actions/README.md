@@ -28,7 +28,7 @@ Table of Contents
   - [RESTful API](#restful-api)
     - [`POST /api/action`: Create action](#post-apiaction-create-action)
     - [`DELETE /api/action/{id}`: Delete action](#delete-apiactionid-delete-action)
-    - [`GET /api/action/_find`: Find actions](#get-apiactionfind-find-actions)
+    - [`GET /api/action/_getAll`: Get all actions](#get-apiaction-get-all-actions)
     - [`GET /api/action/{id}`: Get action](#get-apiactionid-get-action)
     - [`GET /api/action/types`: List action types](#get-apiactiontypes-list-action-types)
     - [`PUT /api/action/{id}`: Update action](#put-apiactionid-update-action)
@@ -174,11 +174,13 @@ Params:
 | -------- | --------------------------------------------- | ------ |
 | id       | The id of the action you're trying to delete. | string |
 
-### `GET /api/action/_find`: Find actions
+### `GET /api/action/_getAll`: Get all actions
 
-Params:
+No parameters.
 
-See the [saved objects API documentation for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html). All the properties are the same except that you cannot pass in `type`.
+Return all actions from saved objects merged with predefined list.
+Use the [saved objects API for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html) with the proprties: `type: 'action'` and `perPage: 10000`.
+List of predefined connectors should be set up in Kibana.yaml.
 
 ### `GET /api/action/{id}`: Get action
 

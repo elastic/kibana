@@ -11,9 +11,16 @@ import {
   SavedObject,
 } from 'src/core/server';
 
+import { i18n } from '@kbn/i18n';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets } from './lib';
 import { ActionResult, FindActionResult, RawAction, PreConfiguredAction } from './types';
+import { PredefinedConnectorDisabledModificationError } from './lib/errors/predefined_connector_disabled_modification';
+
+// We are assuming there won't be many actions. This is why we will load
+// all the actions in advance and assume the total count to not go over 100 or so.
+// We'll set this max setting assuming it's never reached.
+export const MAX_ACTIONS_RETURNED = 10000;
 
 interface ActionUpdate extends SavedObjectAttributes {
   name: string;
@@ -27,30 +34,6 @@ interface Action extends ActionUpdate {
 
 interface CreateOptions {
   action: Action;
-}
-
-interface FindOptions {
-  options?: {
-    perPage?: number;
-    page?: number;
-    search?: string;
-    defaultSearchOperator?: 'AND' | 'OR';
-    searchFields?: string[];
-    sortField?: string;
-    hasReference?: {
-      type: string;
-      id: string;
-    };
-    fields?: string[];
-    filter?: string;
-  };
-}
-
-interface FindResult {
-  page: number;
-  perPage: number;
-  total: number;
-  data: FindActionResult[];
 }
 
 interface ConstructorOptions {
@@ -119,7 +102,15 @@ export class ActionsClient {
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
     if (this.preconfiguredConnectors.find(pConnector => pConnector.id === id) !== undefined) {
-      throw Error(`Preconfigured connector ${id} is not allowed to update.`);
+      throw new PredefinedConnectorDisabledModificationError(
+        i18n.translate('xpack.actions.serverSideErrors.predefinedConnectorUpdatedisabled', {
+          defaultMessage: 'Preconfigured connector {id} is not allowed to update.',
+          values: {
+            id,
+          },
+        }),
+        'update'
+      );
     }
     const existingObject = await this.savedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = existingObject.attributes;
@@ -159,7 +150,6 @@ export class ActionsClient {
         actionTypeId: preconfiguredConnector.actionTypeId,
         name: preconfiguredConnector.name,
         config: preconfiguredConnector.config,
-        description: preconfiguredConnector.description,
         isPreconfigured: true,
       };
     }
@@ -180,12 +170,21 @@ export class ActionsClient {
   public async getAll(): Promise<FindActionResult[]> {
     const savedObjectsActions = (
       await this.savedObjectsClient.find<RawAction>({
-        perPage: 10000,
+        perPage: MAX_ACTIONS_RETURNED,
         type: 'action',
       })
     ).saved_objects.map(actionFromSavedObject);
 
-    const mergedResult = [...savedObjectsActions, ...this.preconfiguredConnectors];
+    const mergedResult = [
+      ...savedObjectsActions,
+      ...this.preconfiguredConnectors.map(preconfiguredConnector => ({
+        id: preconfiguredConnector.id,
+        actionTypeId: preconfiguredConnector.actionTypeId,
+        name: preconfiguredConnector.name,
+        config: preconfiguredConnector.config,
+        isPreconfigured: true,
+      })),
+    ].sort((a, b) => a.name.localeCompare(b.name));
     return await injectExtraFindData(
       this.defaultKibanaIndex,
       this.scopedClusterClient,
@@ -194,34 +193,19 @@ export class ActionsClient {
   }
 
   /**
-   * Find actions (only saved objects actions)
-   */
-  public async find({ options = {} }: FindOptions): Promise<FindResult> {
-    const findResult = await this.savedObjectsClient.find<RawAction>({
-      ...options,
-      type: 'action',
-    });
-
-    const data = await injectExtraFindData(
-      this.defaultKibanaIndex,
-      this.scopedClusterClient,
-      findResult.saved_objects.map(actionFromSavedObject)
-    );
-
-    return {
-      page: findResult.page,
-      perPage: findResult.per_page,
-      total: findResult.total,
-      data,
-    };
-  }
-
-  /**
    * Delete action
    */
   public async delete({ id }: { id: string }) {
     if (this.preconfiguredConnectors.find(pConnector => pConnector.id === id) !== undefined) {
-      throw Error(`Preconfigured connector ${id} is not allowed to delete.`);
+      throw new PredefinedConnectorDisabledModificationError(
+        i18n.translate('xpack.actions.serverSideErrors.predefinedConnectorUpdatedisabled', {
+          defaultMessage: 'Preconfigured connector {id} is not allowed to delete.',
+          values: {
+            id,
+          },
+        }),
+        'delete'
+      );
     }
     return await this.savedObjectsClient.delete('action', id);
   }

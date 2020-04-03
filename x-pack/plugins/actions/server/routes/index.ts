@@ -6,7 +6,6 @@
 
 export { createActionRoute } from './create';
 export { deleteActionRoute } from './delete';
-export { findActionRoute } from './find';
 export { getAllActionRoute } from './get_all';
 export { getActionRoute } from './get';
 export { updateActionRoute } from './update';

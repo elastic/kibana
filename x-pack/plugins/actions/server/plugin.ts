@@ -44,7 +44,6 @@ import { getActionsConfigurationUtilities } from './actions_config';
 import {
   createActionRoute,
   deleteActionRoute,
-  findActionRoute,
   getAllActionRoute,
   getActionRoute,
   updateActionRoute,
@@ -205,7 +204,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     createActionRoute(router, this.licenseState);
     deleteActionRoute(router, this.licenseState);
     getActionRoute(router, this.licenseState);
-    findActionRoute(router, this.licenseState);
     getAllActionRoute(router, this.licenseState);
     updateActionRoute(router, this.licenseState);
     listActionTypesRoute(router, this.licenseState);

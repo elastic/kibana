@@ -11,7 +11,6 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
   describe('Actions', () => {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./list_action_types'));

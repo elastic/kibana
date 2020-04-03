@@ -356,58 +356,6 @@ describe('get()', () => {
   });
 });
 
-describe('find()', () => {
-  test('calls savedObjectsClient with parameters', async () => {
-    const expectedResult = {
-      total: 1,
-      per_page: 10,
-      page: 1,
-      saved_objects: [
-        {
-          id: '1',
-          type: 'type',
-          attributes: {
-            config: {
-              foo: 'bar',
-            },
-          },
-          references: [],
-        },
-      ],
-    };
-    savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
-    scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
-      aggregations: {
-        '1': { doc_count: 6 },
-      },
-    });
-    const result = await actionsClient.find({});
-    expect(result).toEqual({
-      total: 1,
-      perPage: 10,
-      page: 1,
-      data: [
-        {
-          id: '1',
-          isPreconfigured: false,
-          config: {
-            foo: 'bar',
-          },
-          referencedByCount: 6,
-        },
-      ],
-    });
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "type": "action",
-        },
-      ]
-    `);
-  });
-});
-
 describe('getAll()', () => {
   test('calls savedObjectsClient with parameters', async () => {
     const expectedResult = {

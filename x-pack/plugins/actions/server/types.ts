@@ -56,7 +56,6 @@ export interface ActionResult {
   name: string;
   config: Record<string, any>;
   isPreconfigured: boolean;
-  description?: string;
 }
 
 export interface PreConfiguredAction extends ActionResult {

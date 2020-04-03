@@ -48,6 +48,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         })
         .expect(200, {
           id: createdAction.id,
+          isPreconfigured: false,
           actionTypeId: 'test.index-record',
           name: 'My action updated',
           config: {

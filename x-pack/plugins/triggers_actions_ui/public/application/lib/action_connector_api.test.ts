@@ -56,7 +56,7 @@ describe('loadAllActions', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/_find",
+        "/api/action/_getAll",
         Object {
           "query": Object {
             "per_page": 10000,
