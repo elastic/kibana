@@ -25,7 +25,7 @@ import {
 import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
 
 const indexPattern = {
   id: '1234',
@@ -222,10 +222,6 @@ describe('Terms Agg Other bucket helper', () => {
   const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {
     return new AggConfigs(indexPattern, [...aggs], { typesRegistry });
   };
-
-  beforeEach(() => {
-    mockDataServices();
-  });
 
   describe('buildOtherBucketAgg', () => {
     test('returns a function', () => {
