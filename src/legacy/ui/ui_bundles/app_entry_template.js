@@ -28,21 +28,13 @@ export const appEntryTemplate = bundle => `
  * context: ${bundle.getContext()}
  */
 
-// import global polyfills
-import Symbol_observable from 'symbol-observable';
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
-import 'childnode-remove-polyfill';
 ${apmImport()}
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
 
 const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
 
-${apmInit('injectedMetadata.apm')}
+${apmInit('injectedMetadata.vars.apmConfig')}
 
 i18n.load(injectedMetadata.i18n.translationsUrl)
   .catch(e => e)
