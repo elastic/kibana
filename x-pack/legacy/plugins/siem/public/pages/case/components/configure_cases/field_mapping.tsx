@@ -76,7 +76,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   );
   return (
     <>
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth data-test-subj="case-configure-field-mapping-cols">
         <EuiFlexGroup>
           <EuiFlexItem>
             <span className="euiFormLabel">{i18n.FIELD_MAPPING_FIRST_COL}</span>
@@ -89,7 +89,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <FieldRowWrapper>
+      <FieldRowWrapper data-test-subj="case-configure-field-mapping-row-wrapper">
         {(mapping ?? defaultMapping).map(item => (
           <FieldMappingRow
             key={item.source}

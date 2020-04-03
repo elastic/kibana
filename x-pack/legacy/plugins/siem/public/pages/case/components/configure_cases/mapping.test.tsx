@@ -15,7 +15,7 @@ import { mapping } from './__mock__';
 describe('Mapping', () => {
   const mount = useMountAppended();
 
-  test('it renders', () => {
+  test('it shows the left side', () => {
     const wrapper = shallow(
       <Mapping
         disabled={false}
@@ -24,21 +24,6 @@ describe('Mapping', () => {
         updateConnectorDisabled={false}
         setEditFlyoutVisibility={jest.fn()}
       />
-    );
-
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  test('it shows the left side', () => {
-    const wrapper = mount(
-      <Mapping
-        disabled={false}
-        mapping={mapping}
-        onChangeMapping={jest.fn()}
-        updateConnectorDisabled={false}
-        setEditFlyoutVisibility={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
     );
 
     expect(

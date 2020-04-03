@@ -27,7 +27,12 @@ describe('ConnectorsDropdown', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(
+      wrapper
+        .find('[data-test-subj="dropdown-connectors"]')
+        .first()
+        .exists()
+    ).toBe(true);
   });
 
   test('it formats the connectors correctly', () => {

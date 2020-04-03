@@ -16,7 +16,7 @@ import { connectors } from './__mock__';
 describe('Connectors', () => {
   const mount = useMountAppended();
 
-  test('it renders', () => {
+  test('it shows the left side', () => {
     const wrapper = shallow(
       <Connectors
         connectors={[]}
@@ -26,22 +26,6 @@ describe('Connectors', () => {
         onChangeConnector={jest.fn()}
         handleShowAddFlyout={jest.fn()}
       />
-    );
-
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  test('it shows the left side', () => {
-    const wrapper = mount(
-      <Connectors
-        connectors={[]}
-        disabled={false}
-        selectedConnector={'none'}
-        isLoading={false}
-        onChangeConnector={jest.fn()}
-        handleShowAddFlyout={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
     );
 
     expect(

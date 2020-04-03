@@ -23,7 +23,12 @@ describe('ClosureOptionsRadio', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(
+      wrapper
+        .find('[data-test-subj="closure-options-radio-group"]')
+        .first()
+        .exists()
+    ).toBe(true);
   });
 
   test('it shows the correct number of radio buttons', () => {

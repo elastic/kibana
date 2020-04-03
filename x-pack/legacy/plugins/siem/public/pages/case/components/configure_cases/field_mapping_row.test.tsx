@@ -42,7 +42,19 @@ describe('FieldMappingRow', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(
+      wrapper
+        .find('[data-test-subj="case-configure-third-party-select"]')
+        .first()
+        .exists()
+    ).toBe(true);
+
+    expect(
+      wrapper
+        .find('[data-test-subj="case-configure-action-type-select"]')
+        .first()
+        .exists()
+    ).toBe(true);
   });
 
   test('it passes thirdPartyOptions correctly', () => {

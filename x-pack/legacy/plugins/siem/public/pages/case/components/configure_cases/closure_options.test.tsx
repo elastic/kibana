@@ -15,26 +15,13 @@ import { ClosureOptionsRadio } from './closure_options_radio';
 describe('ClosureOptions', () => {
   const mount = useMountAppended();
 
-  test('it renders', () => {
+  test('it shows the left side', () => {
     const wrapper = shallow(
       <ClosureOptions
         disabled={false}
         closureTypeSelected="close-by-user"
         onChangeClosureType={jest.fn()}
       />
-    );
-
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  test('it shows the left side', () => {
-    const wrapper = mount(
-      <ClosureOptions
-        disabled={false}
-        closureTypeSelected="close-by-user"
-        onChangeClosureType={jest.fn()}
-      />,
-      { wrappingComponent: TestProviders }
     );
 
     expect(

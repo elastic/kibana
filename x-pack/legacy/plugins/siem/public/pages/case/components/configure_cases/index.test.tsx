@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { shallow } from 'enzyme';
 
 import { useKibana } from '../../../../lib/kibana';
 import {
@@ -74,12 +73,6 @@ describe('ConfigureCases', () => {
     useConnectorsMock.mockImplementation(() => useConnectorsResponse);
     useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
     useGetUrlSearchMock.mockImplementation(() => searchURL);
-  });
-
-  test('it renders', () => {
-    const wrapper = shallow(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
-    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders correctly', () => {
