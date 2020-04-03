@@ -12,6 +12,10 @@ const mockCore = {
   chrome: {
     setBreadcrumbs: () => {}
   },
+  docLinks: {
+    DOC_LINK_VERSION: '0',
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/'
+  },
   http: {
     basePath: {
       prepend: (path: string) => `/basepath${path}`
@@ -36,7 +40,6 @@ const mockConfig: ConfigSchema = {
 export const mockApmPluginContextValue = {
   config: mockConfig,
   core: mockCore,
-  packageInfo: { version: '0' },
   plugins: {}
 };
 
