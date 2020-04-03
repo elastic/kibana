@@ -20,7 +20,7 @@ By default that is set to `@timestamp`.
 * The interval for the X Axis is set to `auto`.
 The bucket size is determined by the time range.
 * To use *Open in Visualize* you need access to the Visualize app.
-* To use *Create alert* you need alerting {kibana-ref}/alerting-getting-started.html#alerting-setup-prerequisites[setup].
+* To use *Create alert* you need to {kibana-ref}/alerting-getting-started.html#alerting-setup-prerequisites[set up alerting].
 
 [float]
 [[metrics-explorer-tutorial]]
