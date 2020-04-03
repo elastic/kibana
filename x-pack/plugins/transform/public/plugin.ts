@@ -9,16 +9,6 @@ import { CoreSetup } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementSetup } from 'src/plugins/management/public';
 
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-
-import { renderApp } from './app/app';
-import { AppDependencies } from './app/app_dependencies';
-import { breadcrumbService } from './app/services/navigation';
-import { docTitleService } from './app/services/navigation';
-import { textService } from './app/services/text';
-
-const localStorage = new Storage(window.localStorage);
-
 export interface PluginsDependencies {
   data: DataPublicPluginStart;
   management: ManagementSetup;
@@ -37,34 +27,9 @@ export class TransformUiPlugin {
           defaultMessage: 'Transforms',
         }),
         order: 3,
-        mount: async ({ element, setBreadcrumbs }) => {
-          const { http, notifications, getStartServices } = coreSetup;
-          const startServices = await getStartServices();
-          const [core, plugins] = startServices;
-          const { chrome, docLinks, i18n, overlays, savedObjects, uiSettings } = core;
-          const { data } = plugins;
-          const { docTitle } = chrome;
-
-          // Initialize services
-          textService.init();
-          docTitleService.init(docTitle.change);
-          breadcrumbService.setup(setBreadcrumbs);
-
-          // AppCore/AppPlugins to be passed on as React context
-          const appDependencies: AppDependencies = {
-            chrome,
-            data,
-            docLinks,
-            http,
-            i18n,
-            notifications,
-            overlays,
-            savedObjects,
-            storage: localStorage,
-            uiSettings,
-          };
-
-          return renderApp(element, appDependencies);
+        mount: async params => {
+          const { mountManagementSection } = await import('./app/mount_management_section');
+          return mountManagementSection(coreSetup, params);
         },
       });
     }
