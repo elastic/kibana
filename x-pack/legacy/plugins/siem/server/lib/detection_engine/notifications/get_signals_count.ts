@@ -8,8 +8,8 @@ import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 interface GetSignalsCount {
-  from: string;
-  to: string;
+  from?: string;
+  to?: string;
   ruleId: string;
   index: string;
   callCluster: AlertServices['callCluster'];
@@ -26,6 +26,10 @@ export const getSignalsCount = async ({
   index,
   callCluster,
 }: GetSignalsCount): Promise<number> => {
+  if (from == null || to == null) {
+    throw Error('"from" or "to" was not provided to signals count query');
+  }
+
   const query = buildSignalsSearchQuery({
     index,
     ruleId,

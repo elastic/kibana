@@ -50,16 +50,16 @@ export const rulesNotificationAlertType = ({
     const toInMs = parseScheduleDates(startedAt.toISOString())?.format('x');
 
     const signalsCount = await getSignalsCount({
-      from: fromInMs!,
-      to: toInMs!,
+      from: fromInMs,
+      to: toInMs,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId!,
       callCluster: services.callCluster,
     });
 
     const resultsLink = getNotificationResultsLink({
-      from: fromInMs!,
-      to: toInMs!,
+      from: fromInMs,
+      to: toInMs,
       id: ruleAlertSavedObject.id,
       kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl as string,
     });

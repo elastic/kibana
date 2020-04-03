@@ -253,8 +253,8 @@ export const signalRulesAlertType = ({
             const toInMs = parseScheduleDates('now')?.format('x');
 
             const resultsLink = getNotificationResultsLink({
-              from: fromInMs!,
-              to: toInMs!,
+              from: fromInMs,
+              to: toInMs,
               id: savedObject.id,
               kibanaSiemAppUrl: meta?.kibanaSiemAppUrl as string,
             });
