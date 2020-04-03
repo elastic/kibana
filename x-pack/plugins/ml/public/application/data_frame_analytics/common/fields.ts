@@ -266,7 +266,7 @@ export const getDefaultFieldsFromJobCaps = (
 
   const featureImportanceFields = [];
 
-  if (numTopFeatureImportanceValues > 0) {
+  if ((numTopFeatureImportanceValues ?? 0) > 0) {
     featureImportanceFields.push(
       ...fields.map(d => ({
         id: `${resultsField}.feature_importance.${d.id}`,
