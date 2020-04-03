@@ -714,8 +714,7 @@ module.exports = {
         'no-useless-catch': 'error',
         'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-escape': 'warn',
+        'no-useless-escape': 'error',
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
         // This will be turned on after bug fixers are mostly complete
