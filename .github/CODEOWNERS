@@ -196,6 +196,7 @@
 /x-pack/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/plugins/upgrade_assistant/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
+/x-pack/plugins/ingest_pipelines/  @elastic/es-ui
 
 # Endpoint
 /x-pack/plugins/endpoint/ @elastic/endpoint-app-team
