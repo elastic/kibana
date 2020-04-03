@@ -5,8 +5,9 @@
  */
 
 import { get } from 'lodash';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { ESCallCluster, ExportTypesRegistry } from '../../types';
-import { ReportingConfig, ReportingSetupDeps } from '../types';
+import { ReportingConfig } from '../types';
 import { decorateRangeStats } from './decorate_range_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import {
@@ -18,6 +19,8 @@ import {
   RangeAggregationResults,
   RangeStats,
 } from './types';
+
+type XPackInfo = XPackMainPlugin['info'];
 
 const JOB_TYPES_KEY = 'jobTypes';
 const JOB_TYPES_FIELD = 'jobtype';
@@ -100,7 +103,7 @@ async function handleResponse(response: AggregationResults): Promise<RangeStatSe
 
 export async function getReportingUsage(
   config: ReportingConfig,
-  plugins: ReportingSetupDeps,
+  xpackMainInfo: XPackInfo,
   callCluster: ESCallCluster,
   exportTypesRegistry: ExportTypesRegistry
 ) {
@@ -137,7 +140,6 @@ export async function getReportingUsage(
     },
   };
 
-  const { info: xpackMainInfo } = plugins.__LEGACY.plugins.xpack_main;
   return callCluster('search', params)
     .then((response: AggregationResults) => handleResponse(response))
     .then((usage: RangeStatSets) => {

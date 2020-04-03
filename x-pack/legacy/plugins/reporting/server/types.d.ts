@@ -16,7 +16,7 @@ import { ReportingConfig, ReportingConfigType } from './core';
 export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
   security: SecurityPluginSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
   __LEGACY: LegacySetup;
 }
 
