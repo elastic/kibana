@@ -24,7 +24,7 @@ import { StepScheduleRule } from '../components/step_schedule_rule';
 import { StepRuleActions } from '../components/step_rule_actions';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
-import { redirectToDetections, getActionMessageParams } from '../helpers';
+import { redirectToDetections, getActionMessageParams, userHasNoPermissions } from '../helpers';
 import {
   AboutStepRule,
   DefineStepRule,
@@ -271,7 +271,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (!canUserCRUD) {
+  } else if (userHasNoPermissions(canUserCRUD)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
