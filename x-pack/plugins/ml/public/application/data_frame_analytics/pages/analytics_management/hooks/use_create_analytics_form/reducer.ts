@@ -222,19 +222,21 @@ export const validateAdvancedEditor = (state: State): State => {
       numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
         numTopFeatureImportanceValues
       );
-      state.advancedEditorMessages.push({
-        error: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.numTopFeatureImportanceValuesInvalid',
-          {
-            defaultMessage:
-              'The value for num_top_feature_importance_values must be an integer of {min} or higher.',
-            values: {
-              min: 0,
-            },
-          }
-        ),
-        message: '',
-      });
+      if (numTopFeatureImportanceValuesValid === false) {
+        state.advancedEditorMessages.push({
+          error: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.advancedEditorMessage.numTopFeatureImportanceValuesInvalid',
+            {
+              defaultMessage:
+                'The value for num_top_feature_importance_values must be an integer of {min} or higher.',
+              values: {
+                min: 0,
+              },
+            }
+          ),
+          message: '',
+        });
+      }
     }
   }
 

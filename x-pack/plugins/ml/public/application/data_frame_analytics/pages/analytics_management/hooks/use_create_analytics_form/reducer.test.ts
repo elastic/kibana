@@ -23,10 +23,12 @@ const getMockState = ({
   index,
   trainingPercent = 75,
   modelMemoryLimit = '100mb',
+  numTopFeatureImportanceValues = 2,
 }: {
   index: SourceIndex;
   trainingPercent?: number;
   modelMemoryLimit?: string;
+  numTopFeatureImportanceValues?: number;
 }) =>
   merge(getInitialState(), {
     form: {
@@ -39,7 +41,11 @@ const getMockState = ({
       source: { index },
       dest: { index: 'the-destination-index' },
       analysis: {
-        classification: { dependent_variable: 'the-variable', training_percent: trainingPercent },
+        classification: {
+          dependent_variable: 'the-variable',
+          num_top_feature_importance_values: numTopFeatureImportanceValues,
+          training_percent: trainingPercent,
+        },
       },
       model_memory_limit: modelMemoryLimit,
     },
@@ -176,6 +182,27 @@ describe('useCreateAnalyticsForm', () => {
     expect(
       validateAdvancedEditor(getMockState({ index: 'the-source-index', trainingPercent: 0 }))
         .isValid
+    ).toBe(false);
+  });
+
+  test('validateAdvancedEditor(): check num_top_feature_importance_values validation', () => {
+    // valid num_top_feature_importance_values value
+    expect(
+      validateAdvancedEditor(
+        getMockState({ index: 'the-source-index', numTopFeatureImportanceValues: 1 })
+      ).isValid
+    ).toBe(true);
+    // invalid num_top_feature_importance_values numeric value
+    expect(
+      validateAdvancedEditor(
+        getMockState({ index: 'the-source-index', numTopFeatureImportanceValues: -1 })
+      ).isValid
+    ).toBe(false);
+    // invalid training_percent numeric value if not an integer
+    expect(
+      validateAdvancedEditor(
+        getMockState({ index: 'the-source-index', numTopFeatureImportanceValues: 1.1 })
+      ).isValid
     ).toBe(false);
   });
 });
