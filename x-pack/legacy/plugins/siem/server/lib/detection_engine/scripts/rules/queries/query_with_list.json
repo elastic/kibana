@@ -1,7 +1,7 @@
 {
   "name": "Query with a list",
   "description": "Query with a list",
-  "rule_id": "query-with-list-5",
+  "rule_id": "query-with-list",
   "risk_score": 1,
   "severity": "high",
   "type": "query",
