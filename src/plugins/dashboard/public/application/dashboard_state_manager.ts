@@ -116,7 +116,7 @@ export class DashboardStateManager {
 
     // get state defaults from saved dashboard, make sure it is migrated
     this.stateDefaults = migrateAppState(
-      { ...getAppStateDefaults(this.savedDashboard, this.hideWriteControls) },
+      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
       kibanaVersion,
       usageCollection
     );
@@ -300,7 +300,7 @@ export class DashboardStateManager {
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
     this.stateDefaults = migrateAppState(
-      { ...getAppStateDefaults(this.savedDashboard, this.hideWriteControls) },
+      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
       this.kibanaVersion,
       this.usageCollection
     );
@@ -542,7 +542,7 @@ export class DashboardStateManager {
   public syncTimefilterWithDashboardRefreshInterval(timeFilter: Timefilter) {
     if (!this.getIsTimeSavedWithDashboard()) {
       throw new Error(
-        i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
+        i18n.translate('dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
           defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
         })
       );
