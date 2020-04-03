@@ -159,7 +159,7 @@ const requestNodeMetrics = async (
               date_histogram: {
                 field: options.sourceConfiguration.fields.timestamp,
                 interval: options.timerange.interval || '1m',
-                offset: getDateHistogramOffset(options),
+                offset: getDateHistogramOffset(options.timerange.from, options.timerange.interval),
                 extended_bounds: {
                   min: options.timerange.from,
                   max: options.timerange.to,

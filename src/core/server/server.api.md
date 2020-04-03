@@ -622,14 +622,15 @@ export interface ContextSetup {
 export type CoreId = symbol;
 
 // @public
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+    // (undocumented)
+    getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
@@ -1425,10 +1426,10 @@ export type PluginName = string;
 // @public (undocumented)
 export type PluginOpaqueId = symbol;
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface PluginsServiceSetup {
-    // (undocumented)
     contracts: Map<PluginName, unknown>;
+    initialized: boolean;
     // (undocumented)
     uiPlugins: {
         internal: Map<PluginName, InternalPluginInfo>;
@@ -1437,9 +1438,8 @@ export interface PluginsServiceSetup {
     };
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface PluginsServiceStart {
-    // (undocumented)
     contracts: Map<PluginName, unknown>;
 }
 
@@ -2028,6 +2028,8 @@ export interface SavedObjectsLegacyService {
     // (undocumented)
     getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
     // (undocumented)
+    importAndExportableTypes: string[];
+    // (undocumented)
     importExport: {
         objectLimit: number;
         importSavedObjects(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
@@ -2270,6 +2272,9 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 }>;
 
 // @public
+export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+// @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
 
 // @public
@@ -2344,9 +2349,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:164:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:166:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:44:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:228:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/plugins_service.ts:47:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:232:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IReducerState {
-  errors: Error[];
+import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
+
+export interface AsyncInitialState<ReduceStateType> {
+  data: ReduceStateType | null;
   loading: boolean;
+  error?: IHttpFetchError | null;
 }

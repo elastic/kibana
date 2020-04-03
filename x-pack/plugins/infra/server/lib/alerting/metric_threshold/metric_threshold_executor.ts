@@ -11,6 +11,10 @@ import { getAllCompositeData } from '../../../utils/get_all_composite_data';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Comparator, AlertStates } from './types';
 import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { getDateHistogramOffset } from '../../snapshot/query_helpers';
+
+const TOTAL_BUCKETS = 5;
 
 interface Aggregation {
   aggregatedIntervals: {
@@ -70,6 +74,12 @@ export const getElasticsearchMetricQuery = (
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
   const interval = `${timeSize}${timeUnit}`;
+  const to = Date.now();
+  const intervalAsSeconds = getIntervalInSeconds(interval);
+  // We need enough data for 5 buckets worth of data. We also need
+  // to convert the intervalAsSeconds to milliseconds.
+  const from = to - intervalAsSeconds * 1000 * TOTAL_BUCKETS;
+  const offset = getDateHistogramOffset(from, interval);
 
   const aggregations =
     aggType === 'count'
@@ -89,6 +99,11 @@ export const getElasticsearchMetricQuery = (
       date_histogram: {
         field: '@timestamp',
         fixed_interval: interval,
+        offset,
+        extended_bounds: {
+          min: from,
+          max: to,
+        },
       },
       aggregations,
     },
@@ -118,7 +133,9 @@ export const getElasticsearchMetricQuery = (
     {
       range: {
         '@timestamp': {
-          gte: `now-${interval}`,
+          gte: from,
+          lte: to,
+          format: 'epoch_millis',
         },
       },
     },
@@ -206,6 +223,17 @@ const comparatorMap = {
   [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
 };
 
+const mapToConditionsLookup = (
+  list: any[],
+  mapFn: (value: any, index: number, array: any[]) => unknown
+) =>
+  list
+    .map(mapFn)
+    .reduce(
+      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
+      {}
+    );
+
 export const createMetricThresholdExecutor = (alertUUID: string) =>
   async function({ services, params }: AlertExecutorOptions) {
     const { criteria, groupBy, filterQuery } = params as {
@@ -244,7 +272,9 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
       if (shouldAlertFire) {
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
-          value: alertResults.map(result => result[group].currentValue),
+          valueOf: mapToConditionsLookup(alertResults, result => result[group].currentValue),
+          thresholdOf: mapToConditionsLookup(criteria, criterion => criterion.threshold),
+          metricOf: mapToConditionsLookup(criteria, criterion => criterion.metric),
         });
       }
       // Future use: ability to fetch display current alert state

@@ -35,10 +35,13 @@ import {
 
 import { DiscoverStartPlugins } from './plugin';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
-import { VisualizationsStart } from '../../../visualizations/public';
-import { createSavedSearchesLoader, SavedSearch } from '../../../../../plugins/discover/public';
+import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
+import {
+  createSavedSearchesLoader,
+  DocViewerComponent,
+  SavedSearch,
+} from '../../../../../plugins/discover/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -47,7 +50,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
-  docViewsRegistry: DocViewsRegistry;
+  DocViewer: DocViewerComponent;
   history: History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
@@ -64,8 +67,7 @@ export interface DiscoverServices {
 }
 export async function buildServices(
   core: CoreStart,
-  plugins: DiscoverStartPlugins,
-  docViewsRegistry: DocViewsRegistry
+  plugins: DiscoverStartPlugins
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
@@ -81,7 +83,7 @@ export async function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
-    docViewsRegistry,
+    DocViewer: plugins.discover.docViews.DocViewer,
     history: createHashHistory(),
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,

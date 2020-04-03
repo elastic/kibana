@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
-import { useTimefilter } from '../contexts/kibana';
+import { useTimefilter, useMlKibana } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
 
@@ -50,8 +50,14 @@ function startTrialDescription() {
 
 export const DatavisualizerSelector: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
+  const {
+    services: { licenseManagement },
+  } = useMlKibana();
 
-  const startTrialVisible = isFullLicense() === false;
+  const startTrialVisible =
+    licenseManagement !== undefined &&
+    licenseManagement.enabled === true &&
+    isFullLicense() === false;
 
   return (
     <Fragment>

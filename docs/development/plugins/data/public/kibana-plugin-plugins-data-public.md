@@ -18,7 +18,9 @@
 |  [IndexPatternSelect](./kibana-plugin-plugins-data-public.indexpatternselect.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-public.plugin.md) |  |
+|  [RequestTimeoutError](./kibana-plugin-plugins-data-public.requesttimeouterror.md) | Class used to signify that a request timed out. Useful for applications to conditionally handle this type of error differently than other errors. |
 |  [SearchError](./kibana-plugin-plugins-data-public.searcherror.md) |  |
+|  [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) |  |
 |  [SearchSource](./kibana-plugin-plugins-data-public.searchsource.md) |  |
 |  [TimeHistory](./kibana-plugin-plugins-data-public.timehistory.md) |  |
 

@@ -83,8 +83,11 @@ export const transformFields = ({
     const transform = flow(...cur.pipes.map(p => t[p]));
     prev[cur.key] = transform({
       value: cur.value,
-      date: params.createdAt,
-      user: params.createdBy.fullName ?? params.createdBy.username,
+      date: params.updatedAt ?? params.createdAt,
+      user:
+        params.updatedBy != null
+          ? params.updatedBy.fullName ?? params.updatedBy.username
+          : params.createdBy.fullName ?? params.createdBy.username,
       previousValue: currentIncident ? currentIncident[cur.key] : '',
     }).value;
     return prev;
@@ -112,8 +115,11 @@ export const transformComments = (
     ...c,
     comment: flow(...pipes.map(p => t[p]))({
       value: c.comment,
-      date: params.createdAt,
-      user: params.createdBy.fullName ?? '',
+      date: c.updatedAt ?? c.createdAt,
+      user:
+        c.updatedBy != null
+          ? c.updatedBy.fullName ?? c.updatedBy.username
+          : c.createdBy.fullName ?? c.createdBy.username,
     }).value,
   }));
 };

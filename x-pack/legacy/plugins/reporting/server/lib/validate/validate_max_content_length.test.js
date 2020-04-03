@@ -32,7 +32,11 @@ describe('Reporting: Validate Max Content Length', () => {
   });
 
   it('should log warning messages when reporting has a higher max-size than elasticsearch', async () => {
-    const config = { get: sinon.stub().returns(FIVE_HUNDRED_MEGABYTES) };
+    const server = {
+      config: () => ({
+        get: sinon.stub().returns(FIVE_HUNDRED_MEGABYTES),
+      }),
+    };
     const elasticsearch = {
       dataClient: {
         callAsInternalUser: () => ({
@@ -45,7 +49,7 @@ describe('Reporting: Validate Max Content Length', () => {
       },
     };
 
-    await validateMaxContentLength(config, elasticsearch, logger);
+    await validateMaxContentLength(server, elasticsearch, logger);
 
     sinon.assert.calledWithMatch(
       logger.warning,
@@ -66,10 +70,14 @@ describe('Reporting: Validate Max Content Length', () => {
   });
 
   it('should do nothing when reporting has the same max-size as elasticsearch', async () => {
-    const config = { get: sinon.stub().returns(ONE_HUNDRED_MEGABYTES) };
+    const server = {
+      config: () => ({
+        get: sinon.stub().returns(ONE_HUNDRED_MEGABYTES),
+      }),
+    };
 
     expect(
-      async () => await validateMaxContentLength(config, elasticsearch, logger.warning)
+      async () => await validateMaxContentLength(server, elasticsearch, logger.warning)
     ).not.toThrow();
     sinon.assert.notCalled(logger.warning);
   });

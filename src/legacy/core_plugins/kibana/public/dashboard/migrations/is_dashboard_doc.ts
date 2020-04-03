@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DashboardDoc730ToLatest } from './types';
+import { DashboardDoc730ToLatest } from '../../../../../../plugins/dashboard/public';
 import { isDoc } from '../../../migrations/is_doc';
 
 export function isDashboardDoc(

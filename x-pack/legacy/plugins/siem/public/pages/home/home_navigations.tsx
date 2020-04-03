@@ -54,7 +54,7 @@ export const navTabs: SiemNavTab = {
   [SiemPageName.case]: {
     id: SiemPageName.case,
     name: i18n.CASE,
-    href: getCaseUrl(),
+    href: getCaseUrl(null),
     disabled: false,
     urlKey: 'case',
   },

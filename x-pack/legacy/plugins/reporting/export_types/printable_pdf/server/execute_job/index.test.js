@@ -5,6 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { memoize } from 'lodash';
 import { createMockReportingCore } from '../../../../test_helpers';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
@@ -13,65 +14,57 @@ import { LevelLogger } from '../../../../server/lib';
 
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
-let mockReporting;
-let mockReportingConfig;
-
 const cancellationToken = {
   on: jest.fn(),
 };
 
-const mockLoggerFactory = {
-  get: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-  })),
-};
-const getMockLogger = () => new LevelLogger(mockLoggerFactory);
-
-const mockEncryptionKey = 'testencryptionkey';
-const encryptHeaders = async headers => {
-  const crypto = cryptoFactory(mockEncryptionKey);
-  return await crypto.encrypt(headers);
-};
+let config;
+let mockServer;
+let mockReporting;
 
 beforeEach(async () => {
   mockReporting = await createMockReportingCore();
 
-  const kbnConfig = {
+  config = {
+    'xpack.reporting.encryptionKey': 'testencryptionkey',
     'server.basePath': '/sbp',
+    'server.host': 'localhost',
+    'server.port': 5601,
   };
-  const reportingConfig = {
-    encryptionKey: mockEncryptionKey,
-    'kibanaServer.hostname': 'localhost',
-    'kibanaServer.port': 5601,
-    'kibanaServer.protocol': 'http',
-  };
-
-  const mockGetConfig = jest.fn();
-  mockReportingConfig = {
-    get: (...keys) => reportingConfig[keys.join('.')],
-    kbnConfig: { get: (...keys) => kbnConfig[keys.join('.')] },
-  };
-  mockGetConfig.mockImplementation(() => Promise.resolve(mockReportingConfig));
-  mockReporting.getConfig = mockGetConfig;
-
-  const mockElasticsearch = {
-    dataClient: {
-      asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+  mockServer = {
+    config: memoize(() => ({ get: jest.fn() })),
+    info: {
+      protocol: 'http',
     },
   };
-  const mockGetElasticsearch = jest.fn();
-  mockGetElasticsearch.mockImplementation(() => Promise.resolve(mockElasticsearch));
-  mockReporting.getElasticsearchService = mockGetElasticsearch;
+  mockServer.config().get.mockImplementation(key => {
+    return config[key];
+  });
 
   generatePdfObservableFactory.mockReturnValue(jest.fn());
 });
 
 afterEach(() => generatePdfObservableFactory.mockReset());
 
+const getMockLogger = () => new LevelLogger();
+const mockElasticsearch = {
+  dataClient: {
+    asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+  },
+};
+
+const encryptHeaders = async headers => {
+  const crypto = cryptoFactory(mockServer);
+  return await crypto.encrypt(headers);
+};
+
 test(`returns content_type of application/pdf`, async () => {
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const executeJob = await executeJobFactory(
+    mockReporting,
+    mockServer,
+    mockElasticsearch,
+    getMockLogger()
+  );
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
@@ -91,7 +84,12 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const executeJob = await executeJobFactory(mockReporting, getMockLogger());
+  const executeJob = await executeJobFactory(
+    mockReporting,
+    mockServer,
+    mockElasticsearch,
+    getMockLogger()
+  );
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pdfJobId',

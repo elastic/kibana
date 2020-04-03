@@ -83,7 +83,7 @@ export interface EmailActionConnector extends ActionConnector {
 
 interface EsIndexConfig {
   index: string;
-  executionTimeField?: string;
+  executionTimeField?: string | null;
   refresh?: boolean;
 }
 

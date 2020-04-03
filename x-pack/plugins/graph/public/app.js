@@ -31,6 +31,11 @@ import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
 import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
 import { formatHttpError } from './helpers/format_http_error';
+import {
+  findSavedWorkspace,
+  getSavedWorkspace,
+  deleteSavedWorkspace,
+} from './helpers/saved_workspace_utils';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -42,7 +47,6 @@ export function initGraphApp(angularModule, deps) {
     getBasePath,
     data,
     config,
-    savedWorkspaceLoader,
     capabilities,
     coreStart,
     storage,
@@ -112,15 +116,21 @@ export function initGraphApp(angularModule, deps) {
             $location.url(getNewPath());
           };
           $scope.find = search => {
-            return savedWorkspaceLoader.find(search, $scope.listingLimit);
+            return findSavedWorkspace(
+              { savedObjectsClient, basePath: coreStart.http.basePath },
+              search,
+              $scope.listingLimit
+            );
           };
           $scope.editItem = workspace => {
             $location.url(getEditPath(workspace));
           };
           $scope.getViewUrl = workspace => getEditUrl(addBasePath, workspace);
-          $scope.delete = workspaces => {
-            return savedWorkspaceLoader.delete(workspaces.map(({ id }) => id));
-          };
+          $scope.delete = workspaces =>
+            deleteSavedWorkspace(
+              savedObjectsClient,
+              workspaces.map(({ id }) => id)
+            );
           $scope.capabilities = capabilities;
           $scope.initialFilter = $location.search().filter || '';
           $scope.coreStart = coreStart;
@@ -133,7 +143,7 @@ export function initGraphApp(angularModule, deps) {
         resolve: {
           savedWorkspace: function($rootScope, $route, $location) {
             return $route.current.params.id
-              ? savedWorkspaceLoader.get($route.current.params.id).catch(function(e) {
+              ? getSavedWorkspace(savedObjectsClient, $route.current.params.id).catch(function(e) {
                   toastNotifications.addError(e, {
                     title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                       defaultMessage: "Couldn't load graph with ID",
@@ -146,7 +156,7 @@ export function initGraphApp(angularModule, deps) {
                   // return promise that never returns to prevent the controller from loading
                   return new Promise();
                 })
-              : savedWorkspaceLoader.get();
+              : getSavedWorkspace(savedObjectsClient);
           },
           indexPatterns: function() {
             return savedObjectsClient
@@ -283,6 +293,8 @@ export function initGraphApp(angularModule, deps) {
       },
       notifications: coreStart.notifications,
       http: coreStart.http,
+      overlays: coreStart.overlays,
+      savedObjectsClient,
       showSaveModal,
       setWorkspaceInitialized: () => {
         $scope.workspaceInitialized = true;

@@ -6,7 +6,12 @@
 
 import * as _ from 'lodash';
 import { parse } from 'url';
-import { NetworkPolicyRule } from '../../types';
+
+interface FirewallRule {
+  allow: boolean;
+  host?: string;
+  protocol?: string;
+}
 
 const isHostMatch = (actualHost: string, ruleHost: string) => {
   const hostParts = actualHost.split('.').reverse();
@@ -15,7 +20,7 @@ const isHostMatch = (actualHost: string, ruleHost: string) => {
   return _.every(ruleParts, (part, idx) => part === hostParts[idx]);
 };
 
-export const allowRequest = (url: string, rules: NetworkPolicyRule[]) => {
+export const allowRequest = (url: string, rules: FirewallRule[]) => {
   const parsed = parse(url);
 
   if (!rules.length) {

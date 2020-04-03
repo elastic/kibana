@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import {
@@ -25,7 +25,7 @@ interface MappingProps {
   updateConnectorDisabled: boolean;
   mapping: CasesConfigurationMapping[] | null;
   onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditFlyoutVisibility: () => void;
 }
 
 const EuiButtonEmptyExtended = styled(EuiButtonEmpty)`
@@ -40,8 +40,6 @@ const MappingComponent: React.FC<MappingProps> = ({
   onChangeMapping,
   setEditFlyoutVisibility,
 }) => {
-  const onClick = useCallback(() => setEditFlyoutVisibility(true), []);
-
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -51,7 +49,10 @@ const MappingComponent: React.FC<MappingProps> = ({
       <EuiFormRow fullWidth>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false} className="euiFormLabel">
-            <EuiButtonEmptyExtended onClick={onClick} disabled={updateConnectorDisabled}>
+            <EuiButtonEmptyExtended
+              onClick={setEditFlyoutVisibility}
+              disabled={updateConnectorDisabled}
+            >
               {i18n.UPDATE_CONNECTOR}
             </EuiButtonEmptyExtended>
           </EuiFlexItem>

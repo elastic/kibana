@@ -45,7 +45,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
         if ('center' in payload) {
           entriesPerHighlightTerm = await Promise.all(
             highlightTerms.map(highlightTerm =>
-              logEntries.getLogEntriesAround__new(requestContext, sourceId, {
+              logEntries.getLogEntriesAround(requestContext, sourceId, {
                 startTimestamp,
                 endTimestamp,
                 query: parseFilterQuery(query),

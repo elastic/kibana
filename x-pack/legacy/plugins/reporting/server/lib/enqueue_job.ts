@@ -5,18 +5,22 @@
  */
 
 import { get } from 'lodash';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+// @ts-ignore
+import { events as esqueueEvents } from './esqueue';
 import {
-  ConditionalHeaders,
   EnqueueJobFn,
   ESQueueCreateJobFn,
   ImmediateCreateJobFn,
   Job,
-  Logger,
+  ServerFacade,
   RequestFacade,
+  Logger,
+  CaptureConfig,
+  QueueConfig,
+  ConditionalHeaders,
 } from '../../types';
 import { ReportingCore } from '../core';
-// @ts-ignore
-import { events as esqueueEvents } from './esqueue';
 
 interface ConfirmedJob {
   id: string;
@@ -25,16 +29,18 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-export async function enqueueJobFactory(
+export function enqueueJobFactory(
   reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger
-): Promise<EnqueueJobFn> {
-  const config = await reporting.getConfig();
+): EnqueueJobFn {
   const logger = parentLogger.clone(['queue-job']);
-  const captureConfig = config.get('capture');
+  const config = server.config();
+  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
   const browserType = captureConfig.browser.type;
   const maxAttempts = captureConfig.maxAttempts;
-  const queueConfig = config.get('queue');
+  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
 
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
@@ -53,7 +59,12 @@ export async function enqueueJobFactory(
     }
 
     // TODO: the createJobFn should be unwrapped in the register method of the export types registry
-    const createJob = (await exportType.createJobFactory(reporting, logger)) as CreateJobFn;
+    const createJob = exportType.createJobFactory(
+      reporting,
+      server,
+      elasticsearch,
+      logger
+    ) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 
     const options = {

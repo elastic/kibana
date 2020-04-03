@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
-import { alertStateSchema } from '../../../../alerting/common';
+import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
 import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
 
@@ -213,4 +213,8 @@ export async function unmuteAlerts({
   http: HttpSetup;
 }): Promise<void> {
   await Promise.all(ids.map(id => unmuteAlert({ id, http })));
+}
+
+export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
+  return await http.get(`${BASE_ALERT_API_PATH}/_health`);
 }

@@ -26,17 +26,16 @@ import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
+import { registerSource } from '../source_registry';
 
 const MAX_GEOTILE_LEVEL = 29;
 
+const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
+  defaultMessage: 'Point to point',
+});
+
 export class ESPewPewSource extends AbstractESAggSource {
   static type = ES_PEW_PEW;
-  static title = i18n.translate('xpack.maps.source.pewPewTitle', {
-    defaultMessage: 'Point to point',
-  });
-  static description = i18n.translate('xpack.maps.source.pewPewDescription', {
-    defaultMessage: 'Aggregated data paths between the source and destination',
-  });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
     return {
@@ -46,21 +45,6 @@ export class ESPewPewSource extends AbstractESAggSource {
       sourceGeoField,
       destGeoField,
     };
-  }
-
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const sourceDescriptor = ESPewPewSource.createDescriptor(sourceConfig);
-      const source = new ESPewPewSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -102,7 +86,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: ESPewPewSource.title,
+        value: sourceTitle,
       },
       {
         label: i18n.translate('xpack.maps.source.pewPew.indexPatternLabel', {
@@ -245,3 +229,30 @@ export class ESPewPewSource extends AbstractESAggSource {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }
+
+registerSource({
+  ConstructorFunction: ESPewPewSource,
+  type: ES_PEW_PEW,
+});
+
+export const point2PointLayerWizardConfig = {
+  description: i18n.translate('xpack.maps.source.pewPewDescription', {
+    defaultMessage: 'Aggregated data paths between the source and destination',
+  }),
+  icon: 'logoElasticsearch',
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = sourceConfig => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const sourceDescriptor = ESPewPewSource.createDescriptor(sourceConfig);
+      const source = new ESPewPewSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+  },
+  title: sourceTitle,
+};

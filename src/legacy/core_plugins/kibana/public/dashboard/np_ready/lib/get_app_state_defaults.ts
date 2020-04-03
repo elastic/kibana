@@ -18,7 +18,7 @@
  */
 
 import { ViewMode } from '../../../../../../../plugins/embeddable/public';
-import { SavedObjectDashboard } from '../../saved_dashboard/saved_dashboard';
+import { SavedObjectDashboard } from '../../../../../../../plugins/dashboard/public';
 import { DashboardAppStateDefaults } from '../types';
 
 export function getAppStateDefaults(

@@ -163,6 +163,7 @@ describe('Login view routes', () => {
         layout: 'error-es-unavailable',
         showLinks: false,
         showRoleMappingsManagement: true,
+        allowSubFeaturePrivileges: true,
         showLogin: true,
       });
 

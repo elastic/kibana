@@ -45,6 +45,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         config: {
           index: ES_TEST_INDEX_NAME,
           refresh: false,
+          executionTimeField: null,
         },
       });
       createdActionID = createdAction.id;
@@ -58,7 +59,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedAction.id,
         name: 'An index action',
         actionTypeId: '.index',
-        config: { index: ES_TEST_INDEX_NAME, refresh: false },
+        config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
       });
 
       // create action with all config props

@@ -32,13 +32,13 @@ export default async function({ readConfigFile }) {
 
   return {
     testFiles: [
-      require.resolve('./test_suites/app_plugins'),
       require.resolve('./test_suites/custom_visualizations'),
       require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/embeddable_explorer'),
       require.resolve('./test_suites/core_plugins'),
       require.resolve('./test_suites/management'),
       require.resolve('./test_suites/bfetch_explorer'),
+      require.resolve('./test_suites/doc_views'),
     ],
     services: {
       ...functionalConfig.get('services'),

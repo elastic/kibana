@@ -24,7 +24,7 @@ export const postAgentAcksHandlerBuilder = function(
   return async (context, request, response) => {
     try {
       const soClient = ackService.getSavedObjectsClientContract(request);
-      const res = APIKeyService.parseApiKey(request.headers);
+      const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
       const agent = await ackService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId as string);
       const agentEvents = request.body.events as AgentEvent[];
 

@@ -13,6 +13,7 @@ import {
   AlertSearchRequest,
   AlertSearchRequestWrapper,
   AlertSort,
+  UndefinedResultPosition,
 } from '../types';
 
 export { Pagination } from './pagination';
@@ -68,6 +69,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
     {
       [query.sort]: {
         order: query.order,
+        missing:
+          query.order === 'asc' ? UndefinedResultPosition.last : UndefinedResultPosition.first,
       },
     },
     // Secondary sort for tie-breaking
@@ -82,6 +85,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
     // Reverse sort order for search_before functionality
     const newDirection = reverseSortDirection(query.order);
     sort[0][query.sort].order = newDirection;
+    sort[0][query.sort].missing =
+      newDirection === 'asc' ? UndefinedResultPosition.last : UndefinedResultPosition.first;
     sort[1]['event.id'].order = newDirection;
   }
 

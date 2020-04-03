@@ -93,7 +93,9 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = actionTypes ?? (await loadActionTypes({ http }));
+        const registeredActionTypes = (
+          actionTypes ?? (await loadActionTypes({ http }))
+        ).sort((a, b) => a.name.localeCompare(b.name));
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
@@ -188,7 +190,7 @@ export const ActionForm = ({
               label={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
-                  defaultMessage="{connectorInstance} instance"
+                  defaultMessage="{connectorInstance} connector"
                   values={{
                     connectorInstance: actionTypesIndex
                       ? actionTypesIndex[actionConnector.actionTypeId].name
@@ -259,7 +261,7 @@ export const ActionForm = ({
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <FormattedMessage
-                        defaultMessage="Action: {actionConnectorName}"
+                        defaultMessage="{actionConnectorName}"
                         id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                         values={{
                           actionConnectorName: actionConnector.name,
@@ -340,7 +342,7 @@ export const ActionForm = ({
               <EuiTitle size="s">
                 <h5>
                   <FormattedMessage
-                    defaultMessage="Action: {actionConnectorName}"
+                    defaultMessage="{actionConnectorName}"
                     id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                     values={{
                       actionConnectorName: actionTypeRegistered.actionTypeTitle,
@@ -378,7 +380,7 @@ export const ActionForm = ({
           title={
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
-              defaultMessage="There are no {actionTypeName} connectors"
+              defaultMessage="No {actionTypeName} connectors."
               values={{
                 actionTypeName,
               }}
@@ -396,10 +398,7 @@ export const ActionForm = ({
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
-                defaultMessage="Add {actionTypeName} connector"
-                values={{
-                  actionTypeName,
-                }}
+                defaultMessage="Create a connector"
               />
             </EuiButton>,
           ]}

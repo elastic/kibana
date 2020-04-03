@@ -6,17 +6,17 @@
 
 import Boom from 'boom';
 import { Legacy } from 'kibana';
-import { Logger } from '../../../types';
-import { ReportingConfig, ReportingSetupDeps } from '../../types';
+import { Logger, ServerFacade } from '../../../types';
+import { ReportingSetupDeps } from '../../types';
 
 export type GetReportingFeatureIdFn = (request: Legacy.Request) => string;
 
 export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRoutingFn(
-  config: ReportingConfig,
+  server: ServerFacade,
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const xpackMainPlugin = plugins.__LEGACY.plugins.xpack_main;
+  const xpackMainPlugin = server.plugins.xpack_main;
   const pluginId = 'reporting';
 
   // License checking and enable/disable logic

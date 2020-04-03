@@ -120,6 +120,8 @@ export interface OpenTimelineProps {
   isLoading: boolean;
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  /** Display import timelines modal*/
+  importDataModalToggle?: boolean;
   /** If this callback is specified, a "Favorite Selected" button will be displayed, and this callback will be invoked when the button is clicked */
   onAddTimelinesToFavorites?: OnAddTimelinesToFavorites;
   /** If this callback is specified, a "Delete Selected" button will be displayed, and this callback will be invoked when the button is clicked */
@@ -144,13 +146,14 @@ export interface OpenTimelineProps {
   pageSize: number;
   /** The currently applied search criteria */
   query: string;
-  /** Refetch timelines data */
+  /** Refetch table */
   refetch?: Refetch;
-
   /** The results of executing a search */
   searchResults: OpenTimelineResult[];
   /** the currently-selected timelines in the table */
   selectedItems: OpenTimelineResult[];
+  /** Toggle export timelines modal*/
+  setImportDataModalToggle?: React.Dispatch<React.SetStateAction<boolean>>;
   /** the requested sort direction of the query results */
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
@@ -170,6 +173,7 @@ export interface UpdateTimeline {
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;
   to: number;
+  ruleNote?: string;
 }
 
 export type DispatchUpdateTimeline = ({
@@ -179,4 +183,5 @@ export type DispatchUpdateTimeline = ({
   notes,
   timeline,
   to,
+  ruleNote,
 }: UpdateTimeline) => () => void;

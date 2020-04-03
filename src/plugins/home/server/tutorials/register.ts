@@ -87,6 +87,8 @@ import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
 import { ibmmqMetricsSpecProvider } from './ibmmq_metrics';
 import { statsdMetricsSpecProvider } from './statsd_metrics';
 import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
+import { openmetricsMetricsSpecProvider } from './openmetrics_metrics';
+import { oracleMetricsSpecProvider } from './oracle_metrics';
 
 export const builtInTutorials = [
   systemLogsSpecProvider,
@@ -160,4 +162,6 @@ export const builtInTutorials = [
   envoyproxyMetricsSpecProvider,
   statsdMetricsSpecProvider,
   redisenterpriseMetricsSpecProvider,
+  openmetricsMetricsSpecProvider,
+  oracleMetricsSpecProvider,
 ];

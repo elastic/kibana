@@ -27,7 +27,7 @@ import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
-import { MarkdownSimple } from '../../../../../kibana_react/public';
+import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public';
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';

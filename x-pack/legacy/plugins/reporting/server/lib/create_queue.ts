@@ -4,24 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESQueueInstance, Logger } from '../../types';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { ESQueueInstance, ServerFacade, QueueConfig, Logger } from '../../types';
 import { ReportingCore } from '../core';
-import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
-import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
+import { createWorkerFactory } from './create_worker';
+import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 
 export async function createQueueFactory<JobParamsType, JobPayloadType>(
   reporting: ReportingCore,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger
 ): Promise<ESQueueInstance> {
-  const [config, elasticsearch] = await Promise.all([
-    reporting.getConfig(),
-    reporting.getElasticsearchService(),
-  ]);
-
-  const queueConfig = config.get('queue');
-  const index = config.get('index');
+  const queueConfig: QueueConfig = server.config().get('xpack.reporting.queue');
+  const index = server.config().get('xpack.reporting.index');
 
   const queueOptions = {
     interval: queueConfig.indexInterval,
@@ -35,7 +33,7 @@ export async function createQueueFactory<JobParamsType, JobPayloadType>(
 
   if (queueConfig.pollEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed
-    const createWorker = await createWorkerFactory(reporting, config, logger);
+    const createWorker = createWorkerFactory(reporting, server, elasticsearch, logger);
     await createWorker(queue);
   } else {
     logger.info(

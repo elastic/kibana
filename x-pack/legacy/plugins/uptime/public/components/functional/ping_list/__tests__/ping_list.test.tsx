@@ -204,9 +204,11 @@ describe('PingList component', () => {
         loading={false}
         data={{ allPings }}
         onPageCountChange={jest.fn()}
+        onPageIndexChange={jest.fn()}
         onSelectedLocationChange={(_loc: any[]) => {}}
         onSelectedStatusChange={jest.fn()}
-        pageSize={30}
+        pageIndex={0}
+        pageSize={10}
         selectedOption="down"
         selectedLocation={AllLocationOption.value}
       />

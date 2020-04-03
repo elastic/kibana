@@ -7,7 +7,6 @@
 import { sortBy } from 'lodash';
 
 import { RequestHandlerContext } from 'src/core/server';
-import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
@@ -50,15 +49,15 @@ export interface LogEntriesAroundParams {
 
 export const LOG_ENTRIES_PAGE_SIZE = 200;
 
+const FIELDS_FROM_CONTEXT = ['log.file.path', 'host.name', 'container.id'] as const;
+
 export class InfraLogEntriesDomain {
   constructor(
     private readonly adapter: LogEntriesAdapter,
     private readonly libs: { sources: InfraSources }
   ) {}
 
-  /* Name is temporary until we can clean up the GraphQL implementation */
-  /* eslint-disable-next-line @typescript-eslint/camelcase */
-  public async getLogEntriesAround__new(
+  public async getLogEntriesAround(
     requestContext: RequestHandlerContext,
     sourceId: string,
     params: LogEntriesAroundParams
@@ -133,14 +132,14 @@ export class InfraLogEntriesDomain {
 
     const entries = documents.map(doc => {
       return {
-        id: doc.gid,
-        cursor: doc.key,
+        id: doc.id,
+        cursor: doc.cursor,
         columns: configuration.logColumns.map(
           (column): LogColumn => {
             if ('timestampColumn' in column) {
               return {
                 columnId: column.timestampColumn.id,
-                timestamp: doc.key.time,
+                timestamp: doc.cursor.time,
               };
             } else if ('messageColumn' in column) {
               return {
@@ -157,6 +156,14 @@ export class InfraLogEntriesDomain {
             }
           }
         ),
+        context: FIELDS_FROM_CONTEXT.reduce<LogEntry['context']>((ctx, field) => {
+          // Users might have different types here in their mappings.
+          const value = doc.fields[field];
+          if (typeof value === 'string') {
+            ctx[field] = value;
+          }
+          return ctx;
+        }, {}),
       };
     });
 
@@ -292,17 +299,17 @@ export interface LogEntriesAdapter {
 export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
+  id: string;
   fields: Fields;
-  gid: string;
   highlights: Highlights;
-  key: TimeKey;
+  cursor: LogEntriesCursor;
 }
 
 export interface LogSummaryBucket {
   entriesCount: number;
   start: number;
   end: number;
-  topEntryKeys: TimeKey[];
+  topEntryKeys: LogEntriesCursor[];
 }
 
 const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
@@ -332,7 +339,9 @@ const getRequiredFields = (
   );
   const fieldsFromFormattingRules = messageFormattingRules.requiredFields;
 
-  return Array.from(new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules]));
+  return Array.from(
+    new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules, ...FIELDS_FROM_CONTEXT])
+  );
 };
 
 const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({

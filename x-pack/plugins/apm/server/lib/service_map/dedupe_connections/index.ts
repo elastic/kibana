@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isEqual, sortBy } from 'lodash';
+import { sortBy, pick, identity } from 'lodash';
 import { ValuesType } from 'utility-types';
 import {
   SERVICE_NAME,
@@ -72,24 +72,35 @@ export function dedupeConnections(response: ServiceMapResponse) {
       return map;
     }
 
-    const service =
-      discoveredServices.find(({ from }) => {
-        if ('span.destination.service.resource' in node) {
-          return (
-            node[SPAN_DESTINATION_SERVICE_RESOURCE] ===
-            from[SPAN_DESTINATION_SERVICE_RESOURCE]
-          );
-        }
-        return false;
-      })?.to ?? serviceNodes.find(serviceNode => serviceNode.id === node.id);
+    const matchedService = discoveredServices.find(({ from }) => {
+      if ('span.destination.service.resource' in node) {
+        return (
+          node[SPAN_DESTINATION_SERVICE_RESOURCE] ===
+          from[SPAN_DESTINATION_SERVICE_RESOURCE]
+        );
+      }
+      return false;
+    })?.to;
 
-    if (service) {
+    let serviceName: string | undefined = matchedService?.[SERVICE_NAME];
+
+    if (!serviceName && 'service.name' in node) {
+      serviceName = node[SERVICE_NAME];
+    }
+
+    const matchedServiceNodes = serviceNodes.filter(
+      serviceNode => serviceNode[SERVICE_NAME] === serviceName
+    );
+
+    if (matchedServiceNodes.length) {
       return {
         ...map,
-        [node.id]: {
-          id: service[SERVICE_NAME],
-          ...service
-        }
+        [node.id]: Object.assign(
+          {
+            id: matchedServiceNodes[0][SERVICE_NAME]
+          },
+          ...matchedServiceNodes.map(serviceNode => pick(serviceNode, identity))
+        )
       };
     }
 
@@ -138,7 +149,7 @@ export function dedupeConnections(response: ServiceMapResponse) {
   const dedupedNodes: typeof nodes = [];
 
   nodes.forEach(node => {
-    if (!dedupedNodes.find(dedupedNode => isEqual(node, dedupedNode))) {
+    if (!dedupedNodes.find(dedupedNode => node.id === dedupedNode.id)) {
       dedupedNodes.push(node);
     }
   });
