@@ -32,7 +32,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 const registerActions = (testBed: TestBed<TestSubjects>) => {
-  const { find, waitFor, exists, component } = testBed;
+  const { find, waitFor } = testBed;
 
   const selectTab = async (tab: 'fields' | 'templates' | 'advanced') => {
     const index = ['field', 'templates', 'advanced'].indexOf(tab);
