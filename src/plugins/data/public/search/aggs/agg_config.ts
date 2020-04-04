@@ -98,11 +98,11 @@ export class AggConfig {
   public parent?: IAggConfigs;
   public brandNew?: boolean;
   public schema?: string;
-  public fieldFormats: FieldFormatsStart;
 
   private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
+  private fieldFormats: FieldFormatsStart;
 
   constructor(
     aggConfigs: IAggConfigs,
