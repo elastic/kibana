@@ -28,7 +28,6 @@ import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
 import { KBN_FIELD_TYPES, IFieldFormat } from '../../../common';
 import { ISearchSource } from '../search_source';
-import { getFieldFormats } from '../../../public/services';
 import { GetInternalStartServicesFn } from '../../types';
 
 export interface AggTypeConfig<
@@ -64,16 +63,9 @@ export interface AggTypeConfig<
 // TODO need to make a more explicit interface for this
 export type IAggType = AggType;
 
-interface AggTypeDependencies {
+export interface AggTypeDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
-
-// TODO: should be removed when PR will be ready to merge
-const temporaryAggTypeDependencies: AggTypeDependencies = {
-  getInternalStartServices: () => ({
-    fieldFormats: getFieldFormats(),
-  }),
-};
 
 export class AggType<
   TAggConfig extends AggConfig = AggConfig,
@@ -222,7 +214,7 @@ export class AggType<
    */
   constructor(
     config: AggTypeConfig<TAggConfig>,
-    { getInternalStartServices }: AggTypeDependencies = temporaryAggTypeDependencies
+    { getInternalStartServices }: AggTypeDependencies
   ) {
     this.name = config.name;
     this.type = config.type || 'metrics';
