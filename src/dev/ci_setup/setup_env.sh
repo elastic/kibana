@@ -54,7 +54,7 @@ export KIBANA_PKG_BRANCH="$kbnBranch"
 ###
 ### Sets correct NODE_OPTIONS for CI
 ###
-NODE_OPTIONS="$(grep -v ^# < ${KIBANA_DIR}/config/node.ci.options | xargs) $NODE_OPTIONS"
+export NODE_OPTIONS="$(grep -v ^# < ${KIBANA_DIR}/config/node.ci.options | xargs) $NODE_OPTIONS"
 
 for entry in "${KIBANA_DIR}/config"/*
 do
