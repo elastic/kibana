@@ -17,7 +17,7 @@ import {
   ServerFacade,
 } from '../../types';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { ReportingSetupDeps, ReportingCore } from '../types';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
@@ -41,9 +41,10 @@ export function registerJobInfoRoutes(
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
+  const config = reporting.getConfig();
   const { elasticsearch } = plugins;
-  const jobsQuery = jobsQueryFactory(server, elasticsearch);
-  const getRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
+  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+  const getRouteConfig = getRouteConfigFactoryManagementPre(config, plugins, logger);
 
   // list jobs in the queue, paginated
   server.route({
@@ -141,8 +142,8 @@ export function registerJobInfoRoutes(
 
   // trigger a download of the output from a job
   const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, plugins, logger);
-  const downloadResponseHandler = downloadJobResponseHandlerFactory(server, elasticsearch, exportTypesRegistry); // prettier-ignore
+  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(config, plugins, logger);
+  const downloadResponseHandler = downloadJobResponseHandlerFactory(config, elasticsearch, exportTypesRegistry); // prettier-ignore
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
@@ -181,8 +182,8 @@ export function registerJobInfoRoutes(
   });
 
   // allow a report to be deleted
-  const getRouteConfigDelete = getRouteConfigFactoryDeletePre(server, plugins, logger);
-  const deleteResponseHandler = deleteJobResponseHandlerFactory(server, elasticsearch);
+  const getRouteConfigDelete = getRouteConfigFactoryDeletePre(config, plugins, logger);
+  const deleteResponseHandler = deleteJobResponseHandlerFactory(config, elasticsearch);
   server.route({
     path: `${MAIN_ENTRY}/delete/{docId}`,
     method: 'DELETE',

@@ -8,7 +8,12 @@ import { createAction } from 'redux-actions';
 import { createAsyncAction } from './utils';
 import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
 import { AnomaliesTableRecord } from '../../../../../../plugins/ml/common/types/anomalies';
-import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from './types';
+import {
+  CreateMLJobSuccess,
+  DeleteJobResults,
+  MonitorIdParam,
+  HeartbeatIndicesParam,
+} from './types';
 import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
 export const resetMLState = createAction('RESET_ML_STATE');
@@ -17,9 +22,10 @@ export const getExistingMLJobAction = createAsyncAction<MonitorIdParam, JobExist
   'GET_EXISTING_ML_JOB'
 );
 
-export const createMLJobAction = createAsyncAction<MonitorIdParam, CreateMLJobSuccess | null>(
-  'CREATE_ML_JOB'
-);
+export const createMLJobAction = createAsyncAction<
+  MonitorIdParam & HeartbeatIndicesParam,
+  CreateMLJobSuccess | null
+>('CREATE_ML_JOB');
 
 export const getMLCapabilitiesAction = createAsyncAction<any, PrivilegesResponse>(
   'GET_ML_CAPABILITIES'
