@@ -27,6 +27,7 @@ export const ColorStopsCategorical = ({
   field,
   onChange,
   getValueSuggestions,
+  swatches,
 }) => {
   const getStopError = (stop, index) => {
     let count = 0;
@@ -81,6 +82,7 @@ export const ColorStopsCategorical = ({
       renderStopInput={renderStopInput}
       canDeleteStop={canDeleteStop}
       addNewRow={addCategoricalRow}
+      swatches={swatches}
     />
   );
 };
