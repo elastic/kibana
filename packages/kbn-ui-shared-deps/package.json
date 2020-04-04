@@ -16,7 +16,7 @@
     "angular": "^1.7.9",
     "core-js": "^3.2.1",
     "custom-event-polyfill": "^0.3.0",
-    "elasticsearch-browser": "^16.7.0",
+    "elasticsearch-browser": "^16.5.0",
     "jquery": "^3.4.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
