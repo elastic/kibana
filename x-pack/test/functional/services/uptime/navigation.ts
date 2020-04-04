@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
 
   const goToUptimeRoot = async () => {
     // Check if are already on overview uptime page, we don't need to repeat the step
@@ -19,6 +19,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
         await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
       } else if (!(await testSubjects.exists('uptimeOverviewPage', { timeout: 0 }))) {
         await PageObjects.common.navigateToApp('uptime');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
       }
     });

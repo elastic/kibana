@@ -76,24 +76,33 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
     load({
       deps: [
+        {{#each sharedJsDepFilenames}}
+          '{{../regularBundlePath}}/kbn-ui-shared-deps/{{this}}',
+        {{/each}}
+      ],
+      urls: [
         {
           deps: [
-            '{{dllBundlePath}}/vendors_runtime.bundle.dll.js'
+            '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedJsFilename}}',
+            {
+              deps: [
+                '{{dllBundlePath}}/vendors_runtime.bundle.dll.js'
+              ],
+              urls: [
+                {{#each dllJsChunks}}
+                  '{{this}}',
+                {{/each}}
+              ]
+            },
+            '{{regularBundlePath}}/commons.bundle.js',
           ],
           urls: [
-            {{#each dllJsChunks}}
+            '{{regularBundlePath}}/{{appId}}.bundle.js',
+            {{#each styleSheetPaths}}
               '{{this}}',
             {{/each}}
           ]
-        },
-        '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
-        '{{regularBundlePath}}/commons.bundle.js',
-      ],
-      urls: [
-        '{{regularBundlePath}}/{{appId}}.bundle.js',
-        {{#each styleSheetPaths}}
-          '{{this}}',
-        {{/each}},
+        }
       ]
     });
   };
