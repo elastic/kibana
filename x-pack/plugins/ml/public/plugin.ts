@@ -71,7 +71,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       },
     });
 
-    registerFeature(licensing, home);
+    registerFeature(home);
 
     initManagementSection(pluginsSetup, core);
     return {};
