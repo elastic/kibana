@@ -92,7 +92,7 @@ export const ResultsView: FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={() => showExplanationFlyout()} disabled={disableButtons}>
                   <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.resultsView.overrideSettingsButtonLabel"
+                    id="xpack.ml.fileDatavisualizer.resultsView.analysisExplanationButtonLabel"
                     defaultMessage="Analysis explanation"
                   />
                 </EuiButtonEmpty>
