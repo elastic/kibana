@@ -7,8 +7,7 @@
 import { performance } from 'perf_hooks';
 import { Logger } from 'src/core/server';
 
-import { SIGNALS_ID, 
-       } from '../../../../common/constants';
+import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/detection_engine/ml_helpers';
 import { SetupPlugins } from '../../../plugin';
 
