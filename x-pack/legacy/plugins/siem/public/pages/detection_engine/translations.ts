@@ -90,7 +90,7 @@ export const USER_UNAUTHENTICATED_MSG_BODY = i18n.translate(
 export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
   'xpack.siem.detectionEngine.mlRulesDisabledMessageTitle',
   {
-    defaultMessage: 'ML rules require Platinum License & ML Admin Permissions',
+    defaultMessage: 'ML rules require Platinum License and ML Admin Permissions',
   }
 );
 
