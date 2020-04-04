@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
@@ -15,6 +16,7 @@ import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../../common/models/event';
 import * as processModel from '../models/process_event';
+import * as selectors from '../store/selectors';
 
 const nodeAssets = {
   runningProcessCube: {
@@ -93,6 +95,9 @@ export const ProcessEventDot = styled(
 
       const selfId = adjacentNodeMap.self;
 
+      const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+      const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+
       const nodeViewportStyle = useMemo(
         () => ({
           left: `${left}px`,
@@ -143,6 +148,9 @@ export const ProcessEventDot = styled(
       const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
       const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
 
+      const isActiveDescendant = nodeId === activeDescendantId;
+      const isSelectedDescendant = nodeId === selectedDescendantId;
+
       const dispatch = useResolverDispatch();
 
       const handleFocus = useCallback(
@@ -153,16 +161,24 @@ export const ProcessEventDot = styled(
               nodeId,
             },
           });
-          focusEvent.currentTarget.setAttribute('aria-current', 'true');
         },
         [dispatch, nodeId]
       );
 
-      const handleClick = useCallback(() => {
-        if (animationTarget.current !== null) {
-          animationTarget.current.beginElement();
-        }
-      }, [animationTarget]);
+      const handleClick = useCallback(
+        (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
+          if (animationTarget.current !== null) {
+            (animationTarget.current as any).beginElement();
+          }
+          dispatch({
+            type: 'userSelectedResolverNode',
+            payload: {
+              nodeId,
+            },
+          });
+        },
+        [animationTarget, dispatch, nodeId]
+      );
 
       return (
         <EuiKeyboardAccessible>
@@ -179,6 +195,8 @@ export const ProcessEventDot = styled(
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
+            aria-current={isActiveDescendant ? 'true' : undefined}
+            aria-selected={isSelectedDescendant ? 'true' : undefined}
             style={nodeViewportStyle}
             id={nodeId}
             onClick={handleClick}
@@ -186,6 +204,15 @@ export const ProcessEventDot = styled(
             tabIndex={-1}
           >
             <g>
+              <use
+                xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+                x={-11.35}
+                y={-11.35}
+                width={markerSize * 1.5}
+                height={markerSize * 1.5}
+                className="backing"
+              />
+              <rect x="7" y="-12.75" width="15" height="10" fill={NamedColors.resolverBackground} />
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
@@ -265,6 +292,20 @@ export const ProcessEventDot = styled(
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;
+
+  //dasharray & dashoffset should be equal to "pull" the stroke back
+  //when it is transitioned.
+  //The value is tuned to look good when animated, but to preserve
+  //the effect, it should always be _at least_ the length of the stroke
+  & .backing {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+  }
+  &[aria-current] .backing {
+    transition-property: stroke-dashoffset;
+    transition-duration: 1s;
+    stroke-dashoffset: 0;
+  }
 `;
 
 const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = {

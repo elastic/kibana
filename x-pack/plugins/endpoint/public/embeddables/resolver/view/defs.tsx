@@ -193,6 +193,7 @@ export const SymbolIds = {
   runningTriggerCube: idGenerator('runningTriggerCube'),
   terminatedProcessCube: idGenerator('terminatedCube'),
   terminatedTriggerCube: idGenerator('terminatedTriggerCube'),
+  processCubeActiveBacking: idGenerator('activeBacking'),
 };
 
 /**
@@ -392,6 +393,15 @@ const SymbolsAndShapes = memo(() => (
           style={{ isolation: 'isolate' }}
         />
       </g>
+    </symbol>
+    <symbol viewBox="0 -3 88 106" id={SymbolIds.processCubeActiveBacking}>
+      <title>resolver active backing</title>
+      <path
+        d="m87.521 25.064a3.795 3.795 0 0 0-1.4313-1.4717l-40.164-23.083a3.8338 3.8338 0 0 0-3.8191 0l-40.165 23.083a3.8634 3.8634 0 0 0-1.9097 3.2926v46.165a3.7986 3.7986 0 0 0 1.9097 3.2925l40.164 23.083a3.8342 3.8342 0 0 0 3.8191 0l40.164-23.083a3.7988 3.7988 0 0 0 1.9099-3.2925v-46.165a3.7775 3.7775 0 0 0-0.47857-1.8209z"
+        fill="transparent"
+        strokeWidth="2"
+        stroke="#7E839C"
+      />
     </symbol>
   </>
 ));
