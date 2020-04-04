@@ -28,6 +28,8 @@ import { IndexPattern } from '../../index_patterns';
 import { ISearchSource } from '../search_source';
 import { FetchOptions } from '../fetch';
 import { TimeRange } from '../../../common';
+import { FieldFormatsStart } from '../../field_formats';
+import { getFieldFormats } from '../../../public/services';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -49,6 +51,14 @@ export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
 }
 
+export interface AggConfigsDependencies {
+  fieldFormats: FieldFormatsStart;
+}
+
+const tempAggConfigsDependencies = {
+  fieldFormats: getFieldFormats(),
+};
+
 export type CreateAggConfigParams = Assign<AggConfigOptions, { type: string | IAggType }>;
 
 /**
@@ -67,6 +77,7 @@ export type IAggConfigs = AggConfigs;
 
 export class AggConfigs {
   public indexPattern: IndexPattern;
+  public fieldFormats: FieldFormatsStart;
   public timeRange?: TimeRange;
   private readonly typesRegistry: AggTypesRegistryStart;
 
@@ -75,7 +86,8 @@ export class AggConfigs {
   constructor(
     indexPattern: IndexPattern,
     configStates: CreateAggConfigParams[] = [],
-    opts: AggConfigsOptions
+    opts: AggConfigsOptions,
+    { fieldFormats }: AggConfigsDependencies = tempAggConfigsDependencies
   ) {
     this.typesRegistry = opts.typesRegistry;
 
@@ -83,6 +95,7 @@ export class AggConfigs {
 
     this.aggs = [];
     this.indexPattern = indexPattern;
+    this.fieldFormats = fieldFormats;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
   }
@@ -129,10 +142,14 @@ export class AggConfigs {
       aggConfig = params;
       params.parent = this;
     } else {
-      aggConfig = new AggConfig(this, {
-        ...params,
-        type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
-      });
+      aggConfig = new AggConfig(
+        this,
+        {
+          ...params,
+          type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
+        },
+        { fieldFormats: this.fieldFormats }
+      );
     }
 
     if (addToAggConfigs) {
