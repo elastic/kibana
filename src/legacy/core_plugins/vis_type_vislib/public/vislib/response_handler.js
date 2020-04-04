@@ -72,7 +72,7 @@ function tableResponseHandler(table, dimensions) {
 function convertTableGroup(tableGroup, convertTable) {
   const tables = tableGroup.tables;
 
-  if (!tables.length) return;
+  if (!tables || !tables.length) return;
 
   const firstChild = tables[0];
   if (firstChild.columns) {
