@@ -115,6 +115,7 @@ export const AllRules = React.memo<AllRulesProps>(
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
 
+    // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions =
       mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
 

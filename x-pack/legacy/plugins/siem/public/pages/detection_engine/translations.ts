@@ -98,5 +98,5 @@ export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
   i18n.translate('xpack.siem.detectionEngine.mlUnavailableTitle', {
     values: { totalRules },
     defaultMessage:
-      '{totalRules} {totalRules, plural, =1 {rule} other {rules}} require Machine Learning to enable.',
+      '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
   });

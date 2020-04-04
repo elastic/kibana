@@ -122,6 +122,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
   const mlCapabilities = useMlCapabilities();
 
+  // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions =
     mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
 
@@ -279,7 +280,9 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                           >
                             <RuleSwitch
                               id={rule?.id ?? '-1'}
-                              isDisabled={userHasNoPermissions || !hasMlPermissions}
+                              isDisabled={
+                                userHasNoPermissions || (!hasMlPermissions && !rule?.enabled)
+                              }
                               enabled={rule?.enabled ?? false}
                               optionLabel={i18n.ACTIVATE_RULE}
                               onChange={handleOnChangeEnabledRule}

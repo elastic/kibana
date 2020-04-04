@@ -9,8 +9,16 @@ import React from 'react';
 
 import '../../mock/match_media';
 import { HeaderGlobal } from './index';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import routeData from 'react-router';
+
+jest.mock('react-router-dom', () => ({
+  useLocation: () => ({
+    pathname: '/app/siem#/hosts/allHosts',
+    hash: '',
+    search: '',
+    state: '',
+  }),
+  withRouter: () => jest.fn(),
+}));
 
 jest.mock('ui/new_platform');
 
@@ -20,20 +28,12 @@ jest.mock('../search_bar', () => ({
   SiemSearchBar: () => null,
 }));
 
-const mockHostsLocation = {
-  pathname: '/app/siem#/hosts/allHosts',
-  hash: '',
-  search: '',
-  state: '',
-};
-
 describe('HeaderGlobal', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   test('it renders', () => {
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockHostsLocation);
     const wrapper = shallow(<HeaderGlobal />);
 
     expect(wrapper).toMatchSnapshot();

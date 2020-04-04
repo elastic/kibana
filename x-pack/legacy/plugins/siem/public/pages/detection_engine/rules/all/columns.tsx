@@ -38,6 +38,7 @@ import {
 import { Action } from './reducer';
 import { LocalizedDateTooltip } from '../../../../components/localized_date_tooltip';
 import * as detectionI18n from '../../translations';
+import { isMlRule } from '../../../../../common/detection_engine/ml_helpers';
 
 export const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -189,7 +190,7 @@ export const getColumns = ({
         <EuiToolTip
           position="top"
           content={
-            item.type === 'machine_learning' && !hasMlPermissions
+            isMlRule(item.type) && !hasMlPermissions
               ? detectionI18n.ML_RULES_DISABLED_MESSAGE
               : undefined
           }
@@ -199,7 +200,9 @@ export const getColumns = ({
             dispatch={dispatch}
             id={item.id}
             enabled={item.enabled}
-            isDisabled={hasNoPermissions || (item.type === 'machine_learning' && !hasMlPermissions)}
+            isDisabled={
+              hasNoPermissions || (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
+            }
             isLoading={loadingRuleIds.includes(item.id)}
           />
         </EuiToolTip>
