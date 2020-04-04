@@ -24,10 +24,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await uptimeService.navigation.goToUptime();
     });
 
-    after(async () => {
-      await esArchiver.unload(archive);
-    });
-
     it('loads and displays uptime data based on date range', async () => {
       await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId, monitorName);
     });

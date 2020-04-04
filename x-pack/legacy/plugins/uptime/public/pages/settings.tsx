@@ -112,7 +112,7 @@ export const SettingsPageComponent = ({
 
   return (
     <>
-      <Link to={OVERVIEW_ROUTE}>
+      <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeSettingsToOverviewLink">
         <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
           {i18n.translate('xpack.uptime.settings.returnToOverviewLinkLabel', {
             defaultMessage: 'Return to overview',

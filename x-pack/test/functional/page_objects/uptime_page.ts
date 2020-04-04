@@ -14,14 +14,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
   return new (class UptimePage {
     public async goToRoot() {
-      await pageObjects.common.navigateToApp('uptime');
+      await navigation.goToUptime();
     }
 
     public async goToUptimePageAndSetDateRange(
       datePickerStartValue: string,
       datePickerEndValue: string
     ) {
-      await pageObjects.common.navigateToApp('uptime');
+      await navigation.goToUptime();
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
     }
 
@@ -30,7 +30,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       datePickerEndValue: string,
       monitorIdToCheck?: string
     ) {
-      await pageObjects.common.navigateToApp('uptime');
+      await navigation.goToUptime();
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
       if (monitorIdToCheck) {
         await commonService.monitorIdExists(monitorIdToCheck);
