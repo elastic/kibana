@@ -47,8 +47,6 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/appleave1'));
       });
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
-        const alert = await browser.getAlert();
-        await alert?.accept();
         await PageObjects.common.navigateToApp('appleave1');
         await appsMenu.clickLink('AppLeave 2');
 
