@@ -40,6 +40,7 @@ export interface SavedObjectsRawDocSource {
   migrationVersion?: SavedObjectsMigrationVersion;
   updated_at?: string;
   references?: SavedObjectReference[];
+  originId?: string;
 
   [typeMapping: string]: any;
 }
@@ -59,6 +60,7 @@ interface SavedObjectDoc {
   migrationVersion?: SavedObjectsMigrationVersion;
   version?: string;
   updated_at?: string;
+  originId?: string;
 
   [rootProp: string]: any;
 }

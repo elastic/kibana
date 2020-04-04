@@ -1658,6 +1658,7 @@ export interface SavedObject<T = unknown> {
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     namespaces?: string[];
+    originId?: string;
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1726,6 +1727,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    originId?: string;
     // (undocumented)
     references?: SavedObjectReference[];
     // (undocumented)
@@ -1851,6 +1853,7 @@ export interface SavedObjectsCoreFieldMapping {
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    originId?: string;
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -2180,14 +2183,7 @@ export class SavedObjectsRepository {
     // (undocumented)
     find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
-        id: string;
-        type: string;
-        updated_at: string;
-        references: any;
-        version: string;
-        attributes: any;
-    }>;
+    incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
     }
 

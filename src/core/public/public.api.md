@@ -959,6 +959,7 @@ export interface SavedObject<T = unknown> {
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     namespaces?: string[];
+    originId?: string;
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;

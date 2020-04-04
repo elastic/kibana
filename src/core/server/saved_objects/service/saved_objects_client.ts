@@ -42,6 +42,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
 }
 
 /**
@@ -55,6 +57,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /** Optional ID of the original saved object, if this object's `id` was regenerated */
+  originId?: string;
 }
 
 /**
