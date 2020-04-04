@@ -136,14 +136,15 @@ describe('rules_notification_alert_type', () => {
     it('should warn about the gap between runs', async () => {
       (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(1000));
       await alert.executor(payload);
-      const message = `a few seconds (1000ms) has passed since last rule execution, and signals may have been missed.
-Consider increasing your look behind time or adding more Kibana instances.
-name: \"Detect Root/Admin Users\"
-id: \"04128c15-0d1b-4716-a4c5-46997ac7f3bd\"
-rule id: \"rule-1\"
-signals index: \".siem-signals\"`;
-      expect(logger.warn).toHaveBeenCalledWith(message);
-      expect(ruleStatusService.error).toHaveBeenCalledWith(message, {
+      expect(logger.warn).toHaveBeenCalled();
+      expect(logger.warn.mock.calls[0][0]).toContain(
+        'a few seconds (1000ms) has passed since last rule execution, and signals may have been missed.'
+      );
+      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(ruleStatusService.error.mock.calls[0][0]).toContain(
+        'a few seconds (1000ms) has passed since last rule execution, and signals may have been missed.'
+      );
+      expect(ruleStatusService.error.mock.calls[0][1]).toEqual({
         gap: 'a few seconds',
       });
     });
@@ -262,7 +263,7 @@ signals index: \".siem-signals\"`;
         );
       });
 
-      it('should should call ruleStatusService.success if no anomalies were found', async () => {
+      it('should not call ruleStatusService.success if no anomalies were found', async () => {
         const ruleAlert = getMlResult();
         payload = getPayload(
           ruleAlert,
@@ -282,10 +283,10 @@ signals index: \".siem-signals\"`;
           createdItemsCount: 0,
         });
         await alert.executor(payload);
-        expect(ruleStatusService.success).toHaveBeenCalled();
+        expect(ruleStatusService.success).not.toHaveBeenCalled();
       });
 
-      it('should should call ruleStatusService.success if signals were created', async () => {
+      it('should call ruleStatusService.success if signals were created', async () => {
         const ruleAlert = getMlResult();
         payload = getPayload(
           ruleAlert,
@@ -293,7 +294,13 @@ signals index: \".siem-signals\"`;
           savedObjectsClient,
           callClusterMock
         );
-        jobsSummaryMock.mockResolvedValue([]);
+        jobsSummaryMock.mockResolvedValue([
+          {
+            id: 'some_job_id',
+            jobState: 'started',
+            datafeedState: 'started',
+          },
+        ]);
         (findMlSignals as jest.Mock).mockResolvedValue({
           hits: {
             hits: [{}],

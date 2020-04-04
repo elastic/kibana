@@ -99,7 +99,9 @@ export const searchAfterAndBulkCreate = async ({
     someResult.hits.hits.length > 0
       ? new Date(someResult.hits.hits[someResult.hits.hits.length - 1]?._source['@timestamp'])
       : null;
-  toReturn.createdSignalsCount = createdItemsCount;
+  if (createdItemsCount) {
+    toReturn.createdSignalsCount = createdItemsCount;
+  }
   if (bulkCreateDuration) {
     toReturn.bulkCreateTimes.push(bulkCreateDuration);
   }

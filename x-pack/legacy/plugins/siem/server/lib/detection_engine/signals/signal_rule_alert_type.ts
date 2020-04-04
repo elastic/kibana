@@ -71,6 +71,7 @@ export const signalRulesAlertType = ({
         bulkCreateTimes: [],
         searchAfterTimes: [],
         lastLookBackDate: null,
+        createdSignalsCount: 0,
       };
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
