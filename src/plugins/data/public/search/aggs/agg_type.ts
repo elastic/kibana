@@ -251,7 +251,7 @@ export class AggType<
         });
       }
 
-      this.params = initParams(params);
+      this.params = initParams(params, { getInternalStartServices });
     }
 
     this.getRequestAggs = config.getRequestAggs || noop;

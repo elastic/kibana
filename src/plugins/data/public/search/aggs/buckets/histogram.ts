@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient, NotificationsSetup } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
@@ -34,7 +34,6 @@ export interface AutoBounds {
 
 export interface HistogramBucketAggDependencies {
   uiSettings: IUiSettingsClient;
-  notifications: NotificationsSetup;
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
@@ -45,7 +44,6 @@ export interface IBucketHistogramAggConfig extends IBucketAggConfig {
 
 export const getHistogramBucketAgg = ({
   uiSettings,
-  notifications,
   getInternalStartServices,
 }: HistogramBucketAggDependencies) =>
   new BucketAggType<IBucketHistogramAggConfig>(
@@ -126,7 +124,7 @@ export const getHistogramBucketAgg = ({
               })
               .catch((e: Error) => {
                 if (e.name === 'AbortError') return;
-                notifications.toasts.addWarning(
+                getInternalStartServices().notifications.toasts.addWarning(
                   i18n.translate('data.search.aggs.histogram.missingMaxMinValuesWarning', {
                     defaultMessage:
                       'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.',

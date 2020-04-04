@@ -24,6 +24,7 @@ import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;
@@ -31,6 +32,7 @@ describe('Top hit metric', () => {
   const aggTypesDependencies: TopHitMetricAggDependencies = {
     getInternalStartServices: () => ({
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      notifications: notificationServiceMock.createStartContract(),
     }),
   };
 

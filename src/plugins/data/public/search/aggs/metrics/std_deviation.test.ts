@@ -26,11 +26,13 @@ import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('AggTypeMetricStandardDeviationProvider class', () => {
   const aggTypesDependencies: StdDeviationMetricAggDependencies = {
     getInternalStartServices: () => ({
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      notifications: notificationServiceMock.createStartContract(),
     }),
   };
   const typesRegistry = mockAggTypesRegistry([getStdDeviationMetricAgg(aggTypesDependencies)]);

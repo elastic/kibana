@@ -75,6 +75,7 @@ export interface IDataPluginServices extends Partial<CoreStart> {
 /** @internal **/
 export interface InternalStartServices {
   fieldFormats: FieldFormatsStart;
+  notifications: CoreStart['notifications'];
 }
 
 /** @internal **/

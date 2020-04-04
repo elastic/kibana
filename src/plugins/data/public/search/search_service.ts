@@ -93,7 +93,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggTypes = getAggTypes({
       query,
       uiSettings: core.uiSettings,
-      notifications: core.notifications,
       getInternalStartServices,
     });
 

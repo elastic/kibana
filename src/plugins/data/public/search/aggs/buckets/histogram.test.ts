@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -34,13 +34,13 @@ describe('Histogram Agg', () => {
   let aggTypesDependencies: HistogramBucketAggDependencies;
 
   beforeEach(() => {
-    const { uiSettings, notifications } = coreMock.createSetup();
+    const { uiSettings } = coreMock.createSetup();
 
     aggTypesDependencies = {
       uiSettings,
-      notifications,
       getInternalStartServices: () => ({
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        notifications: notificationServiceMock.createStartContract(),
       }),
     };
   });

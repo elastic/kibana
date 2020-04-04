@@ -27,10 +27,12 @@ import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { GetInternalStartServicesFn } from '../../../types';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('sibling pipeline aggs', () => {
   const getInternalStartServices: GetInternalStartServicesFn = () => ({
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    notifications: notificationServiceMock.createStartContract(),
   });
 
   const typesRegistry = mockAggTypesRegistry();

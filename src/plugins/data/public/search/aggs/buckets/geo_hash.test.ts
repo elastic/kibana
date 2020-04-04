@@ -21,6 +21,7 @@ import { getGeoHashBucketAgg, GeoHashBucketAggDependencies } from './geo_hash';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 
@@ -32,6 +33,7 @@ describe('Geohash Agg', () => {
     aggTypesDependencies = {
       getInternalStartServices: () => ({
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        notifications: notificationServiceMock.createStartContract(),
       }),
     };
 

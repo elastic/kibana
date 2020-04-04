@@ -49,6 +49,7 @@ import {
   setSearchService,
   setUiSettings,
   getFieldFormats,
+  getNotifications,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
@@ -104,6 +105,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const getInternalStartServices: GetInternalStartServicesFn = () => ({
       fieldFormats: getFieldFormats(),
+      notifications: getNotifications(),
     });
 
     const queryService = this.queryService.setup({

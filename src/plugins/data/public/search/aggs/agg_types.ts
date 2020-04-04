@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient, NotificationsSetup } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { QuerySetup } from '../../query/query_service';
 
 import { getCountMetricAgg } from './metrics/count';
@@ -56,14 +56,12 @@ import { getBucketMaxMetricAgg } from './metrics/bucket_max';
 import { GetInternalStartServicesFn } from '../../types';
 
 export interface AggTypesDependencies {
-  notifications: NotificationsSetup;
   uiSettings: IUiSettingsClient;
   query: QuerySetup;
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
 export const getAggTypes = ({
-  notifications,
   uiSettings,
   query,
   getInternalStartServices,
@@ -93,7 +91,7 @@ export const getAggTypes = ({
   ],
   buckets: [
     getDateHistogramBucketAgg({ uiSettings, query, getInternalStartServices }),
-    getHistogramBucketAgg({ uiSettings, notifications, getInternalStartServices }),
+    getHistogramBucketAgg({ uiSettings, getInternalStartServices }),
     getRangeBucketAgg({ getInternalStartServices }),
     getDateRangeBucketAgg({ uiSettings, getInternalStartServices }),
     getIpRangeBucketAgg({ getInternalStartServices }),

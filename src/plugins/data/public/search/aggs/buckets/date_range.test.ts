@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 import { getDateRangeBucketAgg, DateRangeBucketAggDependencies } from './date_range';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
@@ -34,6 +34,7 @@ describe('date_range params', () => {
       uiSettings,
       getInternalStartServices: () => ({
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        notifications: notificationServiceMock.createStartContract(),
       }),
     };
   });

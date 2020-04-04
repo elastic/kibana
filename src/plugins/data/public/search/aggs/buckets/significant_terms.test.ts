@@ -25,6 +25,7 @@ import {
   SignificantTermsBucketAggDependencies,
 } from './significant_terms';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('Significant Terms Agg', () => {
   describe('order agg editor UI', () => {
@@ -35,6 +36,7 @@ describe('Significant Terms Agg', () => {
         aggTypesDependencies = {
           getInternalStartServices: () => ({
             fieldFormats: fieldFormatsServiceMock.createStartContract(),
+            notifications: notificationServiceMock.createStartContract(),
           }),
         };
       });
