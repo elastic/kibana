@@ -222,10 +222,8 @@ describe('SAMLAuthenticationProvider', () => {
     it('fails if token from the state is rejected because of unknown reason.', async () => {
       const request = requestFixture();
 
-      const failureReason = new Error('Token is not valid!');
-      callWithRequest
-        .withArgs(request, 'shield.authenticate')
-        .returns(Promise.reject(failureReason));
+      const failureReason = { statusCode: 500, message: 'Token is not valid!' };
+      callWithRequest.withArgs(request, 'shield.authenticate').rejects(failureReason);
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'some-invalid-token',
@@ -247,7 +245,7 @@ describe('SAMLAuthenticationProvider', () => {
           sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
           'shield.authenticate'
         )
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+        .rejects({ statusCode: 401 });
 
       callWithRequest
         .withArgs(
@@ -277,7 +275,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('fails if token from the state is expired and refresh attempt failed too.', async () => {
+    it('fails if token from the state is expired and refresh attempt failed with unknown reason too.', async () => {
       const request = requestFixture();
 
       callWithRequest
@@ -285,9 +283,12 @@ describe('SAMLAuthenticationProvider', () => {
           sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
           'shield.authenticate'
         )
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+        .rejects({ statusCode: 401 });
 
-      const refreshFailureReason = new Error('Something is wrong with refresh token.');
+      const refreshFailureReason = {
+        statusCode: 500,
+        message: 'Something is wrong with refresh token.',
+      };
       callWithInternalUser
         .withArgs(
           'shield.getAccessToken',
@@ -305,7 +306,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.error).to.be(refreshFailureReason);
     });
 
-    it('fails for AJAX requests with user friendly message if refresh token is used more than once.', async () => {
+    it('fails for AJAX requests with user friendly message if refresh token is expired.', async () => {
       const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
 
       callWithRequest
@@ -313,18 +314,18 @@ describe('SAMLAuthenticationProvider', () => {
           sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
           'shield.authenticate'
         )
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+        .rejects({ statusCode: 401 });
 
       callWithInternalUser
         .withArgs(
           'shield.getAccessToken',
-          { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
+          { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
         )
-        .returns(Promise.reject({ body: { error_description: 'token has already been refreshed' } }));
+        .rejects({ statusCode: 400 });
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'expired-token',
-        refreshToken: 'invalid-refresh-token'
+        refreshToken: 'expired-refresh-token'
       });
 
       expect(request.headers).to.not.have.property('authorization');
@@ -332,7 +333,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.error).to.eql(Boom.badRequest('Both access and refresh tokens are expired.'));
     });
 
-    it('initiates SAML handshake for non-AJAX requests if refresh token is used more than once.', async () => {
+    it('initiates SAML handshake for non-AJAX requests if access token document is missing.', async () => {
       const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
       callWithInternalUser
@@ -347,18 +348,21 @@ describe('SAMLAuthenticationProvider', () => {
           sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
           'shield.authenticate'
         )
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+        .rejects({
+          statusCode: 500,
+          body: { error: { reason: 'token document is missing and must be present' } },
+        });
 
       callWithInternalUser
         .withArgs(
           'shield.getAccessToken',
-          { body: { grant_type: 'refresh_token', refresh_token: 'invalid-refresh-token' } }
+          { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
         )
-        .returns(Promise.reject({ body: { error_description: 'token has already been refreshed' } }));
+        .rejects({ statusCode: 400 });
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'expired-token',
-        refreshToken: 'invalid-refresh-token'
+        refreshToken: 'expired-refresh-token'
       });
 
       sinon.assert.calledWithExactly(
@@ -373,33 +377,6 @@ describe('SAMLAuthenticationProvider', () => {
         requestId: 'some-request-id',
         nextURL: `/s/foo/some-path`
       });
-    });
-
-    it('fails for AJAX requests with user friendly message if refresh token is expired.', async () => {
-      const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } });
-
-      callWithRequest
-        .withArgs(
-          sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
-          'shield.authenticate'
-        )
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
-
-      callWithInternalUser
-        .withArgs(
-          'shield.getAccessToken',
-          { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
-        )
-        .returns(Promise.reject({ body: { error_description: 'refresh token is expired' } }));
-
-      const authenticationResult = await provider.authenticate(request, {
-        accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token'
-      });
-
-      expect(request.headers).to.not.have.property('authorization');
-      expect(authenticationResult.failed()).to.be(true);
-      expect(authenticationResult.error).to.eql(Boom.badRequest('Both access and refresh tokens are expired.'));
     });
 
     it('initiates SAML handshake for non-AJAX requests if refresh token is expired.', async () => {
@@ -417,14 +394,14 @@ describe('SAMLAuthenticationProvider', () => {
           sinon.match({ headers: { authorization: 'Bearer expired-token' } }),
           'shield.authenticate'
         )
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+        .rejects({ statusCode: 401 });
 
       callWithInternalUser
         .withArgs(
           'shield.getAccessToken',
           { body: { grant_type: 'refresh_token', refresh_token: 'expired-refresh-token' } }
         )
-        .returns(Promise.reject({ body: { error_description: 'refresh token is expired' } }));
+        .rejects({ statusCode: 400 });
 
       const authenticationResult = await provider.authenticate(request, {
         accessToken: 'expired-token',
@@ -464,7 +441,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('fails if token from `authorization` header is rejected.', async () => {
       const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
 
-      const failureReason = new Error('Token is not valid!');
+      const failureReason = { statusCode: 401 };
       callWithRequest
         .withArgs(request, 'shield.authenticate')
         .returns(Promise.reject(failureReason));
@@ -479,7 +456,7 @@ describe('SAMLAuthenticationProvider', () => {
       const user = { username: 'user' };
       const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
 
-      const failureReason = new Error('Token is not valid!');
+      const failureReason = { statusCode: 401 };
       callWithRequest
         .withArgs(request, 'shield.authenticate')
         .returns(Promise.reject(failureReason));

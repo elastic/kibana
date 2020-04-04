@@ -41,10 +41,11 @@ export default async function ({ readConfigFile }) {
   ];
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./apis/saml_only')],
     servers: xPackAPITestsConfig.get('servers'),
     services: {
       chance: kibanaAPITestsConfig.get('services.chance'),
+      es: kibanaAPITestsConfig.get('services.es'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {

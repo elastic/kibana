@@ -7,7 +7,7 @@
 import querystring from 'querystring';
 import url from 'url';
 import { delay } from 'bluebird';
-import { getLogoutRequest, getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml_tools';
+import { getLogoutRequest, getSAMLResponse } from '../../fixtures/saml_tools';
 import expect from 'expect.js';
 import request from 'request';
 
@@ -17,6 +17,8 @@ export default function ({ getService }) {
   const config = getService('config');
 
   const kibanaServerConfig = config.get('servers.kibana');
+  const basicUsername = kibanaServerConfig.username;
+  const basicPassword = kibanaServerConfig.password;
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
@@ -33,122 +35,34 @@ export default function ({ getService }) {
     });
   }
 
-  describe('SAML authentication', () => {
-    it('should reject API requests if client is not authenticated', async () => {
-      await supertest
-        .get('/api/security/v1/me')
-        .set('kbn-xsrf', 'xxx')
-        .expect(401);
-    });
-
+  describe('SAML authentication (IdP initiated login)', () => {
     describe('initiating handshake', () => {
-      it('should properly set cookie and redirect user', async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+      it('should not initiate handshake and redirect to Kibana own login page.', async () => {
+        const response = await supertest.get('/abc/xyz/handshake?one=two three')
           .expect(302);
 
-        const cookies = handshakeResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const handshakeCookie = request.cookie(cookies[0]);
-        expect(handshakeCookie.key).to.be('sid');
-        expect(handshakeCookie.value).to.not.be.empty();
-        expect(handshakeCookie.path).to.be('/');
-        expect(handshakeCookie.httpOnly).to.be(true);
-
-        const redirectURL = url.parse(handshakeResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
-        expect(redirectURL.query.SAMLRequest).to.not.be.empty();
-      });
-
-      it('should not allow access to the API', async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
-          .expect(302);
-
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        await supertest
-          .get('/api/security/v1/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
-          .expect(401);
-      });
-
-      it('AJAX requests should not initiate handshake', async () => {
-        const ajaxResponse = await supertest.get('/abc/xyz/handshake?one=two three')
-          .set('kbn-xsrf', 'xxx')
-          .expect(401);
-
-        expect(ajaxResponse.headers['set-cookie']).to.be(undefined);
+        expect(response.headers['set-cookie']).to.be(undefined);
+        expect(response.headers.location).to.eql('/login?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three');
       });
     });
 
     describe('finishing handshake', () => {
-      let handshakeCookie;
-      let samlRequestId;
-
+      let basicCookie;
       beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
-          .expect(302);
-
-        handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
-      });
-
-      it('should fail if SAML response is not complemented with handshake cookie', async () => {
-        await supertest.post('/api/security/v1/saml')
+        const loginResponse = await supertest.post('/api/security/v1/login')
           .set('kbn-xsrf', 'xxx')
-          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
-          .expect(401);
-      });
+          .send({ username: basicUsername, password: basicPassword })
+          .expect(204);
 
-      it('should succeed if both SAML response and handshake cookie are provided', async () => {
-        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
-          .expect(302);
-
-        // User should be redirected to the URL that initiated handshake.
-        expect(samlAuthenticationResponse.headers.location).to.be('/abc/xyz/handshake?one=two%20three');
-
-        const cookies = samlAuthenticationResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const sessionCookie = request.cookie(cookies[0]);
-        expect(sessionCookie.key).to.be('sid');
-        expect(sessionCookie.value).to.not.be.empty();
-        expect(sessionCookie.path).to.be('/');
-        expect(sessionCookie.httpOnly).to.be(true);
-
-        const apiResponse = await supertest
-          .get('/api/security/v1/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
-          .expect(200);
-
-        expect(apiResponse.body).to.only.have.keys([
-          'username',
-          'full_name',
-          'email',
-          'roles',
-          'scope',
-          'metadata',
-          'enabled',
-          'authentication_realm',
-          'lookup_realm',
-        ]);
-
-        expect(apiResponse.body.username).to.be('a@b.c');
+        basicCookie = request.cookie(loginResponse.headers['set-cookie'][0]);
       });
 
       it('should succeed in case of IdP initiated login', async () => {
-        // Don't pass handshake cookie and don't include `inResponseTo` into SAML response
-        // to simulate IdP initiated login.
         const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
           .send({ SAMLResponse: await createSAMLResponse() }, {})
           .expect(302);
 
-        // User should be redirected to the URL that initiated handshake.
         expect(samlAuthenticationResponse.headers.location).to.be('/');
 
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
@@ -181,103 +95,51 @@ export default function ({ getService }) {
         expect(apiResponse.body.username).to.be('a@b.c');
       });
 
-      it('should fail if there is an active authenticated session already', async () => {
+      it('should succeed if both SAML response and basic cookie are provided', async () => {
         const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
+          .set('Cookie', basicCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse() }, {})
           .expect(302);
 
-        const sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+        expect(samlAuthenticationResponse.headers.location).to.be('/');
 
-        const secondSAMLAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+        const cookies = samlAuthenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        const sessionCookie = request.cookie(cookies[0]);
+        expect(sessionCookie.key).to.be('sid');
+        expect(sessionCookie.value).to.not.be.empty();
+        expect(sessionCookie.path).to.be('/');
+        expect(sessionCookie.httpOnly).to.be(true);
+
+        const apiResponse = await supertest
+          .get('/api/security/v1/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse() }, {})
-          .expect(403);
+          .expect(200);
 
-        expect(secondSAMLAuthenticationResponse.body).to.eql({
-          error: 'Forbidden',
-          message: 'Sorry, you already have an active Kibana session. ' +
-          'If you want to start a new one, please logout from the existing session first.',
-          statusCode: 403
-        });
+        expect(apiResponse.body).to.only.have.keys([
+          'username',
+          'full_name',
+          'email',
+          'roles',
+          'scope',
+          'metadata',
+          'enabled',
+          'authentication_realm',
+          'lookup_realm',
+        ]);
+
+        expect(apiResponse.body.username).to.be('a@b.c');
       });
 
       it('should fail if SAML response is not valid', async () => {
         await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
+          .set('Cookie', basicCookie.cookieString())
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: 'some-invalid-request-id' }) }, {})
           .expect(401);
-      });
-    });
-
-    describe('API access with active session', () => {
-      let sessionCookie;
-
-      beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz')
-          .expect(302);
-
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
-
-        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
-          .expect(302);
-
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
-      });
-
-      it('should extend cookie on every successful non-system API call', async () => {
-        const apiResponseOne = await supertest
-          .get('/api/security/v1/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
-          .expect(200);
-
-        expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = request.cookie(apiResponseOne.headers['set-cookie'][0]);
-
-        expect(sessionCookieOne.value).to.not.be.empty();
-        expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
-
-        const apiResponseTwo = await supertest
-          .get('/api/security/v1/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
-          .expect(200);
-
-        expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = request.cookie(apiResponseTwo.headers['set-cookie'][0]);
-
-        expect(sessionCookieTwo.value).to.not.be.empty();
-        expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
-      });
-
-      it('should not extend cookie for system API calls', async () => {
-        const systemAPIResponse = await supertest
-          .get('/api/security/v1/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('kbn-system-api', 'true')
-          .set('Cookie', sessionCookie.cookieString())
-          .expect(200);
-
-        expect(systemAPIResponse.headers['set-cookie']).to.be(undefined);
-      });
-
-      it('should fail and preserve session cookie if unsupported authentication schema is used', async () => {
-        const apiResponse = await supertest
-          .get('/api/security/v1/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Authorization', 'Basic AbCdEf')
-          .set('Cookie', sessionCookie.cookieString())
-          .expect(401);
-
-        expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
     });
 
@@ -286,19 +148,10 @@ export default function ({ getService }) {
       let idpSessionIndex;
 
       beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz')
-          .expect(302);
-
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
-
         idpSessionIndex = chance.natural();
         const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
-          .send({
-            SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId, sessionIndex: idpSessionIndex })
-          }, {})
+          .send({ SAMLResponse: await createSAMLResponse({ sessionIndex: idpSessionIndex }) }, {})
           .expect(302);
 
         sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
@@ -333,7 +186,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -390,7 +243,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -417,7 +270,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -427,16 +280,9 @@ export default function ({ getService }) {
       let sessionCookie;
 
       beforeEach(async () => {
-        const handshakeResponse = await supertest.get('/abc/xyz')
-          .expect(302);
-
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
-        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
-
         const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', handshakeCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
+          .send({ SAMLResponse: await createSAMLResponse() }, {})
           .expect(302);
 
         sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
@@ -549,6 +395,48 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', newSessionCookie.cookieString())
           .expect(200);
+      });
+    });
+
+    describe('API access with missing access token document.', () => {
+      let sessionCookie;
+
+      beforeEach(async () => {
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+          .set('kbn-xsrf', 'xxx')
+          .send({ SAMLResponse: await createSAMLResponse() }, {})
+          .expect(302);
+
+        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+      });
+
+      it('should properly set cookie and start new SAML handshake', async function () {
+        // Let's delete tokens from `.security` index directly to simulate the case when
+        // Elasticsearch automatically removes access/refresh token document from the index
+        // after some period of time.
+        const esResponse = await getService('es').deleteByQuery({
+          index: '.security',
+          q: 'doc_type:token',
+          refresh: true,
+        });
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
+
+        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        const cookies = handshakeResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        const handshakeCookie = request.cookie(cookies[0]);
+        expect(handshakeCookie.key).to.be('sid');
+        expect(handshakeCookie.value).to.not.be.empty();
+        expect(handshakeCookie.path).to.be('/');
+        expect(handshakeCookie.httpOnly).to.be(true);
+
+        const redirectURL = url.parse(handshakeResponse.headers.location, true /* parseQueryString */);
+        expect(redirectURL.href.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
+        expect(redirectURL.query.SAMLRequest).to.not.be.empty();
       });
     });
   });
