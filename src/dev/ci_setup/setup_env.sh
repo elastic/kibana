@@ -56,6 +56,11 @@ export KIBANA_PKG_BRANCH="$kbnBranch"
 ###
 NODE_OPTIONS="$(grep -v ^# < ${KIBANA_DIR}/config/node.ci.options | xargs) $NODE_OPTIONS"
 
+for entry in "${KIBANA_DIR}/config"/*
+do
+  echo "$entry"
+done
+
 ###
 ### download node
 ###
