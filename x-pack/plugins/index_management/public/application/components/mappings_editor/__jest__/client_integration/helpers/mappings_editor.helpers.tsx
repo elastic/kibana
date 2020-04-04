@@ -50,8 +50,6 @@ const registerActions = (testBed: TestBed<TestSubjects>) => {
 
   const updateJsonEditor = async (testSubject: TestSubjects, value: object) => {
     find(testSubject).simulate('change', { jsonContent: JSON.stringify(value) });
-    // Give time to the form state to be updated
-    await nextTick();
   };
 
   const getJsonEditorValue = (testSubject: TestSubjects) => {
