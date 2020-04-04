@@ -107,7 +107,7 @@ async function attemptToCreateCommand(
           chromeOptions.push('headless', 'disable-gpu', 'remote-debugging-port=9222');
         }
         chromeCapabilities.set('goog:chromeOptions', {
-          w3c: false,
+          w3c: true,
           args: chromeOptions,
         });
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });

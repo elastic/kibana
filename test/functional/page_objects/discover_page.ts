@@ -130,20 +130,23 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickHistogramBar() {
       const el = await elasticChart.getCanvas();
+      const x = browser.isW3CEnabled ? 0 : 200;
 
       await browser
         .getActions()
-        .move({ x: 200, y: 20, origin: el._webElement })
+        .move({ x, y: 20, origin: el._webElement })
         .click()
         .perform();
     }
 
     public async brushHistogram() {
       const el = await elasticChart.getCanvas();
+      const x1 = browser.isW3CEnabled ? -300 : 200;
+      const x2 = browser.isW3CEnabled ? -100 : 400;
 
       await browser.dragAndDrop(
-        { location: el, offset: { x: 200, y: 20 } },
-        { location: el, offset: { x: 400, y: 30 } }
+        { location: el, offset: { x: x1, y: 20 } },
+        { location: el, offset: { x: x2, y: 30 } }
       );
     }
 
