@@ -35,9 +35,6 @@ export interface MlSetupDependencies {
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   setup(core: CoreSetup<MlStartDependencies, MlPluginStart>, pluginsSetup: MlSetupDependencies) {
-    const home = pluginsSetup.home;
-    const licensing = pluginsSetup.licensing;
-
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -58,8 +55,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             management: pluginsSetup.management,
             usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
-            licensing,
-            home,
+            licensing: pluginsSetup.licensing,
+            home: pluginsSetup.home,
           },
           {
             element: params.element,
@@ -71,7 +68,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       },
     });
 
-    registerFeature(home);
+    registerFeature(pluginsSetup.home);
 
     initManagementSection(pluginsSetup, core);
     return {};
