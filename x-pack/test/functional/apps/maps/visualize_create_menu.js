@@ -15,7 +15,7 @@ export default function({ getPageObjects }) {
     });
 
     after(async () => {
-      await PageObjects.maps.gotoMapListingPage();
+      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
     });
 
     it('should show maps application in create menu', async () => {

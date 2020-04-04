@@ -16,7 +16,7 @@ export default function({ getPageObjects, getService }) {
     });
 
     after(async () => {
-      await PageObjects.maps.gotoMapListingPage();
+      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
     });
 
     async function getRequestTimestamp() {
@@ -87,10 +87,6 @@ export default function({ getPageObjects, getService }) {
     describe('layer query', () => {
       before(async () => {
         await PageObjects.maps.setLayerQuery('logstash', 'machine.os.raw : "ios"');
-      });
-
-      after(async () => {
-        await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
       });
 
       it('should apply layer query to search request', async () => {
