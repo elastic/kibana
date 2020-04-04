@@ -5,16 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CaptureConfig } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
+import { CaptureConfig } from '../../../../server/types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
 export const waitForRenderComplete = async (
+  captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  captureConfig: CaptureConfig,
   logger: LevelLogger
 ) => {
   logger.debug(
