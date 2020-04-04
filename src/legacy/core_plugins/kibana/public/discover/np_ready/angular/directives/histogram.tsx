@@ -209,11 +209,11 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const { chartData } = this.props;
     const { chartsTheme } = this.state;
 
-    if (!chartData || !chartData.series[0]) {
+    if (!chartData) {
       return null;
     }
 
-    const data = chartData.series[0].values;
+    const data = chartData.values;
 
     /**
      * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].

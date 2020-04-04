@@ -24,7 +24,7 @@ import { Unit } from '@elastic/datemath';
 import { SerializedFieldFormat } from '../../../../../../../../plugins/expressions/common/types';
 import { getSeries } from './_get_series';
 import { getAspects } from './_get_aspects';
-import { Serie } from './_add_to_siri';
+import { Point } from './_get_point';
 
 export interface Column {
   id: string;
@@ -38,13 +38,6 @@ export interface Row {
 export interface Table {
   columns: Column[];
   rows: Row[];
-  $parent: {
-    table: Table;
-    column: number;
-    row: number;
-    key: number;
-    name: string;
-  };
 }
 
 interface HistogramParams {
@@ -89,7 +82,7 @@ interface Ordered {
 }
 export interface Chart {
   aspects: Aspects;
-  series: Serie[];
+  values?: Point;
   xAxisOrderedValues: number[];
   xAxisFormat: Dimension['format'];
   xAxisLabel: Column['name'];
@@ -126,7 +119,7 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
 
   chart.yAxisLabel = chart.aspects.y && chart.aspects.y[0].title;
 
-  chart.series = getSeries(table, chart);
+  chart.values = getSeries(table, chart);
 
   delete chart.aspects;
   return chart;

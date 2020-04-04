@@ -17,60 +17,24 @@
  * under the License.
  */
 
-import { Aspect, Table, Row } from './point_series';
+import { Row } from './point_series';
 
 type RowValue = number | 'NaN';
-interface Raw {
-  table: Table;
-  column: number;
-  row: number;
-  value: RowValue;
-}
 export interface Point {
   x: RowValue;
   y: RowValue;
-  extraMetrics: [];
-  xRaw: Raw;
-  yRaw: Raw;
-  tableRaw?: {
-    table: Table;
-    column: number;
-    row: number;
-    value: number;
-    title: string;
-  };
   parent: null;
   series?: string;
   seriesId?: string;
 }
 
-export function getPoint(table: Table, x: Aspect, row: Row, rowIndex: number, y: Aspect) {
-  const xRow = row[x.accessor];
-  const yRow = row[y.accessor];
+export function getPoint(x: string, y: string, row: Row) {
+  const xRow = row[x];
+  const yRow = row[y];
 
   const point = {
     x: xRow,
     y: yRow,
-    extraMetrics: [],
-    xRaw: {
-      table,
-      column: x.column,
-      row: rowIndex,
-      value: xRow,
-    },
-    yRaw: {
-      table,
-      column: y.column,
-      row: rowIndex,
-      value: yRow,
-    },
-    tableRaw: table.$parent && {
-      table: table.$parent.table,
-      column: table.$parent.column,
-      row: table.$parent.row,
-      value: table.$parent.key,
-      title: table.$parent.name,
-    },
     parent: null,
   } as Point;
 
@@ -78,12 +42,6 @@ export function getPoint(table: Table, x: Aspect, row: Row, rowIndex: number, y:
     // filter out NaN from stats
     // from metrics that are not based at zero
     return;
-  }
-
-  if (y) {
-    // If the data is not split up with a series aspect, then
-    // each point's "series" becomes the y-agg that produced it
-    point.series = y.title;
   }
 
   return point;
