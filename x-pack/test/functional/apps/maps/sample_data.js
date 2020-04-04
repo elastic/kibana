@@ -45,6 +45,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
+        await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('ecommerce');
@@ -72,6 +73,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
+        await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('flights');
@@ -101,6 +103,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
+        await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.removeSampleDataSet('logs');

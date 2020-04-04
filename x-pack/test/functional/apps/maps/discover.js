@@ -15,6 +15,10 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('discover');
     });
 
+    afterEach(async () => {
+      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
+    });
+
     it('should link geo_shape fields to Maps application', async () => {
       await PageObjects.discover.selectIndexPattern('geo_shapes*');
       await PageObjects.discover.clickFieldListItem('geometry');

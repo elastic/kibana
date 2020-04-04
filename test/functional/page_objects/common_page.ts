@@ -43,7 +43,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     appConfig: {};
     ensureCurrentUrl: boolean;
     shouldLoginIfPrompted: boolean;
-    shouldAcceptAlert: boolean;
     useActualUrl: boolean;
   }
 
@@ -127,13 +126,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     private async navigate(navigateProps: NavigateProps) {
-      const {
-        appConfig,
-        ensureCurrentUrl,
-        shouldLoginIfPrompted,
-        shouldAcceptAlert,
-        useActualUrl,
-      } = navigateProps;
+      const { appConfig, ensureCurrentUrl, shouldLoginIfPrompted, useActualUrl } = navigateProps;
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
 
       await retry.try(async () => {
@@ -141,7 +134,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           log.debug(`navigateToActualUrl ${appUrl}`);
           await browser.get(appUrl);
         } else {
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          log.debug(`navigateToUrl ${appUrl}`);
+          await browser.get(appUrl);
+          // await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
         }
 
         const currentUrl = shouldLoginIfPrompted
@@ -167,7 +162,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         basePath = '',
         ensureCurrentUrl = true,
         shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
         useActualUrl = false,
       } = {}
     ) {
@@ -180,7 +174,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         appConfig,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl,
       });
     }
@@ -200,7 +193,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         basePath = '',
         ensureCurrentUrl = true,
         shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
         useActualUrl = true,
       } = {}
     ) {
@@ -214,7 +206,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         appConfig,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl,
       });
     }
@@ -228,18 +219,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async navigateToActualUrl(
       appName: string,
       hash?: string,
-      {
-        basePath = '',
-        ensureCurrentUrl = true,
-        shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
-      } = {}
+      { basePath = '', ensureCurrentUrl = true, shouldLoginIfPrompted = true } = {}
     ) {
       await this.navigateToUrl(appName, hash, {
         basePath,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl: true,
       });
     }
@@ -252,7 +237,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}
+      { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}
     ) {
       let appUrl: string;
       if (config.has(['apps', appName])) {
@@ -274,7 +259,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await retry.tryForTime(defaultTryTimeout * 2, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          log.debug('navigate to: ' + appUrl);
+          await browser.get(appUrl);
+          // await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
           await this.sleep(700);
           log.debug('returned from get, calling refresh');
           await browser.refresh();

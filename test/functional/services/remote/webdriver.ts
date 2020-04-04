@@ -110,6 +110,7 @@ async function attemptToCreateCommand(
           w3c: true,
           args: chromeOptions,
         });
+        chromeCapabilities.set('unexpectedAlertBehaviour', 'accept');
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
 
         const session = await new Builder()
