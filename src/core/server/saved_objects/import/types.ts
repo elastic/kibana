@@ -19,6 +19,7 @@
 
 import { Readable } from 'stream';
 import { SavedObjectsClientContract } from '../types';
+import { ISavedObjectTypeRegistry } from '..';
 
 /**
  * Describes a retry operation for importing a saved object.
@@ -124,8 +125,8 @@ export interface SavedObjectsImportOptions {
   overwrite: boolean;
   /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
   savedObjectsClient: SavedObjectsClientContract;
-  /** the list of allowed types to import */
-  supportedTypes: string[];
+  /** The registry of all known saved object types */
+  typeRegistry: ISavedObjectTypeRegistry;
   /** if specified, will import in given namespace, else will import as global object */
   namespace?: string;
 }
@@ -141,10 +142,10 @@ export interface SavedObjectsResolveImportErrorsOptions {
   objectLimit: number;
   /** client to use to perform the import operation */
   savedObjectsClient: SavedObjectsClientContract;
+  /** The registry of all known saved object types */
+  typeRegistry: ISavedObjectTypeRegistry;
   /** saved object import references to retry */
   retries: SavedObjectsImportRetry[];
-  /** the list of allowed types to import */
-  supportedTypes: string[];
   /** if specified, will import in given namespace */
   namespace?: string;
 }
