@@ -22,9 +22,8 @@ import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import { green, always } from './utils';
 import { fromNullable } from './either';
+import { COVERAGE_INDEX, TOTALS_INDEX } from './constants';
 
-const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
-const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
 const node = process.env.ES_HOST || 'http://localhost:9200';
 const redacted = redact(node);
 const client = new Client({ node });
