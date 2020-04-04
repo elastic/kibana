@@ -14,6 +14,10 @@ export default function({ getPageObjects }) {
       await PageObjects.maps.loadSavedMap('document example');
     });
 
+    after(async () => {
+      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
+    });
+
     describe('categorical styling', () => {
       before(async () => {
         await PageObjects.maps.openLayerPanel('logstash');
