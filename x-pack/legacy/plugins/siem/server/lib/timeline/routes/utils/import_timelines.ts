@@ -127,7 +127,7 @@ export const saveNotes = (
   existingNoteIds?: string[],
   newNotes?: NoteResult[]
 ) => {
-  return (
+  return Promise.all(
     newNotes?.map(note => {
       const newNote: SavedNote = {
         eventId: note.eventId,
