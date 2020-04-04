@@ -172,6 +172,18 @@ describe('copySavedObjectsToSpaces', () => {
               "get": [MockFunction],
               "update": [MockFunction],
             },
+            "typeRegistry": Object {
+              "getAllTypes": [MockFunction],
+              "getImportableAndExportableTypes": [MockFunction],
+              "getIndex": [MockFunction],
+              "getType": [MockFunction],
+              "isHidden": [MockFunction],
+              "isImportableAndExportable": [MockFunction],
+              "isMultiNamespace": [MockFunction],
+              "isNamespaceAgnostic": [MockFunction],
+              "isSingleNamespace": [MockFunction],
+              "registerType": [MockFunction],
+            },
           },
         ],
       ]

@@ -85,6 +85,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
 
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,
+        typeRegistry: context.core.savedObjects.typeRegistry,
         types,
         search,
         objects,

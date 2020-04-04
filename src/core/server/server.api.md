@@ -831,7 +831,7 @@ export interface ErrorHttpResponseOptions {
 }
 
 // @public
-export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
+export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, typeRegistry, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
 
 // @public
 export interface FakeRequest {
@@ -1943,6 +1943,7 @@ export interface SavedObjectsExportOptions {
     }>;
     savedObjectsClient: SavedObjectsClientContract;
     search?: string;
+    typeRegistry: ISavedObjectTypeRegistry;
     types?: string[];
 }
 

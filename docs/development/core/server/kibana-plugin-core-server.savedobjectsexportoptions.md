@@ -23,5 +23,6 @@ export interface SavedObjectsExportOptions
 |  [objects](./kibana-plugin-core-server.savedobjectsexportoptions.objects.md) | <code>Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;</code> | optional array of objects to export. |
 |  [savedObjectsClient](./kibana-plugin-core-server.savedobjectsexportoptions.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> | an instance of the SavedObjectsClient. |
 |  [search](./kibana-plugin-core-server.savedobjectsexportoptions.search.md) | <code>string</code> | optional query string to filter exported objects. |
+|  [typeRegistry](./kibana-plugin-core-server.savedobjectsexportoptions.typeregistry.md) | <code>ISavedObjectTypeRegistry</code> | The registry of all known saved object types |
 |  [types](./kibana-plugin-core-server.savedobjectsexportoptions.types.md) | <code>string[]</code> | optional array of saved object types. |
 

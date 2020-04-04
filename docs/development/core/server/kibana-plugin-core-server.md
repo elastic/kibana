@@ -41,7 +41,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Function | Description |
 |  --- | --- |
-|  [exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-core-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-core-server.savedobjectsexportoptions.md) for more detailed information. |
+|  [exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, typeRegistry, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-core-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-core-server.savedobjectsexportoptions.md) for more detailed information. |
 |  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, typeRegistry, namespace, })](./kibana-plugin-core-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
 |  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, })](./kibana-plugin-core-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
 

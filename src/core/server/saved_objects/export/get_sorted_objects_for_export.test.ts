@@ -21,6 +21,7 @@ import { exportSavedObjectsToStream } from './get_sorted_objects_for_export';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '../../../../legacy/utils/streams';
+import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -28,6 +29,7 @@ async function readStreamToCompletion(stream: Readable) {
 
 describe('getSortedObjectsForExport()', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
+  const typeRegistry = typeRegistryMock.create();
 
   afterEach(() => {
     savedObjectsClient.find.mockReset();
@@ -37,6 +39,7 @@ describe('getSortedObjectsForExport()', () => {
     savedObjectsClient.delete.mockReset();
     savedObjectsClient.get.mockReset();
     savedObjectsClient.update.mockReset();
+    typeRegistry.isMultiNamespace.mockReset();
   });
 
   test('exports selected types and sorts them', async () => {
@@ -67,6 +70,7 @@ describe('getSortedObjectsForExport()', () => {
     });
     const exportStream = await exportSavedObjectsToStream({
       savedObjectsClient,
+      typeRegistry,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
     });
@@ -153,6 +157,7 @@ describe('getSortedObjectsForExport()', () => {
     });
     const exportStream = await exportSavedObjectsToStream({
       savedObjectsClient,
+      typeRegistry,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
       excludeExportDetails: true,
@@ -212,6 +217,7 @@ describe('getSortedObjectsForExport()', () => {
     });
     const exportStream = await exportSavedObjectsToStream({
       savedObjectsClient,
+      typeRegistry,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
       search: 'foo',
@@ -299,6 +305,7 @@ describe('getSortedObjectsForExport()', () => {
     });
     const exportStream = await exportSavedObjectsToStream({
       savedObjectsClient,
+      typeRegistry,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
       namespace: 'foo',
@@ -387,6 +394,7 @@ describe('getSortedObjectsForExport()', () => {
     await expect(
       exportSavedObjectsToStream({
         savedObjectsClient,
+        typeRegistry,
         exportSizeLimit: 1,
         types: ['index-pattern', 'search'],
       })
@@ -428,6 +436,7 @@ describe('getSortedObjectsForExport()', () => {
     const exportStream = await exportSavedObjectsToStream({
       exportSizeLimit: 10000,
       savedObjectsClient,
+      typeRegistry,
       types: ['index-pattern'],
     });
     const response = await readStreamToCompletion(exportStream);
@@ -492,6 +501,7 @@ describe('getSortedObjectsForExport()', () => {
     const exportStream = await exportSavedObjectsToStream({
       exportSizeLimit: 10000,
       savedObjectsClient,
+      typeRegistry,
       objects: [
         {
           type: 'index-pattern',
@@ -560,6 +570,40 @@ describe('getSortedObjectsForExport()', () => {
         `);
   });
 
+  test('modifies multi-namespace objects to add originId if it is not already present', async () => {
+    typeRegistry.isMultiNamespace.mockImplementation((type: string) => type === 'multi');
+    const createSavedObject = (obj: any) => ({ ...obj, attributes: {}, references: [] });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        createSavedObject({ type: 'multi', id: '1', originId: 'foo' }),
+        createSavedObject({ type: 'multi', id: '2' }),
+        createSavedObject({ type: 'other', id: '3', originId: 'bar' }),
+        createSavedObject({ type: 'other', id: '4' }),
+      ],
+    });
+    const exportStream = await exportSavedObjectsToStream({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      typeRegistry,
+      objects: [
+        { type: 'multi', id: '1' },
+        { type: 'multi', id: '2' },
+        { type: 'other', id: '3' },
+        { type: 'other', id: '4' },
+      ],
+    });
+    const response = await readStreamToCompletion(exportStream);
+    expect(response).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: '1', originId: 'foo' }),
+        expect.objectContaining({ id: '2', originId: '2' }),
+        expect.objectContaining({ id: '3', originId: 'bar' }),
+        expect.not.objectContaining({ id: '4', originId: expect.anything() }),
+        expect.objectContaining({ exportedCount: 4 }),
+      ])
+    );
+  });
+
   test('includes nested dependencies when passed in', async () => {
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -590,6 +634,7 @@ describe('getSortedObjectsForExport()', () => {
     const exportStream = await exportSavedObjectsToStream({
       exportSizeLimit: 10000,
       savedObjectsClient,
+      typeRegistry,
       objects: [
         {
           type: 'search',
@@ -670,6 +715,7 @@ describe('getSortedObjectsForExport()', () => {
     const exportOpts = {
       exportSizeLimit: 1,
       savedObjectsClient,
+      typeRegistry,
       objects: [
         {
           type: 'index-pattern',
@@ -690,6 +736,7 @@ describe('getSortedObjectsForExport()', () => {
     const exportOpts = {
       exportSizeLimit: 1,
       savedObjectsClient,
+      typeRegistry,
       types: undefined,
       objects: undefined,
     };
@@ -703,6 +750,7 @@ describe('getSortedObjectsForExport()', () => {
     const exportOpts = {
       exportSizeLimit: 1,
       savedObjectsClient,
+      typeRegistry,
       objects: [{ type: 'index-pattern', id: '1' }],
       search: 'foo',
     };

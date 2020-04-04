@@ -22,6 +22,7 @@ import { createListStream } from '../../../../legacy/utils/streams';
 import { SavedObjectsClientContract, SavedObject } from '../types';
 import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
+import { ISavedObjectTypeRegistry } from '..';
 
 /**
  * Options controlling the export operation.
@@ -41,6 +42,8 @@ export interface SavedObjectsExportOptions {
   search?: string;
   /** an instance of the SavedObjectsClient. */
   savedObjectsClient: SavedObjectsClientContract;
+  /** The registry of all known saved object types */
+  typeRegistry: ISavedObjectTypeRegistry;
   /** the maximum number of objects to export. */
   exportSizeLimit: number;
   /** flag to also include all related saved objects in the export stream. */
@@ -125,6 +128,23 @@ async function fetchObjectsToExport({
 }
 
 /**
+ * Modifies an array of saved objects to ensure that multi-namespace types include an originId property.
+ * If the saved object is not a multi-namespace type, it is returned unmodified.
+ * Otherwise, if the saved object already has an originId, it is returned unmodified.
+ * Otherwise, the saved object is returned with an originId equivalent to its id.
+ */
+const modifySavedObjectsToIncludeOriginId = (
+  savedObjects: Array<SavedObject<unknown>>,
+  typeRegistry: ISavedObjectTypeRegistry
+) =>
+  savedObjects.map(obj => {
+    if (!typeRegistry.isMultiNamespace(obj.type)) {
+      return obj;
+    }
+    return { ...obj, originId: obj.originId ?? obj.id };
+  });
+
+/**
  * Generates sorted saved object stream to be used for export.
  * See the {@link SavedObjectsExportOptions | options} for more detailed information.
  *
@@ -135,6 +155,7 @@ export async function exportSavedObjectsToStream({
   objects,
   search,
   savedObjectsClient,
+  typeRegistry,
   exportSizeLimit,
   includeReferencesDeep = false,
   excludeExportDetails = false,
@@ -159,10 +180,12 @@ export async function exportSavedObjectsToStream({
     exportedObjects = sortObjects(rootObjects);
   }
 
+  const modifiedObjects = modifySavedObjectsToIncludeOriginId(exportedObjects, typeRegistry);
+
   const exportDetails: SavedObjectsExportResultDetails = {
-    exportedCount: exportedObjects.length,
+    exportedCount: modifiedObjects.length,
     missingRefCount: missingReferences.length,
     missingReferences,
   };
-  return createListStream([...exportedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
+  return createListStream([...modifiedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
 }
