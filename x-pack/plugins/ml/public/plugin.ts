@@ -52,10 +52,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             data: pluginsStart.data,
             share: pluginsStart.share,
             security: pluginsSetup.security,
+            licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
             usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
-            licensing: pluginsSetup.licensing,
             home: pluginsSetup.home,
           },
           {

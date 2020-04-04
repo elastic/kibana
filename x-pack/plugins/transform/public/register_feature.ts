@@ -11,6 +11,7 @@ import {
 } from '../../../../src/plugins/home/public';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {
+  // register Transforms so it appears on the Kibana home page
   home.featureCatalogue.register({
     id: 'transform',
     title: i18n.translate('xpack.transform.transformsTitle', {
@@ -20,7 +21,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
       defaultMessage:
         'Use transforms to pivot existing Elasticsearch indices into summarized or entity-centric indices.',
     }),
-    icon: 'managementApp',
+    icon: 'managementApp', // there is currently no Transforms icon, so using the general management app icon
     path: '/app/kibana#/management/elasticsearch/transform',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN,

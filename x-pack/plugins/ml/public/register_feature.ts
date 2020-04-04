@@ -16,7 +16,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
   // so the file data visualizer appears to allow people to import data
   home.environment.update({ ml: true });
 
-  // register ML to appear on the app list
+  // register ML so it appears on the Kibana home page
   home.featureCatalogue.register({
     id: PLUGIN_ID,
     title: i18n.translate('xpack.ml.machineLearningTitle', {
