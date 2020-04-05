@@ -86,7 +86,8 @@ describe('lists_default_array', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not validate an array of lists that includes "values" when "values_type" is "exists"', () => {
+  // TODO - this scenario should never come up, as the values key is forbidden when values_type is "exists" in the incoming schema - need to find a good way to do this in io-ts
+  test('it will validate an array of lists that includes "values" when "values_type" is "exists"', () => {
     const payload = [
       {
         field: 'host.name',
@@ -102,12 +103,12 @@ describe('lists_default_array', () => {
     const decoded = ListsDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    // TODO - this should result in an error message
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({});
+    expect(message.schema).toEqual(payload);
   });
 
-  test('it should not validate an array of lists that does not include "values" when "values_type" is "match"', () => {
+  // TODO - this scenario should never come up, as the values key is required when values_type is "match" in the incoming schema - need to find a good way to do this in io-ts
+  test('it will validate an array of lists that does not include "values" when "values_type" is "match"', () => {
     const payload = [
       {
         field: 'host.name',
@@ -118,12 +119,12 @@ describe('lists_default_array', () => {
     const decoded = ListsDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    // TODO - this should result in an error message
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({});
+    expect(message.schema).toEqual(payload);
   });
 
-  test('it should not validate an array of lists that does not include "values" when "values_type" is "match_all"', () => {
+  // TODO - this scenario should never come up, as the values key is required when values_type is "match_all" in the incoming schema - need to find a good way to do this in io-ts
+  test('it will validate an array of lists that does not include "values" when "values_type" is "match_all"', () => {
     const payload = [
       {
         field: 'host.name',
@@ -134,11 +135,11 @@ describe('lists_default_array', () => {
     const decoded = ListsDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    // TODO - this should result in an error message
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({});
+    expect(message.schema).toEqual(payload);
   });
 
+  // TODO - this scenario should never come up, as the values key is required when values_type is "list" in the incoming schema - need to find a good way to do this in io-ts
   test('it should not validate an array of lists that does not include "values" when "values_type" is "list"', () => {
     const payload = [
       {
@@ -150,9 +151,8 @@ describe('lists_default_array', () => {
     const decoded = ListsDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    // TODO - this should result in an error message
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({});
+    expect(message.schema).toEqual(payload);
   });
 
   test('it should not validate an array with a number', () => {
@@ -160,7 +160,7 @@ describe('lists_default_array', () => {
       {
         field: 'source.ip',
         values_operator: 'included',
-        values_type: 'match_all',
+        values_type: 'exists',
         values: [
           {
             name: '127.0.0.1',
@@ -172,7 +172,10 @@ describe('lists_default_array', () => {
     const decoded = ListsDefaultArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to ""']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to ""',
+      'Invalid value "5" supplied to ""',
+    ]);
     expect(message.schema).toEqual({});
   });
 

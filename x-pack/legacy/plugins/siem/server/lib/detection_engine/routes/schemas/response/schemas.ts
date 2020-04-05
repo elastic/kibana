@@ -154,28 +154,29 @@ export const note = t.string;
 
 // NOTE: Experimental list support not being shipped currently and behind a feature flag
 // TODO: Remove this comment once we lists have passed testing and is ready for the release
-export const values_operator = t.keyof({ included: null, excluded: null });
-export const values_type = t.keyof({ match: null, match_all: null, list: null, exists: null });
-export const values_type_list = t.exact(
-  t.type({
-    list_id: t.string,
-    name: t.string,
-    description: t.string,
-    created_at,
-  })
+export const list_field = t.string;
+export const list_values_operator = t.keyof({ included: null, excluded: null });
+export const list_values_type = t.keyof({ match: null, match_all: null, list: null, exists: null });
+export const list_values = t.exact(
+  t.intersection([
+    t.type({
+      name: t.string,
+    }),
+    t.partial({
+      id: t.string,
+      description: t.string,
+      created_at,
+    }),
+  ])
 );
-export const values_type_default = t.exact(t.type({ name: t.string }));
-export const list_value = t.array(t.union([values_type_list, values_type_default]));
 export const list = t.exact(
   t.intersection([
     t.type({
       field: t.string,
-      values_operator,
-      values_type,
+      values_operator: list_values_operator,
+      values_type: list_values_type,
     }),
-    t.partial({
-      values: list_value,
-    }),
+    t.partial({ values: t.array(list_values) }),
   ])
 );
 export const list_and = t.intersection([
