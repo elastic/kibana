@@ -91,7 +91,7 @@ export const generalSettings: RawSettingDefinition[] = [
     ),
     excludeAgents: ['js-base', 'rum-js']
   },
-  
+
   // LOG_LEVEL
   {
     key: 'log_level',
