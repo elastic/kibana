@@ -5,10 +5,7 @@
  */
 import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { EndpointConfigSchema } from '../../config';
-import {
-  kibanaRequestToMetadataListESQuery,
-  getESQueryHostMetadataByID,
-} from './query_builders';
+import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
 import { EndpointAppConstants } from '../../../common/types';
 
 describe('query builder', () => {
