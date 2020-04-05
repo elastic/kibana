@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isErrorEmbeddable, EmbeddableFactory } from '../embeddable_plugin';
+import { isErrorEmbeddable } from '../embeddable_plugin';
 import { ExpandPanelAction } from './expand_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
@@ -29,11 +29,16 @@ import {
   ContactCardEmbeddableOutput,
 } from '../embeddable_plugin_test_samples';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(
+// eslint-disable-next-line
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
+const { setup, doStart } = embeddablePluginMock.createInstance();
+
+setup.registerEmbeddableFactory(
   CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
+  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
 );
+const start = doStart();
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
@@ -43,9 +48,7 @@ beforeEach(async () => {
     ExitFullScreenButton: () => null,
     SavedObjectFinder: () => null,
     application: {} as any,
-    embeddable: {
-      getEmbeddableFactory: (id: string) => embeddableFactories.get(id)!,
-    } as any,
+    embeddable: start,
     inspector: {} as any,
     notifications: {} as any,
     overlays: {} as any,

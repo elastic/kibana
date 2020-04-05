@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,9 +29,9 @@ export const ConfigForm: React.FC<{
   supportedOss: string[];
   children: React.ReactNode;
   id: string;
-  selectedEventing: number;
-  totalEventing: number;
-}> = React.memo(({ type, supportedOss, children, id, selectedEventing, totalEventing }) => {
+  /** Takes a react component to be put on the right corner of the card */
+  rightCorner: React.ReactNode;
+}> = React.memo(({ type, supportedOss, children, id, rightCorner }) => {
   const typeTitle = () => {
     return (
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
@@ -63,29 +62,8 @@ export const ConfigForm: React.FC<{
             <EuiText>{supportedOss.join(', ')}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.endpoint.policy.details.eventCollectionsEnabled"
-              defaultMessage="{selectedEventing} / {totalEventing} event collections enabled"
-              values={{ selectedEventing, totalEventing }}
-            />
-          </EuiText>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{rightCorner}</EuiFlexItem>
       </EuiFlexGroup>
-    );
-  };
-
-  const events = () => {
-    return (
-      <EuiTitle size="xxs">
-        <h5>
-          <FormattedMessage
-            id="xpack.endpoint.policyDetailsConfig.eventingEvents"
-            defaultMessage="Events"
-          />
-        </h5>
-      </EuiTitle>
     );
   };
 
@@ -99,8 +77,6 @@ export const ConfigForm: React.FC<{
         children={
           <>
             <EuiHorizontalRule margin="m" />
-            {events()}
-            <EuiSpacer size="s" />
             {children}
           </>
         }
