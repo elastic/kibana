@@ -1211,7 +1211,7 @@ describe('patch rules schema', () => {
   // on demand. Since they are per module, we have a an issue where the ENV variables do not take effect. It is better we change all the
   // schema's to be function calls to avoid global side effects or just wait until the feature is available. If you want to test this early,
   // you can remove the .skip and set your env variable of export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true locally
-  describe('lists', () => {
+  describe.skip('lists', () => {
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and lists] does validate', () => {
       expect(
         patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
