@@ -54,8 +54,9 @@ export const storedDatasourceToAgentDatasource = (
           streams: input.streams.map(stream => {
             const fullStream = {
               ...stream,
-              ...Object.entries(stream.config || {}).reduce(configReducer, {}),
+              ...stream.pkg_stream,
             };
+            delete fullStream.pkg_stream;
             delete fullStream.config;
             return fullStream;
           }),

@@ -21,6 +21,7 @@ import {
 import { getPackageInfo } from './epm/packages';
 import { datasourceService } from './datasource';
 import { generateEnrollmentAPIKey } from './api_keys';
+import { fetchInfo } from './epm/registry';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -118,12 +119,23 @@ async function addPackageToConfig(
   config: AgentConfig,
   defaultOutput: Output
 ) {
+  const pkgkey = `${packageToInstall.name}/${packageToInstall.version}`;
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
-    pkgkey: `${packageToInstall.name}-${packageToInstall.version}`,
+    pkgkey,
   });
-  await datasourceService.create(
-    soClient,
-    packageToConfigDatasource(packageInfo, config.id, defaultOutput.id, undefined, config.namespace)
+
+  const newDatasource = packageToConfigDatasource(
+    packageInfo,
+    config.id,
+    defaultOutput.id,
+    undefined,
+    config.namespace
   );
+
+  const pkg = await fetchInfo(pkgkey);
+
+  newDatasource.inputs = await datasourceService.assignPackageStream(pkg, newDatasource.inputs);
+
+  await datasourceService.create(soClient, newDatasource);
 }

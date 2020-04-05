@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
+import Boom from 'boom';
 import { RequestHandler } from 'src/core/server';
 import { appContextService, datasourceService } from '../../services';
 import { ensureInstalledPackage } from '../../services/epm/packages';
+import * as Registry from '../../services/epm/registry';
 import {
   GetDatasourcesRequestSchema,
   GetOneDatasourceRequestSchema,
@@ -75,6 +77,7 @@ export const createDatasourceHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const newData = { ...request.body };
   try {
     // Make sure the datasource package is installed
     if (request.body.package?.name) {
@@ -83,10 +86,17 @@ export const createDatasourceHandler: RequestHandler<
         pkgName: request.body.package.name,
         callCluster,
       });
+
+      const pkgKey = `${request.body.package.name}/${request.body.package.version}`;
+      const packageInfo = await Registry.fetchInfo(pkgKey);
+      newData.inputs = (await datasourceService.assignPackageStream(
+        packageInfo,
+        request.body.inputs
+      )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
     }
 
     // Create datasource
-    const datasource = await datasourceService.create(soClient, request.body, { user });
+    const datasource = await datasourceService.create(soClient, newData, { user });
     const body: CreateDatasourceResponse = { item: datasource, success: true };
     return response.ok({
       body,
@@ -107,14 +117,31 @@ export const updateDatasourceHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
-    const datasource = await datasourceService.update(
+    const datasource = await datasourceService.get(soClient, request.params.datasourceId);
+
+    if (!datasource) {
+      throw Boom.notFound('Datasource not found');
+    }
+
+    const newData = { ...request.body };
+    const pkg = newData.package || datasource.package;
+    const inputs = newData.inputs || datasource.inputs;
+    if (pkg && (newData.inputs || newData.package)) {
+      const pkgKey = `${pkg.name}/${pkg.version}`;
+      const packageInfo = await Registry.fetchInfo(pkgKey);
+      newData.inputs = (await datasourceService.assignPackageStream(packageInfo, inputs)) as TypeOf<
+        typeof CreateDatasourceRequestSchema.body
+      >['inputs'];
+    }
+
+    const updatedDatasource = await datasourceService.update(
       soClient,
       request.params.datasourceId,
-      request.body,
+      newData,
       { user }
     );
     return response.ok({
-      body: { item: datasource, success: true },
+      body: { item: updatedDatasource, success: true },
     });
   } catch (e) {
     return response.customError({

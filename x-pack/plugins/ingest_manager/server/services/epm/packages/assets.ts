@@ -57,7 +57,7 @@ export async function getAssetsData(
   datasetName?: string
 ): Promise<Registry.ArchiveEntry[]> {
   // TODO: Needs to be called to fill the cache but should not be required
-  const pkgkey = packageInfo.name + '-' + packageInfo.version;
+  const pkgkey = packageInfo.name + '/' + packageInfo.version;
   if (!cacheHas(pkgkey)) await Registry.getArchiveInfo(pkgkey);
 
   // Gather all asset data

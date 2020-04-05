@@ -21,3 +21,12 @@ export function createInput(vars: RegistryVarsEntry[], inputTemplate: string): s
   const template = Handlebars.compile(inputTemplate);
   return template(view);
 }
+
+interface StreamVars {
+  [k: string]: string | string[];
+}
+
+export function createStream(vars: StreamVars, streamTemplate: string) {
+  const template = Handlebars.compile(streamTemplate);
+  return template(vars);
+}
