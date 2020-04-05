@@ -31,11 +31,6 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('join example');
     });
 
-    after(async () => {
-      await inspector.close();
-      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
-    });
-
     it('should re-fetch join with refresh timer', async () => {
       async function getRequestTimestamp() {
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');

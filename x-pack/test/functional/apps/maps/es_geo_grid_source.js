@@ -90,10 +90,6 @@ export default function({ getPageObjects, getService }) {
         await PageObjects.maps.loadSavedMap('geo grid heatmap example');
       });
 
-      after(async () => {
-        await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
-      });
-
       const LAYER_ID = '3xlvm';
       const HEATMAP_PROP_NAME = '__kbn_heatmap_weight__';
 
@@ -142,10 +138,6 @@ export default function({ getPageObjects, getService }) {
       describe('inspector', () => {
         afterEach(async () => {
           await inspector.close();
-        });
-
-        after(async () => {
-          await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
@@ -225,10 +217,6 @@ export default function({ getPageObjects, getService }) {
       describe('inspector', () => {
         afterEach(async () => {
           await inspector.close();
-        });
-
-        after(async () => {
-          await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {

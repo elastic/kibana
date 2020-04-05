@@ -105,6 +105,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         } else {
           log.debug(`navigateToUrl ${appUrl}`);
           await browser.get(appUrl);
+          // accept alert if it pops up
           const alert = await browser.getAlert();
           await alert?.accept();
         }
@@ -231,6 +232,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           // since we're using hash URLs, always reload first to force re-render
           log.debug('navigate to: ' + appUrl);
           await browser.get(appUrl);
+          // accept alert if it pops up
           const alert = await browser.getAlert();
           await alert?.accept();
           await this.sleep(700);

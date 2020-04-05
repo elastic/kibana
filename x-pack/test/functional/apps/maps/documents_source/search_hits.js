@@ -15,10 +15,6 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('document example');
     });
 
-    after(async () => {
-      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
-    });
-
     async function getRequestTimestamp() {
       await inspector.open();
       await inspector.openInspectorRequestsView();

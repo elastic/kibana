@@ -14,10 +14,6 @@ export default function({ getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
-    after(async () => {
-      await PageObjects.maps.gotoMapListingPage({ isOnUnsavedMap: true });
-    });
-
     it('should show maps application in create menu', async () => {
       const hasMapsApp = await PageObjects.visualize.hasMapsApp();
       expect(hasMapsApp).to.equal(true);

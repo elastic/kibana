@@ -31,10 +31,6 @@ export default function({ getPageObjects }) {
       await PageObjects.maps.closeOrCancelLayer();
     });
 
-    after(async () => {
-      await PageObjects.maps.gotoMapListingPage();
-    });
-
     it('should add GeoJSON file to map', async () => {
       const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
       expect(layerLoadedInToc).to.be(true);
