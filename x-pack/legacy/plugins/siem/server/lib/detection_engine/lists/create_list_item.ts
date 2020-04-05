@@ -9,7 +9,7 @@ import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
 import { CreateResponse } from '../../types';
 import { transformListItemsToElasticQuery } from './transform_list_items_to_elastic_query';
-import { ElasticInputType } from './types';
+import { ElasticListItemsInputType } from './types';
 import { Type } from '../routes/schemas/common/schemas';
 
 export const createListItem = async ({
@@ -29,7 +29,7 @@ export const createListItem = async ({
 }): Promise<ListsItemsSchema> => {
   const createdAt = new Date().toISOString();
   const tieBreakerId = uuid.v4();
-  const body: ElasticInputType = {
+  const body: ElasticListItemsInputType = {
     list_id: listId,
     created_at: createdAt,
     tie_breaker_id: tieBreakerId,
@@ -47,9 +47,6 @@ export const createListItem = async ({
     id: response._id,
     type,
     value,
-    list_id: listId,
-    created_at: createdAt,
-    updated_at: createdAt,
-    tie_breaker_id: tieBreakerId,
+    ...body,
   };
 };

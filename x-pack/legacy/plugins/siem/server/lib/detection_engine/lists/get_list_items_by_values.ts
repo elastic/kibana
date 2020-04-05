@@ -9,7 +9,7 @@ import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema'
 import { SearchResponse } from '../../types';
 import { transformElasticToListsItems } from './transform_elastic_to_list_items';
 import { getQueryFilterFromTypeValue } from './get_query_filter_from_type_value';
-import { ElasticReturnType } from './types';
+import { ElasticListItemReturnType } from './types';
 import { Type } from '../routes/schemas/common/schemas';
 
 export const getListItemsByValues = async ({
@@ -29,7 +29,7 @@ export const getListItemsByValues = async ({
   if (listId.trim() === '') {
     return [];
   } else {
-    const response: SearchResponse<ElasticReturnType> = await clusterClient.callAsCurrentUser(
+    const response: SearchResponse<ElasticListItemReturnType> = await clusterClient.callAsCurrentUser(
       'search',
       {
         index: listsItemsIndex,

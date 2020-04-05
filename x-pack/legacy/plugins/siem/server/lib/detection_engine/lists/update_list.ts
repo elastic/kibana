@@ -22,8 +22,7 @@ export const updateList = async ({
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsIndex: string;
 }): Promise<ListsSchema | null> => {
-  // TODO Implement updatedAt from below
-  // const updatedAt = new Date().toISOString();
+  const updatedAt = new Date().toISOString();
   const list = await getList({ id, clusterClient, listsIndex });
   if (list == null) {
     return null;
@@ -31,15 +30,17 @@ export const updateList = async ({
     const response: UpdateResponse = await clusterClient.callAsCurrentUser('update', {
       index: listsIndex,
       id,
-      body: { doc: { name, description } },
+      body: { doc: { name, description, updated_at: updatedAt } }, // TODO: Add strong types for the body
     });
     return {
       id: response._id,
       name: name ?? list.name,
       description: description ?? list.description,
       created_at: list.created_at,
-      type: list.type, // You cannot override or change a list type once created
-      // TODO: Add the rest of the elements such as updatedAt
+      updated_at: updatedAt,
+      tie_breaker_id: list.tie_breaker_id,
+      type: list.type,
+      // TODO: Add the rest of the elements
     };
   }
 };

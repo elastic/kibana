@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListItemsElasticType } from './types';
+import { ElasticListItemsType } from './types';
 import { Type } from '../routes/schemas/common/schemas';
 
 export const transformListItemsToElasticQuery = ({
@@ -13,7 +13,7 @@ export const transformListItemsToElasticQuery = ({
 }: {
   type: Type;
   value: string;
-}): ListItemsElasticType => {
+}): ElasticListItemsType => {
   switch (type) {
     case 'ip': {
       return {

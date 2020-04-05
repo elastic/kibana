@@ -38,7 +38,9 @@ export const updateListItem = async ({
     const response: UpdateResponse = await clusterClient.callAsCurrentUser('update', {
       index: listsItemsIndex,
       id: listItem.id,
-      body: { doc: { ...transformListItemsToElasticQuery({ type, value }) } },
+      body: {
+        doc: { updated_at: updatedAt, ...transformListItemsToElasticQuery({ type, value }) },
+      }, // TODO: Add strong types for the body
     });
     return {
       id: response._id,

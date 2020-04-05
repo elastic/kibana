@@ -10,6 +10,9 @@
     "type": {
       "type": "keyword"
     },
+    "tie_breaker_id": {
+      "type": "keyword"
+    },
     "meta": {
       "type": "object"
     },

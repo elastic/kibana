@@ -8,7 +8,7 @@ import { PassThrough } from 'stream';
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 // TODO: There is a definitely typed version of SearchResponse. Should we migrate to that and not use this type anymore?
 import { SearchResponse } from '../../types';
-import { ElasticReturnType } from './types';
+import { ElasticListItemReturnType } from './types';
 
 /**
  * How many results to page through from the network at a time
@@ -104,7 +104,7 @@ export const getResponse = async ({
   searchAfter: undefined | string[];
   listsItemsIndex: string;
   size?: number;
-}): Promise<SearchResponse<ElasticReturnType>> => {
+}): Promise<SearchResponse<ElasticListItemReturnType>> => {
   return clusterClient.callAsCurrentUser('search', {
     index: listsItemsIndex,
     ignoreUnavailable: true,
@@ -126,7 +126,7 @@ export const writeResponseHitsToStream = ({
   stream,
   stringToAppend,
 }: {
-  response: SearchResponse<ElasticReturnType>;
+  response: SearchResponse<ElasticListItemReturnType>;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
 }) => {

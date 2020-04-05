@@ -7,14 +7,14 @@
 // TODO: Change this out for the definite types?
 import { SearchResponse } from '../../types';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
-import { ElasticReturnType } from './types';
+import { ElasticListItemReturnType } from './types';
 import { Type } from '../routes/schemas/common/schemas';
 
 export const transformElasticToListsItems = ({
   response,
   type,
 }: {
-  response: SearchResponse<ElasticReturnType>;
+  response: SearchResponse<ElasticListItemReturnType>;
   type: Type;
 }): ListsItemsSchema[] => {
   return response.hits.hits.map(hit => {

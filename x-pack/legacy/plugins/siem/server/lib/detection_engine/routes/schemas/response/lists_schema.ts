@@ -8,7 +8,16 @@
 
 import * as t from 'io-ts';
 
-import { name, description, id, meta, type, created_at } from '../common/schemas';
+import {
+  name,
+  description,
+  id,
+  meta,
+  type,
+  created_at,
+  updated_at,
+  tie_breaker_id,
+} from '../common/schemas';
 
 export const listsSchema = t.intersection([
   t.exact(
@@ -18,7 +27,9 @@ export const listsSchema = t.intersection([
       type,
       description,
       created_at,
-      // TODO: Add updated_at, created_by, updated_by, etc...
+      updated_at,
+      tie_breaker_id,
+      // TODO: Add created_by, updated_by, etc...
     })
   ),
   t.exact(t.partial({ meta })),

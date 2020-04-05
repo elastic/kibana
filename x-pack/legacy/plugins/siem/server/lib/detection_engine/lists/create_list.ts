@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { CreateResponse } from '../../types';
 import { ListsSchema } from '../routes/schemas/response/lists_schema';
 import { Type } from '../routes/schemas/common/schemas';
+import { ElasticListInputType } from './types';
 
 export const createList = async ({
   id,
@@ -25,17 +27,21 @@ export const createList = async ({
   listsIndex: string;
 }): Promise<ListsSchema> => {
   const createdAt = new Date().toISOString();
-  const response: CreateResponse = await clusterClient.callAsCurrentUser('index', {
-    index: listsIndex,
-    id,
-    body: { name, description, type, created_at: createdAt }, // TODO: Type this and add updatedAt
-  });
-  return {
-    id: response._id,
+  const body: ElasticListInputType = {
     name,
     description,
     type,
+    tie_breaker_id: uuid.v4(),
+    updated_at: createdAt,
     created_at: createdAt,
-    // TODO: Add the rest of the elements
+  };
+  const response: CreateResponse = await clusterClient.callAsCurrentUser('index', {
+    index: listsIndex,
+    id,
+    body,
+  });
+  return {
+    id: response._id,
+    ...body,
   };
 };
