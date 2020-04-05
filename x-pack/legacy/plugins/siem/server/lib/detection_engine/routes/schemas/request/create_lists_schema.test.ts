@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 import { createListsSchema } from './create_lists_schema';
-import { getFindResponseSingle, foldLeftRight, getPaths } from '../response/__mocks__/utils';
+import { foldLeftRight, getPaths } from '../response/__mocks__/utils';
 import { getListRequest } from './__mocks__/utils';
 
 describe('lists', () => {
@@ -21,6 +21,8 @@ describe('lists', () => {
     unSetFeatureFlagsForTestsOnly();
   });
 
+  // TODO: Finish the tests for this
+
   test('it should validate a typical lists request', () => {
     const payload = getListRequest();
     const decoded = createListsSchema.decode(payload);
@@ -28,10 +30,13 @@ describe('lists', () => {
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(getFindResponseSingle());
+    expect(message.schema).toEqual({
+      description: 'Description of a list item',
+      id: 'some-list-id',
+      name: 'Name of a list item',
+      type: 'ip',
+    });
   });
-
-  // TODO: Finish the tests for this
 
   /*
   test('it should validate an empty find rules response', () => {
