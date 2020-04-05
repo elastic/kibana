@@ -10,6 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
+  const retry = getService('retry');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -25,9 +26,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/60559
-  describe.skip('spaces', () => {
+  describe('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('space with no features disabled', () => {
@@ -68,9 +71,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        await retry.try(async () => {
+          await setDiscoverTimeRange();
+          await PageObjects.discover.clickFieldListItem('bytes');
+          await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        });
       });
     });
 
@@ -134,9 +139,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover', {
           basePath: '/s/custom_space',
         });
-        await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await retry.try(async () => {
+          await setDiscoverTimeRange();
+          await PageObjects.discover.clickFieldListItem('bytes');
+          await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        });
       });
     });
 
