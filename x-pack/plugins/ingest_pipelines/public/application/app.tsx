@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
-import { BASE_PATH } from '../../common';
+import { BASE_PATH } from '../../common/constants';
 import { PipelinesList } from './sections';
 
 export const App = () => {

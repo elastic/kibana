@@ -35,7 +35,7 @@ export const PipelinesList: React.FunctionComponent = () => {
         <EuiTitle size="l">
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <h1>
+              <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.ingestPipelines.pipelinesListTitle"
                   defaultMessage="Ingest Pipelines"
