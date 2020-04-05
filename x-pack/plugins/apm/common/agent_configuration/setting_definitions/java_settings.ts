@@ -20,7 +20,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.enableLogCorrelation.description',
       {
         defaultMessage:
-          "A boolean specifying if the agent should integrate into SLF4J's MDC to enable trace-log correlation. If set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC. Since Java agent version 1.16.0, the agent also adds `error.id` of captured error to the MDC just before the error message is logged.\n\nNOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
+          "A boolean specifying if the agent should integrate into SLF4J's MDC to enable trace-log correlation. If set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC. Since Java agent version 1.16.0, the agent also adds `error.id` of captured error to the MDC just before the error message is logged. NOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
       }
     ),
     includeAgents: ['java']
@@ -41,7 +41,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.traceMethodsDurationThreshold.description',
       {
         defaultMessage:
-          'If `trace_methods` config option is set, provides a threshold to limit spans based on duration. When set to a value greater than 0, spans representing methods traced based on trace_methods will be discarded by default.\n\nNOTE: NOTE: Transactions are never discarded, regardless of their duration. In order not to break span references, all spans leading to an async operation or an exit span (such as a HTTP request or a DB query) are never discarded, regardless of their duration.'
+          'If `trace_methods` config option is set, provides a threshold to limit spans based on duration. When set to a value greater than 0, spans representing methods traced based on trace_methods will be discarded by default. NOTE: Transactions are never discarded, regardless of their duration. In order not to break span references, all spans leading to an async operation or an exit span (such as a HTTP request or a DB query) are never discarded, regardless of their duration.'
       }
     ),
     includeAgents: ['java']
@@ -176,7 +176,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.profilingInferredSpansEnabled.description',
       {
         defaultMessage:
-          'Set to `true` to make the agent create spans for method executions based on async-profiler, a sampling (aka statistical profiler). Due to the nature of how sampling profilers work, the duration of the inferred spans are not exact, but only estimations. The `profiling_inferred_spans_sampling_interval` lets you fine tune the trade-off between accuracy and overhead. The inferred spans are created after a profiling session has ended. This means there is a delay between the regular and the inferred spans being visible in the UI.\n\nNOTE: This feature is not available on Windows.'
+          'Set to `true` to make the agent create spans for method executions based on async-profiler, a sampling aka statistical profiler. Due to the nature of how sampling profilers work, the duration of the inferred spans are not exact, but only estimations. The `profiling_inferred_spans_sampling_interval` lets you fine tune the trade-off between accuracy and overhead. The inferred spans are created after a profiling session has ended. This means there is a delay between the regular and the inferred spans being visible in the UI. NOTE: This feature is not available on Windows.'
       }
     ),
     includeAgents: ['java']
