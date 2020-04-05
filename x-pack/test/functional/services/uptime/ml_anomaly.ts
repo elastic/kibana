@@ -9,62 +9,60 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const log = getService('log');
 
-  const alreadyHasJob = async (timeout?: number) => {
-    return await testSubjects.exists('uptimeManageMLJobBtn', {
-      timeout: timeout ?? 0,
-    });
+  const alreadyHasJob = async () => {
+    return await testSubjects.exists('uptimeManageMLJobBtn');
   };
 
   return {
     async openMLFlyoutOrMenu() {
       return retry.tryForTime(15000, async () => {
-        if (
-          await testSubjects.exists('uptimeEnableAnomalyBtn', {
-            timeout: 1000,
-          })
-        ) {
-          await testSubjects.click('uptimeEnableAnomalyBtn');
-          await testSubjects.existOrFail('uptimeMLFlyout', {
-            timeout: 3000,
-          });
-        } else if (
-          await testSubjects.exists('uptimeManageMLJobBtn', {
-            timeout: 1000,
-          })
-        ) {
-          await testSubjects.click('uptimeManageMLJobBtn');
-          await testSubjects.existOrFail('uptimeManageMLContextMenu', {
-            timeout: 3000,
-          });
+        if (await testSubjects.exists('uptimeEnableAnomalyBtn')) {
+          await this.openMLFlyout();
+        } else if (await testSubjects.exists('uptimeManageMLJobBtn')) {
+          await openMLManageMenu();
         }
+      });
+    },
+    async openMLFlyout() {
+      return retry.tryForTime(15000, async () => {
+        await testSubjects.click('uptimeEnableAnomalyBtn');
+        await testSubjects.existOrFail('uptimeMLFlyout');
+      });
+    },
+    async openMLManageMenu() {
+      return retry.tryForTime(15000, async () => {
+        await testSubjects.click('uptimeManageMLJobBtn');
+        await testSubjects.existOrFail('uptimeManageMLContextMenu');
       });
     },
     async alreadyHasJob() {
       return await alreadyHasJob();
     },
     async createMLJob() {
+      await this.openMLFlyout();
+      await testSubjects.click('uptimeMLCreateJobBtn');
       return retry.tryForTime(15000, async () => {
-        this.openMLFlyoutOrMenu();
-        await testSubjects.click('uptimeMLCreateJobBtn');
         await testSubjects.existOrFail('uptimeMLJobSuccessfullyCreated');
+        log.info('Job successfully created');
       });
     },
 
     async deleteMLJob() {
-      if (await alreadyHasJob(5000)) {
-        this.openMLFlyoutOrMenu();
-        return retry.tryForTime(15000, async () => {
-          await testSubjects.click('uptimeDeleteMLJobBtn', 2000);
-          await testSubjects.click(
-            'uptimeMLJobDeleteConfirmModel > confirmModalConfirmButton',
-            2000
-          );
-          await testSubjects.existOrFail('uptimeMLJobSuccessfullyDeleted', {
-            timeout: 5000,
-          });
-        });
-      }
+      await this.openMLManageMenu();
+      await testSubjects.click('uptimeDeleteMLJobBtn');
+      return retry.tryForTime(15000, async () => {
+        await testSubjects.click('uptimeMLJobDeleteConfirmModel > confirmModalConfirmButton');
+        await testSubjects.existOrFail('uptimeMLJobSuccessfullyDeleted');
+        log.info('Job successfully deleted');
+      });
+    },
+    async canCreateJob() {
+      return !!(await (await testSubjects.find('uptimeMLCreateJobBtn')).getAttribute('disabled'));
+    },
+    async hadLicenseInfo() {
+      return await testSubjects.exists('uptimeMLLicenseInfo');
     },
   };
 }
