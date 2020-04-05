@@ -26,13 +26,11 @@ const TEST_FILTER_COLUMN_NAMES = [
 ];
 
 export default function({ getService, getPageObjects }) {
-  const retry = getService('retry');
+  const browser = getService('browser');
   const docTable = getService('docTable');
-  const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
 
   describe('context link in discover', function contextSize() {
-    this.tags('smoke');
     before(async function() {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -45,36 +43,19 @@ export default function({ getService, getPageObjects }) {
       }
     });
 
-    it('should open the context view with the selected document as anchor', async function() {
-      // get the timestamp of the first row
-      const firstTimestamp = (await docTable.getFields())[0][0];
-
+    it('should go back after loading', async function() {
       // navigate to the context view
       await docTable.clickRowToggle({ rowIndex: 0 });
       await (await docTable.getRowActions({ rowIndex: 0 }))[0].click();
-
-      // check the anchor timestamp in the context view
-      await retry.try(async () => {
-        const anchorTimestamp = (await docTable.getFields({ isAnchorRow: true }))[0][0];
-        expect(anchorTimestamp).to.equal(firstTimestamp);
-      });
-    });
-
-    it('should open the context view with the same columns', async function() {
-      const columnNames = await docTable.getHeaderFields();
-      expect(columnNames).to.eql(['Time', ...TEST_COLUMN_NAMES]);
-    });
-
-    it('should open the context view with the filters disabled', async function() {
-      const hasDisabledFilters = (
-        await Promise.all(
-          TEST_FILTER_COLUMN_NAMES.map(([columnName, value]) =>
-            filterBar.hasFilter(columnName, value, false)
-          )
-        )
-      ).reduce((result, hasDisabledFilter) => result && hasDisabledFilter, true);
-
-      expect(hasDisabledFilters).to.be(true);
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      await browser.goBack();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('1,556');
     });
   });
 }
