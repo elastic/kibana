@@ -10,6 +10,7 @@ import { SearchResponse } from '../../types';
 import { transformElasticToListsItems } from './transform_elastic_to_list_items';
 import { getQueryFilterFromTypeValue } from './get_query_filter_from_type_value';
 import { ElasticReturnType } from './types';
+import { Type } from '../routes/schemas/common/schemas';
 
 export const getListItemsByValues = async ({
   listId,
@@ -21,7 +22,7 @@ export const getListItemsByValues = async ({
   listId: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
-  type: string; // TODO: Use an enum here
+  type: Type;
   value: string[];
 }): Promise<ListsItemsSchema[]> => {
   // TODO: Move the check for trim above this and remove it below. It shouldn't be here but rather a validation check above.

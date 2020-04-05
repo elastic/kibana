@@ -8,6 +8,7 @@ import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { getListItemsByValues } from './get_list_items_by_values';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
 import { getQueryFilterFromTypeValue } from './get_query_filter_from_type_value';
+import { Type } from '../routes/schemas/common/schemas';
 
 export const deleteListItemByValue = async ({
   listId,
@@ -17,7 +18,7 @@ export const deleteListItemByValue = async ({
   listsItemsIndex,
 }: {
   listId: string;
-  type: string; // TODO: Use enum here
+  type: Type;
   value: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;

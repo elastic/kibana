@@ -133,8 +133,8 @@ export const writeResponseHitsToStream = ({
   response.hits.hits.forEach(hit => {
     if (hit._source.ip != null) {
       stream.push(hit._source.ip);
-    } else if (hit._source.string != null) {
-      stream.push(hit._source.string);
+    } else if (hit._source.keyword != null) {
+      stream.push(hit._source.keyword);
     } else {
       // this is an error
       // TODO: Should we do something here?

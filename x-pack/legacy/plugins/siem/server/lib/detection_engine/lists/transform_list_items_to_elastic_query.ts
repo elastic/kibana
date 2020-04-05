@@ -5,12 +5,13 @@
  */
 
 import { ListItemsElasticType } from './types';
+import { Type } from '../routes/schemas/common/schemas';
 
 export const transformListItemsToElasticQuery = ({
   type,
   value,
 }: {
-  type: string; // TODO Change this to an enum
+  type: Type;
   value: string;
 }): ListItemsElasticType => {
   switch (type) {
@@ -19,14 +20,10 @@ export const transformListItemsToElasticQuery = ({
         ip: value,
       };
     }
-    case 'string': {
+    case 'keyword': {
       return {
-        string: value,
+        keyword: value,
       };
-    }
-    default: {
-      // TODO: Once we use an enum this should go away
-      throw new Error('Default should not be reached');
     }
   }
 };

@@ -8,6 +8,7 @@ import uuid from 'uuid';
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { transformListItemsToElasticQuery } from './transform_list_items_to_elastic_query';
 import { ElasticInputType } from './types';
+import { Type } from '../routes/schemas/common/schemas';
 
 export interface CreateBulkType {
   create: { _index: string };
@@ -21,7 +22,7 @@ export const createListItemsBulk = async ({
   listsItemsIndex,
 }: {
   listId: string;
-  type: string; // TODO: Make this into an enum
+  type: Type;
   value: string[];
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;

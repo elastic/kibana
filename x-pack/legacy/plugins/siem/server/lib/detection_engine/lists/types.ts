@@ -13,7 +13,7 @@ export interface BaseElasticType {
 
 export type ElasticReturnType = BaseElasticType & {
   ip: string | null | undefined;
-  string: string | null | undefined;
+  keyword: string | null | undefined;
 };
 
 export type ListItemsElasticType =
@@ -21,7 +21,7 @@ export type ListItemsElasticType =
       ip: string;
     }
   | {
-      string: string;
+      keyword: string;
     };
 
 export type ElasticInputType = BaseElasticType & ListItemsElasticType;

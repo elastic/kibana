@@ -8,13 +8,14 @@
 import { SearchResponse } from '../../types';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
 import { ElasticReturnType } from './types';
+import { Type } from '../routes/schemas/common/schemas';
 
 export const transformElasticToListsItems = ({
   response,
   type,
 }: {
   response: SearchResponse<ElasticReturnType>;
-  type: string; // TODO Change this to an enum
+  type: Type;
 }): ListsItemsSchema[] => {
   return response.hits.hits.map(hit => {
     switch (type) {
@@ -29,7 +30,7 @@ export const transformElasticToListsItems = ({
           value: hit._source.ip ?? '', // TODO: Something better here than empty string
         };
       }
-      case 'string': {
+      case 'keyword': {
         return {
           id: hit._id,
           created_at: hit._source.created_at,
@@ -37,13 +38,15 @@ export const transformElasticToListsItems = ({
           list_id: hit._source.list_id,
           tie_breaker_id: hit._source.tie_breaker_id,
           type,
-          value: hit._source.string ?? 'invalid value', // TODO: Something better here than empty string
+          value: hit._source.keyword ?? 'invalid value', // TODO: Something better here than empty string
         };
       }
-      default: {
-        // TODO: Once we use an enum this should go away
-        throw new Error('Default should not be reached');
-      }
     }
+    // TypeScript is not happy unless I have this line here
+    return assertUnreachable();
   });
+};
+
+export const assertUnreachable = (): never => {
+  throw new Error('Unknown type in elastic_to_list_items');
 };

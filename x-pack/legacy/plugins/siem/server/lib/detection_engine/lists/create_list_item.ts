@@ -10,6 +10,7 @@ import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema'
 import { CreateResponse } from '../../types';
 import { transformListItemsToElasticQuery } from './transform_list_items_to_elastic_query';
 import { ElasticInputType } from './types';
+import { Type } from '../routes/schemas/common/schemas';
 
 export const createListItem = async ({
   id,
@@ -21,7 +22,7 @@ export const createListItem = async ({
 }: {
   id: string | undefined;
   listId: string;
-  type: string; // TODO: Use an enum here
+  type: Type;
   value: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;

@@ -10,7 +10,7 @@
     "ip": {
       "type": "ip"
     },
-    "string": {
+    "keyword": {
       "type": "keyword"
     },
     "meta": {

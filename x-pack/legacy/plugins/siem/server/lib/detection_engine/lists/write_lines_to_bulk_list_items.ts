@@ -9,6 +9,7 @@ import { createListItemsBulk } from '../lists/create_list_items_bulk';
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { getListItemsByValues } from './get_list_items_by_values';
 import { BufferLines } from './buffer_lines';
+import { Type } from '../routes/schemas/common/schemas';
 
 interface LinesResult {
   linesProcessed: number;
@@ -26,7 +27,7 @@ export const writeLinesToBulkListItems = ({
   stream: Readable;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
-  type: string; // TODO: Use an enum here and not a string
+  type: Type;
 }): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const readBuffer = new BufferLines({ input: stream });
@@ -57,7 +58,7 @@ export const writeBufferToItems = async ({
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
   buffer: string[];
-  type: string; // TODO: Make this an enum and not just a string
+  type: Type;
 }): Promise<LinesResult> => {
   const items = await getListItemsByValues({
     listId,

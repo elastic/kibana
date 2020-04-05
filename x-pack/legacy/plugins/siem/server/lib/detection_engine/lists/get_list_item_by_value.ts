@@ -7,6 +7,7 @@
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
 import { getListItemsByValues } from './get_list_items_by_values';
+import { Type } from '../routes/schemas/common/schemas';
 
 export const getListItemByValue = async ({
   listId,
@@ -18,7 +19,7 @@ export const getListItemByValue = async ({
   listId: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
-  type: string; // TODO: Make type an enum here
+  type: Type;
   value: string;
 }): Promise<ListsItemsSchema | null> => {
   // TODO: Move this listId.trim() check above here to within the API boundary

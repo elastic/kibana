@@ -19,6 +19,7 @@ import { writeLinesToBulkListItems } from '../../lists/write_lines_to_bulk_list_
 import { getList } from '../../lists/get_list';
 import { createList } from '../../lists/create_list';
 import { ListsSchema } from '../schemas/response/lists_schema';
+import { Type } from '../schemas/common/schemas';
 
 export const importListsItemsRoute = (router: IRouter): void => {
   router.post(
@@ -104,7 +105,7 @@ export const createListIfNotExists = async ({
   listsIndex,
   type,
 }: {
-  type: string; // TODO: Use enum
+  type: Type;
   listsIndex: string;
   filename: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;

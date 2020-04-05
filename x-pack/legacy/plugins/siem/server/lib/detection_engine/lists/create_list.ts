@@ -7,6 +7,7 @@
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { CreateResponse } from '../../types';
 import { ListsSchema } from '../routes/schemas/response/lists_schema';
+import { Type } from '../routes/schemas/common/schemas';
 
 export const createList = async ({
   id,
@@ -17,7 +18,7 @@ export const createList = async ({
   listsIndex,
 }: {
   id: string | null | undefined;
-  type: string; // TODO: Use an enum here instead of a string
+  type: Type;
   name: string;
   description: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -27,7 +28,7 @@ export const createList = async ({
   const response: CreateResponse = await clusterClient.callAsCurrentUser('index', {
     index: listsIndex,
     id,
-    body: { name, description, type, created_at: createdAt },
+    body: { name, description, type, created_at: createdAt }, // TODO: Type this and add updatedAt
   });
   return {
     id: response._id,

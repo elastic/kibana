@@ -15,8 +15,10 @@ export const item = t.string;
 export const meta = t.object;
 export const created_at = t.string; // TODO: Make this into an ISO Date string check
 export const updated_at = t.string; // TODO: Make this into an ISO Date string check
-export const type = t.string; // TODO: Make this an enum of possible type values such as ip, string, etc...
 export const file = t.object;
 export const id = t.string;
 export const value = t.string;
 export const tie_breaker_id = t.string; // TODO: Use UUID for this instead of a string for validation
+
+export const type = t.keyof({ ip: null, keyword: null }); // TODO: Add the other data types here
+export type Type = t.TypeOf<typeof type>;
