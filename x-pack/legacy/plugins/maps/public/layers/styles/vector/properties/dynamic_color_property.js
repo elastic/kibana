@@ -18,11 +18,10 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { Category } from '../components/legend/category';
-import { COLOR_MAP_TYPE } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, RGBA_0000 } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
-const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
