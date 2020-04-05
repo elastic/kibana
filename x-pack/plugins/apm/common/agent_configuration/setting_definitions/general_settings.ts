@@ -103,8 +103,8 @@ export const generalSettings: RawSettingDefinition[] = [
     description: i18n.translate('xpack.apm.agentConfig.logLevel.description', {
       defaultMessage: 'Sets the logging level for the agent'
     }),
-    includeAgents: ['dotnet', 'ruby']
-  },  
+    excludeAgents: ['js-base', 'rum-js', 'python']
+  },
 
   // Recording
   {
