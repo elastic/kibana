@@ -13,6 +13,7 @@ import {
 } from '../schemas/request/delete_lists_items_schema';
 import { deleteListItem } from '../../lists/delete_list_item';
 import { deleteListItemByValue } from '../../lists/delete_list_item_by_value';
+import { getList } from '../../lists/get_list';
 
 export const deleteListsItemsRoute = (router: IRouter): void => {
   router.delete(
@@ -28,13 +29,13 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id, list_id: listId, ip } = request.query;
+        const { id, list_id: listId, value } = request.query;
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem?.getSiemClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const { listsItemsIndex } = siemClient;
+        const { listsItemsIndex, listsIndex } = siemClient;
         if (id != null) {
           const deleted = await deleteListItem({
             id,
@@ -51,10 +52,22 @@ export const deleteListsItemsRoute = (router: IRouter): void => {
             // TODO: outbound validation
             return response.ok({ body: deleted });
           }
-        } else if (listId != null) {
+        } else if (listId != null && value != null) {
+          const list = await getList({
+            id: listId,
+            clusterClient,
+            listsIndex,
+          });
+          if (list == null) {
+            return siemResponse.error({
+              statusCode: 404,
+              body: `list id: "${listId}" does not exist`,
+            });
+          }
           const deleted = await deleteListItemByValue({
-            ip,
+            type: list.type,
             listId,
+            value,
             clusterClient,
             listsItemsIndex,
           });

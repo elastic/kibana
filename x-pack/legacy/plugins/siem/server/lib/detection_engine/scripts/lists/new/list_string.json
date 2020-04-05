@@ -1,0 +1,6 @@
+{
+  "id": "list-string",
+  "name": "Simple list with a string",
+  "description": "This list describes bad host names",
+  "type": "string"
+}

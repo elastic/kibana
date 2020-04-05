@@ -4,35 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
 import { CreateResponse } from '../../types';
+import { transformListItemsToElasticQuery } from './transform_list_items_to_elastic_query';
+import { ElasticInputType } from './types';
 
 export const createListItem = async ({
-  listId,
-  ip,
   id,
+  listId,
+  type,
+  value,
   clusterClient,
   listsItemsIndex,
 }: {
-  listId: string;
   id: string | undefined;
-  ip: string | undefined;
+  listId: string;
+  type: string; // TODO: Use an enum here
+  value: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
 }): Promise<ListsItemsSchema> => {
-  // TODO: Do something with the undefined ip above?
   const createdAt = new Date().toISOString();
+  const tieBreakerId = uuid.v4();
+  const body: ElasticInputType = {
+    list_id: listId,
+    created_at: createdAt,
+    tie_breaker_id: tieBreakerId,
+    updated_at: createdAt,
+    ...transformListItemsToElasticQuery({ type, value }),
+  };
+
   const response: CreateResponse = await clusterClient.callAsCurrentUser('index', {
     index: listsItemsIndex,
     id,
-    body: { list_id: listId, ip, created_at: createdAt },
+    body,
   });
+
   return {
     id: response._id,
-    ip,
+    type,
+    value,
     list_id: listId,
     created_at: createdAt,
-    // TODO: Add the rest of the elements
+    updated_at: createdAt,
+    tie_breaker_id: tieBreakerId,
   };
 };

@@ -25,7 +25,7 @@ export const createListsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, description, id } = request.body;
+        const { name, description, id, type } = request.body;
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem?.getSiemClient();
         if (!siemClient) {
@@ -41,7 +41,7 @@ export const createListsRoute = (router: IRouter): void => {
             });
           }
         }
-        const list = await createList({ name, description, id, clusterClient, listsIndex });
+        const list = await createList({ name, description, id, clusterClient, listsIndex, type });
         // TODO: outbound validation
         return response.ok({ body: list });
       } catch (err) {

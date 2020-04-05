@@ -17,6 +17,7 @@ export const getList = async ({
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsIndex: string;
 }): Promise<ListsSchema | null> => {
+  // TODO: Move this trim up higher and use the top level API to do the trim here.
   if (id.trim() === '') {
     return null;
   } else {

@@ -8,7 +8,7 @@ import { PassThrough } from 'stream';
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 // TODO: There is a definitely typed version of SearchResponse. Should we migrate to that and not use this type anymore?
 import { SearchResponse } from '../../types';
-import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
+import { ElasticReturnType } from './types';
 
 /**
  * How many results to page through from the network at a time
@@ -21,11 +21,13 @@ export const writeListItemsToStream = ({
   clusterClient,
   stream,
   listsItemsIndex,
+  stringToAppend,
 }: {
   listId: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
   stream: PassThrough;
+  stringToAppend?: string | null;
 }): void => {
   // Use a timeout to start the reading process on the next tick.
   // and prevent the async await from bubbling up to the caller
@@ -36,6 +38,7 @@ export const writeListItemsToStream = ({
       stream,
       listsItemsIndex,
       searchAfter: undefined,
+      stringToAppend,
     });
     while (searchAfter != null) {
       searchAfter = await writeNextResponse({
@@ -44,6 +47,7 @@ export const writeListItemsToStream = ({
         stream,
         listsItemsIndex,
         searchAfter,
+        stringToAppend,
       });
     }
     stream.end();
@@ -56,12 +60,14 @@ export const writeNextResponse = async ({
   stream,
   listsItemsIndex,
   searchAfter,
+  stringToAppend,
 }: {
   listId: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
   stream: PassThrough;
   searchAfter: string[] | undefined;
+  stringToAppend: string | null | undefined;
 }): Promise<string[] | undefined> => {
   const response = await getResponse({
     clusterClient,
@@ -70,12 +76,12 @@ export const writeNextResponse = async ({
     listsItemsIndex,
   });
 
-  if (!response.hits.hits.length) {
-    return;
+  if (response.hits.hits.length) {
+    writeResponseHitsToStream({ response, stream, stringToAppend });
+    return getSearchAfterFromResponse({ response });
+  } else {
+    // return void;
   }
-
-  writeResponseHitsToStream({ response, stream });
-  return getSearchAfterFromResponse({ response });
 };
 
 export const getSearchAfterFromResponse = <T>({
@@ -98,7 +104,7 @@ export const getResponse = async ({
   searchAfter: undefined | string[];
   listsItemsIndex: string;
   size?: number;
-}): Promise<SearchResponse<Omit<ListsItemsSchema, 'id'>>> => {
+}): Promise<SearchResponse<ElasticReturnType>> => {
   return clusterClient.callAsCurrentUser('search', {
     index: listsItemsIndex,
     ignoreUnavailable: true,
@@ -108,7 +114,7 @@ export const getResponse = async ({
           list_id: listId,
         },
       },
-      sort: [{ ip: 'asc' }],
+      sort: [{ tie_breaker_id: 'asc' }],
       search_after: searchAfter,
     },
     size,
@@ -118,13 +124,23 @@ export const getResponse = async ({
 export const writeResponseHitsToStream = ({
   response,
   stream,
+  stringToAppend,
 }: {
-  response: SearchResponse<Omit<ListsItemsSchema, 'id'>>;
+  response: SearchResponse<ElasticReturnType>;
   stream: PassThrough;
+  stringToAppend: string | null | undefined;
 }) => {
   response.hits.hits.forEach(hit => {
-    const ip = hit._source.ip;
-    stream.push(ip);
-    stream.push('\n');
+    if (hit._source.ip != null) {
+      stream.push(hit._source.ip);
+    } else if (hit._source.string != null) {
+      stream.push(hit._source.string);
+    } else {
+      // this is an error
+      // TODO: Should we do something here?
+    }
+    if (stringToAppend != null) {
+      stream.push(stringToAppend);
+    }
   });
 };

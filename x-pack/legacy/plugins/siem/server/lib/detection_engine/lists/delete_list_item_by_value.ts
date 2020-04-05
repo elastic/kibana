@@ -7,15 +7,18 @@
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { getListItemsByValues } from './get_list_items_by_values';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
+import { getQueryFilterFromTypeValue } from './get_query_filter_from_type_value';
 
 export const deleteListItemByValue = async ({
   listId,
-  ip,
+  value,
+  type,
   clusterClient,
   listsItemsIndex,
 }: {
   listId: string;
-  ip: string | null | undefined;
+  type: string; // TODO: Use enum here
+  value: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
 }): Promise<ListsItemsSchema[] | null> => {
@@ -24,34 +27,28 @@ export const deleteListItemByValue = async ({
     return null;
   } else {
     const listItems = await getListItemsByValues({
-      ips: ip ? [ip] : [],
+      type,
+      value: [value],
       listId,
       clusterClient,
       listsItemsIndex,
     });
-    const ips = listItems.map(listItem => listItem.ip).filter(ipFilter => ipFilter != null);
+    const values = listItems.map(listItem => listItem.value);
+    const filter = getQueryFilterFromTypeValue({
+      type,
+      value: values,
+      listId,
+    });
     await clusterClient.callAsCurrentUser('deleteByQuery', {
       index: listsItemsIndex,
       body: {
         query: {
           bool: {
-            filter: [
-              {
-                term: {
-                  list_id: listId,
-                },
-              },
-              {
-                terms: {
-                  ip: ips,
-                },
-              },
-            ],
+            filter,
           },
         },
       },
     });
-    // TODO: We don't filter down here like we do above? This might an issue later?
     return listItems;
   }
 };

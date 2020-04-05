@@ -12,14 +12,16 @@ export const getListItemByValue = async ({
   listId,
   clusterClient,
   listsItemsIndex,
-  ip,
+  type,
+  value,
 }: {
   listId: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
-  // TODO: Make all values work and not just ip here
-  ip: string | undefined;
+  type: string; // TODO: Make type an enum here
+  value: string;
 }): Promise<ListsItemsSchema | null> => {
+  // TODO: Move this listId.trim() check above here to within the API boundary
   if (listId.trim() === '') {
     return null;
   } else {
@@ -27,7 +29,8 @@ export const getListItemByValue = async ({
       listId,
       clusterClient,
       listsItemsIndex,
-      ips: ip ? [ip] : [],
+      type,
+      value: [value],
     });
     if (listItems.length) {
       return listItems[0];

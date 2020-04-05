@@ -7,6 +7,9 @@
     "description": {
       "type": "keyword"
     },
+    "type": {
+      "type": "keyword"
+    },
     "meta": {
       "type": "object"
     },

@@ -9,8 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./delete_list_item.sh?${list_id}&ip=${ip}
+# Example: ./delete_list_item.sh?${list_id}&value=${ip}
 curl -s -k \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X DELETE "${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists/items?list_id=$1&ip=$1" | jq .
+ -X DELETE "${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists/items?list_id=$1&value=$1" | jq .

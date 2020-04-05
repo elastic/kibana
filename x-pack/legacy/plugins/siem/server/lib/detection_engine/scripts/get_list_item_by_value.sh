@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./get_list_by_list_id.sh {list_id} {value}
+# Example: ./get_list_item_by_value.sh ${list_id} ${value}
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET "${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists/items?list_id=$1&ip=$2" | jq .
+ -X GET "${KIBANA_URL}${SPACE_URL}/api/detection_engine/lists/items?list_id=$1&value=$2" | jq .

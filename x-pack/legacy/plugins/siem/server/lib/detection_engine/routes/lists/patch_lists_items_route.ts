@@ -12,6 +12,7 @@ import {
   PatchListsItemsSchema,
 } from '../schemas/request/patch_lists_items_schema';
 import { updateListItem } from '../../lists/update_list_item';
+import { getList } from '../../lists/get_list';
 
 // TODO: Make sure you write updateListItemRoute and update_list_item.sh routes
 
@@ -29,27 +30,36 @@ export const patchListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { ip, list_id: listId } = request.body;
+        const { value, list_id: listId } = request.body;
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem?.getSiemClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const { listsItemsIndex } = siemClient;
-        const list = await updateListItem({
-          listId,
-          ip,
-          clusterClient,
-          listsItemsIndex,
-        });
+        const { listsIndex, listsItemsIndex } = siemClient;
+        const list = await getList({ id: listId, clusterClient, listsIndex });
         if (list == null) {
           return siemResponse.error({
             statusCode: 404,
-            body: `list_id: "${listId}" found found`,
+            body: `list id: "${listId}" does not exist`,
           });
         } else {
-          // TODO: Transform and check the list on exit as well as validate it
-          return response.ok({ body: list });
+          const listItem = await updateListItem({
+            listId,
+            type: list.type, // You cannot change a list type once created
+            value,
+            clusterClient,
+            listsItemsIndex,
+          });
+          if (listItem == null) {
+            return siemResponse.error({
+              statusCode: 404,
+              body: `list_id: "${listId}" found found`,
+            });
+          } else {
+            // TODO: Transform and check the list on exit as well as validate it
+            return response.ok({ body: listItem });
+          }
         }
       } catch (err) {
         const error = transformError(err);

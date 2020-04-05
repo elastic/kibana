@@ -19,6 +19,7 @@ export const deleteList = async ({
   listsIndex: string;
   listsItemsIndex: string;
 }): Promise<ListsSchema | null> => {
+  // TODO: Move this check up higher in the API boundary and remove the trim here.
   if (id.trim() === '') {
     return null;
   } else {

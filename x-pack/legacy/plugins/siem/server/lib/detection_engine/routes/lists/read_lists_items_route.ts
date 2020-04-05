@@ -13,6 +13,7 @@ import {
 } from '../schemas/request/read_lists_items_schema';
 import { getListItemsByValues } from '../../lists/get_list_items_by_values';
 import { getListItem } from '../../lists/get_list_item';
+import { getList } from '../../lists/get_list';
 
 export const readListsItemsRoute = (router: IRouter): void => {
   router.get(
@@ -28,13 +29,13 @@ export const readListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id, list_id: listId, ip } = request.query;
+        const { id, list_id: listId, value } = request.query;
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem?.getSiemClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        const { listsItemsIndex } = siemClient;
+        const { listsItemsIndex, listsIndex } = siemClient;
         if (id != null) {
           const listItem = await getListItem({
             id,
@@ -51,22 +52,31 @@ export const readListsItemsRoute = (router: IRouter): void => {
             // TODO: Should we return this as an array since the other value below can be an array?
             return response.ok({ body: listItem });
           }
-        } else if (listId != null) {
-          const listItems = await getListItemsByValues({
-            listId,
-            ips: ip != null ? [ip] : [],
-            clusterClient,
-            listsItemsIndex,
-          });
-          if (!listItems.length) {
-            // TODO: More specific error message that figures out which item value does not exist
+        } else if (listId != null && value != null) {
+          const list = await getList({ id: listId, clusterClient, listsIndex });
+          if (list == null) {
             return siemResponse.error({
               statusCode: 404,
-              body: `list_id: "${listId}" item does not exist`,
+              body: `list id: "${listId}" does not exist`,
             });
           } else {
-            // TODO: outbound validation
-            return response.ok({ body: listItems });
+            const listItems = await getListItemsByValues({
+              type: list.type,
+              listId,
+              value: [value],
+              clusterClient,
+              listsItemsIndex,
+            });
+            if (!listItems.length) {
+              // TODO: More specific error message that figures out which item value does not exist
+              return siemResponse.error({
+                statusCode: 404,
+                body: `list_id: "${listId}" item does not exist`,
+              });
+            } else {
+              // TODO: outbound validation
+              return response.ok({ body: listItems });
+            }
           }
         } else {
           return siemResponse.error({

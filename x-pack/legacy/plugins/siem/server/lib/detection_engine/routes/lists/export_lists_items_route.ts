@@ -30,9 +30,6 @@ export const exportListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        // TODO: Implement type and make it default to string
-        // TODO: Make list_id optional and default to the file name with the upload
-        // TODO: Make an overwrite flag and set its default to false and implement overwrite
         const { list_id: listId } = request.query;
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem?.getSiemClient();
@@ -47,11 +44,17 @@ export const exportListsItemsRoute = (router: IRouter): void => {
             body: `list_id: ${listId} does not exist`,
           });
         } else {
-          // TODO: Allow the API to override the fileName
+          // TODO: Allow the API to override the name of the file to export
           const fileName = list.name;
 
           const stream = new Stream.PassThrough();
-          writeListItemsToStream({ listId, stream, clusterClient, listsItemsIndex });
+          writeListItemsToStream({
+            listId,
+            stream,
+            clusterClient,
+            listsItemsIndex,
+            stringToAppend: '\n',
+          });
 
           return response.ok({
             headers: {

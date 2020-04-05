@@ -7,53 +7,42 @@
 import { ScopedClusterClient } from '../../../../../../../../src/core/server';
 import { ListsItemsSchema } from '../routes/schemas/response/lists_items_schema';
 import { SearchResponse } from '../../types';
+import { transformElasticToListsItems } from './transform_elastic_to_list_items';
+import { getQueryFilterFromTypeValue } from './get_query_filter_from_type_value';
+import { ElasticReturnType } from './types';
 
 export const getListItemsByValues = async ({
   listId,
   clusterClient,
   listsItemsIndex,
-  ips,
+  type,
+  value,
 }: {
   listId: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
   listsItemsIndex: string;
-  // TODO: Make all values work and not just ip here
-  ips: string[] | undefined;
+  type: string; // TODO: Use an enum here
+  value: string[];
 }): Promise<ListsItemsSchema[]> => {
+  // TODO: Move the check for trim above this and remove it below. It shouldn't be here but rather a validation check above.
   if (listId.trim() === '') {
     return [];
   } else {
-    const result: SearchResponse<Omit<
-      ListsItemsSchema,
-      'id'
-    >> = await clusterClient.callAsCurrentUser('search', {
-      index: listsItemsIndex,
-      ignoreUnavailable: true,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  list_id: listId,
-                },
-              },
-              {
-                terms: {
-                  ip: ips,
-                },
-              },
-            ],
+    const response: SearchResponse<ElasticReturnType> = await clusterClient.callAsCurrentUser(
+      'search',
+      {
+        index: listsItemsIndex,
+        ignoreUnavailable: true,
+        body: {
+          query: {
+            bool: {
+              filter: getQueryFilterFromTypeValue({ listId, type, value }),
+            },
           },
         },
-      },
-      size: ips != null ? ips.length : 0,
-    });
-    return result.hits.hits.map(hit => {
-      return {
-        id: hit._id,
-        ...hit._source,
-      };
-    });
+        size: value.length,
+      }
+    );
+    return transformElasticToListsItems({ response, type });
   }
 };

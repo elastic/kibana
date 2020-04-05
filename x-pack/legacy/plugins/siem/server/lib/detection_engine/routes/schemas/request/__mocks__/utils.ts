@@ -10,4 +10,5 @@ export const getListRequest = (): CreateListsSchema => ({
   name: 'Name of a list item',
   description: 'Description of a list item',
   id: 'some-list-id',
+  type: 'ip',
 });

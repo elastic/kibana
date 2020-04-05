@@ -38,6 +38,7 @@ export const updateList = async ({
       name: name ?? list.name,
       description: description ?? list.description,
       created_at: list.created_at,
+      type: list.type, // You cannot override or change a list type once created
       // TODO: Add the rest of the elements such as updatedAt
     };
   }

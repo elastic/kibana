@@ -11,11 +11,13 @@ import { ListsSchema } from '../routes/schemas/response/lists_schema';
 export const createList = async ({
   id,
   name,
+  type,
   description,
   clusterClient,
   listsIndex,
 }: {
   id: string | null | undefined;
+  type: string; // TODO: Use an enum here instead of a string
   name: string;
   description: string;
   clusterClient: Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -25,12 +27,13 @@ export const createList = async ({
   const response: CreateResponse = await clusterClient.callAsCurrentUser('index', {
     index: listsIndex,
     id,
-    body: { name, description, created_at: createdAt },
+    body: { name, description, type, created_at: createdAt },
   });
   return {
     id: response._id,
     name,
     description,
+    type,
     created_at: createdAt,
     // TODO: Add the rest of the elements
   };

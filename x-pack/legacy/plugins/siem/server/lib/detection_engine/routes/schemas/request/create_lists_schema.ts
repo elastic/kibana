@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { name, description, id, meta } from '../common/schemas';
+import { name, description, id, meta, type } from '../common/schemas';
 
 // TODO: Type dependents where if list_id is there then at least one of the following must be there
 // either ip, string, number, etc... For now we are doing partials
@@ -18,6 +18,7 @@ export const createListsSchema = t.intersection([
     t.type({
       name,
       description,
+      type,
     })
   ),
   t.exact(t.partial({ id, meta })),

@@ -29,7 +29,7 @@ export const createListsItemsRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id, list_id: listId, ip } = request.body;
+        const { id, list_id: listId, value } = request.body;
         const clusterClient = context.core.elasticsearch.dataClient;
         const siemClient = context.siem?.getSiemClient();
         if (!siemClient) {
@@ -45,7 +45,8 @@ export const createListsItemsRoute = (router: IRouter): void => {
         } else {
           const listItem = await getListItemByValue({
             listId,
-            ip,
+            type: list.type,
+            value,
             clusterClient,
             listsItemsIndex,
           });
@@ -59,7 +60,8 @@ export const createListsItemsRoute = (router: IRouter): void => {
             const createdListItem = await createListItem({
               id,
               listId,
-              ip,
+              type: list.type,
+              value,
               clusterClient,
               listsItemsIndex,
             });

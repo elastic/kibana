@@ -8,13 +8,11 @@
 
 import * as t from 'io-ts';
 
-import { id, list_id, ip } from '../common/schemas';
+import { id, list_id, value } from '../common/schemas';
 
 // TODO: Type dependents where if list_id is there then at least one of the following must be there
 // either ip, string, number, etc... For now we are doing partials
 
-export const deleteListsItemsSchema = t.exact(
-  t.partial({ id, list_id, ip /* TODO: Other data types such as date, string, etc... */ })
-);
+export const deleteListsItemsSchema = t.exact(t.partial({ id, list_id, value }));
 
 export type DeleteListsItemsSchema = t.TypeOf<typeof deleteListsItemsSchema>;

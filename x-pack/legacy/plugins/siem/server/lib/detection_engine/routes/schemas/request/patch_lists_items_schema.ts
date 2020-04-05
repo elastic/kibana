@@ -8,15 +8,17 @@
 
 import * as t from 'io-ts';
 
-import { ip, list_id, meta } from '../common/schemas';
+import { list_id, meta, value } from '../common/schemas';
 
+// TODO: Implement the ability to patch an id as well as a list_id
 export const patchListsItemsSchema = t.intersection([
   t.exact(
     t.type({
       list_id,
+      value,
     })
   ),
-  t.exact(t.partial({ meta, ip })),
+  t.exact(t.partial({ meta })),
 ]);
 
 export type PatchListsItemsSchema = t.TypeOf<typeof patchListsItemsSchema>;

@@ -8,13 +8,14 @@
 
 import * as t from 'io-ts';
 
-import { name, description, id, meta, created_at } from '../common/schemas';
+import { name, description, id, meta, type, created_at } from '../common/schemas';
 
 export const listsSchema = t.intersection([
   t.exact(
     t.type({
       id,
       name,
+      type,
       description,
       created_at,
       // TODO: Add updated_at, created_by, updated_by, etc...
