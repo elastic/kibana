@@ -18,42 +18,33 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '../../../core/public/mocks';
 import {
-  ManagementSetup,
-  ManagementStart,
-  ManagementPlugin,
-  ManagementPluginSetupDependencies,
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+  IndexPatternManagementPlugin,
 } from './plugin';
 
-const createSetupContract = (): ManagementSetup => ({
-  indexPattern: {
-    creation: {
-      add: jest.fn(),
-      getType: jest.fn(),
-      getIndexPatternCreationOptions: jest.fn(),
-    } as any,
-    list: {
-      add: jest.fn(),
-      getIndexPatternTags: jest.fn(),
-      getFieldInfo: jest.fn(),
-      areScriptedFieldsEnabled: jest.fn(),
-    } as any,
-  },
+const createSetupContract = (): IndexPatternManagementSetup => ({
+  creation: {
+    add: jest.fn(),
+    getType: jest.fn(),
+    getIndexPatternCreationOptions: jest.fn(),
+  } as any,
+  list: {
+    add: jest.fn(),
+    getIndexPatternTags: jest.fn(),
+    getFieldInfo: jest.fn(),
+    areScriptedFieldsEnabled: jest.fn(),
+  } as any,
 });
 
-const createStartContract = (): ManagementStart => ({});
+const createStartContract = (): IndexPatternManagementStart => ({});
 
 const createInstance = async () => {
-  const plugin = new ManagementPlugin({} as PluginInitializerContext);
+  const plugin = new IndexPatternManagementPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup(), ({
-    home: {
-      featureCatalogue: {
-        register: jest.fn(),
-      },
-    },
-  } as unknown) as ManagementPluginSetupDependencies);
+  const setup = plugin.setup(coreMock.createSetup());
   const doStart = () => plugin.start(coreMock.createStart(), {});
 
   return {

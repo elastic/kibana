@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MatchedIndex } from '../../../../../../kibana/public/management/sections/index_patterns/create_index_pattern_wizard/types';
+import { MatchedIndex } from '../../../../../legacy/core_plugins/kibana/public/management/sections/index_patterns/create_index_pattern_wizard/types';
 
 const indexPatternTypeName = i18n.translate(
   'management.editIndexPattern.createIndex.defaultTypeName',

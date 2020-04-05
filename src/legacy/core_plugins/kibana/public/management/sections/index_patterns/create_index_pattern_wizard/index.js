@@ -19,8 +19,8 @@
 
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
-import { npStart } from 'ui/new_platform';
-import { setup as managementSetup } from '../../../../../../management/public/legacy';
+import { npStart, npSetup } from 'ui/new_platform';
+// import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
@@ -33,9 +33,11 @@ uiRoutes.when('/management/kibana/index_pattern', {
     const kbnUrl = $injector.get('kbnUrl');
     $scope.$$postDigest(() => {
       const $routeParams = $injector.get('$routeParams');
-      const indexPatternCreationType = managementSetup.indexPattern.creation.getType(
+      const indexPatternCreationType = npSetup.indexPatternManagement.creation.getType(
+        // const indexPatternCreationType = managementSetup.indexPattern.creation.getType(
         $routeParams.type
       );
+
       const services = {
         config: npStart.core.uiSettings,
         es: npStart.plugins.data.search.__LEGACY.esClient,

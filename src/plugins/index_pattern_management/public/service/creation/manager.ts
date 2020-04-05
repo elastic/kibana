@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpSetup } from '../../../../../../../../core/public';
+import { HttpSetup } from '../../../../../core/public';
 import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
 
 export class IndexPatternCreationManager {

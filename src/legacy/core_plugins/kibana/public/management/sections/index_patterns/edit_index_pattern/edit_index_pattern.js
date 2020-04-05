@@ -29,7 +29,6 @@ import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
 import { subscribeWithScope } from '../../../../../../../../plugins/kibana_legacy/public';
-import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -37,7 +36,7 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_state_container';
@@ -239,13 +238,17 @@ uiModules
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexPatternListProvider = managementSetup.indexPattern.list;
-    $scope.indexPattern.tags = managementSetup.indexPattern.list.getIndexPatternTags(
+    // $scope.indexPatternListProvider = managementSetup.indexPattern.list;
+    $scope.indexPatternListProvider = npSetup.plugins.indexPatternManagement.list;
+    // $scope.indexPattern.tags = managementSetup.indexPattern.list.getIndexPatternTags(
+    $scope.indexPattern.tags = npSetup.plugins.indexPatternManagement.list.getIndexPatternTags(
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
-    $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo.bind(
-      managementSetup.indexPattern.list
+    $scope.getFieldInfo = npSetup.plugins.indexPatternManagement.list.getFieldInfo.bind(
+      // $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo.bind(
+      // managementSetup.indexPattern.list
+      npSetup.plugins.indexPatternManagement.list
     );
     docTitle.change($scope.indexPattern.title);
 
@@ -257,7 +260,8 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        managementSetup.indexPattern.list
+        // managementSetup.indexPattern.list
+        npSetup.plugins.indexPatternManagement.list
       );
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
@@ -363,7 +367,8 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        managementSetup.indexPattern.list
+        // managementSetup.indexPattern.list
+        npSetup.plugins.indexPatternManagement.list
       );
 
       if ($scope.fieldFilter === undefined) {

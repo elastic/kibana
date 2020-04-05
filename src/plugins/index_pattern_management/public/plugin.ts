@@ -17,42 +17,36 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { IndexPatternManagementService, IndexPatternManagementSetup } from './services';
-
-export interface ManagementPluginSetupDependencies {
-  home: HomePublicPluginSetup;
-}
+import { IndexPatternManagementService, IndexPatternManagementServiceSetup } from './service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ManagementPluginStartDependencies {}
-
-export interface ManagementSetup {
-  indexPattern: IndexPatternManagementSetup;
-}
+export interface IndexPatternManagementSetupDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ManagementStart {}
+export interface IndexPatternManagementStartDependencies {}
 
-export class ManagementPlugin
+export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IndexPatternManagementStart {}
+
+export class IndexPatternManagementPlugin
   implements
     Plugin<
-      ManagementSetup,
-      ManagementStart,
-      ManagementPluginSetupDependencies,
-      ManagementPluginStartDependencies
+      IndexPatternManagementSetup,
+      IndexPatternManagementStart,
+      IndexPatternManagementSetupDependencies,
+      IndexPatternManagementStartDependencies
     > {
   private readonly indexPattern = new IndexPatternManagementService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home }: ManagementPluginSetupDependencies) {
-    return {
-      indexPattern: this.indexPattern.setup({ httpClient: core.http, home }),
-    };
+  public setup(core: CoreSetup) {
+    return this.indexPattern.setup({ httpClient: core.http });
   }
 
-  public start(core: CoreStart, plugins: ManagementPluginStartDependencies) {
+  public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
     return {};
   }
 
