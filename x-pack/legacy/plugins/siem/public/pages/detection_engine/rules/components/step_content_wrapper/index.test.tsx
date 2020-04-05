@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { StepContentWrapper } from './index';
 
 describe('StepContentWrapper', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<StepContentWrapper />);
 
     expect(wrapper).toMatchSnapshot();

@@ -28,6 +28,6 @@ describe('SignalsUtilityBar', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[dataTestSubj="openCloseSignal"]')).toBeTruthy();
   });
 });

@@ -15,6 +15,6 @@ describe('StepDefineRule', () => {
   it('renders correctly against the snapshot', () => {
     const wrapper = shallow(<StepDefineRule isReadOnlyView={false} isLoading={false} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('Form[data-test-subj="stepDefineRule"]')).toHaveLength(1);
   });
 });

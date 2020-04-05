@@ -10,13 +10,13 @@ import { shallow } from 'enzyme';
 import { StepPanel } from './index';
 
 describe('StepPanel', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <StepPanel loading={false} title="Title">
         <div />
       </StepPanel>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('MyPanel')).toHaveLength(1);
   });
 });

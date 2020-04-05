@@ -11,7 +11,7 @@ import { useForm } from '../../../../../shared_imports';
 import { ThrottleSelectField } from './index';
 
 describe('ThrottleSelectField', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const Component = () => {
       const { form } = useForm();
 
@@ -42,6 +42,6 @@ describe('ThrottleSelectField', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('SelectField')).toHaveLength(1);
   });
 });

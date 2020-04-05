@@ -10,9 +10,9 @@ import { shallow } from 'enzyme';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 
 describe('RuleStatusFailedCallOut', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<RuleStatusFailedCallOut date="date" message="message" />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
   });
 });

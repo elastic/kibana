@@ -45,6 +45,6 @@ describe('AddItem', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[iconType="plusInCircle"]')).toHaveLength(1);
   });
 });

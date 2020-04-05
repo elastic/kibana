@@ -10,11 +10,11 @@ import { shallow } from 'enzyme';
 import { RulesTableFilters } from './rules_table_filters';
 
 describe('RulesTableFilters', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <RulesTableFilters onFilterChanged={jest.fn()} rulesCustomInstalled={0} rulesInstalled={0} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[data-test-subj="show-elastic-rules-filter-button"]')).toHaveLength(1);
   });
 });

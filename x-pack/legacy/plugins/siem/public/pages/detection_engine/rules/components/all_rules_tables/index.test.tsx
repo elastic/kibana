@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { AllRulesTables } from './index';
 
 describe('AllRulesTables', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const Component = () => {
       const ref = useRef();
 
@@ -19,18 +19,28 @@ describe('AllRulesTables', () => {
           euiBasicTableSelectionProps={{}}
           hasNoPermissions={false}
           monitoringColumns={[]}
-          paginationMemo={{}}
           rules={[]}
           rulesColumns={[]}
           rulesStatuses={[]}
-          sorting={[]}
           tableOnChangeCallback={jest.fn()}
           tableRef={ref}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 0,
+            totalItemCount: 0,
+            pageSizeOptions: [0],
+          }}
+          sorting={{
+            sort: {
+              field: 'enabled',
+              direction: 'asc',
+            },
+          }}
         />
       );
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[data-test-subj="rules-table"]')).toHaveLength(1);
   });
 });

@@ -28,6 +28,6 @@ describe('EditRulePage', () => {
     (useParams as jest.Mock).mockReturnValue({});
     const wrapper = shallow(<EditRulePage />, { wrappingComponent: TestProviders });
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[title="Edit rule settings"]')).toHaveLength(1);
   });
 });

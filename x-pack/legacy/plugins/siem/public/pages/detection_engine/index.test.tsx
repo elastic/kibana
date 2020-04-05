@@ -10,9 +10,9 @@ import { shallow } from 'enzyme';
 import { DetectionEngineContainer } from './index';
 
 describe('DetectionEngineContainer', () => {
-  it('renders correctly against the snapshot', () => {
-    const wrapper = shallow(<DetectionEngineContainer url="url" />);
+  it('renders correctly', () => {
+    const wrapper = shallow(<DetectionEngineContainer />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('ManageUserInfo')).toHaveLength(1);
   });
 });

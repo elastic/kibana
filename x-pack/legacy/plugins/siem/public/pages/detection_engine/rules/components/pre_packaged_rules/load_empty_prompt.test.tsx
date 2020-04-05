@@ -19,6 +19,6 @@ describe('PrePackagedRulesPrompt', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EmptyPrompt')).toHaveLength(1);
   });
 });

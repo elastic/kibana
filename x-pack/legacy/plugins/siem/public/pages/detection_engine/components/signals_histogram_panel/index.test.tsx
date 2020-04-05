@@ -24,6 +24,6 @@ describe('SignalsHistogramPanel', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[id="detections-histogram"]')).toBeTruthy();
   });
 });

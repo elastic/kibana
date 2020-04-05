@@ -11,9 +11,9 @@ import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 jest.mock('../../lib/kibana');
 
 describe('DetectionEngineEmptyPage', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<DetectionEngineEmptyPage />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EmptyPage')).toHaveLength(1);
   });
 });

@@ -8,9 +8,21 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { UpdatePrePackagedRulesCallOut } from './update_callout';
+import { useKibana } from '../../../../../lib/kibana';
+jest.mock('../../../../../lib/kibana');
 
 describe('UpdatePrePackagedRulesCallOut', () => {
-  it('renders correctly against the snapshot', () => {
+  beforeAll(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: '',
+          DOC_LINK_VERSION: '',
+        },
+      },
+    });
+  });
+  it('renders correctly', () => {
     const wrapper = shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
@@ -19,6 +31,6 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
   });
 });

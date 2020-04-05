@@ -12,11 +12,11 @@ import { StepRuleActions } from './index';
 jest.mock('../../../../../lib/kibana');
 
 describe('StepRuleActions', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <StepRuleActions actionMessageParams={[]} isReadOnlyView={false} isLoading={false} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[data-test-subj="stepRuleActions"]')).toHaveLength(1);
   });
 });

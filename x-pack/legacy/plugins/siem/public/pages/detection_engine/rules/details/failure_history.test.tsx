@@ -17,11 +17,11 @@ describe('FailureHistory', () => {
     (useRuleStatus as jest.Mock).mockReturnValue([false, null]);
   });
 
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<FailureHistory id="id" />, {
       wrappingComponent: TestProviders,
     });
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
   });
 });

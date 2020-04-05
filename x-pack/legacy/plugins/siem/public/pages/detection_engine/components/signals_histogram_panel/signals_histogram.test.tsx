@@ -17,6 +17,6 @@ describe('SignalsHistogram', () => {
       <SignalsHistogram loading={false} data={[]} from={0} to={1} updateDateRange={jest.fn()} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('Chart')).toBeTruthy();
   });
 });

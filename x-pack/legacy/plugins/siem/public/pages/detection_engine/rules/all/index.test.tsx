@@ -19,7 +19,7 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('AllRules', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <AllRules
         createPrePackagedRules={jest.fn()}
@@ -35,6 +35,6 @@ describe('AllRules', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[title="All rules"]')).toHaveLength(1);
   });
 });

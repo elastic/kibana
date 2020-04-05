@@ -13,6 +13,6 @@ describe('AccordionTitle', () => {
   it('renders correctly against the snapshot', () => {
     const wrapper = shallow(<AccordionTitle name="name" title="title" type="valid" />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('h6').text()).toContain('title');
   });
 });

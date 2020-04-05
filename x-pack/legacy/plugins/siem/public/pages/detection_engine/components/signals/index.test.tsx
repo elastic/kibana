@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { SignalsTableComponent } from './index';
 
 describe('SignalsTableComponent', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <SignalsTableComponent
         canUserCRUD
@@ -38,6 +38,6 @@ describe('SignalsTableComponent', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[title="Signals"]')).toBeTruthy();
   });
 });

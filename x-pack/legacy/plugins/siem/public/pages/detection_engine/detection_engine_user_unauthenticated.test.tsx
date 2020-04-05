@@ -11,9 +11,9 @@ import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unau
 jest.mock('../../lib/kibana');
 
 describe('DetectionEngineUserUnauthenticated', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<DetectionEngineUserUnauthenticated />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EmptyPage')).toHaveLength(1);
   });
 });

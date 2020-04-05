@@ -29,7 +29,7 @@ describe('RuleDetailsPageComponent', () => {
     (useParams as jest.Mock).mockReturnValue({});
   });
 
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <RuleDetailsPageComponent
         query={{ query: '', language: 'language' }}
@@ -41,6 +41,6 @@ describe('RuleDetailsPageComponent', () => {
       }
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('WithSource')).toHaveLength(1);
   });
 });

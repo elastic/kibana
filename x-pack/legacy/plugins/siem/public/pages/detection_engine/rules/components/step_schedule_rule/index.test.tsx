@@ -16,12 +16,12 @@ describe('StepScheduleRule', () => {
       wrappingComponent: TestProviders,
     });
 
-    expect(wrapper.find('Memo(StepScheduleRuleComponent)').length).toBe(1);
+    expect(wrapper.find('Form[data-test-subj="stepScheduleRule"]')).toHaveLength(1);
   });
 
   it('renders correctly against the snapshot if isReadOnlyView', () => {
     const wrapper = shallow(<StepScheduleRule isReadOnlyView={true} isLoading={false} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('StepContentWrapper')).toHaveLength(1);
   });
 });

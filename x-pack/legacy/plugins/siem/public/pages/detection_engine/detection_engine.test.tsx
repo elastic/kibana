@@ -28,7 +28,7 @@ describe('DetectionEnginePageComponent', () => {
     (useParams as jest.Mock).mockReturnValue({});
     (useUserInfo as jest.Mock).mockReturnValue({});
   });
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <DetectionEnginePageComponent
         query={{ query: 'query', language: 'language' }}
@@ -37,6 +37,6 @@ describe('DetectionEnginePageComponent', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('WithSource')).toHaveLength(1);
   });
 });

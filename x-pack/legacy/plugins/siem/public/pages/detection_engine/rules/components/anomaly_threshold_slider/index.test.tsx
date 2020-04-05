@@ -11,7 +11,7 @@ import { AnomalyThresholdSlider } from './index';
 import { useForm } from '../../../../../shared_imports';
 
 describe('AnomalyThresholdSlider', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const Component = () => {
       const { form } = useForm();
 
@@ -42,6 +42,6 @@ describe('AnomalyThresholdSlider', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('EuiRange')).toHaveLength(1);
   });
 });

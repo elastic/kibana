@@ -22,6 +22,6 @@ describe('RulesPage', () => {
   it('renders correctly against the snapshot', () => {
     const wrapper = shallow(<RulesPage />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('AllRules')).toHaveLength(1);
   });
 });

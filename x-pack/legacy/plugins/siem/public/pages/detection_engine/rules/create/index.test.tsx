@@ -18,6 +18,6 @@ describe('CreateRulePage', () => {
     (useUserInfo as jest.Mock).mockReturnValue({});
     const wrapper = shallow(<CreateRulePage />, { wrappingComponent: TestProviders });
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[title="Create new rule"]')).toHaveLength(1);
   });
 });

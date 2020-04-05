@@ -11,9 +11,9 @@ import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 jest.mock('../../lib/kibana');
 
 describe('DetectionEngineNoIndex', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<DetectionEngineNoIndex />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EmptyPage')).toHaveLength(1);
   });
 });
