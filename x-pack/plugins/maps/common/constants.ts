@@ -63,6 +63,9 @@ export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
+export const WMS = 'WMS';
+export const KIBANA_TILEMAP = 'KIBANA_TILEMAP';
+export const REGIONMAP_FILE = 'REGIONMAP_FILE';
 export const MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER';
 
 export enum FIELD_ORIGIN {
@@ -212,3 +215,5 @@ export enum SCALING_TYPES {
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
 }
+
+export const RGBA_0000 = 'rgba(0,0,0,0)';

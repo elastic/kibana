@@ -29,7 +29,6 @@ import {
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
-  DashboardContainerFactory,
   DashboardContainerInput,
 } from '../../../../../../../../src/plugins/dashboard/public';
 
@@ -70,8 +69,9 @@ export class DashboardContainerExample extends React.Component<Props, State> {
     this.mounted = true;
     const dashboardFactory = this.props.getEmbeddableFactory<
       DashboardContainerInput,
-      ContainerOutput
-    >(DASHBOARD_CONTAINER_TYPE) as DashboardContainerFactory;
+      ContainerOutput,
+      DashboardContainer
+    >(DASHBOARD_CONTAINER_TYPE);
     if (dashboardFactory) {
       this.container = await dashboardFactory.create(dashboardInput);
       if (this.mounted) {

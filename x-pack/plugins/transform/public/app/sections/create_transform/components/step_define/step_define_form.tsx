@@ -705,6 +705,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                       width="100%"
                       value={advancedEditorSourceConfig}
                       onChange={(d: string) => {
+                        setSearchString(undefined);
                         setAdvancedEditorSourceConfig(d);
 
                         // Disable the "Apply"-Button if the config hasn't changed.

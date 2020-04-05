@@ -9,14 +9,10 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
-  const uptimeService = getService('uptime');
+  const { common: commonService, navigation, alerts } = getService('uptime');
   const retry = getService('retry');
 
   return new (class UptimePage {
-    public get settings() {
-      return uptimeService.settings;
-    }
-
     public async goToRoot() {
       await pageObjects.common.navigateToApp('uptime');
     }
@@ -37,7 +33,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await pageObjects.common.navigateToApp('uptime');
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
       if (monitorIdToCheck) {
-        await uptimeService.monitorIdExists(monitorIdToCheck);
+        await commonService.monitorIdExists(monitorIdToCheck);
       }
     }
 
@@ -47,50 +43,43 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       monitorId: string,
       monitorName?: string
     ) {
-      await pageObjects.common.navigateToApp('uptime');
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await uptimeService.navigateToMonitorWithId(monitorId);
-      if (
-        monitorName &&
-        (await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName
-      ) {
-        throw new Error('Expected monitor name not found');
-      }
+      await navigation.goToMonitor(monitorId, monitorName);
     }
 
     public async inputFilterQuery(filterQuery: string) {
-      await uptimeService.setFilterText(filterQuery);
+      await commonService.setFilterText(filterQuery);
     }
 
     public async pageHasDataMissing() {
-      return await uptimeService.pageHasDataMissing();
+      return await commonService.pageHasDataMissing();
     }
 
     public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
       return retry.tryForTime(15000, async () => {
-        await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
+        await Promise.all(monitorIdsToCheck.map(id => commonService.monitorPageLinkExists(id)));
       });
     }
 
     public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
       return retry.tryForTime(12000, async () => {
-        expect(await uptimeService.urlContains(value)).to.eql(expected);
+        expect(await commonService.urlContains(value)).to.eql(expected);
       });
     }
 
     public async changePage(direction: 'next' | 'prev') {
       if (direction === 'next') {
-        await uptimeService.goToNextPage();
+        await commonService.goToNextPage();
       } else if (direction === 'prev') {
-        await uptimeService.goToPreviousPage();
+        await commonService.goToPreviousPage();
       }
     }
 
     public async setStatusFilter(value: 'up' | 'down') {
       if (value === 'up') {
-        await uptimeService.setStatusFilterUp();
+        await commonService.setStatusFilterUp();
       } else if (value === 'down') {
-        await uptimeService.setStatusFilterDown();
+        await commonService.setStatusFilterDown();
       }
     }
 
@@ -99,18 +88,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
         if (filters.hasOwnProperty(key)) {
           const values = filters[key];
           for (let i = 0; i < values.length; i++) {
-            await uptimeService.selectFilterItem(key, values[i]);
+            await commonService.selectFilterItem(key, values[i]);
           }
         }
       }
     }
 
     public async getSnapshotCount() {
-      return await uptimeService.getSnapshotCount();
-    }
-
-    public locationMissingIsDisplayed() {
-      return uptimeService.locationMissingExists();
+      return await commonService.getSnapshotCount();
     }
 
     public async openAlertFlyoutAndCreateMonitorStatusAlert({
@@ -130,7 +115,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       alertTimerangeSelection: string;
       filters?: string;
     }) {
-      const { alerts, setKueryBarText } = uptimeService;
+      const { setKueryBarText } = commonService;
       await alerts.openFlyout();
       await alerts.openMonitorStatusAlertType();
       await alerts.setAlertName(alertName);
@@ -148,8 +133,8 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     }
 
     public async setMonitorListPageSize(size: number): Promise<void> {
-      await uptimeService.openPageSizeSelectPopover();
-      return uptimeService.clickPageSizeSelectPopoverItem(size);
+      await commonService.openPageSizeSelectPopover();
+      return commonService.clickPageSizeSelectPopoverItem(size);
     }
   })();
 }

@@ -12,7 +12,10 @@ import {
 } from '../../../../../hooks';
 
 export function useEnrollmentApiKeys(pagination: Pagination) {
-  const request = useGetEnrollmentAPIKeys();
+  const request = useGetEnrollmentAPIKeys({
+    page: pagination.currentPage,
+    perPage: pagination.pageSize,
+  });
 
   return {
     data: request.data,
