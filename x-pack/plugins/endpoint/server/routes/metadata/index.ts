@@ -11,9 +11,9 @@ import { schema } from '@kbn/config-schema';
 import {
   kibanaRequestToMetadataListESQuery,
   getESQueryHostMetadataByID,
-} from '../services/endpoint/metadata_query_builders';
-import { HostMetadata, HostResultList } from '../../common/types';
-import { EndpointAppContext } from '../types';
+} from '../../services/metadata/query_builders';
+import { HostMetadata, HostResultList } from '../../../common/types';
+import { EndpointAppContext } from '../../types';
 
 interface HitSource {
   _source: HostMetadata;

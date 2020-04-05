@@ -8,7 +8,7 @@ import { EndpointConfigSchema } from '../../config';
 import {
   kibanaRequestToMetadataListESQuery,
   getESQueryHostMetadataByID,
-} from './metadata_query_builders';
+} from './query_builders';
 import { EndpointAppConstants } from '../../../common/types';
 
 describe('query builder', () => {
