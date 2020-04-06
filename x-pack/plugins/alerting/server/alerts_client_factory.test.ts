@@ -28,6 +28,7 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.createStart(),
+  preconfiguredActions: [],
 };
 const fakeRequest: Request = {
   headers: {},
