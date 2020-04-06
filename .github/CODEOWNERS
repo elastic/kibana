@@ -87,9 +87,8 @@
 /x-pack/test/functional/apps/machine_learning/  @elastic/ml-ui
 /x-pack/test/functional/services/machine_learning/  @elastic/ml-ui
 /x-pack/test/functional/services/ml.ts  @elastic/ml-ui
-# ML team owns the transform plugin, ES team added here for visibility
-# because the plugin lives in Kibana's Elasticsearch management section.
-/x-pack/plugins/transform/  @elastic/ml-ui @elastic/es-ui
+# ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
+/x-pack/plugins/transform/  @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
 /x-pack/test/functional/services/transform.ts @elastic/ml-ui
