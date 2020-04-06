@@ -11,7 +11,7 @@ import { parseScheduleDates } from '../signals/utils';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 interface SignalsCountResults {
-  signalsCount: string;
+  signalsCount: number;
   resultsLink: string;
 }
 
@@ -51,7 +51,7 @@ export const getSignalsCount = async ({
     from: fromInMs,
   });
 
-  const result = await callCluster('count', query);
+  const result: { count: number } = await callCluster('count', query);
   const resultsLink = getNotificationResultsLink({
     kibanaSiemAppUrl: `${kibanaSiemAppUrl}`,
     id: ruleAlertId,

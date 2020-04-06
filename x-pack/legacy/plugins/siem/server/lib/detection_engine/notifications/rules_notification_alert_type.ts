@@ -46,8 +46,8 @@ export const rulesNotificationAlertType = ({
       from: previousStartedAt ?? `now-${ruleParams.interval}`,
       to: startedAt,
       index: ruleParams.outputIndex,
-      ruleId: ruleParams.ruleId!,
-      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl as string,
+      ruleId: ruleParams.ruleId,
+      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl,
       ruleAlertId: ruleAlertSavedObject.id,
       callCluster: services.callCluster,
     });
@@ -56,7 +56,7 @@ export const rulesNotificationAlertType = ({
       `Found ${signalsCount} signals using signal rule name: "${ruleParams.name}", id: "${params.ruleAlertId}", rule_id: "${ruleParams.ruleId}" in "${ruleParams.outputIndex}" index`
     );
 
-    if (signalsCount) {
+    if (signalsCount !== 0) {
       const alertInstance = services.alertInstanceFactory(alertId);
       scheduleNotificationActions({ alertInstance, signalsCount, resultsLink, ruleParams });
     }

@@ -15,7 +15,7 @@ export type NotificationRuleTypeParams = RuleTypeParams & {
 
 interface ScheduleNotificationActions {
   alertInstance: AlertInstance;
-  signalsCount: string;
+  signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
 }

@@ -256,15 +256,15 @@ export const signalRulesAlertType = ({
               from: `now-${interval}`,
               to: 'now',
               index: ruleParams.outputIndex,
-              ruleId: ruleParams.ruleId!,
-              kibanaSiemAppUrl: meta?.kibanaSiemAppUrl as string,
+              ruleId: ruleParams.ruleId,
+              kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
               ruleAlertId: savedObject.id,
               callCluster: services.callCluster,
             });
 
             logger.info(buildRuleMessage(`Found ${signalsCount} signals for notification.`));
 
-            if (signalsCount) {
+            if (signalsCount !== 0) {
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,
