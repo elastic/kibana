@@ -22,9 +22,6 @@ import moment, { Duration } from 'moment';
 import { Unit } from '@elastic/datemath';
 
 import { SerializedFieldFormat } from '../../../../../../../../plugins/expressions/common/types';
-import { getSerie } from './_get_serie';
-import { getAspects } from './_get_aspects';
-import { Point } from './_get_point';
 
 export interface Column {
   id: string;
@@ -32,7 +29,7 @@ export interface Column {
 }
 
 export interface Row {
-  [key: string]: number;
+  [key: string]: number | 'NaN';
 }
 
 export interface Table {
@@ -54,24 +51,13 @@ interface HistogramParams {
 export interface Dimension {
   accessor: 0 | 1;
   format: SerializedFieldFormat<{ pattern: string }>;
-  params?: HistogramParams;
 }
 
 export interface Dimensions {
-  x: Dimension;
+  x: Dimension & { params: HistogramParams };
   y: Dimension;
 }
-export interface Aspect {
-  accessor: Column['id'];
-  column?: Dimension['accessor'];
-  title: Column['name'];
-  format: Dimension['format'];
-  params: Dimension['params'];
-}
-export interface Aspects {
-  x: Aspect[];
-  y: Aspect[];
-}
+
 interface Ordered {
   date: true;
   interval: Duration | number;
@@ -81,8 +67,10 @@ interface Ordered {
   max?: number;
 }
 export interface Chart {
-  aspects: Aspects;
-  values: Point[];
+  values: Array<{
+    x: number;
+    y: number;
+  }>;
   xAxisOrderedValues: number[];
   xAxisFormat: Dimension['format'];
   xAxisLabel: Column['name'];
@@ -91,16 +79,16 @@ export interface Chart {
 }
 
 export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
-  const chart = {
-    aspects: getAspects(table, dimensions),
-  } as Chart;
+  const { x, y } = dimensions;
+  const xAccessor = table.columns[x.accessor].id;
+  const yAccessor = table.columns[y.accessor].id;
+  const chart = {} as Chart;
 
-  const { format, title, params, accessor } = chart.aspects.x[0];
-  chart.xAxisOrderedValues = uniq(table.rows.map(r => r[accessor]));
-  chart.xAxisFormat = format;
-  chart.xAxisLabel = title;
+  chart.xAxisOrderedValues = uniq(table.rows.map(r => r[xAccessor] as number));
+  chart.xAxisFormat = x.format;
+  chart.xAxisLabel = table.columns[x.accessor].name;
 
-  const { intervalESUnit, intervalESValue, interval, bounds } = params as HistogramParams;
+  const { intervalESUnit, intervalESValue, interval, bounds } = x.params;
   chart.ordered = {
     date: true,
     interval: moment.duration(interval),
@@ -117,10 +105,18 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
       : (bounds.max as number);
   }
 
-  chart.yAxisLabel = chart.aspects.y && chart.aspects.y[0].title;
+  chart.yAxisLabel = table.columns[y.accessor].name;
 
-  chart.values = [getSerie(table, chart)] as Point[];
+  const row = table.rows[0];
+  const point =
+    row && row[yAccessor] !== 'NaN'
+      ? {
+          x: row[xAccessor],
+          y: row[yAccessor],
+        }
+      : ({} as any);
 
-  delete chart.aspects;
+  chart.values = [point];
+
   return chart;
 };
