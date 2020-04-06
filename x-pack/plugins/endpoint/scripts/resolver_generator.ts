@@ -104,7 +104,8 @@ async function main() {
     },
     setupOnly: {
       alias: 'so',
-      describe: 'run only the index and pipeline creation then exit',
+      describe:
+        'Run only the index and pipeline creation then exit. This is intended to be used to set up the Endpoint App for use with the real Elastic Endpoint.',
       type: 'boolean',
       default: false,
     },
