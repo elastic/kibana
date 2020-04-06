@@ -105,6 +105,32 @@ export const selectedWindowsEventing = (state: PolicyDetailsState): number => {
   return 0;
 };
 
+/** Returns an object of all the mac eventing configurations */
+export const macEventing = (state: PolicyDetailsState) => {
+  const config = policyConfig(state);
+  return config && config.mac.events;
+};
+
+/** Returns the total number of possible mac eventing configurations */
+export const totalMacEventing = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.keys(config.mac.events).length;
+  }
+  return 0;
+};
+
+/** Returns the number of selected mac eventing configurations */
+export const selectedMacEventing = (state: PolicyDetailsState): number => {
+  const config = policyConfig(state);
+  if (config) {
+    return Object.values(config.mac.events).reduce((count, event) => {
+      return event === true ? count + 1 : count;
+    }, 0);
+  }
+  return 0;
+};
+
 /** is there an api call in flight */
 export const isLoading = (state: PolicyDetailsState) => state.isLoading;
 

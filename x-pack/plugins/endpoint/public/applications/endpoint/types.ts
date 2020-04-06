@@ -133,7 +133,9 @@ export interface PolicyConfig {
   };
   mac: {
     events: {
+      file: boolean;
       process: boolean;
+      network: boolean;
     };
     malware: MalwareFields;
     logging: {
@@ -144,7 +146,9 @@ export interface PolicyConfig {
   };
   linux: {
     events: {
+      file: boolean;
       process: boolean;
+      network: boolean;
     };
     logging: {
       stdout: string;
@@ -191,6 +195,7 @@ export interface UIPolicyConfig {
   mac: MacPolicyConfig;
   linux: LinuxPolicyConfig;
 }
+export type nerds<t extends keyof UIPolicyConfig> = keyof UIPolicyConfig[t]['events'];
 
 /** OS used in Policy */
 export enum OS {
@@ -203,6 +208,7 @@ export enum OS {
 export enum EventingFields {
   process = 'process',
   network = 'network',
+  file = 'file',
 }
 
 /**

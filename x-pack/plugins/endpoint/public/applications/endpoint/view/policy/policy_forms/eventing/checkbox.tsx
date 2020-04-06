@@ -10,28 +10,29 @@ import { useDispatch } from 'react-redux';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig, windowsEventing } from '../../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../../store/policy_details';
-import { OS, EventingFields } from '../../../../types';
+import { OS, UIPolicyConfig, nerds } from '../../../../types';
 import { clone } from '../../../../models/policy_details_config';
 
-export const EventingCheckbox: React.FC<{
+export const EventingCheckbox = React.memo(function<T extends keyof UIPolicyConfig>({
+  id,
+  name,
+  os,
+  protectionField,
+}: {
   id: string;
   name: string;
-  os: OS;
-  protectionField: EventingFields;
-}> = React.memo(({ id, name, os, protectionField }) => {
+  os: T;
+  protectionField: nerds<T>;
+}) {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const eventing = usePolicyDetailsSelector(windowsEventing);
   const dispatch = useDispatch<(action: PolicyDetailsAction) => void>();
 
-  const handleRadioChange = useCallback(
+  const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (policyDetailsConfig) {
         const newPayload = clone(policyDetailsConfig);
-        if (os === OS.linux || os === OS.mac) {
-          newPayload[os].events.process = event.target.checked;
-        } else {
-          newPayload[os].events[protectionField] = event.target.checked;
-        }
+        newPayload[os].events[protectionField] = event.target.checked;
 
         dispatch({
           type: 'userChangedPolicyConfig',
@@ -47,7 +48,7 @@ export const EventingCheckbox: React.FC<{
       id={id}
       label={name}
       checked={eventing && eventing[protectionField]}
-      onChange={handleRadioChange}
+      onChange={handleCheckboxChange}
     />
   );
 });
