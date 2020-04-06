@@ -9,6 +9,7 @@ import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
+import { IngestManagerStart } from '../../ingest_manager/public';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -18,6 +19,7 @@ export interface EndpointPluginSetupDependencies {
 }
 export interface EndpointPluginStartDependencies {
   data: DataPublicPluginStart;
+  ingestManager: IngestManagerStart;
 }
 
 /**
@@ -51,8 +53,7 @@ export class EndpointPlugin
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
 
-        const { renderApp, setupDeps } = await import('./applications/endpoint');
-        await setupDeps(coreStart);
+        const { renderApp } = await import('./applications/endpoint');
         return renderApp(coreStart, depsStart, params);
       },
     });

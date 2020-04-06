@@ -17,15 +17,17 @@ import { DEFAULT_APP_CATEGORIES, deepFreeze } from '../../../../src/core/utils';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
-import { sendSetup, sendIsInitialized } from './applications/ingest_manager/hooks';
+import { sendSetup, sendIsInitialized, setHttpClient } from './applications/ingest_manager/hooks';
 import { IngestManagerConfigType, CreateFleetSetupResponse } from '../common/types';
 
 export { IngestManagerConfigType } from '../common/types';
 
+export type IngestManagerSetup = void;
+
 /**
- * Describes public IngestManager plugin contract returned at the `setup` stage.
+ * Describes public IngestManager plugin contract returned at the `start` stage.
  */
-export interface IngestManagerSetup {
+export interface IngestManagerStart {
   /**
    * Setup initializes the Ingest Manager
    */
@@ -35,8 +37,6 @@ export interface IngestManagerSetup {
    */
   isInitialized: () => Promise<SendRequestResponse<CreateFleetSetupResponse, Error>>;
 }
-
-export type IngestManagerStart = void;
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -56,11 +56,10 @@ export class IngestManagerPlugin
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
   }
 
-  public async setup(
-    core: CoreSetup,
-    deps: IngestManagerSetupDeps
-  ): Promise<RecursiveReadonly<IngestManagerSetup>> {
+  public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
+    setHttpClient(core.http);
+
     // Register main Ingest Manager app
     core.application.register({
       id: PLUGIN_ID,
@@ -77,13 +76,14 @@ export class IngestManagerPlugin
         return renderApp(coreStart, params, deps, startDeps, config);
       },
     });
+  }
+
+  public async start(core: CoreStart): Promise<RecursiveReadonly<IngestManagerStart>> {
     return deepFreeze({
       setup: sendSetup,
       isInitialized: sendIsInitialized,
     });
   }
-
-  public start(core: CoreStart) {}
 
   public stop() {}
 }

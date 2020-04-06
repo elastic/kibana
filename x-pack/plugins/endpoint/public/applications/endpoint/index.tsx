@@ -20,14 +20,9 @@ import { AlertIndex } from './view/alerts';
 import { HostList } from './view/hosts';
 import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
-import { HeaderNavigation } from './components/header_nav';
-import { setupIngestManager } from '../../../../ingest_manager/common';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
-
-export async function setupDeps(coreStart: CoreStart) {
-  // TODO handle a 500 from the ingest manager
-  await setupIngestManager(coreStart.http);
-}
+import { HeaderNavigation } from './components/header_nav';
+import { Setup } from './view/setup';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -59,7 +54,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
     history,
     store,
     coreStart: { http, notifications, uiSettings, application },
-    depsStart: { data },
+    depsStart: { data, ingestManager },
   }) => {
     const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
@@ -68,6 +63,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
         <I18nProvider>
           <KibanaContextProvider services={{ http, notifications, application, data }}>
             <EuiThemeProvider darkMode={isDarkMode}>
+              <Setup ingestManager={ingestManager} notifications={notifications} />
               <Router history={history}>
                 <RouteCapture>
                   <HeaderNavigation />
