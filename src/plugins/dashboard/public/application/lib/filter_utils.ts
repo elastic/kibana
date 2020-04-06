@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment, { Moment } from 'moment';
-import { esFilters, Filter } from '../../../../../../../plugins/data/public';
+import { esFilters, Filter } from '../../../../data/public';
 
 /**
  * @typedef {Object} QueryFilter

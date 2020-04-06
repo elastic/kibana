@@ -22,7 +22,7 @@ import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
 import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { DashboardAppState } from '../../types';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { esFilters } from '../../../../data/public';
 
 export function updateSavedDashboard(
   savedDashboard: SavedObjectDashboard,
