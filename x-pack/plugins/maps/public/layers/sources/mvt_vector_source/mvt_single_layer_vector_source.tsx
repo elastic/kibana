@@ -45,7 +45,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   renderSourceSettingsEditor({ onChange }) {
-    return <div>No source settings to edit</div>;
+    return null;
   }
 
   _createDefaultLayerDescriptor(options) {

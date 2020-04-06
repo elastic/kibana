@@ -20,7 +20,7 @@ import { SyncContext } from '../actions/map_actions';
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
-  static createDescriptor(opMVtions, mapColors) {
+  static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = TiledVectorLayer.type;
 
