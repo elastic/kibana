@@ -8,6 +8,8 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   isClassificationAnalysis,
@@ -158,6 +160,39 @@ export const getInitialState = (): State => ({
   estimatedModelMemoryLimit: '',
 });
 
+const getExcludesFields = (excluded: string[]) => {
+  const { fields } = newJobCapsService;
+  const updatedExcluded = [];
+
+  for (let i = 0; i < excluded.length; i++) {
+    let isBothTypes = false;
+    const fieldName = excluded[i];
+    updatedExcluded.push(fieldName);
+    const fieldType = fields.find(field => field.name === fieldName)?.type;
+    // If it's a keyword type - check if it has a corresponding text type
+    if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.KEYWORD) {
+      const textTypeName = fieldName.replace(/\.keyword$/, '');
+      const field = newJobCapsService.getFieldById(textTypeName);
+      isBothTypes = field !== null && field.type === ES_FIELD_TYPES.TEXT;
+
+      if (isBothTypes) {
+        updatedExcluded.push(textTypeName);
+      }
+    } else if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.TEXT) {
+      //   If text, check if has corresponding keyword type
+      const keywordTypeName = `${fieldName}.keyword`;
+      const field = newJobCapsService.getFieldById(keywordTypeName);
+      isBothTypes = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
+
+      if (isBothTypes) {
+        updatedExcluded.push(keywordTypeName);
+      }
+    }
+  }
+
+  return updatedExcluded;
+};
+
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
@@ -175,7 +210,7 @@ export const getJobConfigFromFormState = (
       index: formState.destinationIndex,
     },
     analyzed_fields: {
-      excludes: formState.excludes,
+      excludes: getExcludesFields(formState.excludes),
     },
     analysis: {
       outlier_detection: {},
