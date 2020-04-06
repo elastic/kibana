@@ -13,6 +13,11 @@ import { TiledVectorLayer } from '../../tiled_vector_layer';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { MVT_SINGLE_LAYER } from '../../../../../../../plugins/maps/common/constants';
 import { IField } from '../../fields/field';
+import { registerSource } from '../source_registry';
+
+const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
+  defaultMessage: 'XYZ Vector Tile Layer',
+});
 
 export class MVTSingleLayerVectorSource extends AbstractSource
   implements ITiledSingleLayerVectorSource {
@@ -32,15 +37,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
       id: uuid(),
       urlTemplate,
     };
-  }
-
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
-      const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
-      const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-    return <MVTVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -75,9 +71,38 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   getFieldByName(fieldName: string) {
     return null;
-  };
+  }
 
   async getUrlTemplateWithMeta() {
     return this._descriptor.urlTemplate;
   }
+
+  getSupportedShapeTypes() {
+    return [];
+  }
+
+  canFormatFeatureProperties() {
+    return false;
+  }
 }
+
+registerSource({
+  ConstructorFunction: MVTSingleLayerVectorSource,
+  type: MVT_SINGLE_LAYER,
+});
+
+export const mvtVectorSourceWizardConfig = {
+  description: i18n.translate('xpack.maps.source.mvtVectorSourceWizard', {
+    defaultMessage: 'Vector source wizard',
+  }),
+  icon: 'grid',
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = sourceConfig => {
+      const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
+      const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+    return <MVTVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+  },
+  title: sourceTitle,
+};

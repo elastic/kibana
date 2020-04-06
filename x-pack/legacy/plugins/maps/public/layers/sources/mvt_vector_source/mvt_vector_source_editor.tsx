@@ -7,11 +7,10 @@
 import React, { Fragment } from 'react';
 import _ from 'lodash';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export class MVTVectorSourceEditor extends React.Component {
   state = {
-    mvtInput: '',
+    urlTemplate: '',
     layerName: '',
     mvtCanPreview: false,
   };
@@ -19,20 +18,20 @@ export class MVTVectorSourceEditor extends React.Component {
   _sourceConfigChange = _.debounce(() => {
     if (this.state.mvtCanPreview && this.state.layerName) {
       this.props.onSourceConfigChange({
-        urlTemplate: this.state.mvtInput,
+        urlTemplate: this.state.urlTemplate,
         layerName: this.state.layerName,
       });
     }
   }, 2000);
 
-  _handleMVTInputChange(e) {
+  _handleUrlTemplateChange(e) {
     const url = e.target.value;
 
     const canPreview =
       url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0;
     this.setState(
       {
-        mvtInput: url,
+        urlTemplate: url,
         mvtCanPreview: canPreview,
       },
       () => this._sourceConfigChange()
@@ -55,8 +54,10 @@ export class MVTVectorSourceEditor extends React.Component {
       <Fragment>
         <div>{example}</div>
         <EuiFormRow label="Url">
-          <EuiFieldText value={``} onChange={e => this._handleMVTInputChange(e)} />
-          <EuiFieldText value={``} onChange={e => this._handleLayerNameInputChange(e)} />
+          <EuiFieldText value={this.state.urlTemplate} onChange={e => this._handleUrlTemplateChange(e)} />
+        </EuiFormRow>
+        <EuiFormRow label="Layer name">
+          <EuiFieldText value={this.state.layerName} onChange={e => this._handleLayerNameInputChange(e)} />
         </EuiFormRow>
       </Fragment>
     );

@@ -33,14 +33,17 @@ export class TiledVectorLayer extends VectorLayer {
     return layerDescriptor;
   }
 
-  private readonly _source: ITiledSingleLayerVectorSource;
-  private readonly _style: IVectorStyle;
+  private readonly _source: ITiledSingleLayerVectorSource; //downcast to the more specific type
 
   constructor(vectorArgs: VectorLayerArguments) {
-    if (vectorArgs.joins) {
+    if (vectorArgs.joins && vectorArgs.joins.length) {
       throw new Error('Tiled vector layers do not support joins');
     }
-    super({ layerDescriptor: vectorArgs.layerDescriptor, source: vectorArgs.source, joins: [] });
+    super(vectorArgs);
+
+    //reassignment is required due since _source is a shadowed property
+    // and in the transpiled JS-code, the .source assignment in super() is getting voided in this constructor.
+    this._source = vectorArgs.source;
   }
 
   destroy() {
@@ -73,6 +76,7 @@ export class TiledVectorLayer extends VectorLayer {
     registerCancelCallback,
     dataFilters,
   }: SyncContext) {
+    console.log('sync mvt template');
     const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
@@ -85,9 +89,11 @@ export class TiledVectorLayer extends VectorLayer {
       return null;
     }
 
+    console.log('start');
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
     try {
-      const templateWithMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
+      const templateWithMeta = await this._source.getUrlTemplateWithMeta();
+      console.log('template with meta', templateWithMeta);
       const url = templateWithMeta.url;
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch (error) {
@@ -96,6 +102,7 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   async syncData(syncContext) {
+    console.log('sunc ddata', syncContext);
     if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
       return;
     }
@@ -107,16 +114,20 @@ export class TiledVectorLayer extends VectorLayer {
 
   _syncSourceBindingWithMb(mbMap) {
     const mbSource = mbMap.getSource(this.getId());
+    console.log('mbs', mbSource);
     if (!mbSource) {
       const sourceDataRequest = this.getSourceDataRequest();
       if (!sourceDataRequest) {
+        console.log('mno source data request', sourceDataRequest);
         // this is possible if the layer was invisible at startup.
         // the actions will not perform any data=syncing as an optimization when a layer is invisible
         // when turning the layer back into visible, it's possible the url has not been resovled yet.
         return;
       }
 
+      ;
       const url = sourceDataRequest.getData();
+      console.log(url);
       if (!url) {
         return;
       }
@@ -132,12 +143,14 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   _syncStylePropertiesWithMb(mbMap) {
+    console.log('sunc style props', mbMap);
     const mbSource = mbMap.getSource(this.getId());
     if (!mbSource) {
       return;
     }
 
     const options = { mvtSourceLayer: this._source.getMvtSourceLayer() };
+
     this._setMbPointsProperties(mbMap, options);
     this._setMbLinePolygonProperties(mbMap, options);
   }
@@ -161,7 +174,10 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   syncLayerWithMB(mbMap) {
+    console.log('sunc kayer with mb', mbMap);
+
     const requiresCleanup = this._requiresPrevSourceCleanup(mbMap);
+    console.log('reclenaup', requiresCleanup);
     if (requiresCleanup) {
       const mbStyle = mbMap.getStyle();
       mbStyle.layers.forEach(mbLayer => {

@@ -79,7 +79,7 @@ export class AbstractSource {
     return false;
   }
 
-  isQueryAware() {
+  async isTimeAware() {
     return false;
   }
 
@@ -105,6 +105,14 @@ export class AbstractSource {
 
   getQueryableIndexPatternIds() {
     return [];
+  }
+
+  isFilterByMapBounds() {
+    return false;
+  }
+
+  isQueryAware() {
+    return false;
   }
 
   getGeoGridPrecision() {

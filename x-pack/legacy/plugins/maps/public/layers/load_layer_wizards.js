@@ -15,6 +15,7 @@ import { kibanaRegionMapLayerWizardConfig } from './sources/kibana_regionmap_sou
 import { kibanaBasemapLayerWizardConfig } from './sources/kibana_tilemap_source';
 import { tmsLayerWizardConfig } from './sources/xyz_tms_source';
 import { wmsLayerWizardConfig } from './sources/wms_source';
+import { mvtVectorSourceWizardConfig } from './sources/mvt_vector_source/mvt_single_layer_vector_source';
 
 // Registration order determines display order
 registerLayerWizard(uploadLayerWizardConfig);
@@ -28,3 +29,4 @@ registerLayerWizard(kibanaRegionMapLayerWizardConfig);
 registerLayerWizard(kibanaBasemapLayerWizardConfig);
 registerLayerWizard(tmsLayerWizardConfig);
 registerLayerWizard(wmsLayerWizardConfig);
+registerLayerWizard(mvtVectorSourceWizardConfig);

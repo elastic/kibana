@@ -37,8 +37,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   ): VectorLayerDescriptor;
 
   protected readonly _source: IVectorSource;
-  protected readonly _style: IVectorStyle;
-
   constructor(options: VectorLayerArguments);
 
   getFields(): Promise<IField[]>;

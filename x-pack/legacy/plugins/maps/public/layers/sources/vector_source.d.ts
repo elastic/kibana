@@ -43,6 +43,8 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField;
+  getSupportedShapeTypes(): VECTOR_SHAPE_TYPES[];
+  canFormatFeatureProperties() : boolean;
 }
 
 type TiledSingleLayerVectorSourceMeta = {
