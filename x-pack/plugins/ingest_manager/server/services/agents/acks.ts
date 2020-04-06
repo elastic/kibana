@@ -55,7 +55,7 @@ export async function acknowledgeAgentActions(
 
   for (const action of actions) {
     if (action.agent_id !== agent.id) {
-      throw Boom.badRequest(`${action.id} cannot be allowed by this agent`);
+      throw Boom.badRequest(`${action.id} not found`);
     }
   }
 
