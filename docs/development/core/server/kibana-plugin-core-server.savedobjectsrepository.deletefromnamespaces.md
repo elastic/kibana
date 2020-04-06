@@ -4,6 +4,8 @@
 
 ## SavedObjectsRepository.deleteFromNamespaces() method
 
+Removes one or more namespaces from a given multi-namespace saved object. If no namespaces remain, the saved object is deleted entirely. This method and \[`addToNamespaces`<!-- -->\][SavedObjectsRepository.addToNamespaces()](./kibana-plugin-core-server.savedobjectsrepository.addtonamespaces.md) are the only ways to change which Spaces a multi-namespace saved object is shared to.
+
 <b>Signature:</b>
 
 ```typescript

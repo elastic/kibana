@@ -4,6 +4,8 @@
 
 ## SavedObjectsRepository.addToNamespaces() method
 
+Adds one or more namespaces to a given multi-namespace saved object. This method and \[`deleteFromNamespaces`<!-- -->\][SavedObjectsRepository.deleteFromNamespaces()](./kibana-plugin-core-server.savedobjectsrepository.deletefromnamespaces.md) are the only ways to change which Spaces a multi-namespace saved object is shared to.
+
 <b>Signature:</b>
 
 ```typescript

@@ -349,7 +349,7 @@ export class SavedObjectsRepository {
         const indexFound = bulkGetResponse.status !== 404;
         const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
         const docFound = indexFound && actualResult.found === true;
-        if (docFound && !this._rawInNamespaces(actualResult, namespace)) {
+        if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
           const { id, type } = object;
           return {
             tag: 'Left' as 'Left',
@@ -768,7 +768,7 @@ export class SavedObjectsRepository {
         const { type, id, esRequestIndex } = expectedResult.value;
         const doc = bulkGetResponse.docs[esRequestIndex];
 
-        if (!doc.found || !this._rawInNamespaces(doc, namespace)) {
+        if (!doc.found || !this.rawDocExistsInNamespace(doc, namespace)) {
           return ({
             id,
             type,
@@ -819,7 +819,7 @@ export class SavedObjectsRepository {
 
     const docNotFound = response.found === false;
     const indexNotFound = response.status === 404;
-    if (docNotFound || indexNotFound || !this._rawInNamespaces(response, namespace)) {
+    if (docNotFound || indexNotFound || !this.rawDocExistsInNamespace(response, namespace)) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -904,6 +904,11 @@ export class SavedObjectsRepository {
     };
   }
 
+  /**
+   * Adds one or more namespaces to a given multi-namespace saved object. This method and
+   * [`deleteFromNamespaces`]{@link SavedObjectsRepository.deleteFromNamespaces} are the only ways to change which Spaces a multi-namespace
+   * saved object is shared to.
+   */
   async addToNamespaces(
     type: string,
     id: string,
@@ -957,6 +962,11 @@ export class SavedObjectsRepository {
     return {};
   }
 
+  /**
+   * Removes one or more namespaces from a given multi-namespace saved object. If no namespaces remain, the saved object is deleted
+   * entirely. This method and [`addToNamespaces`]{@link SavedObjectsRepository.addToNamespaces} are the only ways to change which Spaces a
+   * multi-namespace saved object is shared to.
+   */
   async deleteFromNamespaces(
     type: string,
     id: string,
@@ -1127,7 +1137,7 @@ export class SavedObjectsRepository {
           const indexFound = bulkGetResponse.status !== 404;
           const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
-          if (!docFound || !this._rawInNamespaces(actualResult, namespace)) {
+          if (!docFound || !this.rawDocExistsInNamespace(actualResult, namespace)) {
             return {
               tag: 'Left' as 'Left',
               error: {
@@ -1344,7 +1354,7 @@ export class SavedObjectsRepository {
     return omit(savedObject, 'namespace');
   }
 
-  private _rawInNamespaces(raw: SavedObjectsRawDoc, namespace?: string) {
+  private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace?: string) {
     const rawDocType = raw._source.type as string;
 
     // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
@@ -1383,7 +1393,7 @@ export class SavedObjectsRepository {
     const indexFound = response.status !== 404;
     const docFound = indexFound && response.found === true;
     if (docFound) {
-      if (!this._rawInNamespaces(response, namespace)) {
+      if (!this.rawDocExistsInNamespace(response, namespace)) {
         throw SavedObjectsErrorHelpers.createConflictError(type, id);
       }
       return getSavedObjectNamespaces(namespace, response);
@@ -1415,7 +1425,7 @@ export class SavedObjectsRepository {
 
     const indexFound = response.status !== 404;
     const docFound = indexFound && response.found === true;
-    if (!docFound || !this._rawInNamespaces(response, namespace)) {
+    if (!docFound || !this.rawDocExistsInNamespace(response, namespace)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     return response as SavedObjectsRawDoc;
