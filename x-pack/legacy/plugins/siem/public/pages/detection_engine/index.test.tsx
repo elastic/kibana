@@ -11,7 +11,7 @@ import { DetectionEngineContainer } from './index';
 
 describe('DetectionEngineContainer', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<DetectionEngineContainer />);
+    const wrapper = shallow(<DetectionEngineContainer url="url" />);
 
     expect(wrapper.find('ManageUserInfo')).toHaveLength(1);
   });

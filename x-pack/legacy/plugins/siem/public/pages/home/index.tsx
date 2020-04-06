@@ -109,7 +109,9 @@ export const HomePage: React.FC = () => {
                 />
                 <Route
                   path={`/:pageName(${SiemPageName.detections})`}
-                  render={({ location, match }) => <DetectionEngineContainer location={location} />}
+                  render={({ location, match }) => (
+                    <DetectionEngineContainer location={location} url={match.url} />
+                  )}
                 />
                 <Route
                   path={`/:pageName(${SiemPageName.timelines})`}
