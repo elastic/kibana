@@ -15,7 +15,8 @@ import {
   ITiledSingleLayerVectorSource,
   TiledSingleLayerVectorSourceMeta,
 } from '../vector_source';
-import { ES_GEO_FIELD_TYPE, MVT_SINGLE_LAYER } from '../../../../common/constants';
+import { MVT_SINGLE_LAYER } from '../../../../common/constants';
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 
