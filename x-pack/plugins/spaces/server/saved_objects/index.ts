@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { migrateToKibana660 } from './migrate_6x';
+export { SpacesSavedObjectsService } from './saved_objects_service';
