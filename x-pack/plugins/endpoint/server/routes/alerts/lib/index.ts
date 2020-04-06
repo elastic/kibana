@@ -157,7 +157,7 @@ export const searchESForAlerts = async (
 };
 
 /**
- * Abstraction over alert IDs.
+ * Alert ID abstraction for encoding originating index.
  */
 export class AlertId {
   protected index: string;
@@ -177,12 +177,17 @@ export class AlertId {
   }
 
   static fromEncoded(encoded: string): AlertId {
+    encoded = encoded.replace(/\-/g, '+').replace(/_/g, '/');
     const decoded = Buffer.from(encoded, 'base64').toString('utf8');
     const [index, id] = decoded.split(' ');
     return new AlertId(index, id);
   }
 
   protected toString(): string {
-    return Buffer.from(`${this.index} ${this.id}`).toString('base64');
+    return Buffer.from(`${this.index} ${this.id}`)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
   }
 }
