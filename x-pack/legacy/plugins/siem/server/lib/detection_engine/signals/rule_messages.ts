@@ -24,4 +24,4 @@ export const buildRuleMessageFactory = ({
     `id: "${id}"`,
     `rule id: "${ruleId ?? '(unknown rule id)'}"`,
     `signals index: "${index}"`,
-  ].join('\n');
+  ].join(' ');
