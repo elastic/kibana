@@ -292,7 +292,6 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
 
     let bulkGetRequestIndexCounter = 0;
-    const bulkGetDocs: object[] = [];
     const expectedResults: Either[] = objects.map(object => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
@@ -309,32 +308,24 @@ export class SavedObjectsRepository {
       const requiresNamespacesCheck =
         method === 'index' && this._registry.isMultiNamespace(object.type);
 
-      if (requiresNamespacesCheck) {
-        bulkGetDocs.push({
-          _id: this._serializer.generateRawId(namespace, object.type, object.id),
-          _index: this.getIndexForType(object.type),
-          _source: ['type', 'namespaces'],
-        });
-
-        return {
-          tag: 'Right' as 'Right',
-          value: {
-            esRequestIndex: bulkGetRequestIndexCounter++,
-            method,
-            object,
-          },
-        };
-      } else {
-        return {
-          tag: 'Right' as 'Right',
-          value: {
-            method,
-            object,
-          },
-        };
-      }
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          method,
+          object,
+          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+        },
+      };
     });
 
+    const bulkGetDocs = expectedResults
+      .filter(isRight)
+      .filter(({ value }) => value.esRequestIndex !== undefined)
+      .map(({ value: { object: { type, id } } }) => ({
+        _id: this._serializer.generateRawId(namespace, type, id),
+        _index: this.getIndexForType(type),
+        _source: ['type', 'namespaces'],
+      }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this._callCluster('mget', {
           body: {
@@ -727,7 +718,6 @@ export class SavedObjectsRepository {
     }
 
     let bulkGetRequestIndexCounter = 0;
-    const bulkGetDocs: object[] = [];
     const expectedBulkGetResults: Either[] = objects.map(object => {
       const { type, id, fields } = object;
 
@@ -742,22 +732,24 @@ export class SavedObjectsRepository {
         };
       }
 
-      bulkGetDocs.push({
-        _id: this._serializer.generateRawId(namespace, type, id),
-        _index: this.getIndexForType(type),
-        _source: includedFields(type, fields),
-      });
-
       return {
         tag: 'Right' as 'Right',
         value: {
           type,
           id,
+          fields,
           esRequestIndex: bulkGetRequestIndexCounter++,
         },
       };
     });
 
+    const bulkGetDocs = expectedBulkGetResults
+      .filter(isRight)
+      .map(({ value: { type, id, fields } }) => ({
+        _id: this._serializer.generateRawId(namespace, type, id),
+        _index: this.getIndexForType(type),
+        _source: includedFields(type, fields),
+      }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this._callCluster('mget', {
           body: {
@@ -1067,7 +1059,6 @@ export class SavedObjectsRepository {
     const { namespace } = options;
 
     let bulkGetRequestIndexCounter = 0;
-    const bulkGetDocs: object[] = [];
     const expectedBulkGetResults: Either[] = objects.map(object => {
       const { type, id } = object;
 
@@ -1090,23 +1081,7 @@ export class SavedObjectsRepository {
         ...(Array.isArray(references) && { references }),
       };
 
-      if (!this._registry.isMultiNamespace(type)) {
-        return {
-          tag: 'Right' as 'Right',
-          value: {
-            type,
-            id,
-            version,
-            documentToSave,
-          },
-        };
-      }
-
-      bulkGetDocs.push({
-        _id: this._serializer.generateRawId(namespace, type, id),
-        _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
-      });
+      const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
 
       return {
         tag: 'Right' as 'Right',
@@ -1114,12 +1089,20 @@ export class SavedObjectsRepository {
           type,
           id,
           version,
-          esRequestIndex: bulkGetRequestIndexCounter++,
           documentToSave,
+          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
         },
       };
     });
 
+    const bulkGetDocs = expectedBulkGetResults
+      .filter(isRight)
+      .filter(({ value }) => value.esRequestIndex !== undefined)
+      .map(({ value: { type, id } }) => ({
+        _id: this._serializer.generateRawId(namespace, type, id),
+        _index: this.getIndexForType(type),
+        _source: ['type', 'namespaces'],
+      }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this._callCluster('mget', {
           body: {
