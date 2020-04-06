@@ -103,7 +103,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 .Properties of `error`
 [%collapsible%open]
 =======
-      `type`:::::
+      `type`::::
         (string) The type of error. For example, `unsupported_type`, `missing_references`, or `unknown`.
 =======
 ======
