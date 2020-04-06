@@ -41,6 +41,6 @@ describe('SelectRuleType', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[data-test-subj="selectRuleType"]')).toHaveLength(1);
   });
 });

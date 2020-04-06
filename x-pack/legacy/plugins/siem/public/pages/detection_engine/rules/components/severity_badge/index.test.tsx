@@ -13,6 +13,6 @@ describe('SeverityBadge', () => {
   it('renders correctly against the snapshot', () => {
     const wrapper = shallow(<SeverityBadge value="low" />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiHealth')).toHaveLength(1);
   });
 });

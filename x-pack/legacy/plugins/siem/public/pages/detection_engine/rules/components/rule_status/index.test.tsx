@@ -10,9 +10,9 @@ import { shallow } from 'enzyme';
 import { RuleStatus } from './index';
 
 describe('RuleStatus', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders loader correctly', () => {
     const wrapper = shallow(<RuleStatus ruleId="ruleId" ruleEnabled={true} />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[data-test-subj="rule-status-loader"]')).toHaveLength(1);
   });
 });

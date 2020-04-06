@@ -17,7 +17,7 @@ describe('ScheduleItem', () => {
 
       return (
         <ScheduleItem
-          dataTestSubj="dataTestSubj"
+          dataTestSubj="schedule-item"
           idAria="idAria"
           isDisabled={false}
           field={{
@@ -44,6 +44,6 @@ describe('ScheduleItem', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[data-test-subj="schedule-item"]')).toHaveLength(1);
   });
 });

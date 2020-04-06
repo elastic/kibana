@@ -17,6 +17,6 @@ describe('RuleStatusIcon', () => {
       wrappingComponent: TestProviders,
     });
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiAvatar')).toHaveLength(1);
   });
 });

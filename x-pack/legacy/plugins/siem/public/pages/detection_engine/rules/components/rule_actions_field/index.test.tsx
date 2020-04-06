@@ -13,7 +13,7 @@ import { useKibana } from '../../../../../lib/kibana';
 jest.mock('../../../../../lib/kibana');
 
 describe('RuleActionsField', () => {
-  it('renders correctly against the snapshot', () => {
+  it('should not render ActionForm is no actions are supported', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         triggers_actions_ui: {
@@ -51,8 +51,6 @@ describe('RuleActionsField', () => {
     };
     const wrapper = shallow(<Component />);
 
-    console.log(wrapper.dive().debug());
-
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('ActionForm')).toHaveLength(0);
   });
 });

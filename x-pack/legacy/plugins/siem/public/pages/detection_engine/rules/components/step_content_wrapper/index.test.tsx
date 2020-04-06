@@ -13,6 +13,6 @@ describe('StepContentWrapper', () => {
   it('renders correctly', () => {
     const wrapper = shallow(<StepContentWrapper />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('div')).toHaveLength(1);
   });
 });
