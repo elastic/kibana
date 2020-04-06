@@ -22,6 +22,8 @@ export const OPENED_SIGNALS_BTN = '[data-test-subj="openSignals"]';
 
 export const SELECTED_SIGNALS = '[data-test-subj="selectedSignals"]';
 
+export const SEND_SIGNAL_TO_TIMELINE_BTN = '[data-test-subj="send-signal-to-timeline-button"]';
+
 export const SHOWING_SIGNALS = '[data-test-subj="showingSignals"]';
 
 export const SIGNALS = '[data-test-subj="event"]';
@@ -29,5 +31,3 @@ export const SIGNALS = '[data-test-subj="event"]';
 export const SIGNAL_ID = '[data-test-subj="draggable-content-_id"]';
 
 export const SIGNAL_CHECKBOX = '[data-test-subj="select-event-container"] .euiCheckbox__input';
-
-export const VIEW_SIGNAL_IN_TIMELINE_BTN = '[data-test-subj="send-signal-to-timeline-button"]';

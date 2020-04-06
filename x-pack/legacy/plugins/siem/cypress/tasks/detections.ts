@@ -12,9 +12,9 @@ import {
   OPEN_CLOSE_SIGNAL_BTN,
   OPEN_CLOSE_SIGNALS_BTN,
   OPENED_SIGNALS_BTN,
+  SEND_SIGNAL_TO_TIMELINE_BTN,
   SIGNALS,
   SIGNAL_CHECKBOX,
-  VIEW_SIGNAL_IN_TIMELINE_BTN,
 } from '../screens/detections';
 import { REFRESH_BUTTON } from '../screens/siem_header';
 
@@ -66,8 +66,8 @@ export const selectNumberOfSignals = (numberOfSignals: number) => {
   }
 };
 
-export const viewFirstSignalInTimeline = () => {
-  cy.get(VIEW_SIGNAL_IN_TIMELINE_BTN)
+export const investigateFirstSignalInTimeline = () => {
+  cy.get(SEND_SIGNAL_TO_TIMELINE_BTN)
     .first()
     .click({ force: true });
 };

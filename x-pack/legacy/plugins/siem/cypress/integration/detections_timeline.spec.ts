@@ -9,7 +9,7 @@ import { PROVIDER_BADGE } from '../screens/timeline';
 
 import {
   expandFirstSignal,
-  viewFirstSignalInTimeline,
+  investigateFirstSignalInTimeline,
   waitForSignalsPanelToBeLoaded,
 } from '../tasks/detections';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -27,14 +27,14 @@ describe('Detections timeline', () => {
     esArchiverUnload('timeline_signals');
   });
 
-  it('View a signal in default timeline', () => {
+  it('Investigate signal in default timeline', () => {
     waitForSignalsPanelToBeLoaded();
     expandFirstSignal();
     cy.get(SIGNAL_ID)
       .first()
       .invoke('text')
       .then(eventId => {
-        viewFirstSignalInTimeline();
+        investigateFirstSignalInTimeline();
         cy.get(PROVIDER_BADGE)
           .invoke('text')
           .should('eql', `_id: "${eventId}"`);
