@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { camelCase } from 'lodash';
@@ -37,11 +36,11 @@ interface StateProps {
   pageId: string;
 }
 
-const mapStateToProps = (state: State) => ({
+const mapStateToProps = (state: State): StateProps => ({
   pageId: getSelectedPage(state),
 });
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
+const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
   selectToplevelNodes: (nodes: PositionedElement[]) =>
     dispatch(
       selectToplevelNodes(
@@ -109,12 +108,8 @@ const mergeProps = (
   };
 };
 
-export const SavedElementsModal = connect<StateProps, DispatchProps, ComponentProps>(
+export const SavedElementsModal = connect(
   mapStateToProps,
   mapDispatchToProps,
   mergeProps
 )(Component);
-
-SavedElementsModal.propTypes = {
-  onClose: PropTypes.func,
-};
