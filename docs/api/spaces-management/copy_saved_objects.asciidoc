@@ -58,7 +58,7 @@ You can request to overwrite any objects that already exist in the target space 
 
 `<space_id>`::
   (object) An object that describes the result of the copy operation for the space. Includes the dynamic keys in the response.
-
++
 .Properties of `<space_id>`
 [%collapsible%open]
 =====
