@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -47,8 +47,15 @@ function SubMetricParamEditor({
 
   const aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
   const aggGroup = type === 'customMetric' ? AggGroupNames.Metrics : AggGroupNames.Buckets;
+  const firstRender = useRef(true);
 
   useEffect(() => {
+    if (!firstRender.current) {
+      return;
+    }
+
+    firstRender.current = false;
+
     if (agg.params[type]) {
       setValue(agg.params[type]);
     } else {

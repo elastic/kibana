@@ -29,7 +29,6 @@ function SubAggParamEditor({
   agg,
   aggParam,
   formIsTouched,
-  value,
   metricAggs,
   state,
   setValue,
@@ -44,7 +43,7 @@ function SubAggParamEditor({
     } else if (!agg.params.customMetric) {
       setValue(aggParam.makeAgg(agg));
     }
-  }, [value, metricAggs, agg, setValue, aggParam]);
+  }, [metricAggs, agg, setValue, aggParam]);
 
   const { onAggTypeChange, setAggParamValue } = useSubAggParamsHandlers(
     agg,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -56,12 +56,14 @@ function OrderByParamEditor({
     defaultMessage: 'Order by',
   });
   const isValid = !!value;
+  const firstRender = useRef(true);
 
   useValidation(setValidity, isValid);
 
   useEffect(() => {
     // setup the initial value of orderBy
-    if (!value) {
+    if (firstRender.current && !value) {
+      firstRender.current = false;
       let respAgg = { id: DEFAULT_VALUE };
 
       if (metricAggs) {

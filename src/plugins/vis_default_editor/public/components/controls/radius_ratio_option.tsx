@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { EuiFormRow, EuiIconTip, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -43,9 +43,11 @@ function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: Agg
       />
     </>
   );
+  const firstRender = useRef(true);
 
   useEffect(() => {
-    if (!editorStateParams.radiusRatio) {
+    if (firstRender.current && !editorStateParams.radiusRatio) {
+      firstRender.current = false;
       setStateParamValue(PARAM_NAME, DEFAULT_VALUE);
     }
   }, [editorStateParams.radiusRatio, setStateParamValue]);
