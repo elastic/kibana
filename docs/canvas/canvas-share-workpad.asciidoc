@@ -10,7 +10,7 @@ When you've finished your workpad, you can share it outside of {kib}.
 
 Create a JSON file of your workpad that you can export outside of {kib}.
 
-. From your workpad, click the *Share workpad* icon in the upper left corner.
+. From your workpad, click the *Share workpad* icon.
 
 . Select *Download as JSON*.
 +
@@ -27,7 +27,7 @@ Create a PDF copy of your workpad that you can save and share outside of {kib}.
 
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
-. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
+. From your workpad, click the *Share workpad* icon, then select *PDF reports*.
 
 . Click *Generate PDF*.
 +
@@ -42,9 +42,13 @@ Create a POST URL that you can use to automatically generate PDF reports using W
 
 For more information, refer to <<automating-report-generation, Automating report generation>>.
 
+<<<<<<< HEAD
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
 . From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
+=======
+. From your workpad, click the *Share workpad* icon, then select *PDF reports*.
+>>>>>>> 809ec97649... [DOCS] Removed references to left (#60807)
 
 . Click *Copy POST URL*.
 +
@@ -57,9 +61,13 @@ image::images/canvas-create-URL.gif[Create POST URL]
 
 beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
+<<<<<<< HEAD
 . If you are using a Gold or Platinum license, enable reporting in your `config/kibana.yml` file.
 
 . From your workpad, click the *Share this workpad* icon in the upper left corner, then select *Share on a website*.
+=======
+. From your workpad, click the *Share this workpad* icon, then select *Share on a website*.
+>>>>>>> 809ec97649... [DOCS] Removed references to left (#60807)
 
 . On the *Share on a website* pane, follow the instructions.
 
