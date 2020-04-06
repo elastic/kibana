@@ -55,6 +55,7 @@ export const signalRulesAlertType = ({
         index,
         filters,
         language,
+        maxSignals,
         meta,
         machineLearningJobId,
         outputIndex,
@@ -63,6 +64,14 @@ export const signalRulesAlertType = ({
         to,
         type,
       } = params;
+      const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+      let hasError: boolean = false;
+      let result: SearchAfterAndBulkCreateReturnType = {
+        success: false,
+        bulkCreateTimes: [],
+        searchAfterTimes: [],
+        lastLookBackDate: null,
+      };
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
         alertId,
@@ -104,16 +113,9 @@ export const signalRulesAlertType = ({
         );
         logger.warn(gapMessage);
 
+        hasError = true;
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
-
-      const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-      let result: SearchAfterAndBulkCreateReturnType = {
-        success: false,
-        bulkCreateTimes: [],
-        searchAfterTimes: [],
-        lastLookBackDate: null,
-      };
 
       try {
         if (isMlRule(type)) {
@@ -126,7 +128,7 @@ export const signalRulesAlertType = ({
                 'Machine learning rule is missing job id and/or anomaly threshold:',
                 `job id: "${machineLearningJobId}"`,
                 `anomaly threshold: "${anomalyThreshold}"`,
-              ].join('\n')
+              ].join(' ')
             );
           }
 
@@ -143,6 +145,7 @@ export const signalRulesAlertType = ({
               `datafeed status: "${jobSummary?.datafeedState}"`
             );
             logger.warn(errorMessage);
+            hasError = true;
             await ruleStatusService.error(errorMessage);
           }
 
@@ -270,11 +273,13 @@ export const signalRulesAlertType = ({
           }
 
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
-          await ruleStatusService.success('succeeded', {
-            bulkCreateTimeDurations: result.bulkCreateTimes,
-            searchAfterTimeDurations: result.searchAfterTimes,
-            lastLookBackDate: result.lastLookBackDate?.toISOString(),
-          });
+          if (!hasError) {
+            await ruleStatusService.success('succeeded', {
+              bulkCreateTimeDurations: result.bulkCreateTimes,
+              searchAfterTimeDurations: result.searchAfterTimes,
+              lastLookBackDate: result.lastLookBackDate?.toISOString(),
+            });
+          }
         } else {
           const errorMessage = buildRuleMessage(
             'Bulk Indexing of signals failed. Check logs for further details.'
