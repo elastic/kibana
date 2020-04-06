@@ -14,6 +14,7 @@ import {
 } from '../../constants';
 import { AgentSOAttributes, Agent, AgentEventSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
+import { escapeSearchQueryPhrase } from '../saved_object';
 
 export async function listAgents(
   soClient: SavedObjectsClientContract,
@@ -72,13 +73,15 @@ export async function getAgentByAccessAPIKeyId(
   const response = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
     searchFields: ['access_api_key_id'],
-    search: accessAPIKeyId,
+    search: escapeSearchQueryPhrase(accessAPIKeyId),
   });
-
   const [agent] = response.saved_objects.map(savedObjectToAgent);
 
   if (!agent) {
     throw Boom.notFound('Agent not found');
+  }
+  if (agent.access_api_key_id !== accessAPIKeyId) {
+    throw new Error('Agent api key id is not matching');
   }
   if (!agent.active) {
     throw Boom.forbidden('Agent inactive');
