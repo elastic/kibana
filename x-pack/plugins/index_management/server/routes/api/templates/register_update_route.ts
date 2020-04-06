@@ -5,8 +5,8 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { Template, TemplateEs } from '../../../../common/types';
-import { serializeTemplate } from '../../../../common/lib';
+import { TemplateDeserialized } from '../../../../common';
+import { serializeV1Template } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
@@ -29,8 +29,16 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params as typeof paramsSchema.type;
       const { include_type_name } = req.query as TypeOf<typeof querySchema>;
-      const template = req.body as Template;
-      const serializedTemplate = serializeTemplate(template) as TemplateEs;
+      const template = req.body as TemplateDeserialized;
+      const {
+        _kbnMeta: { formatVersion },
+      } = template;
+
+      if (formatVersion !== 1) {
+        return res.badRequest({ body: 'Only index template version 1 can be edited.' });
+      }
+
+      const serializedTemplate = serializeV1Template(template);
 
       const { order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
 
