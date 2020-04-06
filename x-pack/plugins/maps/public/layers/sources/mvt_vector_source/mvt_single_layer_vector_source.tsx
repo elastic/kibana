@@ -19,6 +19,7 @@ import { MVT_SINGLE_LAYER } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
+import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
   defaultMessage: 'XYZ Vector Tile Layer',
@@ -77,6 +78,18 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   getFieldByName(fieldName: string) {
     return null;
+  }
+
+  async getImmutableProperties() {
+    return [
+      { label: getDataSourceLabel(), value: sourceTitle },
+      { label: getUrlLabel(), value: this._descriptor.urlTemplate },
+      { label: 'Layer name', value: this._descriptor.layerName },
+    ];
+  }
+
+  getDisplayName(): Promise<string> {
+    return this._descriptor.layerName;
   }
 
   async getUrlTemplateWithMeta(): TiledSingleLayerVectorSourceMeta {
