@@ -14,6 +14,7 @@ import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
 import { registerIndexPatternRoute } from './routes/index_pattern';
 import { registerEndpointRoutes } from './routes/metadata';
+import { IngestIndexPatternRetriever } from './index_pattern';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -65,7 +66,10 @@ export class EndpointPlugin
       },
     });
     const endpointContext = {
-      ingestManager: plugins.ingestManager,
+      indexPatternRetriever: new IngestIndexPatternRetriever(
+        plugins.ingestManager.indexPatternService,
+        this.initializerContext.logger
+      ),
       logFactory: this.initializerContext.logger,
       config: (): Promise<EndpointConfigType> => {
         return createConfig$(this.initializerContext)

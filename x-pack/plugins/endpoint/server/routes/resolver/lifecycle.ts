@@ -11,8 +11,7 @@ import { extractParentEntityID } from './utils/normalize';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ResolverEvent } from '../../../common/types';
 import { EndpointAppConstants } from '../../../common/types';
-import { IndexPatternService } from '../../../../ingest_manager/server';
-import { IngestIndexPatternRetriever } from '../../index_pattern';
+import { IndexPatternRetriever } from '../../index_pattern';
 
 interface LifecycleQueryParams {
   ancestors: number;
@@ -50,7 +49,7 @@ function getParentEntityID(results: ResolverEvent[]) {
 
 export function handleLifecycle(
   log: Logger,
-  indexPatternService: IndexPatternService
+  indexRetriever: IndexPatternRetriever
 ): RequestHandler<LifecyclePathParams, LifecycleQueryParams> {
   return async (context, req, res) => {
     const {
@@ -60,11 +59,9 @@ export function handleLifecycle(
     try {
       const ancestorLifecycles = [];
       const client = context.core.elasticsearch.dataClient;
-      const indexPattern = new IngestIndexPatternRetriever(
-        indexPatternService,
+      const indexPattern = await indexRetriever.get(
         context.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET,
-        log
+        EndpointAppConstants.EVENT_DATASET
       );
       const lifecycleQuery = new LifecycleQuery(indexPattern, legacyEndpointID);
       const { results: processLifecycle } = await lifecycleQuery.search(client, id);

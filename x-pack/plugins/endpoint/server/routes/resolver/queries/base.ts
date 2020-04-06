@@ -11,9 +11,8 @@ import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public
 import { IndexPatternRetriever } from '../../../index_pattern';
 
 export abstract class ResolverQuery {
-  private indexPattern: string | undefined;
   constructor(
-    private readonly indexPatternRetriever: IndexPatternRetriever,
+    private readonly indexPattern: string,
     private readonly endpointID?: string,
     private readonly pagination?: PaginationParams
   ) {}
@@ -25,18 +24,15 @@ export abstract class ResolverQuery {
     return paginate(this.pagination, field, query);
   }
 
-  async build(...ids: string[]) {
+  build(...ids: string[]) {
     if (this.endpointID) {
       return this.legacyQuery(this.endpointID, ids, EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
-    }
-    if (!this.indexPattern) {
-      this.indexPattern = await this.indexPatternRetriever.get();
     }
     return this.query(ids, this.indexPattern);
   }
 
   async search(client: IScopedClusterClient, ...ids: string[]) {
-    return paginatedResults(await client.callAsCurrentUser('search', await this.build(...ids)));
+    return paginatedResults(await client.callAsCurrentUser('search', this.build(...ids)));
   }
 
   protected abstract legacyQuery(

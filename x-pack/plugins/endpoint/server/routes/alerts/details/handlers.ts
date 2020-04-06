@@ -9,7 +9,6 @@ import { AlertEvent, EndpointAppConstants } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
-import { IngestIndexPatternRetriever } from '../../../index_pattern';
 import { getHostData } from '../../metadata';
 
 export const alertDetailsHandlerWrapper = function(
@@ -29,14 +28,11 @@ export const alertDetailsHandlerWrapper = function(
         id: alertId,
       })) as GetResponse<AlertEvent>;
 
-      const indexPatternRetriever = new IngestIndexPatternRetriever(
-        endpointAppContext.ingestManager.indexPatternService,
+      const indexPattern = await endpointAppContext.indexPatternRetriever.get(
         ctx.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET,
-        endpointAppContext.logFactory.get('alerts')
+        EndpointAppConstants.EVENT_DATASET
       );
 
-      const indexPattern = await indexPatternRetriever.get();
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(
         config,

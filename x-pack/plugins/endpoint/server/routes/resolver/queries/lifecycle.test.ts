@@ -5,15 +5,12 @@
  */
 import { EndpointAppConstants } from '../../../../common/types';
 import { LifecycleQuery } from './lifecycle';
-import { FakeIndexPatternRetriever, fakeEventIndexPattern } from './children.test';
+import { fakeEventIndexPattern } from './children.test';
 
 describe('lifecycle query', () => {
   it('generates the correct legacy queries', async () => {
     expect(
-      await new LifecycleQuery(
-        FakeIndexPatternRetriever.buildLegacyIndexPattern(),
-        'awesome-id'
-      ).build('5')
+      new LifecycleQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id').build('5')
     ).toStrictEqual({
       body: {
         query: {
@@ -38,9 +35,7 @@ describe('lifecycle query', () => {
   });
 
   it('generates the correct non-legacy queries', async () => {
-    expect(
-      await new LifecycleQuery(FakeIndexPatternRetriever.buildEventIndexPattern()).build('baz')
-    ).toStrictEqual({
+    expect(new LifecycleQuery(fakeEventIndexPattern).build('baz')).toStrictEqual({
       body: {
         query: {
           bool: {

@@ -11,26 +11,21 @@ import {
   indexPatternGetParamsSchema,
   indexPatternGetQueryParamsSchema,
 } from '../../common/schema/index_pattern';
-import { IndexPatternService } from '../../../ingest_manager/server';
-import { IngestIndexPatternRetriever } from '../index_pattern';
+import { IndexPatternRetriever } from '../index_pattern';
 
 function handleIndexPattern(
   log: Logger,
-  indexPatternService: IndexPatternService
+  indexRetriever: IndexPatternRetriever
 ): RequestHandler<IndexPatternGetParamsResult, IndexPatternGetQueryParamsResult> {
   return async (context, req, res) => {
     try {
-      const indexPattern = new IngestIndexPatternRetriever(
-        indexPatternService,
-        context.core.savedObjects.client,
-        req.params.datasetPath,
-        log,
-        req.query.version
-      );
-
       return res.ok({
         body: {
-          indexPattern: await indexPattern.get(),
+          indexPattern: await indexRetriever.get(
+            context.core.savedObjects.client,
+            req.params.datasetPath,
+            req.query.version
+          ),
         },
       });
     } catch (error) {
@@ -42,7 +37,6 @@ function handleIndexPattern(
 
 export function registerIndexPatternRoute(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('index_pattern');
-  const indexPatternService = endpointAppContext.ingestManager.indexPatternService;
 
   router.get(
     {
@@ -50,6 +44,6 @@ export function registerIndexPatternRoute(router: IRouter, endpointAppContext: E
       validate: { params: indexPatternGetParamsSchema, query: indexPatternGetQueryParamsSchema },
       options: { authRequired: true },
     },
-    handleIndexPattern(log, indexPatternService)
+    handleIndexPattern(log, endpointAppContext.indexPatternRetriever)
   );
 }

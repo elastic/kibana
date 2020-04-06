@@ -8,7 +8,6 @@ import { EndpointAppContext } from '../../../types';
 import { searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
 import { AlertingIndexGetQueryResult, EndpointAppConstants } from '../../../../common/types';
-import { IngestIndexPatternRetriever } from '../../../index_pattern';
 
 export const alertListHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -19,17 +18,15 @@ export const alertListHandlerWrapper = function(
     res
   ) => {
     try {
-      const indexPattern = new IngestIndexPatternRetriever(
-        endpointAppContext.ingestManager.indexPatternService,
+      const indexPattern = await endpointAppContext.indexPatternRetriever.get(
         ctx.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET,
-        endpointAppContext.logFactory.get('alerts')
+        EndpointAppConstants.EVENT_DATASET
       );
       const reqData = await getRequestData(req, endpointAppContext);
       const response = await searchESForAlerts(
         ctx.core.elasticsearch.dataClient,
         reqData,
-        await indexPattern.get()
+        indexPattern
       );
       const mappedBody = await mapToAlertResultList(ctx, endpointAppContext, reqData, response);
       return res.ok({ body: mappedBody });

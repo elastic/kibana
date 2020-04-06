@@ -7,29 +7,13 @@ import { ChildrenQuery } from './children';
 import { EndpointAppConstants } from '../../../../common/types';
 import { IndexPatternRetriever } from '../../../index_pattern';
 
-export class FakeIndexPatternRetriever implements IndexPatternRetriever {
-  constructor(private readonly indexPattern: string) {}
-
-  static buildEventIndexPattern() {
-    return new FakeIndexPatternRetriever(fakeEventIndexPattern);
-  }
-
-  static buildLegacyIndexPattern() {
-    return new FakeIndexPatternRetriever(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
-  }
-
-  async get() {
-    return this.indexPattern;
-  }
-}
-
 export const fakeEventIndexPattern = 'events-endpoint-*';
 
 describe('children events query', () => {
   it('generates the correct legacy queries', async () => {
     const timestamp = new Date().getTime();
     expect(
-      await new ChildrenQuery(FakeIndexPatternRetriever.buildLegacyIndexPattern(), 'awesome-id', {
+      await new ChildrenQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id', {
         size: 1,
         timestamp,
         eventID: 'foo',
@@ -73,7 +57,7 @@ describe('children events query', () => {
     const timestamp = new Date().getTime();
 
     expect(
-      await new ChildrenQuery(FakeIndexPatternRetriever.buildEventIndexPattern(), undefined, {
+      await new ChildrenQuery(fakeEventIndexPattern, undefined, {
         size: 1,
         timestamp,
         eventID: 'bar',

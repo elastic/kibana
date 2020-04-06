@@ -6,27 +6,7 @@
 import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { EndpointConfigSchema } from '../../config';
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
-import { IndexPatternService } from '../../../../ingest_manager/server';
-import { SavedObjectsClientContract } from 'kibana/server';
-
-export const MetadataIndexPattern = 'metadata-endpoint-*';
-
-export class FakeIndexPatternService implements IndexPatternService {
-  constructor(private readonly indexPattern: string) {}
-
-  static buildMetadataService() {
-    return new FakeIndexPatternService(MetadataIndexPattern);
-  }
-
-  async get(
-    savedObjectsClient: SavedObjectsClientContract,
-    pkgName: string,
-    datasetPath: string,
-    version?: string
-  ): Promise<string | undefined> {
-    return this.indexPattern;
-  }
-}
+import { MetadataIndexPattern, FakeIndexPatternRetriever } from '../../plugin.test';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -37,7 +17,7 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          ingestManager: { indexPatternService: FakeIndexPatternService.buildMetadataService() },
+          indexPatternRetriever: FakeIndexPatternRetriever.buildMetadata(),
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },
@@ -88,7 +68,7 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          ingestManager: { indexPatternService: FakeIndexPatternService.buildMetadataService() },
+          indexPatternRetriever: FakeIndexPatternRetriever.buildMetadata(),
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },

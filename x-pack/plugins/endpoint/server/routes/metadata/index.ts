@@ -53,16 +53,14 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const indexPattern = new IngestIndexPatternRetriever(
-          endpointAppContext.ingestManager.indexPatternService,
+        const index = await endpointAppContext.indexPatternRetriever.get(
           context.core.savedObjects.client,
-          EndpointAppConstants.METADATA_DATASET,
-          log
+          EndpointAppConstants.METADATA_DATASET
         );
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
-          await indexPattern.get()
+          index
         );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
@@ -85,13 +83,12 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const indexPattern = new IngestIndexPatternRetriever(
-          endpointAppContext.ingestManager.indexPatternService,
+        const index = await endpointAppContext.indexPatternRetriever.get(
           context.core.savedObjects.client,
-          EndpointAppConstants.METADATA_DATASET,
-          log
+          EndpointAppConstants.METADATA_DATASET
         );
-        const doc = await getHostData(context, req.params.id, await indexPattern.get());
+
+        const doc = await getHostData(context, req.params.id, index);
         if (doc) {
           return res.ok({ body: doc });
         }

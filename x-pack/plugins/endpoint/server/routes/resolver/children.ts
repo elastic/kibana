@@ -12,8 +12,7 @@ import { getPaginationParams } from './utils/pagination';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ChildrenQuery } from './queries/children';
 import { EndpointAppConstants } from '../../../common/types';
-import { IndexPatternService } from '../../../../ingest_manager/server';
-import { IngestIndexPatternRetriever } from '../../index_pattern';
+import { IndexPatternRetriever } from '../../index_pattern';
 
 interface ChildrenQueryParams {
   after?: string;
@@ -49,7 +48,7 @@ export const validateChildren = {
 
 export function handleChildren(
   log: Logger,
-  indexPatternService: IndexPatternService
+  indexRetriever: IndexPatternRetriever
 ): RequestHandler<ChildrenPathParams, ChildrenQueryParams> {
   return async (context, req, res) => {
     const {
@@ -58,11 +57,9 @@ export function handleChildren(
     } = req;
     try {
       const pagination = getPaginationParams(limit, after);
-      const indexPattern = new IngestIndexPatternRetriever(
-        indexPatternService,
+      const indexPattern = await indexRetriever.get(
         context.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET,
-        log
+        EndpointAppConstants.EVENT_DATASET
       );
 
       const client = context.core.elasticsearch.dataClient;
