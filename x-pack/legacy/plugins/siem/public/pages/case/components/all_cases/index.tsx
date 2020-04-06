@@ -254,11 +254,11 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
   const onFilterChangedCallback = useCallback(
     (newFilterOptions: Partial<FilterOptions>) => {
       if (newFilterOptions.status && newFilterOptions.status === 'closed') {
-        setQueryParams({ ...queryParams, sortField: SortFieldCase.closedAt });
+        setQueryParams({ sortField: SortFieldCase.closedAt });
       } else if (newFilterOptions.status && newFilterOptions.status === 'open') {
-        setQueryParams({ ...queryParams, sortField: SortFieldCase.createdAt });
+        setQueryParams({ sortField: SortFieldCase.createdAt });
       }
-      setFilters({ ...filterOptions, ...newFilterOptions });
+      setFilters(newFilterOptions);
     },
     [filterOptions, queryParams]
   );
