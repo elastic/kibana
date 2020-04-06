@@ -115,13 +115,16 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
     async forceLogout(isSaml) {
       log.debug('SecurityPage.forceLogout');
-      const url = PageObjects.common.getHostPort() + '/logout';
-      await browser.get(url);
-      log.debug('Waiting on the login form to appear');
+      const logOutUrl = PageObjects.common.getHostPort() + '/logout';
+      log.debug('### Redirecting to /logout to force the logout');
+      await browser.get(logOutUrl);
       await this.waitForLoginForm(isSaml);
     }
 
     async waitForLoginForm(isSaml) {
+      log.debug(`### isSaml: ${isSaml}`);
+      log.debug('Waiting on the login form to appear');
+      // Tre': I wonder if the following wait, looking for login form is correct, when it is saml?  We shall see :)
       await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
         const alert = await browser.getAlert();
         if (alert && alert.accept) {
