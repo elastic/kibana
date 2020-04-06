@@ -61,3 +61,4 @@ export class IndexPatternManagementService {
 
 /** @internal */
 export type IndexPatternManagementServiceSetup = ReturnType<IndexPatternManagementService['setup']>;
+export type IndexPatternManagementServiceStart = ReturnType<IndexPatternManagementService['start']>;

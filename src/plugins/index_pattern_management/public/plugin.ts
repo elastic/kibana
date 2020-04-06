@@ -17,7 +17,11 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IndexPatternManagementService, IndexPatternManagementServiceSetup } from './service';
+import {
+  IndexPatternManagementService,
+  IndexPatternManagementServiceSetup,
+  IndexPatternManagementServiceStart,
+} from './service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IndexPatternManagementSetupDependencies {}
@@ -27,8 +31,7 @@ export interface IndexPatternManagementStartDependencies {}
 
 export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IndexPatternManagementStart {}
+export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
 
 export class IndexPatternManagementPlugin
   implements
@@ -47,7 +50,7 @@ export class IndexPatternManagementPlugin
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
-    return {};
+    return this.indexPattern.start();
   }
 
   public stop() {

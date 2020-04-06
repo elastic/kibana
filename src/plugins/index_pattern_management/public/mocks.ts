@@ -28,18 +28,23 @@ import {
 const createSetupContract = (): IndexPatternManagementSetup => ({
   creation: {
     addCreationConfig: jest.fn(),
+  } as any,
+  list: {
+    addListConfig: jest.fn(),
+  } as any,
+});
+
+const createStartContract = (): IndexPatternManagementStart => ({
+  creation: {
     getType: jest.fn(),
     getIndexPatternCreationOptions: jest.fn(),
   } as any,
   list: {
-    addListConfig: jest.fn(),
     getIndexPatternTags: jest.fn(),
     getFieldInfo: jest.fn(),
     areScriptedFieldsEnabled: jest.fn(),
   } as any,
 });
-
-const createStartContract = (): IndexPatternManagementStart => ({});
 
 const createInstance = async () => {
   const plugin = new IndexPatternManagementPlugin({} as PluginInitializerContext);
