@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
 import { FromToList, FromToObject } from './components/from_to_list';
@@ -38,12 +38,22 @@ function IpRangesParamEditor({
   setValidity,
   showValidation,
 }: AggParamEditorProps<IpRange>) {
-  const handleChange = (modelName: IpRangeTypes, items: Array<FromToObject | MaskObject>) => {
-    setValue({
-      ...value,
-      [modelName]: items,
-    });
-  };
+  const handleMaskListChange = useCallback(
+    (items: MaskObject[]) =>
+      setValue({
+        ...value,
+        [IpRangeTypes.MASK]: items,
+      }),
+    [setValue, value]
+  );
+  const handleFromToListChange = useCallback(
+    (items: FromToObject[]) =>
+      setValue({
+        ...value,
+        [IpRangeTypes.FROM_TO]: items,
+      }),
+    [setValue, value]
+  );
 
   return (
     <EuiFormRow fullWidth={true} id={`visEditorIpRange${agg.id}`} compressed>
@@ -52,7 +62,7 @@ function IpRangesParamEditor({
           list={value.mask}
           showValidation={showValidation}
           onBlur={setTouched}
-          onChange={items => handleChange(IpRangeTypes.MASK, items)}
+          onChange={handleMaskListChange}
           setValidity={setValidity}
         />
       ) : (
@@ -60,7 +70,7 @@ function IpRangesParamEditor({
           list={value.fromTo}
           showValidation={showValidation}
           onBlur={setTouched}
-          onChange={items => handleChange(IpRangeTypes.FROM_TO, items)}
+          onChange={handleFromToListChange}
           setValidity={setValidity}
         />
       )}

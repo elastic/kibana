@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -44,38 +44,42 @@ interface FromToListProps {
   setValidity(isValid: boolean): void;
 }
 
-function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
-  const fromToListConfig: InputListConfig = {
-    defaultValue: {
-      from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
-      to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
+const defaultConfig = {
+  defaultValue: {
+    from: { value: '0.0.0.0', model: '0.0.0.0', isInvalid: false },
+    to: { value: '255.255.255.255', model: '255.255.255.255', isInvalid: false },
+  },
+  validateClass: Ipv4Address,
+  getModelValue: (item: FromToObject = {}) => ({
+    from: {
+      value: item.from || EMPTY_STRING,
+      model: item.from || EMPTY_STRING,
+      isInvalid: false,
     },
-    validateClass: Ipv4Address,
-    getModelValue: (item: FromToObject = {}) => ({
-      from: {
-        value: item.from || EMPTY_STRING,
-        model: item.from || EMPTY_STRING,
-        isInvalid: false,
-      },
-      to: { value: item.to || EMPTY_STRING, model: item.to || EMPTY_STRING, isInvalid: false },
+    to: { value: item.to || EMPTY_STRING, model: item.to || EMPTY_STRING, isInvalid: false },
+  }),
+  getRemoveBtnAriaLabel: (item: FromToModel) =>
+    i18n.translate('visDefaultEditor.controls.ipRanges.removeRangeAriaLabel', {
+      defaultMessage: 'Remove the range of {from} to {to}',
+      values: { from: item.from.value || '*', to: item.to.value || '*' },
     }),
-    getRemoveBtnAriaLabel: (item: FromToModel) =>
-      i18n.translate('visDefaultEditor.controls.ipRanges.removeRangeAriaLabel', {
-        defaultMessage: 'Remove the range of {from} to {to}',
-        values: { from: item.from.value || '*', to: item.to.value || '*' },
-      }),
-    onChangeFn: ({ from, to }: FromToModel) => {
-      const result: FromToObject = {};
-      if (from.model) {
-        result.from = from.model;
-      }
-      if (to.model) {
-        result.to = to.model;
-      }
-      return result;
-    },
-    hasInvalidValuesFn: ({ from, to }: FromToModel) => from.isInvalid || to.isInvalid,
-    renderInputRow: (item: FromToModel, index, onChangeValue) => (
+  onChangeFn: ({ from, to }: FromToModel) => {
+    const result: FromToObject = {};
+    if (from.model) {
+      result.from = from.model;
+    }
+    if (to.model) {
+      result.to = to.model;
+    }
+    return result;
+  },
+  hasInvalidValuesFn: ({ from, to }: FromToModel) => from.isInvalid || to.isInvalid,
+  modelNames: ['from', 'to'],
+};
+
+function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
+  const renderInputRow = useCallback(
+    (item: FromToModel, index, onChangeValue) => (
       <>
         <EuiFlexItem>
           <EuiFieldText
@@ -114,7 +118,11 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
         </EuiFlexItem>
       </>
     ),
-    modelNames: ['from', 'to'],
+    [onBlur, showValidation]
+  );
+  const fromToListConfig: InputListConfig = {
+    ...defaultConfig,
+    renderInputRow,
   };
 
   return <InputList config={fromToListConfig} {...rest} />;

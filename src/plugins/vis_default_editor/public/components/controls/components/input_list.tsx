@@ -70,7 +70,10 @@ interface InputListProps {
 }
 
 const generateId = htmlIdGenerator();
-const validateValue = (inputValue: string | undefined, config: InputListConfig) => {
+const validateValue = (
+  inputValue: string | undefined,
+  InputObject: InputListConfig['validateClass']
+) => {
   const result = {
     model: inputValue || '',
     isInvalid: false,
@@ -80,7 +83,6 @@ const validateValue = (inputValue: string | undefined, config: InputListConfig) 
     return result;
   }
   try {
-    const InputObject = config.validateClass;
     result.model = new InputObject(inputValue).toString();
     result.isInvalid = false;
     return result;
@@ -91,12 +93,13 @@ const validateValue = (inputValue: string | undefined, config: InputListConfig) 
 };
 
 function InputList({ config, list, onChange, setValidity }: InputListProps) {
+  const { defaultValue, getModelValue, modelNames, onChangeFn, validateClass } = config;
   const [models, setModels] = useState(() =>
     list.map(
       item =>
         ({
           id: generateId(),
-          ...config.getModelValue(item),
+          ...getModelValue(item),
         } as InputModel)
     )
   );
@@ -105,36 +108,45 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
   const updateValues = useCallback(
     (modelList: InputModel[]) => {
       setModels(modelList);
-      onChange(modelList.map(config.onChangeFn));
+      onChange(modelList.map(onChangeFn));
     },
-    [config.onChangeFn, onChange]
+    [onChangeFn, onChange]
   );
-  const onChangeValue = (index: number, value: string, modelName: string) => {
-    const { model, isInvalid } = validateValue(value, config);
-    updateValues(
-      models.map((range, arrayIndex) =>
-        arrayIndex === index
-          ? {
-              ...range,
-              [modelName]: {
-                value,
-                model,
-                isInvalid,
-              },
-            }
-          : range
-      )
-    );
-  };
-  const onDelete = (id: string) => updateValues(models.filter(model => model.id !== id));
-  const onAdd = () =>
-    updateValues([
-      ...models,
-      {
-        id: generateId(),
-        ...config.getModelValue(),
-      } as InputModel,
-    ]);
+  const onChangeValue = useCallback(
+    (index: number, value: string, modelName: string) => {
+      const { model, isInvalid } = validateValue(value, validateClass);
+      updateValues(
+        models.map((range, arrayIndex) =>
+          arrayIndex === index
+            ? {
+                ...range,
+                [modelName]: {
+                  value,
+                  model,
+                  isInvalid,
+                },
+              }
+            : range
+        )
+      );
+    },
+    [models, updateValues, validateClass]
+  );
+  const onDelete = useCallback(
+    (id: string) => updateValues(models.filter(model => model.id !== id)),
+    [models, updateValues]
+  );
+  const onAdd = useCallback(
+    () =>
+      updateValues([
+        ...models,
+        {
+          id: generateId(),
+          ...getModelValue(),
+        } as InputModel,
+      ]),
+    [getModelValue, models, updateValues]
+  );
 
   useEffect(() => {
     // resposible for setting up an initial value when there is no default value
@@ -142,11 +154,11 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
       updateValues([
         {
           id: generateId(),
-          ...config.defaultValue,
+          ...defaultValue,
         } as InputModel,
       ]);
     }
-  }, [config.defaultValue, list.length, updateValues]);
+  }, [defaultValue, list.length, updateValues]);
 
   useEffect(() => {
     setValidity(!hasInvalidValues);
@@ -158,7 +170,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
       list.length !== models.length ||
       list.some((item, index) => {
         // make model to be the same shape as stored value
-        const model: InputObject = mapValues(pick(models[index], config.modelNames), 'model');
+        const model: InputObject = mapValues(pick(models[index], modelNames), 'model');
 
         // we need to skip empty values since they are not stored in saved object
         return !isEqual(item, omit(model, isEmpty));
@@ -169,12 +181,12 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
           item =>
             ({
               id: generateId(),
-              ...config.getModelValue(item),
+              ...getModelValue(item),
             } as InputModel)
         )
       );
     }
-  }, [config, list, models]);
+  }, [getModelValue, list, modelNames, models]);
 
   return (
     <>

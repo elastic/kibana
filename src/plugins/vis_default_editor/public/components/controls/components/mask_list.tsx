@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -42,36 +42,40 @@ interface MaskListProps {
   setValidity(isValid: boolean): void;
 }
 
+const defaultConfig = {
+  defaultValue: {
+    mask: { model: '0.0.0.0/1', value: '0.0.0.0/1', isInvalid: false },
+  },
+  validateClass: search.aggs.CidrMask,
+  getModelValue: (item: MaskObject = {}) => ({
+    mask: {
+      model: item.mask || EMPTY_STRING,
+      value: item.mask || EMPTY_STRING,
+      isInvalid: false,
+    },
+  }),
+  getRemoveBtnAriaLabel: (item: MaskModel) =>
+    item.mask.value
+      ? i18n.translate('visDefaultEditor.controls.ipRanges.removeCidrMaskButtonAriaLabel', {
+          defaultMessage: 'Remove the CIDR mask value of {mask}',
+          values: { mask: item.mask.value },
+        })
+      : i18n.translate('visDefaultEditor.controls.ipRanges.removeEmptyCidrMaskButtonAriaLabel', {
+          defaultMessage: 'Remove the CIDR mask default value',
+        }),
+  onChangeFn: ({ mask }: MaskModel) => {
+    if (mask.model) {
+      return { mask: mask.model };
+    }
+    return {};
+  },
+  hasInvalidValuesFn: ({ mask }: MaskModel) => mask.isInvalid,
+  modelNames: 'mask',
+};
+
 function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
-  const maskListConfig: InputListConfig = {
-    defaultValue: {
-      mask: { model: '0.0.0.0/1', value: '0.0.0.0/1', isInvalid: false },
-    },
-    validateClass: search.aggs.CidrMask,
-    getModelValue: (item: MaskObject = {}) => ({
-      mask: {
-        model: item.mask || EMPTY_STRING,
-        value: item.mask || EMPTY_STRING,
-        isInvalid: false,
-      },
-    }),
-    getRemoveBtnAriaLabel: (item: MaskModel) =>
-      item.mask.value
-        ? i18n.translate('visDefaultEditor.controls.ipRanges.removeCidrMaskButtonAriaLabel', {
-            defaultMessage: 'Remove the CIDR mask value of {mask}',
-            values: { mask: item.mask.value },
-          })
-        : i18n.translate('visDefaultEditor.controls.ipRanges.removeEmptyCidrMaskButtonAriaLabel', {
-            defaultMessage: 'Remove the CIDR mask default value',
-          }),
-    onChangeFn: ({ mask }: MaskModel) => {
-      if (mask.model) {
-        return { mask: mask.model };
-      }
-      return {};
-    },
-    hasInvalidValuesFn: ({ mask }) => mask.isInvalid,
-    renderInputRow: ({ mask }: MaskModel, index, onChangeValue) => (
+  const renderInputRow = useCallback(
+    ({ mask }: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText
           aria-label={i18n.translate('visDefaultEditor.controls.ipRanges.cidrMaskAriaLabel', {
@@ -90,7 +94,11 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
         />
       </EuiFlexItem>
     ),
-    modelNames: 'mask',
+    [onBlur, showValidation]
+  );
+  const maskListConfig: InputListConfig = {
+    ...defaultConfig,
+    renderInputRow,
   };
 
   return <InputList config={maskListConfig} {...rest} />;
