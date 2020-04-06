@@ -20,8 +20,10 @@ jest.mock('ui/new_platform');
 
 const { npStart } = createUiNewPlatformMock();
 npStart.plugins.embeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
-  createFromState: () => ({
+  create: () => ({
     reload: jest.fn(),
+    setRenderTooltipContent: jest.fn(),
+    setLayerList: jest.fn(),
   }),
 }));
 

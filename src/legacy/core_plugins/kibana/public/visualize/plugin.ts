@@ -89,7 +89,7 @@ export class VisualizePlugin implements Plugin {
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/visualize',
-      storageKey: 'lastUrl:visualize',
+      storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
@@ -156,6 +156,7 @@ export class VisualizePlugin implements Plugin {
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           DefaultVisualizationEditor: DefaultEditorController,
+          createVisEmbeddableFromObject: visualizations.__LEGACY.createVisEmbeddableFromObject,
         };
         setServices(deps);
 

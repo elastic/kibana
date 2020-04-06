@@ -117,7 +117,7 @@ function augmentMappings(mappings, multiValuedProperties) {
     const fullProp = replaceDotWithProperties(prop);
     const metaPropName = `${fullProp}.meta`;
     const meta = lodash.get(mappings.properties, metaPropName) || {};
-    meta.isArray = true;
+    meta.isArray = 'true';
     lodash.set(mappings.properties, metaPropName, meta);
   }
 }
@@ -127,7 +127,7 @@ function generateSchemaLines(lineWriter, prop, mappings) {
   if (mappings == null) return;
 
   if (StringTypes.has(mappings.type)) {
-    if (mappings.meta && mappings.meta.isArray) {
+    if (mappings.meta && mappings.meta.isArray === 'true') {
       lineWriter.addLine(`${propKey}: ecsStringMulti(),`);
     } else {
       lineWriter.addLine(`${propKey}: ecsString(),`);
