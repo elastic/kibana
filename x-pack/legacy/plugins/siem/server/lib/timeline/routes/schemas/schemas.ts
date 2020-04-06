@@ -139,9 +139,9 @@ export const kqlQuery = Joi.object({
     kuery: Joi.object({
       kind: allowEmptyString,
       expression: allowEmptyString,
-    }),
+    }).allow(null),
     serializedQuery: allowEmptyString,
-  }),
+  }).allow(null),
 });
 export const pinnedEventIds = Joi.array()
   .items(allowEmptyString)

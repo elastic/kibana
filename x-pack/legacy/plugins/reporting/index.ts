@@ -12,9 +12,7 @@ import { config as reportingConfig } from './config';
 import { legacyInit } from './server/legacy';
 import { ReportingPluginSpecOptions } from './types';
 
-const kbToBase64Length = (kb: number) => {
-  return Math.floor((kb * 1024 * 8) / 6);
-};
+const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 
 export const reporting = (kibana: any) => {
   return new kibana.Plugin({
