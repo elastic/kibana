@@ -17,6 +17,7 @@ import {
   IEmbeddable,
   defaultEmbeddableFactoryProvider,
 } from '../../../../src/plugins/embeddable/public';
+import { EnhancedEmbeddable } from './types';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
@@ -39,6 +40,18 @@ export class EmbeddableEnhancedPlugin
   constructor(protected readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
+    this.setCustomEmbeddableFactoryProvider(plugins);
+
+    return {};
+  }
+
+  public start(core: CoreStart, plugins: StartDependencies): StartContract {
+    return {};
+  }
+
+  public stop() {}
+
+  private setCustomEmbeddableFactoryProvider(plugins: SetupDependencies) {
     plugins.embeddable.setCustomEmbeddableFactoryProvider(
       <
         I extends EmbeddableInput = EmbeddableInput,
@@ -55,22 +68,29 @@ export class EmbeddableEnhancedPlugin
           ...factory,
           create: async (...args) => {
             const embeddable = await factory.create(...args);
-            return embeddable;
+            if (!embeddable) return embeddable;
+            return this.enhanceEmbeddableWithDynamicActions(embeddable);
           },
           createFromSavedObject: async (...args) => {
             const embeddable = await factory.createFromSavedObject(...args);
-            return embeddable;
+            if (!embeddable) return embeddable;
+            return this.enhanceEmbeddableWithDynamicActions(embeddable);
           },
         };
       }
     );
-
-    return {};
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): StartContract {
-    return {};
-  }
+  private enhanceEmbeddableWithDynamicActions<E extends IEmbeddable>(
+    embeddable: E
+  ): EnhancedEmbeddable<E> {
+    const enhancedEmbeddable = embeddable as EnhancedEmbeddable<E>;
 
-  public stop() {}
+    enhancedEmbeddable.enhancements = {
+      ...enhancedEmbeddable.enhancements,
+      dynamicActions: {} as any,
+    };
+
+    return enhancedEmbeddable;
+  }
 }

@@ -92,6 +92,11 @@ export interface IEmbeddable<
   readonly runtimeId?: number;
 
   /**
+   * Extra abilities added to Embeddable by `*_enhanced` plugins.
+   */
+  enhancements?: object;
+
+  /**
    * Default implementation of dynamic action API for embeddables.
    */
   dynamicActions?: UiActionsDynamicActionManager;
