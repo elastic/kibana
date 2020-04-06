@@ -5,7 +5,8 @@
  */
 
 import { get, snakeCase } from 'lodash';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { APICaller } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_USAGE_TYPE, KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 
 const TYPES = [
@@ -20,11 +21,15 @@ const TYPES = [
 /**
  * Fetches saved object counts by querying the .kibana index
  */
-export function getKibanaUsageCollector(usageCollection: any, kibanaIndex: string) {
+export function getKibanaUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  kibanaIndex: string
+) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_USAGE_TYPE,
+    onlyForCollectionName: 'monitoring',
     isReady: () => true,
-    async fetch(callCluster: CallCluster) {
+    async fetch(callCluster: APICaller) {
       const savedObjectCountSearchParams = {
         index: kibanaIndex,
         ignoreUnavailable: true,

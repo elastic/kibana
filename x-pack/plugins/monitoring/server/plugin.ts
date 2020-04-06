@@ -120,7 +120,8 @@ export class Plugin {
       instanceUuid: core.uuid.getInstanceUuid(),
       esDataClient: core.elasticsearch.dataClient,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
-        KIBANA_STATS_TYPE_MONITORING
+        KIBANA_STATS_TYPE_MONITORING,
+        'monitoring'
       ),
     };
 

@@ -68,7 +68,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster as any);
+      const result = await collectors.bulkFetch(mockCallCluster as any, 'test');
       expect(loggerSpies.debug).toHaveBeenCalledTimes(1);
       expect(loggerSpies.debug).toHaveBeenCalledWith(
         'Fetching data from MY_TEST_COLLECTOR collector'
@@ -93,7 +93,7 @@ describe('CollectorSet', () => {
 
       let result;
       try {
-        result = await collectors.bulkFetch(mockCallCluster as any);
+        result = await collectors.bulkFetch(mockCallCluster as any, 'test');
       } catch (err) {
         // Do nothing
       }
@@ -111,7 +111,7 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster as any);
+      const result = await collectors.bulkFetch(mockCallCluster as any, 'test');
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -129,7 +129,7 @@ describe('CollectorSet', () => {
         } as any)
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster as any);
+      const result = await collectors.bulkFetch(mockCallCluster as any, 'test');
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
@@ -152,11 +152,88 @@ describe('CollectorSet', () => {
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster as any);
+      const result = await collectors.bulkFetch(mockCallCluster as any, 'test');
       expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
           result: { test: 1 }, // It matches the return of `fetch`. `formatForBulkUpload` is used later on
+        },
+      ]);
+    });
+
+    it('should not return anything because the registered collector is for another collection', async () => {
+      const collectors = new CollectorSet({ logger });
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          onlyForCollectionName: 'other-collection',
+          fetch: () => ({ test: 1 }),
+          isReady: () => true,
+        })
+      );
+
+      const result = await collectors.bulkFetch(mockCallCluster as any, 'test');
+      expect(result).toStrictEqual([]);
+    });
+
+    it('should return the default collector', async () => {
+      const collectors = new CollectorSet({ logger });
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          onlyForCollectionName: 'other-collection',
+          fetch: () => ({ test: 1 }),
+          isReady: () => true,
+        })
+      );
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => ({ test: 2 }),
+          isReady: () => true,
+        })
+      );
+
+      const result = await collectors.bulkFetch(mockCallCluster as any, 'test');
+      expect(result).toStrictEqual([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { test: 2 },
+        },
+      ]);
+    });
+
+    it('should return the collector for the matching collection name', async () => {
+      const collectors = new CollectorSet({ logger });
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          onlyForCollectionName: 'other-collection',
+          fetch: () => ({ test: 1 }),
+          isReady: () => true,
+        })
+      );
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => ({ test: 2 }),
+          isReady: () => true,
+        })
+      );
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          onlyForCollectionName: 'test',
+          fetch: () => ({ test: 3 }),
+          isReady: () => true,
+        })
+      );
+
+      const result = await collectors.bulkFetch(mockCallCluster as any, 'test');
+      expect(result).toStrictEqual([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { test: 3 },
         },
       ]);
     });

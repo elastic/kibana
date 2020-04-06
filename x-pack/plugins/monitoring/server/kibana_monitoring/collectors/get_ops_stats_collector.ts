@@ -40,6 +40,7 @@ export function getOpsStatsCollector(
 
   return usageCollection.makeStatsCollector({
     type: KIBANA_STATS_TYPE_MONITORING,
+    onlyForCollectionName: 'monitoring',
     isReady: () => !!lastMetrics,
     fetch: () => lastMetrics,
   });

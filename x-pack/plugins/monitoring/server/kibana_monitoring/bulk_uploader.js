@@ -149,7 +149,7 @@ export class BulkUploader {
       return;
     }
 
-    const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
+    const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser, 'monitoring');
     const payload = this.toBulkUploadFormat(compact(data), usageCollection);
     if (payload) {
       try {
@@ -251,7 +251,7 @@ export class BulkUploader {
     // its formatter, organizing it per-type
     const typesNested = rawData.reduce((accum, { type, result }) => {
       const { type: uploadType, payload: uploadData } = usageCollection
-        .getCollectorByType(type)
+        .getCollectorByType(type, 'monitoring')
         .formatForBulkUpload(result);
       return defaultsDeep(accum, { [uploadType]: uploadData });
     }, {});

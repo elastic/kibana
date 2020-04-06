@@ -274,7 +274,10 @@ async function getLiveKibanaInstance(usageCollection) {
   if (!usageCollection) {
     return null;
   }
-  const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE_MONITORING);
+  const kibanaStatsCollector = usageCollection.getCollectorByType(
+    KIBANA_STATS_TYPE_MONITORING,
+    'monitoring'
+  );
   if (!(await kibanaStatsCollector.isReady())) {
     return null;
   }

@@ -63,8 +63,18 @@ export class CollectorSet {
     }
   };
 
-  public getCollectorByType = (type: string) => {
-    return this.collectors.find(c => c.type === type);
+  public getCollectorByType = (type: string, forCollectionName?: string) => {
+    // Try to find the collector linked to the collection name first
+    if (forCollectionName) {
+      const collector = this.collectors.find(
+        c => c.type === type && c.onlyForCollectionName === forCollectionName
+      );
+      if (collector) return collector;
+    }
+    // Try to find the collector not linked in exclusivity to any collector
+    return this.collectors.find(
+      c => c.type === type && typeof c.onlyForCollectionName === 'undefined'
+    );
   };
 
   public isUsageCollector = (x: UsageCollector | any): x is UsageCollector => {
@@ -112,10 +122,14 @@ export class CollectorSet {
 
   public bulkFetch = async (
     callCluster: APICaller,
+    collectionName: string,
     collectors: Array<Collector<any, any>> = this.collectors
   ) => {
+    const filteredCollectors = collectors.filter(collector => {
+      return !collector.onlyForCollectionName || collector.onlyForCollectionName === collectionName;
+    });
     const responses = [];
-    for (const collector of collectors) {
+    for (const collector of filteredCollectors) {
       this.logger.debug(`Fetching data from ${collector.type} collector`);
       try {
         responses.push({
@@ -139,9 +153,9 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: APICaller) => {
+  public bulkFetchUsage = async (callCluster: APICaller, collectionName: string) => {
     const usageCollectors = this.getFilteredCollectorSet(c => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, usageCollectors.collectors);
+    return await this.bulkFetch(callCluster, collectionName, usageCollectors.collectors);
   };
 
   // convert an array of fetched stats results into key/object
