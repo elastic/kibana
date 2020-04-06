@@ -97,10 +97,19 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
             '{{regularBundlePath}}/commons.bundle.js',
           ],
           urls: [
-            '{{regularBundlePath}}/{{appId}}.bundle.js',
-            {{#each styleSheetPaths}}
-              '{{this}}',
-            {{/each}}
+            {
+              deps: [
+                '{{regularBundlePath}}/plugin/data/data.plugin.js',
+                '{{regularBundlePath}}/plugin/kibanaUtils/kibanaUtils.plugin.js',
+                '{{regularBundlePath}}/plugin/kibanaReact/kibanaReact.plugin.js',
+              ],
+              urls: [
+                '{{regularBundlePath}}/{{appId}}.bundle.js',
+                {{#each styleSheetPaths}}
+                  '{{this}}',
+                {{/each}}
+              ]
+            }
           ]
         }
       ]
