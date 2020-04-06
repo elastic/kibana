@@ -18,7 +18,6 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
