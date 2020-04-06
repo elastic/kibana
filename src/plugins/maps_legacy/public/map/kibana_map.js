@@ -116,7 +116,7 @@ export class KibanaMap extends EventEmitter {
     this._layers = [];
     this._listeners = [];
     this._showTooltip = false;
-    this.toastService = services.toastService;
+    this.toastService = services ? services.toastService : null;
 
     const leafletOptions = {
       minZoom: options.minZoom,

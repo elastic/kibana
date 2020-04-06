@@ -50,6 +50,10 @@ import { createRegionMapTypeDefinition } from '../region_map_type';
 import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -98,7 +102,31 @@ describe('RegionMapsVisualizationTests', function() {
   let getManifestStub;
   beforeEach(
     ngMock.inject((Private, $injector) => {
-      const serviceSettings = $injector.get('serviceSettings');
+      setInjectedVarFunc(injectedVar => {
+        switch (injectedVar) {
+          case 'mapConfig':
+            return {
+              emsFileApiUrl: '',
+              emsTileApiUrl: '',
+              emsLandingPageUrl: '',
+            };
+          case 'tilemapsConfig':
+            return {
+              deprecated: {
+                config: {
+                  options: {
+                    attribution: '123',
+                  },
+                },
+              },
+            };
+          case 'version':
+            return '123';
+          default:
+            return 'not found';
+        }
+      });
+      const serviceSettings = new ServiceSettings();
       const uiSettings = $injector.get('config');
       const regionmapsConfig = {
         includeElasticMapsService: true,

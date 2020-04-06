@@ -44,6 +44,15 @@ import { createTileMapTypeDefinition } from '../tile_map_type';
 import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+import {
+  getPrecision,
+  getZoomPrecision,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps_legacy/public/map/precision';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -81,13 +90,39 @@ describe('CoordinateMapsVisualizationTest', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject((Private, $injector) => {
-      const serviceSettings = $injector.get('serviceSettings');
+      setInjectedVarFunc(injectedVar => {
+        switch (injectedVar) {
+          case 'mapConfig':
+            return {
+              emsFileApiUrl: '',
+              emsTileApiUrl: '',
+              emsLandingPageUrl: '',
+            };
+          case 'tilemapsConfig':
+            return {
+              deprecated: {
+                config: {
+                  options: {
+                    attribution: '123',
+                  },
+                },
+              },
+            };
+          case 'version':
+            return '123';
+          default:
+            return 'not found';
+        }
+      });
+      const serviceSettings = new ServiceSettings();
       const uiSettings = $injector.get('config');
 
       dependencies = {
         serviceSettings,
         uiSettings,
         $injector,
+        getPrecision,
+        getZoomPrecision,
       };
 
       visType = new BaseVisType(createTileMapTypeDefinition(dependencies));
