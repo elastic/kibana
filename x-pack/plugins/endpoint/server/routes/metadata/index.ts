@@ -8,12 +8,12 @@ import { IRouter, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
-import {
-  kibanaRequestToMetadataListESQuery,
-  getESQueryHostMetadataByID,
-} from '../../services/metadata/query_builders';
 import { HostMetadata, HostResultList } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
+import {
+  getESQueryHostMetadataByID,
+  kibanaRequestToMetadataListESQuery,
+} from './query_builders';
 
 interface HitSource {
   _source: HostMetadata;
