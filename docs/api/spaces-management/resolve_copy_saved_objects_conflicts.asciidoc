@@ -65,6 +65,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
     `overwrite`::::
     (Required, boolean) When set to `true`, the saved object from the source space (desigated by the <<spaces-api-resolve-copy-saved-objects-conflicts-path-params, `space_id` path parameter>>) overwrites the conflicting object in the destination space. When set to `false`, this does nothing.
 ======
+=====
 
 [role="child_attributes"]
 [[spaces-api-resolve-copy-saved-objects-conflicts-response-body]]
