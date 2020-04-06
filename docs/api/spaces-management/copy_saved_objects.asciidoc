@@ -87,7 +87,8 @@ You can request to overwrite any objects that already exist in the target space 
       `type`:::::
         (string) The type of error. For example, `unsupported_type`, `missing_references`, or `unknown`. Errors marked as `conflict` may be resolved by using the <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>>.
 =======
-
+======
+=====
 [[spaces-api-copy-saved-objects-example]]
 ==== {api-examples-title}
 
