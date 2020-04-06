@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EmptyStateComponent } from '../empty_state';
 import { StatesIndexStatus } from '../../../../../common/runtime_types';
 import { IHttpFetchError } from '../../../../../../../../../target/types/core/public/http';

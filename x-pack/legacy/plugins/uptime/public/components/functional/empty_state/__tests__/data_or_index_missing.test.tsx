@@ -7,10 +7,18 @@
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { DataOrIndexMissing } from '../data_or_index_missing';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 describe('DataOrIndexMissing component', () => {
   it('renders basePath and headingMessage', () => {
-    const component = shallowWithIntl(<DataOrIndexMissing headingMessage="bar" />);
+    const headingMessage = (
+      <FormattedMessage
+        id="xpack.uptime.emptyState.noIndexTitle"
+        defaultMessage="Uptime index {indexName} not found"
+        values={{ indexName: <em>heartbeat-*</em> }}
+      />
+    );
+    const component = shallowWithIntl(<DataOrIndexMissing headingMessage={headingMessage} />);
     expect(component).toMatchSnapshot();
   });
 });

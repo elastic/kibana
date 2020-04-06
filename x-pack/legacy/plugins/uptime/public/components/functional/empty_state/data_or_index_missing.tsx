@@ -23,7 +23,7 @@ import { SETTINGS_ROUTE } from '../../../../common/constants';
 import { SETTINGS_LINK_TEXT } from '../../../pages/page_header';
 
 interface DataMissingProps {
-  headingMessage: string;
+  headingMessage: JSX.Element;
   settings?: DynamicSettings;
 }
 
