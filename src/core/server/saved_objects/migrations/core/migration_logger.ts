@@ -33,7 +33,7 @@ export interface SavedObjectsMigrationLogger {
   /**
    * @deprecated Use `warn` instead.
    */
-  warning: (msg: string) => void;
+  warning?: (msg: string) => void;
   warn: (msg: string) => void;
 }
 

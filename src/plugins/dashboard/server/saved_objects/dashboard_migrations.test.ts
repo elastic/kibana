@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { migrations } from './migrations';
+import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
+import { loggerMock } from 'src/core/server';
+
+const mockLoggerFactory = loggerMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
 
 describe('dashboard', () => {
   describe('7.0.0', () => {
-    const migration = migrations.dashboard['7.0.0'];
+    const migration = dashboardSavedObjectTypeMigrations['7.0.0'];
 
     test('skips error on empty object', () => {
-      expect(migration({})).toMatchInlineSnapshot(`
+      expect(migration({ attributes: {}, type: 'dashboard' }, { log: mockLogger }))
+        .toMatchInlineSnapshot(`
 Object {
   "references": Array [],
 }
@@ -43,7 +48,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, { log: mockLogger });
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -82,7 +87,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, { log: mockLogger });
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -121,7 +126,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, { log: mockLogger })).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "kibanaSavedObjectMeta": Object {
@@ -159,7 +164,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, { log: mockLogger })).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "kibanaSavedObjectMeta": Object {
@@ -197,7 +202,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, { log: mockLogger });
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -236,7 +241,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, { log: mockLogger });
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -290,7 +295,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, { log: mockLogger });
 
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
@@ -326,11 +331,12 @@ Object {
     test('skips error when panelsJSON is not a string', () => {
       const doc = {
         id: '1',
+        type: 'dashboard',
         attributes: {
           panelsJSON: 123,
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, { log: mockLogger })).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": 123,
@@ -344,11 +350,12 @@ Object {
     test('skips error when panelsJSON is not valid JSON', () => {
       const doc = {
         id: '1',
+        type: 'dashboard',
         attributes: {
           panelsJSON: '{123abc}',
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, { log: mockLogger })).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": "{123abc}",
@@ -362,11 +369,12 @@ Object {
     test('skips panelsJSON when its not an array', () => {
       const doc = {
         id: '1',
+        type: 'dashboard',
         attributes: {
           panelsJSON: '{}',
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, { log: mockLogger })).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": "{}",
@@ -380,11 +388,12 @@ Object {
     test('skips error when a panel is missing "type" attribute', () => {
       const doc = {
         id: '1',
+        type: 'dashboard',
         attributes: {
           panelsJSON: '[{"id":"123"}]',
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, { log: mockLogger })).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": "[{\\"id\\":\\"123\\"}]",
@@ -398,11 +407,12 @@ Object {
     test('skips error when a panel is missing "id" attribute', () => {
       const doc = {
         id: '1',
+        type: 'dashboard',
         attributes: {
           panelsJSON: '[{"type":"visualization"}]',
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, { log: mockLogger })).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": "[{\\"type\\":\\"visualization\\"}]",
@@ -416,12 +426,13 @@ Object {
     test('extract panel references from doc', () => {
       const doc = {
         id: '1',
+        type: 'dashboard',
         attributes: {
           panelsJSON:
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, { log: mockLogger });
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {

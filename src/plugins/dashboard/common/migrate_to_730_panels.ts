@@ -31,7 +31,7 @@ import {
   SavedDashboardPanel620,
   SavedDashboardPanel630,
   SavedDashboardPanel610,
-} from '../../../../../../plugins/dashboard/public';
+} from '../public';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;

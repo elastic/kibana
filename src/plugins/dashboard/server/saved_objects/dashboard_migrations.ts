@@ -17,5 +17,16 @@
  * under the License.
  */
 
-// @ts-ignore
-export { migrations } from './migrations';
+import { flow } from 'lodash';
+
+import { SavedObjectMigrationFn } from 'kibana/server';
+
+import { dashboardMigrateMatchAllQuery } from './migrate_match_all_query';
+import { dashboardMigrate700 } from './migrations_700';
+import { dashboardMigrate730 } from './migrations_730';
+
+export const dashboardSavedObjectTypeMigrations = {
+  '6.7.2': flow<SavedObjectMigrationFn>(dashboardMigrateMatchAllQuery),
+  '7.0.0': flow<SavedObjectMigrationFn>(dashboardMigrate700),
+  '7.3.0': flow<SavedObjectMigrationFn>(dashboardMigrate730),
+};

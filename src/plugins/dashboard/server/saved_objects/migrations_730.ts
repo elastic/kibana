@@ -18,23 +18,46 @@
  */
 // This file should be moved to dashboard/server/
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsMigrationLogger } from 'src/core/server';
 import { inspect } from 'util';
-import {
-  DashboardDoc730ToLatest,
-  DashboardDoc700To720,
-} from '../../../../../../plugins/dashboard/public';
-import { isDashboardDoc } from './is_dashboard_doc';
-import { moveFiltersToQuery } from './move_filters_to_query';
-import { migratePanelsTo730 } from './migrate_to_730_panels';
+import { SavedObjectsMigrationLogger } from 'src/core/server';
 
-export function migrations730(
+import { DashboardDoc730ToLatest, DashboardDoc700To720 } from '../../public';
+import { moveFiltersToQuery } from './move_filters_to_query';
+import { migratePanelsTo730 } from '../../common/migrate_to_730_panels';
+import { Doc } from './types';
+
+function isDoc(doc: { [key: string]: unknown } | Doc): doc is Doc {
+  return (
+    typeof doc.id === 'string' &&
+    typeof doc.type === 'string' &&
+    doc.attributes !== null &&
+    typeof doc.attributes === 'object' &&
+    doc.references !== null &&
+    typeof doc.references === 'object'
+  );
+}
+
+export function isDashboardDoc(
+  doc: { [key: string]: unknown } | DashboardDoc730ToLatest
+): doc is DashboardDoc730ToLatest {
+  if (!isDoc(doc)) {
+    return false;
+  }
+
+  if (typeof (doc as DashboardDoc730ToLatest).attributes.panelsJSON !== 'string') {
+    return false;
+  }
+
+  return true;
+}
+
+export function dashboardMigrate730(
   doc:
     | {
         [key: string]: unknown;
       }
     | DashboardDoc700To720,
-  logger: SavedObjectsMigrationLogger
+  { log }: { log: SavedObjectsMigrationLogger }
 ): DashboardDoc730ToLatest | { [key: string]: unknown } {
   if (!isDashboardDoc(doc)) {
     // NOTE: we should probably throw an error here... but for now following suit and in the
@@ -48,7 +71,7 @@ export function migrations730(
       moveFiltersToQuery(searchSource)
     );
   } catch (e) {
-    logger.warning(
+    log.warn(
       `Exception @ migrations730 while trying to migrate dashboard query filters!\n` +
         `${e.stack}\n` +
         `dashboard: ${inspect(doc, false, null)}`
@@ -75,7 +98,7 @@ export function migrations730(
 
     delete doc.attributes.uiStateJSON;
   } catch (e) {
-    logger.warning(
+    log.warn(
       `Exception @ migrations730 while trying to migrate dashboard panels!\n` +
         `Error: ${e.stack}\n` +
         `dashboard: ${inspect(doc, false, null)}`

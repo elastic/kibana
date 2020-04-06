@@ -17,5 +17,7 @@
  * under the License.
  */
 
-export { migrations730 } from './migrations_730';
-export { migrateMatchAllQuery } from './migrate_match_all_query';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DashboardsPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DashboardsPluginStart {}

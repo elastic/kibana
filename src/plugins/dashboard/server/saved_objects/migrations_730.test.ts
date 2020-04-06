@@ -17,21 +17,18 @@
  * under the License.
  */
 
-import { migrations } from '../../../migrations';
-import { migrations730 } from './migrations_730';
+import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
+import { dashboardMigrate730 } from './migrations_730';
 import {
   DashboardDoc700To720,
   DashboardDoc730ToLatest,
   RawSavedDashboardPanel730ToLatest,
   DashboardDocPre700,
-} from '../../../../../../plugins/dashboard/public';
+} from '../../public';
+import { loggerMock } from 'src/core/server';
 
-const mockLogger = {
-  warning: () => {},
-  warn: () => {},
-  debug: () => {},
-  info: () => {},
-};
+const mockLoggerFactory = loggerMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
 
 test('dashboard migration 7.3.0 migrates filters to query on search source', () => {
   const doc: DashboardDoc700To720 = {
@@ -53,7 +50,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source', () 
         '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
     },
   };
-  const newDoc = migrations730(doc, mockLogger);
+  const newDoc = dashboardMigrate730(doc, { log: mockLogger });
 
   expect(newDoc).toMatchInlineSnapshot(`
     Object {
@@ -97,8 +94,8 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
     },
   };
 
-  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockLogger);
-  const newDoc = migrations.dashboard['7.3.0'](doc700, mockLogger);
+  const doc700 = dashboardSavedObjectTypeMigrations['7.0.0'](doc, { log: mockLogger });
+  const newDoc = dashboardSavedObjectTypeMigrations['7.3.0'](doc700, { log: mockLogger });
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);
@@ -129,8 +126,8 @@ test('dashboard migration works when panelsJSON is missing panelIndex', () => {
     },
   };
 
-  const doc700: DashboardDoc700To720 = migrations.dashboard['7.0.0'](doc, mockLogger);
-  const newDoc = migrations.dashboard['7.3.0'](doc700, mockLogger);
+  const doc700 = dashboardSavedObjectTypeMigrations['7.0.0'](doc, { log: mockLogger });
+  const newDoc = dashboardSavedObjectTypeMigrations['7.3.0'](doc700, { log: mockLogger });
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
   expect(parsedSearchSource.filter.length).toBe(0);
@@ -159,7 +156,7 @@ test('dashboard migration 7.3.0 migrates panels', () => {
     },
   };
 
-  const newDoc = migrations730(doc, mockLogger) as DashboardDoc730ToLatest;
+  const newDoc = dashboardMigrate730(doc, { log: mockLogger }) as DashboardDoc730ToLatest;
 
   const newPanels = JSON.parse(newDoc.attributes.panelsJSON) as RawSavedDashboardPanel730ToLatest[];
 

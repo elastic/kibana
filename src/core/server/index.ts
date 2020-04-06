@@ -176,7 +176,7 @@ export {
   SafeRouteMethod,
 } from './http';
 export { RenderingServiceSetup, IRenderOptions } from './rendering';
-export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
+export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel, loggerMock } from './logging';
 
 export {
   DiscoveredPlugin,
@@ -220,6 +220,7 @@ export {
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,

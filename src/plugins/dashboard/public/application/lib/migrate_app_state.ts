@@ -33,7 +33,7 @@ import {
   SavedDashboardPanel,
 } from '../../types';
 // should be moved in src/plugins/dashboard/common right after https://github.com/elastic/kibana/pull/61895 is merged
-import { migratePanelsTo730 } from '../../../../../legacy/core_plugins/kibana/public/dashboard/migrations/migrate_to_730_panels';
+import { migratePanelsTo730 } from '../../../common/migrate_to_730_panels';
 
 /**
  * Attempts to migrate the state stored in the URL into the latest version of it.

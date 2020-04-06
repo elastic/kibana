@@ -18,23 +18,29 @@
  */
 
 import { get } from 'lodash';
-import {
-  migrateMatchAllQuery,
-  migrations730 as dashboardMigrations730,
-} from '../public/dashboard/migrations';
+import { SavedObjectUnsanitizedDoc } from 'src/core/server';
 
-function migrateIndexPattern(doc) {
+import { DashboardDoc700To720 } from '../../public';
+
+function migrateIndexPattern(doc: SavedObjectUnsanitizedDoc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+
   if (typeof searchSourceJSON !== 'string') {
     return;
   }
   let searchSource;
+
   try {
     searchSource = JSON.parse(searchSourceJSON);
   } catch (e) {
     // Let it go, the data is invalid and we'll leave it as is
     return;
   }
+
+  if (!Array.isArray(doc.references)) {
+    doc.references = [];
+  }
+
   if (searchSource.index) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
@@ -44,13 +50,14 @@ function migrateIndexPattern(doc) {
     });
     delete searchSource.index;
   }
+
   if (searchSource.filter) {
-    searchSource.filter.forEach((filterRow, i) => {
+    searchSource.filter.forEach((filterRow: any, i: any) => {
       if (!filterRow.meta || !filterRow.meta.index) {
         return;
       }
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
-      doc.references.push({
+      doc.references!.push({
         name: filterRow.meta.indexRefName,
         type: 'index-pattern',
         id: filterRow.meta.index,
@@ -58,49 +65,53 @@ function migrateIndexPattern(doc) {
       delete filterRow.meta.index;
     });
   }
+
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 
-export const migrations = {
-  dashboard: {
-    '6.7.2': migrateMatchAllQuery,
-    '7.0.0': doc => {
-      // Set new "references" attribute
-      doc.references = doc.references || [];
+export function dashboardMigrate700(doc: DashboardDoc700To720) {
+  // Set new "references" attribute
+  doc.references = doc.references || [];
 
-      // Migrate index pattern
-      migrateIndexPattern(doc);
-      // Migrate panels
-      const panelsJSON = get(doc, 'attributes.panelsJSON');
-      if (typeof panelsJSON !== 'string') {
-        return doc;
-      }
-      let panels;
-      try {
-        panels = JSON.parse(panelsJSON);
-      } catch (e) {
-        // Let it go, the data is invalid and we'll leave it as is
-        return doc;
-      }
-      if (!Array.isArray(panels)) {
-        return doc;
-      }
-      panels.forEach((panel, i) => {
-        if (!panel.type || !panel.id) {
-          return;
-        }
-        panel.panelRefName = `panel_${i}`;
-        doc.references.push({
-          name: `panel_${i}`,
-          type: panel.type,
-          id: panel.id,
-        });
-        delete panel.type;
-        delete panel.id;
-      });
-      doc.attributes.panelsJSON = JSON.stringify(panels);
-      return doc;
-    },
-    '7.3.0': dashboardMigrations730,
-  },
-};
+  // Migrate index pattern
+  migrateIndexPattern(doc);
+
+  // Migrate panels
+  const panelsJSON = get(doc, 'attributes.panelsJSON');
+  if (typeof panelsJSON !== 'string') {
+    return doc;
+  }
+
+  let panels;
+  try {
+    panels = JSON.parse(panelsJSON);
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+    return doc;
+  }
+
+  if (!Array.isArray(panels)) {
+    return doc;
+  }
+
+  panels.forEach((panel, i) => {
+    if (!panel.type || !panel.id || !Array.isArray(doc.references)) {
+      return;
+    }
+
+    panel.panelRefName = `panel_${i}`;
+
+    doc.references.push({
+      name: `panel_${i}`,
+      type: panel.type,
+      id: panel.id,
+    });
+
+    delete panel.type;
+    delete panel.id;
+  });
+
+  doc.attributes.panelsJSON = JSON.stringify(panels);
+
+  return doc;
+}

@@ -27,7 +27,7 @@ import {
   DEFAULT_PANEL_HEIGHT,
   SavedDashboardPanelTo60,
   SavedDashboardPanel730ToLatest,
-} from '../../../../../../plugins/dashboard/public';
+} from '../public';
 
 test('6.0 migrates uiState, sort, scales, and gridData', async () => {
   const uiState = {

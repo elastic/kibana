@@ -97,7 +97,7 @@ function handleIndexExists(error: any, log: SavedObjectsMigrationLogger) {
 
   const index = _.get(error, 'body.error.index');
 
-  log.warning(
+  log.warn(
     `Another Kibana instance appears to be migrating the index. Waiting for ` +
       `that migration to complete. If no other Kibana instance is attempting ` +
       `migrations, you can get past this message by deleting index ${index} and ` +

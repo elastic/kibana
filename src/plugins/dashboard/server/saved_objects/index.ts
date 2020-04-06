@@ -17,13 +17,4 @@
  * under the License.
  */
 
-export { Logger, LogMeta } from './logger';
-export { LoggerFactory } from './logger_factory';
-export { LogRecord } from './log_record';
-export { LogLevel } from './log_level';
-export { loggerMock } from './logger.mock';
-
-/** @internal */
-export { config, LoggingConfigType } from './logging_config';
-/** @internal */
-export { LoggingService, ILoggingService } from './logging_service';
+export { dashboardSavedObjectType } from './dashboard';

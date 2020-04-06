@@ -17,13 +17,23 @@
  * under the License.
  */
 
-export { Logger, LogMeta } from './logger';
-export { LoggerFactory } from './logger_factory';
-export { LogRecord } from './log_record';
-export { LogLevel } from './log_level';
-export { loggerMock } from './logger.mock';
+import { SavedObjectsType } from 'kibana/server';
+import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
 
-/** @internal */
-export { config, LoggingConfigType } from './logging_config';
-/** @internal */
-export { LoggingService, ILoggingService } from './logging_service';
+export const dashboardSavedObjectType: SavedObjectsType = {
+  name: 'dashboard',
+  hidden: false,
+  namespaceAgnostic: false,
+  mappings: {
+    properties: {
+      description: { type: 'text' },
+      kibanaSavedObjectMeta: { properties: { searchSourceJSON: { type: 'text' } } },
+      savedSearchRefName: { type: 'keyword' },
+      title: { type: 'text' },
+      uiStateJSON: { type: 'text' },
+      version: { type: 'integer' },
+      visState: { type: 'text' },
+    },
+  },
+  migrations: dashboardSavedObjectTypeMigrations,
+};

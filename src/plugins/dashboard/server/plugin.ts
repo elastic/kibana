@@ -17,19 +17,37 @@
  * under the License.
  */
 
-import { DashboardDoc730ToLatest } from '../../../../../../plugins/dashboard/public';
-import { isDoc } from '../../../migrations/is_doc';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '../../../core/server';
 
-export function isDashboardDoc(
-  doc: { [key: string]: unknown } | DashboardDoc730ToLatest
-): doc is DashboardDoc730ToLatest {
-  if (!isDoc(doc)) {
-    return false;
+import { dashboardSavedObjectType } from './saved_objects';
+
+import { DashboardsPluginSetup, DashboardsPluginStart } from './types';
+
+export class DashboardsPlugin implements Plugin<DashboardsPluginSetup, DashboardsPluginStart> {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
   }
 
-  if (typeof (doc as DashboardDoc730ToLatest).attributes.panelsJSON !== 'string') {
-    return false;
+  public setup(core: CoreSetup) {
+    this.logger.debug('dashboards: Setup');
+
+    core.savedObjects.registerType(dashboardSavedObjectType);
+
+    return {};
   }
 
-  return true;
+  public start(core: CoreStart) {
+    this.logger.debug('dashboards: Started');
+    return {};
+  }
+
+  public stop() {}
 }

@@ -587,7 +587,7 @@ describe('DocumentMigrator', () => {
         migrations: {
           '1.2.3': (doc, { log }) => {
             log.info(logTestMsg);
-            log.warning(logTestMsg);
+            log.warn(logTestMsg);
             return doc;
           },
         },

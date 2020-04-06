@@ -16,41 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { dashboardMigrateMatchAllQuery } from './migrate_match_all_query';
+import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
-import { SavedObjectMigrationFn } from 'kibana/server';
-import { get } from 'lodash';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../../../../plugins/data/common';
+const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
-export const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
-  const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
-
-  if (searchSourceJSON) {
-    let searchSource: any;
-
-    try {
-      searchSource = JSON.parse(searchSourceJSON);
-    } catch (e) {
-      // Let it go, the data is invalid and we'll leave it as is
-    }
-
-    if (searchSource.query?.match_all) {
-      return {
-        ...doc,
+describe('migrate match_all query', () => {
+  test('should migrate obsolete match_all query', () => {
+    const migratedDoc = dashboardMigrateMatchAllQuery(
+      {
         attributes: {
-          ...doc.attributes,
           kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
-              ...searchSource,
               query: {
-                query: '',
-                language: DEFAULT_QUERY_LANGUAGE,
+                match_all: {},
               },
             }),
           },
         },
-      };
-    }
-  }
+      } as Parameters<SavedObjectMigrationFn>[0],
+      savedObjectMigrationContext
+    );
 
-  return doc;
-};
+    const migratedSearchSource = JSON.parse(
+      migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+    );
+
+    expect(migratedSearchSource).toEqual({
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  });
+});
