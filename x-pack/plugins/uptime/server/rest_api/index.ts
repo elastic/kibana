@@ -11,7 +11,6 @@ import { createLogPageViewRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
 import { UMRestApiRouteFactory } from './types';
 import {
-  createGetMonitorRoute,
   createGetMonitorDetailsRoute,
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,
@@ -31,7 +30,6 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetIndexStatusRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
-  createGetMonitorRoute,
   createGetMonitorDetailsRoute,
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,

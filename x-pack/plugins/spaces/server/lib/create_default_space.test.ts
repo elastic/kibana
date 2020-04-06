@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { createDefaultSpace } from './create_default_space';
-import { SavedObjectsLegacyService, IClusterClient } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 interface MockServerSettings {
   defaultExists?: boolean;
@@ -23,7 +22,7 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     simulateCreateErrorCondition = false,
   } = settings;
 
-  const mockGet = jest.fn().mockImplementation(() => {
+  const mockGet = jest.fn().mockImplementation((type, id) => {
     if (simulateGetErrorCondition) {
       throw new Error('unit test: unexpected exception condition');
     }
@@ -31,12 +30,14 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     if (defaultExists) {
       return;
     }
-    throw Boom.notFound('unit test: default space not found');
+    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   });
 
   const mockCreate = jest.fn().mockImplementation(() => {
     if (simulateConflict) {
-      throw new Error('unit test: default space already exists');
+      throw SavedObjectsErrorHelpers.decorateConflictError(
+        new Error('unit test: default space already exists')
+      );
     }
     if (simulateCreateErrorCondition) {
       throw new Error('unit test: some other unexpected error');
@@ -45,36 +46,15 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     return null;
   });
 
-  const mockServer = {
-    config: jest.fn().mockReturnValue({
-      get: jest.fn(),
-    }),
+  return {
     savedObjects: {
-      SavedObjectsClient: {
-        errors: {
-          isNotFoundError: (e: Error) => e.message === 'unit test: default space not found',
-          isConflictError: (e: Error) => e.message === 'unit test: default space already exists',
-        },
-      },
-      getSavedObjectsRepository: jest.fn().mockImplementation(() => {
+      createInternalRepository: jest.fn().mockImplementation(() => {
         return {
           get: mockGet,
           create: mockCreate,
         };
       }),
     },
-  };
-
-  mockServer.config().get.mockImplementation((key: string) => {
-    return settings[key];
-  });
-
-  return {
-    config: mockServer.config(),
-    savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsLegacyService,
-    esClient: ({
-      callAsInternalUser: jest.fn(),
-    } as unknown) as jest.Mocked<IClusterClient>,
   };
 };
 
@@ -85,7 +65,7 @@ test(`it creates the default space when one does not exist`, async () => {
 
   await createDefaultSpace(deps);
 
-  const repository = deps.savedObjects.getSavedObjectsRepository();
+  const repository = deps.savedObjects.createInternalRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(1);
@@ -109,7 +89,7 @@ test(`it does not attempt to recreate the default space if it already exists`, a
 
   await createDefaultSpace(deps);
 
-  const repository = deps.savedObjects.getSavedObjectsRepository();
+  const repository = deps.savedObjects.createInternalRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(0);
@@ -121,7 +101,9 @@ test(`it throws all other errors from the saved objects client when checking for
     simulateGetErrorCondition: true,
   });
 
-  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingSnapshot();
+  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"unit test: unexpected exception condition"`
+  );
 });
 
 test(`it ignores conflict errors if the default space already exists`, async () => {
@@ -132,7 +114,7 @@ test(`it ignores conflict errors if the default space already exists`, async () 
 
   await createDefaultSpace(deps);
 
-  const repository = deps.savedObjects.getSavedObjectsRepository();
+  const repository = deps.savedObjects.createInternalRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(1);
@@ -144,5 +126,7 @@ test(`it throws other errors if there is an error creating the default space`, a
     simulateCreateErrorCondition: true,
   });
 
-  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingSnapshot();
+  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"unit test: some other unexpected error"`
+  );
 });

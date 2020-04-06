@@ -46,7 +46,6 @@ import { UiPlugins } from '../../core/server/plugins';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
-import { IndexPatternsServiceFactory } from './index_patterns';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 import { HomeServerPluginSetup } from '../../plugins/home/server';
 
@@ -69,7 +68,6 @@ declare module 'hapi' {
 
   interface Server {
     config: () => KibanaConfig;
-    indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsLegacyService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
@@ -176,5 +174,4 @@ export default class KbnServer {
 export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
-export { IndexPatternsFetcher as IndexPatternsService } from './index_patterns';
 export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';
