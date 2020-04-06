@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function migrateToKibana660(doc: Record<string, any>) {
-  if (!doc.attributes.hasOwnProperty('disabledFeatures')) {
-    doc.attributes.disabledFeatures = [];
-  }
-  return doc;
-}
+import { SavedObjectsClientProviderOptions } from 'src/core/server';
+
+export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
+  excludedWrappers: ['spaces'],
+};
