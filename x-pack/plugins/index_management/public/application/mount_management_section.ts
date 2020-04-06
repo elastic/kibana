@@ -8,12 +8,12 @@ import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
+import { ExtensionsService } from '../services';
+import { IndexMgmtMetricsType } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
 import { HttpService, NotificationService, UiMetricService } from './services';
-import { ExtensionsService } from '../services';
-import { IndexMgmtMetricsType } from '../types';
 
 import { renderApp } from '.';
 

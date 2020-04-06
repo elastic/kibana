@@ -12,12 +12,12 @@ export async function mountManagementSection(
   isCloudEnabled: boolean,
   params: ManagementAppMountParams
 ) {
-  const [{ i18n: i18nDep, docLinks }] = await coreSetup.getStartServices();
+  const [{ i18n, docLinks }] = await coreSetup.getStartServices();
   return renderApp({
     element: params.element,
     isCloudEnabled,
     http: coreSetup.http,
-    i18n: i18nDep,
+    i18n,
     docLinks,
   });
 }
