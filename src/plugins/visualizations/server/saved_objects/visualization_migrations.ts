@@ -19,6 +19,7 @@
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep, get, omit, has, flow } from 'lodash';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn = doc => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -539,6 +540,40 @@ const migrateTableSplits: SavedObjectMigrationFn = doc => {
   }
 };
 
+const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
+  const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+
+  if (searchSourceJSON) {
+    let searchSource: any;
+
+    try {
+      searchSource = JSON.parse(searchSourceJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    if (searchSource.query?.match_all) {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              ...searchSource,
+              query: {
+                query: '',
+                language: DEFAULT_QUERY_LANGUAGE,
+              },
+            }),
+          },
+        },
+      };
+    }
+  }
+
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -550,7 +585,7 @@ export const visualizationSavedObjectTypeMigrations = {
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
-  '6.7.2': flow<SavedObjectMigrationFn>(removeDateHistogramTimeZones),
+  '6.7.2': flow<SavedObjectMigrationFn>(migrateMatchAllQuery, removeDateHistogramTimeZones),
   '7.0.0': flow<SavedObjectMigrationFn>(
     addDocReferences,
     migrateIndexPattern,
