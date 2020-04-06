@@ -32,6 +32,7 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
   validate: {
     body: schema.object({}, { unknowns: 'allow' }),
   },
+  writeAccess: true,
   options: {
     tags: ['access:uptime-write'],
   },
