@@ -108,9 +108,9 @@ export class AxisLabels {
 
       selection.selectAll('.tick text').text(function(d) {
         const parentNode = d3.select(this.parentNode).node();
-        const currentTickCenter =
-          scaleStartPad +
-          (config.isHorizontal() ? self.axisScale.scale(d) : upperBound - self.axisScale.scale(d));
+        const currentTickCenter = config.isHorizontal()
+          ? scaleStartPad + self.axisScale.scale(d)
+          : upperBound - scaleStartPad - self.axisScale.scale(d);
         const currentTickSize =
           (config.isHorizontal() ? parentNode.getBBox().width : parentNode.getBBox().height) *
           padding;
