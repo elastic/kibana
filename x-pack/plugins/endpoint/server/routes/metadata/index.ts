@@ -10,10 +10,7 @@ import { schema } from '@kbn/config-schema';
 
 import { HostMetadata, HostResultList } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
-import {
-  getESQueryHostMetadataByID,
-  kibanaRequestToMetadataListESQuery,
-} from './query_builders';
+import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 
 interface HitSource {
   _source: HostMetadata;
