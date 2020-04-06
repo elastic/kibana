@@ -10,7 +10,7 @@ export const LOADING_SIGNALS_PANEL = '[data-test-subj="loading-signals-panel"]';
 
 export const MANAGE_SIGNAL_DETECTION_RULES_BTN = '[data-test-subj="manage-signal-detection-rules"]';
 
-export const NUMBER_OF_SIGNALS = '[data-test-subj="server-side-event-count"]';
+export const NUMBER_OF_SIGNALS = '[data-test-subj="server-side-event-count"] .euiBadge__text';
 
 export const OPEN_CLOSE_SIGNAL_BTN = '[data-test-subj="update-signal-status-button"]';
 

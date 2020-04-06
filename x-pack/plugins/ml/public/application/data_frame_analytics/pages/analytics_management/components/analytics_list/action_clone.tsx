@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import {
+  CreateAnalyticsFormProps,
+  DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
+} from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from './common';
 
@@ -97,6 +100,8 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             num_top_feature_importance_values: {
               optional: true,
+              defaultValue: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
+              formKey: 'numTopFeatureImportanceValues',
             },
             class_assignment_objective: {
               optional: true,
@@ -164,6 +169,8 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             num_top_feature_importance_values: {
               optional: true,
+              defaultValue: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
+              formKey: 'numTopFeatureImportanceValues',
             },
             randomize_seed: {
               optional: true,

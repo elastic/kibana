@@ -267,3 +267,7 @@ export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined
     ...actionMessageRuleParams.map(param => `context.rule.${param}`),
   ];
 });
+
+// typed as null not undefined as the initial state for this value is null.
+export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
+  canUserCRUD != null ? !canUserCRUD : false;

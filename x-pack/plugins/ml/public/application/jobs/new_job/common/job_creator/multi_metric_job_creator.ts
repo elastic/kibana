@@ -32,6 +32,7 @@ export class MultiMetricJobCreator extends JobCreator {
   ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+    this._wizardInitialized$.next(true);
   }
 
   // set the split field, applying it to each detector
