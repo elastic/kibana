@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isMetricCountable } from '../../util/is_metric_countable';
+import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { RenderAsSelect } from './render_as_select';
 
 export class UpdateSourceEditor extends Component {
