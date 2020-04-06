@@ -45,7 +45,7 @@ const UNIT_OPTIONS = [
     value: '',
   },
   {
-    label: i18n.translate('visTypeTimeseries.units.perSecond', {
+    label: i18n.translate('visTypeTimeseries.units.perMillisecond', {
       defaultMessage: 'per millisecond',
     }),
     value: '1ms',
