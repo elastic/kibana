@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as yargs from 'yargs';
+import seedrandom from 'seedrandom';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { EndpointDocGenerator } from '../common/generate_data';
-import { default as mapping } from './mapping.json';
+import { EndpointDocGenerator, Event } from '../common/generate_data';
+import { default as eventMapping } from './event_mapping.json';
+import { default as alertMapping } from './alert_mapping.json';
 
 main();
 
@@ -22,6 +24,12 @@ async function main() {
       alias: 'n',
       describe: 'elasticsearch node url',
       default: 'http://localhost:9200',
+      type: 'string',
+    },
+    alertIndex: {
+      alias: 'ai',
+      describe: 'index to store alerts in',
+      default: '.alerts-endpoint-000001',
       type: 'string',
     },
     eventIndex: {
@@ -94,7 +102,16 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    setupOnly: {
+      alias: 'so',
+      describe:
+        'Run only the index and pipeline creation then exit. This is intended to be used to set up the Endpoint App for use with the real Elastic Endpoint.',
+      type: 'boolean',
+      default: false,
+    },
   }).argv;
+  const pipelineName = 'endpoint-event-pipeline';
+  eventMapping.settings.index.default_pipeline = pipelineName;
   const clientOptions: ClientOptions = {
     node: argv.node,
   };
@@ -106,7 +123,7 @@ async function main() {
   if (argv.delete) {
     try {
       await client.indices.delete({
-        index: [argv.eventIndex, argv.metadataIndex],
+        index: [argv.eventIndex, argv.metadataIndex, argv.alertIndex],
       });
     } catch (err) {
       if (err instanceof ResponseError && err.statusCode !== 404) {
@@ -116,9 +133,98 @@ async function main() {
       }
     }
   }
+
+  const pipeline = {
+    description: 'redirects alerts to their own index',
+    processors: [
+      {
+        set: {
+          field: '_index',
+          value: argv.alertIndex,
+          if: "ctx.event.kind == 'alert'",
+        },
+      },
+      {
+        set: {
+          field: 'mutable_state.triage_status',
+          value: 'open',
+        },
+      },
+    ],
+  };
+  try {
+    await client.ingest.putPipeline({
+      id: pipelineName,
+      body: pipeline,
+    });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+    process.exit(1);
+  }
+
+  await createIndex(client, argv.alertIndex, alertMapping);
+  await createIndex(client, argv.eventIndex, eventMapping);
+  if (argv.setupOnly) {
+    process.exit(0);
+  }
+
+  let seed = argv.seed;
+  if (!seed) {
+    seed = Math.random().toString();
+    // eslint-disable-next-line no-console
+    console.log('No seed supplied, using random seed: ' + seed);
+  }
+  const random = seedrandom(seed);
+  for (let i = 0; i < argv.numHosts; i++) {
+    const generator = new EndpointDocGenerator(random);
+    const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
+    const numMetadataDocs = 5;
+    const timestamp = new Date().getTime();
+    for (let j = 0; j < numMetadataDocs; j++) {
+      generator.updateHostData();
+      await client.index({
+        index: argv.metadataIndex,
+        body: generator.generateHostMetadata(
+          timestamp - timeBetweenDocs * (numMetadataDocs - j - 1)
+        ),
+      });
+    }
+
+    for (let j = 0; j < argv.alertsPerHost; j++) {
+      const resolverDocGenerator = generator.fullResolverTreeGenerator(
+        argv.ancestors,
+        argv.generations,
+        argv.children,
+        argv.relatedEvents,
+        argv.percentWithRelated,
+        argv.percentTerminated
+      );
+      let result = resolverDocGenerator.next();
+      while (!result.done) {
+        let k = 0;
+        const resolverDocs: Event[] = [];
+        while (k < 1000 && !result.done) {
+          resolverDocs.push(result.value);
+          result = resolverDocGenerator.next();
+          k++;
+        }
+        const body = resolverDocs.reduce(
+          (array: Array<Record<string, any>>, doc) => (
+            array.push({ index: { _index: argv.eventIndex } }, doc), array
+          ),
+          []
+        );
+        await client.bulk({ body });
+      }
+    }
+  }
+}
+
+async function createIndex(client: Client, index: string, mapping: any) {
   try {
     await client.indices.create({
-      index: argv.eventIndex,
+      index,
       body: mapping,
     });
   } catch (err) {
@@ -130,37 +236,5 @@ async function main() {
       console.log(err.body);
       process.exit(1);
     }
-  }
-  let seed = argv.seed;
-  if (!seed) {
-    seed = Math.random().toString();
-    // eslint-disable-next-line no-console
-    console.log('No seed supplied, using random seed: ' + seed);
-  }
-  const generator = new EndpointDocGenerator(seed);
-  for (let i = 0; i < argv.numHosts; i++) {
-    await client.index({
-      index: argv.metadataIndex,
-      body: generator.generateHostMetadata(),
-    });
-    for (let j = 0; j < argv.alertsPerHost; j++) {
-      const resolverDocs = generator.generateFullResolverTree(
-        argv.ancestors,
-        argv.generations,
-        argv.children,
-        argv.relatedEvents,
-        argv.percentWithRelated,
-        argv.percentTerminated
-      );
-      const body = resolverDocs.reduce(
-        (array: Array<Record<string, any>>, doc) => (
-          array.push({ index: { _index: argv.eventIndex } }, doc), array
-        ),
-        []
-      );
-
-      await client.bulk({ body });
-    }
-    generator.randomizeHostData();
   }
 }

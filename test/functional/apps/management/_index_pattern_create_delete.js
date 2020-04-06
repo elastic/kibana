@@ -42,7 +42,7 @@ export default function({ getService, getPageObjects }) {
 
     describe('special character handling', () => {
       it('should handle special charaters in template input', async () => {
-        await PageObjects.settings.clickOptionalAddNewButton();
+        await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.setIndexPatternField({
           indexPatternName: '❤️',
