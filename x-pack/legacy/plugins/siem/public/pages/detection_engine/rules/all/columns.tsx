@@ -85,8 +85,8 @@ export type RuleStatusRowItemType = RuleStatus & {
   name: string;
   id: string;
 };
-type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
-type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
+export type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+export type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
 
 interface GetColumns {
   dispatch: React.Dispatch<Action>;

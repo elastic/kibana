@@ -5,6 +5,7 @@
  */
 import React, { useEffect, useCallback } from 'react';
 import classNames from 'classnames';
+import * as _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
@@ -31,7 +32,7 @@ import {
   filterTypesForNonRootFields,
 } from '../../../../lib';
 import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
-import { NameParameter, TypeParameter } from '../../field_parameters';
+import { NameParameter, TypeParameter, OtherTypeNameParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -155,9 +156,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     },
     [form, getSubTypeMeta]
   );
-
   const renderFormFields = useCallback(
     ({ type }) => {
+      const isOtherType = type === 'other';
       const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
 
       const docLink = documentationService.getTypeDocLink(type) as string;
@@ -178,7 +179,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 docLink={docLink}
               />
             </EuiFlexItem>
-            {/* Field sub type (if any) */}
+            {/* Other type */}
+            {isOtherType && (
+              <EuiFlexItem>
+                <OtherTypeNameParameter />
+              </EuiFlexItem>
+            )}
+            {/* Field sub type (if any) - will never be the case if we have an "other" type */}
             {subTypeOptions && (
               <EuiFlexItem>
                 <UseField
@@ -266,7 +273,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   return (
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
-      <Form form={form} FormWrapper={formWrapper} onSubmit={submitForm}>
+      <Form
+        form={form}
+        FormWrapper={formWrapper}
+        onSubmit={submitForm}
+        data-test-subj="createFieldForm"
+      >
         <div
           className={classNames('mappingsEditor__createFieldWrapper', {
             'mappingsEditor__createFieldWrapper--toggle':
@@ -280,7 +292,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 : paddingLeft
             }px`,
           }}
-          data-test-subj="createFieldWrapper"
         >
           <div className="mappingsEditor__createFieldContent">
             <EuiFlexGroup gutterSize="s" alignItems="center">

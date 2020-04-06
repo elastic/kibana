@@ -130,6 +130,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                     <EuiTab
                       onClick={() => changeTab('fields', state)}
                       isSelected={selectedTab === 'fields'}
+                      data-test-subj="formTab"
                     >
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
                         defaultMessage: 'Mapped fields',
@@ -138,6 +139,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                     <EuiTab
                       onClick={() => changeTab('templates', state)}
                       isSelected={selectedTab === 'templates'}
+                      data-test-subj="formTab"
                     >
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
                         defaultMessage: 'Dynamic templates',
@@ -146,6 +148,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                     <EuiTab
                       onClick={() => changeTab('advanced', state)}
                       isSelected={selectedTab === 'advanced'}
+                      data-test-subj="formTab"
                     >
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
                         defaultMessage: 'Advanced options',
