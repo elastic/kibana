@@ -44,7 +44,8 @@ const serviceIcons: { [key: string]: string } = {
   nodejs: nodeJsIcon,
   php: phpIcon,
   python: pythonIcon,
-  ruby: rubyIcon
+  ruby: rubyIcon,
+  'rum-js': rumJsIcon
 };
 
 // IE 11 does not properly load some SVGs, which causes a runtime error and the
