@@ -84,7 +84,7 @@ export const loadPluginBundle: LoadPluginBundle = <
         }
       };
 
-      if (pluginName === 'data') {
+      if (pluginName === 'data' || pluginName === 'kibanaUtils' || pluginName === 'kibanaReact') {
         readPluginExport();
         return;
       }
