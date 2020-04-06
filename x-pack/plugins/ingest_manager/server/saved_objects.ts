@@ -148,6 +148,7 @@ export const savedObjectMappings = {
     properties: {
       name: { type: 'keyword' },
       version: { type: 'keyword' },
+      internal: { type: 'boolean' },
       installed: {
         type: 'nested',
         properties: {

@@ -6,10 +6,15 @@
 
 import React from 'react';
 import chrome from '../../np_imports/ui/chrome';
-import { capitalize } from 'lodash';
+import { capitalize, get } from 'lodash';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
-import { CALCULATE_DURATION_SINCE, EUI_SORT_DESCENDING } from '../../../common/constants';
+import {
+  CALCULATE_DURATION_SINCE,
+  EUI_SORT_DESCENDING,
+  ALERT_TYPE_LICENSE_EXPIRATION,
+  ALERT_TYPE_CLUSTER_STATE,
+} from '../../../common/constants';
 import { mapSeverity } from './map_severity';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
@@ -21,6 +26,8 @@ const linkToCategories = {
   'elasticsearch/indices': 'Elasticsearch Indices',
   'kibana/instances': 'Kibana Instances',
   'logstash/instances': 'Logstash Nodes',
+  [ALERT_TYPE_LICENSE_EXPIRATION]: 'License expiration',
+  [ALERT_TYPE_CLUSTER_STATE]: 'Cluster state',
 };
 const getColumns = (kbnUrl, scope, timezone) => [
   {
@@ -94,19 +101,22 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'message',
     sortable: true,
-    render: (message, alert) => (
-      <FormattedAlert
-        prefix={alert.prefix}
-        suffix={alert.suffix}
-        message={message}
-        metadata={alert.metadata}
-        changeUrl={target => {
-          scope.$evalAsync(() => {
-            kbnUrl.changePath(target);
-          });
-        }}
-      />
-    ),
+    render: (_message, alert) => {
+      const message = get(alert, 'message.text', get(alert, 'message', ''));
+      return (
+        <FormattedAlert
+          prefix={alert.prefix}
+          suffix={alert.suffix}
+          message={message}
+          metadata={alert.metadata}
+          changeUrl={target => {
+            scope.$evalAsync(() => {
+              kbnUrl.changePath(target);
+            });
+          }}
+        />
+      );
+    },
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.categoryColumnTitle', {
@@ -148,8 +158,8 @@ const getColumns = (kbnUrl, scope, timezone) => [
 export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
   const alertsFlattened = alerts.map(alert => ({
     ...alert,
-    status: alert.metadata.severity,
-    category: alert.metadata.link,
+    status: get(alert, 'metadata.severity', get(alert, 'severity', 0)),
+    category: get(alert, 'metadata.link', get(alert, 'type', null)),
   }));
 
   const injector = chrome.dangerouslyGetActiveInjector();
