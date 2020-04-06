@@ -23,6 +23,38 @@ import { searchSavedObjectTypeMigrations } from './search_migrations';
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
 describe('migration search', () => {
+  describe('6.7.2', () => {
+    const migrationFn = searchSavedObjectTypeMigrations['6.7.2'];
+
+    it('should migrate obsolete match_all query', () => {
+      const migratedDoc = migrationFn(
+        {
+          type: 'search',
+          attributes: {
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                query: {
+                  match_all: {},
+                },
+              }),
+            },
+          },
+        },
+        savedObjectMigrationContext
+      );
+      const migratedSearchSource = JSON.parse(
+        migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+
+      expect(migratedSearchSource).toEqual({
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      });
+    });
+  });
+
   describe('7.0.0', () => {
     const migrationFn = searchSavedObjectTypeMigrations['7.0.0'];
 
