@@ -29,7 +29,7 @@ import {
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
-import { VisTypeTimeseriesConfig } from '.';
+import { VisTypeTimeseriesConfig } from './config';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
 import { ValidationTelemetryService } from './validation_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
