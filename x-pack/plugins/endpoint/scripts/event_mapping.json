@@ -2361,7 +2361,8 @@
           "limit": 10000
         }
       },
-      "refresh_interval": "5s"
+      "refresh_interval": "5s",
+      "default_pipeline": "endpoint-event-pipeline"
     }
   }
 }
