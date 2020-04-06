@@ -70,7 +70,6 @@ export class MessageImporter extends Importer {
         success: true,
       };
     } catch (error) {
-      // console.error(error);
       return {
         success: false,
         error,

@@ -3,11 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -66,7 +61,11 @@ export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
 const Content: FC<{ explanation: string[] }> = ({ explanation }) => (
   <>
     <EuiText size={'s'}>
-      The logical steps that have produced the analysis results.
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.explanationFlyout.content"
+        defaultMessage="The logical steps that have produced the analysis results."
+      />
+
       <EuiSpacer size="l" />
       <EuiSubSteps>
         <ul style={{ wordBreak: 'break-word' }}>
