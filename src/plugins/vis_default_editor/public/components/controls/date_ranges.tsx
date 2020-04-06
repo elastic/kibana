@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { Fragment, useState, useEffect, useCallback, useRef } from 'react';
 import {
   htmlIdGenerator,
   EuiButtonIcon,
@@ -67,6 +67,7 @@ function DateRangesParamEditor({
   setValidity,
 }: AggParamEditorProps<DateRangeValues[]>) {
   const { services } = useKibana();
+  const firstRender = useRef(true);
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
   const hasInvalidRange = value.some(
     ({ from, to }) => (!from && !to) || !validateDateMath(from) || !validateDateMath(to)
@@ -88,7 +89,8 @@ function DateRangesParamEditor({
 
   // set up an initial range when there is no default range
   useEffect(() => {
-    if (!value.length) {
+    if (firstRender.current && !value.length) {
+      firstRender.current = false;
       onAddRange();
     }
   }, [onAddRange, value.length]);
