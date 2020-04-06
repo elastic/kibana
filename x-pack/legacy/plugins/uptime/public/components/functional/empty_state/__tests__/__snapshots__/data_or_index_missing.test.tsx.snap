@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DataOrIndexMissing component renders basePath and headingMessage 1`] = `
+exports[`DataOrIndexMissing component renders headingMessage 1`] = `
 <EuiFlexGroup
   data-test-subj="data-missing"
   justifyContent="center"
@@ -78,7 +78,17 @@ exports[`DataOrIndexMissing component renders basePath and headingMessage 1`] = 
             size="l"
           >
             <h3>
-              bar
+              <FormattedMessage
+                defaultMessage="Uptime index {indexName} not found"
+                id="xpack.uptime.emptyState.noIndexTitle"
+                values={
+                  Object {
+                    "indexName": <em>
+                      heartbeat-*
+                    </em>,
+                  }
+                }
+              />
             </h3>
           </EuiTitle>
         }

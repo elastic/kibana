@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DataOrIndexMissing } from '../data_or_index_missing';
 
 describe('DataOrIndexMissing component', () => {
-  it('renders basePath and headingMessage', () => {
+  it('renders headingMessage', () => {
     const headingMessage = (
       <FormattedMessage
         id="xpack.uptime.emptyState.noIndexTitle"
