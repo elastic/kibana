@@ -237,10 +237,12 @@ class TutorialUi extends React.Component {
         {
           id: INSTRUCTIONS_TYPE.ON_PREM,
           label: selfManagedLabel,
+          'data-test-subj': 'selfManagedTutorial',
         },
         {
           id: INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD,
           label: cloudLabel,
+          'data-test-subj': 'onCloudTutorial',
         },
       ];
       return (
