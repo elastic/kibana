@@ -18,6 +18,7 @@ export const createLogThresholdExecutor = (alertUUID: string) =>
     const alertInstance = services.alertInstanceFactory(alertUUID);
     const { threshold, comparator, timeUnit, timeSize } = params as LogThresholdAlertParams;
 
+    // @ts-ignore
     const interval = `${timeSize}${timeUnit}`;
 
     const logCount = 1; // Replace this with a function to count matching logs over the `interval`
