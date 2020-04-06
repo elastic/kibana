@@ -25,9 +25,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/60559
-  // eslint-disable-next-line ban/ban
-  describe.only('spaces', () => {
+  describe('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
@@ -72,7 +70,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
         await retry.try(async () => {
           await setDiscoverTimeRange();
-
           const hasNoResults = await PageObjects.discover.hasNoResults();
           expect(hasNoResults).to.be(false);
 

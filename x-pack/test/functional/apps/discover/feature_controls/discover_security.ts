@@ -28,8 +28,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/60535
-  describe.skip('security', () => {
+  describe('security', () => {
     before(async () => {
       await esArchiver.load('discover/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -185,9 +184,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
-        await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await retry.try(async () => {
+          await setDiscoverTimeRange();
+          const hasNoResults = await PageObjects.discover.hasNoResults();
+          expect(hasNoResults).to.be(false);
+
+          await PageObjects.discover.clickFieldListItem('bytes');
+          await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        });
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
@@ -274,9 +278,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
-        await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await retry.try(async () => {
+          await setDiscoverTimeRange();
+          const hasNoResults = await PageObjects.discover.hasNoResults();
+          expect(hasNoResults).to.be(false);
+          await PageObjects.discover.clickFieldListItem('bytes');
+          await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        });
       });
 
       it('Permalinks shows create short-url button', async () => {
@@ -351,9 +359,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows the visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
-        await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        await retry.try(async () => {
+          await setDiscoverTimeRange();
+          const hasNoResults = await PageObjects.discover.hasNoResults();
+          expect(hasNoResults).to.be(false);
+
+          await PageObjects.discover.clickFieldListItem('bytes');
+          await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        });
       });
     });
 
