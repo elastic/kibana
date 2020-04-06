@@ -191,7 +191,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           expect(hasNoResults).to.be(false);
 
           await PageObjects.discover.clickFieldListItem('bytes');
-          await PageObjects.discover.expectFieldListItemVisualize('bytes');
+          await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
         });
       });
 
@@ -284,7 +284,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           const hasNoResults = await PageObjects.discover.hasNoResults();
           expect(hasNoResults).to.be(false);
           await PageObjects.discover.clickFieldListItem('bytes');
-          await PageObjects.discover.expectFieldListItemVisualize('bytes');
+          await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
         });
       });
 
