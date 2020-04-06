@@ -261,7 +261,7 @@ export const ProcessEventDot = styled(
               </use>
               <foreignObject x="7.41" y="-3.4" height="6.4px" width="42px">
                 <LabelText>
-                  <span>{eventModel.eventName(event)}</span>
+                  <span id={labelId}>{eventModel.eventName(event)}</span>
                 </LabelText>
               </foreignObject>
               <text
