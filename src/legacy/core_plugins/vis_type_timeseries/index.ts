@@ -24,7 +24,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 
 const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
-    id: 'metrics',
+    id: 'vis_type_timeseries',
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
