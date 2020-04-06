@@ -398,7 +398,16 @@ export interface Visualization<T = unknown, P = unknown> {
 
   switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
 
-  // For initializing from saved object
+  /**
+   * Initialize is called when opening the visualization, such as in the following cases:
+   *
+   * - Loading Lens in an empty state
+   * - Loading a saved Lens visualization which uses this visualization
+   * - When switching to this visualization in the chart switcher
+   *
+   * The response of the initialize call will be used to update the editor state, such as
+   * if the visualization tracks UI state that is not saved
+   */
   initialize: (frame: FramePublicAPI, state?: P) => T;
 
   getPersistableState: (state: T) => P;

@@ -126,28 +126,50 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   getSuggestions,
 
   initialize(frame, state) {
-    return (
-      state || {
-        title: 'Empty XY chart',
-        legend: { isVisible: true, position: Position.Right },
-        preferredSeriesType: defaultSeriesType,
-        layers: [
-          {
-            layerId: frame.addNewLayer(),
-            accessors: [],
-            position: Position.Top,
-            seriesType: defaultSeriesType,
-            showGridlines: false,
-          },
-        ],
-      }
-    );
+    if (state) {
+      // Before 7.7, the XY visualization would generate IDs for missing dimensions
+      // Instead of migrating, we use the initialization step to hide these
+      return {
+        ...state,
+        layers: state.layers.map(layer => {
+          const datasource = frame.datasourceLayers[layer.layerId];
+          const hasXAccessor =
+            layer.xAccessor && datasource.getOperationForColumnId(layer.xAccessor);
+          const hasSplitAccessor =
+            layer.splitAccessor && datasource.getOperationForColumnId(layer.splitAccessor);
+          const yAccessors = layer.accessors.filter(accessor =>
+            datasource.getOperationForColumnId(accessor)
+          );
+          return {
+            ...layer,
+            accessors: yAccessors,
+            xAccessor: hasXAccessor ? layer.xAccessor : undefined,
+            splitAccessor: hasSplitAccessor ? layer.splitAccessor : undefined,
+          };
+        }),
+      };
+    }
+    return {
+      title: 'Empty XY chart',
+      legend: { isVisible: true, position: Position.Right },
+      preferredSeriesType: defaultSeriesType,
+      layers: [
+        {
+          layerId: frame.addNewLayer(),
+          accessors: [],
+          position: Position.Top,
+          seriesType: defaultSeriesType,
+          showGridlines: false,
+        },
+      ],
+    };
   },
 
   getPersistableState: state => state,
 
   getConfiguration(props) {
     const layer = props.state.layers.find(l => l.layerId === props.layerId)!;
+
     return {
       groups: [
         {

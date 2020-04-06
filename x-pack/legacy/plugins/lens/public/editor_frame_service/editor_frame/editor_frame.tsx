@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import React, { useEffect, useReducer } from 'react';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
@@ -163,13 +164,21 @@ export function EditorFrame(props: EditorFrameProps) {
 
   // Initialize visualization as soon as all datasources are ready
   useEffect(() => {
-    if (allLoaded && state.visualization.state === null && activeVisualization) {
-      const initialVisualizationState = activeVisualization.initialize(framePublicAPI);
-      dispatch({
-        type: 'UPDATE_VISUALIZATION_STATE',
-        visualizationId: activeVisualization.id,
-        newState: initialVisualizationState,
-      });
+    if (allLoaded && activeVisualization) {
+      // Initialize from either empty state or saved doc
+      const initializedState = activeVisualization.initialize(
+        framePublicAPI,
+        state.visualization.state ?? null
+      );
+
+      // Visualizations can have private state that is not saved
+      if (!isEqual(state.visualization.state, initializedState)) {
+        dispatch({
+          type: 'UPDATE_VISUALIZATION_STATE',
+          visualizationId: activeVisualization.id,
+          newState: initializedState,
+        });
+      }
     }
   }, [allLoaded, activeVisualization, state.visualization.state]);
 

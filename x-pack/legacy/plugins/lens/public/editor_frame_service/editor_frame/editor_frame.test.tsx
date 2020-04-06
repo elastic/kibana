@@ -116,7 +116,7 @@ describe('editor_frame', () => {
       expect(mockDatasource.initialize).toHaveBeenCalled();
     });
 
-    it('should not initialize datasource and visualization if no initial one is specificed', () => {
+    it('should not initialize datasource and visualization if no initial one is specified', () => {
       act(() => {
         mount(
           <EditorFrame
@@ -226,13 +226,17 @@ describe('editor_frame', () => {
       expect(mockVisualization.initialize).toHaveBeenCalled();
     });
 
-    it('should pass the public frame api into visualization initialize', async () => {
+    it('should use initialize the visualization and update with private state', async () => {
+      const initializeMock = {
+        ...mockVisualization,
+        initialize: jest.fn().mockReturnValue('initialized'),
+      };
       await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
             visualizationMap={{
-              testVis: mockVisualization,
+              testVis: initializeMock,
             }}
             datasourceMap={{
               testDatasource: mockDatasource,
@@ -243,17 +247,33 @@ describe('editor_frame', () => {
             dateRange={{ fromDate: 'now-7d', toDate: 'now' }}
           />
         );
-        expect(mockVisualization.initialize).not.toHaveBeenCalled();
+        expect(initializeMock.initialize).not.toHaveBeenCalled();
       });
 
-      expect(mockVisualization.initialize).toHaveBeenCalledWith({
-        datasourceLayers: {},
-        addNewLayer: expect.any(Function),
-        removeLayers: expect.any(Function),
-        query: { query: '', language: 'lucene' },
-        filters: [],
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
-      });
+      expect(initializeMock.initialize).toHaveBeenCalledTimes(2);
+      expect(initializeMock.initialize).toHaveBeenCalledWith(
+        {
+          datasourceLayers: {},
+          addNewLayer: expect.any(Function),
+          removeLayers: expect.any(Function),
+          query: { query: '', language: 'lucene' },
+          filters: [],
+          dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        },
+        null
+      );
+
+      expect(initializeMock.initialize).toHaveBeenCalledWith(
+        {
+          datasourceLayers: {},
+          addNewLayer: expect.any(Function),
+          removeLayers: expect.any(Function),
+          query: { query: '', language: 'lucene' },
+          filters: [],
+          dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        },
+        'initialized'
+      );
     });
 
     it('should add new layer on active datasource on frame api call', async () => {

@@ -111,10 +111,27 @@ describe('xy_visualization', () => {
       `);
     });
 
-    it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(createMockFramePublicAPI(), exampleState())).toEqual(
-        exampleState()
-      );
+    it('removes dimensions from saved state if they are not on datasource', () => {
+      const state = exampleState();
+      expect(xyVisualization.initialize(createMockFramePublicAPI(), state)).toEqual({
+        ...state,
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: undefined,
+            xAccessor: undefined,
+            accessors: [],
+          },
+        ],
+      });
+    });
+
+    it('keeps dimensions from saved state if they are in datasource', () => {
+      const state = exampleState();
+      const frame = createMockFramePublicAPI();
+      (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue(true);
+      expect(xyVisualization.initialize(frame, state)).toEqual(state);
     });
   });
 
