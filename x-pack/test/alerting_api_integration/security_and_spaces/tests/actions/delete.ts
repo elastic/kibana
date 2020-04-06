@@ -144,17 +144,23 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 
-          expect(response.statusCode).to.eql(400);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
             case 'superuser at space1':
+            case 'space_1_all at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'Preconfigured connector my-slack1 is not allowed to delete.',
+                message: 'Preconfigured action my-slack1 is not allowed to delete.',
               });
               break;
             default:
