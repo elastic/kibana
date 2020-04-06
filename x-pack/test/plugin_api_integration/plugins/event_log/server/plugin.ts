@@ -14,14 +14,14 @@ import {
   IRouter,
   Logger,
   PluginInitializerContext,
+  RouteValidationResultFactory,
 } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
 import {
   IEventLogService,
   IEventLogClientService,
   IEventLogger,
 } from '../../../../../plugins/event_log/server';
-import { EventSchema } from '../../../../../plugins/event_log/server/types';
+import { IValidatedEvent } from '../../../../../plugins/event_log/server/types';
 
 // this plugin's dependendencies
 export interface EventLogFixtureSetupDeps {
@@ -63,17 +63,15 @@ export class EventLogFixturePlugin
   public stop() {}
 }
 
-const paramSchema = schema.object({
-  id: schema.string(),
-});
-
 const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logger) => {
   router.post(
     {
       path: `/api/log_event_fixture/{id}/_log`,
       validate: {
-        params: paramSchema,
-        body: EventSchema,
+        // removed validation as schema is currently broken in tests
+        // blocked by: https://github.com/elastic/kibana/issues/61652
+        params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
+        body: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
     },
     async function(
@@ -81,8 +79,9 @@ const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logge
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      const { id } = req.params;
-      logger.info(`log event: ${id}`);
+      const { id } = req.params as { id: string };
+      const event: IValidatedEvent = req.body;
+      logger.info(`test fixture: log event: ${id} ${JSON.stringify(event)}`);
       try {
         await context.core.savedObjects.client.get('event_log_test', id);
         logger.info(`found existing saved object`);
@@ -91,7 +90,7 @@ const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logge
         await context.core.savedObjects.client.create('event_log_test', {}, { id });
         logger.info(`created saved object`);
       }
-      eventLogger.logEvent(req.body);
+      eventLogger.logEvent(event);
       logger.info(`logged`);
       return res.ok({});
     }
