@@ -35,7 +35,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   //     await PageObjects.common.navigateToApp('settings');
   //   });
 
-  describe('Management', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/60470
+  describe.skip('Management', () => {
     before(async () => {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
