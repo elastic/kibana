@@ -6,6 +6,8 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
+import { SendRequestResponse } from 'src/plugins/es_ui_shared/public';
+import { CreateFleetSetupResponse } from '../../../../../ingest_manager/common';
 import { IngestManagerStart } from '../../../../../ingest_manager/public';
 
 async function isIngestManagerInitialized(ingestManager: IngestManagerStart) {
@@ -20,39 +22,33 @@ export const Setup: React.FunctionComponent<{
   ingestManager: IngestManagerStart;
   notifications: NotificationsStart;
 }> = ({ ingestManager, notifications }) => {
-  const unknownError = 'Ingest Manager failed to initialize for an unknown reason';
-
-  const sendToast = (text: string) => {
-    const errorText = new Error(
-      i18n.translate('xpack.endpoint.ingestToastMessage', {
-        defaultMessage: 'Ingest Manager failed during its setup.',
-      })
-    );
-    errorText.stack = text;
-    notifications.toasts.addError(errorText, {
-      title: i18n.translate('xpack.endpoint.ingestToastTitle', {
-        defaultMessage: 'App failed to initialize',
-      }),
-    });
-  };
-
   React.useEffect(() => {
+    const unknownError = i18n.translate('xpack.endpoint.ingestUnknownError', {
+      defaultMessage: 'Ingest Manager failed to initialize for an unknown reason',
+    });
+
+    const sendToast = (text: string) => {
+      const errorText = new Error(
+        i18n.translate('xpack.endpoint.ingestToastMessage', {
+          defaultMessage: 'Ingest Manager failed during its setup.',
+        })
+      );
+      errorText.stack = text;
+      notifications.toasts.addError(errorText, {
+        title: i18n.translate('xpack.endpoint.ingestToastTitle', {
+          defaultMessage: 'App failed to initialize',
+        }),
+      });
+    };
+
     (async () => {
       if (await isIngestManagerInitialized(ingestManager)) {
         return null;
       }
-    })();
-
-    ingestManager
-      .setup()
-      .then(response => {
-        if (response.error) {
-          sendToast(response.error.message);
-        } else if (!response.data?.isInitialized) {
-          sendToast(unknownError);
-        }
-      })
-      .catch(error => {
+      let response: SendRequestResponse<CreateFleetSetupResponse, Error>;
+      try {
+        response = await ingestManager.setup();
+      } catch (error) {
         if (typeof error === 'string') {
           sendToast(error);
         } else if (error?.message && typeof error.message === 'string') {
@@ -60,10 +56,15 @@ export const Setup: React.FunctionComponent<{
         } else {
           sendToast(unknownError);
         }
-      });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        return null;
+      }
+      if (response.error) {
+        sendToast(response.error.message);
+      } else if (!response.data?.isInitialized) {
+        sendToast(unknownError);
+      }
+    })();
+  }, [ingestManager, notifications.toasts]);
 
   return null;
 };
