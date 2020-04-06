@@ -4,5 +4,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["home", "management", "data"],
-  "optionalPlugins": ["dashboard", "visualizations"]
+  "optionalPlugins": ["dashboard", "visualizations", "discover"]
 }

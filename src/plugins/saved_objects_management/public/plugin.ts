@@ -22,6 +22,7 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
+import { DiscoverStart } from '../../discover/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import {
@@ -52,6 +53,7 @@ export interface StartDependencies {
   data: DataPublicPluginStart;
   dashboard?: DashboardStart;
   visualizations?: VisualizationsStart;
+  discover?: DiscoverStart;
 }
 
 export class SavedObjectsManagementPlugin
