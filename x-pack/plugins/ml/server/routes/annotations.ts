@@ -45,10 +45,7 @@ export function annotationRoutes(
    * @apiName GetAnnotations
    * @apiDescription Gets annotations.
    *
-   * @apiParam {String[]} jobIds List of job IDs
-   * @apiParam {String} earliestMs
-   * @apiParam {Number} latestMs
-   * @apiParam {Number} maxAnnotations Max limit of annotations returned
+   * @apiSchema getAnnotationsSchema
    *
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object} annotations
@@ -82,6 +79,8 @@ export function annotationRoutes(
    * @api {put} /api/ml/annotations/index Index annotation
    * @apiName IndexAnnotations
    * @apiDescription Index the annotation.
+   *
+   * @apiSchema indexAnnotationSchema
    *
    * @apiParam {Object} annotation
    * @apiParam {String} username
@@ -127,6 +126,8 @@ export function annotationRoutes(
    * @api {delete} /api/ml/annotations/index Deletes annotation
    * @apiName DeleteAnnotation
    * @apiDescription Deletes specified annotation
+   *
+   * @apiSchema deleteAnnotationSchema
    *
    * @apiParam {String} annotationId
    */
