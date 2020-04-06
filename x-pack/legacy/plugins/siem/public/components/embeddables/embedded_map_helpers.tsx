@@ -11,10 +11,20 @@ import minimatch from 'minimatch';
 import { IndexPatternMapping, SetQuery } from './types';
 import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../plugins/maps/public';
-import { MapEmbeddable, RenderTooltipContentParams } from '../../../../maps/public';
+import {
+  MapEmbeddable,
+  RenderTooltipContentParams,
+  MapEmbeddableInput,
+} from '../../../../maps/public';
 import * as i18n from './translations';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-import { EmbeddableStart, ViewMode } from '../../../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableStart,
+  isErrorEmbeddable,
+  EmbeddableOutput,
+  ViewMode,
+  ErrorEmbeddable,
+} from '../../../../../../../src/plugins/embeddable/public';
 import { IndexPatternSavedObject } from '../../hooks/types';
 
 /**
@@ -40,14 +50,19 @@ export const createEmbeddable = async (
   setQuery: SetQuery,
   portalNode: PortalNode,
   embeddableApi: EmbeddableStart
-): Promise<MapEmbeddable> => {
-  const factory = embeddableApi.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+): Promise<MapEmbeddable | ErrorEmbeddable> => {
+  const factory = embeddableApi.getEmbeddableFactory<
+    MapEmbeddableInput,
+    EmbeddableOutput,
+    MapEmbeddable
+  >(MAP_SAVED_OBJECT_TYPE);
 
-  const state = {
-    layerList: getLayerList(indexPatterns),
+  if (!factory) {
+    throw new Error('Map embeddable factory undefined');
+  }
+
+  const input: MapEmbeddableInput = {
     title: i18n.MAP_TITLE,
-  };
-  const input = {
     id: uuid.v4(),
     filters,
     hidePanelTitles: true,
@@ -86,13 +101,16 @@ export const createEmbeddable = async (
     return <OutPortal node={portalNode} {...props} />;
   };
 
-  // @ts-ignore method added in https://github.com/elastic/kibana/pull/43878
-  const embeddableObject = await factory.createFromState(
-    state,
-    input,
-    undefined,
-    renderTooltipContent
-  );
+  const embeddableObject = await factory.create(input);
+
+  if (!embeddableObject) {
+    throw new Error('Map embeddable is undefined');
+  }
+
+  if (!isErrorEmbeddable(embeddableObject)) {
+    embeddableObject.setRenderTooltipContent(renderTooltipContent);
+    embeddableObject.setLayerList(getLayerList(indexPatterns));
+  }
 
   // Wire up to app refresh action
   setQuery({

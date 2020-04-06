@@ -31,7 +31,7 @@ import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { PrePackagedRulesPrompt } from '../components/pre_packaged_rules/load_empty_prompt';
 import { GenericDownloader } from '../../../../components/generic_downloader';
-import { AllRulesTables } from '../components/all_rules_tables';
+import { AllRulesTables, SortingType } from '../components/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
@@ -41,11 +41,12 @@ import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 
+const SORT_FIELD = 'enabled';
 const initialState: State = {
   exportRuleIds: [],
   filterOptions: {
     filter: '',
-    sortField: 'enabled',
+    sortField: SORT_FIELD,
     sortOrder: 'desc',
   },
   loadingRuleIds: [],
@@ -127,9 +128,7 @@ export const AllRules = React.memo<AllRulesProps>(
     });
 
     const sorting = useMemo(
-      () => ({
-        sort: { field: 'enabled', direction: filterOptions.sortOrder },
-      }),
+      (): SortingType => ({ sort: { field: 'enabled', direction: filterOptions.sortOrder } }),
       [filterOptions.sortOrder]
     );
 
@@ -171,7 +170,7 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch({
           type: 'updateFilterOptions',
           filterOptions: {
-            sortField: 'enabled', // Only enabled is supported for sorting currently
+            sortField: SORT_FIELD, // Only enabled is supported for sorting currently
             sortOrder: sort?.direction ?? 'desc',
           },
           pagination: { page: page.index + 1, perPage: page.size },
@@ -331,7 +330,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   euiBasicTableSelectionProps={euiBasicTableSelectionProps}
                   hasNoPermissions={hasNoPermissions}
                   monitoringColumns={monitoringColumns}
-                  paginationMemo={paginationMemo}
+                  pagination={paginationMemo}
                   rules={rules}
                   rulesColumns={rulesColumns}
                   rulesStatuses={rulesStatuses}

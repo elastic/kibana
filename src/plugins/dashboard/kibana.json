@@ -5,12 +5,12 @@
     "data",
     "embeddable",
     "inspector",
+    "kibanaLegacy",
+    "navigation",
     "uiActions",
     "savedObjects"
   ],
-  "optionalPlugins": [
-    "share"
-  ],
+  "optionalPlugins": ["home", "share", "usageCollection"],
   "server": false,
   "ui": true
 }

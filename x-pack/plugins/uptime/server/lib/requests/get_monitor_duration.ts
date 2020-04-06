@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { getHistogramIntervalFormatted } from '../helper';
+import { QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
 import {
   LocationDurationLine,
   MonitorDurationResult,
@@ -62,10 +62,9 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
       size: 0,
       aggs: {
         timeseries: {
-          date_histogram: {
+          auto_date_histogram: {
             field: '@timestamp',
-            fixed_interval: getHistogramIntervalFormatted(dateStart, dateEnd),
-            min_doc_count: 0,
+            buckets: QUERY.DEFAULT_BUCKET_COUNT,
           },
           aggs: {
             location: {
