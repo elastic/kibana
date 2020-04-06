@@ -10,7 +10,7 @@ import React from 'react';
 import { MVTVectorSourceEditor } from './mvt_vector_source_editor';
 import { AbstractSource } from '../source';
 import { TiledVectorLayer } from '../../tiled_vector_layer';
-import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import {GeoJsonWithMeta, ITiledSingleLayerVectorSource, TiledSingleLayerVectorSourceMeta} from '../vector_source';
 import { MVT_SINGLE_LAYER } from '../../../../../../../plugins/maps/common/constants';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
@@ -31,11 +31,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   static icon = 'logoElasticsearch';
 
-  static createDescriptor({ urlTemplate }) {
+  static createDescriptor({ urlTemplate, layerName }) {
     return {
       type: MVTSingleLayerVectorSource.type,
       id: uuid(),
       urlTemplate,
+      layerName,
     };
   }
 
@@ -73,8 +74,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  async getUrlTemplateWithMeta() {
-    return this._descriptor.urlTemplate;
+  async getUrlTemplateWithMeta(): TiledSingleLayerVectorSourceMeta {
+    return {
+      urlTemplate: this._descriptor.urlTemplate,
+      layerName: this._descriptor.layerName,
+
+    };
   }
 
   getSupportedShapeTypes() {
