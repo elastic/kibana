@@ -34,7 +34,6 @@ uiRoutes.when('/management/kibana/index_pattern', {
     $scope.$$postDigest(() => {
       const $routeParams = $injector.get('$routeParams');
       const indexPatternCreationType = npSetup.indexPatternManagement.creation.getType(
-        // const indexPatternCreationType = managementSetup.indexPattern.creation.getType(
         $routeParams.type
       );
 
