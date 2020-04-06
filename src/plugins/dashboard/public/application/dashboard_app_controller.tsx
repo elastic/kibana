@@ -19,9 +19,10 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup, EuiHorizontalRule } from '@elastic/eui';
+import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 import { FlexGroupJustifyContent } from '@elastic/eui/src/components/flex/flex_group';
-import React from 'react';
+import React, { useState, ReactElement } from 'react';
 import ReactDOM from 'react-dom';
 import angular from 'angular';
 
@@ -96,6 +97,25 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   navigation: NavigationStart;
 }
 
+enum UrlParams {
+  SHOW_TOP_MENU = 'show-top-menu',
+  SHOW_QUERY_INPUT = 'show-query-input',
+  SHOW_TIME_FILTER = 'show-time-filter',
+  SHOW_FILTER_BAR = 'show-filter-bar',
+  HIDE_FILTER_BAR = 'hide-filter-bar',
+}
+
+interface UrlParamsSelectedMap {
+  [UrlParams.SHOW_TOP_MENU]: boolean;
+  [UrlParams.SHOW_QUERY_INPUT]: boolean;
+  [UrlParams.SHOW_TIME_FILTER]: boolean;
+  [UrlParams.SHOW_FILTER_BAR]: boolean;
+}
+
+interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTER_BAR> {
+  [UrlParams.HIDE_FILTER_BAR]: boolean;
+}
+
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
   appStatus: {
@@ -145,10 +165,10 @@ export class DashboardAppController {
     const shouldForceDisplay = (param: string): boolean =>
       chrome.isEmbedded && Boolean($routeParams[param]);
 
-    const forceShowTopNavMenu = shouldForceDisplay('show-top-menu');
-    const forceShowQueryInput = shouldForceDisplay('show-query-input');
-    const forceShowDatePicker = shouldForceDisplay('show-time-filter');
-    const forceHideFilterBar = shouldForceDisplay('hide-filter-bar');
+    const forceShowTopNavMenu = shouldForceDisplay(UrlParams.SHOW_TOP_MENU);
+    const forceShowQueryInput = shouldForceDisplay(UrlParams.SHOW_QUERY_INPUT);
+    const forceShowDatePicker = shouldForceDisplay(UrlParams.SHOW_TIME_FILTER);
+    const forceHideFilterBar = shouldForceDisplay(UrlParams.HIDE_FILTER_BAR);
 
     let lastReloadRequestTime = 0;
     const dash = ($scope.dash = $route.current.locals.dash);
@@ -942,6 +962,70 @@ export class DashboardAppController {
     if (share) {
       // the share button is only availabale if "share" plugin contract enabled
       navActions[TopNavIds.SHARE] = (anchorElement) => {
+        const EmbedUrlParamExtension = ({
+          setParamValue,
+        }: {
+          setParamValue: (paramUpdate: UrlParamValues) => void;
+        }): ReactElement => {
+          const [urlParamsSelectedMap, setUrlParamsSelectedMap] = useState<UrlParamsSelectedMap>({
+            [UrlParams.SHOW_TOP_MENU]: false,
+            [UrlParams.SHOW_QUERY_INPUT]: false,
+            [UrlParams.SHOW_TIME_FILTER]: false,
+            [UrlParams.SHOW_FILTER_BAR]: true,
+          });
+
+          const checkboxes = [
+            [UrlParams.SHOW_TOP_MENU, 'topMenu', 'Top menu'],
+            [UrlParams.SHOW_QUERY_INPUT, 'query', 'Query'],
+            [UrlParams.SHOW_TIME_FILTER, 'timeFilter', 'Time filter'],
+            [UrlParams.SHOW_FILTER_BAR, 'filterBar', 'Filter bar'],
+          ].map(([urlParam, translationId, defaultMessage]) => ({
+            id: urlParam,
+            label: i18n.translate(`share.urlPanel.${translationId}`, {
+              defaultMessage,
+            }),
+          }));
+
+          const handleChange = (param: string): void => {
+            const urlParamsSelectedMapUpdate = {
+              ...urlParamsSelectedMap,
+              [param]: !urlParamsSelectedMap[param as keyof UrlParamsSelectedMap],
+            };
+            setUrlParamsSelectedMap(urlParamsSelectedMapUpdate);
+
+            const urlParamValues = {
+              [UrlParams.SHOW_TOP_MENU]: urlParamsSelectedMap[UrlParams.SHOW_TOP_MENU],
+              [UrlParams.SHOW_QUERY_INPUT]: urlParamsSelectedMap[UrlParams.SHOW_QUERY_INPUT],
+              [UrlParams.SHOW_TIME_FILTER]: urlParamsSelectedMap[UrlParams.SHOW_TIME_FILTER],
+              [UrlParams.HIDE_FILTER_BAR]: !urlParamsSelectedMap[UrlParams.SHOW_FILTER_BAR],
+              [param === UrlParams.SHOW_FILTER_BAR ? UrlParams.HIDE_FILTER_BAR : param]:
+                param === UrlParams.SHOW_FILTER_BAR
+                  ? urlParamsSelectedMap[UrlParams.SHOW_FILTER_BAR]
+                  : !urlParamsSelectedMap[param as keyof UrlParamsSelectedMap],
+            };
+            setParamValue(urlParamValues);
+          };
+
+          return (
+            <React.Fragment>
+              <EuiHorizontalRule />
+              <EuiCheckboxGroup
+                options={checkboxes}
+                idToSelectedMap={
+                  (urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap
+                }
+                onChange={handleChange}
+                legend={{
+                  children: i18n.translate('share.urlPanel.include', {
+                    defaultMessage: 'Include',
+                  }),
+                }}
+                data-test-subj="embedUrlParamExtension"
+              />
+            </React.Fragment>
+          );
+        };
+
         share.toggleShareContextMenu({
           anchorElement,
           allowEmbed: true,
@@ -954,6 +1038,12 @@ export class DashboardAppController {
             title: dash.title,
           },
           isDirty: dashboardStateManager.getIsDirty(),
+          embedUrlParamExtensions: [
+            {
+              paramName: 'embed',
+              component: EmbedUrlParamExtension,
+            },
+          ],
         });
       };
     }

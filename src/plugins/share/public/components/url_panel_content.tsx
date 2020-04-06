@@ -21,15 +21,12 @@ import React, { Component, ReactElement } from 'react';
 
 import {
   EuiButton,
-  EuiCheckboxGroup,
-  EuiCheckboxGroupIdToSelectedMap,
   EuiCopy,
   EuiFlexGroup,
   EuiSpacer,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
@@ -44,6 +41,7 @@ import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 
 import { shortenUrl } from '../lib/url_shortener';
+import { UrlParamExtension } from '../types';
 
 interface Props {
   allowShortUrl: boolean;
@@ -53,18 +51,12 @@ interface Props {
   shareableUrl?: string;
   basePath: string;
   post: HttpStart['post'];
+  urlParamExtensions?: UrlParamExtension[];
 }
 
 export enum ExportUrlAsType {
   EXPORT_URL_AS_SAVED_OBJECT = 'savedObject',
   EXPORT_URL_AS_SNAPSHOT = 'snapshot',
-}
-
-interface UrlParams {
-  topMenu: boolean;
-  query: boolean;
-  timeFilter: boolean;
-  filterBar: boolean;
 }
 
 interface State {
@@ -73,7 +65,7 @@ interface State {
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
-  urlParamsSelectedMap: UrlParams;
+  urlParams?: { [key: string]: { [queryParam: string]: boolean } };
 }
 
 export class UrlPanelContent extends Component<Props, State> {
@@ -90,12 +82,6 @@ export class UrlPanelContent extends Component<Props, State> {
       useShortUrl: false,
       isCreatingShortUrl: false,
       url: '',
-      urlParamsSelectedMap: {
-        topMenu: false,
-        query: false,
-        timeFilter: false,
-        filterBar: true,
-      },
     };
   }
 
@@ -206,31 +192,52 @@ export class UrlPanelContent extends Component<Props, State> {
 
   private getSnapshotUrl = () => {
     let url = this.props.shareableUrl || window.location.href;
+
     if (this.props.isEmbedded) {
       url = this.makeUrlEmbeddable(url);
     }
+    if (this.state.urlParams) {
+      url = this.getUrlParamExtensions(url);
+    }
+
     return url;
   };
 
-  private getEmbedQueryParams = (): string => {
-    return [
-      ['&show-top-menu=true', this.state.urlParamsSelectedMap.topMenu],
-      ['&show-query-input=true', this.state.urlParamsSelectedMap.query],
-      ['&show-time-filter=true', this.state.urlParamsSelectedMap.timeFilter],
-      ['&hide-filter-bar=true', !this.state.urlParamsSelectedMap.filterBar], // Inverted to keep default behaviour for old links
-    ].reduce(
-      (accumulator, [queryParam, include]) => (include ? accumulator + queryParam : accumulator),
-      '?embed=true'
-    );
+  private makeUrlEmbeddable = (url: string): string => {
+    const embedParam = '?embed=true';
+    const urlHasQueryString = url.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return url.replace('?', `${embedParam}&`);
+    }
+
+    return `${url}${embedParam}`;
   };
 
-  private makeUrlEmbeddable = (url: string): string => {
-    const urlHasQueryString = url.indexOf('?') !== -1;
-    const embedQueryParams = this.getEmbedQueryParams();
-    if (urlHasQueryString) {
-      return url.replace('?', `${embedQueryParams}&`);
+  private getUrlParamExtensions = (url: string): string => {
+    if (!this.state.urlParams) {
+      return url;
     }
-    return `${url}${embedQueryParams}`;
+
+    return Object.keys(this.state.urlParams).reduce((urlAccumulator, key) => {
+      if (!this.state.urlParams || !this.state.urlParams[key]) {
+        return urlAccumulator;
+      }
+
+      return Object.keys(this.state.urlParams[key]).reduce((queryAccumulator, queryParam) => {
+        if (
+          !this.state.urlParams ||
+          !this.state.urlParams[key] ||
+          !this.state.urlParams[key][queryParam]
+        ) {
+          return queryAccumulator;
+        }
+
+        return this.state.urlParams[key][queryParam]
+          ? queryAccumulator + `&${queryParam}=true`
+          : queryAccumulator;
+      }, urlAccumulator);
+    }, url);
   };
 
   private makeIframeTag = (url?: string) => {
@@ -314,17 +321,6 @@ export class UrlPanelContent extends Component<Props, State> {
         );
       }
     }
-  };
-
-  private handleUrlParamChange = (optionId: string): void => {
-    const param = optionId as keyof UrlParams;
-    const stateUpdate: Partial<State> = {
-      urlParamsSelectedMap: {
-        ...this.state.urlParamsSelectedMap,
-        [param]: !this.state.urlParamsSelectedMap[param],
-      },
-    };
-    this.setState(stateUpdate as State, this.setUrl);
   };
 
   private renderExportUrlAsOptions = () => {
@@ -439,34 +435,29 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private renderUrlParamExtensions = (): ReactElement | void => {
-    if (!this.props.isEmbedded) {
+    if (!this.props.urlParamExtensions) {
       return;
     }
 
-    const checkboxes = [
-      ['topMenu', 'Top menu'],
-      ['query', 'Query'],
-      ['timeFilter', 'Time filter'],
-      ['filterBar', 'Filter bar'],
-    ].map(([id, message]) => ({
-      id,
-      label: <FormattedMessage id={`share.urlPanel.${id}`} defaultMessage={message} />,
-    }));
+    const setParamValue = (paramName: string) => (
+      values: { [queryParam: string]: boolean } = {}
+    ): void => {
+      const stateUpdate = {
+        urlParams: {
+          ...this.state.urlParams,
+          [paramName]: {
+            ...values,
+          },
+        },
+      };
+      this.setState(stateUpdate, this.setUrl);
+    };
 
     return (
       <React.Fragment>
-        <EuiHorizontalRule />
-        <EuiCheckboxGroup
-          options={checkboxes}
-          idToSelectedMap={
-            (this.state.urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap
-          }
-          onChange={this.handleUrlParamChange}
-          legend={{
-            children: <FormattedMessage id="share.urlPanel.include" defaultMessage="Include" />,
-          }}
-          data-test-subj="urlParamExtensions"
-        />
+        {this.props.urlParamExtensions.map(({ paramName, component: UrlParamComponent }) => (
+          <UrlParamComponent key={paramName} setParamValue={setParamValue(paramName)} />
+        ))}
       </React.Fragment>
     );
   };
