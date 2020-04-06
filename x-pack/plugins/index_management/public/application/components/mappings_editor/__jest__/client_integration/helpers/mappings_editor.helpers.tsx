@@ -31,7 +31,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-const registerActions = (testBed: TestBed<TestSubjects>) => {
+const createActions = (testBed: TestBed<TestSubjects>) => {
   const { find, waitFor, form, component } = testBed;
 
   const addField = async (name: string, type: string) => {
@@ -105,12 +105,12 @@ export const setup = async (props: any = { onUpdate() {} }): Promise<MappingsEdi
 
   return {
     ...testBed,
-    actions: registerActions(testBed),
+    actions: createActions(testBed),
   };
 };
 
 export type MappingsEditorTestBed = TestBed<TestSubjects> & {
-  actions: ReturnType<typeof registerActions>;
+  actions: ReturnType<typeof createActions>;
 };
 
 export type TestSubjects =
