@@ -34,23 +34,31 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('creating prepackaged rules', () => {
       beforeEach(async () => {
+        console.log('------> GRIND TEST IN BEFORE EACH');
         await createSignalsIndex(supertest);
       });
 
       afterEach(async () => {
+        console.log('------> GRIND TEST IN AFTER EACH');
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(es);
       });
 
-      it('should contain two output keys of rules_installed and rules_updated', async () => {
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(Object.keys(body)).to.eql(['rules_installed', 'rules_updated']);
-      });
+      console.log('ABOUT TO BEGIN LOOP');
+      for (let i = 0; i < 1000; ++i) {
+        it('should contain two output keys of rules_installed and rules_updated (in a loop)', async () => {
+          console.log('----> GRIND TEST IN LOOP', i);
+          const { body, status } = await supertest
+            .put(DETECTION_ENGINE_PREPACKAGED_URL)
+            .set('kbn-xsrf', 'true')
+            .send();
+          if (status !== 200) {
+            console.log('body is:', body, 'status is:', status);
+            process.exit(1);
+          }
+          expect(Object.keys(body)).to.eql(['rules_installed', 'rules_updated']);
+        });
+      }
 
       it('should create the prepackaged rules and return a count greater than zero', async () => {
         const { body } = await supertest
