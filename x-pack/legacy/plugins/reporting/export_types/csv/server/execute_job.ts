@@ -51,9 +51,18 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     } = job;
 
     const decryptHeaders = async () => {
-      let decryptedHeaders;
       try {
-        decryptedHeaders = await crypto.decrypt(headers);
+        if (typeof headers !== 'string') {
+          throw new Error(
+            i18n.translate(
+              'xpack.reporting.exportTypes.csv.executeJob.missingJobHeadersErrorMessage',
+              {
+                defaultMessage: 'Job headers are missing',
+              }
+            )
+          );
+        }
+        return await crypto.decrypt(headers);
       } catch (err) {
         logger.error(err);
         throw new Error(
@@ -66,7 +75,6 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
           )
         ); // prettier-ignore
       }
-      return decryptedHeaders;
     };
 
     const fakeRequest = KibanaRequest.from({
