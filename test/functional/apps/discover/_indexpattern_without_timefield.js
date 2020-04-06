@@ -28,7 +28,6 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       await esArchiver.loadIfNeeded('index_pattern_without_timefield');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
-      await PageObjects.common.navigateToApp('discover');
     });
 
     after(async function unloadMakelogs() {
@@ -36,8 +35,16 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should not display a timepicker', async function() {
+      await PageObjects.common.navigateToApp('discover');
       const timepickerExists = await PageObjects.timePicker.timePickerExists();
       expect(timepickerExists).to.be(false);
+    });
+
+    it('should display a timepicker after switching to an index pattern with timefield', async function() {
+      await PageObjects.common.navigateToApp('discover');
+      expect(await PageObjects.timePicker.timePickerExists()).to.be(false);
+      await PageObjects.discover.selectIndexPattern('with-timefield');
+      expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
     });
   });
 }
