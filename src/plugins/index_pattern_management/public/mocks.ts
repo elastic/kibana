@@ -27,12 +27,12 @@ import {
 
 const createSetupContract = (): IndexPatternManagementSetup => ({
   creation: {
-    add: jest.fn(),
+    addCreationConfig: jest.fn(),
     getType: jest.fn(),
     getIndexPatternCreationOptions: jest.fn(),
   } as any,
   list: {
-    add: jest.fn(),
+    addListConfig: jest.fn(),
     getIndexPatternTags: jest.fn(),
     getFieldInfo: jest.fn(),
     areScriptedFieldsEnabled: jest.fn(),

@@ -25,7 +25,7 @@ import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
 import indexPatternListTemplate from './list.html';
 import { IndexPatternTable } from './index_pattern_table';
-import { npSetup, npStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { UICapabilitiesProvider } from 'ui/capabilities/react';
@@ -110,7 +110,7 @@ uiModules
       transclude: true,
       template: indexTemplate,
       link: async function($scope) {
-        const indexPatternCreationOptions = await npSetup.plugins.indexPatternManagement.creation.getIndexPatternCreationOptions(
+        const indexPatternCreationOptions = await npStart.plugins.indexPatternManagement.creation.getIndexPatternCreationOptions(
           url => {
             $scope.$evalAsync(() => kbnUrl.change(url));
           }
@@ -123,7 +123,7 @@ uiModules
                 const id = pattern.id;
                 const title = pattern.get('title');
                 const isDefault = $scope.defaultIndex === id;
-                const tags = npSetup.plugins.indexPatternManagement.list.getIndexPatternTags(
+                const tags = npStart.plugins.indexPatternManagement.list.getIndexPatternTags(
                   pattern,
                   isDefault
                 );

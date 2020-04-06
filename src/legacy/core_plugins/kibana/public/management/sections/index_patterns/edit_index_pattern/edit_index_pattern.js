@@ -36,7 +36,7 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { npSetup, npStart } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_state_container';
@@ -238,14 +238,12 @@ uiModules
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexPatternListProvider = npSetup.plugins.indexPatternManagement.list;
-    $scope.indexPattern.tags = npSetup.plugins.indexPatternManagement.list.getIndexPatternTags(
+    $scope.indexPatternListProvider = npStart.plugins.indexPatternManagement.list;
+    $scope.indexPattern.tags = npStart.plugins.indexPatternManagement.list.getIndexPatternTags(
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
-    $scope.getFieldInfo = npSetup.plugins.indexPatternManagement.list.getFieldInfo.bind(
-      npSetup.plugins.indexPatternManagement.list
-    );
+    $scope.getFieldInfo = npStart.plugins.indexPatternManagement.list.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
@@ -256,7 +254,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        npSetup.plugins.indexPatternManagement.list
+        npStart.plugins.indexPatternManagement.list
       );
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
@@ -362,7 +360,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        npSetup.plugins.indexPatternManagement.list
+        npStart.plugins.indexPatternManagement.list
       );
 
       if ($scope.fieldFilter === undefined) {

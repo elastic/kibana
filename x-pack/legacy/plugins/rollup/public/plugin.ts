@@ -54,8 +54,8 @@ export class RollupPlugin implements Plugin {
     const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
 
     if (isRollupIndexPatternsEnabled) {
-      indexPatternManagement.creation.add(RollupIndexPatternCreationConfig);
-      indexPatternManagement.list.add(RollupIndexPatternListConfig);
+      indexPatternManagement.creation.addCreationConfig(RollupIndexPatternCreationConfig);
+      indexPatternManagement.list.addListConfig(RollupIndexPatternListConfig);
     }
 
     if (home) {

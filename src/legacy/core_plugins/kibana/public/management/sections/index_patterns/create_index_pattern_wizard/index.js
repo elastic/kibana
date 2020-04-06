@@ -19,7 +19,7 @@
 
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
-import { npStart, npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
@@ -32,7 +32,7 @@ uiRoutes.when('/management/kibana/index_pattern', {
     const kbnUrl = $injector.get('kbnUrl');
     $scope.$$postDigest(() => {
       const $routeParams = $injector.get('$routeParams');
-      const indexPatternCreationType = npSetup.plugins.indexPatternManagement.creation.getType(
+      const indexPatternCreationType = npStart.plugins.indexPatternManagement.creation.getType(
         $routeParams.type
       );
       const services = {

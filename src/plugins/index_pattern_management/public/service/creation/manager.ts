@@ -27,7 +27,7 @@ export class IndexPatternCreationManager {
     this.configs = [];
   }
 
-  public add(Config: typeof IndexPatternCreationConfig) {
+  public addCreationConfig(Config: typeof IndexPatternCreationConfig) {
     const config = new Config({ httpClient: this.httpClient });
     if (this.configs.findIndex(c => c.key === config.key) !== -1) {
       throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
@@ -58,4 +58,13 @@ export class IndexPatternCreationManager {
     );
     return options;
   }
+
+  setup = {
+    addCreationConfig: this.addCreationConfig.bind(this),
+  };
+
+  start = {
+    getType: this.getType.bind(this),
+    getIndexPatternCreationOptions: this.getIndexPatternCreationOptions.bind(this),
+  };
 }

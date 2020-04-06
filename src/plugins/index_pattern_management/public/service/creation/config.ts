@@ -21,17 +21,17 @@ import { i18n } from '@kbn/i18n';
 import { MatchedIndex } from '../../../../../legacy/core_plugins/kibana/public/management/sections/index_patterns/create_index_pattern_wizard/types';
 
 const indexPatternTypeName = i18n.translate(
-  'management.editIndexPattern.createIndex.defaultTypeName',
+  'indexPatternManagement.editIndexPattern.createIndex.defaultTypeName',
   { defaultMessage: 'index pattern' }
 );
 
 const indexPatternButtonText = i18n.translate(
-  'management.editIndexPattern.createIndex.defaultButtonText',
+  'indexPatternManagement.editIndexPattern.createIndex.defaultButtonText',
   { defaultMessage: 'Standard index pattern' }
 );
 
 const indexPatternButtonDescription = i18n.translate(
-  'management.editIndexPattern.createIndex.defaultButtonDescription',
+  'indexPatternManagement.editIndexPattern.createIndex.defaultButtonDescription',
   { defaultMessage: 'Perform full aggregations against any data' }
 );
 
