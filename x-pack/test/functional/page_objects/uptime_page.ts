@@ -44,7 +44,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       monitorName?: string
     ) {
       await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
-      await navigation.goToMonitor(monitorId, monitorName);
+      await navigation.goToMonitor(monitorId);
     }
 
     public async inputFilterQuery(filterQuery: string) {

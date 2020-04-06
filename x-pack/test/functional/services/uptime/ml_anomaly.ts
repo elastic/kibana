@@ -21,7 +21,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
         if (await testSubjects.exists('uptimeEnableAnomalyBtn')) {
           await this.openMLFlyout();
         } else if (await testSubjects.exists('uptimeManageMLJobBtn')) {
-          await openMLManageMenu();
+          await this.openMLManageMenu();
         }
       });
     },
