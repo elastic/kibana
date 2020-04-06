@@ -6,11 +6,11 @@
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { DataMissing } from '../data_missing';
+import { DataOrIndexMissing } from '../data_or_index_missing';
 
-describe('DataMissing component', () => {
+describe('DataOrIndexMissing component', () => {
   it('renders basePath and headingMessage', () => {
-    const component = shallowWithIntl(<DataMissing headingMessage="bar" />);
+    const component = shallowWithIntl(<DataOrIndexMissing headingMessage="bar" />);
     expect(component).toMatchSnapshot();
   });
 });

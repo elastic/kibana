@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataOrIndexMissing component renders basePath and headingMessage 1`] = `
+<EuiFlexGroup
+  data-test-subj="data-missing"
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+    style={
+      Object {
+        "flexBasis": 700,
+      }
+    }
+  >
+    <EuiSpacer
+      size="xs"
+    />
+    <EuiPanel>
+      <EuiEmptyPrompt
+        actions={
+          <EuiButton
+            color="primary"
+            fill={true}
+            href="/app/kibana#/home/tutorial/uptimeMonitors"
+            iconType="gear"
+          >
+            <FormattedMessage
+              defaultMessage="Add data with Heartbeat"
+              id="xpack.uptime.emptyState.addDataWithHeartbeat"
+              values={Object {}}
+            />
+          </EuiButton>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              <FormattedMessage
+                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                values={
+                  Object {
+                    "configureHeartbeatLink": <ForwardRef
+                      href="/app/kibana#/home/tutorial/uptimeMonitors"
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Configure Heartbeat"
+                        id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                        values={Object {}}
+                      />
+                    </ForwardRef>,
+                  }
+                }
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="Use {settingsLink} to update Index pattern for matching
+                    indices that contain Heartbeat data."
+                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                values={
+                  Object {
+                    "settingsLink": <ForwardRef
+                      to="/settings"
+                    >
+                      Settings
+                    </ForwardRef>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="uptimeApp"
+        title={
+          <EuiTitle
+            size="l"
+          >
+            <h3>
+              bar
+            </h3>
+          </EuiTitle>
+        }
+      />
+    </EuiPanel>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

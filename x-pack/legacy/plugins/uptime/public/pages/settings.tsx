@@ -57,7 +57,7 @@ export const SettingsPageComponent = ({
   useUptimeTelemetry(UptimePage.Settings);
 
   useEffect(() => {
-    dispatchGetDynamicSettings({});
+    dispatchGetDynamicSettings();
   }, [dispatchGetDynamicSettings]);
 
   const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
@@ -237,7 +237,7 @@ const mapStateToProps = (state: AppState) => ({
 
 const mapDispatchToProps = (dispatch: any) => ({
   dispatchGetDynamicSettings: () => {
-    return dispatch(getDynamicSettings({}));
+    return dispatch(getDynamicSettings());
   },
   dispatchSetDynamicSettings: (settings: DynamicSettings) => {
     return dispatch(setDynamicSettings(settings));
