@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { search } from '../../../../data/public';
@@ -28,12 +28,21 @@ const { isType } = search.aggs;
 
 function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
   const { agg, setValue, value } = props;
+  const minDocCount = useRef(agg.params.min_doc_count);
+
   useEffect(() => {
-    setValue(value && agg.params.min_doc_count);
+    if (minDocCount.current !== agg.params.min_doc_count) {
+      // The "Extend bounds" param is only enabled when "Show empty buckets" is turned on.
+      // So if "Show empty buckets" is changed, "Extend bounds" should reflect changes
+      minDocCount.current = agg.params.min_doc_count;
+
+      setValue(value && agg.params.min_doc_count);
+    }
   }, [agg.params.min_doc_count, setValue, value]);
 
   return (
     <SwitchParamEditor
+      {...props}
       displayLabel={i18n.translate('visDefaultEditor.controls.extendedBoundsLabel', {
         defaultMessage: 'Extend bounds',
       })}
@@ -45,7 +54,6 @@ function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
         !props.agg.params.min_doc_count ||
         !(isType('number')(props.agg) || isType('date')(props.agg))
       }
-      {...props}
     />
   );
 }
