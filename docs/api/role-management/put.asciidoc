@@ -31,7 +31,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 
 `kibana`::
   (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role.
-
++
 .Properties of `kibana`
 [%collapsible%open]
 =====
