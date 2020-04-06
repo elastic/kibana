@@ -19,10 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
-import { ViewMode, IContainer, PanelState, IEmbeddable } from '../embeddable_plugin';
-import { SavedObject } from '../../../saved_objects/public';
-import { EmbeddableInput } from '../../../embeddable/public';
+import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import { ViewMode, IContainer, PanelState, IEmbeddable } from '../../embeddable_plugin';
+import { SavedObject } from '../../../../saved_objects/public';
+import { EmbeddableInput } from '../../../../embeddable/public';
 import { DashboardPanelState, GridData, DASHBOARD_CONTAINER_TYPE } from '..';
 
 export const ACTION_DUPLICATE_PANEL = 'duplicatePanel';
