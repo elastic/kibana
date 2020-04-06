@@ -16,7 +16,8 @@ const executor = createMetricThresholdExecutor('test') as (opts: {
 const alertInstances = new Map();
 
 const services = {
-  callCluster(_: string, { body }: any) {
+  callCluster(_: string, { body, index }: any) {
+    if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
     const metric = body.query.bool.filter[1]?.exists.field;
     if (body.aggs.groupings) {
       if (body.aggs.groupings.composite.after) {
@@ -55,6 +56,13 @@ const services = {
       },
     };
   },
+  savedObjectsClient: {
+    get(_: string, sourceId: string) {
+      if (sourceId === 'alternate')
+        return { id: 'alternate', attributes: { metricAlias: 'alternatebeat-*' } };
+      return { id: 'default', attributes: { metricAlias: 'metricbeat-*' } };
+    },
+  },
 };
 
 const baseCriterion = {
@@ -62,15 +70,15 @@ const baseCriterion = {
   metric: 'test.metric.1',
   timeSize: 1,
   timeUnit: 'm',
-  indexPattern: 'metricbeat-*',
 };
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     const instanceID = 'test-*';
-    const execute = (comparator: Comparator, threshold: number[]) =>
+    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         services,
         params: {
+          sourceId,
           criteria: [
             {
               ...baseCriterion,
@@ -133,6 +141,14 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction.action.valueOf.condition0).toBe(1);
       expect(mostRecentAction.action.thresholdOf.condition0).toStrictEqual([0.75]);
       expect(mostRecentAction.action.metricOf.condition0).toBe('test.metric.1');
+    });
+    test('fetches the index pattern dynamically', async () => {
+      await execute(Comparator.LT, [17], 'alternate');
+      expect(alertInstances.get(instanceID).mostRecentAction.id).toBe(FIRED_ACTIONS.id);
+      expect(alertInstances.get(instanceID).state.alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.LT, [1.5], 'alternate');
+      expect(alertInstances.get(instanceID).mostRecentAction).toBe(undefined);
+      expect(alertInstances.get(instanceID).state.alertState).toBe(AlertStates.OK);
     });
   });
 

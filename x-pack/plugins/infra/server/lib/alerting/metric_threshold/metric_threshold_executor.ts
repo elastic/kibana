@@ -170,8 +170,8 @@ export const getElasticsearchMetricQuery = (
 
 const getIndexPattern: (
   services: AlertServices,
-  params: MetricExpressionParams
-) => Promise<string> = async function({ savedObjectsClient }, { sourceId = 'default' }) {
+  sourceId?: string
+) => Promise<string> = async function({ savedObjectsClient }, sourceId = 'default') {
   try {
     const sourceConfiguration = await savedObjectsClient.get(
       infraSourceConfigurationSavedObjectType,
@@ -263,16 +263,17 @@ const mapToConditionsLookup = (
 
 export const createMetricThresholdExecutor = (alertUUID: string) =>
   async function({ services, params }: AlertExecutorOptions) {
-    const { criteria, groupBy, filterQuery } = params as {
+    const { criteria, groupBy, filterQuery, sourceId } = params as {
       criteria: MetricExpressionParams[];
       groupBy: string | undefined;
       filterQuery: string | undefined;
+      sourceId?: string;
     };
 
     const alertResults = await Promise.all(
       criteria.map(criterion =>
         (async () => {
-          const index = await getIndexPattern(services, criterion);
+          const index = await getIndexPattern(services, sourceId);
           const currentValues = await getMetric(services, criterion, index, groupBy, filterQuery);
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];

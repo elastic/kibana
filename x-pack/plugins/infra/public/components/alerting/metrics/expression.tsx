@@ -52,6 +52,7 @@ interface Props {
     criteria: MetricExpression[];
     groupBy?: string;
     filterQuery?: string;
+    sourceId?: string;
   };
   alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
@@ -62,6 +63,24 @@ type TimeUnit = 's' | 'm' | 'h' | 'd';
 type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
   metric?: string;
 };
+
+enum AGGREGATION_TYPES {
+  COUNT = 'count',
+  AVERAGE = 'avg',
+  SUM = 'sum',
+  MIN = 'min',
+  MAX = 'max',
+  RATE = 'rate',
+  CARDINALITY = 'cardinality',
+}
+
+const defaultExpression = {
+  aggType: AGGREGATION_TYPES.AVERAGE,
+  comparator: Comparator.GT,
+  threshold: [],
+  timeSize: 1,
+  timeUnit: 'm',
+} as MetricExpression;
 
 export const Expressions: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
@@ -84,18 +103,6 @@ export const Expressions: React.FC<Props> = props => {
     }
   }, [alertsContext.metadata]);
 
-  const defaultExpression = useMemo<MetricExpression>(
-    () => ({
-      aggType: AGGREGATION_TYPES.AVERAGE,
-      comparator: Comparator.GT,
-      threshold: [],
-      timeSize: 1,
-      timeUnit: 'm',
-      sourceId: source?.id,
-    }),
-    [source]
-  );
-
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
       const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
@@ -109,7 +116,7 @@ export const Expressions: React.FC<Props> = props => {
     const exp = alertParams.criteria.slice();
     exp.push(defaultExpression);
     setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria, defaultExpression]);
+  }, [setAlertParams, alertParams.criteria]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -180,7 +187,6 @@ export const Expressions: React.FC<Props> = props => {
             threshold: [],
             timeSize,
             timeUnit,
-            sourceId: source?.id,
             aggType: metric.aggregation,
           }))
         );
@@ -198,6 +204,7 @@ export const Expressions: React.FC<Props> = props => {
 
         setAlertParams('groupBy', md.currentOptions.groupBy);
       }
+      setAlertParams('sourceId', source?.id);
     }
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -412,16 +419,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
     </>
   );
 };
-
-enum AGGREGATION_TYPES {
-  COUNT = 'count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  RATE = 'rate',
-  CARDINALITY = 'cardinality',
-}
 
 export const aggregationType: { [key: string]: any } = {
   avg: {
