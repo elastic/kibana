@@ -1197,7 +1197,7 @@
   dependencies:
     "@elastic/apm-rum-core" "^4.7.0"
 
-"@elastic/charts@^18.1.1":
+"@elastic/charts@^18.1.2":
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-18.2.0.tgz#e141151b4d7ecc71c9f6f235f8ce141665c67195"
   integrity sha512-OWsARaHI/4Ict/GkeKIO3a+e2c86esGw3FtSGRLPFVgzpwBXdjvjYyraGntKOIVs/NAGNVWYj5XoRRb5C6cMlQ==
