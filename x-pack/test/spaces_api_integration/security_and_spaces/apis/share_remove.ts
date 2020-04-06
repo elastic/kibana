@@ -13,10 +13,10 @@ import { TestUser } from '../../../saved_object_api_integration/common/lib/types
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
 import { TestInvoker } from '../../common/lib/types';
 import {
-  removeNamespacesTestSuiteFactory,
-  RemoveNamespacesTestCase,
-  RemoveNamespacesTestDefinition,
-} from '../../common/suites/remove_namespaces';
+  shareRemoveTestSuiteFactory,
+  ShareRemoveTestCase,
+  ShareRemoveTestDefinition,
+} from '../../common/suites/share_remove';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -37,7 +37,7 @@ const createTestCases = (spaceId: string) => {
     { id: CASES.SPACE_1_AND_SPACE_2.id, namespaces, ...fail404(spaceId === DEFAULT_SPACE_ID) },
     { id: CASES.ALL_SPACES.id, namespaces },
     { id: CASES.DOES_NOT_EXIST.id, namespaces, ...fail404() },
-  ] as RemoveNamespacesTestCase[];
+  ] as ShareRemoveTestCase[];
 
   // Test cases to check removing all three namespaces from different saved objects that exist in two spaces
   // These are non-exhaustive, they only check some cases -- each object will result in a 404, either because
@@ -48,7 +48,7 @@ const createTestCases = (spaceId: string) => {
     { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces, ...fail404() },
     { id: CASES.DEFAULT_AND_SPACE_2.id, namespaces, ...fail404() },
     { id: CASES.SPACE_1_AND_SPACE_2.id, namespaces, ...fail404() },
-  ] as RemoveNamespacesTestCase[];
+  ] as ShareRemoveTestCase[];
 
   const allCases = singleSpace.concat(multipleSpaces);
   return { singleSpace, multipleSpaces, allCases };
@@ -59,10 +59,7 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions } = removeNamespacesTestSuiteFactory(
-    esArchiver,
-    supertest
-  );
+  const { addTests, createTestDefinitions } = shareRemoveTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
     const { singleSpace, multipleSpaces, allCases } = createTestCases(spaceId);
     return {
@@ -79,7 +76,7 @@ export default function({ getService }: TestInvoker) {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` targeting the ${spaceId} space`;
       const { unauthorized, authorizedThisSpace, authorizedGlobally } = createTests(spaceId);
-      const _addTests = (user: TestUser, tests: RemoveNamespacesTestDefinition[]) => {
+      const _addTests = (user: TestUser, tests: ShareRemoveTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
 

@@ -31,8 +31,8 @@ const create = () =>
     find: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
-    addNamespaces: jest.fn(),
-    removeNamespaces: jest.fn(),
+    addToNamespaces: jest.fn(),
+    deleteFromNamespaces: jest.fn(),
   } as unknown) as jest.Mocked<SavedObjectsClientContract>);
 
 export const savedObjectsClientMock = { create };

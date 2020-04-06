@@ -20,11 +20,11 @@ import {
   TestSuite,
 } from '../../../saved_object_api_integration/common/lib/types';
 
-export interface RemoveNamespacesTestDefinition extends TestDefinition {
+export interface ShareRemoveTestDefinition extends TestDefinition {
   request: { spaces: string[]; object: { type: string; id: string } };
 }
-export type RemoveNamespacesTestSuite = TestSuite<RemoveNamespacesTestDefinition>;
-export interface RemoveNamespacesTestCase {
+export type ShareRemoveTestSuite = TestSuite<ShareRemoveTestDefinition>;
+export interface ShareRemoveTestCase {
   id: string;
   namespaces: string[];
   failure?: 400 | 403 | 404;
@@ -32,14 +32,14 @@ export interface RemoveNamespacesTestCase {
 }
 
 const TYPE = 'sharedtype';
-const createRequest = ({ id, namespaces }: RemoveNamespacesTestCase) => ({
+const createRequest = ({ id, namespaces }: ShareRemoveTestCase) => ({
   spaces: namespaces,
   object: { type: TYPE, id },
 });
 
-export function removeNamespacesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectForbidden = expectResponses.forbidden('delete');
-  const expectResponseBody = (testCase: RemoveNamespacesTestCase): ExpectResponseBody => async (
+  const expectResponseBody = (testCase: ShareRemoveTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
     const { id, failure, fail400Param } = testCase;
@@ -63,12 +63,12 @@ export function removeNamespacesTestSuiteFactory(esArchiver: any, supertest: Sup
     }
   };
   const createTestDefinitions = (
-    testCases: RemoveNamespacesTestCase | RemoveNamespacesTestCase[],
+    testCases: ShareRemoveTestCase | ShareRemoveTestCase[],
     forbidden: boolean,
     options?: {
       responseBodyOverride?: ExpectResponseBody;
     }
-  ): RemoveNamespacesTestDefinition[] => {
+  ): ShareRemoveTestDefinition[] => {
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
@@ -82,9 +82,9 @@ export function removeNamespacesTestSuiteFactory(esArchiver: any, supertest: Sup
     }));
   };
 
-  const makeRemoveNamespacesTest = (describeFn: DescribeFn) => (
+  const makeShareRemoveTest = (describeFn: DescribeFn) => (
     description: string,
-    definition: RemoveNamespacesTestSuite
+    definition: ShareRemoveTestSuite
   ) => {
     const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
@@ -106,9 +106,9 @@ export function removeNamespacesTestSuiteFactory(esArchiver: any, supertest: Sup
     });
   };
 
-  const addTests = makeRemoveNamespacesTest(describe);
+  const addTests = makeShareRemoveTest(describe);
   // @ts-ignore
-  addTests.only = makeRemoveNamespacesTest(describe.only);
+  addTests.only = makeShareRemoveTest(describe.only);
 
   return {
     addTests,

@@ -52,7 +52,7 @@ export function initShareRemoveSpacesApi(deps: ExternalRouteDeps) {
       const { type, id } = request.body.object;
 
       try {
-        await scopedClient.removeNamespaces(type, id, spaces);
+        await scopedClient.deleteFromNamespaces(type, id, spaces);
       } catch (error) {
         return response.customError(wrapError(error));
       }

@@ -12,10 +12,7 @@ import {
 import { TestUser } from '../../../saved_object_api_integration/common/lib/types';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
 import { TestInvoker } from '../../common/lib/types';
-import {
-  addNamespacesTestSuiteFactory,
-  AddNamespacesTestDefinition,
-} from '../../common/suites/add_namespaces';
+import { shareAddTestSuiteFactory, ShareAddTestDefinition } from '../../common/suites/share_add';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -73,7 +70,7 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions } = addNamespacesTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = shareAddTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
     const thisSpace = calculateSingleSpaceAuthZ(testCases, spaceId);
@@ -104,7 +101,7 @@ export default function({ getService }: TestInvoker) {
       const { unauthorized, authorizedInSpace, authorizedInOtherSpace, authorized } = createTests(
         spaceId
       );
-      const _addTests = (user: TestUser, tests: AddNamespacesTestDefinition[]) => {
+      const _addTests = (user: TestUser, tests: ShareAddTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
 

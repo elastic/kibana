@@ -127,7 +127,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectMigrationContext](./kibana-plugin-core-server.savedobjectmigrationcontext.md) | Migration context provided when invoking a [migration handler](./kibana-plugin-core-server.savedobjectmigrationfn.md) |
 |  [SavedObjectMigrationMap](./kibana-plugin-core-server.savedobjectmigrationmap.md) | A map of [migration functions](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions.<!-- -->For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one. |
 |  [SavedObjectReference](./kibana-plugin-core-server.savedobjectreference.md) | A reference to another saved object. |
-|  [SavedObjectsAddNamespacesOptions](./kibana-plugin-core-server.savedobjectsaddnamespacesoptions.md) |  |
+|  [SavedObjectsAddToNamespacesOptions](./kibana-plugin-core-server.savedobjectsaddtonamespacesoptions.md) |  |
 |  [SavedObjectsBaseOptions](./kibana-plugin-core-server.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-core-server.savedobjectsbulkcreateobject.md) |  |
 |  [SavedObjectsBulkGetObject](./kibana-plugin-core-server.savedobjectsbulkgetobject.md) |  |
@@ -141,6 +141,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCoreFieldMapping](./kibana-plugin-core-server.savedobjectscorefieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |
+|  [SavedObjectsDeleteFromNamespacesOptions](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesoptions.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-core-server.savedobjectsdeleteoptions.md) |  |
 |  [SavedObjectsExportOptions](./kibana-plugin-core-server.savedobjectsexportoptions.md) | Options controlling the export operation. |
 |  [SavedObjectsExportResultDetails](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
@@ -159,7 +160,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMigrationLogger](./kibana-plugin-core-server.savedobjectsmigrationlogger.md) |  |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-core-server.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsRawDoc](./kibana-plugin-core-server.savedobjectsrawdoc.md) | A raw document as represented directly in the saved object index. |
-|  [SavedObjectsRemoveNamespacesOptions](./kibana-plugin-core-server.savedobjectsremovenamespacesoptions.md) |  |
 |  [SavedObjectsRepositoryFactory](./kibana-plugin-core-server.savedobjectsrepositoryfactory.md) | Factory provided when invoking a [client factory provider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) See [SavedObjectsServiceSetup.setClientFactoryProvider](./kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md) |
 |  [SavedObjectsResolveImportErrorsOptions](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) | Options to control the "resolve import" operation. |
 |  [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories. |

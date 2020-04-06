@@ -19,11 +19,11 @@ import {
   TestSuite,
 } from '../../../saved_object_api_integration/common/lib/types';
 
-export interface AddNamespacesTestDefinition extends TestDefinition {
+export interface ShareAddTestDefinition extends TestDefinition {
   request: { spaces: string[]; object: { type: string; id: string } };
 }
-export type AddNamespacesTestSuite = TestSuite<AddNamespacesTestDefinition>;
-export interface AddNamespacesTestCase {
+export type ShareAddTestSuite = TestSuite<ShareAddTestDefinition>;
+export interface ShareAddTestCase {
   id: string;
   namespaces: string[];
   failure?: 400 | 403 | 404;
@@ -32,15 +32,15 @@ export interface AddNamespacesTestCase {
 }
 
 const TYPE = 'sharedtype';
-const createRequest = ({ id, namespaces }: AddNamespacesTestCase) => ({
+const createRequest = ({ id, namespaces }: ShareAddTestCase) => ({
   spaces: namespaces,
   object: { type: TYPE, id },
 });
-const getTestTitle = ({ id, namespaces }: AddNamespacesTestCase) =>
+const getTestTitle = ({ id, namespaces }: ShareAddTestCase) =>
   `{id: ${id}, namespaces: [${namespaces.join(',')}]}`;
 
-export function addNamespacesTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectResponseBody = (testCase: AddNamespacesTestCase): ExpectResponseBody => async (
+export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+  const expectResponseBody = (testCase: ShareAddTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
     const { id, failure, fail400Param, fail403Param } = testCase;
@@ -64,13 +64,13 @@ export function addNamespacesTestSuiteFactory(esArchiver: any, supertest: SuperT
     }
   };
   const createTestDefinitions = (
-    testCases: AddNamespacesTestCase | AddNamespacesTestCase[],
+    testCases: ShareAddTestCase | ShareAddTestCase[],
     forbidden: boolean,
     options?: {
       responseBodyOverride?: ExpectResponseBody;
       fail403Param?: string;
     }
-  ): AddNamespacesTestDefinition[] => {
+  ): ShareAddTestDefinition[] => {
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
@@ -84,9 +84,9 @@ export function addNamespacesTestSuiteFactory(esArchiver: any, supertest: SuperT
     }));
   };
 
-  const makeAddNamespacesTest = (describeFn: DescribeFn) => (
+  const makeShareAddTest = (describeFn: DescribeFn) => (
     description: string,
-    definition: AddNamespacesTestSuite
+    definition: ShareAddTestSuite
   ) => {
     const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
@@ -108,9 +108,9 @@ export function addNamespacesTestSuiteFactory(esArchiver: any, supertest: SuperT
     });
   };
 
-  const addTests = makeAddNamespacesTest(describe);
+  const addTests = makeShareAddTest(describe);
   // @ts-ignore
-  addTests.only = makeAddNamespacesTest(describe.only);
+  addTests.only = makeShareAddTest(describe.only);
 
   return {
     addTests,

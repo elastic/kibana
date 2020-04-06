@@ -324,60 +324,60 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
     });
 
-    describe('#addNamespaces', () => {
+    describe('#addToNamespaces', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const { client } = await createSpacesSavedObjectsClient();
 
         await expect(
           // @ts-ignore
-          client.addNamespaces(null, null, null, { namespace: 'bar' })
+          client.addToNamespaces(null, null, null, { namespace: 'bar' })
         ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
       });
 
       test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
         const expectedReturnValue = createMockResponse();
-        baseClient.addNamespaces.mockReturnValue(Promise.resolve(expectedReturnValue));
+        baseClient.addToNamespaces.mockReturnValue(Promise.resolve(expectedReturnValue));
 
         const type = Symbol();
         const id = Symbol();
         const namespaces = Symbol();
         const options = Object.freeze({ foo: 'bar' });
         // @ts-ignore
-        const actualReturnValue = await client.addNamespaces(type, id, namespaces, options);
+        const actualReturnValue = await client.addToNamespaces(type, id, namespaces, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.addNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
+        expect(baseClient.addToNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
       });
     });
 
-    describe('#removeNamespaces', () => {
+    describe('#deleteFromNamespaces', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const { client } = await createSpacesSavedObjectsClient();
 
         await expect(
           // @ts-ignore
-          client.removeNamespaces(null, null, null, { namespace: 'bar' })
+          client.deleteFromNamespaces(null, null, null, { namespace: 'bar' })
         ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
       });
 
       test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = await createSpacesSavedObjectsClient();
         const expectedReturnValue = createMockResponse();
-        baseClient.removeNamespaces.mockReturnValue(Promise.resolve(expectedReturnValue));
+        baseClient.deleteFromNamespaces.mockReturnValue(Promise.resolve(expectedReturnValue));
 
         const type = Symbol();
         const id = Symbol();
         const namespaces = Symbol();
         const options = Object.freeze({ foo: 'bar' });
         // @ts-ignore
-        const actualReturnValue = await client.removeNamespaces(type, id, namespaces, options);
+        const actualReturnValue = await client.deleteFromNamespaces(type, id, namespaces, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.removeNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
+        expect(baseClient.deleteFromNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });

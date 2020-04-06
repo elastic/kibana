@@ -52,7 +52,7 @@ export function initShareAddSpacesApi(deps: ExternalRouteDeps) {
       const { type, id } = request.body.object;
 
       try {
-        await scopedClient.addNamespaces(type, id, spaces);
+        await scopedClient.addToNamespaces(type, id, spaces);
       } catch (error) {
         return response.customError(wrapError(error));
       }

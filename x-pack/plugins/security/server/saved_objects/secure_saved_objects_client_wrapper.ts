@@ -13,8 +13,8 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
-  SavedObjectsAddNamespacesOptions,
-  SavedObjectsRemoveNamespacesOptions,
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesOptions,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
@@ -138,37 +138,37 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return await this.redactSavedObjectNamespaces(savedObject);
   }
 
-  public async addNamespaces(
+  public async addToNamespaces(
     type: string,
     id: string,
     namespaces: string[],
-    options: SavedObjectsAddNamespacesOptions = {}
+    options: SavedObjectsAddToNamespacesOptions = {}
   ) {
     const args = { type, id, namespaces, options };
     const { namespace } = options;
     // To share an object, the user must have the "create" permission in each of the destination namespaces.
-    await this.ensureAuthorized(type, 'create', namespaces, args, 'addNamespacesCreate');
+    await this.ensureAuthorized(type, 'create', namespaces, args, 'addToNamespacesCreate');
 
     // To share an object, the user must also have the "update" permission in one or more of the source namespaces. Because the
-    // `addNamespaces` operation is scoped to the current namespace, we can just check if the user has the "update" permission in the
+    // `addToNamespaces` operation is scoped to the current namespace, we can just check if the user has the "update" permission in the
     // current namespace. If the user has permission, but the saved object doesn't exist in this namespace, the base client operation will
     // result in a 404 error.
-    await this.ensureAuthorized(type, 'update', namespace, args, 'addNamespacesUpdate');
+    await this.ensureAuthorized(type, 'update', namespace, args, 'addToNamespacesUpdate');
 
-    return await this.baseClient.addNamespaces(type, id, namespaces, options);
+    return await this.baseClient.addToNamespaces(type, id, namespaces, options);
   }
 
-  public async removeNamespaces(
+  public async deleteFromNamespaces(
     type: string,
     id: string,
     namespaces: string[],
-    options: SavedObjectsRemoveNamespacesOptions = {}
+    options: SavedObjectsDeleteFromNamespacesOptions = {}
   ) {
     const args = { type, id, namespaces, options };
     // To un-share an object, the user must have the "delete" permission in each of the target namespaces.
-    await this.ensureAuthorized(type, 'delete', namespaces, args, 'removeNamespaces');
+    await this.ensureAuthorized(type, 'delete', namespaces, args, 'deleteFromNamespaces');
 
-    return await this.baseClient.removeNamespaces(type, id, namespaces, options);
+    return await this.baseClient.deleteFromNamespaces(type, id, namespaces, options);
   }
 
   public async bulkUpdate<T = unknown>(

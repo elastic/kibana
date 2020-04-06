@@ -1653,7 +1653,7 @@ export interface SavedObjectReference {
 }
 
 // @public (undocumented)
-export interface SavedObjectsAddNamespacesOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
     version?: string;
 }
@@ -1725,19 +1725,19 @@ export interface SavedObjectsBulkUpdateResponse<T = unknown> {
 export class SavedObjectsClient {
     // @internal
     constructor(repository: ISavedObjectsRepository);
-    addNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddNamespacesOptions): Promise<{}>;
+    addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<{}>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
+    deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
     static errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
     errors: typeof SavedObjectsErrorHelpers;
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    removeNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsRemoveNamespacesOptions): Promise<{}>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -1809,6 +1809,11 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
 
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
+export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -2105,14 +2110,9 @@ export interface SavedObjectsRawDoc {
 }
 
 // @public (undocumented)
-export interface SavedObjectsRemoveNamespacesOptions extends SavedObjectsBaseOptions {
-    refresh?: MutatingOperationRefreshSetting;
-}
-
-// @public (undocumented)
 export class SavedObjectsRepository {
     // (undocumented)
-    addNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddNamespacesOptions): Promise<{}>;
+    addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<{}>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
@@ -2124,6 +2124,8 @@ export class SavedObjectsRepository {
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
+    deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
+    // (undocumented)
     find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
@@ -2134,8 +2136,6 @@ export class SavedObjectsRepository {
         version: string;
         attributes: any;
     }>;
-    // (undocumented)
-    removeNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsRemoveNamespacesOptions): Promise<{}>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
     }
 

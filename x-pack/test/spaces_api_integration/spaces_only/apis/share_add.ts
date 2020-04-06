@@ -11,7 +11,7 @@ import {
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import { TestInvoker } from '../../common/lib/types';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
-import { addNamespacesTestSuiteFactory } from '../../common/suites/add_namespaces';
+import { shareAddTestSuiteFactory } from '../../common/suites/share_add';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -57,7 +57,7 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions } = addNamespacesTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = shareAddTestSuiteFactory(esArchiver, supertest);
   const createSingleTests = (spaceId: string) => {
     const testCases = createSingleTestCases(spaceId);
     return createTestDefinitions(testCases, false);

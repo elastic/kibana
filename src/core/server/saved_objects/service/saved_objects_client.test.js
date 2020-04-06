@@ -148,10 +148,10 @@ test(`#bulkUpdate`, async () => {
   expect(result).toBe(returnValue);
 });
 
-test(`#addNamespaces`, async () => {
+test(`#addToNamespaces`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    addNamespaces: jest.fn().mockResolvedValue(returnValue),
+    addToNamespaces: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
@@ -159,16 +159,16 @@ test(`#addNamespaces`, async () => {
   const id = Symbol();
   const namespaces = Symbol();
   const options = Symbol();
-  const result = await client.addNamespaces(type, id, namespaces, options);
+  const result = await client.addToNamespaces(type, id, namespaces, options);
 
-  expect(mockRepository.addNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
+  expect(mockRepository.addToNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
   expect(result).toBe(returnValue);
 });
 
-test(`#removeNamespaces`, async () => {
+test(`#deleteFromNamespaces`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
-    removeNamespaces: jest.fn().mockResolvedValue(returnValue),
+    deleteFromNamespaces: jest.fn().mockResolvedValue(returnValue),
   };
   const client = new SavedObjectsClient(mockRepository);
 
@@ -176,8 +176,8 @@ test(`#removeNamespaces`, async () => {
   const id = Symbol();
   const namespaces = Symbol();
   const options = Symbol();
-  const result = await client.removeNamespaces(type, id, namespaces, options);
+  const result = await client.deleteFromNamespaces(type, id, namespaces, options);
 
-  expect(mockRepository.removeNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
+  expect(mockRepository.deleteFromNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
   expect(result).toBe(returnValue);
 });

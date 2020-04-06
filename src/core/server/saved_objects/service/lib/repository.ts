@@ -45,8 +45,8 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsAddNamespacesOptions,
-  SavedObjectsRemoveNamespacesOptions,
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -904,11 +904,11 @@ export class SavedObjectsRepository {
     };
   }
 
-  async addNamespaces(
+  async addToNamespaces(
     type: string,
     id: string,
     namespaces: string[],
-    options: SavedObjectsAddNamespacesOptions = {}
+    options: SavedObjectsAddToNamespacesOptions = {}
   ): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -957,11 +957,11 @@ export class SavedObjectsRepository {
     return {};
   }
 
-  async removeNamespaces(
+  async deleteFromNamespaces(
     type: string,
     id: string,
     namespaces: string[],
-    options: SavedObjectsRemoveNamespacesOptions = {}
+    options: SavedObjectsDeleteFromNamespacesOptions = {}
   ): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
