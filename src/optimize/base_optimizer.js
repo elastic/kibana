@@ -403,9 +403,7 @@ export default class BaseOptimizer {
         hints: false,
       },
 
-      externals: {
-        ...UiSharedDeps.externals,
-      },
+      externals: [...UiSharedDeps.externals],
     };
 
     // when running from the distributable define an environment variable we can use

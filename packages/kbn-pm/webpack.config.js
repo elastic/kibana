@@ -87,11 +87,13 @@ module.exports = {
     __dirname: false,
   },
 
-  externals: {
-    worker_threads: {
-      commonjs: 'worker_threads',
+  externals: [
+    {
+      worker_threads: {
+        commonjs: 'worker_threads',
+      },
     },
-  },
+  ],
 
   watchOptions: {
     ignored: [/node_modules/, /vendor/],

@@ -172,9 +172,7 @@ function generateDLL(config) {
       // and not for the webpack compilations performance itself
       hints: false,
     },
-    externals: {
-      ...UiSharedDeps.externals,
-    },
+    externals: [...UiSharedDeps.externals],
   };
 }
 

@@ -33,11 +33,13 @@ module.exports = {
   },
 
   // These are necessary for using Enzyme with Webpack (https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md).
-  externals: {
-    'react/lib/ExecutionEnvironment': true,
-    'react/lib/ReactContext': true,
-    'react/addons': true,
-  },
+  externals: [
+    {
+      'react/lib/ExecutionEnvironment': true,
+      'react/lib/ReactContext': true,
+      'react/addons': true,
+    },
+  ],
 
   module: {
     rules: [

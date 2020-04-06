@@ -72,9 +72,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       noEmitOnErrors: true,
     },
 
-    externals: {
-      ...UiSharedDeps.externals,
-    },
+    externals: [...UiSharedDeps.externals],
 
     plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
 

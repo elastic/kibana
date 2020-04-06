@@ -50,6 +50,6 @@ export const lightCssDistFilename: string;
 /**
  * Externals mapping inteded to be used in a webpack config
  */
-export const externals: {
+export const externals: Array<{
   [key: string]: string;
-};
+}>;
