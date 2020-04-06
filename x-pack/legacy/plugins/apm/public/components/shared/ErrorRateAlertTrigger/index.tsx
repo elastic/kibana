@@ -58,7 +58,7 @@ export function ErrorRateAlertTrigger(props: Props) {
     </PopoverExpression>,
     <ForLastExpression
       onChangeWindowSize={windowSize =>
-        setAlertParams('windowSize', windowSize)
+        setAlertParams('windowSize', windowSize || '')
       }
       onChangeWindowUnit={windowUnit =>
         setAlertParams('windowUnit', windowUnit)
