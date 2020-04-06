@@ -134,7 +134,8 @@ export function uiRenderMixin(kbnServer, server, config) {
             dllBundlePath,
             dllJsChunks,
             styleSheetPaths,
-            sharedDepsFilename: UiSharedDeps.distFilename,
+            sharedJsFilename: UiSharedDeps.jsFilename,
+            sharedJsDepFilenames: UiSharedDeps.jsDepFilenames,
             darkMode,
           },
         });
