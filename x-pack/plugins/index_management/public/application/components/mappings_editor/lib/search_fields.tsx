@@ -185,8 +185,6 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
   const score = calculateScore(metadata);
   const display = getJSXdisplayFromMeta(searchData, fieldData, metadata);
 
-  // console.log(fieldData.path, score, metadata);
-
   return {
     ...metadata,
     display,
