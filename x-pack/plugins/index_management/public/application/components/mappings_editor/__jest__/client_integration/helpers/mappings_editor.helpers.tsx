@@ -32,10 +32,30 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 const registerActions = (testBed: TestBed<TestSubjects>) => {
-  const { find, waitFor } = testBed;
+  const { find, waitFor, form, component } = testBed;
+
+  const addField = async (name: string, type: string) => {
+    const currentCount = find('fieldsListItem').length;
+
+    form.setInputValue('nameParameterInput', name);
+    find('createFieldForm.fieldType').simulate('change', [
+      {
+        label: type,
+        value: type,
+      },
+    ]);
+
+    await nextTick();
+    component.update();
+
+    find('createFieldForm.addButton').simulate('click');
+
+    // We wait until there is one more field in the DOM
+    await waitFor('fieldsListItem', currentCount + 1);
+  };
 
   const selectTab = async (tab: 'fields' | 'templates' | 'advanced') => {
-    const index = ['field', 'templates', 'advanced'].indexOf(tab);
+    const index = ['fields', 'templates', 'advanced'].indexOf(tab);
     const tabIdToContentMap: { [key: string]: TestSubjects } = {
       fields: 'documentFields',
       templates: 'dynamicTemplates',
@@ -43,6 +63,9 @@ const registerActions = (testBed: TestBed<TestSubjects>) => {
     };
 
     const tabElement = find('formTab').at(index);
+    if (tabElement.length === 0) {
+      throw new Error(`Tab not found: "${tab}"`);
+    }
     tabElement.simulate('click');
 
     await waitFor(tabIdToContentMap[tab]);
@@ -66,6 +89,7 @@ const registerActions = (testBed: TestBed<TestSubjects>) => {
 
   return {
     selectTab,
+    addField,
     updateJsonEditor,
     getJsonEditorValue,
   };
@@ -92,8 +116,17 @@ export type MappingsEditorTestBed = TestBed<TestSubjects> & {
 export type TestSubjects =
   | 'formTab'
   | 'mappingsEditor'
+  | 'fieldsListItem'
+  | 'fieldName'
   | 'mappingTypesDetectedCallout'
   | 'documentFields'
   | 'dynamicTemplates'
   | 'advancedConfiguration'
-  | 'dynamicTemplatesEditor';
+  | 'advancedConfiguration.numericDetection'
+  | 'advancedConfiguration.numericDetection.input'
+  | 'advancedConfiguration.dynamicMappingsToggle'
+  | 'advancedConfiguration.dynamicMappingsToggle.input'
+  | 'dynamicTemplatesEditor'
+  | 'nameParameterInput'
+  | 'createFieldForm.fieldType'
+  | 'createFieldForm.addButton';

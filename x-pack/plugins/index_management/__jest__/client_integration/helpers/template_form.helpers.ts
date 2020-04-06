@@ -205,7 +205,7 @@ export type TestSubjects =
   | 'editFieldButton'
   | 'editFieldUpdateButton'
   | 'fieldsListItem'
-  | 'fieldTypeComboBox'
+  | 'fieldType'
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
