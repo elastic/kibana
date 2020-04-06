@@ -98,6 +98,38 @@ const migratePercentileRankAggregation: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
+// [TSVB] Remove stale opperator key
+const migrateOperatorKeyTypo: SavedObjectMigrationFn = doc => {
+  const visStateJSON = get<string>(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const gaugeColorRules: any[] = get(visState, 'params.gauge_color_rules') || [];
+
+      gaugeColorRules.forEach(colorRule => {
+        if (colorRule.opperator) {
+          delete colorRule.opperator;
+        }
+      });
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 // Migrate date histogram aggregation (remove customInterval)
 const migrateDateHistogramAggregation: SavedObjectMigrationFn = doc => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
@@ -571,4 +603,5 @@ export const visualizationSavedObjectTypeMigrations = {
   ),
   '7.3.1': flow<SavedObjectMigrationFn>(migrateFiltersAggQueryStringQueries),
   '7.4.2': flow<SavedObjectMigrationFn>(transformSplitFiltersStringToQueryObject),
+  '7.7.0': flow<SavedObjectMigrationFn>(migrateOperatorKeyTypo),
 };
