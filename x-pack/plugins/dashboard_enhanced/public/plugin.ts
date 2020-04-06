@@ -5,18 +5,31 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { SavedObjectAttributes } from 'kibana/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import {
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+  EmbeddableInput,
+  EmbeddableOutput,
+  EmbeddableSetup,
+  EmbeddableStart,
+  IEmbeddable,
+  defaultEmbeddableFactoryProvider,
+} from '../../../../src/plugins/embeddable/public';
 import { DashboardDrilldownsService } from './services';
 import { DrilldownsSetup, DrilldownsStart } from '../../drilldowns/public';
 
 export interface SetupDependencies {
-  uiActions: UiActionsSetup;
   drilldowns: DrilldownsSetup;
+  embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface StartDependencies {
-  uiActions: UiActionsStart;
   drilldowns: DrilldownsStart;
+  embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
 }
 
 // eslint-disable-next-line
@@ -35,8 +48,34 @@ export class DashboardEnhancedPlugin
   }
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
+    plugins.embeddable.setCustomEmbeddableFactoryProvider(
+      <
+        I extends EmbeddableInput = EmbeddableInput,
+        O extends EmbeddableOutput = EmbeddableOutput,
+        E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+        T extends SavedObjectAttributes = SavedObjectAttributes
+      >(
+        def: EmbeddableFactoryDefinition<I, O, E, T>
+      ): EmbeddableFactory<I, O, E, T> => {
+        const factory: EmbeddableFactory<I, O, E, T> = defaultEmbeddableFactoryProvider<I, O, E, T>(
+          def
+        );
+        return {
+          ...factory,
+          create: async (...args) => {
+            const embeddable = await factory.create(...args);
+            return embeddable;
+          },
+          createFromSavedObject: async (...args) => {
+            const embeddable = await factory.createFromSavedObject(...args);
+            return embeddable;
+          },
+        };
+      }
+    );
+
     this.drilldowns.bootstrap(core, plugins, {
-      enableDrilldowns: this.config.drilldowns.enabled,
+      enableDrilldowns: true,
     });
 
     return {};
