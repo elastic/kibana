@@ -12,7 +12,7 @@ import { Connector } from '../../../../containers/case/configure/types';
 import { connectors as connectorsDefinition } from '../../../../lib/connectors/config';
 import * as i18n from './translations';
 
-interface Props {
+export interface Props {
   connectors: Connector[];
   disabled: boolean;
   isLoading: boolean;
@@ -34,7 +34,7 @@ const noConnectorOption = {
       <span>{i18n.NO_CONNECTOR}</span>
     </>
   ),
-  'data-test-subj': 'no-connector',
+  'data-test-subj': 'dropdown-connector-no-connector',
 };
 
 const ConnectorsDropdownComponent: React.FC<Props> = ({
@@ -60,7 +60,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 <span>{connector.name}</span>
               </>
             ),
-            'data-test-subj': connector.id,
+            'data-test-subj': `dropdown-connector-${connector.id}`,
           },
         ],
         [noConnectorOption]
@@ -76,6 +76,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       valueOfSelected={selectedConnector}
       fullWidth
       onChange={onChange}
+      data-test-subj="dropdown-connectors"
     />
   );
 };
