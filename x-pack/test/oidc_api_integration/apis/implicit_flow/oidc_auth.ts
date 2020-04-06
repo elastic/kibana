@@ -59,7 +59,9 @@ export default function({ getService }: FtrProviderContext) {
 
         // Check that proxy page is returned with proper headers.
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
-        expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
+        expect(response.headers['cache-control']).to.be(
+          'private, no-cache, no-store, must-revalidate'
+        );
         expect(response.headers['content-security-policy']).to.be(
           `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
