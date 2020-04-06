@@ -253,10 +253,6 @@ export enum DefaultPackages {
   system = 'system',
 }
 
-export enum HiddenPackages {
-  base = 'base',
-}
-
 export interface IndexTemplate {
   order: number;
   index_patterns: string[];

@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { Installation, InstallationStatus, PackageInfo, HiddenPackages } from '../../../types';
+import { Installation, InstallationStatus, PackageInfo } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
@@ -35,10 +35,8 @@ export async function getPackages(
   const results = await savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
   });
-  // filter out the base package
-  const savedObjectsVisible = results.saved_objects.filter(
-    o => o.attributes.name !== HiddenPackages.base
-  );
+  // filter out any internal packages
+  const savedObjectsVisible = results.saved_objects.filter(o => !o.attributes.internal);
   const packageList = registryItems
     .map(item =>
       createInstallableFrom(
