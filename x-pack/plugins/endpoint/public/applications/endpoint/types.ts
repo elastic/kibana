@@ -195,7 +195,6 @@ export interface UIPolicyConfig {
   mac: MacPolicyConfig;
   linux: LinuxPolicyConfig;
 }
-export type nerds<t extends keyof UIPolicyConfig> = keyof UIPolicyConfig[t]['events'];
 
 /** OS used in Policy */
 export enum OS {

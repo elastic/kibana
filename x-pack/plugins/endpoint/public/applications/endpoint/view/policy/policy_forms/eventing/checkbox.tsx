@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig, windowsEventing } from '../../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../../store/policy_details';
-import { OS, UIPolicyConfig, nerds } from '../../../../types';
+import { UIPolicyConfig } from '../../../../types';
 import { clone } from '../../../../models/policy_details_config';
 
 export const EventingCheckbox = React.memo(function<T extends keyof UIPolicyConfig>({
@@ -22,7 +22,7 @@ export const EventingCheckbox = React.memo(function<T extends keyof UIPolicyConf
   id: string;
   name: string;
   os: T;
-  protectionField: nerds<T>;
+  protectionField: keyof UIPolicyConfig[T]['events'];
 }) {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const eventing = usePolicyDetailsSelector(windowsEventing);
@@ -31,7 +31,7 @@ export const EventingCheckbox = React.memo(function<T extends keyof UIPolicyConf
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (policyDetailsConfig) {
-        const newPayload = clone(policyDetailsConfig);
+        const newPayload: UIPolicyConfig = clone(policyDetailsConfig);
         newPayload[os].events[protectionField] = event.target.checked;
 
         dispatch({
