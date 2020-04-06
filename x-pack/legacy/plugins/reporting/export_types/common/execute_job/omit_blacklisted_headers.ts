@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { omit } from 'lodash';
-import { KBN_SCREENSHOT_HEADER_BLACKLIST } from '../../../common/constants';
+import {
+  KBN_SCREENSHOT_HEADER_BLACKLIST,
+  KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN,
+} from '../../../common/constants';
 
 export const omitBlacklistedHeaders = <JobDocPayloadType>({
   job,
@@ -15,7 +18,12 @@ export const omitBlacklistedHeaders = <JobDocPayloadType>({
 }) => {
   const filteredHeaders: Record<string, string> = omit(
     decryptedHeaders,
-    KBN_SCREENSHOT_HEADER_BLACKLIST
+    (_value, header: string) =>
+      header &&
+      (KBN_SCREENSHOT_HEADER_BLACKLIST.includes(header) ||
+        KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN.some(pattern =>
+          header?.startsWith(pattern)
+        ))
   );
   return filteredHeaders;
 };
