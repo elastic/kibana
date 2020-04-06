@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { getPoint } from './_get_point';
+import { getPoint, Point } from './_get_point';
 import { Chart, Table } from './point_series';
 
-export function getSeries(table: Table, chart: Chart) {
+export function getSerie(table: Table, chart: Chart) {
   const aspects = chart.aspects;
   const yAspect = aspects.y[0];
 
@@ -30,5 +30,5 @@ export function getSeries(table: Table, chart: Chart) {
     const id = `${point.series}-${yAspect.accessor}`;
     point.seriesId = id;
   }
-  return point;
+  return point || ({} as Point);
 }
