@@ -16,7 +16,7 @@ import {
 import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { Template } from '../../../common/types';
+import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, services } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
@@ -36,10 +36,13 @@ export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
     selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
     selectDetailsTab: (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => void;
     clickReloadButton: () => void;
-    clickTemplateAction: (name: Template['name'], action: 'edit' | 'clone' | 'delete') => void;
+    clickTemplateAction: (
+      name: TemplateDeserialized['name'],
+      action: 'edit' | 'clone' | 'delete'
+    ) => void;
     clickTemplateAt: (index: number) => void;
     clickCloseDetailsButton: () => void;
-    clickActionMenu: (name: Template['name']) => void;
+    clickActionMenu: (name: TemplateDeserialized['name']) => void;
   };
 }
 
@@ -78,7 +81,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     find('reloadButton').simulate('click');
   };
 
-  const clickActionMenu = async (templateName: Template['name']) => {
+  const clickActionMenu = async (templateName: TemplateDeserialized['name']) => {
     const { component } = testBed;
 
     // When a table has > 2 actions, EUI displays an overflow menu with an id "<template_name>-actions"
@@ -87,7 +90,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
   };
 
   const clickTemplateAction = (
-    templateName: Template['name'],
+    templateName: TemplateDeserialized['name'],
     action: 'edit' | 'clone' | 'delete'
   ) => {
     const actions = ['edit', 'clone', 'delete'];

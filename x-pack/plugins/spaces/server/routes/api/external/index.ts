@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, SavedObjectsLegacyService, IRouter } from 'src/core/server';
+import { Logger, IRouter, CoreSetup } from 'src/core/server';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
@@ -17,7 +17,8 @@ import { initShareRemoveSpacesApi } from './share_remove_spaces';
 
 export interface ExternalRouteDeps {
   externalRouter: IRouter;
-  getSavedObjects: () => SavedObjectsLegacyService;
+  getStartServices: CoreSetup['getStartServices'];
+  getImportExportObjectLimit: () => number;
   spacesService: SpacesServiceSetup;
   log: Logger;
 }

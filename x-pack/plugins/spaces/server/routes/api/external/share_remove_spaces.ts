@@ -12,7 +12,7 @@ import { createLicensedRouteHandler } from '../../lib';
 
 const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 export function initShareRemoveSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSavedObjects } = deps;
+  const { externalRouter, getStartServices } = deps;
 
   externalRouter.post(
     {
@@ -45,8 +45,8 @@ export function initShareRemoveSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (_context, request, response) => {
-      const { getScopedSavedObjectsClient } = getSavedObjects();
-      const scopedClient = getScopedSavedObjectsClient(request);
+      const [startServices] = await getStartServices();
+      const scopedClient = startServices.savedObjects.getScopedClient(request);
 
       const spaces = request.body.spaces;
       const { type, id } = request.body.object;

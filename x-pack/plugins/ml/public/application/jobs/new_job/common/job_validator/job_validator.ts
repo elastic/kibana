@@ -137,6 +137,7 @@ export class JobValidator {
     const formattedJobConfig = this._jobCreator.formattedJobJson;
     const formattedDatafeedConfig = this._jobCreator.formattedDatafeedJson;
 
+    this._runAdvancedValidation();
     // only validate if the config has changed
     if (
       forceValidate ||
@@ -151,7 +152,6 @@ export class JobValidator {
       this._lastDatafeedConfig = formattedDatafeedConfig;
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
-        this._runAdvancedValidation();
 
         this._jobCreatorSubject$.next(this._jobCreator);
 
