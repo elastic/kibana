@@ -5,7 +5,6 @@
  */
 import React, { useEffect, useCallback } from 'react';
 import classNames from 'classnames';
-import * as _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
