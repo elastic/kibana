@@ -26,11 +26,11 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
   handler: async (
     { savedObjectsClient, callES, dynamicSettings },
     _context,
-    _request,
+    request,
     response
   ): Promise<any> => {
     await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(callES, savedObjectsClient);
-    const pageViewResult = KibanaTelemetryAdapter.countPageView(_request.body as PageViewParams);
+    const pageViewResult = KibanaTelemetryAdapter.countPageView(request.body as PageViewParams);
 
     return response.ok({
       body: pageViewResult,
