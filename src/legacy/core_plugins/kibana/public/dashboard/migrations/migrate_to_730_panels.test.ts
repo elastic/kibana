@@ -16,28 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getKibanaVersion: () => '6.3.0',
-  }),
-  { virtual: true }
-);
-
-jest.mock(
-  'ui/notify',
-  () => ({
-    toastNotifications: {
-      addDanger: () => {},
-    },
-  }),
-  { virtual: true }
-);
-
-jest.mock('ui/new_platform');
-
 import { migratePanelsTo730 } from './migrate_to_730_panels';
-import { SavedDashboardPanelTo60, SavedDashboardPanel730ToLatest } from '../np_ready/types';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -46,6 +25,8 @@ import {
   RawSavedDashboardPanel640To720,
   DEFAULT_PANEL_WIDTH,
   DEFAULT_PANEL_HEIGHT,
+  SavedDashboardPanelTo60,
+  SavedDashboardPanel730ToLatest,
 } from '../../../../../../plugins/dashboard/public';
 
 test('6.0 migrates uiState, sort, scales, and gridData', async () => {
