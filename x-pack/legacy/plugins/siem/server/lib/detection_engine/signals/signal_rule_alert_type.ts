@@ -19,19 +19,16 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns, makeFloatString } from './utils';
+import { getGapBetweenRuns, makeFloatString, parseScheduleDates } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { getSignalsCount } from '../notifications/get_signals_count';
-import {
-  scheduleNotificationActions,
-  NotificationRuleTypeParams,
-} from '../notifications/schedule_notification_actions';
+import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
+import { getNotificationResultsLink } from '../notifications/utils';
 
 export const signalRulesAlertType = ({
   logger,
@@ -74,6 +71,7 @@ export const signalRulesAlertType = ({
         bulkCreateTimes: [],
         searchAfterTimes: [],
         lastLookBackDate: null,
+        createdSignalsCount: 0,
       };
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
@@ -164,7 +162,7 @@ export const signalRulesAlertType = ({
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
           }
 
-          const { success, bulkCreateDuration } = await bulkCreateMlSignals({
+          const { success, bulkCreateDuration, createdItemsCount } = await bulkCreateMlSignals({
             actions,
             throttle,
             someResult: anomalyResults,
@@ -183,6 +181,7 @@ export const signalRulesAlertType = ({
             tags,
           });
           result.success = success;
+          result.createdSignalsCount = createdItemsCount;
           if (bulkCreateDuration) {
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
@@ -252,23 +251,26 @@ export const signalRulesAlertType = ({
               name,
               id: savedObject.id,
             };
-            const { signalsCount, resultsLink } = await getSignalsCount({
-              from: `now-${interval}`,
-              to: 'now',
-              index: ruleParams.outputIndex,
-              ruleId: ruleParams.ruleId,
+
+            const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
+            const toInMs = parseScheduleDates('now')?.format('x');
+
+            const resultsLink = getNotificationResultsLink({
+              from: fromInMs,
+              to: toInMs,
+              id: savedObject.id,
               kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
-              ruleAlertId: savedObject.id,
-              callCluster: services.callCluster,
             });
 
-            logger.info(buildRuleMessage(`Found ${signalsCount} signals for notification.`));
+            logger.info(
+              buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
+            );
 
-            if (signalsCount !== 0) {
+            if (result.createdSignalsCount) {
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,
-                signalsCount,
+                signalsCount: result.createdSignalsCount,
                 resultsLink,
                 ruleParams: notificationRuleParams,
               });

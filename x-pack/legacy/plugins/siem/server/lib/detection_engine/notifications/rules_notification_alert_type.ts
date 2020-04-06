@@ -13,6 +13,8 @@ import { getSignalsCount } from './get_signals_count';
 import { RuleAlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
+import { getNotificationResultsLink } from './utils';
+import { parseScheduleDates } from '../signals/utils';
 
 export const rulesNotificationAlertType = ({
   logger,
@@ -42,14 +44,24 @@ export const rulesNotificationAlertType = ({
     const { params: ruleAlertParams, name: ruleName } = ruleAlertSavedObject.attributes;
     const ruleParams = { ...ruleAlertParams, name: ruleName, id: ruleAlertSavedObject.id };
 
-    const { signalsCount, resultsLink } = await getSignalsCount({
-      from: previousStartedAt ?? `now-${ruleParams.interval}`,
-      to: startedAt,
+    const fromInMs = parseScheduleDates(
+      previousStartedAt ? previousStartedAt.toISOString() : `now-${ruleParams.interval}`
+    )?.format('x');
+    const toInMs = parseScheduleDates(startedAt.toISOString())?.format('x');
+
+    const signalsCount = await getSignalsCount({
+      from: fromInMs,
+      to: toInMs,
       index: ruleParams.outputIndex,
-      ruleId: ruleParams.ruleId,
-      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl,
-      ruleAlertId: ruleAlertSavedObject.id,
+      ruleId: ruleParams.ruleId!,
       callCluster: services.callCluster,
+    });
+
+    const resultsLink = getNotificationResultsLink({
+      from: fromInMs,
+      to: toInMs,
+      id: ruleAlertSavedObject.id,
+      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl as string,
     });
 
     logger.info(

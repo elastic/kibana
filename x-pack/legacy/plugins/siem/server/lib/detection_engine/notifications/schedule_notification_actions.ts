@@ -23,7 +23,7 @@ interface ScheduleNotificationActions {
 export const scheduleNotificationActions = ({
   alertInstance,
   signalsCount,
-  resultsLink,
+  resultsLink = '',
   ruleParams,
 }: ScheduleNotificationActions): AlertInstance =>
   alertInstance
