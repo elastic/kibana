@@ -76,6 +76,13 @@ if [ $? -ne 0 ]; then
 fi
 
 #
+# Cypress
+##################################################
+echo "\n${bold}Cypress (logs: ${TMP_DIR}/e2e-yarn.log)${normal}"
+echo "Installing cypress dependencies "
+yarn &> ${TMP_DIR}/e2e-yarn.log
+
+#
 # Static mock data
 ##################################################
 printf "\n${bold}Static mock data (logs: ${TMP_DIR}/ingest-data.log)\n${normal}"
@@ -98,13 +105,6 @@ if [ $? -ne 0 ]; then
     printf "\n⚠️  Not all events were ingested correctly. This might affect test tests. \n"
     exit 1
 fi
-
-#
-# Cypress
-##################################################
-echo "\n${bold}Cypress (logs: ${TMP_DIR}/e2e-yarn.log)${normal}"
-echo "Installing cypress dependencies "
-yarn &> ${TMP_DIR}/e2e-yarn.log
 
 #
 # Wait for Kibana to start
