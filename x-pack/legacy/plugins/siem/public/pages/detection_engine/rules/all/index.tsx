@@ -40,6 +40,8 @@ import { getColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
+import { useMlCapabilities } from '../../../../components/ml_popover/hooks/use_ml_capabilities';
+import { hasMlAdminPermissions } from '../../../../components/ml/permissions/has_ml_admin_permissions';
 
 const SORT_FIELD = 'enabled';
 const initialState: State = {
@@ -111,6 +113,11 @@ export const AllRules = React.memo<AllRulesProps>(
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
+    const mlCapabilities = useMlCapabilities();
+
+    // TODO: Refactor license check + hasMlAdminPermissions to common check
+    const hasMlPermissions =
+      mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
 
     const setRules = useCallback((newRules: Rule[], newPagination: Partial<PaginationOptions>) => {
       dispatch({
@@ -145,6 +152,7 @@ export const AllRules = React.memo<AllRulesProps>(
             closePopover,
             dispatch,
             dispatchToaster,
+            hasMlPermissions,
             loadingRuleIds,
             selectedRuleIds,
             reFetchRules: reFetchRulesData,
@@ -152,7 +160,15 @@ export const AllRules = React.memo<AllRulesProps>(
           })}
         />
       ),
-      [dispatch, dispatchToaster, loadingRuleIds, reFetchRulesData, rules, selectedRuleIds]
+      [
+        dispatch,
+        dispatchToaster,
+        hasMlPermissions,
+        loadingRuleIds,
+        reFetchRulesData,
+        rules,
+        selectedRuleIds,
+      ]
     );
 
     const paginationMemo = useMemo(
@@ -184,6 +200,7 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch,
         dispatchToaster,
         history,
+        hasMlPermissions,
         hasNoPermissions,
         loadingRuleIds:
           loadingRulesAction != null &&
@@ -192,7 +209,15 @@ export const AllRules = React.memo<AllRulesProps>(
             : [],
         reFetchRules: reFetchRulesData,
       });
-    }, [dispatch, dispatchToaster, history, loadingRuleIds, loadingRulesAction, reFetchRulesData]);
+    }, [
+      dispatch,
+      dispatchToaster,
+      hasMlPermissions,
+      history,
+      loadingRuleIds,
+      loadingRulesAction,
+      reFetchRulesData,
+    ]);
 
     const monitoringColumns = useMemo(() => getMonitoringColumns(), []);
 

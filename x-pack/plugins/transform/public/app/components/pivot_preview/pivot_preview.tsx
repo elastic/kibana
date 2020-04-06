@@ -245,6 +245,10 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
           return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
         }
 
+        if (previewMappings.properties[columnId].type === ES_FIELD_TYPES.BOOLEAN) {
+          return cellValue ? 'true' : 'false';
+        }
+
         return cellValue;
       };
     }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappings.properties]);
