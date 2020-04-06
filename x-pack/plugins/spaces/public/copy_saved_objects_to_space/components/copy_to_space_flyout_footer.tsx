@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-// todo
 import { ProcessedImportResponse } from '../../../../../../src/legacy/core_plugins/kibana/public/management/sections/objects/lib';
 import { ImportRetry } from '../types';
 

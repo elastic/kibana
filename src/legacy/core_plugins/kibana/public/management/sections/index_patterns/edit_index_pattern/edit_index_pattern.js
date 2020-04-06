@@ -238,16 +238,12 @@ uiModules
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
-    // $scope.indexPatternListProvider = managementSetup.indexPattern.list;
     $scope.indexPatternListProvider = npSetup.plugins.indexPatternManagement.list;
-    // $scope.indexPattern.tags = managementSetup.indexPattern.list.getIndexPatternTags(
     $scope.indexPattern.tags = npSetup.plugins.indexPatternManagement.list.getIndexPatternTags(
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
     $scope.getFieldInfo = npSetup.plugins.indexPatternManagement.list.getFieldInfo.bind(
-      // $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo.bind(
-      // managementSetup.indexPattern.list
       npSetup.plugins.indexPatternManagement.list
     );
     docTitle.change($scope.indexPattern.title);
@@ -260,7 +256,6 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        // managementSetup.indexPattern.list
         npSetup.plugins.indexPatternManagement.list
       );
       $scope.refreshFilters();
@@ -367,7 +362,6 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        // managementSetup.indexPattern.list
         npSetup.plugins.indexPatternManagement.list
       );
 
