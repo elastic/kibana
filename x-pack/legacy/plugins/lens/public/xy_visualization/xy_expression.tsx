@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import moment from 'moment';
 import {
   Chart,
   Settings,
@@ -28,6 +29,8 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+
+import { buildPointSeriesData } from '../../../../../../src/legacy/ui/public/agg_response/point_series/point_series.js';
 import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
 import { LensMultiTable, FormatFactory } from '../types';
@@ -226,6 +229,58 @@ export function XYChart({
           minInterval,
         }
       : undefined;
+
+  const onBrushEnd = (min: number, max: number) => {
+    const firstLayer = layers[0];
+    const table = data.tables[firstLayer.layerId];
+
+    const startRange = moment(min).toISOString();
+    const endRange = moment(max).toISOString();
+
+    const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
+      ({ id }) => id === firstLayer.accessors[0]
+    );
+
+    const dimensions = {
+      x: {
+        accessor: table.columns.findIndex(el => el.id === xAxisColumn?.id),
+        format: xAxisColumn?.formatHint,
+        params: {
+          ...xAxisColumn?.meta?.aggConfigParams,
+          date: xAxisColumn?.formatHint?.id === 'date',
+          format: xAxisColumn?.formatHint,
+          bounds: { min: startRange, max: endRange },
+        },
+        label: xAxisColumn?.name,
+        aggType: xAxisColumn?.meta?.type,
+      },
+      y: [
+        {
+          accessor: table.columns.findIndex(el => el.id === firstYAxisColumn?.id), // index of x accessor in table
+          format: firstYAxisColumn?.formatHint,
+          label: firstYAxisColumn?.name,
+          aggType: firstYAxisColumn?.meta?.type,
+        },
+      ],
+    };
+
+    const pointSeriesData = buildPointSeriesData(table, dimensions);
+
+    const xAxisFieldName: string | undefined = xAxisColumn?.meta?.aggConfigParams?.field;
+    const timeFieldName = xDomain && xAxisFieldName;
+
+    const context: EmbeddableVisTriggerContext = {
+      data: {
+        range: [startRange, endRange],
+        data: {
+          ...pointSeriesData,
+        },
+      },
+      timeFieldName,
+    };
+    executeTriggerActions(VIS_EVENT_TO_TRIGGER.brush, context);
+  };
+
   return (
     <Chart>
       <Settings
@@ -235,6 +290,7 @@ export function XYChart({
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
+        onBrushEnd={onBrushEnd}
         onElementClick={([[geometry, series]]) => {
           // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
           const xySeries = series as XYChartSeriesIdentifier;
@@ -288,7 +344,6 @@ export function XYChart({
             },
             timeFieldName,
           };
-
           executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
         }}
       />
