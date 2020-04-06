@@ -47,7 +47,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 
 `retries`::
   (Required, object) The retry operations to attempt. Object keys represent the target space IDs.
-
++
 .Properties of `retries`
 [%collapsible%open]
 =====
