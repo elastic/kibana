@@ -26,7 +26,7 @@ import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
@@ -40,6 +40,7 @@ describe('AggConfig Filters', () => {
         uiSettings,
         getInternalStartServices: () => ({
           fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
         }),
       };
     });

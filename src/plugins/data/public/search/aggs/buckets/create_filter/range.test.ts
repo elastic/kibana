@@ -25,6 +25,7 @@ import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('range', () => {
@@ -34,6 +35,7 @@ describe('AggConfig Filters', () => {
       aggTypesDependencies = {
         getInternalStartServices: () => ({
           fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
         }),
       };
 
