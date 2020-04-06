@@ -106,6 +106,8 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
       `type`:::::
         (string) The type of error. For example, `unsupported_type`, `missing_references`, or `unknown`.
 =======
+======
+=====
 
 [[spaces-api-resolve-copy-saved-objects-conflicts-example]]
 ==== {api-examples-title}
