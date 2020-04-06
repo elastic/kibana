@@ -76,7 +76,7 @@ export {
 export { removeQueryParam, redirectWhenMissing, ensureDefaultIndexPattern } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
 
-/** dummy plugin, we just want kibana react to have its own bundle */
+/** dummy plugin, we just want kibanaUtils to have its own bundle */
 export function plugin() {
   return new (class KibanaUtilsPlugin {
     setup() {}

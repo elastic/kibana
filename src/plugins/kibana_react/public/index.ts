@@ -32,7 +32,7 @@ export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { useUrlTracker } from './use_url_tracker';
 export { toMountPoint } from './util';
 
-/** dummy plugin, we just want kibana react to have its own bundle */
+/** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {
   return new (class KibanaReactPlugin {
     setup() {}
