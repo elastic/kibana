@@ -33,6 +33,9 @@ export const Setup: React.FunctionComponent<{
           defaultMessage: 'Ingest Manager failed during its setup.',
         })
       );
+      // we're leveraging the notification's error toast which is usually used for displaying stack traces of an
+      // actually Error. Instead of displaying a stack trace we'll display the more detailed error text when the
+      // user clicks `See the full error` button to see the modal
       errorText.stack = text;
       notifications.toasts.addError(errorText, {
         title: i18n.translate('xpack.endpoint.ingestToastTitle', {
