@@ -97,7 +97,7 @@ test(`fails if URLs are absolute for PDF`, async () => {
           },
         ],
         forceNow,
-      })),
+      }),
       config: mockConfig,
     } as FullUrlsOpts);
   expect(fn).toThrowErrorMatchingInlineSnapshot(
@@ -182,7 +182,7 @@ test(`adds forceNow to each of multiple urls`, async () => {
         { relativeUrl: '/app/kibana#/something_ddd' },
       ],
       forceNow,
-    }),
+    },
     config: mockConfig,
   } as FullUrlsOpts);
 
