@@ -3,15 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import {
+  FIFTH_RULE,
+  FIRST_RULE,
+  RULE_NAME,
+  SECOND_RULE,
+  SEVENTH_RULE,
+} from '../screens/signal_detection_rules';
 
+import { goToManageSignalDetectionRules } from '../tasks/detections';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { DETECTIONS } from '../urls/navigation';
-import { goToManageSignalDetectionRules } from '../tasks/detections';
 import {
+  activateRule,
+  sortByActivatedRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
-  waitForRulesToBeLoaded,
+  waitForRuleToBeActivated,
 } from '../tasks/signal_detection_rules';
+
+import { DETECTIONS } from '../urls/navigation';
 
 describe('Signal detection rules', () => {
   before(() => {
@@ -26,37 +36,25 @@ describe('Signal detection rules', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
-
-    cy.get('[data-test-subj="ruleName"]')
-      .eq(4)
+    cy.get(RULE_NAME)
+      .eq(FIFTH_RULE)
       .invoke('text')
       .then(fifthRuleName => {
-        cy.get('[data-test-subj="rule-switch"]')
-          .eq(4)
-          .click({ force: true });
-        cy.get('[data-test-subj="rule-switch-loader"]').should('exist');
-        cy.get('[data-test-subj="rule-switch-loader"]').should('not.exist');
-
-        cy.get('[data-test-subj="ruleName"]')
-          .eq(6)
+        activateRule(FIFTH_RULE);
+        waitForRuleToBeActivated();
+        cy.get(RULE_NAME)
+          .eq(SEVENTH_RULE)
           .invoke('text')
           .then(seventhRuleName => {
-            cy.get('[data-test-subj="rule-switch"]')
-              .eq(6)
-              .click({ force: true });
-            cy.get('[data-test-subj="rule-switch-loader"]').should('exist');
-            cy.get('[data-test-subj="rule-switch-loader"]').should('not.exist');
+            activateRule(SEVENTH_RULE);
+            waitForRuleToBeActivated();
+            sortByActivatedRules();
 
-            cy.get('[data-test-subj="tableHeaderSortButton"]').click({ force: true });
-            waitForRulesToBeLoaded();
-            cy.get('[data-test-subj="tableHeaderSortButton"]').click({ force: true });
-            waitForRulesToBeLoaded();
-
-            cy.get('[data-test-subj="ruleName"]')
-              .eq(0)
+            cy.get(RULE_NAME)
+              .eq(FIRST_RULE)
               .should('have.text', fifthRuleName);
-            cy.get('[data-test-subj="ruleName"]')
-              .eq(1)
+            cy.get(RULE_NAME)
+              .eq(SECOND_RULE)
               .should('have.text', seventhRuleName);
           });
       });
