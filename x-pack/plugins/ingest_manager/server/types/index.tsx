@@ -14,6 +14,7 @@ export {
   AgentEvent,
   AgentEventSOAttributes,
   AgentAction,
+  AgentActionSOAttributes,
   Datasource,
   NewDatasource,
   FullAgentConfigDatasource,
