@@ -706,6 +706,8 @@ export class AlertsClient {
         type: 'action',
       });
       const actionMapValue = actionMap.get(id);
+      // if action is a save object, than actionTypeId should be under attributes property
+      // if action is a preconfigured, than actionTypeId is the action property
       const actionTypeId = actionIds.find(actionId => actionId === id)
         ? actionMapValue.attributes.actionTypeId
         : actionMapValue.actionTypeId;
