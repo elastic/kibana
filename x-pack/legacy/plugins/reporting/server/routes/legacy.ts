@@ -8,7 +8,7 @@ import { Legacy } from 'kibana';
 import querystring from 'querystring';
 import { API_BASE_URL } from '../../common/constants';
 import { ServerFacade, ReportingResponseToolkit, Logger } from '../../types';
-import { ReportingSetupDeps } from '../types';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import {
   getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,
@@ -21,13 +21,15 @@ const getStaticFeatureConfig = (getRouteConfig: GetRouteConfigFactoryFn, feature
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerLegacy(
+  reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction,
   logger: Logger
 ) {
-  const getRouteConfig = getRouteConfigFactoryReportingPre(server, plugins, logger);
+  const config = reporting.getConfig();
+  const getRouteConfig = getRouteConfigFactoryReportingPre(config, plugins, logger);
 
   function createLegacyPdfRoute({ path, objectType }: { path: string; objectType: string }) {
     const exportTypeId = 'printablePdf';
