@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { migrations } from '../../../migrations/';
+import { migrations } from '../../../migrations';
 import { migrations730 } from './migrations_730';
 import {
   DashboardDoc700To720,

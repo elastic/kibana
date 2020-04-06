@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import * as sinon from 'sinon';
-import { ReportingCore } from '../../server';
+import { ReportingConfig, ReportingCore } from '../../server/types';
 import { createMockReportingCore } from '../../test_helpers';
-import { ServerFacade } from '../../types';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
@@ -17,21 +15,15 @@ import { ClientMock } from './esqueue/__tests__/fixtures/legacy_elasticsearch';
 import { ExportTypesRegistry } from './export_types_registry';
 
 const configGetStub = sinon.stub();
-configGetStub.withArgs('xpack.reporting.queue').returns({
+configGetStub.withArgs('queue').returns({
   pollInterval: 3300,
   pollIntervalErrorMultiplier: 10,
 });
-configGetStub.withArgs('server.name').returns('test-server-123');
-configGetStub.withArgs('server.uuid').returns('g9ymiujthvy6v8yrh7567g6fwzgzftzfr');
+configGetStub.withArgs('server', 'name').returns('test-server-123');
+configGetStub.withArgs('server', 'uuid').returns('g9ymiujthvy6v8yrh7567g6fwzgzftzfr');
 
 const executeJobFactoryStub = sinon.stub();
-
-const getMockServer = (): ServerFacade => {
-  return ({
-    config: () => ({ get: configGetStub }),
-  } as unknown) as ServerFacade;
-};
-const getMockLogger = jest.fn();
+const getMockLogger = sinon.stub();
 
 const getMockExportTypesRegistry = (
   exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
@@ -41,25 +33,22 @@ const getMockExportTypesRegistry = (
   } as ExportTypesRegistry);
 
 describe('Create Worker', () => {
+  let mockReporting: ReportingCore;
+  let mockConfig: ReportingConfig;
   let queue: Esqueue;
   let client: ClientMock;
-  let mockReporting: ReportingCore;
 
   beforeEach(async () => {
-    mockReporting = await createMockReportingCore();
+    mockConfig = { get: configGetStub, kbnConfig: { get: configGetStub } };
+    mockReporting = await createMockReportingCore(mockConfig);
+    mockReporting.getExportTypesRegistry = () => getMockExportTypesRegistry();
     client = new ClientMock();
     queue = new Esqueue('reporting-queue', { client });
     executeJobFactoryStub.reset();
   });
 
   test('Creates a single Esqueue worker for Reporting', async () => {
-    mockReporting.getExportTypesRegistry = () => getMockExportTypesRegistry();
-    const createWorker = createWorkerFactory(
-      mockReporting,
-      getMockServer(),
-      {} as ElasticsearchServiceSetup,
-      getMockLogger()
-    );
+    const createWorker = createWorkerFactory(mockReporting, getMockLogger());
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     await createWorker(queue);
@@ -91,12 +80,7 @@ Object {
       { executeJobFactory: executeJobFactoryStub },
     ]);
     mockReporting.getExportTypesRegistry = () => exportTypesRegistry;
-    const createWorker = createWorkerFactory(
-      mockReporting,
-      getMockServer(),
-      {} as ElasticsearchServiceSetup,
-      getMockLogger()
-    );
+    const createWorker = createWorkerFactory(mockReporting, getMockLogger());
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
     await createWorker(queue);
