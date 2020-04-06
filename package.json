@@ -235,6 +235,7 @@
     "react-monaco-editor": "~0.27.0",
     "react-redux": "^7.1.3",
     "react-resize-detector": "^4.2.0",
+    "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
     "react-sizeme": "^2.3.6",
     "react-use": "^13.27.0",

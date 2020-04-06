@@ -27,7 +27,7 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 // @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import * as SharedDeps from '@kbn/ui-shared-deps';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
 
@@ -71,7 +71,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
 
     externals: {
-      ...SharedDeps.externals,
+      ...UiSharedDeps.externals,
     },
 
     plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
