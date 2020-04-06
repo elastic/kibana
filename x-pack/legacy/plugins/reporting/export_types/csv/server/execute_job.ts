@@ -45,7 +45,14 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     const decryptHeaders = async () => {
       try {
         if (typeof headers !== 'string') {
-          throw new Error('Job headers are missing');
+          throw new Error(
+            i18n.translate(
+              'xpack.reporting.exportTypes.csv.executeJob.missingJobHeadersErrorMessage',
+              {
+                defaultMessage: 'Job headers are missing',
+              }
+            )
+          );
         }
         return await crypto.decrypt(headers);
       } catch (err) {
