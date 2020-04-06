@@ -18,7 +18,7 @@ export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const ELASTIC_RULES_BTN = '[data-test-subj="show-elastic-rules-filter-button"]';
 
-export const FIFTH_RULE = 5;
+export const FIFTH_RULE = 4;
 
 export const FIRST_RULE = 0;
 
