@@ -62,20 +62,12 @@ import { validateConvertFilterToKueryNode } from './filter_utils';
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Left<T> = {
-  tag: 'Left';
-  error: T;
-};
+type Left = { tag: 'Left'; error: Record<string, any> };
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Right<T> = {
-  tag: 'Right';
-  value: T;
-};
-
-type Either<L, R> = Left<L> | Right<R>;
-const isLeft = <L, R>(either: Either<L, R>): either is Left<L> => {
-  return either.tag === 'Left';
-};
+type Right = { tag: 'Right'; value: Record<string, any> };
+type Either = Left | Right;
+const isLeft = (either: Either): either is Left => either.tag === 'Left';
+const isRight = (either: Either): either is Right => either.tag === 'Right';
 
 export interface SavedObjectsRepositoryOptions {
   index: string;
@@ -301,7 +293,7 @@ export class SavedObjectsRepository {
 
     let bulkGetRequestIndexCounter = 0;
     const bulkGetDocs: object[] = [];
-    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+    const expectedResults: Either[] = objects.map(object => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
           tag: 'Left' as 'Left',
@@ -354,69 +346,67 @@ export class SavedObjectsRepository {
 
     let bulkRequestIndexCounter = 0;
     const bulkCreateParams: object[] = [];
-    const expectedBulkResults: Array<Either<any, any>> = expectedResults.map(
-      expectedBulkGetResult => {
-        if (isLeft(expectedBulkGetResult)) {
-          return expectedBulkGetResult;
-        }
-
-        let savedObjectNamespace;
-        let savedObjectNamespaces;
-        const { esRequestIndex, object, method } = expectedBulkGetResult.value;
-        if (esRequestIndex !== undefined) {
-          const indexFound = bulkGetResponse.status !== 404;
-          const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
-          const docFound = indexFound && actualResult.found === true;
-          if (docFound && !this._rawInNamespaces(actualResult, namespace)) {
-            const { id, type } = object;
-            return {
-              tag: 'Left' as 'Left',
-              error: {
-                id,
-                type,
-                error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
-              },
-            };
-          }
-          savedObjectNamespaces = getSavedObjectNamespaces(namespace, docFound && actualResult);
-        } else {
-          if (this._registry.isSingleNamespace(object.type)) {
-            savedObjectNamespace = namespace;
-          } else if (this._registry.isMultiNamespace(object.type)) {
-            savedObjectNamespaces = getSavedObjectNamespaces(namespace);
-          }
-        }
-
-        const expectedResult = {
-          esRequestIndex: bulkRequestIndexCounter++,
-          requestedId: object.id,
-          rawMigratedDoc: this._serializer.savedObjectToRaw(
-            this._migrator.migrateDocument({
-              id: object.id,
-              type: object.type,
-              attributes: object.attributes,
-              migrationVersion: object.migrationVersion,
-              ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-              ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-              updated_at: time,
-              references: object.references || [],
-            }) as SavedObjectSanitizedDoc
-          ),
-        };
-
-        bulkCreateParams.push(
-          {
-            [method]: {
-              _id: expectedResult.rawMigratedDoc._id,
-              _index: this.getIndexForType(object.type),
-            },
-          },
-          expectedResult.rawMigratedDoc._source
-        );
-
-        return { tag: 'Right' as 'Right', value: expectedResult };
+    const expectedBulkResults: Either[] = expectedResults.map(expectedBulkGetResult => {
+      if (isLeft(expectedBulkGetResult)) {
+        return expectedBulkGetResult;
       }
-    );
+
+      let savedObjectNamespace;
+      let savedObjectNamespaces;
+      const { esRequestIndex, object, method } = expectedBulkGetResult.value;
+      if (esRequestIndex !== undefined) {
+        const indexFound = bulkGetResponse.status !== 404;
+        const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
+        const docFound = indexFound && actualResult.found === true;
+        if (docFound && !this._rawInNamespaces(actualResult, namespace)) {
+          const { id, type } = object;
+          return {
+            tag: 'Left' as 'Left',
+            error: {
+              id,
+              type,
+              error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+            },
+          };
+        }
+        savedObjectNamespaces = getSavedObjectNamespaces(namespace, docFound && actualResult);
+      } else {
+        if (this._registry.isSingleNamespace(object.type)) {
+          savedObjectNamespace = namespace;
+        } else if (this._registry.isMultiNamespace(object.type)) {
+          savedObjectNamespaces = getSavedObjectNamespaces(namespace);
+        }
+      }
+
+      const expectedResult = {
+        esRequestIndex: bulkRequestIndexCounter++,
+        requestedId: object.id,
+        rawMigratedDoc: this._serializer.savedObjectToRaw(
+          this._migrator.migrateDocument({
+            id: object.id,
+            type: object.type,
+            attributes: object.attributes,
+            migrationVersion: object.migrationVersion,
+            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+            updated_at: time,
+            references: object.references || [],
+          }) as SavedObjectSanitizedDoc
+        ),
+      };
+
+      bulkCreateParams.push(
+        {
+          [method]: {
+            _id: expectedResult.rawMigratedDoc._id,
+            _index: this.getIndexForType(object.type),
+          },
+        },
+        expectedResult.rawMigratedDoc._source
+      );
+
+      return { tag: 'Right' as 'Right', value: expectedResult };
+    });
 
     const bulkResponse = bulkCreateParams.length
       ? await this._writeToCluster('bulk', {
@@ -428,7 +418,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkResults.map(expectedResult => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error;
+          return expectedResult.error as any;
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
@@ -738,7 +728,7 @@ export class SavedObjectsRepository {
 
     let bulkGetRequestIndexCounter = 0;
     const bulkGetDocs: object[] = [];
-    const expectedBulkGetResults: Array<Either<any, any>> = objects.map(object => {
+    const expectedBulkGetResults: Either[] = objects.map(object => {
       const { type, id, fields } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -780,7 +770,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkGetResults.map(expectedResult => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error;
+          return expectedResult.error as any;
         }
 
         const { type, id, esRequestIndex } = expectedResult.value;
@@ -1078,7 +1068,7 @@ export class SavedObjectsRepository {
 
     let bulkGetRequestIndexCounter = 0;
     const bulkGetDocs: object[] = [];
-    const expectedBulkGetResults: Array<Either<any, any>> = objects.map(object => {
+    const expectedBulkGetResults: Either[] = objects.map(object => {
       const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -1141,7 +1131,7 @@ export class SavedObjectsRepository {
 
     let bulkUpdateRequestIndexCounter = 0;
     const bulkUpdateParams: object[] = [];
-    const expectedBulkUpdateResults: Array<Either<any, any>> = expectedBulkGetResults.map(
+    const expectedBulkUpdateResults: Either[] = expectedBulkGetResults.map(
       expectedBulkGetResult => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
@@ -1204,7 +1194,7 @@ export class SavedObjectsRepository {
     return {
       saved_objects: expectedBulkUpdateResults.map(expectedResult => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error;
+          return expectedResult.error as any;
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
