@@ -53,7 +53,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 =====
   `<space_id>`:::
   (Required, array) The errors to resolve for the specified `<space_id>`.
-=====
++
 
 .Properties of `<space_id>`
 [%collapsible%open]
