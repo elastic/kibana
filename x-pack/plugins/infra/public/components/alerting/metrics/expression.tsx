@@ -17,6 +17,11 @@ import {
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import {
+  MetricExpressionParams,
+  Comparator,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../server/lib/alerting/metric_threshold/types';
 import { euiStyled } from '../../../../../observability/public';
 import {
   WhenExpression,
@@ -36,16 +41,6 @@ import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explo
 import { useSource } from '../../../containers/source';
 import { MetricsExplorerGroupBy } from '../../metrics_explorer/group_by';
 
-export interface MetricExpression {
-  aggType?: string;
-  metric?: string;
-  comparator?: Comparator;
-  threshold?: number[];
-  timeSize?: number;
-  timeUnit?: TimeUnit;
-  indexPattern?: string;
-}
-
 interface AlertContextMeta {
   currentOptions?: Partial<MetricsExplorerOptions>;
   series?: MetricsExplorerSeries;
@@ -63,8 +58,10 @@ interface Props {
   setAlertProperty(key: string, value: any): void;
 }
 
-type Comparator = '>' | '>=' | 'between' | '<' | '<=';
 type TimeUnit = 's' | 'm' | 'h' | 'd';
+type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
+  metric?: string;
+};
 
 export const Expressions: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
@@ -90,11 +87,11 @@ export const Expressions: React.FC<Props> = props => {
   const defaultExpression = useMemo<MetricExpression>(
     () => ({
       aggType: AGGREGATION_TYPES.MAX,
-      comparator: '>',
+      comparator: Comparator.GT,
       threshold: [],
       timeSize: 1,
       timeUnit: 'm',
-      indexPattern: source?.configuration.metricAlias,
+      sourceId: source?.id,
     }),
     [source]
   );
@@ -179,11 +176,11 @@ export const Expressions: React.FC<Props> = props => {
           'criteria',
           md.currentOptions.metrics.map(metric => ({
             metric: metric.field,
-            comparator: '>',
+            comparator: Comparator.GT,
             threshold: [],
             timeSize,
             timeUnit,
-            indexPattern: source?.configuration.metricAlias,
+            sourceId: source?.id,
             aggType: metric.aggregation,
           }))
         );
@@ -325,17 +322,22 @@ const StyledExpression = euiStyled.div`
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   const { setAlertParams, expression, errors, expressionId, remove, fields, canDelete } = props;
-  const { aggType = AGGREGATION_TYPES.MAX, metric, comparator = '>', threshold = [] } = expression;
+  const {
+    aggType = AGGREGATION_TYPES.MAX,
+    metric,
+    comparator = Comparator.GT,
+    threshold = [],
+  } = expression;
 
   const updateAggType = useCallback(
     (at: string) => {
-      setAlertParams(expressionId, { ...expression, aggType: at });
+      setAlertParams(expressionId, { ...expression, aggType: at as MetricExpression['aggType'] });
     },
     [expressionId, expression, setAlertParams]
   );
 
   const updateMetric = useCallback(
-    (m?: string) => {
+    (m?: MetricExpression['metric']) => {
       setAlertParams(expressionId, { ...expression, metric: m });
     },
     [expressionId, expression, setAlertParams]
@@ -384,7 +386,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
             )}
             <StyledExpression>
               <ThresholdExpression
-                thresholdComparator={comparator || '>'}
+                thresholdComparator={comparator || Comparator.GT}
                 threshold={threshold}
                 onChangeSelectedThresholdComparator={updateComparator}
                 onChangeSelectedThreshold={updateThreshold}

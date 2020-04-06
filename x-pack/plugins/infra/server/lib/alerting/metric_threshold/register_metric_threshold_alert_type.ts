@@ -28,7 +28,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     ]),
     timeUnit: schema.string(),
     timeSize: schema.number(),
-    indexPattern: schema.string(),
+    sourceId: schema.string(),
   };
 
   const nonCountCriterion = schema.object({
