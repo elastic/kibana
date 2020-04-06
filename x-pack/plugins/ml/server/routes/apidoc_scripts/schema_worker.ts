@@ -42,12 +42,7 @@ interface Block {
   local: Local;
 }
 
-export function postProcess(
-  parsedFiles: any[],
-  filenames: any,
-  preProcess: any,
-  packageInfos: any
-): void {
+export function postProcess(parsedFiles: any[]): void {
   const schemasDirPath = `${__dirname}${path.sep}..${path.sep}..${path.sep}schemas/`;
   const schemaFiles = fs
     .readdirSync(schemasDirPath)

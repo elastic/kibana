@@ -13,10 +13,7 @@ interface DocEntry {
   optional?: boolean;
 }
 
-/** Generate documentation for all classes in a set of .ts files
- * @param fileNames
- * @param options
- */
+/** Generate documentation for all classes in a set of .ts files */
 export function extractDocumentation(
   fileNames: string[],
   options: ts.CompilerOptions = {
@@ -78,12 +75,17 @@ export function extractDocumentation(
 
   /** Serialize a symbol into a json object */
   function serializeSymbol(symbol: ts.Symbol): DocEntry {
+    const symbolType = checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
+    const typePropertySymbol = checker.getPropertyOfType(symbolType, 'type');
+    const resultType = checker.getTypeOfSymbolAtLocation(
+      typePropertySymbol!,
+      typePropertySymbol!.valueDeclaration
+    );
+
     return {
       name: symbol.getName(),
       documentation: ts.displayPartsToString(symbol.getDocumentationComment(checker)),
-      type: checker.typeToString(
-        checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration!)
-      ),
+      type: checker.typeToString(resultType),
     };
   }
 
