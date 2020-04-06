@@ -53,7 +53,7 @@ import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
-import { getStepsData, redirectToDetections } from '../helpers';
+import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
@@ -96,7 +96,6 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
-    hasManageApiKey,
     hasIndexWrite,
     signalIndexName,
   } = useUserInfo();
@@ -115,8 +114,6 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           scheduleRuleData: null,
         };
   const [lastSignals] = useSignalInfo({ ruleId });
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
@@ -227,7 +224,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   return (
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
-      {userHasNoPermissions && <ReadOnlyCallOut />}
+      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -264,7 +261,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <EuiFlexItem grow={false}>
                           <RuleSwitch
                             id={rule?.id ?? '-1'}
-                            isDisabled={userHasNoPermissions}
+                            isDisabled={userHasNoPermissions(canUserCRUD)}
                             enabled={rule?.enabled ?? false}
                             optionLabel={i18n.ACTIVATE_RULE}
                             onChange={handleOnChangeEnabledRule}
@@ -277,7 +274,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                               <EuiButton
                                 href={getEditRuleUrl(ruleId ?? '')}
                                 iconType="controlsHorizontal"
-                                isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
+                                isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
                               >
                                 {ruleI18n.EDIT_RULE_SETTINGS}
                               </EuiButton>
@@ -285,7 +282,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             <EuiFlexItem grow={false}>
                               <RuleActionsOverflow
                                 rule={rule}
-                                userHasNoPermissions={userHasNoPermissions}
+                                userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
                               />
                             </EuiFlexItem>
                           </EuiFlexGroup>

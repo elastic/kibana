@@ -27,10 +27,9 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 // @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import * as SharedDeps from '@kbn/ui-shared-deps';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, WorkerConfig } from '../common';
-import { parseDirPath } from './parse_path';
+import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
@@ -74,10 +73,10 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
 
     externals: {
-      ...SharedDeps.externals,
+      ...UiSharedDeps.externals,
     },
 
-    plugins: [new CleanWebpackPlugin()],
+    plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements

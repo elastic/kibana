@@ -12,6 +12,7 @@ const fetchCase = jest.fn();
 
 export const caseProps: CaseProps = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+  userCanCrud: true,
   caseData: {
     closedAt: null,
     closedBy: null,

@@ -21,7 +21,6 @@ export interface IDynamicStyleProperty extends IStyleProperty {
   getField(): IField | undefined;
   getFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | undefined;
-  getComputedFieldName(): string | undefined;
   getRangeFieldMeta(): RangeFieldMeta;
   getCategoryFieldMeta(): CategoryFieldMeta;
   isFieldMetaEnabled(): boolean;

@@ -17,6 +17,7 @@ import {
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { deleteNotifications } from '../../notifications/delete_notifications';
+import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
 
 export const deleteRulesRoute = (router: IRouter) => {
   router.delete(
@@ -34,12 +35,9 @@ export const deleteRulesRoute = (router: IRouter) => {
 
       try {
         const { id, rule_id: ruleId } = request.query;
-        if (!context.alerting || !context.actions) {
-          return siemResponse.error({ statusCode: 404 });
-        }
 
-        const alertsClient = context.alerting.getAlertsClient();
-        const actionsClient = context.actions.getActionsClient();
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
         if (!actionsClient || !alertsClient) {
@@ -54,6 +52,10 @@ export const deleteRulesRoute = (router: IRouter) => {
         });
         if (rule != null) {
           await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
+          await deleteRuleActionsSavedObject({
+            ruleAlertId: rule.id,
+            savedObjectsClient,
+          });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({
@@ -65,7 +67,11 @@ export const deleteRulesRoute = (router: IRouter) => {
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          const [validated, errors] = transformValidate(rule, ruleStatuses.saved_objects[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            undefined,
+            ruleStatuses.saved_objects[0]
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {
