@@ -26,6 +26,7 @@ function isValidIndexNameLength(indexName: string) {
 // https://github.com/elastic/elasticsearch/blob/master/docs/reference/indices/create-index.asciidoc
 export function isValidIndexName(indexName: string) {
   return (
+    typeof indexName === 'string' &&
     // Lowercase only
     indexName === indexName.toLowerCase() &&
     // Cannot include \, /, *, ?, ", <, >, |, space character, comma, #, :
