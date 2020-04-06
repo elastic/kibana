@@ -56,7 +56,7 @@ const missingFields = [
     name: '_id',
     type: 'string',
     searchable: true,
-    aggregatable: true,
+    aggregatable: false,
     readFromDocValues: true,
   },
   {

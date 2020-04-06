@@ -59,56 +59,6 @@ export interface SchemaItem {
 export type Schema = Array<Partial<SchemaItem>>;
 
 /*
- * ECS Interface
- *
- */
-
-interface EcsField {
-  allowed_values: unknown[];
-  dashed_name: string;
-  description: string;
-  doc_values: boolean;
-  example: string | number | string[];
-  flat_name: string;
-  footnote: string;
-  format: string;
-  group: number;
-  index: boolean;
-  ignore_above: number;
-  input_format: string;
-  level: string;
-  multi_fields: unknown[];
-  name: string;
-  normalize: unknown[];
-  norms: boolean;
-  object_type: string;
-  order: number;
-  original_fieldset: string;
-  output_format: string;
-  output_precision: number;
-  required: boolean;
-  short: string;
-  type: string;
-}
-
-interface EcsNamespace {
-  description: string;
-  fields: Readonly<Record<string, Partial<EcsField>>>;
-  footnote: string;
-  group: number;
-  name: string;
-  nestings: string[];
-  prefix: string;
-  reusable: unknown;
-  root: boolean;
-  short: string;
-  title: string;
-  type: string;
-}
-
-export type EcsSchema = Readonly<Record<string, Partial<EcsNamespace>>>;
-
-/*
  * Associative Array Output Interface
  *
  */
