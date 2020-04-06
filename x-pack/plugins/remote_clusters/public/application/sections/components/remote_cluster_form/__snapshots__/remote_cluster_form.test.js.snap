@@ -350,7 +350,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
         description={
           <React.Fragment>
             <FormattedMessage
-              defaultMessage="Use seed nodes by default, or switch to a single proxy address."
+              defaultMessage="Use seed nodes by default, or switch to proxy mode."
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
               values={Object {}}
             />
@@ -367,7 +367,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                 data-test-subj="remoteClusterFormConnectionModeToggle"
                 label={
                   <FormattedMessage
-                    defaultMessage="Use a single proxy address"
+                    defaultMessage="Use proxy mode"
                     id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                     values={Object {}}
                   />
@@ -443,11 +443,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           className="euiTextColor euiTextColor--subdued"
                         >
                           <FormattedMessage
-                            defaultMessage="Use seed nodes by default, or switch to a single proxy address."
+                            defaultMessage="Use seed nodes by default, or switch to proxy mode."
                             id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
                             values={Object {}}
                           >
-                            Use seed nodes by default, or switch to a single proxy address.
+                            Use seed nodes by default, or switch to proxy mode.
                           </FormattedMessage>
                           <EuiFormRow
                             describedByIds={Array []}
@@ -470,7 +470,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   id="mockId"
                                   label={
                                     <FormattedMessage
-                                      defaultMessage="Use a single proxy address"
+                                      defaultMessage="Use proxy mode"
                                       id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                                       values={Object {}}
                                     />
@@ -534,11 +534,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                       onClick={[Function]}
                                     >
                                       <FormattedMessage
-                                        defaultMessage="Use a single proxy address"
+                                        defaultMessage="Use proxy mode"
                                         id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                                         values={Object {}}
                                       >
-                                        Use a single proxy address
+                                        Use proxy mode
                                       </FormattedMessage>
                                     </span>
                                   </div>
@@ -1447,7 +1447,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Use seed nodes by default, or switch to a single proxy address.
+              Use seed nodes by default, or switch to proxy mode.
               <div
                 class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
                 id="mockId-row"
@@ -1491,7 +1491,7 @@ Array [
                       class="euiSwitch__label"
                       id="mockId"
                     >
-                      Use a single proxy address
+                      Use proxy mode
                     </span>
                   </div>
                 </div>

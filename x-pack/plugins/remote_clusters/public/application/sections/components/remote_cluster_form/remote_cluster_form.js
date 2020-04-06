@@ -499,14 +499,14 @@ export class RemoteClusterForm extends Component {
           <>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
-              defaultMessage="Use seed nodes by default, or switch to a single proxy address."
+              defaultMessage="Use seed nodes by default, or switch to proxy mode."
             />
             <EuiFormRow hasEmptyLabelSpace fullWidth>
               <EuiSwitch
                 label={
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
-                    defaultMessage="Use a single proxy address"
+                    defaultMessage="Use proxy mode"
                   />
                 }
                 checked={mode === PROXY_MODE}
@@ -525,7 +525,7 @@ export class RemoteClusterForm extends Component {
                   title={
                     <FormattedMessage
                       id="xpack.remoteClusters.cloudClusterInformationTitle"
-                      defaultMessage="Use the proxy address for Elastic Cloud deployments"
+                      defaultMessage="Use proxy mode for Elasticsearch Service deployment"
                     />
                   }
                 >
