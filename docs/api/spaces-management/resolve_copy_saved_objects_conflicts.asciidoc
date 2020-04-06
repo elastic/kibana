@@ -73,7 +73,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 
 `<space_id>`::
   (object) An object that describes the result of the copy operation for the space. Includes the dynamic keys in the response.
-
++
 .Properties of `<space_id>`
 [%collapsible%open]
 =====
