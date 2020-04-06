@@ -31,7 +31,7 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
         const results = (await actionsClient.getAll()).filter(
           action => action.actionTypeId === CASE_SERVICE_NOW_ACTION
         );
-        return response.ok({ body: { ...results } });
+        return response.ok({ body: results });
       } catch (error) {
         return response.customError(wrapError(error));
       }

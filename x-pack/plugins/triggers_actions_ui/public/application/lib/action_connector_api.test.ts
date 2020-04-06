@@ -60,6 +60,7 @@ describe('createActionConnector', () => {
   test('should call create action API', async () => {
     const connector: ActionConnectorWithoutId = {
       actionTypeId: 'test',
+      isPreconfigured: false,
       name: 'My test',
       config: {},
       secrets: {},
@@ -73,7 +74,7 @@ describe('createActionConnector', () => {
       Array [
         "/api/action",
         Object {
-          "body": "{\\"actionTypeId\\":\\"test\\",\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
+          "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
       ]
     `);
@@ -85,6 +86,7 @@ describe('updateActionConnector', () => {
     const id = '123';
     const connector: ActionConnectorWithoutId = {
       actionTypeId: 'test',
+      isPreconfigured: false,
       name: 'My test',
       config: {},
       secrets: {},

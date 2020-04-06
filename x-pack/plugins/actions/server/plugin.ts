@@ -67,6 +67,7 @@ export interface PluginStartContract {
   isActionTypeEnabled(id: string): boolean;
   execute(options: ExecuteOptions): Promise<void>;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export interface ActionsPluginsSetup {
@@ -283,6 +284,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           preconfiguredActions,
         });
       },
+      preconfiguredActions,
     };
   }
 
