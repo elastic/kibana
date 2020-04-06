@@ -86,7 +86,7 @@ describe('data generator', () => {
     let events: Event[];
 
     beforeEach(() => {
-      events = generator.generateAlertEventAncestry(3);
+      events = generator.createAlertEventAncestry(3);
     });
 
     it('with n-1 process events', () => {
@@ -153,7 +153,7 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = [root, ...generator.generateDescendantsTree(root, generations)];
+    const events = [root, ...generator.descendantsTreeGenerator(root, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, generations);
     expect(visitedEvents).toEqual(events.length);
@@ -162,7 +162,7 @@ describe('data generator', () => {
   it('creates full resolver tree', () => {
     const alertAncestors = 3;
     const generations = 2;
-    const events = generator.generateFullResolverTree(alertAncestors, generations);
+    const events = [...generator.fullResolverTreeGenerator(alertAncestors, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);
