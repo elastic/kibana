@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../legacy_imports', () => ({
+jest.mock('../../../../../../src/plugins/dashboard/public', () => ({
   DashboardConstants: {
     ADD_EMBEDDABLE_ID: 'addEmbeddableId',
     ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
