@@ -36,8 +36,8 @@ export type Direction = 'asc' | 'desc';
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
-  static ALERT_INDEX_NAME = '.alerts-endpoint-000001'; // TODO: wildcard?
   static EVENT_INDEX_NAME = 'events-endpoint-*';
+  static ALERT_INDEX_PATTERN = '.alerts-endpoint-*';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix
@@ -245,9 +245,9 @@ interface AlertMetadata {
 }
 
 interface AlertState {
-  state: {
+  mutable_state: {
     host_metadata: HostMetadata;
-    active: boolean;
+    triage_status: string;
   };
 }
 

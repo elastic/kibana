@@ -3,13 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UpdateResponse } from 'elasticsearch';
+import { GetResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
-import {
-  AlertEvent,
-  AlertingIndexPatchBodyResult,
-  EndpointAppConstants,
-} from '../../../../common/types';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+import { AlertDetails, AlertEvent, AlertingIndexPatchBodyResult } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertId } from '../lib';
@@ -40,24 +37,18 @@ export const alertDetailsGetHandlerWrapper = function(
       );
 
       const currentHostInfo = await getHostData(ctx, response._source.host.id);
-
-      let triageState = response._source.state?.active;
-      if (triageState === undefined) {
-        triageState = true;
-      }
-
       return res.ok({
         body: {
           id: alertId.toString(),
           ...response._source,
-          state: {
-            active: triageState,
+          mutable_state: {
+            triage_status: response._source.mutable_state.triage_status,
             host_metadata: currentHostInfo,
           },
           next: await pagination.getNextUrl(),
           prev: await pagination.getPrevUrl(),
         },
-      });
+      } as AlertDetails);
     } catch (err) {
       if (err.status === 404) {
         return res.notFound({ body: err });
@@ -82,14 +73,14 @@ export const alertDetailsUpdateHandlerWrapper = function(
     res
   ) => {
     try {
-      const alertId = req.params.id;
+      const alertId = AlertId.fromEncoded(req.params.id);
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('update', {
-        index: EndpointAppConstants.ALERT_INDEX_NAME,
-        id: alertId,
+        index: alertId.index,
+        id: alertId.id,
         body: {
-          doc: req.body,
+          doc: req.body, // overlays `mutable_state` from request params onto document
         },
-      })) as UpdateResponse<AlertEvent>;
+      })) as JsonObject;
 
       return res.ok({ body: response });
     } catch (err) {

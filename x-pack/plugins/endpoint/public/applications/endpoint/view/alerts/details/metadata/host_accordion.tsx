@@ -17,7 +17,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostNameCurrent', {
           defaultMessage: 'Host Name (Current)',
         }),
-        description: alertData.state.host_metadata.host.hostname,
+        description: alertData.mutable_state.host_metadata.host.hostname,
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostNameOriginal', {
@@ -29,7 +29,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostIPCurrent', {
           defaultMessage: 'Host IP (Current)',
         }),
-        description: alertData.state.host_metadata.host.ip.join(', '),
+        description: alertData.mutable_state.host_metadata.host.ip.join(', '),
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.hostIPOriginal', {
@@ -55,7 +55,7 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.osCurrent', {
           defaultMessage: 'OS (Current)',
         }),
-        description: alertData.state.host_metadata.host.os.name,
+        description: alertData.mutable_state.host_metadata.host.os.name,
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.osOriginal', {

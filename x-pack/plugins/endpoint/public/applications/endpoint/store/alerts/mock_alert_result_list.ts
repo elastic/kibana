@@ -56,8 +56,9 @@ export const mockAlertDetailsResult = (): AlertDetails => {
       id: 'xDUYMHABAKk0XnHd8rrd',
       prev: null,
       next: null,
-      state: {
+      mutable_state: {
         host_metadata: generator.generateHostMetadata(),
+        triage_status: 'open',
       },
     },
   };

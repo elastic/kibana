@@ -114,7 +114,7 @@ export const alertingIndexGetQuerySchema = schema.object(
  */
 export const alertingIndexPatchQuerySchema = schema.object({
   alert_ids: schema.arrayOf(schema.string(), {
-    minLength: 1,
+    minSize: 1,
   }),
 });
 
@@ -122,8 +122,8 @@ export const alertingIndexPatchQuerySchema = schema.object({
  * Used to validate JSON body params for modifications via alert list and detail APIs.
  */
 export const alertingIndexPatchBodySchema = schema.object({
-  state: schema.object({
-    active: schema.maybe(schema.boolean()),
+  mutable_state: schema.object({
+    triage_status: schema.oneOf([schema.literal('open'), schema.literal('closed')]),
   }),
 });
 

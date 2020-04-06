@@ -125,7 +125,7 @@ const buildAlertSearchQuery = async (
 
   const reqWrapper: AlertSearchRequestWrapper = {
     size: query.pageSize,
-    index: EndpointAppConstants.ALERT_INDEX_NAME,
+    index: EndpointAppConstants.ALERT_INDEX_PATTERN,
     body: reqBody,
   };
 
@@ -160,30 +160,38 @@ export const searchESForAlerts = async (
  * Alert ID abstraction for encoding originating index.
  */
 export class AlertId {
-  protected index: string;
-  protected id: string;
+  protected _index: string;
+  protected _id: string;
 
   constructor(index: string, id: string) {
-    this.index = index;
-    this.id = id;
+    this._index = index;
+    this._id = id;
   }
 
   public get index() {
-    return this.index;
+    return this._index;
+  }
+
+  public set index(index: string) {
+    this._index = index;
   }
 
   public get id() {
-    return this.id;
+    return this._id;
   }
 
-  static fromEncoded(encoded: string): AlertId {
+  public set id(id: string) {
+    this._id = id;
+  }
+
+  public static fromEncoded(encoded: string): AlertId {
     encoded = encoded.replace(/\-/g, '+').replace(/_/g, '/');
     const decoded = Buffer.from(encoded, 'base64').toString('utf8');
     const [index, id] = decoded.split(' ');
     return new AlertId(index, id);
   }
 
-  protected toString(): string {
+  public toString(): string {
     return Buffer.from(`${this.index} ${this.id}`)
       .toString('base64')
       .replace(/\+/g, '-')

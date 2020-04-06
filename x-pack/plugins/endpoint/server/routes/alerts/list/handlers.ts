@@ -6,7 +6,7 @@
 import { UpdateDocumentByQueryParams, UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { RequestHandler } from 'kibana/server';
 import { EndpointAppContext } from '../../../types';
-import { searchESForAlerts } from '../lib';
+import { AlertId, searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
 import {
   AlertingIndexGetQueryResult,
@@ -45,8 +45,8 @@ export const alertListUpdateHandlerWrapper = function(
     AlertingIndexPatchBodyResult
   > = async (ctx, req, res) => {
     try {
-      const reqWrapper: UpdateDocumentByQueryParams = {
-        index: EndpointAppConstants.ALERT_INDEX_NAME,
+      const reqWrapper = {
+        index: EndpointAppConstants.ALERT_INDEX_PATTERN,
         body: {
           query: {
             ids: {
@@ -54,20 +54,13 @@ export const alertListUpdateHandlerWrapper = function(
             },
           },
           script: {
-            source: `
-              if (ctx._source['state'] == null) {
-                def state = ['active': ${req.body.state.active}];
-                ctx._source.state = state;
-              } else {
-                ctx._source.state['active'] = ${req.body.state.active};
-              }
-            `,
+            source: `ctx._source.state['mutable_state']['triage_status'] = ${req.body.mutable_state.triage_status}`,
             lang: 'painless',
           },
         },
       };
       for (const id of req.query.alert_ids) {
-        reqWrapper.body.query.ids.values.push(id);
+        reqWrapper.body.query.ids.values.push(AlertId.fromEncoded(id).index);
       }
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
         'updateByQuery',
