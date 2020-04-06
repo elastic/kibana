@@ -25,7 +25,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart, ChromeBreadcrumb, Capabilities } from 'src/core/public';
-import { ManagementSetup } from '../../../management/public';
+import { ManagementAppMountParams } from '../../../management/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import {
@@ -36,66 +36,56 @@ import { SavedObjectsTable } from './objects_table';
 import { SavedObjectEdition } from './object_view';
 import { getAllowedTypes } from './../lib';
 
-interface RegisterOptions {
+interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
-  sections: ManagementSetup['sections'];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  mountParams: ManagementAppMountParams;
 }
 
-const title = i18n.translate('savedObjectsManagement.managementSectionLabel', {
-  defaultMessage: 'Saved Objects',
-});
+export const mountManagementSection = async ({
+  core,
+  mountParams,
+  serviceRegistry,
+}: MountParams) => {
+  const [coreStart, { data }, pluginStart] = await core.getStartServices();
+  const { element, basePath, setBreadcrumbs } = mountParams;
+  const allowedTypes = await getAllowedTypes(coreStart.http);
+  const capabilities = coreStart.application.capabilities;
 
-export const registerManagementSection = ({ core, sections, serviceRegistry }: RegisterOptions) => {
-  const kibanaSection = sections.getSection('kibana');
-  if (!kibanaSection) {
-    throw new Error('`kibana` management section not found.');
-  }
-  kibanaSection.registerApp({
-    id: 'objects',
-    title,
-    order: 10,
-    mount: async ({ element, basePath, setBreadcrumbs }) => {
-      const [coreStart, { data }, pluginStart] = await core.getStartServices();
-      const allowedTypes = await getAllowedTypes(coreStart.http);
-      const capabilities = coreStart.application.capabilities;
+  ReactDOM.render(
+    <I18nProvider>
+      <HashRouter basename={basePath}>
+        <Switch>
+          <Route path={'/:service/:id'} exact={true}>
+            <RedirectToHomeIfUnauthorized capabilities={capabilities}>
+              <SavedObjectsEditionPage
+                coreStart={coreStart}
+                serviceRegistry={serviceRegistry}
+                setBreadcrumbs={setBreadcrumbs}
+              />
+            </RedirectToHomeIfUnauthorized>
+          </Route>
+          <Route path={'/'} exact={false}>
+            <RedirectToHomeIfUnauthorized capabilities={capabilities}>
+              <SavedObjectsTablePage
+                coreStart={coreStart}
+                dataStart={data}
+                serviceRegistry={serviceRegistry}
+                actionRegistry={pluginStart.actions}
+                allowedTypes={allowedTypes}
+                setBreadcrumbs={setBreadcrumbs}
+              />
+            </RedirectToHomeIfUnauthorized>
+          </Route>
+        </Switch>
+      </HashRouter>
+    </I18nProvider>,
+    element
+  );
 
-      ReactDOM.render(
-        <I18nProvider>
-          <HashRouter basename={basePath}>
-            <Switch>
-              <Route path={'/:service/:id'} exact={true}>
-                <RedirectToHomeIfUnauthorized capabilities={capabilities}>
-                  <SavedObjectsEditionPage
-                    coreStart={coreStart}
-                    serviceRegistry={serviceRegistry}
-                    setBreadcrumbs={setBreadcrumbs}
-                  />
-                </RedirectToHomeIfUnauthorized>
-              </Route>
-              <Route path={'/'} exact={false}>
-                <RedirectToHomeIfUnauthorized capabilities={capabilities}>
-                  <SavedObjectsTablePage
-                    coreStart={coreStart}
-                    dataStart={data}
-                    serviceRegistry={serviceRegistry}
-                    actionRegistry={pluginStart.actions}
-                    allowedTypes={allowedTypes}
-                    setBreadcrumbs={setBreadcrumbs}
-                  />
-                </RedirectToHomeIfUnauthorized>
-              </Route>
-            </Switch>
-          </HashRouter>
-        </I18nProvider>,
-        element
-      );
-
-      return () => {
-        ReactDOM.unmountComponentAtNode(element);
-      };
-    },
-  });
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
 };
 
 const RedirectToHomeIfUnauthorized: React.FunctionComponent<{
