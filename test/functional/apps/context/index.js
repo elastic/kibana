@@ -38,6 +38,7 @@ export default function({ getService, getPageObjects, loadTestFile }) {
       return esArchiver.unload('logstash_functional');
     });
 
+    loadTestFile(require.resolve('./_context_navigation'));
     loadTestFile(require.resolve('./_discover_navigation'));
     loadTestFile(require.resolve('./_filters'));
     loadTestFile(require.resolve('./_size'));
