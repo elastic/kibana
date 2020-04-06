@@ -29,6 +29,9 @@ export interface Point {
 }
 
 export function getPoint(x: string, y: string, row: Row) {
+  if (!row) {
+    return;
+  }
   const xRow = row[x];
   const yRow = row[y];
 
