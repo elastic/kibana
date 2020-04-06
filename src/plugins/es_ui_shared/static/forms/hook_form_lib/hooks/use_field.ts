@@ -431,6 +431,7 @@ export const useField = (
     errors,
     form,
     isPristine,
+    isValid: errors.length === 0,
     isValidating,
     isValidated,
     isChangingValue,

@@ -213,3 +213,5 @@ export enum SCALING_TYPES {
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
 }
+
+export const RGBA_0000 = 'rgba(0,0,0,0)';

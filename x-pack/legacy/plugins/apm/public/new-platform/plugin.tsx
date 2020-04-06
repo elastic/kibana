@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
+import { ApmRoute } from '@elastic/apm-rum-react';
 import styled from 'styled-components';
 import {
   CoreSetup,
@@ -64,7 +65,7 @@ const App = () => {
       <APMIndicesPermission>
         <Switch>
           {routes.map((route, i) => (
-            <Route key={i} {...route} />
+            <ApmRoute key={i} {...route} />
           ))}
         </Switch>
       </APMIndicesPermission>
