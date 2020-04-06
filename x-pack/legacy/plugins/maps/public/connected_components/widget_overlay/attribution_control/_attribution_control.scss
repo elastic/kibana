@@ -4,3 +4,7 @@
   pointer-events: all;
   padding-left: $euiSizeM;
 }
+
+.mapAttributionControl__fullScreen {
+  padding-left: $euiSizeXXL * 4 !important;
+}
