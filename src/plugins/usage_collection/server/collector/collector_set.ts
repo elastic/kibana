@@ -125,11 +125,19 @@ export class CollectorSet {
     collectionName: string,
     collectors: Array<Collector<any, any>> = this.collectors
   ) => {
-    const filteredCollectors = collectors.filter(collector => {
-      return !collector.onlyForCollectionName || collector.onlyForCollectionName === collectionName;
-    });
+    const filteredCollectors = collectors.reduce((acc, collector) => {
+      const { type, onlyForCollectionName } = collector;
+      // If it's an exclusive collector OR it's not exclusive but it hasn't been assigned before
+      if (onlyForCollectionName === collectionName || (!onlyForCollectionName && !acc[type])) {
+        return {
+          ...acc,
+          [type]: collector,
+        };
+      }
+      return acc;
+    }, {} as { [key: string]: Collector<any, any> });
     const responses = [];
-    for (const collector of filteredCollectors) {
+    for (const collector of Object.values(filteredCollectors)) {
       this.logger.debug(`Fetching data from ${collector.type} collector`);
       try {
         responses.push({
