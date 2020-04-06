@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { PrePackagedRulesPrompt } from './load_empty_prompt';
 
 describe('PrePackagedRulesPrompt', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <PrePackagedRulesPrompt
         createPrePackagedRules={jest.fn()}

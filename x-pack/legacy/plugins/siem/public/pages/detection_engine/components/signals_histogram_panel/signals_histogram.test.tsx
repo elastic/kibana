@@ -12,7 +12,7 @@ import { SignalsHistogram } from './signals_histogram';
 jest.mock('../../../../lib/kibana');
 
 describe('SignalsHistogram', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <SignalsHistogram loading={false} data={[]} from={0} to={1} updateDateRange={jest.fn()} />
     );

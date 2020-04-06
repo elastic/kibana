@@ -19,7 +19,7 @@ describe('RulesPage', () => {
     (useUserInfo as jest.Mock).mockReturnValue({});
     (usePrePackagedRules as jest.Mock).mockReturnValue({});
   });
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<RulesPage />);
 
     expect(wrapper.find('AllRules')).toHaveLength(1);

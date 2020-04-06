@@ -18,7 +18,7 @@ describe('MlJobSelect', () => {
     (useSiemJobs as jest.Mock).mockReturnValue([false, []]);
   });
 
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const Component = () => {
       const { form } = useForm();
 

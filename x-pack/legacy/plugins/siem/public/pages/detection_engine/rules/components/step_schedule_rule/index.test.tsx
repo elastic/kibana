@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../../mock';
 import { StepScheduleRule } from './index';
 
 describe('StepScheduleRule', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = mount(<StepScheduleRule isReadOnlyView={false} isLoading={false} />, {
       wrappingComponent: TestProviders,
     });
@@ -19,7 +19,7 @@ describe('StepScheduleRule', () => {
     expect(wrapper.find('Form[data-test-subj="stepScheduleRule"]')).toHaveLength(1);
   });
 
-  it('renders correctly against the snapshot if isReadOnlyView', () => {
+  it('renders correctly if isReadOnlyView', () => {
     const wrapper = shallow(<StepScheduleRule isReadOnlyView={true} isLoading={false} />);
 
     expect(wrapper.find('StepContentWrapper')).toHaveLength(1);

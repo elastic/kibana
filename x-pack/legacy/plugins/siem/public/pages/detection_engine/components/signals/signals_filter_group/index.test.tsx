@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { SignalsTableFilterGroup } from './index';
 
 describe('SignalsTableFilterGroup', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<SignalsTableFilterGroup onFilterGroupChanged={jest.fn()} />);
 
     expect(wrapper.find('EuiFilterButton')).toBeTruthy();

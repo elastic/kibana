@@ -12,7 +12,7 @@ import { StepDefineRule } from './index';
 jest.mock('../../../../../lib/kibana');
 
 describe('StepDefineRule', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<StepDefineRule isReadOnlyView={false} isLoading={false} />);
 
     expect(wrapper.find('Form[data-test-subj="stepDefineRule"]')).toHaveLength(1);

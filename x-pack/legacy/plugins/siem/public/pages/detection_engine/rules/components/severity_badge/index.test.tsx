@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { SeverityBadge } from './index';
 
 describe('SeverityBadge', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<SeverityBadge value="low" />);
 
     expect(wrapper.find('EuiHealth')).toHaveLength(1);

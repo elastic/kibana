@@ -11,7 +11,7 @@ import { SelectRuleType } from './index';
 import { useForm } from '../../../../../shared_imports';
 
 describe('SelectRuleType', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const Component = () => {
       const { form } = useForm();
 

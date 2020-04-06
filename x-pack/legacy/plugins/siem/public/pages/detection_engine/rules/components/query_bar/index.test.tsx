@@ -13,7 +13,7 @@ import { useForm } from '../../../../../shared_imports';
 jest.mock('../../../../../lib/kibana');
 
 describe('QueryBarDefineRule', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const Component = () => {
       const { form } = useForm();
 

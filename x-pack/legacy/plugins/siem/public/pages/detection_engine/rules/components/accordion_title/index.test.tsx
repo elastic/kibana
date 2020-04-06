@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { AccordionTitle } from './index';
 
 describe('AccordionTitle', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<AccordionTitle name="name" title="title" type="valid" />);
 
     expect(wrapper.find('h6').text()).toContain('title');

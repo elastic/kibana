@@ -11,7 +11,7 @@ import { AddMitreThreat } from './index';
 import { useForm } from '../../../../../shared_imports';
 
 describe('AddMitreThreat', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const Component = () => {
       const { form } = useForm();
 

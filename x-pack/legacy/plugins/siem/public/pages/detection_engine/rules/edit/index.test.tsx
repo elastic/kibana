@@ -23,7 +23,7 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('EditRulePage', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     (useUserInfo as jest.Mock).mockReturnValue({});
     (useParams as jest.Mock).mockReturnValue({});
     const wrapper = shallow(<EditRulePage />, { wrappingComponent: TestProviders });

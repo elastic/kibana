@@ -12,7 +12,7 @@ import { RuleStatusIcon } from './index';
 jest.mock('../../../../../lib/kibana');
 
 describe('RuleStatusIcon', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<RuleStatusIcon name="name" type="active" />, {
       wrappingComponent: TestProviders,
     });

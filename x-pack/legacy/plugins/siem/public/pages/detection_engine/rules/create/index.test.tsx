@@ -14,7 +14,7 @@ import { useUserInfo } from '../../components/user_info';
 jest.mock('../../components/user_info');
 
 describe('CreateRulePage', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     (useUserInfo as jest.Mock).mockReturnValue({});
     const wrapper = shallow(<CreateRulePage />, { wrappingComponent: TestProviders });
 

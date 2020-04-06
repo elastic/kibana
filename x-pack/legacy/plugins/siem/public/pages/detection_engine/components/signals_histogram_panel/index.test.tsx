@@ -13,7 +13,7 @@ jest.mock('../../../../lib/kibana');
 jest.mock('../../../../components/navigation/use_get_url_search');
 
 describe('SignalsHistogramPanel', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <SignalsHistogramPanel
         from={0}

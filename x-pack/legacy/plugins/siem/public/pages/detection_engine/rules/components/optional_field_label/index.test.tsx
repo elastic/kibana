@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import { OptionalFieldLabel } from './index';
 
 describe('OptionalFieldLabel', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(OptionalFieldLabel);
 
     expect(wrapper.find('EuiTextColor')).toHaveLength(1);

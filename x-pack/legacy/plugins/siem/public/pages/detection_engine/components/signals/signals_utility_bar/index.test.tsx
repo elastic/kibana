@@ -12,7 +12,7 @@ import { SignalsUtilityBar } from './index';
 jest.mock('../../../../../lib/kibana');
 
 describe('SignalsUtilityBar', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(
       <SignalsUtilityBar
         canUserCRUD={true}
