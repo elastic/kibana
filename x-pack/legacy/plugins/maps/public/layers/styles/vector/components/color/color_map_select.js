@@ -99,6 +99,7 @@ export class ColorMapSelect extends Component {
         <ColorStopsOrdinal
           colorStops={this.state.customColorMap}
           onChange={this._onCustomColorMapChange}
+          swatches={this.props.swatches}
         />
       );
     } else
@@ -108,6 +109,7 @@ export class ColorMapSelect extends Component {
           field={this.props.styleProperty.getField()}
           getValueSuggestions={this.props.styleProperty.getValueSuggestions}
           onChange={this._onCustomColorMapChange}
+          swatches={this.props.swatches}
         />
       );
 
