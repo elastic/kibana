@@ -254,7 +254,11 @@ function FieldListItemComponent(
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__name">
+            <EuiFlexItem
+              grow={false}
+              className="mappingsEditor__fieldsListItem__name"
+              data-test-subj="fieldName"
+            >
               {source.name}
             </EuiFlexItem>
 

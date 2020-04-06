@@ -28,12 +28,14 @@ import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'leaflet';
-import 'plugins/kibana/dashboard/legacy';
 import { npStart } from 'ui/new_platform';
 import { localApplicationService } from 'plugins/kibana/local_application_service';
 
 import { showAppRedirectNotification } from '../../../../../src/plugins/kibana_legacy/public';
-import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
+import {
+  DashboardConstants,
+  createDashboardEditUrl,
+} from '../../../../../src/plugins/dashboard/public';
 
 npStart.plugins.kibanaLegacy.dashboardConfig.turnHideWriteControlsOn();
 
