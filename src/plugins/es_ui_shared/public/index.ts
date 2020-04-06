@@ -19,6 +19,10 @@
 
 export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
 
+export { SectionLoading } from './components/section_loading';
+
+export { CronEditor, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './components/cron_editor';
+
 export {
   SendRequestConfig,
   SendRequestResponse,
