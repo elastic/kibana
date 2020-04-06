@@ -292,6 +292,7 @@ export const registerTestBed = <T extends string = string>(
         exists,
         find,
         setProps,
+        waitFor,
         table: {
           getMetaData,
         },
