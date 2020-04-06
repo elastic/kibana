@@ -94,6 +94,7 @@ export interface FieldHook {
   readonly type: string;
   readonly value: unknown;
   readonly errors: ValidationError[];
+  readonly isValid: boolean;
   readonly isPristine: boolean;
   readonly isValidating: boolean;
   readonly isValidated: boolean;
