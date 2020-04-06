@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import React from 'react';
+import { getSavedObjectFinder } from '../../saved_objects/public';
+import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+import { Start as InspectorStart } from '../../inspector/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { EmbeddableFactoryRegistry, EmbeddableFactoryProvider } from './types';
 import { bootstrap } from './bootstrap';
@@ -26,11 +29,17 @@ import {
   EmbeddableOutput,
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
+  EmbeddablePanel,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
+}
+
+export interface EmbeddableStartDependencies {
+  uiActions: UiActionsStart;
+  inspector: InspectorStart;
 }
 
 export interface EmbeddableSetup {
@@ -50,6 +59,7 @@ export interface EmbeddableStart {
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
+  EmbeddablePanel: React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
 }
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -78,7 +88,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public start(core: CoreStart): EmbeddableStart {
+  public start(
+    core: CoreStart,
+    { uiActions, inspector }: EmbeddableStartDependencies
+  ): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach(def => {
       this.embeddableFactories.set(
         def.type,
@@ -89,14 +102,35 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     });
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
-      getEmbeddableFactories: () => {
-        this.ensureFactoriesExist();
-        return this.embeddableFactories.values();
-      },
+      getEmbeddableFactories: this.getEmbeddableFactories,
+      EmbeddablePanel: ({
+        embeddable,
+        hideHeader,
+      }: {
+        embeddable: IEmbeddable;
+        hideHeader?: boolean;
+      }) => (
+        <EmbeddablePanel
+          hideHeader={hideHeader}
+          embeddable={embeddable}
+          getActions={uiActions.getTriggerCompatibleActions}
+          getEmbeddableFactory={this.getEmbeddableFactory}
+          getAllEmbeddableFactories={this.getEmbeddableFactories}
+          overlays={core.overlays}
+          notifications={core.notifications}
+          inspector={inspector}
+          SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+        />
+      ),
     };
   }
 
   public stop() {}
+
+  private getEmbeddableFactories = () => {
+    this.ensureFactoriesExist();
+    return this.embeddableFactories.values();
+  };
 
   private registerEmbeddableFactory = (
     embeddableFactoryId: string,
@@ -130,11 +164,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   };
 
   // These two functions are only to support legacy plugins registering factories after the start lifecycle.
-  private ensureFactoriesExist() {
+  private ensureFactoriesExist = () => {
     this.embeddableFactoryDefinitions.forEach(def => this.ensureFactoryExists(def.type));
-  }
+  };
 
-  private ensureFactoryExists(type: string) {
+  private ensureFactoryExists = (type: string) => {
     if (!this.embeddableFactories.get(type)) {
       const def = this.embeddableFactoryDefinitions.get(type);
       if (!def) return;
@@ -145,5 +179,5 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           : defaultEmbeddableFactoryProvider(def)
       );
     }
-  }
+  };
 }
