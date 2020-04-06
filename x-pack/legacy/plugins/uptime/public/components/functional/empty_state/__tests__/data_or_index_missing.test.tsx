@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import { DataOrIndexMissing } from '../data_or_index_missing';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DataOrIndexMissing } from '../data_or_index_missing';
 
 describe('DataOrIndexMissing component', () => {
   it('renders basePath and headingMessage', () => {
