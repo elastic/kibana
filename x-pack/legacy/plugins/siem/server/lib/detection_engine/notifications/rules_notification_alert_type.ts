@@ -61,7 +61,7 @@ export const rulesNotificationAlertType = ({
       from: fromInMs,
       to: toInMs,
       id: ruleAlertSavedObject.id,
-      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl as string,
+      kibanaSiemAppUrl: ruleAlertParams.meta?.kibanaSiemAppUrl,
     });
 
     logger.info(
