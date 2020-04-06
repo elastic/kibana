@@ -63,10 +63,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       });
       after(async () => await esArchiver.unload(ARCHIVE));
 
-      loadTestFile(require.resolve('./feature_controls'));
       loadTestFile(require.resolve('./overview'));
       loadTestFile(require.resolve('./monitor'));
       loadTestFile(require.resolve('./ml_anomaly'));
+      loadTestFile(require.resolve('./feature_controls'));
     });
   });
 };

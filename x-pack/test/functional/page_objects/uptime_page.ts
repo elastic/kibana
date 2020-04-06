@@ -17,33 +17,29 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await navigation.goToUptime();
     }
 
-    public async goToUptimePageAndSetDateRange(
-      datePickerStartValue: string,
-      datePickerEndValue: string
-    ) {
-      await navigation.goToUptime();
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
+    public async setDateRange(start: string, end: string) {
+      const { start: prevStart, end: prevEnd } = await pageObjects.timePicker.getTimeConfig();
+      if (start !== prevStart || prevEnd !== end) {
+        await pageObjects.timePicker.setAbsoluteRange(start, end);
+      } else {
+        await navigation.refreshApp();
+      }
     }
 
     public async goToUptimeOverviewAndLoadData(
-      datePickerStartValue: string,
-      datePickerEndValue: string,
+      dateStart: string,
+      dateEnd: string,
       monitorIdToCheck?: string
     ) {
       await navigation.goToUptime();
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
+      await this.setDateRange(dateStart, dateEnd);
       if (monitorIdToCheck) {
         await commonService.monitorIdExists(monitorIdToCheck);
       }
     }
 
-    public async loadDataAndGoToMonitorPage(
-      datePickerStartValue: string,
-      datePickerEndValue: string,
-      monitorId: string,
-      monitorName?: string
-    ) {
-      await pageObjects.timePicker.setAbsoluteRange(datePickerStartValue, datePickerEndValue);
+    public async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
+      await this.setDateRange(dateStart, dateEnd);
       await navigation.goToMonitor(monitorId);
     }
 
@@ -135,6 +131,11 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     public async setMonitorListPageSize(size: number): Promise<void> {
       await commonService.openPageSizeSelectPopover();
       return commonService.clickPageSizeSelectPopoverItem(size);
+    }
+
+    public async resetFilters() {
+      await this.inputFilterQuery('');
+      await commonService.resetStatusFilter();
     }
   })();
 }

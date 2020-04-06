@@ -12,7 +12,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   const alreadyHasJob = async () => {
-    return await testSubjects.exists('uptimeManageMLJobBtn');
+    return await testSubjects.exists('uptimeManageMLJobBtn', { timeout: 0 });
   };
 
   return {
@@ -32,7 +32,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
       });
     },
     async openMLManageMenu() {
-      return retry.tryForTime(15000, async () => {
+      return retry.tryForTime(30000, async () => {
         await testSubjects.click('uptimeManageMLJobBtn');
         await testSubjects.existOrFail('uptimeManageMLContextMenu');
       });
@@ -46,10 +46,12 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
       return retry.tryForTime(15000, async () => {
         await testSubjects.existOrFail('uptimeMLJobSuccessfullyCreated');
         log.info('Job successfully created');
+        await testSubjects.click('superDatePickerApplyTimeButton');
       });
     },
 
     async deleteMLJob() {
+      await testSubjects.click('superDatePickerApplyTimeButton');
       await this.openMLManageMenu();
       await testSubjects.click('uptimeDeleteMLJobBtn');
       return retry.tryForTime(15000, async () => {
@@ -62,7 +64,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
       return !!(await (await testSubjects.find('uptimeMLCreateJobBtn')).getAttribute('disabled'));
     },
     async hadLicenseInfo() {
-      return await testSubjects.exists('uptimeMLLicenseInfo');
+      return await testSubjects.exists('uptimeMLLicenseInfo', { timeout: 0 });
     },
   };
 }
