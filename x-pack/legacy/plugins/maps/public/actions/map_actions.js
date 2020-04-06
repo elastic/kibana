@@ -174,9 +174,16 @@ export function removeTrackedLayerStateForSelectedLayer() {
 
 export function replaceLayerList(newLayerList) {
   return (dispatch, getState) => {
-    getLayerListRaw(getState()).forEach(({ id }) => {
-      dispatch(removeLayerFromLayerList(id));
-    });
+    const isMapReady = getMapReady(getState());
+    if (!isMapReady) {
+      dispatch({
+        type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
+      });
+    } else {
+      getLayerListRaw(getState()).forEach(({ id }) => {
+        dispatch(removeLayerFromLayerList(id));
+      });
+    }
 
     newLayerList.forEach(layerDescriptor => {
       dispatch(addLayer(layerDescriptor));

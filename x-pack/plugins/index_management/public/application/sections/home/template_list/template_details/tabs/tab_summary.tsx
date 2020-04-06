@@ -14,11 +14,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Template } from '../../../../../../../common/types';
+import { TemplateDeserialized } from '../../../../../../../common';
 import { getILMPolicyPath } from '../../../../../services/navigation';
 
 interface Props {
-  templateDetails: Template;
+  templateDetails: TemplateDeserialized;
 }
 
 const NoneDescriptionText = () => (
@@ -35,6 +35,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   return (
     <EuiDescriptionList textStyle="reverse" data-test-subj="summaryTab">
+      {/* Index patterns */}
       <EuiDescriptionListTitle>
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.summaryTab.indexPatternsDescriptionListTitle"
@@ -61,6 +62,8 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
           indexPatterns.toString()
         )}
       </EuiDescriptionListDescription>
+
+      {/* // ILM Policy */}
       <EuiDescriptionListTitle>
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.summaryTab.ilmPolicyDescriptionListTitle"
@@ -74,6 +77,8 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
           <NoneDescriptionText />
         )}
       </EuiDescriptionListDescription>
+
+      {/* // Order */}
       <EuiDescriptionListTitle>
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.summaryTab.orderDescriptionListTitle"
@@ -83,6 +88,8 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
       <EuiDescriptionListDescription>
         {order || order === 0 ? order : <NoneDescriptionText />}
       </EuiDescriptionListDescription>
+
+      {/* // Version */}
       <EuiDescriptionListTitle>
         <FormattedMessage
           id="xpack.idxMgmt.templateDetails.summaryTab.versionDescriptionListTitle"
