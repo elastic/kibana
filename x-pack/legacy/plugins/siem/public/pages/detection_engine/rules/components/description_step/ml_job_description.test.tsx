@@ -30,25 +30,25 @@ const job = {
 };
 
 describe('MlJobDescription', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<MlJobDescription job={job} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[data-test-subj="machineLearningJobId"]')).toHaveLength(1);
   });
 });
 
 describe('AuditIcon', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<AuditIcon message={undefined} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiToolTip')).toHaveLength(0);
   });
 });
 
 describe('JobStatusBadge', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<JobStatusBadge job={job} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiBadge')).toHaveLength(1);
   });
 });

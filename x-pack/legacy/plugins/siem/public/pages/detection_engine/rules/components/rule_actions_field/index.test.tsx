@@ -51,6 +51,8 @@ describe('RuleActionsField', () => {
     };
     const wrapper = shallow(<Component />);
 
+    console.log(wrapper.dive().debug());
+
     expect(wrapper.dive()).toMatchSnapshot();
   });
 });

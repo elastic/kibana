@@ -49,6 +49,6 @@ describe('MlJobSelect', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[data-test-subj="mlJobSelect"]')).toHaveLength(1);
   });
 });

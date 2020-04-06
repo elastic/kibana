@@ -10,9 +10,9 @@ import { shallow } from 'enzyme';
 import { ReadOnlyCallOut } from './index';
 
 describe('ReadOnlyCallOut', () => {
-  it('renders correctly against the snapshot', () => {
+  it('renders correctly', () => {
     const wrapper = shallow(<ReadOnlyCallOut />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
   });
 });

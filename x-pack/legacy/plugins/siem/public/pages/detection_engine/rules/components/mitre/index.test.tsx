@@ -44,6 +44,6 @@ describe('AddMitreThreat', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[data-test-subj="addMitre"]')).toHaveLength(1);
   });
 });

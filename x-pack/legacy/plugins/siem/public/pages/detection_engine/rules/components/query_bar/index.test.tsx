@@ -24,7 +24,7 @@ describe('QueryBarDefineRule', () => {
           indexPattern={{ fields: [], title: 'title' }}
           onCloseTimelineSearch={jest.fn()}
           openTimelineSearch={true}
-          dataTestSubj="dataTestSubj"
+          dataTestSubj="query-bar-define-rule"
           idAria="idAria"
           field={{
             path: 'path',
@@ -50,6 +50,6 @@ describe('QueryBarDefineRule', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[data-test-subj="query-bar-define-rule"]')).toHaveLength(1);
   });
 });

@@ -17,7 +17,7 @@ describe('PickTimeline', () => {
 
       return (
         <PickTimeline
-          dataTestSubj="dataTestSubj"
+          dataTestSubj="pick-timeline"
           idAria="idAria"
           isDisabled={false}
           field={{
@@ -44,6 +44,6 @@ describe('PickTimeline', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive()).toMatchSnapshot();
+    expect(wrapper.dive().find('[data-test-subj="pick-timeline"]')).toHaveLength(1);
   });
 });

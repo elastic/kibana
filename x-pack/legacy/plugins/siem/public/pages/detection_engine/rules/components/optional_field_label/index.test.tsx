@@ -12,6 +12,6 @@ describe('OptionalFieldLabel', () => {
   it('renders correctly against the snapshot', () => {
     const wrapper = shallow(OptionalFieldLabel);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiTextColor')).toHaveLength(1);
   });
 });
