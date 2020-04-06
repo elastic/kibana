@@ -12,7 +12,7 @@ import moment from 'moment';
 
 describe('EventLogStart', () => {
   describe('findEventsBySavedObject', () => {
-    test('verifies that the user can to access the specified saved object', async () => {
+    test('verifies that the user can access the specified saved object', async () => {
       const esContext = contextMock.create();
       const savedObjectsClient = savedObjectsClientMock.create();
       const eventLogClient = new EventLogClient({

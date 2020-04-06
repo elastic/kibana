@@ -74,7 +74,7 @@ export class EventLogClient implements IEventLogClient {
     id: string,
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult> {
-    // veridy the user has the required permissions to view this saved object
+    // verify the user has the required permissions to view this saved object
     await this.savedObjectsClient.get(type, id);
     return await this.esContext.esAdapter.queryEventsBySavedObject(
       this.esContext.esNames.alias,
