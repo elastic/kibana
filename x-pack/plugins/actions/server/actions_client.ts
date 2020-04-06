@@ -106,7 +106,7 @@ export class ActionsClient {
       undefined
     ) {
       throw new PreconfiguredActionDisabledModificationError(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdatedisabled', {
+        i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
           defaultMessage: 'Preconfigured action {id} is not allowed to update.',
           values: {
             id,
@@ -204,7 +204,7 @@ export class ActionsClient {
       undefined
     ) {
       throw new PreconfiguredActionDisabledModificationError(
-        i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdatedisabled', {
+        i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
           defaultMessage: 'Preconfigured action {id} is not allowed to delete.',
           values: {
             id,
