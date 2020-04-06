@@ -31,34 +31,28 @@ To use the create or update role API, you must have the `manage_security` cluste
   `cluster`, `indices`, and `run_as`. For more information, see
   {ref}/defining-roles.html[Defining roles].
 
-<<<<<<< HEAD
 `kibana`:: 
-  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role:
-
-`base` ::: 
-=======
-`kibana`::
-  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role.
+(list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role:
 +
 .Properties of `kibana`
 [%collapsible%open]
-=====
-`base` :::
->>>>>>> 23755f95fa... [DOCS] Collapses content in Kibana and APM APIs (#62201)
-  (Optional, list) A base privilege. When specified, the base must be `["all"]` or `["read"]`.
-  When the `base` privilege is specified, you are unable to use the `feature` section.
-  "all" grants read/write access to all {kib} features for the specified spaces.
-  "read" grants read-only access to all {kib} features for the specified spaces.
+====
+`base`::: 
+(Optional, list) A base privilege. When specified, the base must be `["all"]` or
+`["read"]`. When the `base` privilege is specified, you are unable to use the
+`feature` section. "all" grants read/write access to all {kib} features for the
+specified spaces. "read" grants read-only access to all {kib} features for the
+specified spaces.
 
-`feature` ::: 
-  (object) Contains privileges for specific features.
-  When the `feature` privileges are specified, you are unable to use the `base` section.
-  To retrieve a list of available features, use the <<features-api-get, features API>>.
+`feature`::: 
+(object) Contains privileges for specific features. When the `feature`
+privileges are specified, you are unable to use the `base` section. To retrieve
+a list of available features, use the <<features-api-get, features API>>.
 
-`spaces` ::: 
-  (list) The spaces to apply the privileges to.
-  To grant access to all spaces, set to `["*"]`, or omit the value.
-=====
+`spaces`::: 
+(list) The spaces to apply the privileges to. To grant access to all spaces, set
+to `["*"]`, or omit the value.
+====
 
 [[role-management-api-put-response-codes]]
 ==== Response code
