@@ -18,13 +18,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import crypto from 'crypto';
+import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
-
-// `crypto` type definitions doesn't currently include `crypto.constants`, see
-// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
-const cryptoConstants = (crypto as any).constants;
 
 const protocolMap = new Map<string, number>([
   ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],
