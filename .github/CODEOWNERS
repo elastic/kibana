@@ -177,7 +177,7 @@
 **/*.scss  @elastic/kibana-design
 
 # Elasticsearch UI
-/src/plugins/dev_tools/ @elastic/kibana-app
+/src/plugins/dev_tools/ @elastic/es-ui
 /src/plugins/console/  @elastic/es-ui
 /src/plugins/es_ui_shared/  @elastic/es-ui
 /x-pack/legacy/plugins/cross_cluster_replication/  @elastic/es-ui
