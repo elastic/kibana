@@ -85,7 +85,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 
   `errors`:::
     (Optional, array) The errors that occurred during the copy operation. When errors are reported, the `success` flag is set to `false`.
-=====
++
 
 .Properties of `errors`
 [%collapsible%open]
