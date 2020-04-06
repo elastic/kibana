@@ -23,19 +23,19 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { REPO_ROOT } = require('@kbn/dev-utils');
 const webpack = require('webpack');
 
-const SharedDeps = require('./index');
+const UiSharedDeps = require('./index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
 exports.getWebpackConfig = ({ dev = false } = {}) => ({
   mode: dev ? 'development' : 'production',
   entry: {
-    [SharedDeps.distFilename.replace(/\.js$/, '')]: './entry.js',
-    [SharedDeps.darkCssDistFilename.replace(/\.css$/, '')]: [
+    'kbn-ui-shared-deps': './entry.js',
+    'kbn-ui-shared-deps.dark': [
       '@elastic/eui/dist/eui_theme_dark.css',
       '@elastic/charts/dist/theme_only_dark.css',
     ],
-    [SharedDeps.lightCssDistFilename.replace(/\.css$/, '')]: [
+    'kbn-ui-shared-deps.light': [
       '@elastic/eui/dist/eui_theme_light.css',
       '@elastic/charts/dist/theme_only_light.css',
     ],
@@ -43,7 +43,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   context: __dirname,
   devtool: dev ? '#cheap-source-map' : false,
   output: {
-    path: SharedDeps.distDir,
+    path: UiSharedDeps.distDir,
     filename: '[name].js',
     sourceMapFilename: '[file].map',
     publicPath: '__REPLACE_WITH_PUBLIC_PATH__',
@@ -81,6 +81,16 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
 
   optimization: {
     noEmitOnErrors: true,
+    splitChunks: {
+      cacheGroups: {
+        'kbn-ui-shared-deps.@elastic': {
+          name: 'kbn-ui-shared-deps.@elastic',
+          test: m => m.resource && m.resource.includes('@elastic'),
+          chunks: 'all',
+          enforce: true,
+        },
+      },
+    },
   },
 
   performance: {
