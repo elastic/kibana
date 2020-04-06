@@ -107,16 +107,19 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
 
   chart.yAxisLabel = table.columns[y.accessor].name;
 
-  const row = table.rows[0];
-  const point =
-    row && row[yAccessor] !== 'NaN'
-      ? {
-          x: row[xAccessor],
-          y: row[yAccessor],
-        }
-      : ({} as any);
+  chart.values = [];
+  table.rows.forEach((row, rowIndex) => {
+    if (row && row[yAccessor] !== 'NaN') {
+      chart.values.push({
+        x: row[xAccessor] as number,
+        y: row[yAccessor] as number,
+      });
+    }
+  });
 
-  chart.values = [point];
+  if (!chart.values.length) {
+    chart.values.push({} as any);
+  }
 
   return chart;
 };
