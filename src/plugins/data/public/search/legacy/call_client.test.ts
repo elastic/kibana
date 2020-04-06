@@ -18,8 +18,8 @@
  */
 
 import { callClient } from './call_client';
-import { handleResponse } from './handle_response';
-import { FetchHandlers } from './types';
+import { handleResponse } from '../fetch/handle_response';
+import { FetchHandlers } from '../fetch/types';
 import { SearchStrategySearchParams, defaultSearchStrategy } from '../search_strategy';
 
 const mockAbortFn = jest.fn();

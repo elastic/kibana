@@ -21,14 +21,6 @@ import { IUiSettingsClient } from '../../../../../core/public';
 
 const sessionId = Date.now();
 
-export function getMSearchParams(config: IUiSettingsClient) {
-  return {
-    rest_total_hits_as_int: true,
-    ignore_throttled: getIgnoreThrottled(config),
-    max_concurrent_shard_requests: getMaxConcurrentShardRequests(config),
-  };
-}
-
 export function getSearchParams(config: IUiSettingsClient, esShardTimeout: number = 0) {
   return {
     rest_total_hits_as_int: true,
@@ -40,11 +32,11 @@ export function getSearchParams(config: IUiSettingsClient, esShardTimeout: numbe
   };
 }
 
-function getIgnoreThrottled(config: IUiSettingsClient) {
+export function getIgnoreThrottled(config: IUiSettingsClient) {
   return !config.get('search:includeFrozen');
 }
 
-function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
+export function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
   const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
   return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 }
