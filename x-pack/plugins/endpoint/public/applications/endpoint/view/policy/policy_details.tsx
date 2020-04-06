@@ -35,6 +35,7 @@ import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
+import { MalwareProtections } from './policy_forms/protections/malware';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -181,6 +182,17 @@ export const PolicyDetails = React.memo(() => {
         headerLeft={headerLeftContent}
         headerRight={headerRightContent}
       >
+        <EuiText size="xs" color="subdued">
+          <h4>
+            <FormattedMessage
+              id="xpack.endpoint.policy.details.protections"
+              defaultMessage="Protections"
+            />
+          </h4>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <MalwareProtections />
+        <EuiSpacer size="l" />
         <EuiText size="xs" color="subdued">
           <h4>
             <FormattedMessage
