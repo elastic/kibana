@@ -58,6 +58,7 @@ export const filterDuplicateRules = (
 export interface SingleBulkCreateResponse {
   success: boolean;
   bulkCreateDuration?: string;
+  createdItemsCount: number;
 }
 
 // Bulk Index documents.
@@ -81,7 +82,7 @@ export const singleBulkCreate = async ({
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
   someResult.hits.hits = filterDuplicateRules(id, someResult);
   if (someResult.hits.hits.length === 0) {
-    return { success: true };
+    return { success: true, createdItemsCount: 0 };
   }
   // index documents after creating an ID based on the
   // source documents' originating index, and the original
@@ -145,5 +146,8 @@ export const singleBulkCreate = async ({
       );
     }
   }
-  return { success: true, bulkCreateDuration: makeFloatString(end - start) };
+
+  const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+
+  return { success: true, bulkCreateDuration: makeFloatString(end - start), createdItemsCount };
 };
