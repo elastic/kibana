@@ -68,6 +68,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsPlugin: alertsClientFactoryParams.encryptedSavedObjectsPlugin,
+    preconfiguredActions: [],
   });
 });
 

@@ -198,20 +198,6 @@ describe('action_form', () => {
       ).toBeFalsy();
     });
 
-    it('renders alert action form', async () => {
-      await setup();
-      expect(wrapper).toMatchSnapshot();
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
-      );
-      expect(actionOption.exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find(`EuiToolTip [data-test-subj="${actionType.id}-ActionTypeSelectOption"]`)
-          .exists()
-      ).toBeFalsy();
-    });
-
     it(`doesn't render action types disabled by config`, async () => {
       await setup();
       const actionOption = wrapper.find(
