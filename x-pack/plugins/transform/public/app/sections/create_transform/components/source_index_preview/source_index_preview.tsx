@@ -107,6 +107,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
       switch (field?.type) {
         case KBN_FIELD_TYPES.BOOLEAN:
           schema = 'boolean';
+          break;
         case KBN_FIELD_TYPES.DATE:
           schema = 'datetime';
           break;
