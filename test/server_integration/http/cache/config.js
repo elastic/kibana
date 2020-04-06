@@ -17,20 +17,17 @@
  * under the License.
  */
 
-/**
- * Take text from the model and present it to the user as a string
- * @param text model value
- * @returns {string}
- */
-export function toUser(text: { [key: string]: any } | string | number): string {
-  if (text == null) {
-    return '';
-  }
-  if (typeof text === 'object') {
-    if (text.query_string) {
-      return toUser(text.query_string.query);
-    }
-    return JSON.stringify(text);
-  }
-  return '' + text;
+export default async function({ readConfigFile }) {
+  const httpConfig = await readConfigFile(require.resolve('../../config'));
+
+  return {
+    testFiles: [require.resolve('./')],
+    services: httpConfig.get('services'),
+    servers: httpConfig.get('servers'),
+    junit: {
+      reportName: 'Http Cache-Control Integration Tests',
+    },
+    esTestCluster: httpConfig.get('esTestCluster'),
+    kbnTestServer: httpConfig.get('kbnTestServer'),
+  };
 }
