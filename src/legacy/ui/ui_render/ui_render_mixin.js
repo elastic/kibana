@@ -23,6 +23,7 @@ import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
+import { getApmConfig } from '../apm';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
 /**
@@ -185,7 +186,10 @@ export function uiRenderMixin(kbnServer, server, config) {
       uiSettings: { asScopedToClient },
     } = kbnServer.newPlatform.__internals;
     const uiSettings = asScopedToClient(savedObjects.getClient(h.request));
-    const vars = await legacy.getVars(app.getId(), h.request, overrides);
+    const vars = await legacy.getVars(app.getId(), h.request, {
+      apmConfig: getApmConfig(app),
+      ...overrides,
+    });
     const content = await rendering.render(h.request, uiSettings, {
       app,
       includeUserSettings,
