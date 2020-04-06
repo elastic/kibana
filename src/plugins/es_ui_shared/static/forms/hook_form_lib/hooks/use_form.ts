@@ -173,7 +173,7 @@ export function useForm<T extends FormData = FormData>(
 
     if (fieldsToValidate.length === 0) {
       if (isFormValid === undefined) {
-        // We should hever enter this condition as the form validity is updated each time
+        // We should never enter this condition as the form validity is updated each time
         // a field is validated. But sometimes, during tests it does not happen and we need
         // to wait the next tick (hooks lifecycle being tricky) to make sure the "isValid" state is updated.
         // In order to avoid this unintentional behaviour, we add this if condition here.
