@@ -86,7 +86,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const defaultExpression = useMemo<MetricExpression>(
     () => ({
-      aggType: AGGREGATION_TYPES.MAX,
+      aggType: AGGREGATION_TYPES.AVERAGE,
       comparator: Comparator.GT,
       threshold: [],
       timeSize: 1,

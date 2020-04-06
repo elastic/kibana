@@ -43,13 +43,9 @@ describe('filterByAgent', () => {
   describe('options per agent', () => {
     it('go', () => {
       expect(getSettingKeysForAgent('go')).toEqual([
-        'api_request_size',
-        'api_request_time',
         'capture_body',
         'capture_headers',
-        'log_level',
         'recording',
-        'server_timeout',
         'span_frames_min_duration',
         'stack_trace_limit',
         'transaction_max_spans',
@@ -65,7 +61,6 @@ describe('filterByAgent', () => {
         'capture_headers',
         'circuit_breaker_enabled',
         'enable_log_correlation',
-        'log_level',
         'profiling_inferred_spans_enabled',
         'profiling_inferred_spans_excluded_classes',
         'profiling_inferred_spans_included_classes',
@@ -80,7 +75,6 @@ describe('filterByAgent', () => {
         'stress_monitor_gc_stress_threshold',
         'stress_monitor_system_cpu_relief_threshold',
         'stress_monitor_system_cpu_stress_threshold',
-        'trace_methods_duration_threshold',
         'transaction_max_spans',
         'transaction_sample_rate'
       ]);
@@ -102,14 +96,7 @@ describe('filterByAgent', () => {
 
     it('nodejs', () => {
       expect(getSettingKeysForAgent('nodejs')).toEqual([
-        'api_request_size',
-        'api_request_time',
         'capture_body',
-        'capture_headers',
-        'log_level',
-        'recording',
-        'server_timeout',
-        'stack_trace_limit',
         'transaction_max_spans',
         'transaction_sample_rate'
       ]);
@@ -158,8 +145,6 @@ describe('filterByAgent', () => {
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual([
         'capture_body',
-        'capture_headers',
-        'recording',
         'transaction_max_spans',
         'transaction_sample_rate'
       ]);
