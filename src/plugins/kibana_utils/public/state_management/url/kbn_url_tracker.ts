@@ -115,7 +115,6 @@ export function createKbnUrlTracker({
    */
   shouldTrackUrlUpdate?: (pathname: string) => boolean;
 }): KbnUrlTracker {
-  const historyInstance = history || createHashHistory();
   const storageInstance = storage || sessionStorage;
 
   // local state storing current listeners and active url
@@ -159,6 +158,7 @@ export function createKbnUrlTracker({
 
   function onMountApp() {
     unsubscribe();
+    const historyInstance = history || createHashHistory();
     // track current hash when within app
     unsubscribeURLHistory = historyInstance.listen(location => {
       if (shouldTrackUrlUpdate(location.pathname)) {
