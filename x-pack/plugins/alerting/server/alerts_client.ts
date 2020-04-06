@@ -683,16 +683,18 @@ export class AlertsClient {
           .map(alertAction => alertAction.id)
       ),
     ];
-    const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
-    const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
+    if (actionIds.length > 0) {
+      const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
+      const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
 
-    for (const action of bulkGetResult.saved_objects) {
-      if (action.error) {
-        throw Boom.badRequest(
-          `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
-        );
+      for (const action of bulkGetResult.saved_objects) {
+        if (action.error) {
+          throw Boom.badRequest(
+            `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
+          );
+        }
+        actionMap.set(action.id, action);
       }
-      actionMap.set(action.id, action);
     }
     // Extract references and set actionTypeId
     const references: SavedObjectReference[] = [];
@@ -703,10 +705,14 @@ export class AlertsClient {
         name: actionRef,
         type: 'action',
       });
+      const actionMapValue = actionMap.get(id);
+      const actionTypeId = actionIds.find(actionId => actionId === id)
+        ? actionMapValue.attributes.actionTypeId
+        : actionMapValue.actionTypeId;
       return {
         ...alertAction,
         actionRef,
-        actionTypeId: actionMap.get(id).attributes.actionTypeId,
+        actionTypeId,
       };
     });
     return {
