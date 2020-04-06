@@ -150,6 +150,32 @@ describe('migration visualization', () => {
         expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
         expect(aggs[2]).not.toHaveProperty('params.time_zone');
       });
+
+      it('should migrate obsolete match_all query', () => {
+        const migratedDoc = migrate({
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                query: {
+                  match_all: {},
+                },
+              }),
+            },
+          },
+        });
+        const migratedSearchSource = JSON.parse(
+          migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+
+        expect(migratedSearchSource).toEqual({
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+        });
+      });
     });
   });
 
