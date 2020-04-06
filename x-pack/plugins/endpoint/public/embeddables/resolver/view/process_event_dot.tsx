@@ -153,6 +153,30 @@ export const ProcessEventDot = styled(
 
       const dispatch = useResolverDispatch();
 
+      const LabelText = styled.div`
+        color: ${NamedColors.empty};
+        width: 100%;
+        height: 100%;
+        font-size: 45%;
+        background-color: ${labelFill};
+        text-align: left;
+        vertical-align: middle;
+        font-weight: bold;
+        letter-spacing: -0.02px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+
+        & span {
+          display: inline-block;
+          max-width: 100%;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      `;
+
       const handleFocus = useCallback(
         (focusEvent: React.FocusEvent<SVGSVGElement>) => {
           dispatch({
@@ -235,31 +259,11 @@ export const ProcessEventDot = styled(
                   ref={animationTarget}
                 />
               </use>
-              <use
-                role="presentation"
-                xlinkHref={`#${SymbolIds.processNodeLabel}`}
-                x={markerPositionOffset + markerSize - 0.5}
-                y={labelYOffset}
-                width={(markerSize / 1.7647) * 5}
-                height={markerSize / 1.7647}
-                opacity="1"
-                fill={labelFill}
-              />
-              <text
-                x={markerPositionOffset + 0.7 * markerSize + 50 / 2}
-                y={labelYOffset + labelYHeight / 2}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="3.75"
-                fontWeight="bold"
-                fill={NamedColors.empty}
-                paintOrder="stroke"
-                tabIndex={-1}
-                style={{ letterSpacing: '-0.02px' }}
-                id={labelId}
-              >
-                {eventModel.eventName(event)}
-              </text>
+              <foreignObject x="7.41" y="-3.4" height="6.4px" width="42px">
+                <LabelText>
+                  <span>{eventModel.eventName(event)}</span>
+                </LabelText>
+              </foreignObject>
               <text
                 x={markerPositionOffset + markerSize}
                 y={labelYOffset - 1}
