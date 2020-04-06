@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SIGNAL_ID } from '../screens/detections';
+import { PROVIDER_BADGE } from '../screens/timeline';
+
+import {
+  expandFirstSignal,
+  viewFirstSignalInTimeline,
+  waitForSignalsPanelToBeLoaded,
+} from '../tasks/detections';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
-import { waitForSignalsPanelToBeLoaded } from '../tasks/detections';
 
 describe('Detections timeline', () => {
   beforeEach(() => {
@@ -17,25 +24,20 @@ describe('Detections timeline', () => {
   });
 
   afterEach(() => {
-    // esArchiverUnload('timeline_signals');
+    esArchiverUnload('timeline_signals');
   });
 
-  it('View a signal in timeline', () => {
+  it('View a signal in default timeline', () => {
     waitForSignalsPanelToBeLoaded();
-    cy.get('[data-test-subj="expand-event"]')
-      .first()
-      .click({ force: true });
-    cy.get('[data-test-subj="draggable-content-_id"]')
+    expandFirstSignal();
+    cy.get(SIGNAL_ID)
       .first()
       .invoke('text')
       .then(eventId => {
-        cy.get('[data-test-subj="send-signal-to-timeline-button"]')
-          .first()
-          .click({ force: true });
-        cy.get('[data-test-subj="providerBadge"]')
+        viewFirstSignalInTimeline();
+        cy.get(PROVIDER_BADGE)
           .invoke('text')
           .should('eql', `_id: "${eventId}"`);
       });
-    cy.pause();
   });
 });

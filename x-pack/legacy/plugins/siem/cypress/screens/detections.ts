@@ -6,6 +6,8 @@
 
 export const CLOSED_SIGNALS_BTN = '[data-test-subj="closedSignals"]';
 
+export const EXPAND_SIGNAL_BTN = '[data-test-subj="expand-event"]';
+
 export const LOADING_SIGNALS_PANEL = '[data-test-subj="loading-signals-panel"]';
 
 export const MANAGE_SIGNAL_DETECTION_RULES_BTN = '[data-test-subj="manage-signal-detection-rules"]';
@@ -24,4 +26,8 @@ export const SHOWING_SIGNALS = '[data-test-subj="showingSignals"]';
 
 export const SIGNALS = '[data-test-subj="event"]';
 
+export const SIGNAL_ID = '[data-test-subj="draggable-content-_id"]';
+
 export const SIGNAL_CHECKBOX = '[data-test-subj="select-event-container"] .euiCheckbox__input';
+
+export const VIEW_SIGNAL_IN_TIMELINE_BTN = '[data-test-subj="send-signal-to-timeline-button"]';

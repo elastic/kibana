@@ -6,6 +6,7 @@
 
 import {
   CLOSED_SIGNALS_BTN,
+  EXPAND_SIGNAL_BTN,
   LOADING_SIGNALS_PANEL,
   MANAGE_SIGNAL_DETECTION_RULES_BTN,
   OPEN_CLOSE_SIGNAL_BTN,
@@ -13,6 +14,7 @@ import {
   OPENED_SIGNALS_BTN,
   SIGNALS,
   SIGNAL_CHECKBOX,
+  VIEW_SIGNAL_IN_TIMELINE_BTN,
 } from '../screens/detections';
 import { REFRESH_BUTTON } from '../screens/siem_header';
 
@@ -24,6 +26,12 @@ export const closeFirstSignal = () => {
 
 export const closeSignals = () => {
   cy.get(OPEN_CLOSE_SIGNALS_BTN).click({ force: true });
+};
+
+export const expandFirstSignal = () => {
+  cy.get(EXPAND_SIGNAL_BTN)
+    .first()
+    .click({ force: true });
 };
 
 export const goToClosedSignals = () => {
@@ -56,6 +64,12 @@ export const selectNumberOfSignals = (numberOfSignals: number) => {
       .eq(i)
       .click({ force: true });
   }
+};
+
+export const viewFirstSignalInTimeline = () => {
+  cy.get(VIEW_SIGNAL_IN_TIMELINE_BTN)
+    .first()
+    .click({ force: true });
 };
 
 export const waitForSignals = () => {
