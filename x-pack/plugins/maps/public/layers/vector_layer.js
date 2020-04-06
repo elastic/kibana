@@ -666,7 +666,7 @@ export class VectorLayer extends AbstractLayer {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
         mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
       }
-      this._setMbSymbolProperties(mbMap);
+      this._setMbSymbolProperties(mbMap, options);
     }
 
     this.syncVisibilityWithMb(mbMap, markerLayerId);

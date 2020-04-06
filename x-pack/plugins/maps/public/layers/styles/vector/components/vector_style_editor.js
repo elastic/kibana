@@ -37,7 +37,7 @@ export class VectorStyleEditor extends Component {
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
-    selectedFeatureType: undefined,
+    selectedFeature: null,
   };
 
   componentWillUnmount() {
@@ -91,18 +91,21 @@ export class VectorStyleEditor extends Component {
       return;
     }
 
-    let selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
-    if (this.props.isPointsOnly) {
-      selectedFeature = VECTOR_SHAPE_TYPES.POINT;
-    } else if (this.props.isLinesOnly) {
-      selectedFeature = VECTOR_SHAPE_TYPES.LINE;
+    if (!_.isEqual(supportedFeatures, this.state.supportedFeatures)) {
+      this.setState({ supportedFeatures });
     }
 
-    if (
-      !_.isEqual(supportedFeatures, this.state.supportedFeatures) ||
-      selectedFeature !== this.state.selectedFeature
-    ) {
-      this.setState({ supportedFeatures, selectedFeature });
+    //todo: this should be fixed separately
+    if (this.state.selectedFeature === null) {
+      let selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
+      if (this.props.isPointsOnly) {
+        selectedFeature = VECTOR_SHAPE_TYPES.POINT;
+      } else if (this.props.isLinesOnly) {
+        selectedFeature = VECTOR_SHAPE_TYPES.LINE;
+      }
+      this.setState({
+        selectedFeature: selectedFeature,
+      });
     }
   }
 
@@ -111,6 +114,7 @@ export class VectorStyleEditor extends Component {
   }
 
   _handleSelectedFeatureChange = selectedFeature => {
+    console.log('sel feature change', selectedFeature);
     this.setState({ selectedFeature });
   };
 
