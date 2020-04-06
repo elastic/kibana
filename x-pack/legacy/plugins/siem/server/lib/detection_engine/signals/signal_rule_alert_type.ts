@@ -25,7 +25,10 @@ import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { getSignalsCount } from '../notifications/get_signals_count';
-import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
+import {
+  scheduleNotificationActions,
+  NotificationRuleTypeParams,
+} from '../notifications/schedule_notification_actions';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
@@ -244,7 +247,7 @@ export const signalRulesAlertType = ({
 
         if (result.success) {
           if (actions.length) {
-            const notificationRuleParams = {
+            const notificationRuleParams: NotificationRuleTypeParams = {
               ...ruleParams,
               name,
               id: savedObject.id,

@@ -23,7 +23,12 @@ export const updateRuleActionsSavedObject = async ({
   savedObjectsClient,
   actions,
   throttle,
-}: DeleteRuleActionsSavedObject) => {
+}: DeleteRuleActionsSavedObject): Promise<{
+  ruleThrottle: string;
+  alertThrottle: string | null;
+  actions: RuleAlertAction[];
+  id: string;
+} | null> => {
   const ruleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
 
   if (!ruleActions) return null;

@@ -22,7 +22,12 @@ export const createRuleActionsSavedObject = async ({
   savedObjectsClient,
   actions = [],
   throttle,
-}: CreateRuleActionsSavedObject) => {
+}: CreateRuleActionsSavedObject): Promise<{
+  id: string;
+  actions: RuleAlertAction[];
+  alertThrottle: string | null;
+  ruleThrottle: string;
+}> => {
   const ruleActionsSavedObject = await savedObjectsClient.create<
     IRuleActionsAttributesSavedObjectAttributes
   >(ruleActionsSavedObjectType, {

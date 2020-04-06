@@ -9,6 +9,7 @@ import { AlertsClient, AlertServices } from '../../../../../../../plugins/alerti
 import { updateOrCreateRuleActionsSavedObject } from '../rule_actions/update_or_create_rule_actions_saved_object';
 import { updateNotifications } from '../notifications/update_notifications';
 import { updateRuleActions } from './update_rule_actions';
+import { RuleActions } from '../rule_actions/types';
 
 interface UpdateRulesNotifications {
   alertsClient: AlertsClient;
@@ -28,7 +29,7 @@ export const updateRulesNotifications = async ({
   enabled,
   name,
   throttle,
-}: UpdateRulesNotifications) => {
+}: UpdateRulesNotifications): Promise<RuleActions> => {
   const ruleActions = await updateOrCreateRuleActionsSavedObject({
     savedObjectsClient,
     ruleAlertId,

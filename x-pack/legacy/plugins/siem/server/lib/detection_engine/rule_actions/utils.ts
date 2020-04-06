@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsUpdateResponse } from 'kibana/server';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 
 export const getThrottleOptions = (throttle = 'no_actions') => ({
@@ -14,7 +15,12 @@ export const getThrottleOptions = (throttle = 'no_actions') => ({
 
 export const getRuleActionsFromSavedObject = (
   savedObject: SavedObjectsUpdateResponse<IRuleActionsAttributesSavedObjectAttributes>
-) => ({
+): {
+  id: string;
+  actions: RuleAlertAction[];
+  alertThrottle: string | null;
+  ruleThrottle: string;
+} => ({
   id: savedObject.id,
   actions: savedObject.attributes.actions || [],
   alertThrottle: savedObject.attributes.alertThrottle || null,
