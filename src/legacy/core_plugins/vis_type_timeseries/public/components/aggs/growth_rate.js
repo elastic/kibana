@@ -145,7 +145,7 @@ export const GrowthRateAgg = props => {
           >
             <EuiComboBox
               placeholder={i18n.translate('visTypeTimeseries.growthRate.unitSelectPlaceholder', {
-                defaultMessage: 'Select unit...',
+                defaultMessage: 'Select scale...',
               })}
               options={UNIT_OPTIONS}
               onChange={handleSelectChange('unit')}
