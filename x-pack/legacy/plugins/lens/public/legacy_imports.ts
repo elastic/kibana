@@ -7,4 +7,4 @@
 import { npSetup } from 'ui/new_platform';
 export const { visualizations } = npSetup.plugins;
 export { VisualizationsSetup } from '../../../../../src/plugins/visualizations/public';
-export { DashboardConstants } from '../../../../../src/legacy/core_plugins/kibana/public/dashboard';
+export { DashboardConstants } from '../../../../../src/plugins/dashboard/public';
