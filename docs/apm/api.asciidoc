@@ -44,7 +44,7 @@ The following Agent configuration APIs are available:
 
 `service`::
 (required, object) Service identifying the configuration to create or update.
-
++
 .Properties of `service`
 [%collapsible%open]
 ======
@@ -100,7 +100,7 @@ PUT /api/apm/settings/agent-configuration
 ===== Request body
 `service`::
 (required, object) Service identifying the configuration to delete
-
++
 .Properties of `service`
 [%collapsible%open]
 ======
@@ -217,7 +217,7 @@ GET  /api/apm/settings/agent-configuration
 
 `service`::
 (required, object) Service identifying the configuration.
-
++
 .Properties of `service`
 [%collapsible%open]
 ======
