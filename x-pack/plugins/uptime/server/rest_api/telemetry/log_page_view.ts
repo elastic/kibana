@@ -27,7 +27,4 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       body: result,
     });
   },
-  options: {
-    tags: ['access:uptime-read'],
-  },
 });
