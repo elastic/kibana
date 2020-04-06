@@ -29,8 +29,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   describe('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('space with no features disabled', () => {
