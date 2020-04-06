@@ -14,7 +14,9 @@ export async function createAPIKey(
   name: string,
   roleDescriptors: any
 ) {
+  console.log('createAPIKey', { name, roleDescriptors });
   const adminUser = await outputService.getAdminUser(soClient);
+  console.log({ adminUser });
   if (!adminUser) {
     throw new Error('No admin user configured');
   }

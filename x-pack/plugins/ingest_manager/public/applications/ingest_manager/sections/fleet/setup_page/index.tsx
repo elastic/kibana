@@ -22,6 +22,7 @@ import { WithoutHeaderLayout } from '../../../layouts';
 export const SetupPage: React.FunctionComponent<{
   refresh: () => Promise<void>;
 }> = ({ refresh }) => {
+  console.log('SetupPage');
   const [isFormLoading, setIsFormLoading] = useState<boolean>(false);
   const core = useCore();
 
@@ -29,10 +30,11 @@ export const SetupPage: React.FunctionComponent<{
     e.preventDefault();
     setIsFormLoading(true);
     try {
-      await sendRequest({
-        method: 'post',
-        path: fleetSetupRouteService.postFleetSetupPath(),
-      });
+      // console.log('fleet setup page does POST /fleet/setup');
+      // await sendRequest({
+      //   method: 'post',
+      //   path: fleetSetupRouteService.postFleetSetupPath(),
+      // });
       await refresh();
     } catch (error) {
       core.notifications.toasts.addDanger(error.message);

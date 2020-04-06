@@ -21,7 +21,9 @@ import { IngestManagerConfigType } from '../common/types';
 export { IngestManagerConfigType } from '../common/types';
 
 export type IngestManagerSetup = void;
-export type IngestManagerStart = void;
+export interface IngestManagerStart {
+  isInitialized: boolean;
+}
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -42,6 +44,7 @@ export class IngestManagerPlugin
   }
 
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+    console.log('plugin#setup', { core, deps });
     const config = this.config;
     // Register main Ingest Manager app
     core.application.register({
@@ -55,13 +58,30 @@ export class IngestManagerPlugin
           IngestManagerStartDeps,
           IngestManagerStart
         ];
+        console.log('plugin#setup mount()');
         const { renderApp } = await import('./applications/ingest_manager');
         return renderApp(coreStart, params, deps, startDeps, config);
       },
     });
   }
 
-  public start(core: CoreStart) {}
+  public async start(core: CoreStart): Promise<IngestManagerStart> {
+    const config = this.config;
+    core.http.post('/api/ingest_manager/setup');
+
+    let isInitialized = false;
+    if (config.fleet.enabled) {
+      const results = await core.http.get('/api/ingest_manager/fleet/setup');
+      console.log({ results });
+      if (!results.isInitialized) {
+        const retry = await core.http.post('/api/ingest_manager/fleet/setup');
+        console.log({ retry });
+      }
+      isInitialized = results.isInitialized;
+    }
+
+    return { isInitialized };
+  }
 
   public stop() {}
 }
