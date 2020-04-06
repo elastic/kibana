@@ -1,4 +1,3 @@
-[role="xpack"]
 [[create-canvas-workpad]]
 == Create a workpad
 

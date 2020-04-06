@@ -1,4 +1,3 @@
-[role="xpack"]
 [[canvas-present-workpad]]
 === Present your workpad
 
@@ -15,7 +14,7 @@ image::images/canvas-fullscreen.png[Fullscreen mode]
 
 [float]
 [[enable-autoplay]]
-==== Enable autoplay 
+==== Enable autoplay
 
 Automatically cycle through your workpads pages in fullscreen mode.
 
