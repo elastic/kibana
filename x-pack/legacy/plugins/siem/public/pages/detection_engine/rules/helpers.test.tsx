@@ -14,6 +14,7 @@ import {
   getHumanizedDuration,
   getModifiedAboutDetailsData,
   determineDetailsValue,
+  userHasNoPermissions,
 } from './helpers';
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
@@ -335,6 +336,29 @@ describe('rule helpers', () => {
       const aboutRuleDetailsData = { note: '', description: mockRuleWithoutNote.description };
 
       expect(result).toEqual(aboutRuleDetailsData);
+    });
+  });
+
+  describe('userHasNoPermissions', () => {
+    test("returns false when user's CRUD operations are null", () => {
+      const result: boolean = userHasNoPermissions(null);
+      const userHasNoPermissionsExpectedResult = false;
+
+      expect(result).toEqual(userHasNoPermissionsExpectedResult);
+    });
+
+    test('returns true when user cannot CRUD', () => {
+      const result: boolean = userHasNoPermissions(false);
+      const userHasNoPermissionsExpectedResult = true;
+
+      expect(result).toEqual(userHasNoPermissionsExpectedResult);
+    });
+
+    test('returns false when user can CRUD', () => {
+      const result: boolean = userHasNoPermissions(true);
+      const userHasNoPermissionsExpectedResult = false;
+
+      expect(result).toEqual(userHasNoPermissionsExpectedResult);
     });
   });
 });
