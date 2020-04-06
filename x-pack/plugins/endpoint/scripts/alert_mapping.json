@@ -17,6 +17,14 @@
       }
     ],
     "properties": {
+      "mutable_state": {
+        "properties": {
+          "triage_status": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      },
       "@timestamp": {
         "type": "date"
       },
@@ -90,7 +98,7 @@
               }
             }
           },
-          "malware_classifier": {
+          "malware_classification": {
             "properties": {
               "features": {
                 "properties": {
@@ -452,7 +460,7 @@
               }
             }
           },
-          "malware_classifier": {
+          "malware_classification": {
             "properties": {
               "features": {
                 "properties": {
@@ -849,7 +857,7 @@
               }
             }
           },
-          "malware_classifier": {
+          "malware_classification": {
             "properties": {
               "features": {
                 "properties": {
@@ -1494,7 +1502,7 @@
                   }
                 }
               },
-              "malware_classifier": {
+              "malware_classification": {
                 "properties": {
                   "features": {
                     "properties": {
@@ -1687,7 +1695,7 @@
                   }
                 }
               },
-              "malware_classifier": {
+              "malware_classification": {
                 "properties": {
                   "features": {
                     "properties": {
