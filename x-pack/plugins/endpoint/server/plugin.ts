@@ -10,10 +10,10 @@ import { IngestManagerSetupContract } from '../../ingest_manager/server';
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
-import { registerEndpointRoutes } from './routes/metadata';
 import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
 import { registerIndexPatternRoute } from './routes/index_pattern';
+import { registerEndpointRoutes } from './routes/metadata';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;

@@ -117,7 +117,7 @@ export interface HashFields {
   sha1: string;
   sha256: string;
 }
-export interface MalwareClassifierFields {
+export interface MalwareClassificationFields {
   identifier: string;
   score: number;
   threshold: number;
@@ -146,7 +146,7 @@ export interface DllFields {
   };
   compile_time: number;
   hash: HashFields;
-  malware_classifier: MalwareClassifierFields;
+  malware_classification: MalwareClassificationFields;
   mapped_address: number;
   mapped_size: number;
   path: string;
@@ -198,7 +198,7 @@ export type AlertEvent = Immutable<{
     executable: string;
     sid?: string;
     start: number;
-    malware_classifier?: MalwareClassifierFields;
+    malware_classification?: MalwareClassificationFields;
     token: {
       domain: string;
       type: string;
@@ -228,7 +228,7 @@ export type AlertEvent = Immutable<{
       trusted: boolean;
       subject_name: string;
     };
-    malware_classifier: MalwareClassifierFields;
+    malware_classification: MalwareClassificationFields;
     temp_file_path: string;
   };
   host: HostFields;
@@ -260,6 +260,11 @@ export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+  };
+  elastic: {
+    agent: {
+      id: string;
+    };
   };
   endpoint: {
     policy: {

@@ -89,7 +89,7 @@ export async function installPackage(options: {
 }): Promise<InstalledReferences> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
-  const { name: pkgName, version: pkgVersion } = registryPackageInfo;
+  const { name: pkgName, version: pkgVersion, internal = false } = registryPackageInfo;
 
   const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
@@ -119,6 +119,7 @@ export async function installPackage(options: {
     pkgkey,
     pkgName,
     pkgVersion,
+    internal,
     toSaveRefs,
     toSavePatterns,
   });
@@ -148,10 +149,19 @@ export async function saveInstallationReferences(options: {
   pkgkey: string;
   pkgName: string;
   pkgVersion: string;
+  internal: boolean;
   toSaveRefs: AssetReference[];
   toSavePatterns: Record<string, string>;
 }) {
-  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSaveRefs, toSavePatterns } = options;
+  const {
+    savedObjectsClient,
+    pkgkey,
+    pkgName,
+    pkgVersion,
+    internal,
+    toSaveRefs,
+    toSavePatterns,
+  } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgkey });
   const savedRefs = installation?.installed.references || [];
   const toInstallStreams = Object.assign(installation?.datasetIndexPattern || {}, toSavePatterns);
@@ -170,6 +180,7 @@ export async function saveInstallationReferences(options: {
       installed,
       name: pkgName,
       version: pkgVersion,
+      internal,
     },
     { id: pkgkey, overwrite: true }
   );
