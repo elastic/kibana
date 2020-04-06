@@ -5,7 +5,6 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
-import uuid from 'uuid';
 import {
   Agent,
   AgentEvent,
@@ -17,6 +16,7 @@ import {
 import { agentConfigService } from '../agent_config';
 import * as APIKeysService from '../api_keys';
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { getAgentActionsForCheckin, createAgentAction } from './actions';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
@@ -34,10 +34,10 @@ export async function agentCheckin(
     last_checkin: new Date().toISOString(),
   };
 
-  const actions = filterActionsForCheckin(agent);
+  const actions = await getAgentActionsForCheckin(soClient, agent.id);
 
   // Generate new agent config if config is updated
-  if (agent.config_id && shouldCreateConfigAction(agent)) {
+  if (agent.config_id && shouldCreateConfigAction(agent, actions)) {
     const config = await agentConfigService.getFullConfig(soClient, agent.config_id);
     if (config) {
       // Assign output API keys
@@ -52,18 +52,14 @@ export async function agentCheckin(
       // Mutate the config to set the api token for this agent
       config.outputs.default.api_key = agent.default_api_key || updateData.default_api_key;
 
-      const configChangeAction: AgentAction = {
-        id: uuid.v4(),
+      const configChangeAction = await createAgentAction(soClient, {
+        agent_id: agent.id,
         type: 'CONFIG_CHANGE',
+        data: { config } as any,
         created_at: new Date().toISOString(),
-        data: JSON.stringify({
-          config,
-        }),
         sent_at: undefined,
-      };
+      });
       actions.push(configChangeAction);
-      // persist new action
-      updateData.actions = actions;
     }
   }
   if (localMetadata) {
@@ -149,7 +145,7 @@ function isActionEvent(event: AgentEvent) {
   );
 }
 
-export function shouldCreateConfigAction(agent: Agent): boolean {
+export function shouldCreateConfigAction(agent: Agent, actions: AgentAction[]): boolean {
   if (!agent.config_id) {
     return false;
   }
@@ -167,7 +163,7 @@ export function shouldCreateConfigAction(agent: Agent): boolean {
     return false;
   }
 
-  const isActionAlreadyGenerated = !!agent.actions.find(action => {
+  const isActionAlreadyGenerated = !!actions.find(action => {
     if (!action.data || action.type !== 'CONFIG_CHANGE') {
       return false;
     }
@@ -180,8 +176,4 @@ export function shouldCreateConfigAction(agent: Agent): boolean {
   });
 
   return !isActionAlreadyGenerated;
-}
-
-function filterActionsForCheckin(agent: Agent): AgentAction[] {
-  return agent.actions.filter((a: AgentAction) => !a.sent_at);
 }
