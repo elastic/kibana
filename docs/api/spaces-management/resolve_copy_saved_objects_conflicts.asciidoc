@@ -251,7 +251,7 @@ Indicates one or more listed indices or index aliases **do not** exist.
 .Properties of `error`
 [%collapsible%open]
 =======
-      `type`:::::
+      `type`::::
         (string) The type of error. For example, `unsupported_type`, `missing_references`, or `unknown`.
 =======
 ======
