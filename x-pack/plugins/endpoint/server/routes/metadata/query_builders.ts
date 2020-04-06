@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { KibanaRequest } from 'kibana/server';
-import { EndpointAppConstants } from '../../../common/types';
-import { EndpointAppContext } from '../../types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
+import { EndpointAppContext } from '../../types';
+import { EndpointAppConstants } from '../../../common/types';
 
 export const kibanaRequestToMetadataListESQuery = async (
   request: KibanaRequest<any, any, any>,
