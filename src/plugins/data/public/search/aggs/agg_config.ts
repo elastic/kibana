@@ -40,8 +40,10 @@ export interface AggConfigDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
-const tempAggConfigDependencies = {
-  fieldFormats: getFieldFormats(),
+const tempAggConfigDependencies = () => {
+  return {
+    fieldFormats: getFieldFormats(),
+  };
 };
 
 /**
@@ -107,7 +109,7 @@ export class AggConfig {
   constructor(
     aggConfigs: IAggConfigs,
     opts: AggConfigOptions,
-    { fieldFormats }: AggConfigDependencies = tempAggConfigDependencies
+    { fieldFormats }: AggConfigDependencies = tempAggConfigDependencies()
   ) {
     this.aggConfigs = aggConfigs;
     this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));

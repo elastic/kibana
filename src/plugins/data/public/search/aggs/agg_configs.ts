@@ -55,8 +55,10 @@ export interface AggConfigsDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
-const tempAggConfigsDependencies = {
-  fieldFormats: getFieldFormats(),
+const tempAggConfigsDependencies = () => {
+  return {
+    fieldFormats: getFieldFormats(),
+  };
 };
 
 export type CreateAggConfigParams = Assign<AggConfigOptions, { type: string | IAggType }>;
@@ -87,7 +89,7 @@ export class AggConfigs {
     indexPattern: IndexPattern,
     configStates: CreateAggConfigParams[] = [],
     opts: AggConfigsOptions,
-    { fieldFormats }: AggConfigsDependencies = tempAggConfigsDependencies
+    { fieldFormats }: AggConfigsDependencies = tempAggConfigsDependencies()
   ) {
     this.typesRegistry = opts.typesRegistry;
 
