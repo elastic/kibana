@@ -21,6 +21,7 @@ import * as i18n from './translations';
 
 interface UserActionItemProps {
   createdAt: string;
+  disabled: boolean;
   id: string;
   isEditable: boolean;
   isLoading: boolean;
@@ -110,6 +111,7 @@ const PushedInfoContainer = styled.div`
 
 export const UserActionItem = ({
   createdAt,
+  disabled,
   id,
   idToOutline,
   isEditable,
@@ -132,8 +134,8 @@ export const UserActionItem = ({
     <EuiFlexItem>
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
-          {(fullName && fullName.length > 0) || username.length > 0 ? (
-            <UserActionAvatar name={fullName ?? username} />
+          {(fullName && fullName.length > 0) || (username && username.length > 0) ? (
+            <UserActionAvatar name={fullName && fullName.length > 0 ? fullName : username ?? ''} />
           ) : (
             <EuiLoadingSpinner className="userAction_loadingAvatar" />
           )}
@@ -148,12 +150,14 @@ export const UserActionItem = ({
             >
               <UserActionTitle
                 createdAt={createdAt}
+                disabled={disabled}
                 id={id}
                 isLoading={isLoading}
                 labelEditAction={labelEditAction}
                 labelQuoteAction={labelQuoteAction}
                 labelTitle={labelTitle ?? <></>}
                 linkId={linkId}
+                fullName={fullName}
                 username={username}
                 updatedAt={updatedAt}
                 onEdit={onEdit}

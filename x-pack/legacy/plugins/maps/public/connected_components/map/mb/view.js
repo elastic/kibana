@@ -235,12 +235,12 @@ export class MBMapContainer extends React.Component {
       //clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
       const lnLatBounds = new mapboxgl.LngLatBounds(
         new mapboxgl.LngLat(
-          clampToLonBounds(goto.bounds.min_lon),
-          clampToLatBounds(goto.bounds.min_lat)
+          clampToLonBounds(goto.bounds.minLon),
+          clampToLatBounds(goto.bounds.minLat)
         ),
         new mapboxgl.LngLat(
-          clampToLonBounds(goto.bounds.max_lon),
-          clampToLatBounds(goto.bounds.max_lat)
+          clampToLonBounds(goto.bounds.maxLon),
+          clampToLatBounds(goto.bounds.maxLat)
         )
       );
       //maxZoom ensure we're not zooming in too far on single points or small shapes

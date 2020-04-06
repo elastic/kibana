@@ -38,7 +38,11 @@ import {
   setChrome,
   setOverlays,
 } from './services';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeEmbeddableFactory,
+  createVisEmbeddableFromObject,
+} from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../../plugins/expressions/public';
 import { EmbeddableSetup } from '../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
@@ -70,6 +74,7 @@ export interface VisualizationsStart extends TypesStart {
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
+  __LEGACY: { createVisEmbeddableFromObject: typeof createVisEmbeddableFromObject };
 }
 
 export interface VisualizationsSetupDeps {
@@ -166,6 +171,7 @@ export class VisualizationsPlugin
       convertToSerializedVis,
       convertFromSerializedVis,
       savedVisualizationsLoader,
+      __LEGACY: { createVisEmbeddableFromObject },
     };
   }
 

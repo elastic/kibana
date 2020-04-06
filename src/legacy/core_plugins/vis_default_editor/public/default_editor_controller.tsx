@@ -20,7 +20,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
 import { EventEmitter } from 'events';
 
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
@@ -83,7 +82,7 @@ class DefaultEditorController {
 
   render({ data, core, ...props }: EditorRenderProps) {
     render(
-      <I18nProvider>
+      <core.i18n.Context>
         <KibanaContextProvider
           services={{
             appName: 'vis_default_editor',
@@ -94,7 +93,7 @@ class DefaultEditorController {
         >
           <DefaultEditor {...this.state} {...props} />
         </KibanaContextProvider>
-      </I18nProvider>,
+      </core.i18n.Context>,
       this.el
     );
   }
