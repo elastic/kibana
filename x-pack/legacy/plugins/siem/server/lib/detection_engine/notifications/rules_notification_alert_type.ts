@@ -53,7 +53,7 @@ export const rulesNotificationAlertType = ({
       from: fromInMs,
       to: toInMs,
       index: ruleParams.outputIndex,
-      ruleId: ruleParams.ruleId!,
+      ruleId: ruleParams.ruleId,
       callCluster: services.callCluster,
     });
 
