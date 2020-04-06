@@ -98,7 +98,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 
     `error`::::
       (object) The error that caused the copy operation to fail.
-======
++
 
 .Properties of `error`
 [%collapsible%open]
