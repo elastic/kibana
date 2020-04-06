@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server';
+import { LicenseCheck } from '../../../../licensing/server';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
@@ -21,11 +21,7 @@ interface TestOptions {
 describe('Check API keys privileges', () => {
   const getPrivilegesTest = (
     description: string,
-    {
-      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-      apiResponses = [],
-      asserts,
-    }: TestOptions
+    { licenseCheckResult = { state: 'valid' }, apiResponses = [], asserts }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -68,7 +64,7 @@ describe('Check API keys privileges', () => {
 
   describe('failure', () => {
     getPrivilegesTest('returns result of license checker', {
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 

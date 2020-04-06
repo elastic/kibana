@@ -14,7 +14,7 @@ import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertId } from '../lib';
 import { AlertDetailsPagination } from './lib';
-import { getHostData } from '../../../routes/metadata';
+import { getHostData } from '../../metadata';
 
 export const alertDetailsGetHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
