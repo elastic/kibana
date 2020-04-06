@@ -27,6 +27,7 @@ export default function({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard filter bar', () => {
@@ -126,32 +127,45 @@ export default function({ getService, getPageObjects }) {
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
-
         await pieChart.expectPieSliceCount(1);
       });
 
-      it("saving with pinned filter doesn't unpinns them", async () => {
+      it("restoring filters doesn't break back button", async () => {
+        await browser.goBack();
+        await PageObjects.dashboard.expectExistsDashboardLandingPage();
+        await browser.goForward();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await pieChart.expectPieSliceCount(1);
+      });
+
+      it("saving with pinned filter doesn't unpin them", async () => {
         const filterKey = 'bytes';
         await filterBar.toggleFilterPinned(filterKey);
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.dashboard.saveDashboard('with filters');
+        await PageObjects.dashboard.saveDashboard('saved with pinned filters', {
+          saveAsNew: true,
+        });
         expect(await filterBar.isFilterPinned(filterKey)).to.be(true);
+        await pieChart.expectPieSliceCount(1);
       });
 
-      it("navigating to the dashboard with global filters doesn't unpinns them", async () => {
+      it("navigating to a dashboard with global filter doesn't unpin it if same filter is saved with dashboard", async () => {
         await PageObjects.dashboard.preserveCrossAppState();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await filterBar.isFilterPinned('bytes')).to.be(true);
+        await pieChart.expectPieSliceCount(1);
       });
 
-      it('filter which was saved when it was in pinned state is actually unpinned', async () => {
+      it("pinned filters aren't saved", async () => {
         await filterBar.removeFilter('bytes');
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.loadSavedDashboard('with filters');
+        await PageObjects.dashboard.loadSavedDashboard('saved with pinned filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await filterBar.isFilterPinned('bytes')).to.be(false);
+        expect(await filterBar.getFilterCount()).to.be(0);
+        await pieChart.expectPieSliceCount(5);
       });
     });
 

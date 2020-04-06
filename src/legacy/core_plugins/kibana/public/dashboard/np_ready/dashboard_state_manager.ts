@@ -590,7 +590,7 @@ export class DashboardStateManager {
    */
   public applyFilters(query: Query, filters: Filter[]) {
     this.savedDashboard.searchSource.setField('query', query);
-    this.savedDashboard.searchSource.setField('filter', FilterUtils.ensureUnpinned(filters));
+    this.savedDashboard.searchSource.setField('filter', filters);
     this.stateContainer.transitions.set('query', query);
   }
 
