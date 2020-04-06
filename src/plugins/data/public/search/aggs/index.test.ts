@@ -26,12 +26,14 @@ import { QueryStart } from '../../query';
 import { FieldFormatsStart } from '../../field_formats';
 
 describe('AggTypesComponent', () => {
-  const core = coreMock.createSetup();
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createSetup();
+
   const aggTypes = getAggTypes({
-    uiSettings: core.uiSettings,
-    notifications: core.notifications,
+    uiSettings: coreSetup.uiSettings,
     query: {} as QueryStart,
     getInternalStartServices: () => ({
+      notifications: coreStart.notifications,
       fieldFormats: {} as FieldFormatsStart,
     }),
   });
