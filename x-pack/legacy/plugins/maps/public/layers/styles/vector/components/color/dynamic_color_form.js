@@ -18,6 +18,7 @@ export function DynamicColorForm({
   onDynamicStyleChange,
   staticDynamicSelect,
   styleProperty,
+  swatches,
 }) {
   const styleOptions = styleProperty.getOptions();
 
@@ -101,6 +102,7 @@ export function DynamicColorForm({
           useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
+          swatches={swatches}
         />
       );
     } else if (styleProperty.isCategorical()) {
@@ -118,6 +120,7 @@ export function DynamicColorForm({
           useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
+          swatches={swatches}
         />
       );
     }

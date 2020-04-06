@@ -45,6 +45,8 @@ export class AdvancedJobCreator extends JobCreator {
     super(indexPattern, savedSearch, query);
 
     this._queryString = JSON.stringify(this._datafeed_config.query);
+
+    this._wizardInitialized$.next(true);
   }
 
   public addDetector(
