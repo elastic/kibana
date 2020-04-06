@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from './state';
 export { useCreateAnalyticsForm, CreateAnalyticsFormProps } from './use_create_analytics_form';
