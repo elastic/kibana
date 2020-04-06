@@ -31,7 +31,7 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 
 `objects`::
   (Required, object array) The saved objects to copy. The `objects` must be the same values used during the failed <<spaces-api-copy-saved-objects, copy saved objects to space API>> operation.
-
++
 .Properties of `objects`
 [%collapsible%open]
 =====
