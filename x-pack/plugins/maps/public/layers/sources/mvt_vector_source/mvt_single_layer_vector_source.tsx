@@ -15,7 +15,7 @@ import {
   ITiledSingleLayerVectorSource,
   TiledSingleLayerVectorSourceMeta,
 } from '../vector_source';
-import { MVT_SINGLE_LAYER } from '../../../../../../../plugins/maps/common/constants';
+import { MVT_SINGLE_LAYER } from '../../../../common/constants';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 
