@@ -140,6 +140,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     setClosureType,
     setCurrentConfiguration,
   });
+
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
   // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.

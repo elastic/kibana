@@ -9,6 +9,12 @@ import {
   CasesConfigurationMapping,
 } from '../../../../../containers/case/configure/types';
 import { State } from '../reducer';
+import { ReturnConnectors } from '../../../../../containers/case/configure/use_connectors';
+import { ReturnUseCaseConfigure } from '../../../../../containers/case/configure/use_configure';
+import { createUseKibanaMock } from '../../../../../mock/kibana_react';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { actionTypeRegistryMock } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/action_type_registry.mock';
 
 export const connectors: Connector[] = [
   {
@@ -93,4 +99,24 @@ export const initialState: State = {
   closureType: 'close-by-user',
   mapping: null,
   currentConfiguration: { connectorId: 'none', closureType: 'close-by-user' },
+};
+
+export const useCaseConfigureResponse: ReturnUseCaseConfigure = {
+  loading: false,
+  persistLoading: false,
+  refetchCaseConfigure: jest.fn(),
+  persistCaseConfigure: jest.fn(),
+};
+
+export const useConnectorsResponse: ReturnConnectors = {
+  loading: false,
+  connectors,
+  refetchConnectors: jest.fn(),
+};
+
+export const kibanaMockImplementationArgs = {
+  services: {
+    ...createUseKibanaMock()().services,
+    triggers_actions_ui: { actionTypeRegistry: actionTypeRegistryMock.create() },
+  },
 };

@@ -8,17 +8,17 @@ import React, { useEffect } from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 
 import { useKibana } from '../../../../lib/kibana';
-import {
-  useConnectors,
-  ReturnConnectors,
-} from '../../../../containers/case/configure/use_connectors';
-import {
-  useCaseConfigure,
-  ReturnUseCaseConfigure,
-} from '../../../../containers/case/configure/use_configure';
+import { useConnectors } from '../../../../containers/case/configure/use_connectors';
+import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 
-import { connectors, searchURL } from './__mock__';
+import {
+  connectors,
+  searchURL,
+  useCaseConfigureResponse,
+  useConnectorsResponse,
+  kibanaMockImplementationArgs,
+} from './__mock__';
 
 jest.mock('../../../../lib/kibana');
 jest.mock('../../../../containers/case/configure/use_connectors');
@@ -32,8 +32,6 @@ const useGetUrlSearchMock = useGetUrlSearch as jest.Mock;
 
 import { ConfigureCases } from './';
 import { TestProviders } from '../../../../mock';
-import { createUseKibanaMock } from '../../../../mock/kibana_react';
-import { actionTypeRegistryMock } from '../../../../../../../../plugins/triggers_actions_ui/public/application/action_type_registry.mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import { Mapping } from './mapping';
@@ -44,27 +42,84 @@ import {
 } from '../../../../../../../../plugins/triggers_actions_ui/public';
 import { EuiBottomBar } from '@elastic/eui';
 
-const useCaseConfigureResponse: ReturnUseCaseConfigure = {
-  loading: false,
-  persistLoading: false,
-  refetchCaseConfigure: jest.fn(),
-  persistCaseConfigure: jest.fn(),
-};
+describe('rendering', () => {
+  let wrapper: ReactWrapper;
+  beforeEach(() => {
+    jest.resetAllMocks();
+    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
+    useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
+    useGetUrlSearchMock.mockImplementation(() => searchURL);
 
-const useConnectorsResponse: ReturnConnectors = {
-  loading: false,
-  connectors,
-  refetchConnectors: jest.fn(),
-};
+    wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+  });
 
-const kibanaMockImplementationArgs = {
-  services: {
-    ...createUseKibanaMock()().services,
-    triggers_actions_ui: { actionTypeRegistry: actionTypeRegistryMock.create() },
-  },
-};
+  test('it renders the Connectors', () => {
+    expect(wrapper.find('[data-test-subj="case-connectors-form-group"]').exists()).toBeTruthy();
+  });
 
-describe('ConfigureCases', () => {
+  test('it renders the ClosureType', () => {
+    expect(
+      wrapper.find('[data-test-subj="case-closure-options-form-group"]').exists()
+    ).toBeTruthy();
+  });
+
+  test('it renders the Mapping', () => {
+    expect(wrapper.find('[data-test-subj="case-mapping-form-group"]').exists()).toBeTruthy();
+  });
+
+  test('it renders the ActionsConnectorsContextProvider', () => {
+    // Components from triggers_actions_ui do not have a data-test-subj
+    expect(wrapper.find(ActionsConnectorsContextProvider).exists()).toBeTruthy();
+  });
+
+  test('it renders the ConnectorAddFlyout', () => {
+    // Components from triggers_actions_ui do not have a data-test-subj
+    expect(wrapper.find(ConnectorAddFlyout).exists()).toBeTruthy();
+  });
+
+  test('it does NOT render the ConnectorEditFlyout', () => {
+    // Components from triggers_actions_ui do not have a data-test-subj
+    expect(wrapper.find(ConnectorEditFlyout).exists()).toBeFalsy();
+  });
+
+  test('it does NOT render the EuiCallOut', () => {
+    expect(wrapper.find('[data-test-subj="configure-cases-warning-callout"]').exists()).toBeFalsy();
+  });
+
+  test('it does NOT render the EuiBottomBar', () => {
+    expect(
+      wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+    ).toBeFalsy();
+  });
+});
+
+describe('ConfigureCases - Unhappy path', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
+    useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
+    useGetUrlSearchMock.mockImplementation(() => searchURL);
+  });
+
+  test('it shows the warning callout when configuration is invalid', () => {
+    useCaseConfigureMock.mockImplementation(
+      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
+        useEffect(() => setConnector('not-id'), []);
+        return useCaseConfigureResponse;
+      }
+    );
+
+    const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+
+    expect(
+      wrapper.find('[data-test-subj="configure-cases-warning-callout"]').exists()
+    ).toBeTruthy();
+  });
+});
+
+describe('ConfigureCases - Happy path', () => {
   let wrapper: ReactWrapper;
 
   beforeEach(() => {
@@ -91,17 +146,8 @@ describe('ConfigureCases', () => {
     wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
   });
 
-  test('it renders correctly', () => {
-    expect(wrapper.find(Connectors).exists()).toBeTruthy();
-    expect(wrapper.find(ClosureOptions).exists()).toBeTruthy();
-    expect(wrapper.find(Mapping).exists()).toBeTruthy();
-    expect(wrapper.find(ActionsConnectorsContextProvider).exists()).toBeTruthy();
-    expect(wrapper.find(ConnectorAddFlyout).exists()).toBeTruthy();
+  test('it renders the ConnectorEditFlyout', () => {
     expect(wrapper.find(ConnectorEditFlyout).exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="configure-cases-warning-callout"]').exists()).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
-    ).toBeFalsy();
   });
 
   test('it renders with correct props', () => {
@@ -148,21 +194,6 @@ describe('ConfigureCases', () => {
     expect(newWrapper.find(ClosureOptions).prop('disabled')).toBe(true);
     expect(newWrapper.find(Mapping).prop('disabled')).toBe(true);
     expect(newWrapper.find(Mapping).prop('updateConnectorDisabled')).toBe(true);
-  });
-
-  test('it shows the warning callout when configuration is invalid', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setConnector('not-id'), []);
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
-    expect(
-      newWrapper.find('[data-test-subj="configure-cases-warning-callout"]').exists()
-    ).toBeTruthy();
   });
 
   test('it disables correctly Connector when loading connectors', () => {
