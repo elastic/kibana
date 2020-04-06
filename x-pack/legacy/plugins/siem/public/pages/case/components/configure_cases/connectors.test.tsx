@@ -66,4 +66,25 @@ describe('Connectors', () => {
       onChange: props.onChangeConnector,
     });
   });
+
+  test('the connector is changed successfully', () => {
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
+
+    expect(onChangeConnector).toHaveBeenCalled();
+    expect(onChangeConnector).toHaveBeenCalledWith('456');
+  });
+
+  test('the connector is changed successfully to none', () => {
+    onChangeConnector.mockClear();
+    const newWrapper = mount(<Connectors {...props} selectedConnector={'123'} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    newWrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    newWrapper.find('button[data-test-subj="dropdown-connector-no-connector"]').simulate('click');
+
+    expect(onChangeConnector).toHaveBeenCalled();
+    expect(onChangeConnector).toHaveBeenCalledWith('none');
+  });
 });

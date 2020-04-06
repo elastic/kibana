@@ -211,25 +211,6 @@ describe('ConfigureCases', () => {
     expect(newWrapper.find(Connectors).prop('selectedConnector')).toBe('456');
   });
 
-  test('the connector is changed successfully', () => {
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.update();
-    wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
-    wrapper.update();
-
-    expect(wrapper.find(Connectors).prop('selectedConnector')).toBe('456');
-  });
-
-  test('the connector is changed successfully to none', () => {
-    wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.update();
-    wrapper.find('button[data-test-subj="dropdown-connector-no-connector"]').simulate('click');
-    wrapper.update();
-
-    expect(wrapper.find(Connectors).prop('selectedConnector')).toBe('none');
-  });
-
   test('it show the add flyout when pressing the add connector button', () => {
     wrapper.find('button[data-test-subj="case-configure-add-connector-button"]').simulate('click');
     wrapper.update();
@@ -271,26 +252,6 @@ describe('ConfigureCases', () => {
     const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
     expect(newWrapper.find(ClosureOptions).prop('disabled')).toBe(true);
-  });
-
-  test('it set correctly the selected closure type', () => {
-    useCaseConfigureMock.mockImplementation(
-      ({ setConnector, setClosureType, setCurrentConfiguration }) => {
-        useEffect(() => setClosureType('close-by-pushing'), []);
-        return useCaseConfigureResponse;
-      }
-    );
-
-    const newWrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-
-    expect(newWrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-pushing');
-  });
-
-  test('the closure type is changed successfully', () => {
-    wrapper.find('input[id="close-by-pushing"]').simulate('change');
-    wrapper.update();
-
-    expect(wrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-pushing');
   });
 
   test('it disables the mapping permanently', () => {
@@ -372,7 +333,7 @@ describe('ConfigureCases', () => {
   test.todo('the mapping is changed successfully when changing the third party');
   test.todo('the mapping is changed successfully when changing the action type');
 
-  test('it not shows the action bar when there is no change', () => {
+  test('it does not shows the action bar when there is no change', () => {
     expect(
       wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
     ).toBeFalsy();

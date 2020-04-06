@@ -57,4 +57,11 @@ describe('ClosureOptions', () => {
     expect(closureOptionsRadioComponent.props().closureTypeSelected).toEqual('close-by-user');
     expect(closureOptionsRadioComponent.props().onChangeClosureType).toEqual(onChangeClosureType);
   });
+
+  test('the closure type is changed successfully', () => {
+    wrapper.find('input[id="close-by-pushing"]').simulate('change');
+
+    expect(onChangeClosureType).toHaveBeenCalled();
+    expect(onChangeClosureType).toHaveBeenCalledWith('close-by-pushing');
+  });
 });
