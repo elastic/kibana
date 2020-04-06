@@ -24,20 +24,49 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldText,
   EuiFormRow,
   EuiSpacer,
   EuiText,
   EuiLink,
+  EuiComboBox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
+
+const UNIT_OPTIONS = [
+  {
+    label: i18n.translate('visTypeTimeseries.units.auto', { defaultMessage: 'auto' }),
+    value: '',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.units.perSecond', {
+      defaultMessage: 'per millisecond',
+    }),
+    value: '1ms',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.units.perSecond', { defaultMessage: 'per second' }),
+    value: '1s',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.units.perMinute', { defaultMessage: 'per minute' }),
+    value: '1m',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.units.perHour', { defaultMessage: 'per hour' }),
+    value: '1h',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.units.perDay', { defaultMessage: 'per day' }),
+    value: '1d',
+  },
+];
 
 export const GrowthRateAgg = props => {
   const defaults = { unit: '' };
@@ -45,12 +74,13 @@ export const GrowthRateAgg = props => {
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleTextChange = createTextHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
   const indexPattern =
     (props.series.override_index_pattern && props.series.series_index_pattern) ||
     props.panel.index_pattern;
+
+  const selectedUnitOptions = UNIT_OPTIONS.filter(o => o.value === model.unit);
 
   return (
     <AggRow
@@ -108,13 +138,20 @@ export const GrowthRateAgg = props => {
             label={
               <FormattedMessage
                 id="visTypeTimeseries.growthRate.unitsLabel"
-                defaultMessage="Units (1s, 1m, etc)"
-                description="1s and 1m are required values and must not be translated."
+                defaultMessage="Scale"
               />
             }
             fullWidth
           >
-            <EuiFieldText onChange={handleTextChange('unit')} value={model.unit} fullWidth />
+            <EuiComboBox
+              placeholder={i18n.translate('visTypeTimeseries.growthRate.unitSelectPlaceholder', {
+                defaultMessage: 'Select unit...',
+              })}
+              options={UNIT_OPTIONS}
+              onChange={handleSelectChange('unit')}
+              singleSelection={{ asPlainText: true }}
+              selectedOptions={selectedUnitOptions}
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
