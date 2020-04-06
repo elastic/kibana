@@ -16,7 +16,6 @@ export function createCustomResourceResponse(body: string, contentType: string, 
     body,
     headers: {
       'content-type': contentType,
-      'cache-control': 'private, no-cache, no-store',
       'content-security-policy': cspHeader,
     },
     statusCode: 200,
