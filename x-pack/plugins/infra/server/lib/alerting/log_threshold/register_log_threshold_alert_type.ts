@@ -14,7 +14,7 @@ const sampleActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.sampleActionVariableDescription',
   {
     defaultMessage:
-      'Action variables are whatever values you want to make available to messages that this alert sends. This one would replace {{context.sample}} in an action message.',
+      'Action variables are whatever values you want to make available to messages that this alert sends. This one would replace \\{\\{context.sample\\}\\} in an action message.',
   }
 );
 
