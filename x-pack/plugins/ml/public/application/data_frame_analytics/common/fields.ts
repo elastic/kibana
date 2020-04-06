@@ -7,12 +7,13 @@
 import { getNestedProperty } from '../../util/object_utils';
 import {
   DataFrameAnalyticsConfig,
+  getNumTopFeatureImportanceValues,
   getPredictedFieldName,
   getDependentVar,
   getPredictionFieldName,
 } from './analytics';
 import { Field } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
 export type EsId = string;
@@ -254,6 +255,7 @@ export const getDefaultFieldsFromJobCaps = (
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const type = newJobCapsService.getFieldById(dependentVariable)?.type;
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+  const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
 
@@ -261,7 +263,20 @@ export const getDefaultFieldsFromJobCaps = (
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
-  // Only need to add these first two fields if we didn't use dest index pattern to get the fields
+
+  const featureImportanceFields = [];
+
+  if ((numTopFeatureImportanceValues ?? 0) > 0) {
+    featureImportanceFields.push(
+      ...fields.map(d => ({
+        id: `${resultsField}.feature_importance.${d.id}`,
+        name: `${resultsField}.feature_importance.${d.name}`,
+        type: KBN_FIELD_TYPES.NUMBER,
+      }))
+    );
+  }
+
+  // Only need to add these fields if we didn't use dest index pattern to get the fields
   const allFields: any =
     needsDestIndexFields === true
       ? [
@@ -271,16 +286,20 @@ export const getDefaultFieldsFromJobCaps = (
             type: ES_FIELD_TYPES.BOOLEAN,
           },
           { id: predictedField, name: predictedField, type },
+          ...featureImportanceFields,
         ]
       : [];
 
   allFields.push(...fields);
-  // @ts-ignore
-  allFields.sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
+  allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
+    sortRegressionResultsFields(a, b, jobConfig)
+  );
 
-  let selectedFields = allFields
-    .slice(0, DEFAULT_REGRESSION_COLUMNS * 2)
-    .filter((field: any) => field.name === predictedField || !field.name.includes('.keyword'));
+  let selectedFields = allFields.filter(
+    (field: any) =>
+      field.name === predictedField ||
+      (!field.name.includes('.keyword') && !field.name.includes('.feature_importance.'))
+  );
 
   if (selectedFields.length > DEFAULT_REGRESSION_COLUMNS) {
     selectedFields = selectedFields.slice(0, DEFAULT_REGRESSION_COLUMNS);
