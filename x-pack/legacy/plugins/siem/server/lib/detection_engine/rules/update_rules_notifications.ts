@@ -16,7 +16,7 @@ interface UpdateRulesNotifications {
   savedObjectsClient: AlertServices['savedObjectsClient'];
   ruleAlertId: string;
   actions: RuleAlertAction[] | undefined;
-  throttle: string | undefined;
+  throttle: string | null | undefined;
   enabled: boolean;
   name: string;
 }

@@ -14,7 +14,7 @@ interface CreateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
   actions: RuleAlertAction[] | undefined;
-  throttle: string | undefined;
+  throttle: string | null | undefined;
 }
 
 export const createRuleActionsSavedObject = async ({

@@ -65,7 +65,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: RuleType;
   version: number;
-  throttle: string;
+  throttle: string | undefined | null;
   lists: ListsDefaultArraySchema | null | undefined;
 }
 

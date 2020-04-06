@@ -8,9 +8,14 @@ import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
 
-export const getThrottleOptions = (throttle = 'no_actions') => ({
-  ruleThrottle: throttle,
-  alertThrottle: ['no_actions', 'rule'].includes(throttle) ? null : throttle,
+export const getThrottleOptions = (
+  throttle: string | undefined | null = 'no_actions'
+): {
+  ruleThrottle: string;
+  alertThrottle: string | null;
+} => ({
+  ruleThrottle: throttle ?? 'no_actions',
+  alertThrottle: ['no_actions', 'rule'].includes(throttle ?? 'no_actions') ? null : throttle,
 });
 
 export const getRuleActionsFromSavedObject = (
