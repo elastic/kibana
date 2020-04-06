@@ -5,7 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { getLayerWizards } from '../../../layers/layer_wizard_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getLayerWizards } from '../../../../../../../plugins/maps/public/layers/layer_wizard_registry';
 import { EuiTitle, EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';

@@ -7,17 +7,18 @@
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
-import { ConditionalHeaders, HeadlessChromiumDriverFactory, ServerFacade } from '../../../../types';
+import { CaptureConfig } from '../../../../server/types';
+import { ConditionalHeaders, HeadlessChromiumDriverFactory } from '../../../../types';
 import { LayoutParams } from '../../../common/layouts/layout';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
 import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 
 export function generatePngObservableFactory(
-  server: ServerFacade,
+  captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
 ) {
-  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
+  const screenshotsObservable = screenshotsObservableFactory(captureConfig, browserDriverFactory);
 
   return function generatePngObservable(
     logger: LevelLogger,
