@@ -145,3 +145,34 @@ export const searchESForAlerts = async (
 
   return response;
 };
+
+/**
+ * Abstraction over alert IDs.
+ */
+export class AlertId {
+  protected index: string;
+  protected id: string;
+
+  constructor(index: string, id: string) {
+    this.index = index;
+    this.id = id;
+  }
+
+  public get index() {
+    return this.index;
+  }
+
+  public get id() {
+    return this.id;
+  }
+
+  static fromEncoded(encoded: string): AlertId {
+    const decoded = Buffer.from(encoded, 'base64').toString('utf8');
+    const [index, id] = decoded.split(' ');
+    return new AlertId(index, id);
+  }
+
+  protected toString(): string {
+    return Buffer.from(`${this.index} ${this.id}`).toString('base64');
+  }
+}

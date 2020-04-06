@@ -8,6 +8,7 @@ import { KibanaRequest, RequestHandler } from 'kibana/server';
 import { AlertEvent, EndpointAppConstants } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
+import { AlertId } from '../lib';
 import { AlertDetailsPagination } from './lib';
 import { getHostData } from '../../metadata';
 
@@ -20,10 +21,10 @@ export const alertDetailsHandlerWrapper = function(
     res
   ) => {
     try {
-      const alertId = req.params.id;
+      const alertId = AlertId.fromEncoded(req.params.id);
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
-        index: EndpointAppConstants.ALERT_INDEX_NAME,
-        id: alertId,
+        index: alertId.index,
+        id: alertId.id,
       })) as GetResponse<AlertEvent>;
 
       const config = await endpointAppContext.config();
@@ -38,7 +39,7 @@ export const alertDetailsHandlerWrapper = function(
 
       return res.ok({
         body: {
-          id: response._id,
+          id: alertId.toString(),
           ...response._source,
           state: {
             host_metadata: currentHostInfo?.metadata,

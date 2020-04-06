@@ -18,6 +18,7 @@ import {
   AlertingIndexGetQueryResult,
 } from '../../../../../common/types';
 import { EndpointAppContext } from '../../../../types';
+import { AlertId } from '../../lib';
 import { AlertSearchQuery } from '../../types';
 import { AlertListPagination } from './pagination';
 
@@ -107,8 +108,9 @@ export async function mapToAlertResultList(
   const pagination: AlertListPagination = new AlertListPagination(config, reqCtx, reqData, hits);
 
   function mapHit(entry: AlertHits[0]): AlertData {
+    const alertId = new AlertId(entry._index, entry._id);
     return {
-      id: entry._id,
+      id: alertId.toString(),
       ...entry._source,
       prev: null,
       next: null,
