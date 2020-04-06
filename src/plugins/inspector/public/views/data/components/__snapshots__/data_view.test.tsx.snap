@@ -12,6 +12,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
         "_maxListeners": undefined,
         "tabular": [Function],
         "tabularOptions": Object {},
+        Symbol(kCapture): false,
       },
     }
   }
@@ -130,6 +131,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
           "_maxListeners": undefined,
           "tabular": [Function],
           "tabularOptions": Object {},
+          Symbol(kCapture): false,
         },
       }
     }
@@ -324,6 +326,7 @@ exports[`Inspector Data View component should render loading state 1`] = `
         "_maxListeners": undefined,
         "tabular": undefined,
         "tabularOptions": undefined,
+        Symbol(kCapture): false,
       },
     }
   }
@@ -442,6 +445,7 @@ exports[`Inspector Data View component should render loading state 1`] = `
           "_maxListeners": undefined,
           "tabular": undefined,
           "tabularOptions": undefined,
+          Symbol(kCapture): false,
         },
       }
     }
