@@ -47,7 +47,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "index-pattern:logstash-*",
     "source": {
       "index-pattern": {
@@ -68,7 +68,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "visualization": {
@@ -91,7 +91,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "dashboard:my-dashboard",
     "source": {
       "dashboard": {
@@ -116,7 +116,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "another-space:index-pattern:logstash-*",
     "source": {
       "index-pattern": {
@@ -138,7 +138,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "another-space:visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "visualization": {
@@ -162,7 +162,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "another-space:dashboard:my-dashboard",
     "source": {
       "dashboard": {
