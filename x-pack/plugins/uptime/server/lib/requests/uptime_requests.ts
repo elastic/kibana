@@ -9,7 +9,6 @@ import { Ping, PingResults } from '../../../../../legacy/plugins/uptime/common/g
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,
-  GetMonitorParams,
   GetMonitorChartsParams,
   GetMonitorDetailsParams,
   GetMonitorLocationsParams,
@@ -37,9 +36,8 @@ type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
 export interface UptimeRequests {
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
-  getIndexPattern: ESQ<any, {}>;
+  getIndexPattern: ESQ<{}, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
-  getMonitor: ESQ<GetMonitorParams, Ping>;
   getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorDurationResult>;
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;

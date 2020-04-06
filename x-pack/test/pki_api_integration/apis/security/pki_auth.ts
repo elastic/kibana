@@ -9,7 +9,6 @@ import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-// @ts-ignore
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

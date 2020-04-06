@@ -7,10 +7,14 @@
 import dateMath from '@elastic/datemath';
 import { get } from 'lodash/fp';
 import moment from 'moment';
+import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
+import { RuleAlertAction, RuleType } from '../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../common/detection_engine/ml_helpers';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
-import { Rule, RuleType } from '../../../containers/detection_engine/rules';
+import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
 import {
   AboutStepRule,
@@ -18,6 +22,7 @@ import {
   DefineStepRule,
   IMitreEnterpriseAttack,
   ScheduleStepRule,
+  ActionsStepRule,
 } from './types';
 
 export interface GetStepsData {
@@ -25,6 +30,7 @@ export interface GetStepsData {
   modifiedAboutRuleDetailsData: AboutStepRuleDetails;
   defineRuleData: DefineStepRule;
   scheduleRuleData: ScheduleStepRule;
+  ruleActionsData: ActionsStepRule;
 }
 
 export const getStepsData = ({
@@ -38,32 +44,54 @@ export const getStepsData = ({
   const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView);
   const modifiedAboutRuleDetailsData: AboutStepRuleDetails = getModifiedAboutDetailsData(rule);
   const scheduleRuleData: ScheduleStepRule = getScheduleStepsData(rule);
+  const ruleActionsData: ActionsStepRule = getActionsStepsData(rule);
 
-  return { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData };
-};
-
-export const getDefineStepsData = (rule: Rule): DefineStepRule => {
   return {
-    isNew: false,
-    ruleType: rule.type,
-    anomalyThreshold: rule.anomaly_threshold ?? 50,
-    machineLearningJobId: rule.machine_learning_job_id ?? '',
-    index: rule.index ?? [],
-    queryBar: {
-      query: { query: rule.query ?? '', language: rule.language ?? '' },
-      filters: (rule.filters ?? []) as Filter[],
-      saved_id: rule.saved_id,
-    },
+    aboutRuleData,
+    modifiedAboutRuleDetailsData,
+    defineRuleData,
+    scheduleRuleData,
+    ruleActionsData,
   };
 };
 
+export const getActionsStepsData = (
+  rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
+): ActionsStepRule => {
+  const { enabled, throttle, meta, actions = [] } = rule;
+
+  return {
+    actions: actions?.map(transformRuleToAlertAction),
+    isNew: false,
+    throttle,
+    kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
+    enabled,
+  };
+};
+
+export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
+  isNew: false,
+  ruleType: rule.type,
+  anomalyThreshold: rule.anomaly_threshold ?? 50,
+  machineLearningJobId: rule.machine_learning_job_id ?? '',
+  index: rule.index ?? [],
+  queryBar: {
+    query: { query: rule.query ?? '', language: rule.language ?? '' },
+    filters: (rule.filters ?? []) as Filter[],
+    saved_id: rule.saved_id,
+  },
+  timeline: {
+    id: rule.timeline_id ?? null,
+    title: rule.timeline_title ?? null,
+  },
+});
+
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
-  const { enabled, interval, from } = rule;
+  const { interval, from } = rule;
   const fromHumanizedValue = getHumanizedDuration(from, interval);
 
   return {
     isNew: false,
-    enabled,
     interval,
     from: fromHumanizedValue,
   };
@@ -94,8 +122,6 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     risk_score: riskScore,
     tags,
     threat,
-    timeline_id: timelineId,
-    timeline_title: timelineTitle,
   } = rule;
 
   return {
@@ -109,10 +135,6 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     riskScore,
     falsePositives,
     threat: threat as IMitreEnterpriseAttack[],
-    timeline: {
-      id: timelineId ?? null,
-      title: timelineTitle ?? null,
-    },
   };
 };
 
@@ -193,8 +215,6 @@ export const setFieldValue = (
     }
   });
 
-export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';
-
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
@@ -204,3 +224,50 @@ export const redirectToDetections = (
   isAuthenticated != null &&
   hasEncryptionKey != null &&
   (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
+
+export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
+  const commonRuleParamsKeys = [
+    'id',
+    'name',
+    'description',
+    'false_positives',
+    'rule_id',
+    'max_signals',
+    'risk_score',
+    'output_index',
+    'references',
+    'severity',
+    'timeline_id',
+    'timeline_title',
+    'threat',
+    'type',
+    'version',
+    // 'lists',
+  ];
+
+  const ruleParamsKeys = [
+    ...commonRuleParamsKeys,
+    ...(isMlRule(ruleType)
+      ? ['anomaly_threshold', 'machine_learning_job_id']
+      : ['index', 'filters', 'language', 'query', 'saved_id']),
+  ].sort();
+
+  return ruleParamsKeys;
+};
+
+export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined): string[] => {
+  if (!ruleType) {
+    return [];
+  }
+  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+
+  return [
+    'state.signals_count',
+    '{context.results_link}',
+    ...actionMessageRuleParams.map(param => `context.rule.${param}`),
+  ];
+});
+
+// typed as null not undefined as the initial state for this value is null.
+export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
+  canUserCRUD != null ? !canUserCRUD : false;

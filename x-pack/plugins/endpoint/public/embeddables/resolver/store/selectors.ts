@@ -6,6 +6,7 @@
 
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
+import * as uiSelectors from './ui/selectors';
 import { ResolverState } from '../types';
 
 /**
@@ -54,6 +55,27 @@ export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataSelectors.processNodePositionsAndEdgeLineSegments
 );
 
+export const processAdjacencies = composeSelectors(
+  dataStateSelector,
+  dataSelectors.processAdjacencies
+);
+
+/**
+ * Returns the id of the "current" tree node (fake-focused)
+ */
+export const uiActiveDescendantId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.activeDescendantId
+);
+
+/**
+ * Returns the id of the "selected" tree node (the node that is currently "pressed" and possibly controlling other popups / components)
+ */
+export const uiSelectedDescendantId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantId
+);
+
 /**
  * Returns the camera state from within ResolverState
  */
@@ -66,6 +88,13 @@ function cameraStateSelector(state: ResolverState) {
  */
 function dataStateSelector(state: ResolverState) {
   return state.data;
+}
+
+/**
+ * Returns the ui state from within ResolverState
+ */
+function uiStateSelector(state: ResolverState) {
+  return state.ui;
 }
 
 /**

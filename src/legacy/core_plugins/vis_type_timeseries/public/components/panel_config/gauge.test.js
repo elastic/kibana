@@ -20,12 +20,6 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('plugins/data', () => {
-  return {
-    QueryStringInput: () => <div className="queryStringInput" />,
-  };
-});
-
 jest.mock('../lib/get_default_query_language', () => ({
   getDefaultQueryLanguage: () => 'kuery',
 }));

@@ -36,3 +36,20 @@ export interface AnomalyRecordDoc {
   // TODO provide the causes resource interface.
   causes?: any[];
 }
+
+export interface AnomaliesTableRecord {
+  time: number;
+  source: AnomalyRecordDoc;
+  rowId: string;
+  jobId: string;
+  detectorIndex: number;
+  severity: number;
+  entityName?: string;
+  entityValue?: any;
+  influencers?: Array<{ [key: string]: any }>;
+  actual?: number[];
+  actualSort?: any;
+  typical?: number[];
+  typicalSort?: any;
+  metricDescriptionSort?: number;
+}

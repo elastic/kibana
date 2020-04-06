@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { AlertType } from '../../common';
 import { AlertNavigationHandler } from './types';
@@ -36,7 +35,7 @@ export class AlertNavigationRegistry {
 
   public registerDefault(consumer: string, handler: AlertNavigationHandler) {
     if (this.hasDefaultHandler(consumer)) {
-      throw Boom.badRequest(
+      throw new Error(
         i18n.translate('xpack.alerting.alertNavigationRegistry.register.duplicateDefaultError', {
           defaultMessage: 'Default Navigation within "{consumer}" is already registered.',
           values: {
@@ -54,7 +53,7 @@ export class AlertNavigationRegistry {
 
   public register(consumer: string, alertType: AlertType, handler: AlertNavigationHandler) {
     if (this.hasTypedHandler(consumer, alertType)) {
-      throw Boom.badRequest(
+      throw new Error(
         i18n.translate('xpack.alerting.alertNavigationRegistry.register.duplicateNavigationError', {
           defaultMessage:
             'Navigation for Alert type "{alertType}" within "{consumer}" is already registered.',
@@ -78,7 +77,7 @@ export class AlertNavigationRegistry {
       return (consumerHandlers.get(alertType.id) ?? consumerHandlers.get(DEFAULT_HANDLER))!;
     }
 
-    throw Boom.badRequest(
+    throw new Error(
       i18n.translate('xpack.alerting.alertNavigationRegistry.get.missingNavigationError', {
         defaultMessage:
           'Navigation for Alert type "{alertType}" within "{consumer}" is not registered.',

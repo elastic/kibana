@@ -7,12 +7,13 @@
 import { getNestedProperty } from '../../util/object_utils';
 import {
   DataFrameAnalyticsConfig,
+  getNumTopFeatureImportanceValues,
   getPredictedFieldName,
   getDependentVar,
   getPredictionFieldName,
 } from './analytics';
 import { Field } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
 export type EsId = string;
@@ -243,7 +244,8 @@ export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFi
 
 export const getDefaultFieldsFromJobCaps = (
   fields: Field[],
-  jobConfig: DataFrameAnalyticsConfig
+  jobConfig: DataFrameAnalyticsConfig,
+  needsDestIndexFields: boolean
 ): { selectedFields: Field[]; docFields: Field[]; depVarType?: ES_FIELD_TYPES } => {
   const fieldsObj = { selectedFields: [], docFields: [] };
   if (fields.length === 0) {
@@ -253,6 +255,7 @@ export const getDefaultFieldsFromJobCaps = (
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const type = newJobCapsService.getFieldById(dependentVariable)?.type;
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+  const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
 
@@ -261,19 +264,42 @@ export const getDefaultFieldsFromJobCaps = (
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
-  const allFields: any = [
-    {
-      id: `${resultsField}.is_training`,
-      name: `${resultsField}.is_training`,
-      type: ES_FIELD_TYPES.BOOLEAN,
-    },
-    { id: predictedField, name: predictedField, type },
-    ...fields,
-  ].sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
+  const featureImportanceFields = [];
 
-  let selectedFields = allFields
-    .slice(0, DEFAULT_REGRESSION_COLUMNS * 2)
-    .filter((field: any) => field.name === predictedField || !field.name.includes('.keyword'));
+  if ((numTopFeatureImportanceValues ?? 0) > 0) {
+    featureImportanceFields.push(
+      ...fields.map(d => ({
+        id: `${resultsField}.feature_importance.${d.id}`,
+        name: `${resultsField}.feature_importance.${d.name}`,
+        type: KBN_FIELD_TYPES.NUMBER,
+      }))
+    );
+  }
+
+  // Only need to add these fields if we didn't use dest index pattern to get the fields
+  const allFields: any =
+    needsDestIndexFields === true
+      ? [
+          {
+            id: `${resultsField}.is_training`,
+            name: `${resultsField}.is_training`,
+            type: ES_FIELD_TYPES.BOOLEAN,
+          },
+          { id: predictedField, name: predictedField, type },
+          ...featureImportanceFields,
+        ]
+      : [];
+
+  allFields.push(...fields);
+  allFields.sort(({ name: a }: { name: string }, { name: b }: { name: string }) =>
+    sortRegressionResultsFields(a, b, jobConfig)
+  );
+
+  let selectedFields = allFields.filter(
+    (field: any) =>
+      field.name === predictedField ||
+      (!field.name.includes('.keyword') && !field.name.includes('.feature_importance.'))
+  );
 
   if (selectedFields.length > DEFAULT_REGRESSION_COLUMNS) {
     selectedFields = selectedFields.slice(0, DEFAULT_REGRESSION_COLUMNS);
@@ -362,18 +388,16 @@ export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string):
   }
 
   const newDocFields = getFlattenedFields(docs[0]._source, resultsField);
-  return newDocFields
-    .filter(k => {
-      if (k === `${resultsField}.outlier_score`) {
-        return true;
-      }
-      if (k.split('.')[0] === resultsField) {
-        return false;
-      }
+  return newDocFields.filter(k => {
+    if (k === `${resultsField}.outlier_score`) {
+      return true;
+    }
+    if (k.split('.')[0] === resultsField) {
+      return false;
+    }
 
-      return docs.some(row => row._source[k] !== null);
-    })
-    .slice(0, MAX_COLUMNS);
+    return docs.some(row => row._source[k] !== null);
+  });
 };
 
 export const toggleSelectedFieldSimple = (

@@ -46,6 +46,7 @@ import {
   unmuteAllAlertRoute,
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
+  healthRoute,
 } from './routes';
 import { LicensingPluginSetup } from '../../licensing/server';
 import {
@@ -55,6 +56,15 @@ import {
 import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
+import { IEventLogger, IEventLogService } from '../../event_log/server';
+
+const EVENT_LOG_PROVIDER = 'alerting';
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeAction: 'execute-action',
+  newInstance: 'new-instance',
+  resolvedInstance: 'resolved-instance',
+};
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -72,6 +82,7 @@ export interface AlertingPluginsSetup {
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  eventLog: IEventLogService;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -92,6 +103,7 @@ export class AlertingPlugin {
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
+  private eventLogger?: IEventLogger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -132,6 +144,11 @@ export class AlertingPlugin {
       ]),
     });
 
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.eventLog.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
+    });
+
     const alertTypeRegistry = new AlertTypeRegistry({
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
@@ -142,7 +159,7 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
+      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeAlertingTelemetry(
@@ -173,6 +190,7 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
+    healthRoute(router, this.licenseState);
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
@@ -209,6 +227,7 @@ export class AlertingPlugin {
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
+      eventLogger: this.eventLogger!,
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);

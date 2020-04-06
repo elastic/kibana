@@ -31,6 +31,7 @@ import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { collapseLiteralStrings } from '../../../../../../shared_imports';
+import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -41,6 +42,7 @@ export class EditJobFlyoutUI extends Component {
     this.state = {
       job: {},
       hasDatafeed: false,
+      datafeedRunning: false,
       isFlyoutVisible: false,
       isConfirmationModalVisible: false,
       jobDescription: '',
@@ -157,10 +159,12 @@ export class EditJobFlyoutUI extends Component {
 
   extractJob(job, hasDatafeed) {
     this.extractInitialJobFormState(job, hasDatafeed);
+    const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
 
     this.setState({
       job,
       hasDatafeed,
+      datafeedRunning,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       ...cloneDeep(this._initialJobFormState),
@@ -283,6 +287,7 @@ export class EditJobFlyoutUI extends Component {
         jobModelMemoryLimitValidationError,
         isValidJobDetails,
         isValidJobCustomUrls,
+        datafeedRunning,
       } = this.state;
 
       const tabs = [
@@ -293,6 +298,7 @@ export class EditJobFlyoutUI extends Component {
           }),
           content: (
             <JobDetails
+              datafeedRunning={datafeedRunning}
               jobDescription={jobDescription}
               jobGroups={jobGroups}
               jobModelMemoryLimit={jobModelMemoryLimit}
@@ -328,6 +334,7 @@ export class EditJobFlyoutUI extends Component {
               datafeedScrollSize={datafeedScrollSize}
               jobBucketSpan={jobBucketSpan}
               setDatafeed={this.setDatafeed}
+              datafeedRunning={datafeedRunning}
             />
           ),
         },
@@ -359,7 +366,7 @@ export class EditJobFlyoutUI extends Component {
                 <FormattedMessage
                   id="xpack.ml.jobsList.editJobFlyout.pageTitle"
                   defaultMessage="Edit {jobId}"
-                  values={{ jobId: job.id }}
+                  values={{ jobId: job.job_id }}
                 />
               </h2>
             </EuiTitle>

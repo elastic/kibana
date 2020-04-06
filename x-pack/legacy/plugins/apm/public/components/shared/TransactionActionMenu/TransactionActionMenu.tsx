@@ -6,7 +6,9 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useMemo, useState } from 'react';
+import { Filter } from '../../../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -16,11 +18,17 @@ import {
   SectionSubtitle,
   SectionTitle
 } from '../../../../../../../plugins/observability/public';
-import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useFetcher } from '../../../hooks/useFetcher';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { CustomLinkFlyout } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout';
+import { CustomLink } from './CustomLink';
+import { CustomLinkPopover } from './CustomLink/CustomLinkPopover';
 import { getSections } from './sections';
+import { useLicense } from '../../../hooks/useLicense';
+import { px } from '../../../style/variables';
+import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 
 interface Props {
   readonly transaction: Transaction;
@@ -37,11 +45,38 @@ const ActionMenuButton = ({ onClick }: { onClick: () => void }) => (
 export const TransactionActionMenu: FunctionComponent<Props> = ({
   transaction
 }: Props) => {
+  const license = useLicense();
+  const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
+
   const { core } = useApmPluginContext();
   const location = useLocation();
   const { urlParams } = useUrlParams();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
+  const [isCustomLinksPopoverOpen, setIsCustomLinksPopoverOpen] = useState(
+    false
+  );
+  const [isCustomLinkFlyoutOpen, setIsCustomLinkFlyoutOpen] = useState(false);
+
+  const filters = useMemo(
+    () =>
+      [
+        { key: 'service.name', value: transaction?.service.name },
+        { key: 'service.environment', value: transaction?.service.environment },
+        { key: 'transaction.name', value: transaction?.transaction.name },
+        { key: 'transaction.type', value: transaction?.transaction.type }
+      ].filter((filter): filter is Filter => typeof filter.value === 'string'),
+    [transaction]
+  );
+
+  const { data: customLinks = [], status, refetch } = useFetcher(
+    callApmApi =>
+      callApmApi({
+        pathname: '/api/apm/settings/custom_links',
+        params: { query: convertFiltersToQuery(filters) }
+      }),
+    [filters]
+  );
 
   const sections = getSections({
     transaction,
@@ -50,39 +85,92 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     urlParams
   });
 
+  const toggleCustomLinkFlyout = () => {
+    setIsCustomLinkFlyoutOpen(isOpen => !isOpen);
+  };
+
+  const toggleCustomLinkPopover = () => {
+    setIsCustomLinksPopoverOpen(isOpen => !isOpen);
+  };
+
   return (
-    <ActionMenu
-      id="transactionActionMenu"
-      closePopover={() => setIsOpen(false)}
-      isOpen={isOpen}
-      anchorPosition="downRight"
-      button={<ActionMenuButton onClick={() => setIsOpen(!isOpen)} />}
-    >
-      {sections.map((section, idx) => {
-        const isLastSection = idx !== sections.length - 1;
-        return (
-          <div key={idx}>
-            {section.map(item => (
-              <Section key={item.key}>
-                {item.title && <SectionTitle>{item.title}</SectionTitle>}
-                {item.subtitle && (
-                  <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-                )}
-                <SectionLinks>
-                  {item.actions.map(action => (
-                    <SectionLink
-                      key={action.key}
-                      label={action.label}
-                      href={action.href}
-                    />
-                  ))}
-                </SectionLinks>
-              </Section>
-            ))}
-            {isLastSection && <ActionMenuDivider />}
-          </div>
-        );
-      })}
-    </ActionMenu>
+    <>
+      {isCustomLinkFlyoutOpen && (
+        <CustomLinkFlyout
+          defaults={{ filters }}
+          onClose={toggleCustomLinkFlyout}
+          onSave={() => {
+            toggleCustomLinkFlyout();
+            refetch();
+          }}
+          onDelete={() => {
+            toggleCustomLinkFlyout();
+            refetch();
+          }}
+        />
+      )}
+      <ActionMenu
+        id="transactionActionMenu"
+        closePopover={() => {
+          setIsActionPopoverOpen(false);
+          setIsCustomLinksPopoverOpen(false);
+        }}
+        isOpen={isActionPopoverOpen}
+        anchorPosition="downRight"
+        button={
+          <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
+        }
+      >
+        <div style={{ maxHeight: px(600) }}>
+          {isCustomLinksPopoverOpen ? (
+            <CustomLinkPopover
+              customLinks={customLinks.slice(3, customLinks.length)}
+              onCreateCustomLinkClick={toggleCustomLinkFlyout}
+              onClose={toggleCustomLinkPopover}
+              transaction={transaction}
+            />
+          ) : (
+            <>
+              {sections.map((section, idx) => {
+                const isLastSection = idx !== sections.length - 1;
+                return (
+                  <div key={idx}>
+                    {section.map(item => (
+                      <Section key={item.key}>
+                        {item.title && (
+                          <SectionTitle>{item.title}</SectionTitle>
+                        )}
+                        {item.subtitle && (
+                          <SectionSubtitle>{item.subtitle}</SectionSubtitle>
+                        )}
+                        <SectionLinks>
+                          {item.actions.map(action => (
+                            <SectionLink
+                              key={action.key}
+                              label={action.label}
+                              href={action.href}
+                            />
+                          ))}
+                        </SectionLinks>
+                      </Section>
+                    ))}
+                    {isLastSection && <ActionMenuDivider />}
+                  </div>
+                );
+              })}
+              {hasValidLicense && (
+                <CustomLink
+                  customLinks={customLinks}
+                  status={status}
+                  onCreateCustomLinkClick={toggleCustomLinkFlyout}
+                  onSeeMoreClick={toggleCustomLinkPopover}
+                  transaction={transaction}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </ActionMenu>
+    </>
   );
 };

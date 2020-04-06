@@ -510,6 +510,20 @@ describe('get_filter', () => {
       ).rejects.toThrow('savedId parameter should be defined');
     });
 
+    test('throws on machine learning query', async () => {
+      await expect(
+        getFilter({
+          type: 'machine_learning',
+          filters: undefined,
+          language: undefined,
+          query: undefined,
+          savedId: 'some-id',
+          services: servicesMock,
+          index: undefined,
+        })
+      ).rejects.toThrow('Unsupported Rule of type "machine_learning" supplied to getFilter');
+    });
+
     test('it works with references and does not add indexes', () => {
       const esQuery = getQueryFilter(
         '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',

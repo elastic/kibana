@@ -40,6 +40,50 @@ import {
   getCreateBreadcrumbs,
   getEditBreadcrumbs,
 } from './breadcrumbs';
+import { createSavedSearchesLoader } from '../../../../../../plugins/discover/public';
+
+const getResolvedResults = deps => {
+  const { core, data, visualizations, createVisEmbeddableFromObject } = deps;
+
+  const results = {};
+
+  return savedVis => {
+    results.savedVis = savedVis;
+    return visualizations
+      .convertToSerializedVis(savedVis)
+      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+      .then(vis => {
+        if (vis.type.setup) {
+          return vis.type.setup(vis).catch(() => vis);
+        }
+        return vis;
+      })
+      .then(vis => {
+        results.vis = vis;
+        return createVisEmbeddableFromObject(vis, {
+          timeRange: data.query.timefilter.timefilter.getTime(),
+          filters: data.query.filterManager.getFilters(),
+        });
+      })
+      .then(embeddableHandler => {
+        results.embeddableHandler = embeddableHandler;
+        if (results.vis.data.savedSearchId) {
+          return createSavedSearchesLoader({
+            savedObjectsClient: core.savedObjects.client,
+            indexPatterns: data.indexPatterns,
+            chrome: core.chrome,
+            overlays: core.overlays,
+          }).get(results.vis.data.savedSearchId);
+        }
+      })
+      .then(savedSearch => {
+        if (savedSearch) {
+          results.savedSearch = savedSearch;
+        }
+        return results;
+      });
+  };
+};
 
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
@@ -101,7 +145,7 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          savedVis: function($route, history) {
+          resolved: function($route, history) {
             const { core, data, savedVisualizations, visualizations, toastNotifications } = deps;
             const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
@@ -121,12 +165,7 @@ export function initVisualizeApp(app, deps) {
 
             return ensureDefaultIndexPattern(core, data, history)
               .then(() => savedVisualizations.get($route.current.params))
-              .then(savedVis => {
-                if (savedVis.vis.type.setup) {
-                  return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
-                }
-                return savedVis;
-              })
+              .then(getResolvedResults(deps))
               .catch(
                 redirectWhenMissing({
                   history,
@@ -142,20 +181,16 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
-          savedVis: function($route, history) {
+          resolved: function($route, history) {
             const { chrome, core, data, savedVisualizations, toastNotifications } = deps;
+
             return ensureDefaultIndexPattern(core, data, history)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
                 chrome.recentlyAccessed.add(savedVis.getFullPath(), savedVis.title, savedVis.id);
                 return savedVis;
               })
-              .then(savedVis => {
-                if (savedVis.vis.type.setup) {
-                  return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
-                }
-                return savedVis;
-              })
+              .then(getResolvedResults(deps))
               .catch(
                 redirectWhenMissing({
                   history,
@@ -169,6 +204,9 @@ export function initVisualizeApp(app, deps) {
                       '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
                   },
                   toastNotifications,
+                  onBeforeRedirect() {
+                    deps.setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
+                  },
                 })
               );
           },

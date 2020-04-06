@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './layers/layer_wizard_registry';
+import './layers/sources/source_registry';
+import './layers/load_layer_wizards';
+
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
@@ -24,7 +28,6 @@ import {
   setToasts,
   setIndexPatternService,
   setAutocompleteService,
-  // @ts-ignore
 } from './kibana_services';
 // @ts-ignore
 import { setInjectedVarFunc as npSetInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
@@ -80,7 +83,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
   setIndexPatternService(data.indexPatterns);
-  setAutocompleteService(data.autocompleteService);
+  setAutocompleteService(data.autocomplete);
 };
 
 /** @internal */

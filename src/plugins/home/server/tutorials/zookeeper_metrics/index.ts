@@ -36,6 +36,7 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
     name: i18n.translate('home.tutorials.zookeeperMetrics.nameTitle', {
       defaultMessage: 'Zookeeper metrics',
     }),
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/zookeeper.svg',
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.zookeeperMetrics.shortDescription', {

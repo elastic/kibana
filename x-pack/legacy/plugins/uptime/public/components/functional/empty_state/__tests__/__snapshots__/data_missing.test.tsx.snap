@@ -2,6 +2,7 @@
 
 exports[`DataMissing component renders basePath and headingMessage 1`] = `
 <EuiFlexGroup
+  data-test-subj="data-missing"
   justifyContent="center"
 >
   <EuiFlexItem

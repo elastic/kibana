@@ -23,6 +23,25 @@ export interface ResolverState {
    * Contains the state associated with event data (process events and possibly other event types).
    */
   readonly data: DataState;
+
+  /**
+   * Contains the state needed to maintain Resolver UI elements.
+   */
+  readonly ui: ResolverUIState;
+}
+
+/**
+ * Piece of redux state that models an animation for the camera.
+ */
+export interface ResolverUIState {
+  /**
+   * The ID attribute of the resolver's aria-activedescendent.
+   */
+  readonly activeDescendantId: string | null;
+  /**
+   * The ID attribute of the resolver's currently selected descendant.
+   */
+  readonly selectedDescendantId: string | null;
 }
 
 /**
@@ -174,7 +193,24 @@ export interface ProcessEvent {
     source_id?: number;
     process_name: string;
     process_path: string;
+    signature_status?: string;
   };
+}
+
+/**
+ * A map of Process Ids that indicate which processes are adjacent to a given process along
+ * directions in two axes: up/down and previous/next.
+ */
+export interface AdjacentProcessMap {
+  readonly self: string;
+  parent: string | null;
+  firstChild: string | null;
+  previousSibling: string | null;
+  nextSibling: string | null;
+  /**
+   * To support aria-level, this must be >= 1
+   */
+  level: number;
 }
 
 /**
@@ -189,6 +225,10 @@ export interface IndexedProcessTree {
    * Map of ID to process
    */
   idToProcess: Map<string, ResolverEvent>;
+  /**
+   * Map of ID to adjacent processes
+   */
+  idToAdjacent: Map<string, AdjacentProcessMap>;
 }
 
 /**

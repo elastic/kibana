@@ -197,16 +197,29 @@ function addFieldAsMetricOperation(
     field,
   });
   const newColumnId = generateId();
-  const updatedColumns = {
-    ...layer.columns,
-    [newColumnId]: newColumn,
-  };
-  const updatedColumnOrder = [...layer.columnOrder, newColumnId];
+
+  const [, metrics] = separateBucketColumns(layer);
+
+  // Add metrics if there are 0 or > 1 metric
+  if (metrics.length !== 1) {
+    return {
+      indexPatternId: indexPattern.id,
+      columns: {
+        ...layer.columns,
+        [newColumnId]: newColumn,
+      },
+      columnOrder: [...layer.columnOrder, newColumnId],
+    };
+  }
+
+  // If only one metric, replace instead of add
+  const newColumns = { ...layer.columns, [newColumnId]: newColumn };
+  delete newColumns[metrics[0]];
 
   return {
     indexPatternId: indexPattern.id,
-    columns: updatedColumns,
-    columnOrder: updatedColumnOrder,
+    columns: newColumns,
+    columnOrder: [...layer.columnOrder.filter(c => c !== metrics[0]), newColumnId],
   };
 }
 
@@ -231,21 +244,34 @@ function addFieldAsBucketOperation(
     ...layer.columns,
     [newColumnId]: newColumn,
   };
+
+  const oldDateHistogramIndex = layer.columnOrder.findIndex(
+    columnId => layer.columns[columnId].operationType === 'date_histogram'
+  );
+  const oldDateHistogramId =
+    oldDateHistogramIndex > -1 ? layer.columnOrder[oldDateHistogramIndex] : null;
+
   let updatedColumnOrder: string[] = [];
-  if (applicableBucketOperation === 'terms') {
-    updatedColumnOrder = [newColumnId, ...buckets, ...metrics];
-  } else {
-    const oldDateHistogramColumn = layer.columnOrder.find(
-      columnId => layer.columns[columnId].operationType === 'date_histogram'
-    );
-    if (oldDateHistogramColumn) {
-      delete updatedColumns[oldDateHistogramColumn];
+  if (oldDateHistogramId) {
+    if (applicableBucketOperation === 'terms') {
+      // Insert the new terms bucket above the first date histogram
+      updatedColumnOrder = [
+        ...buckets.slice(0, oldDateHistogramIndex),
+        newColumnId,
+        ...buckets.slice(oldDateHistogramIndex, buckets.length),
+        ...metrics,
+      ];
+    } else if (applicableBucketOperation === 'date_histogram') {
+      // Replace date histogram with new date histogram
+      delete updatedColumns[oldDateHistogramId];
       updatedColumnOrder = layer.columnOrder.map(columnId =>
-        columnId !== oldDateHistogramColumn ? columnId : newColumnId
+        columnId !== oldDateHistogramId ? columnId : newColumnId
       );
-    } else {
-      updatedColumnOrder = [...buckets, newColumnId, ...metrics];
     }
+  } else {
+    // Insert the new bucket after existing buckets. Users will see the same data
+    // they already had, with an extra level of detail.
+    updatedColumnOrder = [...buckets, newColumnId, ...metrics];
   }
   return {
     indexPatternId: indexPattern.id,

@@ -20,7 +20,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IndexPattern, IAggConfig, AggGroupNames } from 'src/plugins/data/public';
 import {
   DefaultEditorAggParams as PureDefaultEditorAggParams,
@@ -28,6 +27,7 @@ import {
 } from './agg_params';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
+import { EditorVisState } from './sidebar/state/reducers';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },
@@ -108,7 +108,7 @@ describe('DefaultEditorAggParams component', () => {
       formIsTouched: false,
       indexPattern: {} as IndexPattern,
       metricAggs: [],
-      state: {} as VisState,
+      state: {} as EditorVisState,
       setAggParamValue,
       onAggTypeChange,
       setTouched,

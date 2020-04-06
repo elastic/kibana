@@ -22,7 +22,7 @@ import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { CreateSection } from './types';
-import { CoreSetup, CoreStart } from '../../../core/public';
+import { StartServicesAccessor, CoreStart } from '../../../core/public';
 
 export class ManagementService {
   private sections: ManagementSection[] = [];
@@ -30,7 +30,7 @@ export class ManagementService {
   private register(
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagement: () => LegacyManagementSection,
-    getStartServices: CoreSetup['getStartServices']
+    getStartServices: StartServicesAccessor
   ) {
     return (section: CreateSection) => {
       if (this.getSection(section.id)) {
@@ -71,7 +71,7 @@ export class ManagementService {
   public setup(
     kibanaLegacy: KibanaLegacySetup,
     getLegacyManagement: () => LegacyManagementSection,
-    getStartServices: CoreSetup['getStartServices']
+    getStartServices: StartServicesAccessor
   ) {
     const register = this.register.bind(this)(
       kibanaLegacy.registerLegacyApp,

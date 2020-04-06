@@ -151,8 +151,15 @@ export const ml = {
     });
   },
 
-  validateJob({ job }: { job: Job }) {
-    const body = JSON.stringify({ job });
+  validateJob(payload: {
+    job: Job;
+    duration: {
+      start?: number;
+      end?: number;
+    };
+    fields?: any[];
+  }) {
+    const body = JSON.stringify(payload);
     return http<any>({
       path: `${basePath()}/validate/job`,
       method: 'POST',
@@ -367,6 +374,7 @@ export const ml = {
     start,
     end,
     jobOverrides,
+    estimateModelMemory,
   }: {
     moduleId: string;
     prefix?: string;
@@ -378,6 +386,7 @@ export const ml = {
     start?: number;
     end?: number;
     jobOverrides?: Array<Partial<Job>>;
+    estimateModelMemory?: boolean;
   }) {
     const body = JSON.stringify({
       prefix,
@@ -389,6 +398,7 @@ export const ml = {
       start,
       end,
       jobOverrides,
+      estimateModelMemory,
     });
 
     return http<DataRecognizerConfigResponse>({
@@ -532,7 +542,7 @@ export const ml = {
     });
   },
 
-  calculateModelMemoryLimit({
+  calculateModelMemoryLimit$({
     analysisConfig,
     indexPattern,
     query,
@@ -556,7 +566,7 @@ export const ml = {
       latestMs,
     });
 
-    return http<{ modelMemoryLimit: string }>({
+    return http$<{ modelMemoryLimit: string }>({
       path: `${basePath()}/validate/calculate_model_memory_limit`,
       method: 'POST',
       body,

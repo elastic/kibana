@@ -43,13 +43,13 @@ export function createMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
-export const LAYER_TYPE = {
-  TILE: 'TILE',
-  VECTOR: 'VECTOR',
-  VECTOR_TILE: 'VECTOR_TILE',
-  HEATMAP: 'HEATMAP',
-  BLENDED_VECTOR: 'BLENDED_VECTOR',
-};
+export enum LAYER_TYPE {
+  TILE = 'TILE',
+  VECTOR = 'VECTOR',
+  VECTOR_TILE = 'VECTOR_TILE',
+  HEATMAP = 'HEATMAP',
+  BLENDED_VECTOR = 'BLENDED_VECTOR',
+}
 
 export enum SORT_ORDER {
   ASC = 'asc',
@@ -62,6 +62,9 @@ export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
+export const WMS = 'WMS';
+export const KIBANA_TILEMAP = 'KIBANA_TILEMAP';
+export const REGIONMAP_FILE = 'REGIONMAP_FILE';
 
 export enum FIELD_ORIGIN {
   SOURCE = 'source',
@@ -90,16 +93,16 @@ export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
 
 export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
 
-export const ES_GEO_FIELD_TYPE = {
-  GEO_POINT: 'geo_point',
-  GEO_SHAPE: 'geo_shape',
-};
+export enum ES_GEO_FIELD_TYPE {
+  GEO_POINT = 'geo_point',
+  GEO_SHAPE = 'geo_shape',
+}
 
-export const ES_SPATIAL_RELATIONS = {
-  INTERSECTS: 'INTERSECTS',
-  DISJOINT: 'DISJOINT',
-  WITHIN: 'WITHIN',
-};
+export enum ES_SPATIAL_RELATIONS {
+  INTERSECTS = 'INTERSECTS',
+  DISJOINT = 'DISJOINT',
+  WITHIN = 'WITHIN',
+}
 
 export const GEO_JSON_TYPE = {
   POINT: 'Point',
@@ -120,11 +123,11 @@ export const EMPTY_FEATURE_COLLECTION = {
   features: [],
 };
 
-export const DRAW_TYPE = {
-  BOUNDS: 'BOUNDS',
-  DISTANCE: 'DISTANCE',
-  POLYGON: 'POLYGON',
-};
+export enum DRAW_TYPE {
+  BOUNDS = 'BOUNDS',
+  DISTANCE = 'DISTANCE',
+  POLYGON = 'POLYGON',
+}
 
 export enum AGG_TYPE {
   AVG = 'avg',
@@ -188,7 +191,7 @@ export enum LABEL_BORDER_SIZES {
   LARGE = 'LARGE',
 }
 
-export const DEFAULT_ICON = 'airfield';
+export const DEFAULT_ICON = 'marker';
 
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',
@@ -210,3 +213,5 @@ export enum SCALING_TYPES {
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
 }
+
+export const RGBA_0000 = 'rgba(0,0,0,0)';

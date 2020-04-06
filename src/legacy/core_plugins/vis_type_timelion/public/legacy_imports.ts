@@ -19,6 +19,3 @@
 
 export { npSetup, npStart } from 'ui/new_platform';
 export { PluginsStart } from 'ui/new_platform/new_platform';
-
-// @ts-ignore
-export { timezoneProvider } from 'ui/vis/lib/timezone';

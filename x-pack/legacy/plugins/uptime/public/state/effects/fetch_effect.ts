@@ -6,6 +6,7 @@
 
 import { call, put } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
+import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,
@@ -21,20 +22,23 @@ import { Action } from 'redux-actions';
 export function fetchEffectFactory<T, R, S, F>(
   fetch: (request: T) => Promise<R>,
   success: (response: R) => Action<S>,
-  fail: (error: Error) => Action<F>
+  fail: (error: IHttpFetchError) => Action<F>
 ) {
   return function*(action: Action<T>) {
-    const {
-      payload: { ...params },
-    } = action;
-    const response = yield call(fetch, params);
-    if (response instanceof Error) {
-      // eslint-disable-next-line no-console
-      console.error(response);
+    try {
+      const response = yield call(fetch, action.payload);
+      if (response instanceof Error) {
+        // eslint-disable-next-line no-console
+        console.error(response);
 
-      yield put(fail(response));
-    } else {
-      yield put(success(response));
+        yield put(fail(response as IHttpFetchError));
+      } else {
+        yield put(success(response));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      yield put(fail(error as IHttpFetchError));
     }
   };
 }

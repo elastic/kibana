@@ -8,13 +8,12 @@
 import { IStyleProperty } from './style_property';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
 import {
-  FieldMetaOptions,
+  CategoryFieldMeta,
   DynamicStylePropertyOptions,
-} from '../../../../../common/style_property_descriptor_types';
+  FieldMetaOptions,
+  RangeFieldMeta,
+} from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../vector_layer';
-import { IVectorSource } from '../../../sources/vector_source';
-import { CategoryFieldMeta, RangeFieldMeta } from '../../../../../common/descriptor_types';
 
 export interface IDynamicStyleProperty extends IStyleProperty {
   getOptions(): DynamicStylePropertyOptions;
@@ -22,7 +21,6 @@ export interface IDynamicStyleProperty extends IStyleProperty {
   getField(): IField | undefined;
   getFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | undefined;
-  getComputedFieldName(): string | undefined;
   getRangeFieldMeta(): RangeFieldMeta;
   getCategoryFieldMeta(): CategoryFieldMeta;
   isFieldMetaEnabled(): boolean;

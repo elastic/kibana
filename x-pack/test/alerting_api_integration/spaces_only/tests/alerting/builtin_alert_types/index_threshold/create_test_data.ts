@@ -53,6 +53,7 @@ async function createEsDocument(es: any, epochMillis: number, testedValue: numbe
     source: DOCUMENT_SOURCE,
     reference: DOCUMENT_REFERENCE,
     date: new Date(epochMillis).toISOString(),
+    date_epoch_millis: epochMillis,
     testedValue,
     group,
   };

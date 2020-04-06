@@ -15,9 +15,12 @@ export enum PIVOT_SUPPORTED_AGGS {
   CARDINALITY = 'cardinality',
   MAX = 'max',
   MIN = 'min',
+  PERCENTILES = 'percentiles',
   SUM = 'sum',
   VALUE_COUNT = 'value_count',
 }
+
+export const PERCENTILES_AGG_DEFAULT_PERCENTS = [1, 5, 25, 50, 75, 95, 99];
 
 export const pivotAggsFieldSupport = {
   [KBN_FIELD_TYPES.ATTACHMENT]: [PIVOT_SUPPORTED_AGGS.VALUE_COUNT],
@@ -36,6 +39,7 @@ export const pivotAggsFieldSupport = {
     PIVOT_SUPPORTED_AGGS.CARDINALITY,
     PIVOT_SUPPORTED_AGGS.MAX,
     PIVOT_SUPPORTED_AGGS.MIN,
+    PIVOT_SUPPORTED_AGGS.PERCENTILES,
     PIVOT_SUPPORTED_AGGS.SUM,
     PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
   ],
@@ -60,9 +64,16 @@ export interface PivotAggsConfigBase {
   dropDownName: string;
 }
 
-export interface PivotAggsConfigWithUiSupport extends PivotAggsConfigBase {
+interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName;
 }
+
+interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
+  agg: PIVOT_SUPPORTED_AGGS.PERCENTILES;
+  percents: number[];
+}
+
+export type PivotAggsConfigWithUiSupport = PivotAggsConfigWithUiBase | PivotAggsConfigPercentiles;
 
 export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfigWithUiSupport {
   return (
@@ -71,6 +82,15 @@ export function isPivotAggsConfigWithUiSupport(arg: any): arg is PivotAggsConfig
     arg.hasOwnProperty('dropDownName') &&
     arg.hasOwnProperty('field') &&
     Object.values(PIVOT_SUPPORTED_AGGS).includes(arg.agg)
+  );
+}
+
+export function isPivotAggsConfigPercentiles(arg: any): arg is PivotAggsConfigPercentiles {
+  return (
+    arg.hasOwnProperty('agg') &&
+    arg.hasOwnProperty('field') &&
+    arg.hasOwnProperty('percents') &&
+    arg.agg === PIVOT_SUPPORTED_AGGS.PERCENTILES
   );
 }
 

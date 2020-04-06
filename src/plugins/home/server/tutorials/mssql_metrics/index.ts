@@ -48,7 +48,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mssql.html',
       },
     }),
-    // euiIconType: 'logoMSSQL',
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/mssql.svg',
     isBeta: false,
     artifacts: {
       dashboards: [

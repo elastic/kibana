@@ -8,61 +8,8 @@ import _ from 'lodash';
 import React from 'react';
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiColorPicker, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-
-function getColorStopRow({ index, errors, stopInput, onColorChange, color, deleteButton, onAdd }) {
-  const colorPickerButtons = (
-    <div className="mapColorStop__icons">
-      {deleteButton}
-      <EuiButtonIcon
-        iconType="plusInCircle"
-        color="primary"
-        aria-label="Add"
-        title="Add"
-        onClick={onAdd}
-      />
-    </div>
-  );
-  return (
-    <EuiFormRow
-      key={index}
-      className="mapColorStop"
-      isInvalid={errors.length !== 0}
-      error={errors}
-      display="rowCompressed"
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
-        <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
-          {stopInput}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiColorPicker
-            onChange={onColorChange}
-            color={color}
-            compressed
-            append={colorPickerButtons}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
-  );
-}
-
-export function getDeleteButton(onRemove) {
-  return (
-    <EuiButtonIcon
-      iconType="trash"
-      color="danger"
-      aria-label={i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
-        defaultMessage: 'Delete',
-      })}
-      title={i18n.translate('xpack.maps.styles.colorStops.deleteButtonLabel', {
-        defaultMessage: 'Delete',
-      })}
-      onClick={onRemove}
-    />
-  );
-}
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { MbValidatedColorPicker } from './mb_validated_color_picker';
 
 export const ColorStops = ({
   onChange,
@@ -72,6 +19,7 @@ export const ColorStops = ({
   renderStopInput,
   addNewRow,
   canDeleteStop,
+  swatches,
 }) => {
   function getStopInput(stop, index) {
     const onStopChange = newStopValue => {
@@ -134,10 +82,56 @@ export const ColorStops = ({
           isInvalid: isStopsInvalid(newColorStops),
         });
       };
-      deleteButton = getDeleteButton(onRemove);
+      deleteButton = (
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          aria-label={i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
+            defaultMessage: 'Delete',
+          })}
+          title={i18n.translate('xpack.maps.styles.colorStops.deleteButtonLabel', {
+            defaultMessage: 'Delete',
+          })}
+          onClick={onRemove}
+        />
+      );
     }
 
-    return getColorStopRow({ index, errors, stopInput, onColorChange, color, deleteButton, onAdd });
+    const colorPickerButtons = (
+      <div>
+        {deleteButton}
+        <EuiButtonIcon
+          iconType="plusInCircle"
+          color="primary"
+          aria-label="Add"
+          title="Add"
+          onClick={onAdd}
+        />
+      </div>
+    );
+    return (
+      <EuiFormRow
+        key={index}
+        className="mapColorStop"
+        isInvalid={errors.length !== 0}
+        error={errors}
+        display="rowCompressed"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+            {stopInput}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <MbValidatedColorPicker
+              onChange={onColorChange}
+              color={color}
+              swatches={swatches}
+              append={colorPickerButtons}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+    );
   });
 
   return <div>{rows}</div>;

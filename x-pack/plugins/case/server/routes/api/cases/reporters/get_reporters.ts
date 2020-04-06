@@ -16,8 +16,9 @@ export function initGetReportersApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const reporters = await caseService.getReporters({
-          client: context.core.savedObjects.client,
+          client,
         });
         return response.ok({ body: UsersRt.encode(reporters) });
       } catch (error) {

@@ -28,6 +28,8 @@ import {
   DATA_FRAME_TASK_STATE,
   Query,
   Clause,
+  TermClause,
+  FieldClause,
 } from './common';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
@@ -58,7 +60,7 @@ function getItemIdToExpandedRowMap(
   }, {} as ItemIdToExpandedRowMap);
 }
 
-function stringMatch(str: string | undefined, substr: string) {
+function stringMatch(str: string | undefined, substr: any) {
   return (
     typeof str === 'string' &&
     typeof substr === 'string' &&
@@ -128,7 +130,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       }
       if (clauses.length > 0) {
         setFilterActive(true);
-        filterAnalytics(clauses);
+        filterAnalytics(clauses as Array<TermClause | FieldClause>);
       } else {
         setFilterActive(false);
       }
@@ -136,7 +138,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     }
   };
 
-  const filterAnalytics = (clauses: Clause[]) => {
+  const filterAnalytics = (clauses: Array<TermClause | FieldClause>) => {
     setIsLoading(true);
     // keep count of the number of matches we make as we're looping over the clauses
     // we only want to return analytics which match all clauses, i.e. each search term is ANDed
@@ -173,7 +175,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = analytics.filter(d => c.value.includes(d.stats.state));
+          ts = analytics.filter(d => (c.value as string).includes(d.stats.state));
         } else {
           ts = analytics.filter(d => d.mode === c.value);
         }
@@ -186,6 +188,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     const filtered = Object.values(matches)
       .filter(m => (m && m.count) >= clauses.length)
       .map(m => m.analytics);
+
+    let pageStart = pageIndex * pageSize;
+    if (pageStart >= filtered.length && filtered.length !== 0) {
+      // if the page start is larger than the number of items due to
+      // filters being applied, calculate a new page start
+      pageStart = Math.floor((filtered.length - 1) / pageSize) * pageSize;
+      setPageIndex(pageStart / pageSize);
+    }
 
     setFilteredAnalytics(filtered);
     setIsLoading(false);

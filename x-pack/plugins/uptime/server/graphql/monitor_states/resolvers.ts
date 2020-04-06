@@ -12,6 +12,7 @@ import {
   MonitorSummaryResult,
 } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
+import { savedObjectsAdapter } from '../../lib/saved_objects';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,
@@ -31,9 +32,13 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
     Query: {
       async getMonitorStates(
         _resolver,
-        { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter },
-        { APICaller }
+        { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter, pageSize },
+        { APICaller, savedObjectsClient }
       ): Promise<MonitorSummaryResult> {
+        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+          savedObjectsClient
+        );
+
         const decodedPagination = pagination
           ? JSON.parse(decodeURIComponent(pagination))
           : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
@@ -41,12 +46,14 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           indexStatus,
           { summaries, nextPagePagination, prevPagePagination },
         ] = await Promise.all([
-          libs.requests.getIndexStatus({ callES: APICaller }),
+          libs.requests.getIndexStatus({ callES: APICaller, dynamicSettings }),
           libs.requests.getMonitorStates({
             callES: APICaller,
+            dynamicSettings,
             dateRangeStart,
             dateRangeEnd,
             pagination: decodedPagination,
+            pageSize,
             filters,
             // this is added to make typescript happy,
             // this sort of reassignment used to be further downstream but I've moved it here

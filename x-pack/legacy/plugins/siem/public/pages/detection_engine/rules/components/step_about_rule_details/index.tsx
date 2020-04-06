@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiResizeObserver,
 } from '@elastic/eui';
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
@@ -71,9 +71,12 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   const [selectedToggleOption, setToggleOption] = useState('details');
   const [aboutPanelHeight, setAboutPanelHeight] = useState(0);
 
-  const onResize = (e: { height: number; width: number }) => {
-    setAboutPanelHeight(e.height);
-  };
+  const onResize = useCallback(
+    (e: { height: number; width: number }) => {
+      setAboutPanelHeight(e.height);
+    },
+    [setAboutPanelHeight]
+  );
 
   return (
     <MyPanel>
@@ -85,7 +88,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       )}
       {stepData != null && stepDataDetails != null && (
         <FlexGroupFullHeight gutterSize="xs" direction="column">
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={1} key="header">
             <HeaderSection title={i18n.ABOUT_TEXT}>
               {!isEmpty(stepDataDetails.note) && stepDataDetails.note.trim() !== '' && (
                 <EuiButtonGroup
@@ -99,7 +102,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
               )}
             </HeaderSection>
           </EuiFlexItem>
-          <EuiFlexItem grow={5}>
+          <EuiFlexItem grow={5} key="details">
             {selectedToggleOption === 'details' ? (
               <EuiResizeObserver data-test-subj="stepAboutDetailsContent" onResize={onResize}>
                 {resizeRef => (

@@ -273,6 +273,32 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       };
       expect(await runQueryExpect(query, 400)).eql(expected);
     });
+
+    it('should handle epoch_millis time field', async () => {
+      const query = getQueryBody({
+        dateStart: START_DATE,
+        dateEnd: START_DATE,
+        timeField: 'date_epoch_millis',
+      });
+      const expected = {
+        results: [{ group: 'all documents', metrics: [[START_DATE, 6]] }],
+      };
+      expect(await runQueryExpect(query, 200)).eql(expected);
+    });
+
+    it('should handle ES errors', async () => {
+      const query = getQueryBody({
+        dateStart: START_DATE,
+        dateEnd: START_DATE,
+        timeField: 'source', // bad field for time
+        aggType: 'avg',
+        aggField: 'source', // bad field for agg
+      });
+      const expected = {
+        results: [],
+      };
+      expect(await runQueryExpect(query, 200)).eql(expected);
+    });
   });
 
   async function runQueryExpect(requestBody: TimeSeriesQuery, status: number): Promise<any> {

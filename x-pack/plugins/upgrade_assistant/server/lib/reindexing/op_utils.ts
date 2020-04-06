@@ -50,6 +50,12 @@ const orderQueuedReindexOperations = ({
   ),
 });
 
+export const isQueuedOp = (op: ReindexSavedObject) =>
+  Boolean(op.attributes.reindexOptions?.queueSettings);
+
+export const queuedOpHasStarted = (op: ReindexSavedObject) =>
+  Boolean(op.attributes.reindexOptions?.queueSettings?.startedAt);
+
 export const sortAndOrderReindexOperations = flow(
   sortReindexOperations,
   orderQueuedReindexOperations

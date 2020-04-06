@@ -184,12 +184,14 @@ describe('secrets validation', () => {
     expect(validateSecrets(actionType, secrets)).toEqual(secrets);
   });
 
-  test('secrets validation fails when secrets is not valid', () => {
-    expect(() => {
-      validateSecrets(actionType, {});
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [user]: expected value of type [string] but got [undefined]"`
-    );
+  test('secrets validation succeeds when secrets props are null/undefined', () => {
+    const secrets: Record<string, any> = {
+      user: null,
+      password: null,
+    };
+    expect(validateSecrets(actionType, {})).toEqual(secrets);
+    expect(validateSecrets(actionType, { user: null })).toEqual(secrets);
+    expect(validateSecrets(actionType, { password: null })).toEqual(secrets);
   });
 });
 
