@@ -120,8 +120,6 @@ export const ProcessEventDot = styled(
 
       const labelYOffset = markerPositionOffset + 0.25 * markerSize - 0.5;
 
-      const labelYHeight = markerSize / 1.7647;
-
       /**
        * An element that should be animated when the node is clicked.
        */
