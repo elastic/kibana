@@ -47,7 +47,10 @@ export const migrateIncludeExcludeFormat = {
     const value = aggConfig.getParam(this.name);
 
     if (isArray(value) && value.length > 0 && isNumberType(aggConfig)) {
-      output.params[this.name] = (value as number[]).filter((val: number) => val || val === 0);
+      const parsedValue = (value as number[]).filter((val: number) => val || val === 0);
+      if (parsedValue.length) {
+        output.params[this.name] = parsedValue;
+      }
     } else if (isObject(value)) {
       output.params[this.name] = value.pattern;
     } else if (value && isStringType(aggConfig)) {
