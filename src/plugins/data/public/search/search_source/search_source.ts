@@ -429,7 +429,7 @@ export class SearchSource {
    * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
    * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
    *
-   * Using `parseSearchSource`, the instance can be re-created.
+   * Using `createSearchSource`, the instance can be re-created.
    * @param searchSource The search source to serialize
    * @public */
   public serialize() {

@@ -82,7 +82,7 @@ export function buildSavedObject(
   savedObject.init = _.once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
   savedObject.applyESResp = (resp: EsResponse) =>
-    applyESResp(resp, savedObject, config, services.search.parseSearchSource);
+    applyESResp(resp, savedObject, config, services.search.createSearchSource);
 
   /**
    * Serialize this object

@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { parseSearchSource as parseSearchSourceFactory } from './parse_search_source';
+import { createSearchSource as createSearchSourceFactory } from './create_search_source';
 import { IIndexPattern } from '../../../common/index_patterns';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { Filter } from '../../../common/es_query/filters';
 
-describe('parseSearchSource', function() {
-  let parseSearchSource: ReturnType<typeof parseSearchSourceFactory>;
+describe('createSearchSource', function() {
+  let createSearchSource: ReturnType<typeof createSearchSourceFactory>;
   const indexPatternMock: IIndexPattern = {} as IIndexPattern;
   let indexPatternContractMock: jest.Mocked<IndexPatternsContract>;
 
@@ -30,17 +30,17 @@ describe('parseSearchSource', function() {
     indexPatternContractMock = ({
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
     } as unknown) as jest.Mocked<IndexPatternsContract>;
-    parseSearchSource = parseSearchSourceFactory(indexPatternContractMock);
+    createSearchSource = createSearchSourceFactory(indexPatternContractMock);
   });
 
   it('should fail if JSON is invalid', () => {
-    expect(parseSearchSource('{', [])).rejects.toThrow();
-    expect(parseSearchSource('0', [])).rejects.toThrow();
-    expect(parseSearchSource('"abcdefg"', [])).rejects.toThrow();
+    expect(createSearchSource('{', [])).rejects.toThrow();
+    expect(createSearchSource('0', [])).rejects.toThrow();
+    expect(createSearchSource('"abcdefg"', [])).rejects.toThrow();
   });
 
   it('should set fields', async () => {
-    const searchSource = await parseSearchSource(
+    const searchSource = await createSearchSource(
       JSON.stringify({
         highlightAll: true,
         query: {
@@ -58,7 +58,7 @@ describe('parseSearchSource', function() {
   });
 
   it('should resolve referenced index pattern', async () => {
-    const searchSource = await parseSearchSource(
+    const searchSource = await createSearchSource(
       JSON.stringify({
         indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
       }),
@@ -75,7 +75,7 @@ describe('parseSearchSource', function() {
   });
 
   it('should set filters and resolve referenced index patterns', async () => {
-    const searchSource = await parseSearchSource(
+    const searchSource = await createSearchSource(
       JSON.stringify({
         filter: [
           {
@@ -136,7 +136,7 @@ describe('parseSearchSource', function() {
   });
 
   it('should migrate legacy queries on the fly', async () => {
-    const searchSource = await parseSearchSource(
+    const searchSource = await createSearchSource(
       JSON.stringify({
         highlightAll: true,
         query: 'a:b',

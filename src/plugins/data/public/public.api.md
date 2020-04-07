@@ -210,6 +210,9 @@ export const connectToQueryState: <S extends QueryState>({ timefilter: { timefil
 // @public (undocumented)
 export const createSavedQueryService: (savedObjectsClient: Pick<import("../../../../../core/public").SavedObjectsClient, "update" | "find" | "get" | "delete" | "create" | "bulkCreate" | "bulkGet" | "bulkUpdate">) => SavedQueryService;
 
+// @public
+export const createSearchSource: (indexPatterns: Pick<import("../../index_patterns/index_patterns").IndexPatternsService, "get" | "clearCache" | "getFieldsForTimePattern" | "getFieldsForWildcard" | "getIds" | "getTitles" | "getFields" | "getCache" | "getDefault" | "make">) => (searchSourceJson: string, references: SavedObjectReference[]) => Promise<SearchSource>;
+
 // Warning: (ae-missing-release-tag) "CustomFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1274,9 +1277,6 @@ export interface OptionedValueProp {
 //
 // @public (undocumented)
 export type ParsedInterval = ReturnType<typeof parseEsInterval>;
-
-// @public
-export const parseSearchSource: (indexPatterns: Pick<import("../../index_patterns/index_patterns").IndexPatternsService, "get" | "clearCache" | "getFieldsForTimePattern" | "getFieldsForWildcard" | "getIds" | "getTitles" | "getFields" | "getCache" | "getDefault" | "make">) => (searchSourceJson: string, references: SavedObjectReference[]) => Promise<SearchSource>;
 
 // Warning: (ae-missing-release-tag) "PhraseFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

@@ -27,7 +27,7 @@ import {
 import {
   IndexPatternsContract,
   IIndexPattern,
-  parseSearchSource,
+  createSearchSource,
 } from '../../../../../../../../plugins/data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
@@ -212,7 +212,7 @@ export async function resolveIndexPatternConflicts(
       // The user decided to skip this conflict so do nothing
       return;
     }
-    obj.searchSource = await parseSearchSource(indexPatterns)(
+    obj.searchSource = await createSearchSource(indexPatterns)(
       JSON.stringify(serializedSearchSource),
       replacedReferences
     );

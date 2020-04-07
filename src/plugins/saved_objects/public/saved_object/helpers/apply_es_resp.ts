@@ -29,7 +29,7 @@ export async function applyESResp(
   resp: EsResponse,
   savedObject: SavedObject,
   config: SavedObjectConfig,
-  parseSearchSource: DataPublicPluginStart['search']['parseSearchSource']
+  createSearchSource: DataPublicPluginStart['search']['createSearchSource']
 ) {
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
@@ -65,7 +65,7 @@ export async function applyESResp(
 
   if (config.searchSource) {
     try {
-      savedObject.searchSource = await parseSearchSource(meta.searchSourceJSON, resp.references);
+      savedObject.searchSource = await createSearchSource(meta.searchSourceJSON, resp.references);
     } catch (error) {
       if (
         error.constructor.name === 'SavedObjectNotFound' &&

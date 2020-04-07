@@ -8,7 +8,7 @@ Serializes the instance to a JSON string and a set of referenced objects. Use th
 
 The references returned by this function can be mixed with other references in the same object, however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index` and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`<!-- -->.
 
-Using `parseSearchSource`<!-- -->, the instance can be re-created.
+Using `createSearchSource`<!-- -->, the instance can be re-created.
 
 <b>Signature:</b>
 

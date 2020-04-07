@@ -103,7 +103,7 @@ describe('Saved Object', () => {
   }
 
   beforeEach(() => {
-    (dataStartMock.search.parseSearchSource as jest.Mock).mockReset();
+    (dataStartMock.search.createSearchSource as jest.Mock).mockReset();
     SavedObjectClass = createSavedObjectClass({
       savedObjectsClient: savedObjectsClientStub,
       indexPatterns: dataStartMock.indexPatterns,
@@ -411,8 +411,8 @@ describe('Saved Object', () => {
       });
     });
 
-    it('forwards thrown exceptions from parseSearchSource', async () => {
-      (dataStartMock.search.parseSearchSource as jest.Mock).mockImplementation(() => {
+    it('forwards thrown exceptions from createSearchSource', async () => {
+      (dataStartMock.search.createSearchSource as jest.Mock).mockImplementation(() => {
         throw new InvalidJSONProperty('');
       });
       const savedObject = await createInitializedSavedObject({
@@ -621,7 +621,7 @@ describe('Saved Object', () => {
           ],
         };
         savedObject.applyESResp(response);
-        expect(dataStartMock.search.parseSearchSource).toBeCalledWith(
+        expect(dataStartMock.search.createSearchSource).toBeCalledWith(
           searchSourceJSON,
           response.references
         );

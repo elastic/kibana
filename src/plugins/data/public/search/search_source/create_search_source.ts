@@ -39,7 +39,7 @@ import { SearchSourceFields } from './types';
  * returned by `serializeSearchSource`.
  *
  * @public */
-export const parseSearchSource = (indexPatterns: IndexPatternsContract) => async (
+export const createSearchSource = (indexPatterns: IndexPatternsContract) => async (
   searchSourceJson: string,
   references: SavedObjectReference[]
 ) => {
