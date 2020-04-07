@@ -179,17 +179,21 @@ const getExcludesFields = (excluded: string[]) => {
       if (fieldMatch !== null) {
         mainField = suffixRemovedField;
       } else {
-        updatedExcluded.push(fieldName);
+        if (updatedExcluded.includes(fieldName) === false) {
+          updatedExcluded.push(fieldName);
+        }
       }
     }
 
     if (mainField !== undefined) {
-      updatedExcluded.push(mainField);
+      if (updatedExcluded.includes(mainField) === false) {
+        updatedExcluded.push(mainField);
+      }
       regex = new RegExp(`${mainField}\\..+`);
 
       for (let j = 0; j < fields.length; j++) {
         const field = fields[j]?.name;
-        if (field.match(regex) !== null) {
+        if (updatedExcluded.includes(field) === false && field.match(regex) !== null) {
           updatedExcluded.push(field);
         }
       }
