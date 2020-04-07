@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../meta', () => {
+jest.mock('../../../../../plugins/maps/public/meta', () => {
   return {};
 });
 jest.mock('../kibana_services');
@@ -32,7 +32,7 @@ describe('Saved object has layer list', () => {
 
 describe('kibana.yml configured with map.tilemap.url', () => {
   beforeAll(() => {
-    require('../meta').getKibanaTileMap = () => {
+    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
       return {
         url: 'myTileUrl',
       };
@@ -62,7 +62,7 @@ describe('kibana.yml configured with map.tilemap.url', () => {
 
 describe('EMS is enabled', () => {
   beforeAll(() => {
-    require('../meta').getKibanaTileMap = () => {
+    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
       return null;
     };
     require('../kibana_services').getInjectedVarFunc = () => key => {
@@ -106,7 +106,7 @@ describe('EMS is enabled', () => {
 
 describe('EMS is not enabled', () => {
   beforeAll(() => {
-    require('../meta').getKibanaTileMap = () => {
+    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
       return null;
     };
 
