@@ -22,7 +22,10 @@ export { IngestManagerConfigType } from '../common/types';
 
 export type IngestManagerSetup = void;
 export interface IngestManagerStart {
-  isInitialized: boolean;
+  success: boolean;
+  error?: {
+    message: string;
+  };
 }
 
 export interface IngestManagerSetupDeps {
@@ -64,9 +67,12 @@ export class IngestManagerPlugin
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
-    const { isInitialized } = await core.http.post('/api/ingest_manager/setup');
-
-    return { isInitialized };
+    try {
+      const { isInitialized } = await core.http.post('/api/ingest_manager/setup');
+      return { success: isInitialized };
+    } catch (error) {
+      return { success: false, error };
+    }
   }
 
   public stop() {}
