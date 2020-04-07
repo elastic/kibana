@@ -6,17 +6,31 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiStepsHorizontal, EuiProgress, EuiSpacer } from '@elastic/eui';
 
-export const IMPORT_STATUS = {
-  INCOMPLETE: 'incomplete',
-  COMPLETE: 'complete',
-  FAILED: 'danger',
-};
+export enum IMPORT_STATUS {
+  INCOMPLETE = 'incomplete',
+  COMPLETE = 'complete',
+  FAILED = 'danger',
+}
 
-export function ImportProgress({ statuses }) {
+export interface Statuses {
+  reading: boolean;
+  readStatus: IMPORT_STATUS;
+  parseJSONStatus: IMPORT_STATUS;
+  indexCreatedStatus: IMPORT_STATUS;
+  ingestPipelineCreatedStatus: IMPORT_STATUS;
+  indexPatternCreatedStatus: IMPORT_STATUS;
+  uploadProgress: number;
+  uploadStatus: IMPORT_STATUS;
+  createIndexPattern: boolean;
+  createPipeline: boolean;
+  permissionCheckStatus: IMPORT_STATUS;
+}
+
+export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   const {
     reading,
     readStatus,
@@ -271,9 +285,9 @@ export function ImportProgress({ statuses }) {
       )}
     </React.Fragment>
   );
-}
+};
 
-function UploadFunctionProgress({ progress }) {
+const UploadFunctionProgress: FC<{ progress: number }> = ({ progress }) => {
   return (
     <React.Fragment>
       <p>
@@ -290,4 +304,4 @@ function UploadFunctionProgress({ progress }) {
       )}
     </React.Fragment>
   );
-}
+};

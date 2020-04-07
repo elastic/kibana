@@ -4,30 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ml } from '../../../../../services/ml_api_service';
 import { chunk } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { ml } from '../../../../../services/ml_api_service';
+import {
+  Doc,
+  ImportFailure,
+  ImportResponse,
+  Mappings,
+  Settings,
+  IngestPipeline,
+} from '../../../../../../../common/types/file_datavisualizer';
 
 const CHUNK_SIZE = 5000;
 const MAX_CHUNK_CHAR_COUNT = 1000000;
 const IMPORT_RETRIES = 5;
 
-export class Importer {
-  constructor({ settings, mappings, pipeline }) {
-    this.settings = settings;
-    this.mappings = mappings;
-    this.pipeline = pipeline;
+export interface ImportConfig {
+  settings: Settings;
+  mappings: Mappings;
+  pipeline: IngestPipeline;
+}
 
-    this.data = [];
-    this.docArray = [];
-    this.docSizeArray = [];
+export interface ImportResults {
+  success: boolean;
+  failures?: any[];
+  docCount?: number;
+  error?: any;
+}
+
+export class Importer {
+  private _settings: Settings;
+  private _mappings: Mappings;
+  private _pipeline: IngestPipeline;
+
+  protected _docArray: Doc[] = [];
+
+  constructor({ settings, mappings, pipeline }: ImportConfig) {
+    this._settings = settings;
+    this._mappings = mappings;
+    this._pipeline = pipeline;
   }
 
-  async initializeImport(index) {
-    const settings = this.settings;
-    const mappings = this.mappings;
-    const pipeline = this.pipeline;
+  async initializeImport(index: string) {
+    const settings = this._settings;
+    const mappings = this._mappings;
+    const pipeline = this._pipeline;
     updatePipelineTimezone(pipeline);
 
     // if no pipeline has been supplied,
@@ -52,7 +75,12 @@ export class Importer {
     return createIndexResp;
   }
 
-  async import(id, index, pipelineId, setImportProgress) {
+  async import(
+    id: string,
+    index: string,
+    pipelineId: string,
+    setImportProgress: (progress: number) => void
+  ): Promise<ImportResults> {
     if (!id || !index) {
       return {
         success: false,
@@ -65,14 +93,14 @@ export class Importer {
       };
     }
 
-    const chunks = createDocumentChunks(this.docArray);
+    const chunks = createDocumentChunks(this._docArray);
 
     const ingestPipeline = {
       id: pipelineId,
     };
 
     let success = true;
-    const failures = [];
+    const failures: ImportFailure[] = [];
     let error;
 
     for (let i = 0; i < chunks.length; i++) {
@@ -86,10 +114,13 @@ export class Importer {
       };
 
       let retries = IMPORT_RETRIES;
-      let resp = {
+      let resp: ImportResponse = {
         success: false,
         failures: [],
         docCount: 0,
+        id: '',
+        index: '',
+        pipelineId: '',
       };
 
       while (resp.success === false && retries > 0) {
@@ -97,12 +128,14 @@ export class Importer {
           resp = await ml.fileDatavisualizer.import(aggs);
 
           if (retries < IMPORT_RETRIES) {
+            // eslint-disable-next-line no-console
             console.log(`Retrying import ${IMPORT_RETRIES - retries}`);
           }
 
           retries--;
         } catch (err) {
-          resp = { success: false, error: err };
+          resp.success = false;
+          resp.error = err;
           retries = 0;
         }
       }
@@ -110,6 +143,7 @@ export class Importer {
       if (resp.success) {
         setImportProgress(((i + 1) / chunks.length) * 100);
       } else {
+        // eslint-disable-next-line no-console
         console.error(resp);
         success = false;
         error = resp.error;
@@ -120,10 +154,10 @@ export class Importer {
       populateFailures(resp, failures, i);
     }
 
-    const result = {
+    const result: ImportResults = {
       success,
       failures,
-      docCount: this.docArray.length,
+      docCount: this._docArray.length,
     };
 
     if (success) {
@@ -136,7 +170,7 @@ export class Importer {
   }
 }
 
-function populateFailures(error, failures, chunkCount) {
+function populateFailures(error: ImportResponse, failures: ImportFailure[], chunkCount: number) {
   if (error.failures && error.failures.length) {
     // update the item value to include the chunk count
     // e.g. item 3 in chunk 2 is actually item 20003
@@ -155,10 +189,10 @@ function populateFailures(error, failures, chunkCount) {
 // But it's not sending every single field that Filebeat would add, so the ingest pipeline
 // cannot look for a event.timezone variable in each input record.
 // Therefore we need to replace {{ event.timezone }} with the actual browser timezone
-function updatePipelineTimezone(ingestPipeline) {
+function updatePipelineTimezone(ingestPipeline: IngestPipeline) {
   if (ingestPipeline !== undefined && ingestPipeline.processors && ingestPipeline.processors) {
     const dateProcessor = ingestPipeline.processors.find(
-      p => p.date !== undefined && p.date.timezone === '{{ event.timezone }}'
+      (p: any) => p.date !== undefined && p.date.timezone === '{{ event.timezone }}'
     );
 
     if (dateProcessor) {
@@ -167,8 +201,8 @@ function updatePipelineTimezone(ingestPipeline) {
   }
 }
 
-function createDocumentChunks(docArray) {
-  const chunks = [];
+function createDocumentChunks(docArray: Doc[]) {
+  const chunks: Doc[][] = [];
   // chop docArray into 5000 doc chunks
   const tempChunks = chunk(docArray, CHUNK_SIZE);
 
