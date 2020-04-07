@@ -54,7 +54,11 @@ module.exports = function(grunt) {
     return [
       'http://localhost:5610/test_bundle/built_css.css',
 
-      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.distFilename}`,
+      ...UiSharedDeps.jsDepFilenames.map(
+        chunkFilename => `http://localhost:5610/bundles/kbn-ui-shared-deps/${chunkFilename}`
+      ),
+      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
+
       'http://localhost:5610/built_assets/dlls/vendors_runtime.bundle.dll.js',
       ...DllCompiler.getRawDllConfig().chunks.map(
         chunk => `http://localhost:5610/built_assets/dlls/vendors${chunk}.bundle.dll.js`
