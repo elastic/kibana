@@ -24,9 +24,12 @@ import { getRequestAbortedSignal } from '../lib';
 export function registerSearchRoute(router: IRouter): void {
   router.post(
     {
-      path: '/internal/search/{strategy}',
+      path: '/internal/search/{strategy}/{id?}',
       validate: {
-        params: schema.object({ strategy: schema.string() }),
+        params: schema.object({
+          id: schema.string(),
+          strategy: schema.string(),
+        }),
 
         query: schema.object({}, { unknowns: 'allow' }),
 
@@ -35,11 +38,15 @@ export function registerSearchRoute(router: IRouter): void {
     },
     async (context, request, res) => {
       const searchRequest = request.body;
-      const { strategy } = request.params;
+      const { strategy, id } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
-        const response = await context.search!.search(searchRequest, { signal }, strategy);
+        const response = await context.search!.search(
+          { ...(id ? { id } : {}), ...searchRequest },
+          { signal },
+          strategy
+        );
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({

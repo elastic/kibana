@@ -39,10 +39,8 @@ describe('Sync search strategy', () => {
     syncSearch.search(request, {});
 
     expect(mockCoreStart.http.fetch.mock.calls[0][0]).toEqual({
-      path: `/internal/search/${SYNC_SEARCH_STRATEGY}`,
-      body: JSON.stringify({
-        serverStrategy: 'SYNC_SEARCH_STRATEGY',
-      }),
+      path: `/internal/search/${SYNC_SEARCH_STRATEGY}/`,
+      body: JSON.stringify({}),
       method: 'POST',
       signal: undefined,
     });

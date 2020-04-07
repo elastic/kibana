@@ -41,11 +41,13 @@ export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEA
   ) => {
     loadingCount$.next(loadingCount$.getValue() + 1);
 
+    const { serverStrategy, id, ...searchRequest } = request;
+
     return from(
       context.core.http.fetch({
-        path: `/internal/search/${request.serverStrategy}`,
+        path: `/internal/search/${request.serverStrategy}/${id ?? ''}`,
         method: 'POST',
-        body: JSON.stringify(request),
+        body: JSON.stringify(searchRequest),
         signal: options.signal,
       })
     ).pipe(finalize(() => loadingCount$.next(loadingCount$.getValue() - 1)));
