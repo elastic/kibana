@@ -63,18 +63,8 @@ export class CollectorSet {
     }
   };
 
-  public getCollectorByType = (type: string, forCollectionName?: string) => {
-    // Try to find the collector linked to the collection name first
-    if (forCollectionName) {
-      const collector = this.collectors.find(
-        c => c.type === type && c.onlyForCollectionName === forCollectionName
-      );
-      if (collector) return collector;
-    }
-    // Try to find the collector not linked in exclusivity to any collector
-    return this.collectors.find(
-      c => c.type === type && typeof c.onlyForCollectionName === 'undefined'
-    );
+  public getCollectorByType = (type: string) => {
+    return this.collectors.find(c => c.type === type);
   };
 
   public isUsageCollector = (x: UsageCollector | any): x is UsageCollector => {
@@ -122,22 +112,10 @@ export class CollectorSet {
 
   public bulkFetch = async (
     callCluster: APICaller,
-    collectionName: string,
     collectors: Array<Collector<any, any>> = this.collectors
   ) => {
-    const filteredCollectors = collectors.reduce((acc, collector) => {
-      const { type, onlyForCollectionName } = collector;
-      // If it's an exclusive collector OR it's not exclusive but it hasn't been assigned before
-      if (onlyForCollectionName === collectionName || (!onlyForCollectionName && !acc[type])) {
-        return {
-          ...acc,
-          [type]: collector,
-        };
-      }
-      return acc;
-    }, {} as { [key: string]: Collector<any, any> });
     const responses = [];
-    for (const collector of Object.values(filteredCollectors)) {
+    for (const collector of collectors) {
       this.logger.debug(`Fetching data from ${collector.type} collector`);
       try {
         responses.push({
@@ -161,9 +139,9 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: APICaller, collectionName: string) => {
+  public bulkFetchUsage = async (callCluster: APICaller) => {
     const usageCollectors = this.getFilteredCollectorSet(c => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, collectionName, usageCollectors.collectors);
+    return await this.bulkFetch(callCluster, usageCollectors.collectors);
   };
 
   // convert an array of fetched stats results into key/object

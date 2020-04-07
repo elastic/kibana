@@ -23,7 +23,6 @@ export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; 
 
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;
-  onlyForCollectionName?: string;
   init?: Function;
   fetch: (callCluster: APICaller) => Promise<T> | T;
   /*
@@ -37,7 +36,6 @@ export interface CollectorOptions<T = unknown, U = T> {
 
 export class Collector<T = unknown, U = T> {
   public readonly type: CollectorOptions<T, U>['type'];
-  public readonly onlyForCollectionName?: CollectorOptions<T, U>['onlyForCollectionName'];
   public readonly init?: CollectorOptions<T, U>['init'];
   public readonly fetch: CollectorOptions<T, U>['fetch'];
   private readonly _formatForBulkUpload?: CollectorFormatForBulkUpload<T, U>;
@@ -52,15 +50,7 @@ export class Collector<T = unknown, U = T> {
    */
   constructor(
     protected readonly log: Logger,
-    {
-      type,
-      onlyForCollectionName,
-      init,
-      fetch,
-      formatForBulkUpload,
-      isReady,
-      ...options
-    }: CollectorOptions<T, U>
+    { type, init, fetch, formatForBulkUpload, isReady, ...options }: CollectorOptions<T, U>
   ) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
@@ -77,7 +67,6 @@ export class Collector<T = unknown, U = T> {
     Object.assign(this, options); // spread in other properties and mutate "this"
 
     this.type = type;
-    this.onlyForCollectionName = onlyForCollectionName;
     this.init = init;
     this.fetch = fetch;
     this.isReady = typeof isReady === 'function' ? isReady : () => true;

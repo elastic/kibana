@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { registerOpsStatsCollector } from './get_ops_stats_collector';
+export { registerOpsStatsCollector } from './ops_stats_collector';

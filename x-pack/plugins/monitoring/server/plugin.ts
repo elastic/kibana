@@ -120,8 +120,7 @@ export class Plugin {
       instanceUuid: core.uuid.getInstanceUuid(),
       esDataClient: core.elasticsearch.dataClient,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
-        KIBANA_STATS_TYPE_MONITORING,
-        'monitoring'
+        KIBANA_STATS_TYPE_MONITORING
       ),
     };
 
@@ -166,7 +165,7 @@ export class Plugin {
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(plugins.usageCollection, config, core.metrics.getOpsMetrics$());
+      registerCollectors(plugins.usageCollection, config);
     }
 
     // If collection is enabled, create the bulk uploader

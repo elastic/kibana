@@ -3,17 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Observable } from 'rxjs';
-import { OpsMetrics } from 'kibana/server';
-import { getOpsStatsCollector } from './get_ops_stats_collector';
+
 import { getSettingsCollector } from './get_settings_collector';
 import { MonitoringConfig } from '../../config';
 
-export function registerCollectors(
-  usageCollection: any,
-  config: MonitoringConfig,
-  opsMetrics$: Observable<OpsMetrics>
-) {
-  usageCollection.registerCollector(getOpsStatsCollector(usageCollection, opsMetrics$));
+export function registerCollectors(usageCollection: any, config: MonitoringConfig) {
   usageCollection.registerCollector(getSettingsCollector(usageCollection, config));
 }

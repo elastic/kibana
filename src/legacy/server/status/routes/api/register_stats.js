@@ -46,7 +46,7 @@ export function registerStatsApi(usageCollection, server, config, kbnServer) {
   };
 
   const getUsage = async callCluster => {
-    const usage = await usageCollection.bulkFetchUsage(callCluster, 'local');
+    const usage = await usageCollection.bulkFetchUsage(callCluster);
     return usageCollection.toObject(usage);
   };
 
