@@ -55,7 +55,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const { setFormState, setEstimatedModelMemoryLimit } = actions;
   const mlContext = useMlContext();
-  const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
+  const {
+    estimatedModelMemoryLimit,
+    form,
+    indexPatternsMap,
+    isAdvancedEditorEnabled,
+    isJobCreated,
+    requestMessages,
+  } = state;
 
   const forceInput = useRef<HTMLInputElement | null>(null);
   const firstUpdate = useRef<boolean>(true);
@@ -152,6 +159,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
   const debouncedGetExplainData = debounce(async () => {
     const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    const shouldUpdateEstimatedMml =
+      !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
+
     if (firstUpdate.current) {
       firstUpdate.current = false;
     }
@@ -172,7 +182,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       );
       const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
 
-      if (shouldUpdateModelMemoryLimit) {
+      if (shouldUpdateEstimatedMml) {
         setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
       }
 
