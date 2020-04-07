@@ -6,7 +6,7 @@ beta::[]
 
 The APM app is integrated with Kibana's {kibana-ref}/alerting-getting-started.html[alerting and actions] feature.
 It provides a set of built-in **actions** and APM specific threshold **alerts** for you to use,
-and allows all alerts to be centrally managed from <<management,*Kibana Management*>>.
+and allows all alerts to be centrally managed from <<management,Kibana Management>>.
 
 [role="screenshot"]
 image::apm/images/apm-alert.png[Create an alert in the APM app]
@@ -29,7 +29,7 @@ From the APM app, navigate to the `opbeans-java` service and select
 **Alerts** > **Create threshold alert** > **Transaction duration**.
 
 The name of your alert will automatically be set as `Transaction duration | opbeans-java`,
-and the alert will be tagged with: `apm` and `service.name:opbeans-java`.
+and the alert will be tagged with `apm` and `service.name:opbeans-java`.
 Feel free to edit either of these defaults.
 
 Based on the alert criteria, define the following alert details:
@@ -65,7 +65,7 @@ From the APM app, navigate to the `opbeans-python` service and select
 **Alerts** > **Create threshold alert** > **Error rate**.
 
 The name of your alert will automatically be set as `Error rate | opbeans-python`,
-and the alert will be tagged with: `apm` and `service.name:opbeans-python`.
+and the alert will be tagged with `apm` and `service.name:opbeans-python`.
 Feel free to edit either of these defaults.
 
 Based on the alert criteria, define the following alert details:
