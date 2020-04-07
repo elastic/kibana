@@ -5,15 +5,21 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import numeral from '@elastic/numeral';
+import { ErrorResponse } from '../../../../../../common/types/errors';
 
 const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 
-export function FileTooLarge({ fileSize, maxFileSize }) {
+interface FileTooLargeProps {
+  fileSize: number;
+  maxFileSize: number;
+}
+
+export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) => {
   const fileSizeFormatted = numeral(fileSize).format(FILE_SIZE_DISPLAY_FORMAT);
   const maxFileSizeFormatted = numeral(maxFileSize).format(FILE_SIZE_DISPLAY_FORMAT);
 
@@ -67,9 +73,15 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
       {errorText}
     </EuiCallOut>
   );
+};
+
+interface FileCouldNotBeReadProps {
+  error: ErrorResponse;
+  loaded: boolean;
 }
 
-export function FileCouldNotBeRead({ error, loaded }) {
+export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({ error, loaded }) => {
+  const message = error.body.message;
   return (
     <EuiCallOut
       title={
@@ -82,15 +94,32 @@ export function FileCouldNotBeRead({ error, loaded }) {
       iconType="cross"
       data-test-subj="mlFileUploadErrorCallout fileCouldNotBeRead"
     >
-      {error !== undefined && <p>{error}</p>}
+      {message}
+      <Explanation error={error} />
       {loaded && (
-        <p>
+        <>
+          <EuiSpacer size="s" />
           <FormattedMessage
             id="xpack.ml.fileDatavisualizer.fileErrorCallouts.revertingToPreviousSettingsDescription"
             defaultMessage="Reverting to previous settings"
           />
-        </p>
+        </>
       )}
     </EuiCallOut>
   );
-}
+};
+
+export const Explanation: FC<{ error: ErrorResponse }> = ({ error }) => {
+  if (!error.body.attributes?.body?.error?.suppressed?.length) {
+    return null;
+  }
+  const reason: string = error.body.attributes.body.error.suppressed[0].reason;
+  return (
+    <>
+      <EuiSpacer size="s" />
+      {reason.split('\n').map((m, i) => (
+        <div key={i}>{m}</div>
+      ))}
+    </>
+  );
+};
