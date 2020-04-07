@@ -24,6 +24,7 @@ describe('Ingest Manager - packageToConfig', () => {
         visualization: [],
         search: [],
         'index-pattern': [],
+        map: [],
       },
     },
     status: InstallationStatus.notInstalled,
