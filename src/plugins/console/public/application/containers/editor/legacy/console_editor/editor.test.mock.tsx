@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import '../../../../../../../es_ui_shared/public/mocks';
 jest.mock('../../../../contexts/editor_context/editor_registry.ts', () => ({
   instance: {
     setInputEditor: () => {},

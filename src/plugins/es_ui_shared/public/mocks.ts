@@ -17,6 +17,6 @@
  * under the License.
  */
 
-jest.mock('./ace/modes/x_json/worker', () => ({
+jest.mock('./console_lang/ace/modes/x_json/worker', () => ({
   workerModule: { id: 'ace/mode/json_worker', src: '' },
 }));
