@@ -182,7 +182,7 @@ export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
 export const mockActionsStepRule = (isNew = false, enabled = false): ActionsStepRule => ({
   isNew,
   actions: [],
-  kibana_siem_app_url: 'http://localhost:5601/app/siem',
+  kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
   enabled,
   throttle: 'no_actions',
 });

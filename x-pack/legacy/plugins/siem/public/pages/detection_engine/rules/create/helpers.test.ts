@@ -533,7 +533,7 @@ describe('helpers', () => {
         actions: [],
         enabled: false,
         meta: {
-          kibana_siem_app_url: mockStepData.kibana_siem_app_url,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: 'no_actions',
       };
@@ -566,7 +566,7 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          kibana_siem_app_url: mockStepData.kibana_siem_app_url,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: 'rule',
       };
@@ -599,7 +599,7 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          kibana_siem_app_url: mockStepData.kibana_siem_app_url,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: mockStepData.throttle,
       };
@@ -631,7 +631,7 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          kibana_siem_app_url: mockStepData.kibana_siem_app_url,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: 'no_actions',
       };
