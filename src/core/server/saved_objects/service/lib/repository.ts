@@ -1354,8 +1354,16 @@ export class SavedObjectsRepository {
     return omit(savedObject, 'namespace');
   }
 
+  /**
+   * Check to ensure that a raw document exists in a namespace. If the document is not a multi-namespace type, then this returns `true` as
+   * we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to ensure that the
+   * document's `namespaces` value includes the string representation of the given namespace.
+   *
+   * WARNING: This should only be used for documents that were retrieved from Elasticsearch. Otherwise, the guarantees of the document ID
+   * format mentioned above do not apply.
+   */
   private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace?: string) {
-    const rawDocType = raw._source.type as string;
+    const rawDocType = raw._source.type;
 
     // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
     // of the document ID format and don't need to check this
@@ -1465,6 +1473,7 @@ function getExpectedVersionProperties(version?: string, document?: SavedObjectsR
 
 /**
  * Returns the string representation of a namespace.
+ * The default namespace is undefined, and is represented by the string 'default'.
  */
 function getNamespaceString(namespace?: string) {
   return namespace ?? 'default';
@@ -1483,7 +1492,7 @@ function getSavedObjectNamespaces(
   document?: SavedObjectsRawDoc
 ): string[] | undefined {
   if (document) {
-    return document._source.namespaces;
+    return document._source?.namespaces;
   }
   return [getNamespaceString(namespace)];
 }
