@@ -105,7 +105,8 @@
       "examples/*",
       "test/plugin_functional/plugins/*",
       "test/interpreter_functional/plugins/*",
-      "x-pack/test/functional_with_es_ssl/fixtures/plugins/*"
+      "x-pack/test/functional_with_es_ssl/fixtures/plugins/*",
+      "x-pack/test/plugin_api_integration/plugins/*"
     ],
     "nohoist": [
       "**/@types/*",
@@ -126,7 +127,7 @@
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.4.0",
-    "@elastic/request-crypto": "^1.0.2",
+    "@elastic/request-crypto": "1.1.2",
     "@elastic/ui-ace": "0.2.3",
     "@hapi/good-squeeze": "5.2.1",
     "@hapi/wreck": "^15.0.2",

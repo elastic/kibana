@@ -19,32 +19,17 @@
 import React from 'react';
 import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import { ContainerOutput } from 'src/plugins/embeddable/public';
-import {
-  ErrorEmbeddable,
-  ViewMode,
-  isErrorEmbeddable,
-  EmbeddablePanel,
-  EmbeddableStart,
-} from '../embeddable_api';
+import { ErrorEmbeddable, ViewMode, isErrorEmbeddable, EmbeddableStart } from '../embeddable_api';
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
   DashboardContainerInput,
 } from '../../../../../../../../src/plugins/dashboard/public';
 
-import { CoreStart } from '../../../../../../../../src/core/public';
 import { dashboardInput } from './dashboard_input';
-import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
-import { UiActionsService } from '../../../../../../../../src/plugins/ui_actions/public';
 
 interface Props {
-  getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
-  overlays: CoreStart['overlays'];
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
+  embeddableServices: EmbeddableStart;
 }
 
 interface State {
@@ -67,7 +52,7 @@ export class DashboardContainerExample extends React.Component<Props, State> {
 
   public async componentDidMount() {
     this.mounted = true;
-    const dashboardFactory = this.props.getEmbeddableFactory<
+    const dashboardFactory = this.props.embeddableServices.getEmbeddableFactory<
       DashboardContainerInput,
       ContainerOutput,
       DashboardContainer
@@ -99,6 +84,7 @@ export class DashboardContainerExample extends React.Component<Props, State> {
   };
 
   public render() {
+    const { embeddableServices } = this.props;
     return (
       <div className="app-container dshAppContainer">
         <h1>Dashboard Container</h1>
@@ -108,16 +94,7 @@ export class DashboardContainerExample extends React.Component<Props, State> {
         {!this.state.loaded || !this.container ? (
           <EuiLoadingChart size="l" mono />
         ) : (
-          <EmbeddablePanel
-            embeddable={this.container}
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            notifications={this.props.notifications}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
-          />
+          <embeddableServices.EmbeddablePanel embeddable={this.container} />
         )}
       </div>
     );
