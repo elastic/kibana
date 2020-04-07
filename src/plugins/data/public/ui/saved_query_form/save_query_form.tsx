@@ -63,6 +63,7 @@ export function SaveQueryForm({
   showTimeFilterOption = true,
 }: Props) {
   const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
+  const [enabledSaveButton, setEnabledSaveButton] = useState(!!savedQuery);
   const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
@@ -98,27 +99,16 @@ export function SaveQueryForm({
       defaultMessage: 'Name conflicts with an existing saved query',
     }
   );
-  const titleMissingErrorText = i18n.translate(
-    'data.search.searchBar.savedQueryForm.titleMissingText',
-    {
-      defaultMessage: 'Name is required',
+
+  const autoTrim = () => {
+    const trimmedTitle = title.trim();
+    if (title.length > trimmedTitle.length) {
+      setTitle(trimmedTitle);
     }
-  );
-  const whitespaceErrorText = i18n.translate(
-    'data.search.searchBar.savedQueryForm.whitespaceErrorText',
-    {
-      defaultMessage: 'Name cannot contain leading or trailing whitespace',
-    }
-  );
+  };
 
   const validate = () => {
     const errors = [];
-    if (!title.length) {
-      errors.push(titleMissingErrorText);
-    }
-    if (title.length > title.trim().length) {
-      errors.push(whitespaceErrorText);
-    }
     if (
       !!savedQueries.find(
         existingSavedQuery => !savedQuery && existingSavedQuery.attributes.title === title
@@ -129,14 +119,13 @@ export function SaveQueryForm({
 
     if (!isEqual(errors, formErrors)) {
       setFormErrors(errors);
+      return false;
     }
+
+    return !formErrors.length;
   };
 
   const hasErrors = formErrors.length > 0;
-
-  if (hasErrors) {
-    validate();
-  }
 
   const saveQueryForm = (
     <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
@@ -158,11 +147,16 @@ export function SaveQueryForm({
           value={title}
           name="title"
           onChange={event => {
+            if (!event.target.value) {
+              setEnabledSaveButton(false);
+            } else {
+              setEnabledSaveButton(true);
+            }
             setTitle(event.target.value);
           }}
           data-test-subj="saveQueryFormTitle"
           isInvalid={hasErrors}
-          onBlur={validate}
+          onBlur={autoTrim}
         />
       </EuiFormRow>
 
@@ -235,17 +229,19 @@ export function SaveQueryForm({
           </EuiButtonEmpty>
 
           <EuiButton
-            onClick={() =>
-              onSave({
-                title,
-                description,
-                shouldIncludeFilters,
-                shouldIncludeTimefilter,
-              })
-            }
+            onClick={() => {
+              if (validate()) {
+                onSave({
+                  title,
+                  description,
+                  shouldIncludeFilters,
+                  shouldIncludeTimefilter,
+                });
+              }
+            }}
             fill
             data-test-subj="savedQueryFormSaveButton"
-            disabled={hasErrors}
+            disabled={hasErrors || !enabledSaveButton}
           >
             {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
               defaultMessage: 'Save',
