@@ -6,11 +6,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
 
-export const SimpleSettings = ({
+interface Props {
+  index: string;
+  initialized: boolean;
+  onIndexChange(): void;
+  createIndexPattern: boolean;
+  onCreateIndexPatternChange(): void;
+  indexNameError: string;
+}
+
+export const SimpleSettings: FC<Props> = ({
   index,
   initialized,
   onIndexChange,

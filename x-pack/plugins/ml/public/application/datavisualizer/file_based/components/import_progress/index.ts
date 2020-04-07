@@ -4,13 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum AlertClusterStateState {
-  Green = 'green',
-  Red = 'red',
-  Yellow = 'yellow',
-}
-
-export enum AlertCommonPerClusterMessageTokenType {
-  Time = 'time',
-  Link = 'link',
-}
+export { ImportProgress, IMPORT_STATUS, Statuses } from './import_progress';
