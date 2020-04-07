@@ -185,7 +185,7 @@ export class DashboardAppController {
       queryService,
       kbnUrlStateStorage
     );
-    let showSaveQuery = dashboardCapabilities.saveQuery as boolean;
+    $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
     const getShouldShowEditHelp = () =>
       !dashboardStateManager.getPanels().length &&
@@ -254,7 +254,7 @@ export class DashboardAppController {
         showSearchBar,
         showFilterBar: showFilterBar(),
         showQueryBar,
-        showSaveQuery,
+        showSaveQuery: $scope.showSaveQuery,
         query: $scope.model.query,
         savedQuery: $scope.savedQuery,
         onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
@@ -267,12 +267,12 @@ export class DashboardAppController {
         screenTitle: $scope.screenTitle,
         indexPatterns: $scope.indexPatterns,
         filters: $scope.model.filters,
-        onFiltersUpdated,
+        onFiltersUpdated: $scope.onFiltersUpdated,
         isRefreshPaused: $scope.model.refreshInterval.pause,
         refreshInterval: $scope.model.refreshInterval.value,
-        onSaved: onQuerySaved,
-        onSavedQueryUpdated,
-        onClearSavedQuery,
+        onSaved: $scope.onQuerySaved,
+        onSavedQueryUpdated: $scope.onSavedQueryUpdated,
+        onClearSavedQuery: $scope.onClearSavedQuery,
         onRefreshChange: $scope.onRefreshChange,
       };
     };
@@ -562,18 +562,12 @@ export class DashboardAppController {
       });
     };
 
-    const onFiltersUpdated = (filters: Filter[]) => {
-      // The filters will automatically be set when the queryFilter emits an update event (see below)
-      queryFilter.setFilters(filters);
-      updateNavBar();
-    };
-
-    const onQuerySaved = (savedQuery: SavedQuery) => {
+    $scope.onQuerySaved = (savedQuery: SavedQuery) => {
       $scope.savedQuery = savedQuery;
       updateNavBar();
     };
 
-    const onSavedQueryUpdated = (savedQuery: SavedQuery) => {
+    $scope.onSavedQueryUpdated = (savedQuery: SavedQuery) => {
       $scope.savedQuery = { ...savedQuery };
       const filters = savedQuery.attributes.filters;
       if (filters) {
@@ -582,7 +576,7 @@ export class DashboardAppController {
       updateNavBar();
     };
 
-    const onClearSavedQuery = () => {
+    $scope.onClearSavedQuery = () => {
       delete $scope.savedQuery;
       dashboardStateManager.setSavedQueryId(undefined);
       dashboardStateManager.applyFilters(
@@ -594,6 +588,12 @@ export class DashboardAppController {
         queryFilter.getGlobalFilters()
       );
       queryFilter.setFilters(queryFilter.getGlobalFilters());
+      updateNavBar();
+    };
+
+    $scope.onFiltersUpdated = (filters: Filter[]) => {
+      // The filters will automatically be set when the queryFilter emits an update event (see below)
+      queryFilter.setFilters(filters);
       updateNavBar();
     };
 
