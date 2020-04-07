@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useReducer, useState } from 'react';
+import { isObject } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -216,6 +217,6 @@ export const AlertAdd = ({
 
 const parseErrors: (errors: IErrorObject) => boolean = errors =>
   !!Object.values(errors).find(errorList => {
-    if (Array.isArray(errorList)) return errorList.length >= 1;
-    return parseErrors(errorList);
+    if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
+    return errorList.length >= 1;
   });

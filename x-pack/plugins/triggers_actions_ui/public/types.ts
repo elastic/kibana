@@ -56,7 +56,7 @@ export interface ActionTypeModel {
 }
 
 export interface ValidationResult {
-  errors: Record<string, any>;
+  errors: IErrorObject;
 }
 
 export interface ActionConnector {
@@ -111,5 +111,5 @@ export interface AlertTypeModel {
 }
 
 export interface IErrorObject {
-  [key: string]: string[] | IErrorObject;
+  [key: string]: string | string[] | IErrorObject;
 }
