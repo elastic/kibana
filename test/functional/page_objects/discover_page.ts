@@ -132,7 +132,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
       await browser
         .getActions()
-        .move({ x: 200, y: 20, origin: el._webElement })
+        .move({ x: 0, y: 20, origin: el._webElement })
         .click()
         .perform();
     }
@@ -141,8 +141,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const el = await elasticChart.getCanvas();
 
       await browser.dragAndDrop(
-        { location: el, offset: { x: 200, y: 20 } },
-        { location: el, offset: { x: 400, y: 30 } }
+        { location: el, offset: { x: -300, y: 20 } },
+        { location: el, offset: { x: -100, y: 30 } }
       );
     }
 
