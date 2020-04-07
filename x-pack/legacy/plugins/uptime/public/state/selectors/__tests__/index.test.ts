@@ -71,6 +71,16 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
+    monitorList: {
+      list: {
+        prevPagePagination: null,
+        nextPagePagination: null,
+        summaries: [],
+        totalSummaryCount: 0,
+      },
+      errors: [],
+      loading: false,
+    },
     ml: {
       mlJob: {
         data: null,

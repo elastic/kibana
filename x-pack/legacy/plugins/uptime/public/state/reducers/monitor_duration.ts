@@ -24,9 +24,9 @@ const initialState: MonitorDuration = {
   errors: [],
 };
 
-type PayLoad = MonitorDurationResult & Error;
+type Payload = MonitorDurationResult & Error;
 
-export const monitorDurationReducer = handleActions<MonitorDuration, PayLoad>(
+export const monitorDurationReducer = handleActions<MonitorDuration, Payload>(
   {
     [String(getMonitorDurationAction)]: (state: MonitorDuration) => ({
       ...state,
