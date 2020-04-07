@@ -12,25 +12,35 @@ export type IndexAlias = 'auditbeat' | 'filebeat' | 'packetbeat' | 'ecs' | 'winl
  */
 
 export interface SchemaFields {
+  default_field: boolean;
+  default_fields: boolean;
   definition: string;
+  deprecated: string;
   description: string;
   doc_values: boolean;
-  example: string | number | object;
+  example: string | number | object | boolean;
   footnote: string;
   format: string;
   group: number;
   index: boolean;
+  ignore_above: number;
   input_format: string;
   level: string;
   migration: boolean;
   multi_fields: object[];
   name: string;
+  norms: boolean;
   object_type: string;
+  object_type_mapping_type: string;
+  output_format: string;
+  output_precision: number;
+  overwrite: boolean;
   path: string;
   possible_values: string[] | number[];
   release: string;
   required: boolean;
   reusable: object;
+  short: string;
   title: string;
   type: string;
   fields: Array<Partial<SchemaFields>>;
@@ -47,33 +57,6 @@ export interface SchemaItem {
 }
 
 export type Schema = Array<Partial<SchemaItem>>;
-
-/*
- * ECS Interface
- *
- */
-
-interface EcsField {
-  description: string;
-  example: string;
-  footnote: string;
-  group: number;
-  level: string;
-  name: string;
-  required: boolean;
-  type: string;
-}
-
-interface EcsNamespace {
-  description: string;
-  fields: Readonly<Record<string, EcsField>>;
-  group: number;
-  name: string;
-  title: string;
-  type: string;
-}
-
-export type EcsSchema = Readonly<Record<string, EcsNamespace>>;
 
 /*
  * Associative Array Output Interface
