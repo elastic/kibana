@@ -26,27 +26,6 @@ export const javaSettings: RawSettingDefinition[] = [
     includeAgents: ['java']
   },
 
-  // TRACE_METHODS_DURATION_THRESHOLD
-  {
-    key: 'trace_methods_duration_threshold',
-    type: 'duration',
-    defaultValue: '0ms',
-    label: i18n.translate(
-      'xpack.apm.agentConfig.traceMethodsDurationThreshold.label',
-      {
-        defaultMessage: 'Trace methods duration threshold'
-      }
-    ),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.traceMethodsDurationThreshold.description',
-      {
-        defaultMessage:
-          'If `trace_methods` config option is set, provides a threshold to limit spans based on duration. When set to a value greater than 0, spans representing methods traced based on trace_methods will be discarded by default. NOTE: Transactions are never discarded, regardless of their duration. In order not to break span references, all spans leading to an async operation or an exit span (such as a HTTP request or a DB query) are never discarded, regardless of their duration.'
-      }
-    ),
-    includeAgents: ['java']
-  },
-
   /*
    * Circuit-Breaker
    **/
