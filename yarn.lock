@@ -1343,27 +1343,22 @@
   resolved "https://registry.yarnpkg.com/@elastic/maki/-/maki-6.2.0.tgz#d0a85aa248bdc14dca44e1f9430c0b670f65e489"
   integrity sha512-QkmRNpEY4Dy6eqwDimR5X9leMgdPFjdANmpEIwEW1XVUG2U4YtB2BXhDxsnMmNTUrJUjtnjnwgwBUyg0pU0FTg==
 
-"@elastic/node-crypto@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"
-  integrity sha1-wYrCgvY16I8EHMFVXYBuSSyo87E=
-
-"@elastic/node-crypto@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.0.0.tgz#4d325df333fe1319556bb4d54214098ada1171d4"
-  integrity sha512-bbjbEyILPRTRt0xnda18OttLtlkJBPuXx3CjISUSn9jhWqHoFMzfOaZ73D5jxZE2SaFZUrJYfPpqXP6qqPufAQ==
+"@elastic/node-crypto@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.1.1.tgz#619b70322c9cce4a7ee5fbf8f678b1baa7f06095"
+  integrity sha512-F6tIk8Txdqjg8Siv60iAvXzO9ZdQI87K3sS/fh5xd2XaWK+T5ZfqeTvsT7srwG6fr6uCBfuQEJV1KBBl+JpLZA==
 
 "@elastic/numeral@2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.4.0.tgz#883197b7f4bf3c2dd994f53b274769ddfa2bf79a"
   integrity sha512-uGBKGCNghTgUZPHClji/00v+AKt5nidPTGOIbcT+lbTPVxNB6QPpPLGWtXyrg3QZAxobPM/LAZB1mAqtJeq44Q==
 
-"@elastic/request-crypto@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.0.2.tgz#bf27bf009227166f3eeb2b5193a108752335ebd3"
-  integrity sha512-8FtGYl7LebhmJmEDWiGn3MorvNiGWSYPqhvgRlKXjNakEuLoPBBe0DHxbwLkj08CMLWczXcO2ixqBPY7fEhJpA==
+"@elastic/request-crypto@1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.1.2.tgz#2e323550f546f6286994126d462a9ea480a3bfb1"
+  integrity sha512-i73wjj1Qi8dGJIy170Z8xyJ760mFNjTbdmcp/nEczqWD0miNW6I5wZ5MNrv7M6CXn2m1wMXiT6qzDYd93Hv1Dw==
   dependencies:
-    "@elastic/node-crypto" "^0.1.2"
+    "@elastic/node-crypto" "1.1.1"
     "@types/node-jose" "1.1.0"
     node-jose "1.1.0"
 
@@ -9651,7 +9646,7 @@ core-js@^2.2.0, core-js@^2.4.0, core-js@^2.5.0, core-js@^2.5.1, core-js@^2.5.3, 
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.1, core-js@^3.0.4, core-js@^3.2.1, core-js@^3.4.1, core-js@^3.6.4:
+core-js@^3.0.1, core-js@^3.0.4, core-js@^3.4.1, core-js@^3.6.4:
   version "3.6.4"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.6.4.tgz#440a83536b458114b9cb2ac1580ba377dc470647"
   integrity sha512-4paDGScNgZP2IXXilaffL9X7968RuvwlkK3xWtZRVqgd8SYNiVKRJvkFd1aqqEuPfN7E68ZHEp9hDj6lHj4Hyw==
@@ -24284,7 +24279,7 @@ react-router-redux@^4.0.8:
   resolved "https://registry.yarnpkg.com/react-router-redux/-/react-router-redux-4.0.8.tgz#227403596b5151e182377dab835b5d45f0f8054e"
   integrity sha1-InQDWWtRUeGCN32rg1tdRfD4BU4=
 
-react-router@5.1.2:
+react-router@5.1.2, react-router@^5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/react-router/-/react-router-5.1.2.tgz#6ea51d789cb36a6be1ba5f7c0d48dd9e817d3418"
   integrity sha512-yjEuMFy1ONK246B+rsa0cUam5OeAQ8pyclRDgpxuSCrAlJ1qN9uZ5IgyKC7gQg0w8OM50NXHEegPh/ks9YuR2A==

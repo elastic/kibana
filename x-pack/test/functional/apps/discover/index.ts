@@ -10,5 +10,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup8');
 
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./preserve_url'));
   });
 }

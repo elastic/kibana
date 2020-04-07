@@ -11,7 +11,6 @@ import { first } from 'rxjs/operators';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import { LICENSE_CHECK_STATE } from '../../licensing/public';
 
 import { PLUGIN } from '../common/constants';
 
@@ -82,7 +81,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           PLUGIN.id,
           PLUGIN.minimumLicenseType
         );
-        const isValidLicense = state === LICENSE_CHECK_STATE.Valid;
+        const isValidLicense = state === 'valid';
 
         if (!isValidLicense) {
           notifications.toasts.addDanger(invalidLicenseMessage as string);
