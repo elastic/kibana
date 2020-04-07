@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './layers/layer_wizard_registry';
-import './layers/sources/source_registry';
-import './layers/load_layer_wizards';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import '../../../../plugins/maps/public/layers/layer_wizard_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import '../../../../plugins/maps/public/layers/sources/source_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import '../../../../plugins/maps/public/layers/load_layer_wizards';
 
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
@@ -17,20 +20,17 @@ import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
-  setLicenseId,
   setInspector,
-  setFileUpload,
   setIndexPatternSelect,
-  setHttp,
   setTimeFilter,
-  setUiSettings,
   setInjectedVarFunc,
-  setToasts,
   setIndexPatternService,
-  setAutocompleteService,
 } from './kibana_services';
 // @ts-ignore
-import { setInjectedVarFunc as npSetInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import {
+  bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
+  bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
+} from '../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -63,27 +63,17 @@ interface MapsPluginStartDependencies {
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { licensing } = plugins;
-  const { injectedMetadata, http } = core;
-  if (licensing) {
-    licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
-  }
+  const { injectedMetadata } = core;
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
-  setHttp(http);
-  setUiSettings(core.uiSettings);
   setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-  npSetInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-  setToasts(core.notifications.toasts);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { file_upload, data, inspector } = plugins;
+  const { data, inspector } = plugins;
   setInspector(inspector);
-  setFileUpload(file_upload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
   setIndexPatternService(data.indexPatterns);
-  setAutocompleteService(data.autocomplete);
 };
 
 /** @internal */
@@ -96,11 +86,13 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
       });
 
     bindSetupCoreAndPlugins(core, np);
+    bindNpSetupCoreAndPlugins(core, np);
 
     np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
     bindStartCoreAndPlugins(core, plugins);
+    bindNpStartCoreAndPlugins(core, plugins);
   }
 }
