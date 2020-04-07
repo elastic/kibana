@@ -44,7 +44,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     testBed.find('editFieldUpdateButton').simulate('click');
   };
 
-  const clickRemoveButtonAtField = (index: number) => {
+  const deleteMappingsFieldAt = (index: number) => {
     testBed
       .find('removeFieldButton')
       .at(index)
@@ -54,7 +54,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   };
 
   const clickCancelCreateFieldButton = () => {
-    testBed.find('createFieldWrapper.cancelButton').simulate('click');
+    testBed.find('createFieldForm.cancelButton').simulate('click');
   };
 
   const completeStepOne = async ({
@@ -154,7 +154,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     const { find, form, component } = testBed;
 
     form.setInputValue('nameParameterInput', name);
-    find('createFieldWrapper.mockComboBox').simulate('change', [
+    find('createFieldForm.mockComboBox').simulate('change', [
       {
         label: type,
         value: type,
@@ -164,7 +164,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     await nextTick(50);
     component.update();
 
-    find('createFieldWrapper.addButton').simulate('click');
+    find('createFieldForm.addButton').simulate('click');
 
     await nextTick();
     component.update();
@@ -178,7 +178,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       clickSubmitButton,
       clickEditButtonAtField,
       clickEditFieldUpdateButton,
-      clickRemoveButtonAtField,
+      deleteMappingsFieldAt,
       clickCancelCreateFieldButton,
       completeStepOne,
       completeStepTwo,
@@ -196,16 +196,16 @@ export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
   | 'confirmModalConfirmButton'
-  | 'createFieldWrapper.addPropertyButton'
-  | 'createFieldWrapper.addButton'
-  | 'createFieldWrapper.addFieldButton'
-  | 'createFieldWrapper.addMultiFieldButton'
-  | 'createFieldWrapper.cancelButton'
-  | 'createFieldWrapper.mockComboBox'
+  | 'createFieldForm.addPropertyButton'
+  | 'createFieldForm.addButton'
+  | 'createFieldForm.addFieldButton'
+  | 'createFieldForm.addMultiFieldButton'
+  | 'createFieldForm.cancelButton'
+  | 'createFieldForm.mockComboBox'
   | 'editFieldButton'
   | 'editFieldUpdateButton'
   | 'fieldsListItem'
-  | 'fieldTypeComboBox'
+  | 'fieldType'
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
