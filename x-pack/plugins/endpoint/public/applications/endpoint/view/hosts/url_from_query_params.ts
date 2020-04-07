@@ -12,7 +12,6 @@ export function urlFromQueryParams(
 ): Partial<EndpointAppLocation> {
   const search = querystring.stringify(queryParams);
   return {
-    pathname: '/hosts',
     search,
   };
 }
