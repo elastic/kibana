@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useState } from 'react';
+import { XJsonMode } from '../../../../../../src/plugins/es_ui_shared/console_lang/ace/modes/x_json';
 import {
   collapseLiteralStrings,
   expandLiteralStrings,
 } from '../../../../../../src/plugins/es_ui_shared/console_lang/lib';
-import { XJsonMode } from '../../../../es_ui_shared/console_lang';
-
+// @ts-ignore
 export const xJsonMode = new XJsonMode();
-
 export const useXJsonMode = (json: Record<string, any> | null) => {
   const [xJson, setXJson] = useState(
     json === null ? '' : expandLiteralStrings(JSON.stringify(json, null, 2))

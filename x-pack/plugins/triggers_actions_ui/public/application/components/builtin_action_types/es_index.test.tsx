@@ -149,7 +149,9 @@ describe('IndexParamsFields renders', () => {
         .find('[data-test-subj="actionIndexDoc"]')
         .first()
         .prop('value')
-    ).toBe('"test"');
+    ).toBe(`{
+  "test": 123
+}`);
     expect(
       wrapper.find('[data-test-subj="indexDocumentAddVariableButton"]').length > 0
     ).toBeTruthy();
