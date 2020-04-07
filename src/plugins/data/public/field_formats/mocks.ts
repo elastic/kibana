@@ -27,7 +27,7 @@ const createStartContractMock = () => fieldFormatsMock as FieldFormatsStart;
 
 const createMock = () => {
   const mocked: jest.Mocked<FieldFormatsServiceClientContract> = {
-    setup: jest.fn().mockReturnValue(createsetupContractMock()),
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn().mockReturnValue(createStartContractMock()),
   };
 
