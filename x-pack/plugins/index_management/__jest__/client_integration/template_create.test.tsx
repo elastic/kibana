@@ -175,7 +175,7 @@ describe('<TemplateCreate />', () => {
 
         actions.clickCancelCreateFieldButton();
         // Remove first field
-        actions.clickRemoveButtonAtField(0);
+        actions.deleteMappingsFieldAt(0);
 
         expect(find('fieldsListItem').length).toBe(1);
       });
