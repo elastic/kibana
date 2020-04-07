@@ -10911,7 +10911,6 @@
     "xpack.monitoring.alerts.licenseExpiration.actionGroups.default": "デフォルト",
     "xpack.monitoring.alerts.licenseExpiration.newSubject": "NEW X-Pack 監視:ライセンス期限",
     "xpack.monitoring.alerts.licenseExpiration.resolvedSubject": "RESOLVED X-Pack 監視:ライセンス期限",
-    "xpack.monitoring.alerts.licenseExpiration.ui.firingMessage": "このクラスターのライセンスは、#relative で #absolute に期限が切れます。",
     "xpack.monitoring.alerts.licenseExpiration.ui.resolvedMessage": "このクラスターのライセンスはアクティブです。",
     "xpack.monitoring.alerts.lowSeverityName": "低",
     "xpack.monitoring.alerts.mediumSeverityName": "中",

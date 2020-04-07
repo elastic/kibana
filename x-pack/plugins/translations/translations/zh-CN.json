@@ -10915,7 +10915,6 @@
     "xpack.monitoring.alerts.licenseExpiration.actionGroups.default": "默认值",
     "xpack.monitoring.alerts.licenseExpiration.newSubject": "新 X-Pack Monitoring：许可证到期",
     "xpack.monitoring.alerts.licenseExpiration.resolvedSubject": "已解决 X-Pack Monitoring：许可证到期",
-    "xpack.monitoring.alerts.licenseExpiration.ui.firingMessage": "此集群的许可证将在 #relative 后，即 #absolute到期",
     "xpack.monitoring.alerts.licenseExpiration.ui.resolvedMessage": "此集群的许可证处于活动状态。",
     "xpack.monitoring.alerts.lowSeverityName": "低",
     "xpack.monitoring.alerts.mediumSeverityName": "中",
