@@ -120,6 +120,11 @@ echo "\n${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
 yarn wait-on -i 500 -w 500 http://localhost:${KIBANA_PORT}/status > /dev/null
 
+### When running in the CI let's ensure Kibana is fully up and running
+if [ -n "${JENKINS_URL}" ] ; then
+  source /usr/local/bin/bash_standard_lib.sh
+  retry 8 (curl --silent --user admin:changeme http://localhost:${KIBANA_PORT}/api/status | jq .status.overall.state | grep 'green') || true
+fi
 echo "\n✅ Setup completed successfully. Running tests...\n"
 
 #
