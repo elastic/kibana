@@ -20,7 +20,7 @@ export interface InfraServerPluginDeps {
   home: HomeServerPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  metrics: VisTypeTimeseriesSetup;
+  visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
   apm: APMPluginContract;
   alerting: AlertingPluginContract;
