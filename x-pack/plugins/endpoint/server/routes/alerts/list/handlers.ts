@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UpdateDocumentByQueryParams, UpdateDocumentByQueryResponse } from 'elasticsearch';
+import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { RequestHandler } from 'kibana/server';
 import { EndpointAppContext } from '../../../types';
 import { AlertId, searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
+import { UpdateDocumentByQueryParams } from '../types';
 import {
   AlertingIndexGetQueryResult,
   AlertingIndexPatchBodyResult,
@@ -45,7 +46,7 @@ export const alertListUpdateHandlerWrapper = function(
     AlertingIndexPatchBodyResult
   > = async (ctx, req, res) => {
     try {
-      const reqWrapper = {
+      const reqWrapper: UpdateDocumentByQueryParams = {
         index: EndpointAppConstants.ALERT_INDEX_PATTERN,
         body: {
           query: {

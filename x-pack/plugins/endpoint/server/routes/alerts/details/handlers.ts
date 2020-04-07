@@ -6,7 +6,7 @@
 import { GetResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
-import { AlertDetails, AlertEvent, AlertingIndexPatchBodyResult } from '../../../../common/types';
+import { AlertDetails, AlertingIndexPatchBodyResult } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertId } from '../lib';
@@ -26,7 +26,7 @@ export const alertDetailsGetHandlerWrapper = function(
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
         index: alertId.index,
         id: alertId.id,
-      })) as GetResponse<AlertEvent>;
+      })) as GetResponse<AlertDetails>;
 
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(
@@ -48,7 +48,7 @@ export const alertDetailsGetHandlerWrapper = function(
           next: await pagination.getNextUrl(),
           prev: await pagination.getPrevUrl(),
         },
-      } as AlertDetails);
+      });
     } catch (err) {
       if (err.status === 404) {
         return res.notFound({ body: err });
