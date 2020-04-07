@@ -9,7 +9,6 @@ import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
-import { VisualizeEmbeddableContract } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
 import { PlaceContext, ActionContext, Config, CollectConfigProps } from './types';
 
 import { CollectConfigContainer } from './collect_config';
@@ -17,6 +16,7 @@ import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { DrilldownDefinition as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
 import { DataPublicPluginStart, esFilters } from '../../../../../../../src/plugins/data/public';
+import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
 
 export interface Params {
   getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
@@ -69,7 +69,7 @@ export class DashboardToDashboardDrilldown
       timeRange: currentTimeRange,
       query,
       filters: currentFilters,
-    } = context.embeddable.getInput();
+    } = context.embeddable!.getInput();
 
     // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
     // otherwise preserve only pinned
@@ -87,7 +87,7 @@ export class DashboardToDashboardDrilldown
       // look up by range
       const { restOfFilters, timeRangeFilter } =
         (await selectRangeActionGetFilters({
-          timeFieldName: context.timeFieldName,
+          timeFieldName: context.timeFieldName!,
           data: context.data,
         })) || {};
       filters.push(...(restOfFilters || []));
@@ -96,7 +96,7 @@ export class DashboardToDashboardDrilldown
       }
     } else {
       const { restOfFilters, timeRangeFilter } = await valueClickActionGetFilters({
-        timeFieldName: context.timeFieldName,
+        timeFieldName: context.timeFieldName!,
         data: context.data,
       });
       filters.push(...(restOfFilters || []));

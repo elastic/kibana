@@ -9,7 +9,6 @@ import { UrlGeneratorContract } from '../../../../../../../src/plugins/share/pub
 import { savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ActionContext, Config } from './types';
-import { VisualizeEmbeddableContract } from '../../../../../../../src/legacy/core_plugins/visualizations/public/';
 import {
   Filter,
   FilterStateStore,
@@ -21,6 +20,7 @@ import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 // convenient to use real implementation here.
 import { createDirectAccessDashboardLinkGenerator } from '../../../../../../../src/plugins/dashboard/public/url_generator';
+import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
 
 describe('.isConfigValid()', () => {
   const drilldown = new DashboardToDashboardDrilldown({} as any);

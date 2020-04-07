@@ -25,12 +25,12 @@ export interface EmbeddableContext {
 }
 
 export interface EmbeddableVisTriggerContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable: T;
-  timeFieldName: string;
+  embeddable?: T;
+  timeFieldName?: string;
   data: {
     e?: MouseEvent;
     data: unknown;
-    range: unknown;
+    range?: unknown;
   };
 }
 
