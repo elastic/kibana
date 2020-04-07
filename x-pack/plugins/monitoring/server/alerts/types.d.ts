@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Moment } from 'moment';
+import { UiSettingsServiceStart, ICustomClusterClient, Logger } from 'kibana/server';
 import { AlertExecutorOptions } from '../../../alerting/server';
 import { AlertClusterStateState, AlertCommonPerClusterMessageTokenType } from './enums';
+import { MonitoringConfig } from '../config';
 
 export interface AlertLicense {
   status: string;
@@ -35,6 +37,10 @@ export interface AlertLicensePerClusterState extends AlertCommonPerClusterState 
   expiredCheckDateMS: number;
 }
 
+export interface AlertCpuUsagePerClusterState extends AlertCommonPerClusterState {
+  cpuUsage: number;
+}
+
 export interface AlertCommonPerClusterUiState {
   isFiring: boolean;
   severity: number;
@@ -62,6 +68,7 @@ export interface AlertCommonPerClusterMessageLinkToken extends AlertCommonPerClu
 export interface AlertCommonPerClusterMessageTimeToken extends AlertCommonPerClusterMessageToken {
   isRelative: boolean;
   isAbsolute: boolean;
+  timestamp: number;
 }
 
 export interface AlertLicensePerClusterUiState extends AlertCommonPerClusterUiState {
@@ -80,4 +87,21 @@ export interface AlertCommonExecutorOptions extends AlertExecutorOptions {
 export interface AlertCommonParams {
   dateFormat: string;
   timezone: string;
+}
+
+export interface AlertCreationParameters {
+  getUiSettingsService: () => Promise<UiSettingsServiceStart>;
+  monitoringCluster: ICustomClusterClient;
+  getLogger: (...scopes: string[]) => Logger;
+  config: MonitoringConfig;
+}
+
+export interface AlertCpuUsageNodeStats {
+  clusterUuid: string;
+  nodeId: string;
+  nodeName: string;
+  cpuUsage: number;
+  containerUsage: number;
+  containerPeriods: number;
+  containerQuota: number;
 }

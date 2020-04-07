@@ -143,5 +143,14 @@ export const config = Joi => {
         enabled: Joi.boolean().default(true),
       }).default(),
     }).default(),
+    alerts: Joi.object({
+      cpu_usage: Joi.object({
+        email: Joi.object({
+          tokens: Joi.object(),
+          subject: Joi.string(),
+          message: Joi.string(),
+        }),
+      }),
+    }),
   }).default();
 };

@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
 import { isFunction } from 'lodash';
 import {
   ALERT_TYPE_LICENSE_EXPIRATION,
@@ -89,11 +90,11 @@ export function createKibanaAlertsRoute(server) {
         }),
       },
     },
-    async handler(req, headers) {
+    async handler(req, res) {
       const { emailAddress, selectedEmailActionId } = req.payload;
       const alertsClient = isFunction(req.getAlertsClient) ? req.getAlertsClient() : null;
       if (!alertsClient) {
-        return headers.response().code(404);
+        return res.badRequest();
       }
 
       const [alerts, emailResponse] = await Promise.all([
@@ -118,14 +119,14 @@ export function createKibanaAlertsRoute(server) {
         }),
       },
     },
-    async handler(req, headers) {
+    async handler(req, res) {
       const alertsClient = isFunction(req.getAlertsClient) ? req.getAlertsClient() : null;
       if (!alertsClient) {
-        return headers.response().code(404);
+        return res.badRequest();
       }
 
-      const start = req.payload.timeRange.min;
-      const end = req.payload.timeRange.max;
+      const start = moment(req.payload.timeRange.min).valueOf();
+      const end = moment(req.payload.timeRange.max).valueOf();
       let alerts;
 
       try {

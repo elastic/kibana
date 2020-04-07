@@ -5,9 +5,8 @@
  */
 
 import moment from 'moment-timezone';
-import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../common/constants';
+import { ALERT_TYPE_LICENSE_EXPIRATION, INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertType } from '../../../../plugins/alerting/server';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import {
@@ -16,18 +15,15 @@ import {
   AlertCommonExecutorOptions,
   AlertCommonCluster,
   AlertLicensePerClusterUiState,
+  AlertCreationParameters,
 } from './types';
 import { executeActions, getUiMessage } from '../lib/alerts/license_expiration.lib';
 import { getPreparedAlert } from '../lib/alerts/get_prepared_alert';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
-export const getLicenseExpiration = (
-  getUiSettingsService: () => Promise<UiSettingsServiceStart>,
-  monitoringCluster: ICustomClusterClient,
-  getLogger: (...scopes: string[]) => Logger,
-  ccsEnabled: boolean
-): AlertType => {
+export const getLicenseExpiration = (creationParams: AlertCreationParameters): AlertType => {
+  const { getUiSettingsService, monitoringCluster, getLogger, config } = creationParams;
   const logger = getLogger(ALERT_TYPE_LICENSE_EXPIRATION);
   return {
     id: ALERT_TYPE_LICENSE_EXPIRATION,
@@ -51,16 +47,21 @@ export const getLicenseExpiration = (
         getUiSettingsService,
         monitoringCluster,
         logger,
-        ccsEnabled,
-        services,
-        fetchLicenses
+        config.ui.ccs.enabled,
+        INDEX_PATTERN_ELASTICSEARCH,
+        services
       );
 
       if (!preparedAlert) {
         return state;
       }
 
-      const { emailAddress, data: licenses, clusters, dateFormat } = preparedAlert;
+      const { emailAddress, callCluster, indexPattern, clusters, dateFormat } = preparedAlert;
+      const licenses = await fetchLicenses(callCluster, clusters, indexPattern);
+      if (licenses.length === 0) {
+        logger.warn(`No data found for license expiration alert.`);
+        return state;
+      }
 
       const result: AlertCommonState = { ...state };
       const defaultAlertState: AlertLicensePerClusterState = {

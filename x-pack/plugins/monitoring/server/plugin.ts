@@ -46,9 +46,12 @@ import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
+import { PluginStartContract as ActionsPluginsStartContract } from '../../actions/server';
 import { getLicenseExpiration } from './alerts/license_expiration';
 import { getClusterState } from './alerts/cluster_state';
 import { InfraPluginSetup } from '../../infra/server';
+import { getGuardRailCpuUsage } from './alerts/guard_rail_cpu_usage';
+import { AlertCreationParameters } from './alerts/types';
 
 export interface LegacyAPI {
   getServerStatus: () => string;
@@ -65,6 +68,7 @@ interface PluginsSetup {
 
 interface PluginsStart {
   alerting: AlertingPluginStartContract;
+  actions: ActionsPluginsStartContract;
 }
 
 interface MonitoringCoreConfig {
@@ -144,28 +148,19 @@ export class Plugin {
     await this.licenseService.refresh();
 
     if (KIBANA_ALERTING_ENABLED) {
-      plugins.alerting.registerType(
-        getLicenseExpiration(
-          async () => {
-            const coreStart = (await core.getStartServices())[0];
-            return coreStart.uiSettings;
-          },
-          cluster,
-          this.getLogger,
-          config.ui.ccs.enabled
-        )
-      );
-      plugins.alerting.registerType(
-        getClusterState(
-          async () => {
-            const coreStart = (await core.getStartServices())[0];
-            return coreStart.uiSettings;
-          },
-          cluster,
-          this.getLogger,
-          config.ui.ccs.enabled
-        )
-      );
+      const alertingCreationParams: AlertCreationParameters = {
+        getUiSettingsService: async () => {
+          const coreStart = (await core.getStartServices())[0];
+          return coreStart.uiSettings;
+        },
+        monitoringCluster: cluster,
+        getLogger: this.getLogger,
+        config,
+      };
+
+      plugins.alerting.registerType(getLicenseExpiration(alertingCreationParams));
+      plugins.alerting.registerType(getClusterState(alertingCreationParams));
+      plugins.alerting.registerType(getGuardRailCpuUsage(alertingCreationParams));
     }
 
     // Initialize telemetry
@@ -282,6 +277,7 @@ export class Plugin {
       privileges: null,
       reserved: {
         privilege: {
+          api: ['monitoring'],
           app: ['monitoring', 'kibana'],
           catalogue: ['monitoring'],
           savedObject: {
@@ -346,6 +342,7 @@ export class Plugin {
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
             getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
+            getActionsClient: () => plugins.actions.getActionsClientWithRequest(req),
             server: {
               config: legacyConfigWrapper,
               newPlatform: {
@@ -370,7 +367,7 @@ export class Plugin {
             },
           };
 
-          const result = await options.handler(legacyRequest);
+          const result = await options.handler(legacyRequest, res);
           if (Boom.isBoom(result)) {
             return res.customError({ statusCode: result.output.statusCode, body: result });
           }

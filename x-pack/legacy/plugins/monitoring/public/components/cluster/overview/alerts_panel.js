@@ -38,11 +38,12 @@ function replaceTokens(alert) {
 
   for (const token of alert.message.tokens) {
     if (token.type === 'time') {
+      // alert.expirationTime will not work here!!!!
       text = text.replace(
         token.startToken,
         token.isRelative
-          ? formatTimestampToDuration(alert.expirationTime, CALCULATE_DURATION_UNTIL)
-          : moment.tz(alert.expirationTime, moment.tz.guess()).format('LLL z')
+          ? formatTimestampToDuration(token.timestamp, CALCULATE_DURATION_UNTIL)
+          : moment.tz(token.timestamp, moment.tz.guess()).format('LLL z')
       );
     } else if (token.type === 'link') {
       const linkPart = new RegExp(`${token.startToken}(.+?)${token.endToken}`).exec(text);

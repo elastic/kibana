@@ -6,8 +6,7 @@
 
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'src/core/server';
-import { ALERT_TYPE_CLUSTER_STATE } from '../../common/constants';
+import { ALERT_TYPE_CLUSTER_STATE, INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertType } from '../../../alerting/server';
 import { executeActions, getUiMessage } from '../lib/alerts/cluster_state.lib';
 import {
@@ -15,17 +14,14 @@ import {
   AlertCommonState,
   AlertClusterStatePerClusterState,
   AlertCommonCluster,
+  AlertCreationParameters,
 } from './types';
 import { AlertClusterStateState } from './enums';
 import { getPreparedAlert } from '../lib/alerts/get_prepared_alert';
 import { fetchClusterState } from '../lib/alerts/fetch_cluster_state';
 
-export const getClusterState = (
-  getUiSettingsService: () => Promise<UiSettingsServiceStart>,
-  monitoringCluster: ICustomClusterClient,
-  getLogger: (...scopes: string[]) => Logger,
-  ccsEnabled: boolean
-): AlertType => {
+export const getClusterState = (creationParams: AlertCreationParameters): AlertType => {
+  const { getUiSettingsService, monitoringCluster, getLogger, config } = creationParams;
   const logger = getLogger(ALERT_TYPE_CLUSTER_STATE);
   return {
     id: ALERT_TYPE_CLUSTER_STATE,
@@ -53,16 +49,21 @@ export const getClusterState = (
         getUiSettingsService,
         monitoringCluster,
         logger,
-        ccsEnabled,
-        services,
-        fetchClusterState
+        config.ui.ccs.enabled,
+        INDEX_PATTERN_ELASTICSEARCH,
+        services
       );
 
       if (!preparedAlert) {
         return state;
       }
 
-      const { emailAddress, data: states, clusters } = preparedAlert;
+      const { emailAddress, callCluster, indexPattern, clusters } = preparedAlert;
+      const states = await fetchClusterState(callCluster, clusters, indexPattern);
+      if (states.length === 0) {
+        logger.warn(`No data found for license expiration alert.`);
+        return state;
+      }
 
       const result: AlertCommonState = { ...state };
       const defaultAlertState: AlertClusterStatePerClusterState = {

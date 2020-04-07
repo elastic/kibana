@@ -8,7 +8,6 @@ import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'kibana/ser
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { AlertServices } from '../../../../alerting/server';
 import { AlertCommonCluster } from '../../alerts/types';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../common/constants';
 import { fetchAvailableCcs } from './fetch_available_ccs';
 import { getCcsIndexPattern } from './get_ccs_index_pattern';
 import { fetchClusters } from './fetch_clusters';
@@ -17,9 +16,10 @@ import { fetchDefaultEmailAddress } from './fetch_default_email_address';
 export interface PreparedAlert {
   emailAddress: string;
   clusters: AlertCommonCluster[];
-  data: any[];
   timezone: string;
   dateFormat: string;
+  callCluster: CallCluster;
+  indexPattern: string;
 }
 
 async function getCallCluster(
@@ -39,33 +39,29 @@ export async function getPreparedAlert(
   monitoringCluster: ICustomClusterClient,
   logger: Logger,
   ccsEnabled: boolean,
-  services: Pick<AlertServices, 'callCluster' | 'savedObjectsClient'>,
-  dataFetcher: (
-    callCluster: CallCluster,
-    clusters: AlertCommonCluster[],
-    esIndexPattern: string
-  ) => Promise<any>
+  _indexPattern: string,
+  services: Pick<AlertServices, 'callCluster' | 'savedObjectsClient'>
 ): Promise<PreparedAlert | null> {
   const callCluster = await getCallCluster(monitoringCluster, services);
 
   // Support CCS use cases by querying to find available remote clusters
   // and then adding those to the index pattern we are searching against
-  let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
+  let indexPattern = _indexPattern;
   if (ccsEnabled) {
     const availableCcs = await fetchAvailableCcs(callCluster);
     if (availableCcs.length > 0) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
+      indexPattern = getCcsIndexPattern(indexPattern, availableCcs);
     }
   }
 
-  const clusters = await fetchClusters(callCluster, esIndexPattern);
+  const clusters = await fetchClusters(callCluster, indexPattern);
 
   // Fetch the specific data
-  const data = await dataFetcher(callCluster, clusters, esIndexPattern);
-  if (data.length === 0) {
-    logger.warn(`No data found for ${alertType}.`);
-    return null;
-  }
+  // const data = await dataFetcher(callCluster, clusters, indexPattern);
+  // if (data.length === 0) {
+  //   logger.warn(`No data found for ${alertType}.`);
+  //   return null;
+  // }
 
   const uiSettings = (await getUiSettingsService()).asScopedToClient(services.savedObjectsClient);
   const dateFormat: string = await uiSettings.get<string>('dateFormat');
@@ -79,9 +75,10 @@ export async function getPreparedAlert(
 
   return {
     emailAddress,
-    data,
     clusters,
     dateFormat,
     timezone,
+    callCluster,
+    indexPattern,
   };
 }
