@@ -32,6 +32,7 @@ import {
   SavedObjectsClient,
   Plugin,
   Logger,
+  SharedGlobalConfig,
 } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
@@ -41,6 +42,7 @@ import {
   registerTelemetryPluginUsageCollector,
   registerManagementUsageCollector,
   registerApplicationUsageCollector,
+  registerKibanaUsageCollector,
 } from './collectors';
 import { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
@@ -61,6 +63,7 @@ export class TelemetryPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly currentKibanaVersion: string;
   private readonly config$: Observable<TelemetryConfigType>;
+  private readonly legacyConfig$: Observable<SharedGlobalConfig>;
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
   private savedObjectsClient?: ISavedObjectsRepository;
@@ -71,6 +74,7 @@ export class TelemetryPlugin implements Plugin {
     this.isDev = initializerContext.env.mode.dev;
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
     this.config$ = initializerContext.config.create();
+    this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.fetcherTask = new FetcherTask({
       ...initializerContext,
       logger: this.logger,
@@ -158,6 +162,7 @@ export class TelemetryPlugin implements Plugin {
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
 
+    registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
     registerTelemetryPluginUsageCollector(usageCollection, {
       currentKibanaVersion: this.currentKibanaVersion,
       config$: this.config$,
