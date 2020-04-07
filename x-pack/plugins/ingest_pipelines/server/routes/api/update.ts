@@ -40,7 +40,7 @@ export const registerUpdateRoute = ({
       const { description, processors, version } = pipeline;
 
       try {
-        // Verify pipeline exists
+        // Verify pipeline exists; ES will throw 404 if it doesn't
         await callAsCurrentUser('ingest.getPipeline', { id: name });
 
         const response = await callAsCurrentUser('ingest.putPipeline', {

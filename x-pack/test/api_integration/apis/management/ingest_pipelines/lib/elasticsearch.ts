@@ -5,34 +5,32 @@
  */
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
+interface Processor {
+  [key: string]: {
+    [key: string]: unknown;
+  };
+}
+
 interface Pipeline {
   id: string;
   body: {
     description: string;
-    processors: any[];
+    processors: Processor[];
     version?: number;
   };
 }
 
 /**
- * Helpers to create and delete indices on the Elasticsearch instance
+ * Helpers to create and delete pipelines on the Elasticsearch instance
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
 export const registerEsHelpers = (getService: FtrProviderContext['getService']) => {
   const es = getService('legacyEs');
 
-  let pipelinesCreated: Pipeline[] = [];
+  const createPipeline = (pipeline: Pipeline) => es.ingest.putPipeline(pipeline);
 
-  const createPipeline = (pipeline: Pipeline) => {
-    pipelinesCreated.push(pipeline);
-    return es.ingest.putPipeline(pipeline).then(() => pipeline);
-  };
-
-  const deletePipeline = (pipelineId: string) => {
-    pipelinesCreated = pipelinesCreated.filter(({ id }) => id !== pipelineId);
-    return es.ingest.deletePipeline({ id: pipelineId });
-  };
+  const deletePipeline = (pipelineId: string) => es.ingest.deletePipeline({ id: pipelineId });
 
   return {
     createPipeline,
