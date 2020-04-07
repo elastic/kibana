@@ -5,13 +5,24 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut, EuiAccordion } from '@elastic/eui';
 
-import { IMPORT_STATUS } from '../import_progress';
+import { IMPORT_STATUS, Statuses } from '../import_progress';
 
-export function ImportErrors({ errors, statuses }) {
+interface ImportError {
+  msg: string;
+  more?: string;
+}
+
+interface Props {
+  errors: any[];
+  statuses: Statuses;
+}
+
+export const ImportErrors: FC<Props> = ({ errors, statuses }) => {
   return (
     <EuiCallOut title={title(statuses)} color="danger" iconType="cross">
       {errors.map((e, i) => (
@@ -19,9 +30,9 @@ export function ImportErrors({ errors, statuses }) {
       ))}
     </EuiCallOut>
   );
-}
+};
 
-function title(statuses) {
+function title(statuses: Statuses) {
   switch (IMPORT_STATUS.FAILED) {
     case statuses.readStatus:
       return (
@@ -82,7 +93,7 @@ function title(statuses) {
   }
 }
 
-function ImportError(error, key) {
+function ImportError(error: any, key: number) {
   const errorObj = toString(error);
   return (
     <React.Fragment>
@@ -106,7 +117,7 @@ function ImportError(error, key) {
   );
 }
 
-function toString(error) {
+function toString(error: any): ImportError {
   if (typeof error === 'string') {
     return { msg: error };
   }
@@ -118,7 +129,7 @@ function toString(error) {
       if (typeof error.error === 'object') {
         if (error.error.msg !== undefined) {
           // this will catch a bulk ingest failure
-          const errorObj = { msg: error.error.msg };
+          const errorObj: ImportError = { msg: error.error.msg };
           if (error.error.body !== undefined) {
             errorObj.more = error.error.response;
           }
@@ -139,11 +150,8 @@ function toString(error) {
   }
 
   return {
-    msg: (
-      <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importErrors.unknownErrorMessage"
-        defaultMessage="Unknown error"
-      />
-    ),
+    msg: i18n.translate('xpack.ml.fileDatavisualizer.importErrors.unknownErrorMessage', {
+      defaultMessage: 'Unknown error',
+    }),
   };
 }
