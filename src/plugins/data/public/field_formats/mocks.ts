@@ -17,4 +17,25 @@
  * under the License.
  */
 
-declare module '@elastic/node-crypto';
+import { FieldFormatsStart, FieldFormatsSetup, FieldFormatsService } from '.';
+import { fieldFormatsMock } from '../../common/field_formats/mocks';
+
+type FieldFormatsServiceClientContract = PublicMethodsOf<FieldFormatsService>;
+
+const createSetupContractMock = () => fieldFormatsMock as FieldFormatsSetup;
+const createStartContractMock = () => fieldFormatsMock as FieldFormatsStart;
+
+const createMock = () => {
+  const mocked: jest.Mocked<FieldFormatsServiceClientContract> = {
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
+    start: jest.fn().mockReturnValue(createStartContractMock()),
+  };
+
+  return mocked;
+};
+
+export const fieldFormatsServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
+};
