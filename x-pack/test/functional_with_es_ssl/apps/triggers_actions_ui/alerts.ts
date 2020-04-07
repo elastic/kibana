@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
   const find = getService('find');
+  const retry = getService('retry');
 
   async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
@@ -57,7 +58,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await filterSelectItem.click();
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
+      await retry.try(async () => {
+        expect(fieldOptions[1]).not.to.be(undefined);
+      });
       await fieldOptions[1].click();
+      await testSubjects.click('closePopover');
       // need this two out of popup clicks to close them
       const nameInput = await testSubjects.find('alertNameInput');
       await nameInput.click();

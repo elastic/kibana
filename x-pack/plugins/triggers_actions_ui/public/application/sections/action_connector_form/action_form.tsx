@@ -201,6 +201,7 @@ export const ActionForm = ({
               labelAppend={
                 <EuiButtonEmpty
                   size="xs"
+                  data-test-subj="createActionConnectorButton"
                   onClick={() => {
                     setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
                     setAddModalVisibility(true);
