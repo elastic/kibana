@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const cloudPasswordAndResetLink = i18n.translate(
-  'home.tutorials.common.cloud.passwordAndResetLink',
+  'home.tutorials.common.cloudInstructions.passwordAndResetLink',
   {
     defaultMessage:
       'Where {passwordTemplate} is the password of the `elastic` user.' +
