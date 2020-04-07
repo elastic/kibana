@@ -108,7 +108,12 @@ export const getDateHistogramBucketAgg = ({
               if (buckets) return buckets;
 
               const { timefilter } = query.timefilter;
-              buckets = new TimeBuckets({ uiSettings });
+              buckets = new TimeBuckets({
+                'histogram:maxBars': uiSettings.get('histogram:maxBars'),
+                'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+                dateFormat: uiSettings.get('dateFormat'),
+                'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+              });
               updateTimeBuckets(this, timefilter, buckets);
 
               return buckets;

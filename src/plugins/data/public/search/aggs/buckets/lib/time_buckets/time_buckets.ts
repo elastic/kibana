@@ -20,7 +20,6 @@
 import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 
-import { IUiSettingsClient } from 'src/core/public';
 import { parseInterval } from '../../../../../../common';
 import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
@@ -49,8 +48,11 @@ function isValidMoment(m: any): boolean {
   return m && 'isValid' in m && m.isValid();
 }
 
-interface TimeBucketsConfig {
-  uiSettings: IUiSettingsClient;
+export interface TimeBucketsConfig {
+  'histogram:maxBars': number;
+  'histogram:barTarget': number;
+  dateFormat: string;
+  'dateFormat:scaled': string[][];
 }
 
 /**
@@ -61,7 +63,7 @@ interface TimeBucketsConfig {
  * @param {[type]} display [description]
  */
 export class TimeBuckets {
-  private _uiSettings: IUiSettingsClient;
+  private _timeBucketConfig: TimeBucketsConfig;
   private _lb: TimeRangeBounds['min'];
   private _ub: TimeRangeBounds['max'];
   private _originalInterval: string | null = null;
@@ -70,8 +72,8 @@ export class TimeBuckets {
   // because other parts of Kibana arbitrarily add properties
   [key: string]: any;
 
-  constructor({ uiSettings }: TimeBucketsConfig) {
-    this._uiSettings = uiSettings;
+  constructor(timeBucketConfig: TimeBucketsConfig) {
+    this._timeBucketConfig = timeBucketConfig;
   }
 
   /**
@@ -248,7 +250,7 @@ export class TimeBuckets {
     const readInterval = () => {
       const interval = this._i;
       if (moment.isDuration(interval)) return interval;
-      return calcAutoIntervalNear(this._uiSettings.get('histogram:barTarget'), Number(duration));
+      return calcAutoIntervalNear(this._timeBucketConfig['histogram:barTarget'], Number(duration));
     };
 
     const parsedInterval = readInterval();
@@ -259,7 +261,7 @@ export class TimeBuckets {
         return interval;
       }
 
-      const maxLength: number = this._uiSettings.get('histogram:maxBars');
+      const maxLength: number = this._timeBucketConfig['histogram:maxBars'];
       const approxLen = Number(duration) / Number(interval);
 
       let scaled;
@@ -316,7 +318,7 @@ export class TimeBuckets {
    */
   getScaledDateFormat() {
     const interval = this.getInterval();
-    const rules = this._uiSettings.get('dateFormat:scaled');
+    const rules = this._timeBucketConfig['dateFormat:scaled'];
 
     for (let i = rules.length - 1; i >= 0; i--) {
       const rule = rules[i];
@@ -325,6 +327,6 @@ export class TimeBuckets {
       }
     }
 
-    return this._uiSettings.get('dateFormat');
+    return this._timeBucketConfig.dateFormat;
   }
 }

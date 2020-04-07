@@ -28,7 +28,12 @@ export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
       return;
     }
 
-    const buckets = new TimeBuckets({ uiSettings });
+    const buckets = new TimeBuckets({
+      'histogram:maxBars': uiSettings.get('histogram:maxBars'),
+      'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+      dateFormat: uiSettings.get('dateFormat'),
+      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+    });
 
     buckets.setInterval('auto');
     buckets.setBounds({

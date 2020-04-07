@@ -17,32 +17,26 @@
  * under the License.
  */
 import moment from 'moment';
-import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 
-import { TimeBuckets } from './time_buckets';
+import { TimeBuckets, TimeBucketsConfig } from './time_buckets';
 
 describe('TimeBuckets', () => {
-  const { uiSettings } = coreMock.createSetup();
-  uiSettings.get.mockImplementation((key: string) => {
-    switch (key) {
-      case 'histogram:maxBars':
-        return 4;
-      case 'histogram:barTarget':
-        return 2;
-      case 'dateFormat:scaled':
-        return [
-          ['', 'HH:mm:ss.SSS'],
-          ['PT1S', 'HH:mm:ss'],
-          ['PT1M', 'HH:mm'],
-          ['PT1H', 'YYYY-MM-DD HH:mm'],
-          ['P1DT', 'YYYY-MM-DD'],
-          ['P1YT', 'YYYY'],
-        ];
-    }
-  });
+  const timeBucketConfig: TimeBucketsConfig = {
+    'histogram:maxBars': 4,
+    'histogram:barTarget': 3,
+    dateFormat: 'YYYY-MM-DD',
+    'dateFormat:scaled': [
+      ['', 'HH:mm:ss.SSS'],
+      ['PT1S', 'HH:mm:ss'],
+      ['PT1M', 'HH:mm'],
+      ['PT1H', 'YYYY-MM-DD HH:mm'],
+      ['P1DT', 'YYYY-MM-DD'],
+      ['P1YT', 'YYYY'],
+    ],
+  };
 
   test('setBounds/getBounds - bounds is correct', () => {
-    const timeBuckets = new TimeBuckets({ uiSettings });
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
     const bounds = {
       min: moment('2020-03-25'),
       max: moment('2020-03-31'),
@@ -54,7 +48,7 @@ describe('TimeBuckets', () => {
   });
 
   test('setBounds/getBounds - bounds is undefined', () => {
-    const timeBuckets = new TimeBuckets({ uiSettings });
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
     const bounds = {
       min: moment('2020-03-25'),
       max: moment('2020-03-31'),
@@ -71,7 +65,7 @@ describe('TimeBuckets', () => {
   });
 
   test('setInterval/getInterval - intreval is a string', () => {
-    const timeBuckets = new TimeBuckets({ uiSettings });
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval('20m');
     const interval = timeBuckets.getInterval();
 
@@ -82,7 +76,7 @@ describe('TimeBuckets', () => {
   });
 
   test('setInterval/getInterval - intreval is a string and bounds is defined', () => {
-    const timeBuckets = new TimeBuckets({ uiSettings });
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
     const bounds = {
       min: moment('2020-03-25'),
       max: moment('2020-03-31'),
@@ -107,7 +101,7 @@ describe('TimeBuckets', () => {
   });
 
   test('setInterval/getInterval - intreval is a "auto"', () => {
-    const timeBuckets = new TimeBuckets({ uiSettings });
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval('auto');
     const interval = timeBuckets.getInterval();
 
@@ -118,7 +112,7 @@ describe('TimeBuckets', () => {
   });
 
   test('getScaledDateFormat', () => {
-    const timeBuckets = new TimeBuckets({ uiSettings });
+    const timeBuckets = new TimeBuckets(timeBucketConfig);
     timeBuckets.setInterval('20m');
     timeBuckets.getScaledDateFormat();
     const format = timeBuckets.getScaledDateFormat();
