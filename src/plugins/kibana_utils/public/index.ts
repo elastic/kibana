@@ -19,7 +19,6 @@
 
 export {
   calculateObjectHash,
-  createGetterSetter,
   defer,
   Defer,
   Get,
@@ -75,6 +74,7 @@ export {
 } from './state_sync';
 export { removeQueryParam, redirectWhenMissing, ensureDefaultIndexPattern } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
+export { createGetterSetter, defaultFeedbackMessage, UiComponent } from '../common';
 
 /** dummy plugin, we just want kibanaUtils to have its own bundle */
 export function plugin() {

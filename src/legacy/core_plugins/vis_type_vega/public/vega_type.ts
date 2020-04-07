@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
-import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/common';
+import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/public';
 
 import { createVegaRequestHandler } from './vega_request_handler';
 // @ts-ignore
