@@ -65,7 +65,7 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
   const inData = request.includes('/data/public');
   const inReact = !inData && request.includes('/kibana_react/public');
   const inUtils = !inReact && request.includes('/kibana_utils/public');
-  if (inData || inReact || inUtils) {
+  if (!(inData || inReact || inUtils)) {
     return;
   }
 
