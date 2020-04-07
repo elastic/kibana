@@ -14,5 +14,6 @@ export default function visualize({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./feature_controls/visualize_spaces'));
     loadTestFile(require.resolve('./hybrid_visualization'));
     loadTestFile(require.resolve('./precalculated_histogram'));
+    loadTestFile(require.resolve('./preserve_url'));
   });
 }
