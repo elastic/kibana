@@ -64,10 +64,10 @@ describe('health check', () => {
     const [description, action] = queryAllByText(/TLS/i);
 
     expect(description.textContent).toMatchInlineSnapshot(
-      `"Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. Learn how to enable TLS"`
+      `"Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. Learn how to enable TLS."`
     );
 
-    expect(action.textContent).toMatchInlineSnapshot(`"enable TLS"`);
+    expect(action.textContent).toMatchInlineSnapshot(`"Learn how to enable TLS."`);
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/configuring-tls.html"`
@@ -80,7 +80,7 @@ describe('health check', () => {
       hasPermanentEncryptionKey: false,
     }));
 
-    const { queryAllByText } = render(
+    const { queryByText, queryByRole } = render(
       <HealthCheck http={http} docLinks={docLinks}>
         <p>{'should render'}</p>
       </HealthCheck>
@@ -89,15 +89,14 @@ describe('health check', () => {
       // wait for useEffect to run
     });
 
-    const [description, action] = queryAllByText(/Encryption/i);
-
-    expect(description.textContent).toMatchInlineSnapshot(
-      `"Alerting relies on API keys, which requires a permanent Encryption Key. Learn how to set a permanent Encryption Key"`
+    const description = queryByRole(/banner/i);
+    expect(description!.textContent).toMatchInlineSnapshot(
+      `"To create an alert, set a value for xpack.encrypted_saved_objects.encryptionKey in your kibana.yml file. Learn how."`
     );
 
-    expect(action.textContent).toMatchInlineSnapshot(`"set a permanent Encryption Key"`);
-
-    expect(action.getAttribute('href')).toMatchInlineSnapshot(
+    const action = queryByText(/Learn/i);
+    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how."`);
+    expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#general-alert-action-settings"`
     );
   });
@@ -108,7 +107,7 @@ describe('health check', () => {
       hasPermanentEncryptionKey: false,
     }));
 
-    const { queryAllByText } = render(
+    const { queryByText } = render(
       <HealthCheck http={http} docLinks={docLinks}>
         <p>{'should render'}</p>
       </HealthCheck>
@@ -117,15 +116,15 @@ describe('health check', () => {
       // wait for useEffect to run
     });
 
-    const [description, action] = queryAllByText(/TLS/i);
+    const description = queryByText(/Transport Layer Security/i);
 
-    expect(description.textContent).toMatchInlineSnapshot(
-      `"Alerting relies on API keys, which require TLS between Elasticsearch and Kibana, and a permanent Encryption Key. Learn how to enable TLS and a permanent Encryption Key"`
+    expect(description!.textContent).toMatchInlineSnapshot(
+      `"You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. Learn how"`
     );
 
-    expect(action.textContent).toMatchInlineSnapshot(`"enable TLS and a permanent Encryption Key"`);
-
-    expect(action.getAttribute('href')).toMatchInlineSnapshot(
+    const action = queryByText(/Learn/i);
+    expect(action!.textContent).toMatchInlineSnapshot(`"Learn how"`);
+    expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"elastic.co/guide/en/kibana/current/alerting-getting-started.html#alerting-setup-prerequisites"`
     );
   });
