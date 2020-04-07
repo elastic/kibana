@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { kfetch } from 'ui/kfetch';
 import { AlertsStatus, AlertsStatusProps } from './status';
-import { ALERT_TYPES } from '../../../common/constants';
+import { ALERT_TYPE_PREFIX } from '../../../common/constants';
 import { getSetupModeState } from '../../lib/setup_mode';
 import { mockUseEffects } from '../../jest.helpers';
 
@@ -63,7 +63,11 @@ describe('Status', () => {
 
   it('should render a success message if all alerts have been migrated and in setup mode', async () => {
     (kfetch as jest.Mock).mockReturnValue({
-      data: ALERT_TYPES.map(type => ({ alertTypeId: type })),
+      data: [
+        {
+          alertTypeId: ALERT_TYPE_PREFIX,
+        },
+      ],
     });
 
     (getSetupModeState as jest.Mock).mockReturnValue({
