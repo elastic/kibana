@@ -20,7 +20,7 @@
 import { Observable, merge, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { ServiceStatus, ServiceStatusLevel } from '../status';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { ElasticsearchStatusMeta } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
@@ -29,8 +29,12 @@ export const calculateStatus$ = (
 ): Observable<ServiceStatus<ElasticsearchStatusMeta>> =>
   merge(
     of({
-      level: ServiceStatusLevel.unavailable,
+      level: ServiceStatusLevels.unavailable,
       summary: `Waiting for Elasticsearch`,
+      meta: {
+        warningNodes: [],
+        incompatibleNodes: [],
+      },
     }),
     esNodesCompatibility$.pipe(
       map(
@@ -42,7 +46,7 @@ export const calculateStatus$ = (
         }): ServiceStatus<ElasticsearchStatusMeta> => {
           if (!isCompatible) {
             return {
-              level: ServiceStatusLevel.critical,
+              level: ServiceStatusLevels.critical,
               summary:
                 // Message should always be present, but this is a safe fallback
                 message ??
@@ -51,7 +55,7 @@ export const calculateStatus$ = (
             };
           } else if (warningNodes.length > 0) {
             return {
-              level: ServiceStatusLevel.degraded,
+              level: ServiceStatusLevels.degraded,
               summary:
                 // Message should always be present, but this is a safe fallback
                 message ??
@@ -60,7 +64,14 @@ export const calculateStatus$ = (
             };
           }
 
-          return { level: ServiceStatusLevel.available, summary: `Elasticsearch is available` };
+          return {
+            level: ServiceStatusLevels.available,
+            summary: `Elasticsearch is available`,
+            meta: {
+              warningNodes: [],
+              incompatibleNodes: [],
+            },
+          };
         }
       )
     )

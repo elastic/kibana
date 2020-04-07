@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-incompatibleNodes?: NodesVersionCompatibility['incompatibleNodes'];
+incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
 ```

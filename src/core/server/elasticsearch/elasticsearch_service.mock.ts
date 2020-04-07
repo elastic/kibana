@@ -29,7 +29,7 @@ import {
   ElasticsearchStatusMeta,
 } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { ServiceStatus, ServiceStatusLevel } from '../status';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
 
 const createScopedClusterClientMock = (): jest.Mocked<IScopedClusterClient> => ({
   callAsInternalUser: jest.fn(),
@@ -105,7 +105,7 @@ const createInternalSetupContractMock = () => {
       kibanaVersion: '8.0.0',
     }),
     status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
-      level: ServiceStatusLevel.available,
+      level: ServiceStatusLevels.available,
       summary: 'Elasticsearch is available',
     }),
     legacy: {

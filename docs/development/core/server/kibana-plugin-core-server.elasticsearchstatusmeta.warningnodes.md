@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-warningNodes?: NodesVersionCompatibility['warningNodes'];
+warningNodes: NodesVersionCompatibility['warningNodes'];
 ```

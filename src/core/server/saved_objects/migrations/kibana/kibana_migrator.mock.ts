@@ -55,7 +55,7 @@ const createMigrator = (
           result: [
             {
               status: 'migrated',
-              destIndex: '.test-kibnaa_2',
+              destIndex: '.test-kibana_2',
               sourceIndex: '.test-kibana_1',
               elapsedMs: 10,
             },

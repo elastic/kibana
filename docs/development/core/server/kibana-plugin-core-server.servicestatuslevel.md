@@ -2,22 +2,12 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [ServiceStatusLevel](./kibana-plugin-core-server.servicestatuslevel.md)
 
-## ServiceStatusLevel enum
+## ServiceStatusLevel type
 
-The current "level" of availability of a service.
+A convenience type that represents the union of each value in [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-export declare enum ServiceStatusLevel 
+export declare type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];
 ```
-
-## Enumeration Members
-
-|  Member | Value | Description |
-|  --- | --- | --- |
-|  available | <code>0</code> | Everything is working! |
-|  critical | <code>3</code> | Block all user functions and display the status page, reserved for Core services only. |
-|  degraded | <code>1</code> | Some features may not be working. |
-|  unavailable | <code>2</code> | The service is unavailable, but other functions that do not depend on this service should work. |
-

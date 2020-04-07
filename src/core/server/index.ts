@@ -298,7 +298,13 @@ export {
   LegacyInternals,
 } from './legacy';
 
-export { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
+export {
+  CoreStatus,
+  ServiceStatus,
+  ServiceStatusLevel,
+  ServiceStatusLevels,
+  StatusServiceSetup,
+} from './status';
 
 /**
  * Plugin specific context passed to a route handler.

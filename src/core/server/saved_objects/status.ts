@@ -19,7 +19,7 @@
 
 import { Observable, combineLatest } from 'rxjs';
 import { startWith, map } from 'rxjs/operators';
-import { ServiceStatus, ServiceStatusLevel } from '../status';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { SavedObjectStatusMeta } from './types';
 import { KibanaMigratorStatus } from './migrations/kibana';
 
@@ -31,12 +31,12 @@ export const calculateStatus$ = (
     map(migrationStatus => {
       if (migrationStatus.status === 'waiting') {
         return {
-          level: ServiceStatusLevel.unavailable,
+          level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is waiting to start migrations`,
         };
       } else if (migrationStatus.status === 'running') {
         return {
-          level: ServiceStatusLevel.unavailable,
+          level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is running migrations`,
         };
       }
@@ -49,7 +49,7 @@ export const calculateStatus$ = (
       }
 
       return {
-        level: ServiceStatusLevel.available,
+        level: ServiceStatusLevels.available,
         summary: `SavedObjects service has completed migrations and is available`,
         meta: {
           migratedIndices: statusCounts,
@@ -57,21 +57,21 @@ export const calculateStatus$ = (
       };
     }),
     startWith({
-      level: ServiceStatusLevel.unavailable,
+      level: ServiceStatusLevels.unavailable,
       summary: `SavedObjects service is waiting to start migrations`,
     })
   );
 
   return combineLatest([elasticsearchStatus$, migratorStatus$]).pipe(
     map(([esStatus, migratorStatus]) => {
-      if (esStatus.level >= ServiceStatusLevel.unavailable) {
+      if (esStatus.level >= ServiceStatusLevels.unavailable) {
         return {
-          level: ServiceStatusLevel.unavailable,
+          level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is not available without a healthy Elasticearch connection`,
         };
-      } else if (migratorStatus.level === ServiceStatusLevel.unavailable) {
+      } else if (migratorStatus.level === ServiceStatusLevels.unavailable) {
         return migratorStatus;
-      } else if (esStatus.level === ServiceStatusLevel.degraded) {
+      } else if (esStatus.level === ServiceStatusLevels.degraded) {
         return {
           level: esStatus.level,
           summary: `SavedObjects service is degraded due to Elasticsearch: [${esStatus.summary}]`,

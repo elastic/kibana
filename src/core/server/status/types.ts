@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { deepFreeze } from '../../utils';
 
 /**
  * The current status of a service at a point in time.
@@ -52,26 +53,52 @@ export interface ServiceStatus<Meta extends Record<string, any> | unknown = unkn
 
 /**
  * The current "level" of availability of a service.
+ *
+ * @remarks
+ * The values implement `valueOf` to allow for easy comparisons between status levels with <, >, etc. Higher values
+ * represent higher severities. Note that the default `Array.prototype.sort` implementation does not correctly sort
+ * these values.
+ *
+ * A snapshot serializer is available in `src/core/server/test_utils` to ease testing of these values with Jest.
+ *
  * @public
  */
-export enum ServiceStatusLevel {
+export const ServiceStatusLevels = deepFreeze({
   /**
    * Everything is working!
    */
-  available,
+  available: {
+    toString: () => 'available',
+    valueOf: () => 0,
+  },
   /**
    * Some features may not be working.
    */
-  degraded,
+  degraded: {
+    toString: () => 'degraded',
+    valueOf: () => 1,
+  },
   /**
    * The service is unavailable, but other functions that do not depend on this service should work.
    */
-  unavailable,
+  unavailable: {
+    toString: () => 'unavailable',
+    valueOf: () => 2,
+  },
   /**
    * Block all user functions and display the status page, reserved for Core services only.
    */
-  critical,
-}
+  critical: {
+    toString: () => 'critical',
+    valueOf: () => 3,
+  },
+});
+
+/**
+ * A convenience type that represents the union of each value in {@link ServiceStatusLevels}.
+ * @public
+ */
+export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];
 
 /**
  * Status of core services.

@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import { ServiceStatus, ServiceStatusLevel } from './types';
+import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from './types';
 
 /**
  * Returns a single {@link ServiceStatus} that summarizes the most severe status level from a group of statuses.
  * @param statuses
  */
-export const getSummaryStatus = (statuses: Record<string, ServiceStatus>): ServiceStatus => {
+export const getSummaryStatus = (statuses: Array<[string, ServiceStatus]>): ServiceStatus => {
   const grouped = groupByLevel(statuses);
   const highestSeverityLevel = getHighestSeverityLevel(grouped.keys());
   const highestSeverityGroup = grouped.get(highestSeverityLevel)!;
 
-  if (highestSeverityLevel === ServiceStatusLevel.available) {
+  if (highestSeverityLevel === ServiceStatusLevels.available) {
     return {
-      level: ServiceStatusLevel.available,
+      level: ServiceStatusLevels.available,
       summary: `All services are available`,
     };
   } else if (highestSeverityGroup.size === 1) {
@@ -42,7 +42,7 @@ export const getSummaryStatus = (statuses: Record<string, ServiceStatus>): Servi
   } else {
     return {
       level: highestSeverityLevel,
-      summary: `[${highestSeverityGroup.size}] services are ${LEVEL_LABELS[highestSeverityLevel]}`,
+      summary: `[${highestSeverityGroup.size}] services are ${highestSeverityLevel.toString()}`,
       // TODO: include URL to status page
       detail: `See the status page for more information`,
       meta: {
@@ -52,19 +52,12 @@ export const getSummaryStatus = (statuses: Record<string, ServiceStatus>): Servi
   }
 };
 
-const LEVEL_LABELS: Record<ServiceStatusLevel, string> = Object.freeze({
-  [ServiceStatusLevel.available]: 'available',
-  [ServiceStatusLevel.degraded]: 'degraded',
-  [ServiceStatusLevel.unavailable]: 'unavailable',
-  [ServiceStatusLevel.critical]: 'critical',
-});
-
 const groupByLevel = (
-  statuses: Record<string, ServiceStatus>
+  statuses: Array<[string, ServiceStatus]>
 ): Map<ServiceStatusLevel, Map<string, ServiceStatus>> => {
   const byLevel = new Map<ServiceStatusLevel, Map<string, ServiceStatus>>();
 
-  for (const [serviceName, status] of Object.entries(statuses)) {
+  for (const [serviceName, status] of statuses) {
     let levelMap = byLevel.get(status.level);
     if (!levelMap) {
       levelMap = new Map<string, ServiceStatus>();
@@ -78,6 +71,14 @@ const groupByLevel = (
 };
 
 const getHighestSeverityLevel = (levels: Iterable<ServiceStatusLevel>): ServiceStatusLevel => {
-  const sorted = [...levels].sort();
-  return sorted[sorted.length - 1] ?? ServiceStatusLevel.available;
+  const sorted = [...levels].sort((a, b) => {
+    if (a < b) {
+      return -1;
+    } else if (a > b) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+  return sorted[sorted.length - 1] ?? ServiceStatusLevels.available;
 };

@@ -807,9 +807,9 @@ export interface ElasticsearchServiceStart {
 // @public (undocumented)
 export interface ElasticsearchStatusMeta {
     // (undocumented)
-    incompatibleNodes?: NodesVersionCompatibility['incompatibleNodes'];
+    incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
     // (undocumented)
-    warningNodes?: NodesVersionCompatibility['warningNodes'];
+    warningNodes: NodesVersionCompatibility['warningNodes'];
 }
 
 // @public (undocumented)
@@ -2293,12 +2293,27 @@ export interface ServiceStatus<Meta extends Record<string, any> | unknown = unkn
 }
 
 // @public
-export enum ServiceStatusLevel {
-    available = 0,
-    critical = 3,
-    degraded = 1,
-    unavailable = 2
-}
+export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];
+
+// @public
+export const ServiceStatusLevels: Readonly<{
+    available: Readonly<{
+        toString: () => "available";
+        valueOf: () => 0;
+    }>;
+    degraded: Readonly<{
+        toString: () => "degraded";
+        valueOf: () => 1;
+    }>;
+    unavailable: Readonly<{
+        toString: () => "unavailable";
+        valueOf: () => 2;
+    }>;
+    critical: Readonly<{
+        toString: () => "critical";
+        valueOf: () => 3;
+    }>;
+}>;
 
 // @public
 export interface SessionCookieValidationResult {

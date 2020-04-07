@@ -21,14 +21,14 @@ import { StatusService } from './status_service';
 import {
   InternalStatusServiceSetup,
   StatusServiceSetup,
-  ServiceStatusLevel,
+  ServiceStatusLevels,
   ServiceStatus,
   CoreStatus,
 } from './types';
 import { BehaviorSubject } from 'rxjs';
 
 const available: ServiceStatus = {
-  level: ServiceStatusLevel.available,
+  level: ServiceStatusLevels.available,
   summary: 'Service is working',
 };
 const availableCoreStatus: CoreStatus = {

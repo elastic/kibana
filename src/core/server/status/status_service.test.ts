@@ -19,18 +19,21 @@
 
 import { of, BehaviorSubject } from 'rxjs';
 
-import { ServiceStatus, ServiceStatusLevel, CoreStatus } from './types';
+import { ServiceStatus, ServiceStatusLevels, CoreStatus } from './types';
 import { StatusService } from './status_service';
 import { first } from 'rxjs/operators';
 import { mockCoreContext } from '../core_context.mock';
+import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
+
+expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 describe('StatusService', () => {
   const available: ServiceStatus<any> = {
-    level: ServiceStatusLevel.available,
+    level: ServiceStatusLevels.available,
     summary: 'Available',
   };
   const degraded: ServiceStatus<any> = {
-    level: ServiceStatusLevel.degraded,
+    level: ServiceStatusLevels.degraded,
     summary: 'This is degraded!',
   };
 
@@ -95,7 +98,7 @@ describe('StatusService', () => {
         elasticsearch$.next(available);
         elasticsearch$.next(available);
         elasticsearch$.next({
-          level: ServiceStatusLevel.available,
+          level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
         savedObjects$.next(degraded);
@@ -107,31 +110,31 @@ describe('StatusService', () => {
           Array [
             Object {
               "elasticsearch": Object {
-                "level": 0,
+                "level": available,
                 "summary": "Available",
               },
               "savedObjects": Object {
-                "level": 1,
+                "level": degraded,
                 "summary": "This is degraded!",
               },
             },
             Object {
               "elasticsearch": Object {
-                "level": 0,
+                "level": available,
                 "summary": "Wow another summary",
               },
               "savedObjects": Object {
-                "level": 1,
+                "level": degraded,
                 "summary": "This is degraded!",
               },
             },
             Object {
               "elasticsearch": Object {
-                "level": 0,
+                "level": available,
                 "summary": "Wow another summary",
               },
               "savedObjects": Object {
-                "level": 0,
+                "level": available,
                 "summary": "Available",
               },
             },
@@ -151,7 +154,7 @@ describe('StatusService', () => {
           },
         });
         expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
-          level: ServiceStatusLevel.degraded,
+          level: ServiceStatusLevels.degraded,
           summary: '[2] services are degraded',
         });
       });
@@ -169,15 +172,15 @@ describe('StatusService', () => {
         const subResult2 = await setup.overall$.pipe(first()).toPromise();
         const subResult3 = await setup.overall$.pipe(first()).toPromise();
         expect(subResult1).toMatchObject({
-          level: ServiceStatusLevel.degraded,
+          level: ServiceStatusLevels.degraded,
           summary: '[2] services are degraded',
         });
         expect(subResult2).toMatchObject({
-          level: ServiceStatusLevel.degraded,
+          level: ServiceStatusLevels.degraded,
           summary: '[2] services are degraded',
         });
         expect(subResult3).toMatchObject({
-          level: ServiceStatusLevel.degraded,
+          level: ServiceStatusLevels.degraded,
           summary: '[2] services are degraded',
         });
       });
@@ -200,7 +203,7 @@ describe('StatusService', () => {
         elasticsearch$.next(available);
         elasticsearch$.next(available);
         elasticsearch$.next({
-          level: ServiceStatusLevel.available,
+          level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
         savedObjects$.next(degraded);
@@ -211,11 +214,11 @@ describe('StatusService', () => {
         expect(statusUpdates).toMatchInlineSnapshot(`
           Array [
             Object {
-              "level": 1,
+              "level": degraded,
               "summary": "[savedObjects]: This is degraded!",
             },
             Object {
-              "level": 0,
+              "level": available,
               "summary": "All services are available",
             },
           ]

@@ -18,26 +18,26 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { ServiceStatus, ServiceStatusLevel } from '../status';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { take } from 'rxjs/operators';
 
 describe('calculateStatus$', () => {
   const expectUnavailableDueToEs = (status$: Observable<ServiceStatus>) =>
     expect(status$.pipe(take(1)).toPromise()).resolves.toEqual({
-      level: ServiceStatusLevel.unavailable,
+      level: ServiceStatusLevels.unavailable,
       summary: `SavedObjects service is not available without a healthy Elasticearch connection`,
     });
 
   const expectUnavailableDueToMigrations = (status$: Observable<ServiceStatus>) =>
     expect(status$.pipe(take(1)).toPromise()).resolves.toEqual({
-      level: ServiceStatusLevel.unavailable,
+      level: ServiceStatusLevels.unavailable,
       summary: `SavedObjects service is waiting to start migrations`,
     });
 
   describe('when elasticsearch is unavailable', () => {
     const esStatus$ = of<ServiceStatus>({
-      level: ServiceStatusLevel.unavailable,
+      level: ServiceStatusLevels.unavailable,
       summary: 'xxx',
     });
 
@@ -53,7 +53,7 @@ describe('calculateStatus$', () => {
 
   describe('when elasticsearch is critical', () => {
     const esStatus$ = of<ServiceStatus>({
-      level: ServiceStatusLevel.critical,
+      level: ServiceStatusLevels.critical,
       summary: 'xxx',
     });
 
@@ -72,7 +72,7 @@ describe('calculateStatus$', () => {
 
   describe('when elasticsearch is available', () => {
     const esStatus$ = of<ServiceStatus>({
-      level: ServiceStatusLevel.available,
+      level: ServiceStatusLevels.available,
       summary: 'Available',
     });
 
@@ -85,7 +85,7 @@ describe('calculateStatus$', () => {
           .pipe(take(2))
           .toPromise()
       ).resolves.toEqual({
-        level: ServiceStatusLevel.unavailable,
+        level: ServiceStatusLevels.unavailable,
         summary: `SavedObjects service is running migrations`,
       });
     });
@@ -98,7 +98,7 @@ describe('calculateStatus$', () => {
           .pipe(take(2))
           .toPromise()
       ).resolves.toEqual({
-        level: ServiceStatusLevel.available,
+        level: ServiceStatusLevels.available,
         summary: `SavedObjects service has completed migrations and is available`,
         meta: {
           migratedIndices: {
@@ -112,7 +112,7 @@ describe('calculateStatus$', () => {
   });
 
   describe('when elasticsearch is degraded', () => {
-    const esStatus$ = of<ServiceStatus>({ level: ServiceStatusLevel.degraded, summary: 'xxx' });
+    const esStatus$ = of<ServiceStatus>({ level: ServiceStatusLevels.degraded, summary: 'xxx' });
 
     it('is unavailable before migrations have ran', async () => {
       await expectUnavailableDueToMigrations(calculateStatus$(of<any>(), esStatus$));
@@ -126,7 +126,7 @@ describe('calculateStatus$', () => {
           .pipe(take(2))
           .toPromise()
       ).resolves.toEqual({
-        level: ServiceStatusLevel.degraded,
+        level: ServiceStatusLevels.degraded,
         summary: 'SavedObjects service is degraded due to Elasticsearch: [xxx]',
       });
     });

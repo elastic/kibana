@@ -21,8 +21,11 @@ import { take } from 'rxjs/operators';
 import { Subject, of } from 'rxjs';
 
 import { calculateStatus$ } from './status';
-import { ServiceStatusLevel, ServiceStatus } from '../status';
+import { ServiceStatusLevels, ServiceStatus } from '../status';
+import { ServiceStatusLevelSnapshotSerializer } from '../status/test_utils';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+
+expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
 const nodeInfo = {
   version: '1.1.1',
@@ -40,8 +43,12 @@ describe('calculateStatus', () => {
         .pipe(take(1))
         .toPromise()
     ).toEqual({
-      level: ServiceStatusLevel.unavailable,
+      level: ServiceStatusLevels.unavailable,
       summary: 'Waiting for Elasticsearch',
+      meta: {
+        warningNodes: [],
+        incompatibleNodes: [],
+      },
     });
   });
 
@@ -53,8 +60,12 @@ describe('calculateStatus', () => {
         .pipe(take(2))
         .toPromise()
     ).toEqual({
-      level: ServiceStatusLevel.available,
+      level: ServiceStatusLevels.available,
       summary: 'Elasticsearch is available',
+      meta: {
+        warningNodes: [],
+        incompatibleNodes: [],
+      },
     });
   });
 
@@ -74,7 +85,7 @@ describe('calculateStatus', () => {
         .pipe(take(2))
         .toPromise()
     ).toEqual({
-      level: ServiceStatusLevel.degraded,
+      level: ServiceStatusLevels.degraded,
       summary: 'Some nodes are a different version',
       meta: {
         incompatibleNodes: [],
@@ -99,7 +110,7 @@ describe('calculateStatus', () => {
         .pipe(take(2))
         .toPromise()
     ).toEqual({
-      level: ServiceStatusLevel.critical,
+      level: ServiceStatusLevels.critical,
       summary: 'Incompatible with Elasticsearch',
       meta: {
         incompatibleNodes: [nodeInfo],
@@ -148,11 +159,15 @@ describe('calculateStatus', () => {
     expect(statusUpdates).toMatchInlineSnapshot(`
       Array [
         Object {
-          "level": 2,
+          "level": unavailable,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
           "summary": "Waiting for Elasticsearch",
         },
         Object {
-          "level": 3,
+          "level": critical,
           "meta": Object {
             "incompatibleNodes": Array [],
             "warningNodes": Array [],
@@ -160,7 +175,7 @@ describe('calculateStatus', () => {
           "summary": "Unable to retrieve version info",
         },
         Object {
-          "level": 3,
+          "level": critical,
           "meta": Object {
             "incompatibleNodes": Array [
               Object {
@@ -177,7 +192,7 @@ describe('calculateStatus', () => {
           "summary": "Incompatible with Elasticsearch",
         },
         Object {
-          "level": 1,
+          "level": degraded,
           "meta": Object {
             "incompatibleNodes": Array [],
             "warningNodes": Array [
@@ -194,7 +209,11 @@ describe('calculateStatus', () => {
           "summary": "Some nodes are incompatible",
         },
         Object {
-          "level": 0,
+          "level": available,
+          "meta": Object {
+            "incompatibleNodes": Array [],
+            "warningNodes": Array [],
+          },
           "summary": "Elasticsearch is available",
         },
       ]

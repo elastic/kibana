@@ -134,6 +134,6 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
 
 /** @public */
 export interface ElasticsearchStatusMeta {
-  warningNodes?: NodesVersionCompatibility['warningNodes'];
-  incompatibleNodes?: NodesVersionCompatibility['incompatibleNodes'];
+  warningNodes: NodesVersionCompatibility['warningNodes'];
+  incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
 }

@@ -48,12 +48,11 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const core$ = this.setupCoreStatus(core);
     const overall$: Observable<ServiceStatus> = core$.pipe(
       map(coreStatus => {
-        const summary = getSummaryStatus(coreStatus as any);
+        const summary = getSummaryStatus(Object.entries(coreStatus));
         this.logger.debug(`Recalculated overall status`, { status: summary });
         return summary;
       }),
-      distinctUntilChanged(isDeepStrictEqual),
-      shareReplay(1)
+      distinctUntilChanged(isDeepStrictEqual)
     );
 
     return {

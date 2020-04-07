@@ -17,5 +17,9 @@
  * under the License.
  */
 
-export { createHttpServer } from './http/test_utils';
-export { ServiceStatusLevelSnapshotSerializer } from './status/test_utils';
+import { ServiceStatusLevels, ServiceStatusLevel } from './types';
+
+export const ServiceStatusLevelSnapshotSerializer: jest.SnapshotSerializerPlugin = {
+  test: (val: any) => Object.values(ServiceStatusLevels).includes(val),
+  print: (val: ServiceStatusLevel) => val.toString(),
+};
