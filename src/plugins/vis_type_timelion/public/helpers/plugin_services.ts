@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext } from 'kibana/public';
-import { ConfigSchema } from '../config';
+import { IndexPatternsContract } from 'src/plugins/data/public';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { createGetterSetter } from '../../../kibana_utils/public';
 
-export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) => ({
-  setup() {},
-  start(core: CoreStart) {
-    if (initializerContext.config.get().ui.enabled === false) {
-      core.chrome.navLinks.update('timelion', { hidden: true });
-    }
-  },
-});
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
+  'IndexPatterns'
+);
+
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<
+  SavedObjectsClientContract
+>('SavedObjectsClient');

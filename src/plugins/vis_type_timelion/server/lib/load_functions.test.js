@@ -17,11 +17,26 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { TimelionVisPlugin as Plugin } from './plugin';
+const fn = require(`src/plugins/vis_type_timelion`);
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+const expect = require('chai').expect;
 
-export { getTimezone } from './helpers/get_timezone';
+describe('load_functions.js', () => {
+  it('exports a function', () => {
+    expect(fn).to.be.a('function');
+  });
+
+  it('returns an object with keys named for the javascript files in the directory', () => {
+    const fnList = fn('series_functions');
+
+    expect(fnList).to.be.an('object');
+    expect(fnList.sum).to.be.a('object');
+  });
+
+  it('also includes index.js files in direct subdirectories, and names the keys for the directory', () => {
+    const fnList = fn('series_functions');
+
+    expect(fnList).to.be.an('object');
+    expect(fnList.es).to.be.a('object');
+  });
+});

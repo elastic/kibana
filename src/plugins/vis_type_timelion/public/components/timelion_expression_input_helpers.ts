@@ -27,10 +27,7 @@ import { Parser } from 'pegjs';
 import { parse } from '../_generated_/chain';
 
 import { ArgValueSuggestions, FunctionArg, Location } from '../helpers/arg_value_suggestions';
-import {
-  ITimelionFunction,
-  TimelionFunctionArgs,
-} from '../../../../../plugins/timelion/common/types';
+import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 
 export enum SUGGESTION_TYPE {
   ARGUMENTS = 'arguments',

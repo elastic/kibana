@@ -19,30 +19,42 @@
 
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { IUiSettingsClient } from 'kibana/public';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { VisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';
+import { KibanaContextProvider } from '../../kibana_react/public';
 
-function TimelionOptions({ stateParams, setValue, setValidity }: VisOptionsProps<VisParams>) {
-  const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [
+const TimelionOptions = (uiSettings: IUiSettingsClient) => {
+  const TimelionOptionsComponent = ({
+    stateParams,
     setValue,
-  ]);
-  const setExpressionInput = useCallback(
-    (value: VisParams['expression']) => setValue('expression', value),
-    [setValue]
-  );
+    setValidity,
+  }: VisOptionsProps<VisParams>) => {
+    const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [
+      setValue,
+    ]);
+    const setExpressionInput = useCallback(
+      (value: VisParams['expression']) => setValue('expression', value),
+      [setValue]
+    );
 
-  return (
-    <EuiPanel className="visEditorSidebar__timelionOptions" paddingSize="s">
-      <TimelionInterval
-        value={stateParams.interval}
-        setValue={setInterval}
-        setValidity={setValidity}
-      />
-      <TimelionExpressionInput value={stateParams.expression} setValue={setExpressionInput} />
-    </EuiPanel>
-  );
-}
+    return (
+      <KibanaContextProvider services={{ uiSettings }}>
+        <EuiPanel className="visEditorSidebar__timelionOptions" paddingSize="s">
+          <TimelionInterval
+            value={stateParams.interval}
+            setValue={setInterval}
+            setValidity={setValidity}
+          />
+          <TimelionExpressionInput value={stateParams.expression} setValue={setExpressionInput} />
+        </EuiPanel>
+      </KibanaContextProvider>
+    );
+  };
+
+  return TimelionOptionsComponent;
+};
 
 export { TimelionOptions };

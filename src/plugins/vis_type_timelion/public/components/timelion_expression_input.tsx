@@ -22,13 +22,10 @@ import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { monaco } from '@kbn/ui-shared-deps/monaco';
 
-import { CodeEditor, useKibana } from '../../../../../plugins/kibana_react/public';
+import { CodeEditor, useKibana } from '../../../kibana_react/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
-import {
-  ITimelionFunction,
-  TimelionFunctionArgs,
-} from '../../../../../plugins/timelion/common/types';
+import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 
 const LANGUAGE_ID = 'timelion_expression';
 monaco.languages.register({ id: LANGUAGE_ID });

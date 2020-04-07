@@ -19,11 +19,8 @@
 
 import { get } from 'lodash';
 import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
-import { TimelionFunctionArgs } from '../../../../../plugins/timelion/common/types';
-import {
-  indexPatterns as indexPatternsUtils,
-  IndexPatternAttributes,
-} from '../../../../../plugins/data/public';
+import { TimelionFunctionArgs } from '../../common/types';
+import { indexPatterns as indexPatternsUtils, IndexPatternAttributes } from '../../../data/public';
 
 export interface Location {
   min: number;

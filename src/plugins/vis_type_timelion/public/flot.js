@@ -17,19 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { configSchema } from '../config';
-import { Plugin } from './plugin';
-
-export { PluginSetupContract } from './plugin';
-
-export const config = {
-  schema: configSchema,
-  exposeToBrowser: {
-    ui: {
-      enabled: true,
-    },
-  },
-};
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+import './webpackShims/jquery.flot';
+import './webpackShims/jquery.flot.time';
+import './webpackShims/jquery.flot.symbol';
+import './webpackShims/jquery.flot.crosshair';
+import './webpackShims/jquery.flot.selection';
+import './webpackShims/jquery.flot.stack';
+import './webpackShims/jquery.flot.axislabels';
