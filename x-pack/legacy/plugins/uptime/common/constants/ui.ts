@@ -10,6 +10,8 @@ export const OVERVIEW_ROUTE = '/';
 
 export const SETTINGS_ROUTE = '/settings';
 
+export const CERTIFICATES_ROUTE = '/certificates';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',
