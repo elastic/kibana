@@ -64,9 +64,9 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
                 </p>
                 <p>
                   <FormattedMessage
-                    id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                    defaultMessage={`Use {settingsLink} to update Index pattern for matching
-                    indices that contain Heartbeat data.`}
+                    id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
+                    defaultMessage="Use {settingsLink} to update Index pattern for matching
+                    indices that contain Heartbeat data."
                     values={{
                       settingsLink: <Link to={SETTINGS_ROUTE}>{SETTINGS_LINK_TEXT}</Link>,
                     }}
@@ -83,7 +83,7 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
               >
                 <FormattedMessage
                   id="xpack.uptime.emptyState.addDataWithHeartbeat"
-                  defaultMessage={`Add data with Heartbeat`}
+                  defaultMessage="Add data with Heartbeat"
                 />
               </EuiButton>
             }
