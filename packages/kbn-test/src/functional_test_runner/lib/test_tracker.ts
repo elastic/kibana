@@ -75,7 +75,7 @@ export class TestTracker {
 
     // If a test fails, we want to make sure all of the ancestors, all the way up to the root, get marked as failed
     // This information is not available on the mocha objects without traversing all descendants of a given node
-    const handleFailure = (error: any, test: any) => {
+    const handleFailure = (_: any, test: any) => {
       let parent = test.parent;
 
       // Infinite loop protection, just in case

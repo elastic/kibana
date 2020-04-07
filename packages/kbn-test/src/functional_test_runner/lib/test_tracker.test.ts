@@ -72,19 +72,25 @@ describe('TestTracker', () => {
     };
   };
 
-  const runLifecycleWithMocks = async (mocks: object[]) => {
+  const runLifecycleWithMocks = async (mocks: object[], fn: (objs: any) => any = () => {}) => {
     const lifecycle = new Lifecycle();
     const testTracker = new TestTracker(lifecycle);
 
+    const ret = { lifecycle, testTracker };
+
     for (const mock of mocks) {
       await lifecycle.beforeTestSuite.trigger(mock);
+    }
+
+    if (fn) {
+      fn(ret);
     }
 
     for (const mock of mocks.reverse()) {
       await lifecycle.afterTestSuite.trigger(mock);
     }
 
-    return { lifecycle, testTracker };
+    return ret;
   };
 
   beforeEach(() => {
@@ -129,5 +135,63 @@ describe('TestTracker', () => {
     expect((fs.writeFileSync as jest.Mock).mock.calls[0][0]).toEqual(
       process.env.TEST_METADATA_PATH
     );
+  });
+
+  it('identifies suites with tests as leaf suites', async () => {
+    const root = createMock({ title: 'root', file: join(REPO_ROOT, 'root.js') });
+    const parent = createMock({ parent: root });
+    const withTests = createMock({ parent, tests: [{}] });
+
+    const { testTracker } = await runLifecycleWithMocks([root, parent, withTests]);
+    const suites = testTracker.getAllFinishedSuites();
+
+    const finishedRoot = suites.find(s => s.title === 'root');
+    const finishedWithTests = suites.find(s => s.title !== 'root');
+
+    expect(finishedRoot).toBeTruthy();
+    expect(finishedRoot?.leafSuite).toBeFalsy();
+    expect(finishedWithTests?.leafSuite).toBe(true);
+  });
+
+  describe('with a failing suite', () => {
+    let root: any;
+    let parent: any;
+    let failed: any;
+
+    beforeEach(() => {
+      root = createMock({ file: join(REPO_ROOT, 'root.js') });
+      parent = createMock({ parent: root });
+      failed = createMock({ parent, tests: [{}] });
+    });
+
+    it('marks parent suites as not successful when a test fails', async () => {
+      const { testTracker } = await runLifecycleWithMocks(
+        [root, parent, failed],
+        async ({ lifecycle }) => {
+          await lifecycle.testFailure.trigger(Error('test'), { parent: failed });
+        }
+      );
+
+      const suites = testTracker.getAllFinishedSuites();
+      expect(suites.length).toBe(2);
+      for (const suite of suites) {
+        expect(suite.success).toBeFalsy();
+      }
+    });
+
+    it('marks parent suites as not successful when a test hook fails', async () => {
+      const { testTracker } = await runLifecycleWithMocks(
+        [root, parent, failed],
+        async ({ lifecycle }) => {
+          await lifecycle.testHookFailure.trigger(Error('test'), { parent: failed });
+        }
+      );
+
+      const suites = testTracker.getAllFinishedSuites();
+      expect(suites.length).toBe(2);
+      for (const suite of suites) {
+        expect(suite.success).toBeFalsy();
+      }
+    });
   });
 });
