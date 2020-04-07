@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isAbsolute, extname } from 'path';
+import { isAbsolute, extname, resolve, join } from 'path';
 import LruCache from 'lru-cache';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { createDynamicAssetResponse } from './dynamic_asset_response';
@@ -84,6 +84,12 @@ export function createBundlesRoute({
         path,
         fileHashCache
       )
+    ),
+    buildRouteForBundles(
+      `${basePublicPath}/bundles/core/`,
+      `/bundles/core/`,
+      resolve(__dirname, join('..', '..', 'core', 'public', 'target', 'public')),
+      fileHashCache
     ),
     buildRouteForBundles(
       `${basePublicPath}/bundles/`,

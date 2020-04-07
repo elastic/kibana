@@ -68,7 +68,30 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       });
     }
 
-    load([
+    // When rendering in Kibana Platform mode, only serve the assets needed by Core.
+    if ('{{appId}}' === 'core') {
+      return load({
+        deps: [
+          {{#each sharedJsDepFilenames}}
+            '{{../regularBundlePath}}/kbn-ui-shared-deps/{{this}}',
+          {{/each}}
+          '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedJsFilename}}',
+          '{{regularBundlePath}}/plugin/kibanaUtils/kibanaUtils.plugin.js',
+          '{{regularBundlePath}}/plugin/esUiShared/esUiShared.plugin.js',
+          '{{regularBundlePath}}/plugin/kibanaReact/kibanaReact.plugin.js'
+        ], function() {
+          load([
+            '{{regularBundlePath}}/core/core.plugin.js',
+              {{#each styleSheetPaths}}
+                '{{this}}',
+              {{/each}}
+          ])
+        },
+      });
+    }
+
+    load({
+      deps: [
         {{#each sharedJsDepFilenames}}
           '{{../regularBundlePath}}/kbn-ui-shared-deps/{{this}}',
         {{/each}}

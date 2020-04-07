@@ -12,6 +12,8 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import '../../../../webpackShims/ace';
 // required for i18nIdDirective
 import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
 // type imports
 import {
   AppMountContext,
