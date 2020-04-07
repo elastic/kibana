@@ -62,3 +62,14 @@ export const getTemplateStrings = (): TemplateStringDict => ({
     }),
   },
 });
+
+export const getUnusedTemplateStrings = (): TemplateStringDict => ({
+  Pitch: {
+    name: i18n.translate('xpack.canvas.templates.pitchName', {
+      defaultMessage: 'Pitch',
+    }),
+    help: i18n.translate('xpack.canvas.templates.pitchHelp', {
+      defaultMessage: 'Branded presentation with large photos',
+    }),
+  },
+});
