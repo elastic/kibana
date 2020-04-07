@@ -70,7 +70,9 @@ const Wrapper = styled.div`
 `;
 
 const MlJobDescriptionComponent: React.FC<{ job: SiemJob }> = ({ job }) => {
-  const jobUrl = useKibana().services.application.getUrlForApp('ml#/jobs');
+  const jobUrl = useKibana().services.application.getUrlForApp(
+    `ml#/jobs?mlManagement=(jobId:${encodeURI(job.id)})`
+  );
 
   return (
     <Wrapper>

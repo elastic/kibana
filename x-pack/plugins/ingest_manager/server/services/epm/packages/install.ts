@@ -87,7 +87,7 @@ export async function installPackage(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
-  const { name: pkgName, version: pkgVersion } = registryPackageInfo;
+  const { name: pkgName, version: pkgVersion, internal = false } = registryPackageInfo;
 
   const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
@@ -116,6 +116,7 @@ export async function installPackage(options: {
     pkgkey,
     pkgName,
     pkgVersion,
+    internal,
     toSave,
   });
   return toSave;
@@ -145,9 +146,10 @@ export async function saveInstallationReferences(options: {
   pkgkey: string;
   pkgName: string;
   pkgVersion: string;
+  internal: boolean;
   toSave: AssetReference[];
 }) {
-  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSave } = options;
+  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, internal, toSave } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgkey });
   const savedRefs = installation?.installed || [];
   const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
@@ -159,7 +161,7 @@ export async function saveInstallationReferences(options: {
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
-    { installed: toInstall, name: pkgName, version: pkgVersion },
+    { installed: toInstall, name: pkgName, version: pkgVersion, internal },
     { id: pkgkey, overwrite: true }
   );
 
