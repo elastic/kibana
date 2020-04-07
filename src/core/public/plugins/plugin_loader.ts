@@ -32,7 +32,7 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string,
  */
 export interface CoreWindow {
   __kbnBundles__: {
-    [pluginBundleName: string]: UnknownPluginInitializer | undefined;
+    [pluginBundleName: string]: { plugin: UnknownPluginInitializer } | undefined;
   };
 }
 
