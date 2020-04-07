@@ -38,8 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/62472
-  describe.skip('alerts', function() {
+  describe('alerts', function() {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -48,10 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      const nameInput = await testSubjects.find('alertNameInput');
-      await nameInput.click();
-      await nameInput.clearValue();
-      await nameInput.type(alertName);
+      await testSubjects.setValue('alertNameInput', alertName);
       await testSubjects.click('.index-threshold-SelectOption');
       await testSubjects.click('selectIndexExpression');
       const comboBox = await find.byCssSelector('#indexSelectSearchBox');
@@ -63,24 +59,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
       await fieldOptions[1].click();
       // need this two out of popup clicks to close them
+      const nameInput = await testSubjects.find('alertNameInput');
       await nameInput.click();
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
-      const connectorNameInput = await testSubjects.find('nameInput');
-      await connectorNameInput.click();
-      await connectorNameInput.clearValue();
-      const connectorName = generateUniqueKey();
-      await connectorNameInput.type(connectorName);
-      const slackWebhookUrlInput = await testSubjects.find('slackWebhookUrlInput');
-      await slackWebhookUrlInput.click();
-      await slackWebhookUrlInput.clearValue();
-      await slackWebhookUrlInput.type('https://test');
+      await testSubjects.setValue('nameInput', generateUniqueKey());
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const loggingMessageInput = await testSubjects.find('slackMessageTextArea');
-      await loggingMessageInput.click();
-      await loggingMessageInput.clearValue();
-      await loggingMessageInput.type('test message');
+      await testSubjects.setValue('slackMessageTextArea', 'test message');
       await testSubjects.click('slackAddVariableButton');
       const variableMenuButton = await testSubjects.find('variableMenuButton-0');
       await variableMenuButton.click();
@@ -134,7 +121,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should edit an alert', async () => {
       const createdAlert = await createAlert({
         alertTypeId: '.index-threshold',
-        name: 'new alert',
+        name: generateUniqueKey(),
         params: {
           aggType: 'count',
           termSize: 5,
@@ -162,11 +149,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const editLink = await testSubjects.findAll('alertsTableCell-editLink');
       await editLink[0].click();
 
-      const updatedAlertName = 'Changed Alert Name';
-      const nameInputToUpdate = await testSubjects.find('alertNameInput');
-      await nameInputToUpdate.click();
-      await nameInputToUpdate.clearValue();
-      await nameInputToUpdate.type(updatedAlertName);
+      const updatedAlertName = `Changed Alert Name ${generateUniqueKey()}`;
+      await testSubjects.setValue('alertNameInput', updatedAlertName);
 
       await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
 
@@ -219,10 +203,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const editLink = await testSubjects.findAll('alertsTableCell-editLink');
       await editLink[0].click();
 
-      const throttleInputToSetInitialValue = await testSubjects.find('throttleInput');
-      await throttleInputToSetInitialValue.click();
-      await throttleInputToSetInitialValue.clearValue();
-      await throttleInputToSetInitialValue.type('1');
+      await testSubjects.setValue('throttleInput', '1');
 
       await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
 
@@ -310,11 +291,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const editLink = await testSubjects.findAll('alertsTableCell-editLink');
       await editLink[0].click();
 
-      const updatedAlertName = 'Changed Alert Name';
-      const nameInputToUpdate = await testSubjects.find('alertNameInput');
-      await nameInputToUpdate.click();
-      await nameInputToUpdate.clearValue();
-      await nameInputToUpdate.type(updatedAlertName);
+      const updatedAlertName = `Changed Alert Name ${generateUniqueKey()}`;
+      await testSubjects.setValue('alertNameInput', updatedAlertName);
 
       await testSubjects.click('cancelSaveEditedAlertButton');
       await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
