@@ -86,7 +86,7 @@ export interface AlertResultList {
 
 export interface HostResultList {
   /* the hosts restricted by the page size */
-  hosts: HostMetadata[];
+  hosts: HostInfo[];
   /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
@@ -251,6 +251,15 @@ interface AlertState {
 export type AlertData = AlertEvent & AlertMetadata;
 
 export type AlertDetails = AlertData & AlertState;
+
+export enum HostStatus {
+  ERROR = 'ERROR',
+}
+
+export type HostInfo = Immutable<{
+  metadata: HostMetadata;
+  host_status: HostStatus;
+}>;
 
 export type HostMetadata = Immutable<{
   '@timestamp': number;

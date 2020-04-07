@@ -139,7 +139,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.total).to.eql(2);
         const resultIps: string[] = [].concat(
-          ...body.hosts.map((metadata: Record<string, any>) => metadata.host.ip)
+          ...body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.ip)
         );
         expect(resultIps).to.eql([
           '10.192.213.130',
@@ -164,7 +164,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.total).to.eql(2);
         const resultOsVariantValue: Set<string> = new Set(
-          body.hosts.map((metadata: Record<string, any>) => metadata.host.os.variant)
+          body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
         expect(body.hosts.length).to.eql(2);
@@ -182,11 +182,11 @@ export default function({ getService }: FtrProviderContext) {
           })
           .expect(200);
         expect(body.total).to.eql(1);
-        const resultIp: string = body.hosts[0].host.ip.filter(
+        const resultIp: string = body.hosts[0].metadata.host.ip.filter(
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        expect(body.hosts[0].event.created).to.eql(1579881969541);
+        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -203,11 +203,11 @@ export default function({ getService }: FtrProviderContext) {
           })
           .expect(200);
         expect(body.total).to.eql(1);
-        const resultHostId: string = body.hosts[0].host.id;
-        const resultElasticAgentId: string = body.hosts[0].elastic.agent.id;
+        const resultHostId: string = body.hosts[0].metadata.host.id;
+        const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
         expect(resultHostId).to.eql(targetEndpointId);
         expect(resultElasticAgentId).to.eql(targetElasticAgentId);
-        expect(body.hosts[0].event.created).to.eql(1579881969541);
+        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
