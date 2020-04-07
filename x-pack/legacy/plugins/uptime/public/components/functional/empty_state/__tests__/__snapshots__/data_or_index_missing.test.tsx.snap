@@ -14,7 +14,7 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
     }
   >
     <EuiSpacer
-      size="xs"
+      size="m"
     />
     <EuiPanel>
       <EuiEmptyPrompt
@@ -23,7 +23,7 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
             color="primary"
             fill={true}
             href="/app/kibana#/home/tutorial/uptimeMonitors"
-            iconType="gear"
+            iconType="help"
           >
             <FormattedMessage
               defaultMessage="Add data with Heartbeat"
@@ -36,35 +36,21 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
           <React.Fragment>
             <p>
               <FormattedMessage
-                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                defaultMessage="Configure Heartbeat to start logging uptime data."
                 id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                values={
-                  Object {
-                    "configureHeartbeatLink": <ForwardRef
-                      href="/app/kibana#/home/tutorial/uptimeMonitors"
-                      target="_blank"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Configure Heartbeat"
-                        id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                        values={Object {}}
-                      />
-                    </ForwardRef>,
-                  }
-                }
+                values={Object {}}
               />
             </p>
             <p>
               <FormattedMessage
-                defaultMessage="Use {settingsLink} to update Index pattern for matching
-                    indices that contain Heartbeat data."
-                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                defaultMessage="{settingsLink} to match an index containing Heartbeat data."
+                id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
                 values={
                   Object {
                     "settingsLink": <ForwardRef
                       to="/settings"
                     >
-                      Settings
+                      Update the index pattern 
                     </ForwardRef>,
                   }
                 }

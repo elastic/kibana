@@ -14,25 +14,29 @@ import {
   EuiLink,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { UptimeSettingsContext } from '../../../contexts';
 import { DynamicSettings } from '../../../../common/runtime_types';
 import { SETTINGS_ROUTE } from '../../../../common/constants';
-import { SETTINGS_LINK_TEXT } from '../../../pages/page_header';
 
 interface DataMissingProps {
   headingMessage: JSX.Element;
   settings?: DynamicSettings;
 }
 
+const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.empty_state.settingsLink', {
+  defaultMessage: 'Update the index pattern ',
+});
+
 export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProps) => {
   const { basePath } = useContext(UptimeSettingsContext);
   return (
     <EuiFlexGroup justifyContent="center" data-test-subj="data-missing">
       <EuiFlexItem grow={false} style={{ flexBasis: 700 }}>
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="m" />
         <EuiPanel>
           <EuiEmptyPrompt
             iconType="uptimeApp"
@@ -46,27 +50,13 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
                 <p>
                   <FormattedMessage
                     id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                    defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                    values={{
-                      configureHeartbeatLink: (
-                        <EuiLink
-                          target="_blank"
-                          href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
-                        >
-                          <FormattedMessage
-                            id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                            defaultMessage="Configure Heartbeat"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
+                    defaultMessage="Configure Heartbeat to start logging uptime data."
                   />
                 </p>
                 <p>
                   <FormattedMessage
                     id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
-                    defaultMessage="Use {settingsLink} to update Index pattern for matching
-                    indices that contain Heartbeat data."
+                    defaultMessage="{settingsLink} to match an index containing Heartbeat data."
                     values={{
                       settingsLink: <Link to={SETTINGS_ROUTE}>{SETTINGS_LINK_TEXT}</Link>,
                     }}
@@ -76,9 +66,9 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
             }
             actions={
               <EuiButton
-                color="primary"
                 fill
-                iconType="gear"
+                color="primary"
+                iconType="help"
                 href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
               >
                 <FormattedMessage

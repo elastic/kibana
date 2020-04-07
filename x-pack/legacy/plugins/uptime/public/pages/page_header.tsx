@@ -17,7 +17,7 @@ interface PageHeaderProps {
   extraLinks?: boolean;
   datePicker?: boolean;
 }
-export const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
+const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
   defaultMessage: 'Settings',
 });
 export const PageHeader = React.memo(
