@@ -77,7 +77,7 @@ export class TodoRefEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('embeddableExamples.todo.displayName', {
-      defaultMessage: 'Todo item',
+      defaultMessage: 'Todo (by reference)',
     });
   }
 }
