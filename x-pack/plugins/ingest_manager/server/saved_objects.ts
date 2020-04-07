@@ -146,6 +146,7 @@ export const savedObjectMappings = {
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
     properties: {
+      name: { type: 'keyword' },
       version: { type: 'keyword' },
       internal: { type: 'boolean' },
       installed: {
