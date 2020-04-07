@@ -11,7 +11,7 @@ import { FormSchema } from '../../../../../shared_imports';
 export const schema: FormSchema = {
   actions: {},
   enabled: {},
-  kibana_siem_app_url: {},
+  kibanaSiemAppUrl: {},
   throttle: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',
