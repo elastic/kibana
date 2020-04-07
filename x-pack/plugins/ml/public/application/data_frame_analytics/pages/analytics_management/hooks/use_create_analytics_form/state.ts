@@ -9,7 +9,6 @@ import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/com
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   isClassificationAnalysis,
@@ -162,30 +161,37 @@ export const getInitialState = (): State => ({
 
 const getExcludesFields = (excluded: string[]) => {
   const { fields } = newJobCapsService;
-  const updatedExcluded = [];
+  const updatedExcluded: string[] = [];
+  let regex;
+  let mainField;
 
   for (let i = 0; i < excluded.length; i++) {
-    let isBothTypes = false;
     const fieldName = excluded[i];
-    updatedExcluded.push(fieldName);
-    const fieldType = fields.find(field => field.name === fieldName)?.type;
-    // If it's a keyword type - check if it has a corresponding text type
-    if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.KEYWORD) {
-      const textTypeName = fieldName.replace(/\.keyword$/, '');
-      const field = newJobCapsService.getFieldById(textTypeName);
-      isBothTypes = field !== null && field.type === ES_FIELD_TYPES.TEXT;
+    // No dot in fieldName - exclude fieldName and others whose names begin with fieldName followed by dot
+    if (fieldName.includes('.') === false) {
+      mainField = fieldName;
+    } else {
+      // Dot in fieldName - check if there's a field whose name equals the fieldName with the last dot suffix removed
+      regex = /\.[^.]*$/;
+      const suffixRemovedField = fieldName.replace(regex, '');
+      const fieldMatch = newJobCapsService.getFieldById(suffixRemovedField);
 
-      if (isBothTypes) {
-        updatedExcluded.push(textTypeName);
+      if (fieldMatch !== null) {
+        mainField = suffixRemovedField;
+      } else {
+        updatedExcluded.push(fieldName);
       }
-    } else if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.TEXT) {
-      //   If text, check if has corresponding keyword type
-      const keywordTypeName = `${fieldName}.keyword`;
-      const field = newJobCapsService.getFieldById(keywordTypeName);
-      isBothTypes = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
+    }
 
-      if (isBothTypes) {
-        updatedExcluded.push(keywordTypeName);
+    if (mainField !== undefined) {
+      updatedExcluded.push(mainField);
+      regex = new RegExp(`${mainField}\..+`);
+
+      for (let j = 0; j < fields.length; j++) {
+        const field = fields[j]?.name;
+        if (field.match(regex) !== null) {
+          updatedExcluded.push(field);
+        }
       }
     }
   }
