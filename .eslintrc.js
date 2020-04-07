@@ -553,29 +553,6 @@ module.exports = {
     },
 
     /**
-     * Graph overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/graph/**/*.js'],
-      globals: {
-        angular: true,
-        $: true,
-      },
-      rules: {
-        'block-scoped-var': 'off',
-        camelcase: 'off',
-        eqeqeq: 'off',
-        'guard-for-in': 'off',
-        'new-cap': 'off',
-        'no-loop-func': 'off',
-        'no-redeclare': 'off',
-        'no-shadow': 'off',
-        'no-unused-vars': 'off',
-        'one-var': 'off',
-      },
-    },
-
-    /**
      * ML overrides
      */
     {
@@ -771,7 +748,7 @@ module.exports = {
      * Lens overrides
      */
     {
-      files: ['x-pack/legacy/plugins/lens/**/*.ts', 'x-pack/legacy/plugins/lens/**/*.tsx'],
+      files: ['x-pack/legacy/plugins/lens/**/*.{ts,tsx}', 'x-pack/plugins/lens/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -885,8 +862,10 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: ['src/legacy/core_plugins/metrics/**/*.js'],
-      excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
+      files: [
+        'src/plugins/vis_type_timeseries/**/*.{js,ts,tsx}',
+        'src/legacy/core_plugins/vis_type_timeseries/**/*.{js,ts,tsx}',
+      ],
       rules: {
         'import/no-default-export': 'error',
       },

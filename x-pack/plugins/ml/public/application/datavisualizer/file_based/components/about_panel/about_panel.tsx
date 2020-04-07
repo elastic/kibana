@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
 import {
   EuiFlexGroup,
@@ -23,7 +23,11 @@ import {
 
 import { WelcomeContent } from './welcome_content';
 
-export function AboutPanel({ onFilePickerChange }) {
+interface Props {
+  onFilePickerChange(files: FileList | null): void;
+}
+
+export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
   return (
     <EuiPage restrictWidth={1000} data-test-subj="mlPageFileDataVisualizerUpload">
       <EuiPageBody>
@@ -54,9 +58,9 @@ export function AboutPanel({ onFilePickerChange }) {
       </EuiPageBody>
     </EuiPage>
   );
-}
+};
 
-export function LoadingPanel() {
+export const LoadingPanel: FC = () => {
   return (
     <EuiPage restrictWidth={400} data-test-subj="mlPageFileDataVisLoading">
       <EuiPageBody>
@@ -79,4 +83,4 @@ export function LoadingPanel() {
       </EuiPageBody>
     </EuiPage>
   );
-}
+};
