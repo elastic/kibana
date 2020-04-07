@@ -17,7 +17,6 @@ import { CoreSetup } from 'kibana/public';
 jest.mock('ui/new_platform');
 
 // mock away actual dependencies to prevent all of it being loaded
-jest.mock('../../../../../../src/legacy/core_plugins/interpreter/public/registries', () => {});
 jest.mock('./embeddable/embeddable_factory', () => ({
   EmbeddableFactory: class Mock {},
 }));
