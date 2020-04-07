@@ -47,7 +47,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const { refresh } = useRefreshAnalyticsList();
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
-  const { createIndexPattern, destinationIndex, jobId } = form;
+  const { createIndexPattern, jobId } = form;
+  let { destinationIndex } = form;
 
   const addRequestMessage = (requestMessage: FormMessage) =>
     dispatch({ type: ACTION.ADD_REQUEST_MESSAGE, requestMessage });
@@ -90,9 +91,13 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     resetRequestMessages();
     setIsModalButtonDisabled(true);
 
-    const analyticsJobConfig = isAdvancedEditorEnabled
+    const analyticsJobConfig = (isAdvancedEditorEnabled
       ? jobConfig
-      : getJobConfigFromFormState(form);
+      : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
+
+    if (isAdvancedEditorEnabled) {
+      destinationIndex = analyticsJobConfig.dest.index;
+    }
 
     try {
       await ml.dataFrameAnalytics.createDataFrameAnalytics(jobId, analyticsJobConfig);
@@ -137,6 +142,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
 
       const id = await newIndexPattern.create();
+
+      await mlContext.indexPatterns.clearCache();
 
       // id returns false if there's a duplicate index pattern.
       if (id === false) {
@@ -248,6 +255,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const openModal = async () => {
+    await mlContext.indexPatterns.clearCache();
     resetForm();
     await prepareFormValidation();
     dispatch({ type: ACTION.OPEN_MODAL });
