@@ -70,6 +70,12 @@ export class ESGeoGridSource extends AbstractESAggSource {
     );
   }
 
+  getSyncMeta() {
+    return {
+      requestType: this._descriptor.requestType,
+    };
+  }
+
   async getImmutableProperties() {
     let indexPatternTitle = this.getIndexPatternId();
     try {
