@@ -655,7 +655,7 @@ export class DashboardAppController {
     $scope.$watch(
       () => dashboardCapabilities.saveQuery,
       newCapability => {
-        showSaveQuery = newCapability as boolean;
+        $scope.showSaveQuery = newCapability as boolean;
       }
     );
 
