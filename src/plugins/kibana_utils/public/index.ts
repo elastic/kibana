@@ -30,6 +30,8 @@ export {
   UiComponent,
   UiComponentInstance,
   url,
+  createGetterSetter,
+  defaultFeedbackMessage,
 } from '../common';
 export * from './core';
 export * from './errors';
@@ -74,7 +76,6 @@ export {
 } from './state_sync';
 export { removeQueryParam, redirectWhenMissing, ensureDefaultIndexPattern } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
-export { createGetterSetter, defaultFeedbackMessage, UiComponent } from '../common';
 
 /** dummy plugin, we just want kibanaUtils to have its own bundle */
 export function plugin() {
