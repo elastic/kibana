@@ -26,7 +26,7 @@ const radios: ClosureRadios[] = [
   },
 ];
 
-interface ClosureOptionsRadioComponentProps {
+export interface ClosureOptionsRadioComponentProps {
   closureTypeSelected: ClosureType;
   disabled: boolean;
   onChangeClosureType: (newClosureType: ClosureType) => void;
@@ -51,6 +51,7 @@ const ClosureOptionsRadioComponent: React.FC<ClosureOptionsRadioComponentProps> 
       idSelected={closureTypeSelected}
       onChange={onChangeLocal}
       name="closure_options"
+      data-test-subj="closure-options-radio-group"
     />
   );
 };
