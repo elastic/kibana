@@ -56,7 +56,7 @@ export interface ActionTypeModel {
 }
 
 export interface ValidationResult {
-  errors: IErrorObject;
+  errors: Record<string, any>;
 }
 
 export interface ActionConnector {
