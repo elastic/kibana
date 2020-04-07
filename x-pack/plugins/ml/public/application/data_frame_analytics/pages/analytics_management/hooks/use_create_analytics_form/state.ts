@@ -185,7 +185,7 @@ const getExcludesFields = (excluded: string[]) => {
 
     if (mainField !== undefined) {
       updatedExcluded.push(mainField);
-      regex = new RegExp(`${mainField}\..+`);
+      regex = new RegExp(`${mainField}\\..+`);
 
       for (let j = 0; j < fields.length; j++) {
         const field = fields[j]?.name;
@@ -193,6 +193,9 @@ const getExcludesFields = (excluded: string[]) => {
           updatedExcluded.push(field);
         }
       }
+
+      mainField = undefined;
+      regex = undefined;
     }
   }
 
