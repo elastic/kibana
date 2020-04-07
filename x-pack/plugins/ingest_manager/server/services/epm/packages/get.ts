@@ -41,7 +41,7 @@ export async function getPackages(
     .map(item =>
       createInstallableFrom(
         item,
-        savedObjectsVisible.find(({ attributes }) => attributes.name === item.name)
+        savedObjectsVisible.find(({ id }) => id === item.name)
       )
     )
     .sort(sortByName);

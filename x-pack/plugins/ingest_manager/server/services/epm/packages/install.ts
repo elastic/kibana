@@ -161,8 +161,8 @@ export async function saveInstallationReferences(options: {
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
-    { installed: toInstall, name: pkgName, version: pkgVersion, internal },
-    { id: pkgkey, overwrite: true }
+    { installed: toInstall, version: pkgVersion, internal },
+    { id: pkgName, overwrite: true }
   );
 
   return toInstall;
