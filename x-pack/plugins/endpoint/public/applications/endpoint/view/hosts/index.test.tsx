@@ -79,7 +79,19 @@ describe('when on the hosts page', () => {
   });
 
   describe('when there is a selected host in the url', () => {
+    let hostDetails: HostMetadata;
     beforeEach(() => {
+      const { host, ...details } = mockHostDetailsApiResult();
+      hostDetails = {
+        ...details,
+        host: {
+          ...host,
+          id: '1',
+        },
+      };
+
+      coreStart.application.getUrlForApp.mockReturnValue('/app/logs');
+
       reactTestingLibrary.act(() => {
         history.push({
           ...history.location,
@@ -89,10 +101,14 @@ describe('when on the hosts page', () => {
       reactTestingLibrary.act(() => {
         store.dispatch({
           type: 'serverReturnedHostDetails',
-          payload: mockHostDetailsApiResult(),
+          payload: hostDetails,
         });
       });
     });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should show the flyout', () => {
       const renderResult = render();
       return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
@@ -103,6 +119,17 @@ describe('when on the hosts page', () => {
       const renderResult = render();
       const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
       expect(linkToLogs).not.toBeNull();
+      expect(linkToLogs.textContent).toEqual('Endpoint Logs');
+      expect(linkToLogs.attributes.href.value).toEqual(
+        "/app/logs/stream?logFilter=(expression:'host.id:1',kind:kuery)"
+      );
+    });
+    it.skip('should navigate to logs without full page refresh', async () => {
+      const renderResult = render();
+      const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
+      expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(0);
+      fireEvent.click(linkToLogs);
+      expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
     });
   });
 });
