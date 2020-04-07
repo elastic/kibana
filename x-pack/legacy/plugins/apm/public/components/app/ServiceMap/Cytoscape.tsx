@@ -174,14 +174,22 @@ export function Cytoscape({
       }
     };
     const layoutstopHandler: cytoscape.EventHandler = event => {
-      event.cy.animate({
-        ...animationOptions,
-        center: {
-          eles: serviceName
-            ? event.cy.getElementById(serviceName)
-            : event.cy.collection()
+      setTimeout(() => {
+        if (serviceName) {
+          event.cy.animate({
+            ...animationOptions,
+            fit: {
+              eles: event.cy.elements(),
+              padding: nodeHeight
+            },
+            center: {
+              eles: event.cy.getElementById(serviceName)
+            }
+          });
+        } else {
+          event.cy.fit(undefined, nodeHeight);
         }
-      });
+      }, 1);
     };
     // debounce hover tracking so it doesn't spam telemetry with redundant events
     const trackNodeEdgeHover = debounce(
