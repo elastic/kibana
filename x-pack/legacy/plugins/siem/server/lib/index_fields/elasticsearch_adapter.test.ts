@@ -43,9 +43,9 @@ describe('Index Fields', () => {
             required: true,
             type: 'string',
             searchable: true,
-            aggregatable: true,
+            aggregatable: false,
             readFromDocValues: true,
-            category: 'base',
+            category: '_id',
             indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           },
           {
@@ -61,7 +61,7 @@ describe('Index Fields', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: true,
-            category: 'base',
+            category: '_index',
             indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           },
           {
