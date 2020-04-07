@@ -39,38 +39,14 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
 
-  class CommonPage {
-    /**
-     * Navigates the browser window to provided URL
-     * @param url URL
-     * @param shouldAcceptAlert pass 'true' if browser alert should be accepted
-     */
-    private static async navigateToUrlAndHandleAlert(url: string, shouldAcceptAlert: boolean) {
-      log.debug('Navigate to: ' + url);
-      try {
-        await browser.get(url);
-      } catch (navigationError) {
-        log.debug('Error navigating to url');
-        const alert = await browser.getAlert();
-        if (alert && alert.accept) {
-          if (shouldAcceptAlert) {
-            log.debug('Should accept alert');
-            try {
-              await alert.accept();
-            } catch (alertException) {
-              log.debug('Error accepting alert');
-              throw alertException;
-            }
-          } else {
-            log.debug('Will not accept alert');
-            throw navigationError;
-          }
-        } else {
-          throw navigationError;
-        }
-      }
-    }
+  interface NavigateProps {
+    appConfig: {};
+    ensureCurrentUrl: boolean;
+    shouldLoginIfPrompted: boolean;
+    useActualUrl: boolean;
+  }
 
+  class CommonPage {
     /**
      * Returns Kibana host URL
      */
@@ -115,28 +91,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       return currentUrl;
     }
 
-    /**
-     * Navigates browser using the pathname from the appConfig and subUrl as the hash
-     * @param appName As defined in the apps config, e.g. 'home'
-     * @param subUrl The route after the hash (#), e.g. 'tutorial_directory/sampleData'
-     * @param args additional arguments
-     */
-    public async navigateToUrl(
-      appName: string,
-      subUrl?: string,
-      {
-        basePath = '',
-        ensureCurrentUrl = true,
-        shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
-        useActualUrl = false,
-      } = {}
-    ) {
-      const appConfig = {
-        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
-        hash: useActualUrl ? subUrl : `/${appName}/${subUrl}`,
-      };
-
+    private async navigate(navigateProps: NavigateProps) {
+      const { appConfig, ensureCurrentUrl, shouldLoginIfPrompted, useActualUrl } = navigateProps;
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
 
       await retry.try(async () => {
@@ -144,7 +100,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           log.debug(`navigateToActualUrl ${appUrl}`);
           await browser.get(appUrl);
         } else {
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          log.debug(`navigateToUrl ${appUrl}`);
+          await browser.get(appUrl);
+          // accept alert if it pops up
+          const alert = await browser.getAlert();
+          await alert?.accept();
         }
 
         const currentUrl = shouldLoginIfPrompted
@@ -158,6 +118,67 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     /**
+     * Navigates browser using the pathname from the appConfig and subUrl as the hash
+     * @param appName As defined in the apps config, e.g. 'home'
+     * @param subUrl The route after the hash (#), e.g. 'tutorial_directory/sampleData'
+     * @param args additional arguments
+     */
+    public async navigateToUrl(
+      appName: string,
+      subUrl?: string,
+      {
+        basePath = '',
+        ensureCurrentUrl = true,
+        shouldLoginIfPrompted = true,
+        useActualUrl = false,
+      } = {}
+    ) {
+      const appConfig = {
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
+        hash: useActualUrl ? subUrl : `/${appName}/${subUrl}`,
+      };
+
+      await this.navigate({
+        appConfig,
+        ensureCurrentUrl,
+        shouldLoginIfPrompted,
+        useActualUrl,
+      });
+    }
+
+    /**
+     * Navigates browser using the pathname from the appConfig and subUrl as the extended path.
+     * This was added to be able to test an application that uses browser history over hash history.
+     * @param appName As defined in the apps config, e.g. 'home'
+     * @param subUrl The route after the appUrl, e.g. 'tutorial_directory/sampleData'
+     * @param args additional arguments
+     */
+    public async navigateToUrlWithBrowserHistory(
+      appName: string,
+      subUrl?: string,
+      search?: string,
+      {
+        basePath = '',
+        ensureCurrentUrl = true,
+        shouldLoginIfPrompted = true,
+        useActualUrl = true,
+      } = {}
+    ) {
+      const appConfig = {
+        // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}${subUrl}`,
+        search,
+      };
+
+      await this.navigate({
+        appConfig,
+        ensureCurrentUrl,
+        shouldLoginIfPrompted,
+        useActualUrl,
+      });
+    }
+
+    /**
      * Navigates browser using only the pathname from the appConfig
      * @param appName As defined in the apps config, e.g. 'kibana'
      * @param hash The route after the hash (#), e.g. 'management/kibana/settings'
@@ -166,18 +187,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async navigateToActualUrl(
       appName: string,
       hash?: string,
-      {
-        basePath = '',
-        ensureCurrentUrl = true,
-        shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
-      } = {}
+      { basePath = '', ensureCurrentUrl = true, shouldLoginIfPrompted = true } = {}
     ) {
       await this.navigateToUrl(appName, hash, {
         basePath,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl: true,
       });
     }
@@ -190,7 +205,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}
+      { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}
     ) {
       let appUrl: string;
       if (config.has(['apps', appName])) {
@@ -212,7 +227,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await retry.tryForTime(defaultTryTimeout * 2, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          log.debug('navigate to: ' + appUrl);
+          await browser.get(appUrl);
+          // accept alert if it pops up
+          const alert = await browser.getAlert();
+          await alert?.accept();
           await this.sleep(700);
           log.debug('returned from get, calling refresh');
           await browser.refresh();
