@@ -31,17 +31,17 @@ export async function getPackages(
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );
   });
-  const searchObjects = registryItems.map(({ name, version }) => ({
+  // get the installed packages
+  const results = await savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
-    id: `${name}-${version}`,
-  }));
-  const results = await savedObjectsClient.bulkGet<Installation>(searchObjects);
-  const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
+  });
+  // filter out any internal packages
+  const savedObjectsVisible = results.saved_objects.filter(o => !o.attributes.internal);
   const packageList = registryItems
     .map(item =>
       createInstallableFrom(
         item,
-        savedObjects.find(({ id }) => id === `${item.name}-${item.version}`)
+        savedObjectsVisible.find(({ attributes }) => attributes.name === item.name)
       )
     )
     .sort(sortByName);

@@ -9,10 +9,10 @@ import { PluginSetupContract as FeaturesPluginSetupContract } from '../../featur
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
-import { registerEndpointRoutes } from './routes/metadata';
 import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
 import { registerWhitelistRoutes } from './routes/whitelist';
+import { registerEndpointRoutes } from './routes/metadata';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;

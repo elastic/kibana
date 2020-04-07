@@ -45,8 +45,8 @@ import {
   hideLayerControl,
   hideViewControl,
   setHiddenLayers,
-  MapCenter,
 } from '../actions/map_actions';
+import { MapCenterAndZoom } from '../../../../../plugins/maps/common/descriptor_types';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -57,7 +57,8 @@ import {
 } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderToolTipContent } from '../../../../../plugins/maps/public/layers/tooltips/tooltip_property';
 
 interface MapEmbeddableConfig {
   editUrl?: string;
@@ -71,7 +72,6 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
   filters: Filter[];
   query?: Query;
-  refresh?: unknown;
   refreshConfig: RefreshInterval;
   isLayerTOCOpen: boolean;
   openTOCDetails?: string[];
@@ -80,7 +80,7 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   hideToolbarOverlay?: boolean;
   hideLayerControl?: boolean;
   hideViewControl?: boolean;
-  mapCenter?: MapCenter;
+  mapCenter?: MapCenterAndZoom;
   hiddenLayers?: string[];
   hideFilterActions?: boolean;
 }
@@ -130,6 +130,14 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
   }
 
+  setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
+    this._renderTooltipContent = renderTooltipContent;
+  };
+
+  setEventHandlers = (eventHandlers: EventHandlers) => {
+    this._eventHandlers = eventHandlers;
+  };
+
   getInspectorAdapters() {
     return getInspectorAdapters(this._store.getState());
   }
@@ -153,7 +161,12 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     timeRange,
     filters,
     refresh,
-  }: Pick<MapEmbeddableInput, 'query' | 'timeRange' | 'filters' | 'refresh'>) {
+  }: {
+    query?: Query;
+    timeRange?: TimeRange;
+    filters: Filter[];
+    refresh?: boolean;
+  }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;

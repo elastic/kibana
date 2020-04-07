@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyConfig } from '../types';
+import { UIPolicyConfig } from '../types';
 
 /**
  * A typed Object.entries() function where the keys and values are typed based on the given object
@@ -14,10 +14,10 @@ const entries = <T extends object>(o: T): Array<[keyof T, T[keyof T]]> =>
 type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
 
 /**
- * Returns a deep copy of PolicyDetailsConfig
+ * Returns a deep copy of `UIPolicyConfig` object
  */
-export function clone(policyDetailsConfig: PolicyConfig): PolicyConfig {
-  const clonedConfig: DeepPartial<PolicyConfig> = {};
+export function clone(policyDetailsConfig: UIPolicyConfig): UIPolicyConfig {
+  const clonedConfig: DeepPartial<UIPolicyConfig> = {};
   for (const [key, val] of entries(policyDetailsConfig)) {
     if (typeof val === 'object') {
       const valClone: Partial<typeof val> = {};
@@ -41,5 +41,5 @@ export function clone(policyDetailsConfig: PolicyConfig): PolicyConfig {
   /**
    * clonedConfig is typed as DeepPartial so we can construct the copy from an empty object
    */
-  return clonedConfig as PolicyConfig;
+  return clonedConfig as UIPolicyConfig;
 }

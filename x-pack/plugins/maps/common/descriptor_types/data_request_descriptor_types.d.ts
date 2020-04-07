@@ -5,38 +5,46 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from './map_descriptor';
-
-type Extent = {
-  maxLat: number;
-  maxLon: number;
-  minLat: number;
-  minLon: number;
-};
+import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
+import { MapExtent, MapQuery } from './map_descriptor';
 
 // Global map state passed to every layer.
 export type MapFilters = {
-  buffer: Extent; // extent with additional buffer
-  extent: Extent; // map viewport
+  buffer: MapExtent; // extent with additional buffer
+  extent: MapExtent; // map viewport
   filters: unknown[];
-  query: Query;
+  query: MapQuery;
   refreshTimerLastTriggeredAt: string;
   timeFilters: unknown;
   zoom: number;
 };
 
+type ESSearchSourceSyncMeta = {
+  sortField: string;
+  sortOrder: SORT_ORDER;
+  scalingType: SCALING_TYPES;
+  topHitsSplitField: string;
+  topHitsSize: number;
+};
+
+type ESGeoGridSourceSyncMeta = {
+  requestType: RENDER_AS;
+};
+
+export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta;
+
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
   geogridPrecision: number;
-  sourceQuery: Query;
-  sourceMeta: unknown;
+  sourceQuery: MapQuery;
+  sourceMeta: VectorSourceSyncMeta;
 };
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
-  sourceQuery: Query;
+  sourceQuery: MapQuery;
   timeFilters: unknown;
 };
 
