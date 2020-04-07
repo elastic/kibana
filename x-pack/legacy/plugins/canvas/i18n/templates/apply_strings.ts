@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'axios';
-import { CanvasTemplate } from '../../types';
+import axios from 'axios';
 import { getTemplateStrings } from './template_strings';
 import { TagStrings } from '../../i18n';
 
@@ -15,10 +14,10 @@ import { TagStrings } from '../../i18n';
  * so the specifications themselves have no dependency on i18n, for clarity for both
  * our and external plugin developers.
  */
-export const applyTemplateStrings = async (templateUrls: CanvasTemplate[]) => {
+export const applyTemplateStrings = async (templateUrls: string[]) => {
   const templateStrings = getTemplateStrings();
   const loadedTemplates = await Promise.all(
-    templateUrls.map(async templateUrl => (await get(templateUrl)).data)
+    templateUrls.map(async templateUrl => (await axios.get(templateUrl)).data)
   );
 
   return loadedTemplates.map(template => {
@@ -39,7 +38,7 @@ export const applyTemplateStrings = async (templateUrls: CanvasTemplate[]) => {
     }
 
     if (template.tags) {
-      template.tags = template.tags.map(tag => {
+      template.tags = template.tags.map((tag: string) => {
         if (TagStrings[tag]) {
           return TagStrings[tag]();
         }

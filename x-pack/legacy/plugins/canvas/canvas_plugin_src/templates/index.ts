@@ -20,12 +20,3 @@ export const asyncTemplateSpecs = async () =>
     statusTemplateUrl,
     summaryTemplateUrl,
   ]);
-
-// Registry expects a function that returns a spec object
-export const templateSpecs = applyTemplateStrings([
-  darkTemplate,
-  lightTemplate,
-  pitchTemplate,
-  statusTemplate,
-  summaryTemplate,
-]);

@@ -5,14 +5,18 @@
  */
 
 import { getTemplateStrings } from './template_strings';
-import { templateSpecs } from '../../canvas_plugin_src/templates';
+import { asyncTemplateSpecs } from '../../canvas_plugin_src/templates';
 
 import { TagStrings } from '../tags';
 
 describe('TemplateStrings', () => {
   const templateStrings = getTemplateStrings();
-  const templateNames = templateSpecs.map(template => template().name);
+  const templateNames: any[] = [];
   const stringKeys = Object.keys(templateStrings);
+
+  beforeAll(async () => {
+    templateNames.push(...(await asyncTemplateSpecs()).map(template => template().name));
+  });
 
   test('All template names should exist in the strings definition', () => {
     templateNames.forEach((name: string) => expect(stringKeys).toContain(name));
@@ -36,10 +40,10 @@ describe('TemplateStrings', () => {
     });
   });
 
-  test('All templates should have tags that are defined', () => {
+  test('All templates should have tags that are defined', async () => {
     const tagNames = Object.keys(TagStrings);
 
-    templateSpecs.forEach(template => {
+    templateNames.forEach(template => {
       template().tags.forEach((tagName: string) => expect(tagNames).toContain(tagName));
     });
   });
