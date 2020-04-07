@@ -17,7 +17,7 @@ export interface ActionGroup {
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
-  isESOUsingEphemeralEncryptionKey: boolean;
+  hasPermanentEncryptionKey: boolean;
 }
 
 export const BASE_ALERT_API_PATH = '/api/alert';
