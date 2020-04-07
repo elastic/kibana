@@ -29,11 +29,36 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 import { Lifecycle } from './lifecycle';
 import { TestTracker } from './test_tracker';
 
+const DEFAULT_TEST_METADATA_PATH = join(REPO_ROOT, 'target', 'test_metadata.json');
 const MOCK_CONFIG_PATH = join('test', 'config.js');
 const MOCK_TEST_PATH = join('test', 'apps', 'test.js');
+const ENVS_TO_RESET = ['TEST_METADATA_PATH'];
 
 describe('TestTracker', () => {
-  let mocks: Record<string, any>;
+  const originalEnvs: Record<string, string> = {};
+
+  beforeEach(() => {
+    for (const env of ENVS_TO_RESET) {
+      if (env in process.env) {
+        originalEnvs[env] = process.env[env] || '';
+        delete process.env[env];
+      }
+    }
+  });
+
+  afterEach(() => {
+    for (const env of ENVS_TO_RESET) {
+      delete process.env[env];
+    }
+
+    for (const env of Object.keys(originalEnvs)) {
+      process.env[env] = originalEnvs[env];
+    }
+
+    jest.resetAllMocks();
+  });
+
+  let MOCKS: Record<string, object>;
 
   const createMock = (overrides = {}) => {
     return {
@@ -47,30 +72,35 @@ describe('TestTracker', () => {
     };
   };
 
-  beforeEach(() => {
-    mocks = {
-      WITH_TESTS: createMock({ tests: [{}] }),
-      WITHOUT_TESTS: createMock(),
-    };
-  });
-
-  it('collects metadata for the current test', async () => {
+  const runLifecycleWithMocks = async (mocks: object[]) => {
     const lifecycle = new Lifecycle();
     const testTracker = new TestTracker(lifecycle);
 
-    const mockSuite = mocks.WITH_TESTS;
-    await lifecycle.beforeTestSuite.trigger(mockSuite);
-    await lifecycle.afterTestSuite.trigger(mockSuite);
-    // await lifecycle.cleanup.trigger();
+    for (const mock of mocks) {
+      await lifecycle.beforeTestSuite.trigger(mock);
+    }
+
+    for (const mock of mocks.reverse()) {
+      await lifecycle.afterTestSuite.trigger(mock);
+    }
+
+    return { lifecycle, testTracker };
+  };
+
+  beforeEach(() => {
+    MOCKS = {
+      WITH_TESTS: createMock({ tests: [{}] }), // i.e. a describe with tests in it
+      WITHOUT_TESTS: createMock(), // i.e. a describe with only other describes in it
+    };
+  });
+
+  it('collects metadata for a single suite with multiple describe()s', async () => {
+    const { testTracker } = await runLifecycleWithMocks([MOCKS.WITHOUT_TESTS, MOCKS.WITH_TESTS]);
 
     const suites = testTracker.getAllFinishedSuites();
     expect(suites.length).toBe(1);
     const suite = suites[0];
 
-    // [{"config": "test/config.js", "duration": 0, "endTime": 2020-04-03T16:10:59.115Z, "file": "test/apps/test.js",
-    // "leafSuite": true, "startTime": 2020-04-03T16:10:59.115Z, "success": true, "tag": undefined, "title": undefined}]
-
-    // expect(fs.writeFileSync).toHaveBeenCalledWith(1);
     expect(suite).toMatchObject({
       config: MOCK_CONFIG_PATH,
       file: MOCK_TEST_PATH,
@@ -78,5 +108,26 @@ describe('TestTracker', () => {
       leafSuite: true,
       success: true,
     });
+  });
+
+  it('writes metadata to a file when cleanup is triggered', async () => {
+    const { lifecycle, testTracker } = await runLifecycleWithMocks([MOCKS.WITH_TESTS]);
+    await lifecycle.cleanup.trigger();
+
+    const suites = testTracker.getAllFinishedSuites();
+
+    const call = (fs.writeFileSync as jest.Mock).mock.calls[0];
+    expect(call[0]).toEqual(DEFAULT_TEST_METADATA_PATH);
+    expect(call[1]).toEqual(JSON.stringify(suites, null, 2));
+  });
+
+  it('respects TEST_METADATA_PATH env var for metadata target override', async () => {
+    process.env.TEST_METADATA_PATH = '/dev/null/fake-test-path';
+    const { lifecycle } = await runLifecycleWithMocks([MOCKS.WITH_TESTS]);
+    await lifecycle.cleanup.trigger();
+
+    expect((fs.writeFileSync as jest.Mock).mock.calls[0][0]).toEqual(
+      process.env.TEST_METADATA_PATH
+    );
   });
 });
