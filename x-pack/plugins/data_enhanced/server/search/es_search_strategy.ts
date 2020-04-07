@@ -45,7 +45,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
 
   const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async id => {
     const method = 'DELETE';
-    const path = encodeURI(`_async_search/${id}`);
+    const path = encodeURI(`/_async_search/${id}`);
     await caller('transport.request', { method, path });
   };
 
@@ -66,7 +66,7 @@ async function asyncSearch(
   const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
 
   const method = request.id ? 'GET' : 'POST';
-  const path = encodeURI(request.id ? `_async_search/${request.id}` : `${index}/_async_search`);
+  const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
   // Wait up to 1s for the response to return
   const query = toSnakeCase({ waitForCompletionTimeout: '1s', ...queryParams });
@@ -87,7 +87,7 @@ async function rollupSearch(
 ) {
   const { body, index, ...params } = request.params;
   const method = 'POST';
-  const path = encodeURI(`${index}/_rollup_search`);
+  const path = encodeURI(`/${index}/_rollup_search`);
   const query = toSnakeCase(params);
 
   const rawResponse = await ((caller(
