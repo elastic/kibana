@@ -7,20 +7,21 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import './empty_connectors_prompt.scss';
 
 export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
   <EuiEmptyPrompt
     data-test-subj="createFirstConnectorEmptyPrompt"
     title={
       <Fragment>
-        <EuiIcon type="logoSlack" size="xl" className="actConnectorsList__logo" />
-        <EuiIcon type="logoGmail" size="xl" className="actConnectorsList__logo" />
-        <EuiIcon type="logoWebhook" size="xl" className="actConnectorsList__logo" />
+        <EuiIcon type="logoSlack" size="xl" className="actEmptyConnectorsPrompt__logo" />
+        <EuiIcon type="logoGmail" size="xl" className="actEmptyConnectorsPrompt__logo" />
+        <EuiIcon type="logoWebhook" size="xl" className="actEmptyConnectorsPrompt__logo" />
         <EuiSpacer size="s" />
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyTitle"
+              id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionEmptyTitle"
               defaultMessage="Create your first connector"
             />
           </h2>
@@ -30,7 +31,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
     body={
       <p>
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyBody"
+          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionEmptyBody"
           defaultMessage="Configure email, Slack, Elasticsearch, and third-party services that Kibana can trigger."
         />
       </p>
@@ -45,7 +46,7 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
         onClick={onCTAClicked}
       >
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addActionButtonLabel"
           defaultMessage="Create connector"
         />
       </EuiButton>

@@ -15,7 +15,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertsList.emptyTitle"
+          id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
           defaultMessage="Create your first alert"
         />
       </h2>
@@ -23,7 +23,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
     body={
       <p>
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertsList.emptyDesc"
+          id="xpack.triggersActionsUI.components.emptyPrompt.emptyDesc"
           defaultMessage="Receive an alert through email, Slack, or another connector when a trigger is hit."
         />
       </p>
@@ -38,7 +38,7 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
         onClick={onCTAClicked}
       >
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertsList.emptyButton"
+          id="xpack.triggersActionsUI.components.emptyPrompt.emptyButton"
           defaultMessage="Create alert"
         />
       </EuiButton>

@@ -8,14 +8,20 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ActionNeededPrompt: FunctionComponent = ({ children }) => (
+interface Props {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export const ActionNeededPrompt: FunctionComponent<Props> = ({ children, style }) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="createFirstAlertEmptyPrompt"
+    style={style ?? {}}
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.actionNeededPrompt.title"
+          id="xpack.triggersActionsUI.components.actionNeededPrompt.title"
           defaultMessage="Action needed"
         />
       </h2>
