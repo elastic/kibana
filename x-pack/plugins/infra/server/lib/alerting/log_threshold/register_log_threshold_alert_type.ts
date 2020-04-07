@@ -10,13 +10,31 @@ import { PluginSetupContract } from '../../../../../alerting/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { LOG_THRESHOLD_ALERT_TYPE_ID } from './types';
 
-const sampleActionVariableDescription = i18n.translate(
-  'xpack.infra.logs.alerting.threshold.sampleActionVariableDescription',
-  {
-    defaultMessage:
-      'Action variables are whatever values you want to make available to messages that this alert sends. This one would replace {{context.sample}} in an action message.',
-  }
-);
+// const sampleActionVariableDescription = i18n.translate(
+//   'xpack.infra.logs.alerting.threshold.sampleActionVariableDescription',
+//   {
+//     defaultMessage:
+//       'Action variables are whatever values you want to make available to messages that this alert sends. This one would replace in an action message.',
+//   }
+// );
+
+const criteriaSchema = schema.object({
+  threshold: schema.oneOf([schema.number(), schema.string()]),
+  comparator: schema.oneOf([
+    schema.literal('>'),
+    schema.literal('<'),
+    schema.literal('>='),
+    schema.literal('<='),
+    schema.literal('equals'),
+    schema.literal('does not equal'),
+    schema.literal('matches'),
+    schema.literal('does not match'),
+  ]),
+  timeUnit: schema.string(),
+  timeSize: schema.number(),
+  field: schema.string(),
+  aggType: schema.oneOf([schema.literal('documentCount')]),
+});
 
 export async function registerLogThresholdAlertType(alertingPlugin: PluginSetupContract) {
   if (!alertingPlugin) {
@@ -32,17 +50,14 @@ export async function registerLogThresholdAlertType(alertingPlugin: PluginSetupC
     name: 'Log threshold',
     validate: {
       params: schema.object({
-        threshold: schema.number(),
-        comparator: schema.oneOf([schema.literal('>'), schema.literal('>=')]),
-        timeUnit: schema.string(),
-        timeSize: schema.number(),
+        criteria: schema.arrayOf(criteriaSchema),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     executor: createLogThresholdExecutor(alertUUID),
-    actionVariables: {
-      context: [{ name: 'sample', description: sampleActionVariableDescription }],
-    },
+    // actionVariables: {
+    //   context: [{ name: 'sample', description: sampleActionVariableDescription }],
+    // },
   });
 }
