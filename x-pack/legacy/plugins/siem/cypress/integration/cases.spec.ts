@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-describe('Cases', () => {});
+import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+
+describe('Cases', () => {
+  it('Creates a new case', () => {
+    loginAndWaitForPageWithoutDateRange('/app/siem#/case');
+  });
+});
