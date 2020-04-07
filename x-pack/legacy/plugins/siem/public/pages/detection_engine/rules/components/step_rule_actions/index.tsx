@@ -134,7 +134,11 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                   messageVariables: actionMessageParams,
                 }}
               />
-              <UseField path="" defaultValue={kibanaAbsoluteUrl} component={GhostFormField} />
+              <UseField
+                path="kibanaSiemAppUrl"
+                defaultValue={kibanaAbsoluteUrl}
+                component={GhostFormField}
+              />
             </>
           )}
           <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
