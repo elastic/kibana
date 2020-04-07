@@ -5,7 +5,8 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -19,7 +20,14 @@ import {
 
 import { ExperimentalBadge } from '../experimental_badge';
 
-export function WelcomeContent() {
+export const WelcomeContent: FC = () => {
+  const toolTipContent = i18n.translate(
+    'xpack.ml.fileDatavisualizer.welcomeContent.experimentalFeatureTooltip',
+    {
+      defaultMessage: "Experimental feature. We'd love to hear your feedback.",
+    }
+  );
+
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -32,16 +40,7 @@ export function WelcomeContent() {
               id="xpack.ml.fileDatavisualizer.welcomeContent.visualizeDataFromLogFileTitle"
               defaultMessage="Visualize data from a log file&nbsp;{experimentalBadge}"
               values={{
-                experimentalBadge: (
-                  <ExperimentalBadge
-                    tooltipContent={
-                      <FormattedMessage
-                        id="xpack.ml.fileDatavisualizer.welcomeContent.experimentalFeatureTooltip"
-                        defaultMessage="Experimental feature. We'd love to hear your feedback."
-                      />
-                    }
-                  />
-                ),
+                experimentalBadge: <ExperimentalBadge tooltipContent={toolTipContent} />,
               }}
             />
           </h1>
@@ -144,4 +143,4 @@ export function WelcomeContent() {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+};

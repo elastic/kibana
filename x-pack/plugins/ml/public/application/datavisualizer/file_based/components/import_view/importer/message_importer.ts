@@ -4,17 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Importer } from './importer';
+import { Importer, ImportConfig } from './importer';
+import {
+  Doc,
+  FindFileStructureResponse,
+} from '../../../../../../../common/types/file_datavisualizer';
 
 export class MessageImporter extends Importer {
-  constructor(results, settings) {
+  private _excludeLinesRegex: RegExp | null;
+  private _multilineStartRegex: RegExp | null;
+
+  constructor(results: FindFileStructureResponse, settings: ImportConfig) {
     super(settings);
 
-    this.excludeLinesRegex =
+    this._excludeLinesRegex =
       results.exclude_lines_pattern === undefined
         ? null
         : new RegExp(results.exclude_lines_pattern);
-    this.multilineStartRegex =
+    this._multilineStartRegex =
       results.multiline_start_pattern === undefined
         ? null
         : new RegExp(results.multiline_start_pattern);
@@ -26,9 +33,9 @@ export class MessageImporter extends Importer {
   // multiline_start_pattern regex
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a newline char inside a field value, so keep looking.
-  read(text) {
+  read(text: string) {
     try {
-      const data = [];
+      const data: Doc[] = [];
 
       let message = '';
       let line = '';
@@ -57,14 +64,12 @@ export class MessageImporter extends Importer {
         data.shift();
       }
 
-      this.data = data;
-      this.docArray = this.data;
+      this._docArray = data;
 
       return {
         success: true,
       };
     } catch (error) {
-      console.error(error);
       return {
         success: false,
         error,
@@ -72,9 +77,9 @@ export class MessageImporter extends Importer {
     }
   }
 
-  processLine(data, message, line) {
-    if (this.excludeLinesRegex === null || line.match(this.excludeLinesRegex) === null) {
-      if (this.multilineStartRegex === null || line.match(this.multilineStartRegex) !== null) {
+  processLine(data: Doc[], message: string, line: string) {
+    if (this._excludeLinesRegex === null || line.match(this._excludeLinesRegex) === null) {
+      if (this._multilineStartRegex === null || line.match(this._multilineStartRegex) !== null) {
         this.addMessage(data, message);
         message = '';
       } else if (data.length === 0) {
@@ -90,7 +95,7 @@ export class MessageImporter extends Importer {
     return message;
   }
 
-  addMessage(data, message) {
+  addMessage(data: Doc[], message: string) {
     // if the message ended \r\n (Windows line endings)
     // then omit the \r as well as the \n for consistency
     message = message.replace(/\r$/, '');

@@ -5,11 +5,29 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiSpacer, EuiDescriptionList, EuiCallOut, EuiAccordion } from '@elastic/eui';
 
-export function ImportSummary({
+interface Props {
+  index: string;
+  indexPattern: string;
+  ingestPipelineId: string;
+  docCount: number;
+  importFailures: DocFailure[];
+  createIndexPattern: boolean;
+  createPipeline: boolean;
+}
+
+interface DocFailure {
+  item: number;
+  reason: string;
+  doc: {
+    message: string;
+  };
+}
+
+export const ImportSummary: FC<Props> = ({
   index,
   indexPattern,
   ingestPipelineId,
@@ -17,7 +35,7 @@ export function ImportSummary({
   importFailures,
   createIndexPattern,
   createPipeline,
-}) {
+}) => {
   const items = createDisplayItems(
     index,
     indexPattern,
@@ -75,9 +93,13 @@ export function ImportSummary({
       )}
     </React.Fragment>
   );
+};
+
+interface FailuresProps {
+  failedDocs: DocFailure[];
 }
 
-function Failures({ failedDocs }) {
+const Failures: FC<FailuresProps> = ({ failedDocs }) => {
   return (
     <EuiAccordion
       id="failureList"
@@ -101,16 +123,16 @@ function Failures({ failedDocs }) {
       </div>
     </EuiAccordion>
   );
-}
+};
 
 function createDisplayItems(
-  index,
-  indexPattern,
-  ingestPipelineId,
-  docCount,
-  importFailures,
-  createIndexPattern,
-  createPipeline
+  index: string,
+  indexPattern: string,
+  ingestPipelineId: string,
+  docCount: number,
+  importFailures: DocFailure[],
+  createIndexPattern: boolean,
+  createPipeline: boolean
 ) {
   const items = [
     {

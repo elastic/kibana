@@ -4,11 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { overrideDefaults, DEFAULT_LINES_TO_SAMPLE } from './overrides';
 import { isEqual } from 'lodash';
 import { ml } from '../../../../services/ml_api_service';
+import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
 
-export function readFile(file) {
+const DEFAULT_LINES_TO_SAMPLE = 1000;
+
+const overrideDefaults = {
+  timestampFormat: undefined,
+  timestampField: undefined,
+  format: undefined,
+  delimiter: undefined,
+  quote: undefined,
+  hasHeaderRow: undefined,
+  charset: undefined,
+  columnNames: undefined,
+  shouldTrimFields: undefined,
+  grokPattern: undefined,
+  linesToSample: undefined,
+};
+
+export function readFile(file: File) {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
       const reader = new FileReader();
@@ -23,14 +39,14 @@ export function readFile(file) {
             resolve({ data });
           }
         };
-      })(file);
+      })();
     } else {
       reject();
     }
   });
 }
 
-export function reduceData(data, mb) {
+export function reduceData(data: string, mb: number) {
   // assuming ascii characters in the file where 1 char is 1 byte
   // TODO -  change this when other non UTF-8 formats are
   // supported for the read data
@@ -38,8 +54,8 @@ export function reduceData(data, mb) {
   return data.length >= size ? data.slice(0, size) : data;
 }
 
-export function createUrlOverrides(overrides, originalSettings) {
-  const formattedOverrides = {};
+export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {
+  const formattedOverrides: InputOverrides = {};
   for (const o in overrideDefaults) {
     if (overrideDefaults.hasOwnProperty(o)) {
       let value = overrides[o];
@@ -93,15 +109,15 @@ export function createUrlOverrides(overrides, originalSettings) {
   return formattedOverrides;
 }
 
-export function processResults(results) {
+export function processResults({ results, overrides }: AnalysisResult) {
   const timestampFormat =
     results.java_timestamp_formats !== undefined && results.java_timestamp_formats.length
       ? results.java_timestamp_formats[0]
       : undefined;
 
   const linesToSample =
-    results.overrides !== undefined && results.overrides.lines_to_sample !== undefined
-      ? results.overrides.lines_to_sample
+    overrides !== undefined && overrides.lines_to_sample !== undefined
+      ? overrides.lines_to_sample
       : DEFAULT_LINES_TO_SAMPLE;
 
   return {
@@ -125,8 +141,8 @@ export function processResults(results) {
  * @param {string} indexName
  * @returns {Promise<boolean>}
  */
-export async function hasImportPermission(indexName) {
-  const priv = {
+export async function hasImportPermission(indexName: string) {
+  const priv: { cluster: string[]; index?: any } = {
     cluster: ['cluster:monitor/nodes/info', 'cluster:admin/ingest/pipeline/put'],
   };
 

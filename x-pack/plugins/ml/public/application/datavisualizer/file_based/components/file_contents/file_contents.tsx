@@ -5,13 +5,19 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
 
-export function FileContents({ data, format, numberOfLines }) {
+interface Props {
+  data: string;
+  format: string;
+  numberOfLines: number;
+}
+
+export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
   let mode = ML_EDITOR_MODE.TEXT;
   if (format === ML_EDITOR_MODE.JSON) {
     mode = ML_EDITOR_MODE.JSON;
@@ -35,7 +41,7 @@ export function FileContents({ data, format, numberOfLines }) {
           id="xpack.ml.fileDatavisualizer.fileContents.firstLinesDescription"
           defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
           values={{
-            numberOfLines: numberOfLines,
+            numberOfLines,
           }}
         />
       </div>
@@ -51,9 +57,9 @@ export function FileContents({ data, format, numberOfLines }) {
       />
     </React.Fragment>
   );
-}
+};
 
-function limitByNumberOfLines(data, numberOfLines) {
+function limitByNumberOfLines(data: string, numberOfLines: number) {
   return data
     .split('\n')
     .slice(0, numberOfLines)

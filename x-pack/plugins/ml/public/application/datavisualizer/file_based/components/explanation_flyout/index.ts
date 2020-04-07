@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createGetMonitorDetailsRoute } from './monitors_details';
-export { createGetMonitorLocationsRoute } from './monitor_locations';
-export { createGetStatusBarRoute } from './monitor_status';
+export { ExplanationFlyout } from './explanation_flyout';
