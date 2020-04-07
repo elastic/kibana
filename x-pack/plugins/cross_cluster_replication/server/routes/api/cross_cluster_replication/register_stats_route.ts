@@ -5,7 +5,6 @@
  */
 
 import { addBasePath } from '../../../services';
-// @ts-ignore
 import { deserializeAutoFollowStats } from '../../../lib/ccr_stats_serialization';
 import { RouteDependencies } from '../../../types';
 

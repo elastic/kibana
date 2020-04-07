@@ -5,12 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  deserializeFollowerIndex,
-  // @ts-ignore
-} from '../../../../common/services/follower_index_serialization';
+import { deserializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
 import { addBasePath } from '../../../services';
-// @ts-ignore
 import { RouteDependencies } from '../../../types';
 
 /**

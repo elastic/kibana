@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { IndexManagementPluginSetup } from '../../../../../plugins/index_management/public';
+
+import { IndexManagementPluginSetup } from '../../index_management/public';
 
 const propertyPath = 'isFollowerIndex';
 

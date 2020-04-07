@@ -5,11 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-// @ts-ignore
-import {
-  serializeAutoFollowPattern,
-  // @ts-ignore
-} from '../../../../common/services/auto_follow_pattern_serialization';
+import { serializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
+import { AutoFollowPattern } from '../../../../common/types';
 import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
 
@@ -31,7 +28,7 @@ export const registerUpdateRoute = ({ router, license, lib }: RouteDependencies)
     },
     license.guardApiRoute(async (context, request, response) => {
       const { id } = request.params as typeof paramsSchema.type;
-      const body = serializeAutoFollowPattern(request.body);
+      const body = serializeAutoFollowPattern(request.body as AutoFollowPattern);
 
       try {
         return response.ok({

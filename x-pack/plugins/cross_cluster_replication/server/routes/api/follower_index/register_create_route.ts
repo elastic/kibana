@@ -5,12 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  serializeFollowerIndex,
-  // @ts-ignore
-} from '../../../../common/services/follower_index_serialization';
+import { serializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
+import { FollowerIndex } from '../../../../common/types';
 import { addBasePath } from '../../../services';
-// @ts-ignore
 import { removeEmptyFields } from '../../../../common/services/utils';
 import { RouteDependencies } from '../../../types';
 
@@ -34,7 +31,7 @@ export const registerCreateRoute = ({ router, license, lib }: RouteDependencies)
     },
     license.guardApiRoute(async (context, request, response) => {
       const { name, ...rest } = request.body as typeof bodySchema.type;
-      const body = removeEmptyFields(serializeFollowerIndex(rest));
+      const body = removeEmptyFields(serializeFollowerIndex(rest as FollowerIndex));
 
       try {
         return response.ok({

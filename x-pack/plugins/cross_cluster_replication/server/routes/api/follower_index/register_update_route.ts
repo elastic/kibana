@@ -5,11 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  serializeAdvancedSettings,
-  // @ts-ignore
-} from '../../../../common/services/follower_index_serialization';
-// @ts-ignore
+import { serializeAdvancedSettings } from '../../../../common/services/follower_index_serialization';
+import { FollowerIndexAdvancedSettings } from '../../../../common/types';
 import { removeEmptyFields } from '../../../../common/services/utils';
 import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
@@ -53,7 +50,9 @@ export const registerUpdateRoute = ({ router, license, lib }: RouteDependencies)
         }
 
         // Resume follower
-        const body = removeEmptyFields(serializeAdvancedSettings(request.body));
+        const body = removeEmptyFields(
+          serializeAdvancedSettings(request.body as FollowerIndexAdvancedSettings)
+        );
         return response.ok({
           body: await context.crossClusterReplication!.client.callAsCurrentUser(
             'ccr.resumeFollowerIndex',

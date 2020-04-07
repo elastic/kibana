@@ -5,11 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-// @ts-ignore
-import {
-  serializeAutoFollowPattern,
-  // @ts-ignore
-} from '../../../../common/services/auto_follow_pattern_serialization';
+import { serializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
+import { AutoFollowPattern } from '../../../../common/types';
 import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
 
@@ -33,7 +30,7 @@ export const registerCreateRoute = ({ router, license, lib }: RouteDependencies)
     },
     license.guardApiRoute(async (context, request, response) => {
       const { id, ...rest } = request.body as typeof bodySchema.type;
-      const body = serializeAutoFollowPattern(rest);
+      const body = serializeAutoFollowPattern(rest as AutoFollowPattern);
 
       /**
        * First let's make sur that an auto-follow pattern with

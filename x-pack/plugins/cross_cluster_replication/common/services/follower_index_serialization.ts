@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable camelcase */
+import {
+  ShardFromEs,
+  Shard,
+  FollowerIndexFromEs,
+  FollowerIndex,
+  FollowerIndexToEs,
+  FollowerIndexAdvancedSettings,
+  FollowerIndexAdvancedSettingsToEs,
+} from '../types';
+
 export const deserializeShard = ({
   remote_cluster,
   leader_index,
@@ -32,7 +41,7 @@ export const deserializeShard = ({
   operations_written,
   read_exceptions,
   time_since_last_read_millis,
-}) => ({
+}: ShardFromEs): Shard => ({
   id: shard_id,
   remoteCluster: remote_cluster,
   leaderIndex: leader_index,
@@ -61,9 +70,7 @@ export const deserializeShard = ({
   readExceptions: read_exceptions,
   timeSinceLastReadMs: time_since_last_read_millis,
 });
-/* eslint-enable camelcase */
 
-/* eslint-disable camelcase */
 export const deserializeFollowerIndex = ({
   follower_index,
   remote_cluster,
@@ -82,7 +89,7 @@ export const deserializeFollowerIndex = ({
     read_poll_timeout,
   } = {},
   shards,
-}) => ({
+}: FollowerIndexFromEs): FollowerIndex => ({
   name: follower_index,
   remoteCluster: remote_cluster,
   leaderIndex: leader_index,
@@ -99,10 +106,10 @@ export const deserializeFollowerIndex = ({
   readPollTimeout: read_poll_timeout,
   shards: shards && shards.map(deserializeShard),
 });
-/* eslint-enable camelcase */
 
-export const deserializeListFollowerIndices = followerIndices =>
-  followerIndices.map(deserializeFollowerIndex);
+export const deserializeListFollowerIndices = (
+  followerIndices: FollowerIndexFromEs[]
+): FollowerIndex[] => followerIndices.map(deserializeFollowerIndex);
 
 export const serializeAdvancedSettings = ({
   maxReadRequestOperationCount,
@@ -115,7 +122,7 @@ export const serializeAdvancedSettings = ({
   maxWriteBufferSize,
   maxRetryDelay,
   readPollTimeout,
-}) => ({
+}: FollowerIndexAdvancedSettings): FollowerIndexAdvancedSettingsToEs => ({
   max_read_request_operation_count: maxReadRequestOperationCount,
   max_outstanding_read_requests: maxOutstandingReadRequests,
   max_read_request_size: maxReadRequestSize,
@@ -128,7 +135,7 @@ export const serializeAdvancedSettings = ({
   read_poll_timeout: readPollTimeout,
 });
 
-export const serializeFollowerIndex = followerIndex => ({
+export const serializeFollowerIndex = (followerIndex: FollowerIndex): FollowerIndexToEs => ({
   remote_cluster: followerIndex.remoteCluster,
   leader_index: followerIndex.leaderIndex,
   ...serializeAdvancedSettings(followerIndex),

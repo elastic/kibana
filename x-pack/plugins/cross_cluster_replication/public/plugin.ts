@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   ChromeBreadcrumb,
   CoreSetup,
@@ -11,7 +12,7 @@ import {
   DocLinksStart,
 } from 'src/core/public';
 
-import { IndexManagementPluginSetup } from '../../../../../plugins/index_management/public';
+import { IndexManagementPluginSetup } from '../../index_management/public';
 
 // @ts-ignore;
 import { setHttpClient } from './app/services/api';

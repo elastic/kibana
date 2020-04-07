@@ -5,11 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-// @ts-ignore
-import {
-  deserializeAutoFollowPattern,
-  // @ts-ignore
-} from '../../../../common/services/auto_follow_pattern_serialization';
+
+import { deserializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
 import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
 

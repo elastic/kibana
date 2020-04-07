@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import {
-  deserializeListAutoFollowPatterns,
-  // @ts-ignore
-} from '../../../../common/services/auto_follow_pattern_serialization';
+import { deserializeListAutoFollowPatterns } from '../../../../common/services/auto_follow_pattern_serialization';
 import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
 

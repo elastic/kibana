@@ -6,9 +6,9 @@
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from 'src/core/public';
 
-import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public';
+import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
-import { BASE_PATH } from '../../../../common/constants';
+import { BASE_PATH } from '../../../common/constants';
 
 let setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 

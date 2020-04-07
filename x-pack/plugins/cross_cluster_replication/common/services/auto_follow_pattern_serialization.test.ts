@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AutoFollowPattern, AutoFollowPatternFromEs } from '../types';
+
 import {
   deserializeAutoFollowPattern,
   deserializeListAutoFollowPatterns,
@@ -12,13 +14,10 @@ import {
 
 describe('[CCR] auto-follow_serialization', () => {
   describe('deserializeAutoFollowPattern()', () => {
-    it('should return empty object if name or esObject are not provided', () => {
-      expect(deserializeAutoFollowPattern()).toEqual({});
-    });
-
     it('should deserialize Elasticsearch object', () => {
       const expected = {
         name: 'some-name',
+        active: true,
         remoteCluster: 'foo',
         leaderIndexPatterns: ['foo-*'],
         followIndexPattern: 'bar',
@@ -27,13 +26,14 @@ describe('[CCR] auto-follow_serialization', () => {
       const esObject = {
         name: 'some-name',
         pattern: {
+          active: true,
           remote_cluster: expected.remoteCluster,
           leader_index_patterns: expected.leaderIndexPatterns,
           follow_index_pattern: expected.followIndexPattern,
         },
       };
 
-      expect(deserializeAutoFollowPattern(esObject)).toEqual(expected);
+      expect(deserializeAutoFollowPattern(esObject as AutoFollowPatternFromEs)).toEqual(expected);
     });
   });
 
@@ -78,7 +78,9 @@ describe('[CCR] auto-follow_serialization', () => {
         ],
       };
 
-      expect(deserializeListAutoFollowPatterns(esObjects.patterns)).toEqual(expected);
+      expect(
+        deserializeListAutoFollowPatterns(esObjects.patterns as AutoFollowPatternFromEs[])
+      ).toEqual(expected);
     });
   });
 
@@ -96,7 +98,7 @@ describe('[CCR] auto-follow_serialization', () => {
         followIndexPattern: expected.follow_index_pattern,
       };
 
-      expect(serializeAutoFollowPattern(object)).toEqual(expected);
+      expect(serializeAutoFollowPattern(object as AutoFollowPattern)).toEqual(expected);
     });
   });
 });

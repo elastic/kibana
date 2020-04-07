@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  deserializeListFollowerIndices,
-  // @ts-ignore
-} from '../../../../common/services/follower_index_serialization';
+import { deserializeListFollowerIndices } from '../../../../common/services/follower_index_serialization';
 import { addBasePath } from '../../../services';
-// @ts-ignore
 import { RouteDependencies } from '../../../types';
 
 /**
