@@ -38,9 +38,7 @@ export function ErrorRateAlertTrigger(props: Props) {
     ...alertParams
   };
 
-  const threshold = isFinite(alertParams.threshold)
-    ? alertParams.threshold
-    : '';
+  const threshold = isFinite(params.threshold) ? params.threshold : '';
 
   const fields = [
     <PopoverExpression
