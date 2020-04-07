@@ -14,13 +14,13 @@ import {
   EuiSelect,
   EuiTitle,
   EuiIconTip,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
-import { EuiContextMenuPanel } from '@elastic/eui';
-import { EuiContextMenuItem } from '@elastic/eui';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
