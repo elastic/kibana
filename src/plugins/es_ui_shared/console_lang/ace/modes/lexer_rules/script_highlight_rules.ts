@@ -17,13 +17,13 @@
  * under the License.
  */
 
-const ace = require('brace');
+import ace from 'brace';
 const oop = ace.acequire('ace/lib/oop');
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 const painlessKeywords =
   'def|int|long|byte|String|float|double|char|null|if|else|while|do|for|continue|break|new|try|catch|throw|this|instanceof|return|ctx';
 
-export function ScriptHighlightRules() {
+export function ScriptHighlightRules(this: any) {
   this.name = 'ScriptHighlightRules';
   this.$rules = {
     start: [

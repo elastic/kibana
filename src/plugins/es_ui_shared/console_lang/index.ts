@@ -25,5 +25,4 @@ export {
   ScriptHighlightRules,
   XJsonHighlightRules,
   addXJsonToRules,
-  XJsonMode,
 } from './ace/modes';
