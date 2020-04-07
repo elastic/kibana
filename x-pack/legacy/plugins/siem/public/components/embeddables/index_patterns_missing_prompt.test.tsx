@@ -14,6 +14,6 @@ jest.mock('../../lib/kibana');
 describe('IndexPatternsMissingPrompt', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<IndexPatternsMissingPromptComponent />);
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiEmptyPrompt')).toHaveLength(1);
   });
 });

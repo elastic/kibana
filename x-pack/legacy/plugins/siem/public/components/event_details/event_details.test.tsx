@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
@@ -17,25 +16,6 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EventDetails', () => {
   const mount = useMountAppended();
-
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const wrapper = shallow(
-        <EventDetails
-          browserFields={mockBrowserFields}
-          columnHeaders={defaultHeaders}
-          data={mockDetailItemData}
-          id={mockDetailItemDataId}
-          view="table-view"
-          onUpdateColumns={jest.fn()}
-          onViewSelected={jest.fn()}
-          timelineId="test"
-          toggleColumn={jest.fn()}
-        />
-      );
-      expect(wrapper).toMatchSnapshot();
-    });
-  });
 
   describe('tabs', () => {
     ['Table', 'JSON View'].forEach(tab => {

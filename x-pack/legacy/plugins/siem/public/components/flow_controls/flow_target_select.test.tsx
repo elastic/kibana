@@ -27,7 +27,7 @@ describe('FlowTargetSelect Component', () => {
     test('it renders the FlowTargetSelect', () => {
       const wrapper = shallow(<FlowTargetSelect {...mockProps} />);
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('EuiSuperSelect')).toHaveLength(1);
     });
   });
 

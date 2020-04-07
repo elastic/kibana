@@ -13,23 +13,17 @@ import { ArrowBody, ArrowHead } from '.';
 
 describe('arrows', () => {
   describe('ArrowBody', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ArrowBody height={3} />
-        </TestProviders>
-      );
-      expect(wrapper.find('ArrowBody')).toMatchSnapshot();
+    test('renders correctly', () => {
+      const wrapper = mount(<ArrowBody height={3} />, { wrappingComponent: TestProviders });
+      expect(wrapper.find('ArrowBody').prop('height')).toEqual(3);
     });
   });
 
   describe('ArrowHead', () => {
     test('it renders an arrow head icon', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ArrowHead direction={'arrowLeft'} />
-        </TestProviders>
-      );
+      const wrapper = mount(<ArrowHead direction={'arrowLeft'} />, {
+        wrappingComponent: TestProviders,
+      });
 
       expect(
         wrapper

@@ -19,10 +19,8 @@ import { Loader } from '../../loader';
 import * as i18n from '../translations';
 
 export const MapToolTipComponent = ({
-  addFilters,
   closeTooltip,
   features = [],
-  isLocked,
   getLayerName,
   loadFeatureProperties,
   loadFeatureGeometry,

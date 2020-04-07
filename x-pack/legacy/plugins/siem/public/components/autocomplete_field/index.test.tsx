@@ -104,11 +104,12 @@ const mockAutoCompleteData: QuerySuggestion[] = [
 
 describe('Autocomplete', () => {
   describe('rendering', () => {
-    test('it renders against snapshot', () => {
+    test('it renders correctly', () => {
       const placeholder = 'myPlaceholder';
 
       const wrapper = shallow(
         <AutocompleteField
+          data-test-subj="autocomplete-field"
           isLoadingSuggestions={false}
           isValid={false}
           loadSuggestions={noop}
@@ -119,7 +120,7 @@ describe('Autocomplete', () => {
           value={''}
         />
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="autocomplete-field"]')).toHaveLength(1);
     });
 
     test('it is rendering with placeholder', () => {

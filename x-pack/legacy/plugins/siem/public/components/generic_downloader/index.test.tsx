@@ -17,6 +17,7 @@ describe('GenericDownloader', () => {
         exportSelectedData={jest.fn()}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+
+    expect(wrapper.find('InvisibleAnchor')).toHaveLength(1);
   });
 });

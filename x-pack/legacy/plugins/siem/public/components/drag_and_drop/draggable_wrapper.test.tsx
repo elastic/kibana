@@ -21,7 +21,7 @@ describe('DraggableWrapper', () => {
   const mount = useMountAppended();
 
   describe('rendering', () => {
-    test('it renders against the snapshot', () => {
+    test('it renders correctly', () => {
       const wrapper = shallow(
         <TestProviders>
           <MockedProvider mocks={{}} addTypename={false}>
@@ -32,7 +32,7 @@ describe('DraggableWrapper', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('DraggableWrapper')).toMatchSnapshot();
+      expect(wrapper.find('DraggableWrapper')).toHaveLength(1);
     });
 
     test('it renders the children passed to the render prop', () => {

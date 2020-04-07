@@ -4,32 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
-import { Provider } from 'react-redux';
 
-import { apolloClientObservable, mockGlobalState } from '../../mock';
-import { createStore } from '../../store/store';
-
+import { TestProviders } from '../../mock';
 import { ErrorToastDispatcher } from '.';
-import { State } from '../../store/reducer';
 
 describe('Error Toast Dispatcher', () => {
-  const state: State = mockGlobalState;
-  let store = createStore(state, apolloClientObservable);
-
-  beforeEach(() => {
-    store = createStore(state, apolloClientObservable);
-  });
-
-  describe('rendering', () => {
-    test('it renders', () => {
-      const wrapper = shallow(
-        <Provider store={store}>
-          <ErrorToastDispatcher toastLifeTimeMs={9999999999} />
-        </Provider>
-      );
-      expect(wrapper.find('Connect(ErrorToastDispatcherComponent)')).toMatchSnapshot();
+  test('it renders', () => {
+    const wrapper = mount(<ErrorToastDispatcher toastLifeTimeMs={9999999999} />, {
+      wrappingComponent: TestProviders,
     });
+
+    expect(wrapper.find('Connect(ErrorToastDispatcherComponent)')).toHaveLength(1);
   });
 });

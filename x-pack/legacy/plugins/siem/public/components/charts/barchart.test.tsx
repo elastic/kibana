@@ -215,7 +215,6 @@ describe('BarChartBaseComponent', () => {
     });
 
     it(`should ${mockBarChartData.length} render BarSeries`, () => {
-      expect(shallow).toMatchSnapshot();
       expect(shallowWrapper.find(BarSeries)).toHaveLength(mockBarChartData.length);
     });
 

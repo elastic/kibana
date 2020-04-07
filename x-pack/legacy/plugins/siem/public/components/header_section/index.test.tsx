@@ -5,19 +5,13 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
 import { HeaderSection } from './index';
 
 describe('HeaderSection', () => {
-  test('it renders', () => {
-    const wrapper = shallow(<HeaderSection title="Test title" />);
-
-    expect(wrapper).toMatchSnapshot();
-  });
-
   test('it renders the title', () => {
     const wrapper = mount(
       <TestProviders>

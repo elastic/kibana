@@ -38,20 +38,44 @@ describe('LineToolTipContent', () => {
     },
   ];
 
-  test('renders correctly against snapshot', () => {
+  test('renders correctly', () => {
     const wrapper = shallow(
       <LineToolTipContentComponent contextId={'contextId'} featureProps={mockFeatureProps} />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[eventId="map-line-tooltip-contextId"]')).toHaveLength(1);
+    expect(
+      wrapper
+        .find('EuiFlexItem')
+        .at(1)
+        .prop('children')
+    ).toContain('Source');
+    expect(
+      wrapper
+        .find('EuiFlexItem')
+        .at(3)
+        .prop('children')
+    ).toContain('Destination');
   });
 
-  test('renders correctly against snapshot when rendering client & server', () => {
+  test('renders correctly when rendering client & server', () => {
     const wrapper = shallow(
       <LineToolTipContentComponent
         contextId={'contextId'}
         featureProps={mockClientServerFeatureProps}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[eventId="map-line-tooltip-contextId"]')).toHaveLength(1);
+    expect(
+      wrapper
+        .find('EuiFlexItem')
+        .at(1)
+        .prop('children')
+    ).toContain('Client');
+    expect(
+      wrapper
+        .find('EuiFlexItem')
+        .at(3)
+        .prop('children')
+    ).toContain('Server');
   });
 });

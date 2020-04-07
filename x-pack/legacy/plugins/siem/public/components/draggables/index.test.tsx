@@ -33,7 +33,7 @@ describe('draggables', () => {
           <span>{'A child of this'}</span>
         </DefaultDraggable>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('DraggableWrapper')).toHaveLength(1);
     });
 
     test('it renders the default Badge', () => {
@@ -49,7 +49,7 @@ describe('draggables', () => {
           <span>{'A child of this'}</span>
         </DraggableBadge>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('DefaultDraggable')).toHaveLength(1);
     });
   });
 

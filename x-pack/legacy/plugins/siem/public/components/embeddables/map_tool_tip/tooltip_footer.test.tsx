@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { ToolTipFooterComponent } from './tooltip_footer';
 
@@ -15,18 +15,6 @@ describe('ToolTipFilter', () => {
   beforeEach(() => {
     nextFeature = jest.fn();
     previousFeature = jest.fn();
-  });
-
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <ToolTipFooterComponent
-        nextFeature={nextFeature}
-        previousFeature={previousFeature}
-        featureIndex={0}
-        totalFeatures={100}
-      />
-    );
-    expect(wrapper).toMatchSnapshot();
   });
 
   describe('Lower bounds', () => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { set } from 'lodash/fp';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
@@ -28,20 +28,19 @@ describe('Flyout', () => {
   const state: State = mockGlobalState;
 
   describe('rendering', () => {
-    test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
+    test('it renders correctly', () => {
+      const wrapper = mount(
+        <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />,
+        { wrappingComponent: TestProviders }
       );
-      expect(wrapper.find('Flyout')).toMatchSnapshot();
+
+      expect(wrapper.find('Flyout')).toHaveLength(1);
     });
 
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
-        <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
+        <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />,
+        { wrappingComponent: TestProviders }
       );
 
       expect(
@@ -57,9 +56,8 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
 
       const wrapper = mount(
-        <TestProviders store={storeShowIsTrue}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
+        <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />,
+        { wrappingComponent: TestProviders, wrappingComponentProps: { store: storeShowIsTrue } }
       );
 
       expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
@@ -76,9 +74,11 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(stateWithDataProviders, apolloClientObservable);
 
       const wrapper = mount(
-        <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
+        <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />,
+        {
+          wrappingComponent: TestProviders,
+          wrappingComponentProps: { store: storeWithDataProviders },
+        }
       );
 
       expect(wrapper.find('[data-test-subj="badge"]').exists()).toEqual(true);
@@ -93,9 +93,11 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(stateWithDataProviders, apolloClientObservable);
 
       const wrapper = mount(
-        <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
+        <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />,
+        {
+          wrappingComponent: TestProviders,
+          wrappingComponentProps: { store: storeWithDataProviders },
+        }
       );
 
       expect(
@@ -108,9 +110,8 @@ describe('Flyout', () => {
 
     test('it hides the data providers badge when the timeline does NOT have data providers', () => {
       const wrapper = mount(
-        <TestProviders>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
+        <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />,
+        { wrappingComponent: TestProviders }
       );
 
       expect(
@@ -130,9 +131,11 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(stateWithDataProviders, apolloClientObservable);
 
       const wrapper = mount(
-        <TestProviders store={storeWithDataProviders}>
-          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
-        </TestProviders>
+        <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />,
+        {
+          wrappingComponent: TestProviders,
+          wrappingComponentProps: { store: storeWithDataProviders },
+        }
       );
 
       expect(
@@ -146,17 +149,16 @@ describe('Flyout', () => {
     test('should call the onOpen when the mouse is clicked for rendering', () => {
       const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(
-        <TestProviders>
-          <FlyoutComponent
-            dataProviders={mockDataProviders}
-            flyoutHeight={testFlyoutHeight}
-            show={false}
-            showTimeline={showTimeline}
-            timelineId="test"
-            width={100}
-            usersViewing={usersViewing}
-          />
-        </TestProviders>
+        <FlyoutComponent
+          dataProviders={mockDataProviders}
+          flyoutHeight={testFlyoutHeight}
+          show={false}
+          showTimeline={showTimeline}
+          timelineId="test"
+          width={100}
+          usersViewing={usersViewing}
+        />,
+        { wrappingComponent: TestProviders }
       );
 
       wrapper
@@ -172,14 +174,13 @@ describe('Flyout', () => {
     test('should show the flyout button when show is true', () => {
       const openMock = jest.fn();
       const wrapper = mount(
-        <TestProviders>
-          <FlyoutButton
-            dataProviders={mockDataProviders}
-            show={true}
-            timelineId="test"
-            onOpen={openMock}
-          />
-        </TestProviders>
+        <FlyoutButton
+          dataProviders={mockDataProviders}
+          show={true}
+          timelineId="test"
+          onOpen={openMock}
+        />,
+        { wrappingComponent: TestProviders }
       );
       expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
         true
@@ -189,14 +190,13 @@ describe('Flyout', () => {
     test('should NOT show the flyout button when show is false', () => {
       const openMock = jest.fn();
       const wrapper = mount(
-        <TestProviders>
-          <FlyoutButton
-            dataProviders={mockDataProviders}
-            show={false}
-            timelineId="test"
-            onOpen={openMock}
-          />
-        </TestProviders>
+        <FlyoutButton
+          dataProviders={mockDataProviders}
+          show={false}
+          timelineId="test"
+          onOpen={openMock}
+        />,
+        { wrappingComponent: TestProviders }
       );
       expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
         false
@@ -206,14 +206,13 @@ describe('Flyout', () => {
     test('should return the flyout button with text', () => {
       const openMock = jest.fn();
       const wrapper = mount(
-        <TestProviders>
-          <FlyoutButton
-            dataProviders={mockDataProviders}
-            show={true}
-            timelineId="test"
-            onOpen={openMock}
-          />
-        </TestProviders>
+        <FlyoutButton
+          dataProviders={mockDataProviders}
+          show={true}
+          timelineId="test"
+          onOpen={openMock}
+        />,
+        { wrappingComponent: TestProviders }
       );
       expect(
         wrapper
@@ -226,14 +225,13 @@ describe('Flyout', () => {
     test('should call the onOpen when it is clicked', () => {
       const openMock = jest.fn();
       const wrapper = mount(
-        <TestProviders>
-          <FlyoutButton
-            dataProviders={mockDataProviders}
-            show={true}
-            timelineId="test"
-            onOpen={openMock}
-          />
-        </TestProviders>
+        <FlyoutButton
+          dataProviders={mockDataProviders}
+          show={true}
+          timelineId="test"
+          onOpen={openMock}
+        />,
+        { wrappingComponent: TestProviders }
       );
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')

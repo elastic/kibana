@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -14,14 +13,6 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 describe('EditableTitle', () => {
   const mount = useMountAppended();
   const submitTitle = jest.fn();
-
-  test('it renders', () => {
-    const wrapper = shallow(
-      <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
-    );
-
-    expect(wrapper).toMatchSnapshot();
-  });
 
   test('it shows the edit title input field', () => {
     const wrapper = mount(

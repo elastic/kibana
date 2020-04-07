@@ -24,7 +24,8 @@ describe('Select Flow Direction', () => {
         />
       );
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="uniDirectional"]')).toHaveLength(1);
+      expect(wrapper.find('[data-test-subj="biDirectional"]')).toHaveLength(1);
     });
   });
 

@@ -15,6 +15,7 @@ import { useStateToaster, errorToToaster } from '../toasters';
 const InvisibleAnchor = styled.a`
   display: none;
 `;
+InvisibleAnchor.displayName = 'InvisibleAnchor';
 
 export type ExportSelectedData = ({
   excludeExportDetails,

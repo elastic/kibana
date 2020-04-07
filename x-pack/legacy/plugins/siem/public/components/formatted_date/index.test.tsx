@@ -29,13 +29,6 @@ describe('formatted_date', () => {
   });
 
   describe('PreferenceFormattedDate', () => {
-    test('renders correctly against snapshot', () => {
-      mockUseDateFormat.mockImplementation(() => '');
-      const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
-
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('it renders the date with the default configuration', () => {
       const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
 

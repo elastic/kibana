@@ -18,11 +18,11 @@ const DEFAULT_BYTES_FORMAT_VALUE = '0,0.[0]b'; // kibana's default for this sett
 const bytes = '2806422';
 
 describe('PreferenceFormattedBytes', () => {
-  test('renders correctly against snapshot', () => {
+  test('renders correctly', () => {
     mockUseUiSetting$.mockImplementation(() => [DEFAULT_BYTES_FORMAT_VALUE]);
     const wrapper = shallow(<PreferenceFormattedBytesComponent value={bytes} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.text()).toEqual('2.7MB');
   });
 
   test('it renders bytes to Numeral formatting when no format setting exists', () => {

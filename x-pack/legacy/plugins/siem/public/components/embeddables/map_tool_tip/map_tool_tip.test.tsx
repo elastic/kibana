@@ -10,13 +10,12 @@ import { MapToolTipComponent } from './map_tool_tip';
 import { MapFeature } from '../types';
 
 describe('MapToolTip', () => {
-  test('placeholder component renders correctly against snapshot', () => {
+  test('placeholder component renders correctly', () => {
     const wrapper = shallow(<MapToolTipComponent />);
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiLoadingSpinner')).toHaveLength(1);
   });
 
-  test('full component renders correctly against snapshot', () => {
-    const addFilters = jest.fn();
+  test('full component renders correctly', () => {
     const closeTooltip = jest.fn();
     const features: MapFeature[] = [
       {
@@ -30,15 +29,13 @@ describe('MapToolTip', () => {
 
     const wrapper = shallow(
       <MapToolTipComponent
-        addFilters={addFilters}
         closeTooltip={closeTooltip}
         features={features}
-        isLocked={false}
         getLayerName={getLayerName}
         loadFeatureProperties={loadFeatureProperties}
         loadFeatureGeometry={loadFeatureGeometry}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EuiLoadingSpinner')).toHaveLength(1);
   });
 });

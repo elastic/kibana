@@ -19,7 +19,7 @@ describe('DroppableWrapper', () => {
   const mount = useMountAppended();
 
   describe('rendering', () => {
-    test('it renders against the snapshot', () => {
+    test('it renders correctly', () => {
       const message = 'draggable wrapper content';
 
       const wrapper = shallow(
@@ -32,7 +32,13 @@ describe('DroppableWrapper', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('DroppableWrapper')).toMatchSnapshot();
+      expect(wrapper.find('DroppableWrapper')).toHaveLength(1);
+      expect(
+        wrapper
+          .find('DroppableWrapper')
+          .children()
+          .text()
+      ).toEqual(message);
     });
 
     test('it renders the children when a render prop is not provided', () => {

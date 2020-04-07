@@ -36,7 +36,7 @@ describe('Field Renderers', () => {
         locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete)
       );
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="location-field"]')).toHaveLength(1);
     });
 
     test('it renders emptyTagValue when no fields provided', () => {
@@ -60,7 +60,7 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(dateRenderer(mockData.complete.source!.firstSeen));
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="preference-time"]')).toHaveLength(1);
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
@@ -78,7 +78,7 @@ describe('Field Renderers', () => {
         autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source)
       );
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('[value="Test Org"]')).toHaveLength(1);
     });
 
     test('it renders emptyTagValue when non-string field provided', () => {
@@ -110,7 +110,7 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('DraggableWrapper')).toHaveLength(1);
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
@@ -153,7 +153,10 @@ describe('Field Renderers', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('DraggableWrapper')).toHaveLength(1);
+      // expect(wrapper.find('DraggableWrapper').prop('dataProvider').name).toEqual(
+      //   mockData.complete.host.name[0]
+      // );
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
@@ -184,18 +187,20 @@ describe('Field Renderers', () => {
   });
 
   describe('#whoisRenderer', () => {
-    test('it renders correctly against snapshot', () => {
+    test('it renders correctly', () => {
       const wrapper = shallow(whoisRenderer('10.10.10.10'));
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('ExternalLink')).toHaveLength(1);
     });
   });
 
   describe('#reputationRenderer', () => {
-    test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(<TestProviders>{reputationRenderer('10.10.10.10')}</TestProviders>);
+    test('it renders correctly', () => {
+      const wrapper = mount(reputationRenderer('10.10.10.10'), {
+        wrappingComponent: TestProviders,
+      });
 
-      expect(wrapper.find('DragDropContext')).toMatchSnapshot();
+      expect(wrapper.find('[domain="10.10.10.10"]')).toHaveLength(1);
     });
   });
 

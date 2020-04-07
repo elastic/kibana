@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
+import { StickyContainer } from 'react-sticky';
 
 import '../../mock/match_media';
 import { FiltersGlobal } from './filters_global';
+import { TestProviders } from '../../mock';
 
 describe('rendering', () => {
   test('renders correctly', () => {
-    const wrapper = shallow(
-      <FiltersGlobal>
-        <p>{'Additional filters here.'}</p>
-      </FiltersGlobal>
+    const wrapper = mount(
+      <StickyContainer>
+        <FiltersGlobal>
+          <p>{'Additional filters here.'}</p>
+        </FiltersGlobal>
+      </StickyContainer>,
+      { wrappingComponent: TestProviders }
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[className="siemFiltersGlobal"]')).toHaveLength(1);
   });
 });

@@ -22,20 +22,10 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('ui/new_platform');
 
-// Test will fail because we will to need to mock some core services to make the test work
-// For now let's forget about SiemSearchBar
-jest.mock('../search_bar', () => ({
-  SiemSearchBar: () => null,
-}));
-
 describe('HeaderGlobal', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   test('it renders', () => {
     const wrapper = shallow(<HeaderGlobal />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[className="siemHeaderGlobal"]')).toHaveLength(1);
   });
 });

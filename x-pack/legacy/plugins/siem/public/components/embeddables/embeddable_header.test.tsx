@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
 import { EmbeddableHeader } from './embeddable_header';
 
 describe('EmbeddableHeader', () => {
-  test('it renders', () => {
-    const wrapper = shallow(<EmbeddableHeader title="Test title" />);
-
-    expect(wrapper).toMatchSnapshot();
-  });
-
   test('it renders the title', () => {
     const wrapper = mount(
       <TestProviders>

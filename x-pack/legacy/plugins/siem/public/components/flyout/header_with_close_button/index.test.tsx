@@ -13,15 +13,13 @@ import { FlyoutHeaderWithCloseButton } from '.';
 describe('FlyoutHeaderWithCloseButton', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
-      <TestProviders>
-        <FlyoutHeaderWithCloseButton
-          onClose={jest.fn()}
-          timelineId={'test'}
-          usersViewing={['elastic']}
-        />
-      </TestProviders>
+      <FlyoutHeaderWithCloseButton
+        onClose={jest.fn()}
+        timelineId={'test'}
+        usersViewing={['elastic']}
+      />
     );
-    expect(EmptyComponent.find('FlyoutHeaderWithCloseButton')).toMatchSnapshot();
+    expect(EmptyComponent.find('[timelineId="test"]')).toHaveLength(1);
   });
 
   test('it should invoke onClose when the close button is clicked', () => {

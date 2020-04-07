@@ -15,7 +15,8 @@ describe('JSON View', () => {
   describe('rendering', () => {
     test('should match snapshot', () => {
       const wrapper = shallow(<JsonView data={mockDetailItemData} />);
-      expect(wrapper).toMatchSnapshot();
+
+      expect(wrapper.find('[data-test-subj="jsonView"]')).toHaveLength(1);
     });
   });
 

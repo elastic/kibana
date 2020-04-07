@@ -17,6 +17,6 @@ describe('Embeddable', () => {
       </Embeddable>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.text()).toContain('Test content');
   });
 });

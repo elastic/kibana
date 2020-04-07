@@ -203,7 +203,6 @@ describe('AreaChartBaseComponent', () => {
     });
 
     it(`should ${mockAreaChartData.length} render AreaSeries`, () => {
-      expect(shallow).toMatchSnapshot();
       expect(shallowWrapper.find(AreaSeries)).toHaveLength(mockAreaChartData.length);
     });
 
@@ -256,7 +255,6 @@ describe('AreaChartBaseComponent', () => {
     });
 
     it(`should ${mockAreaChartData.length} render AreaSeries`, () => {
-      expect(shallow).toMatchSnapshot();
       expect(shallowWrapper.find(AreaSeries)).toHaveLength(mockAreaChartData.length);
     });
 

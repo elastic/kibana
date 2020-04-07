@@ -9,13 +9,15 @@ import React from 'react';
 
 import { EmptyPage } from './index';
 
-test('renders correctly', () => {
-  const EmptyComponent = shallow(
-    <EmptyPage
-      actionPrimaryLabel="Do Something"
-      actionPrimaryUrl="my/url/from/nowwhere"
-      title="My Super Title"
-    />
-  );
-  expect(EmptyComponent).toMatchSnapshot();
+describe('empty_page', () => {
+  test('renders correctly', () => {
+    const EmptyComponent = shallow(
+      <EmptyPage
+        actionPrimaryLabel="Do Something"
+        actionPrimaryUrl="my/url/from/nowwhere"
+        title="My Super Title"
+      />
+    );
+    expect(EmptyComponent.find('EmptyPrompt')).toHaveLength(1);
+  });
 });

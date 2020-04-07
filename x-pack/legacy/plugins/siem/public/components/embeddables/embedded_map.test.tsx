@@ -24,7 +24,7 @@ describe('EmbeddedMapComponent', () => {
     setQuery = jest.fn();
   });
 
-  test('renders correctly against snapshot', () => {
+  test('renders correctly', () => {
     const wrapper = shallow(
       <EmbeddedMapComponent
         endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
@@ -34,6 +34,6 @@ describe('EmbeddedMapComponent', () => {
         startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('EmbeddableMap')).toHaveLength(1);
   });
 });

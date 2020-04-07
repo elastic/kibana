@@ -35,28 +35,26 @@ describe('PointToolTipContent', () => {
     const closeTooltip = jest.fn();
 
     const wrapper = shallow(
-      <TestProviders>
-        <PointToolTipContentComponent
-          contextId={'contextId'}
-          featureProps={mockFeatureProps}
-          closeTooltip={closeTooltip}
-        />
-      </TestProviders>
+      <PointToolTipContentComponent
+        contextId={'contextId'}
+        featureProps={mockFeatureProps}
+        closeTooltip={closeTooltip}
+      />,
+      { wrappingComponent: TestProviders }
     );
-    expect(wrapper.find('PointToolTipContentComponent')).toMatchSnapshot();
+    expect(wrapper.find('DescriptionListStyled')).toHaveLength(1);
   });
 
   test('renders array filter correctly', () => {
     const closeTooltip = jest.fn();
 
     const wrapper = mount(
-      <TestProviders>
-        <PointToolTipContentComponent
-          contextId={'contextId'}
-          featureProps={mockFeaturePropsArrayValue}
-          closeTooltip={closeTooltip}
-        />
-      </TestProviders>
+      <PointToolTipContentComponent
+        contextId={'contextId'}
+        featureProps={mockFeaturePropsArrayValue}
+        closeTooltip={closeTooltip}
+      />,
+      { wrappingComponent: TestProviders }
     );
     expect(wrapper.find('[data-test-subj="add-to-kql-host.name"]').prop('filter')).toEqual({
       meta: {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -13,51 +13,55 @@ import { WrapperPage } from './index';
 describe('WrapperPage', () => {
   test('it renders', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <WrapperPage>
-          <p>{'Test page'}</p>
-        </WrapperPage>
-      </TestProviders>
+      <WrapperPage>
+        <p>{'Test page'}</p>
+      </WrapperPage>,
+      { wrappingComponent: TestProviders }
     );
 
-    expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
+    expect(wrapper.find('[className="siemWrapperPage"]')).toHaveLength(1);
   });
 
   describe('restrict width', () => {
     test('default max width when restrictWidth is true', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <WrapperPage restrictWidth>
-            <p>{'Test page'}</p>
-          </WrapperPage>
-        </TestProviders>
+      const wrapper = mount(
+        <WrapperPage restrictWidth>
+          <p>{'Test page'}</p>
+        </WrapperPage>,
+        { wrappingComponent: TestProviders }
       );
 
-      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
+      expect(
+        wrapper.find('[className="siemWrapperPage siemWrapperPage--restrictWidthDefault"]')
+      ).toHaveLength(1);
     });
 
     test('custom max width when restrictWidth is number', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <WrapperPage restrictWidth={600}>
-            <p>{'Test page'}</p>
-          </WrapperPage>
-        </TestProviders>
+      const wrapper = mount(
+        <WrapperPage restrictWidth={800}>
+          <p>{'Test page'}</p>
+        </WrapperPage>,
+        { wrappingComponent: TestProviders }
       );
 
-      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
+      expect(
+        wrapper.find('[className="siemWrapperPage siemWrapperPage--restrictWidthDefault"]')
+      ).toHaveLength(0);
+      expect(wrapper.find('Wrapper').prop('style')).toEqual({ maxWidth: '800px' });
     });
 
     test('custom max width when restrictWidth is string', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <WrapperPage restrictWidth="600px">
-            <p>{'Test page'}</p>
-          </WrapperPage>
-        </TestProviders>
+      const wrapper = mount(
+        <WrapperPage restrictWidth="800px">
+          <p>{'Test page'}</p>
+        </WrapperPage>,
+        { wrappingComponent: TestProviders }
       );
 
-      expect(wrapper.find('Memo(WrapperPageComponent)')).toMatchSnapshot();
+      expect(
+        wrapper.find('[className="siemWrapperPage siemWrapperPage--restrictWidthDefault"]')
+      ).toHaveLength(0);
+      expect(wrapper.find('Wrapper').prop('style')).toEqual({ maxWidth: '800px' });
     });
   });
 });

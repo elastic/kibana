@@ -82,7 +82,6 @@ describe('Matrix Histogram Component', () => {
   });
   describe('on initial load', () => {
     test('it renders MatrixLoader', () => {
-      expect(wrapper.html()).toMatchSnapshot();
       expect(wrapper.find('MatrixLoader').exists()).toBe(true);
     });
   });
@@ -106,7 +105,6 @@ describe('Matrix Histogram Component', () => {
       wrapper.update();
     });
     test('it renders no MatrixLoader', () => {
-      expect(wrapper.html()).toMatchSnapshot();
       expect(wrapper.find(`MatrixLoader`).exists()).toBe(false);
     });
 

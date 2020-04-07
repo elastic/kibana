@@ -15,7 +15,7 @@ import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 
 describe('DragDropContextWrapper', () => {
   describe('rendering', () => {
-    test('it renders against the snapshot', () => {
+    test('it renders correctly', () => {
       const message = 'Drag drop context wrapper children';
 
       const wrapper = shallow(
@@ -27,7 +27,14 @@ describe('DragDropContextWrapper', () => {
           </MockedProvider>
         </TestProviders>
       );
-      expect(wrapper.find('DragDropContextWrapper')).toMatchSnapshot();
+
+      expect(wrapper.find('DragDropContextWrapper')).toHaveLength(1);
+      expect(
+        wrapper
+          .find('DragDropContextWrapper')
+          .children()
+          .text()
+      ).toEqual(message);
     });
 
     test('it renders the children', () => {
