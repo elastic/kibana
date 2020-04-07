@@ -5,11 +5,12 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 
-export function AnalysisSummary({ results }) {
+export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ results }) => {
   const items = createDisplayItems(results);
 
   return (
@@ -28,10 +29,10 @@ export function AnalysisSummary({ results }) {
       <EuiDescriptionList type="column" listItems={items} className="analysis-summary-list" />
     </React.Fragment>
   );
-}
+};
 
-function createDisplayItems(results) {
-  const items = [
+function createDisplayItems(results: FindFileStructureResponse) {
+  const items: Array<{ title: any; description: string | number }> = [
     {
       title: (
         <FormattedMessage
