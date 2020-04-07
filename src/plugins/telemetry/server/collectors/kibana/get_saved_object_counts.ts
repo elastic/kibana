@@ -76,7 +76,7 @@ export async function getSavedObjectsCounts(
 
   // Add the doc_count from each bucket
   return buckets.reduce(
-    (acc, { key, doc_count: total }) => ({ ...acc, [snakeCase(key)]: { total } }),
+    (acc, { key, doc_count: total }) => (total ? { ...acc, [snakeCase(key)]: { total } } : acc),
     allZeros
   );
 }
