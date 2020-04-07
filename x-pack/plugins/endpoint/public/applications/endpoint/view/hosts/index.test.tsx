@@ -6,43 +6,26 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
-import { EuiThemeProvider } from '../../../../../../../legacy/common/eui_styled_components';
-import { appStoreFactory } from '../../store';
-import { RouteCapture } from '../route_capture';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { fireEvent } from '@testing-library/react';
 import { AppAction } from '../../types';
 import { HostList } from './index';
 import {
   mockHostDetailsApiResult,
   mockHostResultList,
 } from '../../store/hosts/mock_host_result_list';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
+import { HostMetadata } from '../../../../../common/types';
 
 describe('when on the hosts page', () => {
-  let render: () => reactTestingLibrary.RenderResult;
-  let history: MemoryHistory<never>;
-  let store: ReturnType<typeof appStoreFactory>;
+  let render: () => ReturnType<AppContextTestRender['render']>;
+  let history: AppContextTestRender['history'];
+  let store: AppContextTestRender['store'];
+  let coreStart: AppContextTestRender['coreStart'];
 
   beforeEach(async () => {
-    history = createMemoryHistory<never>();
-    store = appStoreFactory();
-    render = () => {
-      return reactTestingLibrary.render(
-        <Provider store={store}>
-          <I18nProvider>
-            <EuiThemeProvider>
-              <Router history={history}>
-                <RouteCapture>
-                  <HostList />
-                </RouteCapture>
-              </Router>
-            </EuiThemeProvider>
-          </I18nProvider>
-        </Provider>
-      );
-    };
+    const mockedContext = createAppRootMockRenderer();
+    ({ history, store, coreStart } = mockedContext);
+    render = () => mockedContext.render(<HostList />);
   });
 
   it('should show a table', async () => {

@@ -41,7 +41,7 @@ export const mockHostResultList: (options?: {
 /**
  * returns a mocked API response for retrieving a single host metadata
  */
-export const mockHostDetailsApiResult = (): HostMetadata => {
+export const mockHostDetailsApiResult = (): ReturnType<typeof generator.generateHostMetadata> => {
   const generator = new EndpointDocGenerator('seed');
   return generator.generateHostMetadata();
 };
