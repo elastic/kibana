@@ -96,10 +96,15 @@ function getLayoutOptions(
 }
 
 function selectRoots(cy: cytoscape.Core): string[] {
-  const nodes = cy.nodes();
-  const roots = nodes.roots();
-  const rumNodes = nodes.filter(node => isRumAgentName(node.data(AGENT_NAME)));
-  return rumNodes.union(roots).map(node => node.id());
+  const bfs = cy.elements().bfs({
+    roots: cy.elements().leaves()
+  });
+  const furthestNodeFromLeaves = bfs.path.last();
+  return cy
+    .elements()
+    .roots()
+    .union(furthestNodeFromLeaves)
+    .map(el => el.id());
 }
 
 export function Cytoscape({
