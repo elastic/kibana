@@ -17,16 +17,25 @@
  * under the License.
  */
 
-import moment from 'moment';
-import { IBucketAggConfig } from '../bucket_agg_type';
-import { DateRangeKey } from '../lib/date_range';
-import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
+import { FieldFormatsStart, FieldFormatsSetup, FieldFormatsService } from '.';
+import { fieldFormatsMock } from '../../common/field_formats/mocks';
 
-export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRangeKey) => {
-  const filter: RangeFilterParams = {};
-  if (from) filter.gte = moment(from).toISOString();
-  if (to) filter.lt = moment(to).toISOString();
-  if (to && from) filter.format = 'strict_date_optional_time';
+type FieldFormatsServiceClientContract = PublicMethodsOf<FieldFormatsService>;
 
-  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
+const createSetupContractMock = () => fieldFormatsMock as FieldFormatsSetup;
+const createStartContractMock = () => fieldFormatsMock as FieldFormatsStart;
+
+const createMock = () => {
+  const mocked: jest.Mocked<FieldFormatsServiceClientContract> = {
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
+    start: jest.fn().mockReturnValue(createStartContractMock()),
+  };
+
+  return mocked;
+};
+
+export const fieldFormatsServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };
