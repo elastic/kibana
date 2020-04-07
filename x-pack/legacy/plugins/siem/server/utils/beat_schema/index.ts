@@ -132,7 +132,7 @@ export const getDocumentation = (index: string, path: string) => {
     return {};
   }
   if (splitPath.length > 1) {
-    return get([category, 'fields', path], getIndexSchemaDoc(index));
+    return get([category, 'fields', path], getIndexSchemaDoc(index)) || {};
   }
-  return get(category, getIndexSchemaDoc(index));
+  return get(category, getIndexSchemaDoc(index)) || {};
 };
