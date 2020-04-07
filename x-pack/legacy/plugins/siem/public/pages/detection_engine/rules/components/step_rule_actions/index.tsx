@@ -28,7 +28,7 @@ const stepActionsDefaultValue = {
   enabled: true,
   isNew: true,
   actions: [],
-  kibanaSiemAppUrl: '',
+  kibana_siem_app_url: '',
   throttle: THROTTLE_OPTIONS[0].value,
 };
 
@@ -135,7 +135,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 }}
               />
               <UseField
-                path="kibanaSiemAppUrl"
+                path="kibana_siem_app_url"
                 defaultValue={kibanaAbsoluteUrl}
                 component={GhostFormField}
               />

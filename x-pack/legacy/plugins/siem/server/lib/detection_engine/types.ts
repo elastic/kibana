@@ -31,7 +31,7 @@ export interface ThreatParams {
 
 export interface Meta {
   [key: string]: {} | string | undefined | null;
-  kibanaSiemAppUrl?: string | undefined;
+  kibana_siem_app_url?: string | undefined;
 }
 
 export interface RuleAlertParams {

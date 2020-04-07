@@ -86,7 +86,7 @@ export interface ScheduleStepRule extends StepRuleData {
 export interface ActionsStepRule extends StepRuleData {
   actions: AlertAction[];
   enabled: boolean;
-  kibanaSiemAppUrl?: string;
+  kibana_siem_app_url?: string;
   throttle?: string | null;
 }
 

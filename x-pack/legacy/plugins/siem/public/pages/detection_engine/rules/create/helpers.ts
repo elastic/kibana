@@ -146,7 +146,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   const {
     actions = [],
     enabled,
-    kibanaSiemAppUrl,
+    kibana_siem_app_url,
     throttle = NOTIFICATION_THROTTLE_NO_ACTIONS,
   } = actionsStepData;
 
@@ -155,7 +155,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
     enabled,
     throttle: actions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,
     meta: {
-      kibanaSiemAppUrl,
+      kibana_siem_app_url,
     },
   };
 };

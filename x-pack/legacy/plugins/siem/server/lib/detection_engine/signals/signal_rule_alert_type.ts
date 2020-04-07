@@ -262,7 +262,7 @@ export const signalRulesAlertType = ({
               from: fromInMs,
               to: toInMs,
               id: savedObject.id,
-              kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
+              kibanaSiemAppUrl: meta?.kibana_siem_app_url,
             });
 
             logger.info(
