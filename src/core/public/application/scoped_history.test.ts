@@ -269,6 +269,17 @@ describe('ScopedHistory', () => {
       gh.push('/app/wow');
       const h = new ScopedHistory(gh, '/app/wow');
       expect(h.createHref({ pathname: '' })).toEqual(`/app/wow`);
+      expect(h.createHref({})).toEqual(`/app/wow`);
+      expect(h.createHref({ pathname: '/new-page', search: '?alpha=true' })).toEqual(
+        `/app/wow/new-page?alpha=true`
+      );
+    });
+
+    it('behave correctly with slash-ending basePath', () => {
+      const gh = createMemoryHistory();
+      gh.push('/app/wow/');
+      const h = new ScopedHistory(gh, '/app/wow/');
+      expect(h.createHref({ pathname: '' })).toEqual(`/app/wow/`);
       expect(h.createHref({ pathname: '/new-page', search: '?alpha=true' })).toEqual(
         `/app/wow/new-page?alpha=true`
       );

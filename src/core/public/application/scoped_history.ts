@@ -252,7 +252,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
         pathname:
           pathOrLocation.pathname !== undefined
             ? this.prependBasePathToString(pathOrLocation.pathname)
-            : undefined,
+            : this.basePath,
       };
     }
   }
@@ -261,8 +261,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * Prepends the base path to string.
    */
   private prependBasePathToString(path: string): string {
-    path = path.startsWith('/') ? path.slice(1) : path;
-    return path.length ? `${this.basePath}/${path}` : this.basePath;
+    return path.length ? `${this.basePath}/${path}`.replace(/\/{2,}/g, '/') : this.basePath;
   }
 
   /**
