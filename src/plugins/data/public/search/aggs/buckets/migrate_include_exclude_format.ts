@@ -18,7 +18,7 @@
  */
 
 import { isString, isObject } from 'lodash';
-import { IBucketAggConfig, BucketAggType, BucketAggParam } from './_bucket_agg_type';
+import { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
 import { IAggConfig } from '../agg_config';
 
 export const isType = (type: string) => {
