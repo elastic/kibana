@@ -40,7 +40,6 @@ export class ServiceSettings {
       appName: 'kibana',
       fileApiUrl: this.mapConfig.emsFileApiUrl,
       tileApiUrl: this.mapConfig.emsTileApiUrl,
-      htmlSanitizer: _.escape,
       landingPageUrl: this.mapConfig.emsLandingPageUrl,
       // Wrap to avoid errors passing window fetch
       fetchFunction: function(...args) {
