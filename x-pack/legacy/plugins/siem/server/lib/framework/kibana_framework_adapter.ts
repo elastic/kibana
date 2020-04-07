@@ -122,7 +122,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
   private async getCurrentUserInfo(request: KibanaRequest): Promise<AuthenticatedUser | null> {
     try {
-      const user = await this.security.authc.getCurrentUser(request);
+      const user = (await this.security?.authc.getCurrentUser(request)) ?? null;
       return user;
     } catch {
       return null;

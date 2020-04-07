@@ -31,8 +31,11 @@ export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
   const core = useCore();
 
   const fullConfigRequest = useGetOneAgentConfigFull(config.id);
-  const apiKeysRequest = useGetEnrollmentAPIKeys();
-  const apiKeyRequest = useGetOneEnrollmentAPIKey(apiKeysRequest.data?.list?.[0].id as string);
+  const apiKeysRequest = useGetEnrollmentAPIKeys({
+    page: 1,
+    perPage: 1000,
+  });
+  const apiKeyRequest = useGetOneEnrollmentAPIKey(apiKeysRequest.data?.list?.[0]?.id as string);
 
   if (fullConfigRequest.isLoading && !fullConfigRequest.data) {
     return <Loading />;
@@ -49,30 +52,30 @@ export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
           })}
         </EuiCodeBlock>
       </EuiFlexItem>
-      <EuiFlexItem grow={3}>
-        <EuiTitle size="s">
-          <h3>
+      {apiKeyRequest.data && (
+        <EuiFlexItem grow={3}>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.ingestManager.yamlConfig.instructionTittle"
+                defaultMessage="Enroll with fleet"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiText size="s">
             <FormattedMessage
-              id="xpack.ingestManager.yamlConfig.instructionTittle"
-              defaultMessage="Enroll with fleet"
+              id="xpack.ingestManager.yamlConfig.instructionDescription"
+              defaultMessage="To enroll an agent with this configuration, copy and run the following command on your host."
             />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.ingestManager.yamlConfig.instructionDescription"
-            defaultMessage="To enroll an agent with this configuration, copy and run the following command on your host."
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        {apiKeyRequest.data && (
+          </EuiText>
+          <EuiSpacer size="m" />
           <ShellEnrollmentInstructions
             apiKey={apiKeyRequest.data.item}
             kibanaUrl={`${window.location.origin}${core.http.basePath.get()}`}
           />
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });

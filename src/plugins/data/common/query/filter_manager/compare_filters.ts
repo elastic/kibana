@@ -18,7 +18,7 @@
  */
 
 import { defaults, isEqual, omit, map } from 'lodash';
-import { FilterMeta, Filter, FilterStateStore } from '../../es_query';
+import { FilterMeta, Filter } from '../../es_query';
 
 export interface FilterCompareOptions {
   disabled?: boolean;
@@ -42,13 +42,11 @@ const mapFilter = (
   comparators: FilterCompareOptions,
   excludedAttributes: string[]
 ) => {
-  const cleaned: Filter & FilterMeta = omit(filter, excludedAttributes);
+  const cleaned: FilterMeta = omit(filter, excludedAttributes);
 
   if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
   if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
-  if (comparators.disabled) cleaned.alias = filter.meta?.alias;
-  if (comparators.state)
-    cleaned.$state = { store: filter.$state?.store ?? FilterStateStore.APP_STATE };
+  if (comparators.alias) cleaned.alias = filter.meta?.alias;
 
   return cleaned;
 };

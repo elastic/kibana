@@ -19,7 +19,7 @@
 
 import { Required } from '@kbn/utility-types';
 
-import { getFormat } from './legacy_imports';
+import { getFormatService } from './services';
 import { Input } from './table_vis_fn';
 
 export interface TableContext {
@@ -54,7 +54,7 @@ export function tableVisResponseHandler(table: Input, dimensions: any): TableCon
   if (split) {
     converted.direction = dimensions.splitRow ? 'row' : 'column';
     const splitColumnIndex = split[0].accessor;
-    const splitColumnFormatter = getFormat(split[0].format);
+    const splitColumnFormatter = getFormatService().deserialize(split[0].format);
     const splitColumn = table.columns[splitColumnIndex];
     const splitMap = {};
     let splitIndex = 0;

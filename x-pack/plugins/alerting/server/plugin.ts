@@ -143,7 +143,7 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
+      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeAlertingTelemetry(

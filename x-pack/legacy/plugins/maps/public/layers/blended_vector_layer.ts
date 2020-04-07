@@ -34,7 +34,7 @@ import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
-} from '../../common/style_property_descriptor_types';
+} from '../../common/descriptor_types';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 

@@ -10,10 +10,11 @@ import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { RuleAlertAction, RuleType } from '../../../../common/detection_engine/types';
+import { isMlRule } from '../../../../common/detection_engine/ml_helpers';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
-import { Rule, RuleType } from '../../../containers/detection_engine/rules';
+import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
 import {
   AboutStepRule,
@@ -57,12 +58,12 @@ export const getStepsData = ({
 export const getActionsStepsData = (
   rule: Omit<Rule, 'actions'> & { actions: RuleAlertAction[] }
 ): ActionsStepRule => {
-  const { enabled, actions = [], meta } = rule;
+  const { enabled, throttle, meta, actions = [] } = rule;
 
   return {
     actions: actions?.map(transformRuleToAlertAction),
     isNew: false,
-    throttle: meta?.throttle,
+    throttle,
     kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
     enabled,
   };
@@ -214,8 +215,6 @@ export const setFieldValue = (
     }
   });
 
-export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';
-
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
@@ -268,3 +267,7 @@ export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined
     ...actionMessageRuleParams.map(param => `context.rule.${param}`),
   ];
 });
+
+// typed as null not undefined as the initial state for this value is null.
+export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
+  canUserCRUD != null ? !canUserCRUD : false;

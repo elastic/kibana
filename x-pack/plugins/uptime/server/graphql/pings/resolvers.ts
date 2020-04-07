@@ -35,7 +35,7 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
   Query: {
     async allPings(
       _resolver,
-      { monitorId, sort, size, status, dateRangeStart, dateRangeEnd, location },
+      { monitorId, sort, size, status, dateRangeStart, dateRangeEnd, location, page },
       { APICaller, savedObjectsClient }
     ): Promise<PingResults> {
       const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
@@ -52,6 +52,7 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
         sort,
         size,
         location,
+        page,
       });
     },
   },

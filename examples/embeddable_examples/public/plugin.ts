@@ -28,11 +28,11 @@ import {
 } from './searchable_list_container';
 import { LIST_CONTAINER, ListContainerFactory } from './list_container';
 
-interface EmbeddableExamplesSetupDependencies {
+export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
 }
 
-interface EmbeddableExamplesStartDependencies {
+export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
 }
 

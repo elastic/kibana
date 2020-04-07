@@ -7,14 +7,13 @@
 import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useContext, useReducer, useState } from 'react';
+import React, { Dispatch, useCallback, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
 import { useKibana } from '../../lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
-import { MlCapabilitiesContext } from '../ml/permissions/ml_capabilities_provider';
-import { errorToToaster, useStateToaster } from '../toasters';
+import { errorToToaster, useStateToaster, ActionToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
 import { filterJobs } from './helpers';
 import { useSiemJobs } from './hooks/use_siem_jobs';
@@ -23,8 +22,9 @@ import { JobsTable } from './jobs_table/jobs_table';
 import { ShowingCount } from './jobs_table/showing_count';
 import { PopoverDescription } from './popover_description';
 import * as i18n from './translations';
-import { JobsFilters, JobSummary, SiemJob } from './types';
+import { JobsFilters, SiemJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
+import { useMlCapabilities } from './hooks/use_ml_capabilities';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
@@ -34,15 +34,10 @@ PopoverContentsDiv.displayName = 'PopoverContentsDiv';
 
 interface State {
   isLoading: boolean;
-  jobs: JobSummary[];
   refreshToggle: boolean;
 }
 
-type Action =
-  | { type: 'refresh' }
-  | { type: 'loading' }
-  | { type: 'success'; results: JobSummary[] }
-  | { type: 'failure' };
+type Action = { type: 'refresh' } | { type: 'loading' } | { type: 'success' } | { type: 'failure' };
 
 function mlPopoverReducer(state: State, action: Action): State {
   switch (action.type) {
@@ -62,14 +57,12 @@ function mlPopoverReducer(state: State, action: Action): State {
       return {
         ...state,
         isLoading: false,
-        jobs: action.results,
       };
     }
     case 'failure': {
       return {
         ...state,
         isLoading: false,
-        jobs: [],
       };
     }
     default:
@@ -79,7 +72,6 @@ function mlPopoverReducer(state: State, action: Action): State {
 
 const initialState: State = {
   isLoading: false,
-  jobs: [],
   refreshToggle: true,
 };
 
@@ -91,58 +83,19 @@ const defaultFilterProps: JobsFilters = {
 };
 
 export const MlPopover = React.memo(() => {
-  const [{ refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
+  const [{ isLoading, refreshToggle }, dispatch] = useReducer(mlPopoverReducer, initialState);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
   const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
-  const capabilities = useContext(MlCapabilitiesContext);
+  const capabilities = useMlCapabilities();
   const docLinks = useKibana().services.docLinks;
-
-  // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
-  const enableDatafeed = async (job: SiemJob, latestTimestampMs: number, enable: boolean) => {
-    submitTelemetry(job, enable);
-
-    if (!job.isInstalled) {
-      try {
-        await setupMlJob({
-          configTemplate: job.moduleId,
-          indexPatternName: job.defaultIndexPattern,
-          jobIdErrorFilter: [job.id],
-          groups: job.groups,
-        });
-      } catch (error) {
-        errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
-        dispatch({ type: 'refresh' });
-        return;
-      }
-    }
-
-    // Max start time for job is no more than two weeks ago to ensure job performance
-    const maxStartTime = moment
-      .utc()
-      .subtract(14, 'days')
-      .valueOf();
-
-    if (enable) {
-      const startTime = Math.max(latestTimestampMs, maxStartTime);
-      try {
-        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
-      } catch (error) {
-        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
-        errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
-      }
-    } else {
-      try {
-        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
-      } catch (error) {
-        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
-        errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });
-      }
-    }
-    dispatch({ type: 'refresh' });
-  };
+  const handleJobStateChange = useCallback(
+    (job: SiemJob, latestTimestampMs: number, enable: boolean) =>
+      enableDatafeed(job, latestTimestampMs, enable, dispatch, dispatchToaster),
+    [dispatch, dispatchToaster]
+  );
 
   const filteredJobs = filterJobs({
     jobs: siemJobs,
@@ -239,9 +192,9 @@ export const MlPopover = React.memo(() => {
           )}
 
           <JobsTable
-            isLoading={isLoadingSiemJobs}
+            isLoading={isLoadingSiemJobs || isLoading}
             jobs={filteredJobs}
-            onJobStateChange={enableDatafeed}
+            onJobStateChange={handleJobStateChange}
           />
         </PopoverContentsDiv>
       </EuiPopover>
@@ -251,6 +204,59 @@ export const MlPopover = React.memo(() => {
     return null;
   }
 });
+
+// Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
+const enableDatafeed = async (
+  job: SiemJob,
+  latestTimestampMs: number,
+  enable: boolean,
+  dispatch: Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>
+) => {
+  submitTelemetry(job, enable);
+
+  if (!job.isInstalled) {
+    dispatch({ type: 'loading' });
+    try {
+      await setupMlJob({
+        configTemplate: job.moduleId,
+        indexPatternName: job.defaultIndexPattern,
+        jobIdErrorFilter: [job.id],
+        groups: job.groups,
+      });
+      dispatch({ type: 'success' });
+    } catch (error) {
+      errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
+      dispatch({ type: 'failure' });
+      dispatch({ type: 'refresh' });
+      return;
+    }
+  }
+
+  // Max start time for job is no more than two weeks ago to ensure job performance
+  const maxStartTime = moment
+    .utc()
+    .subtract(14, 'days')
+    .valueOf();
+
+  if (enable) {
+    const startTime = Math.max(latestTimestampMs, maxStartTime);
+    try {
+      await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
+    } catch (error) {
+      track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
+      errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
+    }
+  } else {
+    try {
+      await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
+    } catch (error) {
+      track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
+      errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });
+    }
+  }
+  dispatch({ type: 'refresh' });
+};
 
 const submitTelemetry = (job: SiemJob, enabled: boolean) => {
   // Report type of job enabled/disabled

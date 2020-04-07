@@ -86,8 +86,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async waitForLayersToLoad() {
       log.debug('Wait for layers to load');
-      const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
+        const tableOfContents = await testSubjects.find('mapLayerTOC');
         await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
@@ -511,7 +511,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async selectGeoJsonUploadSource() {
       log.debug(`Select upload geojson source`);
-      await testSubjects.click('uploadedGeoJson');
+      await testSubjects.click('uploadGeoJson');
     }
 
     async uploadJsonFileForIndexing(path) {
@@ -637,6 +637,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
           throw new Error('Tooltip is not locked at position');
         }
       });
+    }
+
+    async setStyleByValue(styleName, fieldName) {
+      await testSubjects.selectValue(`staticDynamicSelect_${styleName}`, 'DYNAMIC');
+      await comboBox.set(`styleFieldSelect_${styleName}`, fieldName);
+    }
+
+    async selectCustomColorRamp(styleName) {
+      // open super select menu
+      await testSubjects.click(`colorMapSelect_${styleName}`);
+      // Click option
+      await testSubjects.click(`colorMapSelectOption_CUSTOM_COLOR_MAP`);
+    }
+
+    async getCategorySuggestions() {
+      return await comboBox.getOptionsList(`colorStopInput1`);
     }
   }
   return new GisPage();

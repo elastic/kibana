@@ -5,8 +5,8 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPopoverTitle } from '@elastic/eui';
 import { GroupByExpression } from './group_by_over';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 describe('group by expression', () => {
   it('renders with builtin group by types', () => {
@@ -97,6 +97,13 @@ describe('group by expression', () => {
     );
     wrapper.simulate('click');
     expect(wrapper.find('[value="all"]').length > 0).toBeTruthy();
-    expect(wrapper.contains(<EuiPopoverTitle>over</EuiPopoverTitle>)).toBeTruthy();
+    expect(
+      wrapper.contains(
+        <FormattedMessage
+          id="xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel"
+          defaultMessage="over"
+        />
+      )
+    ).toBeTruthy();
   });
 });

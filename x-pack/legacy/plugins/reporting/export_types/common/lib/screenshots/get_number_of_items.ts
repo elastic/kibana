@@ -7,17 +7,16 @@
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
-import { ServerFacade } from '../../../../types';
+import { CaptureConfig } from '../../../../server/types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
 
 export const getNumberOfItems = async (
-  server: ServerFacade,
+  captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   layout: LayoutInstance,
   logger: LevelLogger
 ): Promise<number> => {
-  const config = server.config();
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
 
@@ -33,7 +32,7 @@ export const getNumberOfItems = async (
     // we have to use this hint to wait for all of them
     await browser.waitForSelector(
       `${renderCompleteSelector},[${itemsCountAttribute}]`,
-      { timeout: config.get('xpack.reporting.capture.timeouts.waitForElements') },
+      { timeout: captureConfig.timeouts.waitForElements },
       { context: CONTEXT_READMETADATA },
       logger
     );
