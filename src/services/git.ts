@@ -7,6 +7,7 @@ import { execAsCallback, exec } from './child-process-promisified';
 import { CommitSelected } from './github/Commit';
 import { logger } from './logger';
 import { resolve as pathResolve } from 'path';
+import uniq from 'lodash.uniq';
 
 async function folderExists(path: string): Promise<boolean> {
   try {
@@ -139,14 +140,25 @@ export async function cherrypickContinue(options: BackportOptions) {
   }
 }
 
-export async function hasConflictMarkers(options: BackportOptions) {
+export async function getFilesWithConflicts(options: BackportOptions) {
+  const repoPath = getRepoPath(options);
   try {
-    await exec(`git --no-pager diff --check`, { cwd: getRepoPath(options) });
-    return false;
+    await exec(`git --no-pager diff --check`, { cwd: repoPath });
+
+    return [];
   } catch (e) {
     const isConflictError = e.cmd && e.code === 2;
     if (isConflictError) {
-      return true;
+      const files = (e.stdout as string)
+        .split('\n')
+        .filter((line: string) => !!line.trim())
+        .map((line: string) => {
+          const posSeparator = line.indexOf(':');
+          const filename = line.slice(0, posSeparator).trim();
+          return ` - ${pathResolve(repoPath, filename)}`;
+        });
+
+      return uniq(files);
     }
 
     // rethrow error since it's unrelated
@@ -154,6 +166,7 @@ export async function hasConflictMarkers(options: BackportOptions) {
   }
 }
 
+// retrieve the list of files that could not be cleanly merged
 export async function getUnmergedFiles(options: BackportOptions) {
   const repoPath = getRepoPath(options);
   const res = await exec(`git --no-pager diff --name-only --diff-filter=U`, {

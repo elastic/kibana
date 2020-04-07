@@ -13,7 +13,7 @@ import {
   getUnmergedFiles,
   addUnstagedFiles,
   cherrypickContinue,
-  hasConflictMarkers,
+  getFilesWithConflicts,
 } from '../services/git';
 import { createPullRequest } from '../services/github/createPullRequest';
 import { getRepoPath } from '../services/env';
@@ -25,6 +25,7 @@ import { withSpinner } from './withSpinner';
 import { confirmPrompt } from '../services/prompts';
 import { HandledError } from '../services/HandledError';
 import dedent = require('dedent');
+import isEmpty = require('lodash.isempty');
 
 export async function cherrypickAndCreatePullRequest({
   options,
@@ -99,20 +100,17 @@ async function waitForCherrypick(
     `Cherry-picking commit ${getShortSha(commit.sha)}`
   ).start();
 
-  let didCherrypick: boolean;
   try {
-    didCherrypick = await cherrypick(options, commit);
-    cherrypickSpinner.succeed();
+    const didCherrypick = await cherrypick(options, commit);
+    if (didCherrypick) {
+      cherrypickSpinner.succeed();
+      return;
+    }
+
+    cherrypickSpinner.fail();
   } catch (e) {
     cherrypickSpinner.fail();
     throw e;
-  }
-
-  /*
-   * Commit was cleanly cherrypicked
-   */
-  if (didCherrypick) {
-    return;
   }
 
   /*
@@ -124,8 +122,11 @@ async function waitForCherrypick(
     await exec(`${options.editor} ${repoPath}`, {});
   }
 
+  // list files with conflict markers and require user to resolve them
+  await listConflictingFiles(options);
+
   // list unmerged files and require user to confirm adding+comitting them
-  await listUnmergedFilesAndWaitForUserConfirmation(options);
+  await listUnstagedFiles(options);
 
   // Conflicts resolved and unstaged files will now be staged and committed
   const stagingSpinner = ora(`Staging and committing files`).start();
@@ -133,7 +134,7 @@ async function waitForCherrypick(
     // add unstaged files
     await addUnstagedFiles(options);
 
-    // continue cherrypick (similar to `git commit`)
+    // Run `cherrypick --continue` (similar to `git commit`)
     await cherrypickContinue(options);
     stagingSpinner.succeed();
   } catch (e) {
@@ -142,30 +143,57 @@ async function waitForCherrypick(
   }
 }
 
-async function listUnmergedFilesAndWaitForUserConfirmation(
-  options: BackportOptions
-) {
-  const unmergedFiles = await getUnmergedFiles(options);
-  const text = dedent(`${chalk.reset(
-    `Resolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:`
-  )}
-  ${chalk.reset(unmergedFiles.join('\n'))}
+async function listConflictingFiles(options: BackportOptions) {
+  const checkForConflicts = async (): Promise<void> => {
+    const filesWithConflicts = await getFilesWithConflicts(options);
 
-  Press ENTER to stage and commit the above files...`);
+    if (isEmpty(filesWithConflicts)) {
+      return;
+    }
 
-  const checkForConflicts = async () => {
-    const res = await confirmPrompt(text);
+    consoleLog(''); // linebreak
+    const res = await confirmPrompt(
+      dedent(`
+        ${chalk.reset(`The following files have conflicts:`)}
+        ${chalk.reset(filesWithConflicts.join('\n'))}
+
+        ${chalk.reset.italic(
+          'You do not need to `git add` or `git commit` the files - simply fix the conflicts.'
+        )}
+
+        Press ENTER to continue
+      `)
+    );
     if (!res) {
       throw new HandledError('Aborted');
     }
 
-    const hasUnresolvedConflicts = await hasConflictMarkers(options);
-    if (hasUnresolvedConflicts) {
-      await checkForConflicts();
-    }
+    await checkForConflicts();
   };
 
   await checkForConflicts();
+}
+
+async function listUnstagedFiles(options: BackportOptions) {
+  const unmergedFiles = await getUnmergedFiles(options);
+
+  if (isEmpty(unmergedFiles)) {
+    return;
+  }
+
+  consoleLog(''); // linebreak
+  const res = await confirmPrompt(
+    dedent(`
+      ${chalk.reset(`The following files are unstaged:`)}
+      ${chalk.reset(unmergedFiles.join('\n'))}
+
+      Press ENTER to stage them
+    `)
+  );
+  if (!res) {
+    throw new HandledError('Aborted');
+  }
+  consoleLog(''); // linebreak
 }
 
 function getPullRequestTitle(

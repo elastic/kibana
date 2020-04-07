@@ -9,8 +9,8 @@ const { combine } = format;
 const { argv } = yargs.help(false);
 
 // wrapper around console.log
-export function consoleLog(...args: unknown[]) {
-  console.log(...args);
+export function consoleLog(message: string) {
+  console.log(message);
 }
 
 const level = argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info';

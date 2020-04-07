@@ -6,6 +6,7 @@ import {
   deleteRemote,
   createFeatureBranch,
   cherrypick,
+  getFilesWithConflicts,
 } from '../services/git';
 import * as childProcess from '../services/child-process-promisified';
 
@@ -39,6 +40,30 @@ describe('getUnmergedFiles', () => {
     } as BackportOptions;
 
     await expect(await getUnmergedFiles(options)).toEqual([]);
+  });
+});
+
+describe('getFilesWithConflicts', () => {
+  it('should split by linebreak and remove empty and duplicate items', async () => {
+    const err = {
+      killed: false,
+      code: 2,
+      signal: null,
+      cmd: 'git --no-pager diff --check',
+      stdout:
+        'conflicting-file.txt:1: leftover conflict marker\nconflicting-file.txt:3: leftover conflict marker\nconflicting-file.txt:5: leftover conflict marker\n',
+      stderr: '',
+    };
+    jest.spyOn(childProcess, 'exec').mockRejectedValue(err);
+
+    const options = {
+      repoOwner: 'elastic',
+      repoName: 'kibana',
+    } as BackportOptions;
+
+    expect(await getFilesWithConflicts(options)).toEqual([
+      ' - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
+    ]);
   });
 });
 

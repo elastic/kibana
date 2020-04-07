@@ -223,28 +223,34 @@ describe('cherrypickAndCreatePullRequest', () => {
       expect(promptSpy.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "[0mResolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:[0m
+            "[0mThe following files have conflicts:[0m
         [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
 
-        Press ENTER to stage and commit the above files...",
+        [0m[3mYou do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.[23m[0m
+
+        Press ENTER to continue",
           ],
           Array [
-            "[0mResolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:[0m
+            "[0mThe following files have conflicts:[0m
         [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
 
-        Press ENTER to stage and commit the above files...",
+        [0m[3mYou do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.[23m[0m
+
+        Press ENTER to continue",
           ],
           Array [
-            "[0mResolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:[0m
+            "[0mThe following files have conflicts:[0m
         [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
 
-        Press ENTER to stage and commit the above files...",
+        [0m[3mYou do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.[23m[0m
+
+        Press ENTER to continue",
           ],
           Array [
-            "[0mResolve the conflicts in the following files and then return here. You do not need to \`git add\` or \`git commit\`:[0m
+            "[0mThe following files are unstaged:[0m
         [0m - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt[0m
 
-        Press ENTER to stage and commit the above files...",
+        Press ENTER to stage them",
           ],
         ]
       `);
@@ -256,6 +262,21 @@ describe('cherrypickAndCreatePullRequest', () => {
         [1mBackporting the following commits to 6.x:[22m
          - myCommitMessage
         ",
+          ],
+          Array [
+            "",
+          ],
+          Array [
+            "",
+          ],
+          Array [
+            "",
+          ],
+          Array [
+            "",
+          ],
+          Array [
+            "",
           ],
         ]
       `);
