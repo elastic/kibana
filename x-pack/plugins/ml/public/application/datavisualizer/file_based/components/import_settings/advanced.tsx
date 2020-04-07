@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
 import {
   EuiFieldText,
@@ -20,7 +20,25 @@ import {
 import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
 const EDITOR_HEIGHT = '300px';
 
-export function AdvancedSettings({
+interface Props {
+  index: string;
+  indexPattern: string;
+  initialized: boolean;
+  onIndexChange(): void;
+  createIndexPattern: boolean;
+  onCreateIndexPatternChange(): void;
+  onIndexPatternChange(): void;
+  indexSettingsString: string;
+  mappingsString: string;
+  pipelineString: string;
+  onIndexSettingsStringChange(): void;
+  onMappingsStringChange(): void;
+  onPipelineStringChange(): void;
+  indexNameError: string;
+  indexPatternNameError: string;
+}
+
+export const AdvancedSettings: FC<Props> = ({
   index,
   indexPattern,
   initialized,
@@ -36,7 +54,7 @@ export function AdvancedSettings({
   onPipelineStringChange,
   indexNameError,
   indexPatternNameError,
-}) {
+}) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -93,7 +111,6 @@ export function AdvancedSettings({
             defaultMessage="Index pattern name"
           />
         }
-        disabled={createIndexPattern === false || initialized === true}
         isInvalid={indexPatternNameError !== ''}
         error={[indexPatternNameError]}
       >
@@ -133,9 +150,15 @@ export function AdvancedSettings({
       </EuiFlexGroup>
     </React.Fragment>
   );
+};
+
+interface JsonEditorProps {
+  initialized: boolean;
+  data: string;
+  onChange(): void;
 }
 
-function IndexSettings({ initialized, data, onChange }) {
+const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -145,7 +168,6 @@ function IndexSettings({ initialized, data, onChange }) {
             defaultMessage="Index settings"
           />
         }
-        disabled={initialized === true}
         fullWidth
       >
         <MLJobEditor
@@ -159,9 +181,9 @@ function IndexSettings({ initialized, data, onChange }) {
       </EuiFormRow>
     </React.Fragment>
   );
-}
+};
 
-function Mappings({ initialized, data, onChange }) {
+const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -171,7 +193,6 @@ function Mappings({ initialized, data, onChange }) {
             defaultMessage="Mappings"
           />
         }
-        disabled={initialized === true}
         fullWidth
       >
         <MLJobEditor
@@ -185,9 +206,9 @@ function Mappings({ initialized, data, onChange }) {
       </EuiFormRow>
     </React.Fragment>
   );
-}
+};
 
-function IngestPipeline({ initialized, data, onChange }) {
+const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -197,7 +218,6 @@ function IngestPipeline({ initialized, data, onChange }) {
             defaultMessage="Ingest pipeline"
           />
         }
-        disabled={initialized === true}
         fullWidth
       >
         <MLJobEditor
@@ -211,4 +231,4 @@ function IngestPipeline({ initialized, data, onChange }) {
       </EuiFormRow>
     </React.Fragment>
   );
-}
+};
