@@ -29,7 +29,6 @@ import { ISearchSource } from '../search_source';
 import { FetchOptions } from '../fetch';
 import { TimeRange } from '../../../common';
 import { FieldFormatsStart } from '../../field_formats';
-import { getFieldFormats } from '../../../public/services';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -54,12 +53,6 @@ export interface AggConfigsOptions {
 export interface AggConfigsDependencies {
   fieldFormats: FieldFormatsStart;
 }
-
-const tempAggConfigsDependencies = () => {
-  return {
-    fieldFormats: getFieldFormats(),
-  };
-};
 
 export type CreateAggConfigParams = Assign<AggConfigOptions, { type: string | IAggType }>;
 
@@ -89,7 +82,7 @@ export class AggConfigs {
     indexPattern: IndexPattern,
     configStates: CreateAggConfigParams[] = [],
     opts: AggConfigsOptions,
-    { fieldFormats }: AggConfigsDependencies = tempAggConfigsDependencies()
+    { fieldFormats }: AggConfigsDependencies
   ) {
     this.typesRegistry = opts.typesRegistry;
 

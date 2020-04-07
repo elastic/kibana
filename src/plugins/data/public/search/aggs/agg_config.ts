@@ -25,7 +25,6 @@ import { IAggConfigs } from './agg_configs';
 import { FetchOptions } from '../fetch';
 import { ISearchSource } from '../search_source';
 import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
-import { getFieldFormats } from '../../../public/services';
 import { FieldFormatsStart } from '../../field_formats';
 
 export interface AggConfigOptions {
@@ -39,12 +38,6 @@ export interface AggConfigOptions {
 export interface AggConfigDependencies {
   fieldFormats: FieldFormatsStart;
 }
-
-const tempAggConfigDependencies = () => {
-  return {
-    fieldFormats: getFieldFormats(),
-  };
-};
 
 /**
  * @name AggConfig
@@ -109,7 +102,7 @@ export class AggConfig {
   constructor(
     aggConfigs: IAggConfigs,
     opts: AggConfigOptions,
-    { fieldFormats }: AggConfigDependencies = tempAggConfigDependencies()
+    { fieldFormats }: AggConfigDependencies
   ) {
     this.aggConfigs = aggConfigs;
     this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));

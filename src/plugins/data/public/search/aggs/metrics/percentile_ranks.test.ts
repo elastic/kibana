@@ -70,7 +70,8 @@ describe('AggTypesMetricsPercentileRanksProvider class', function() {
           },
         },
       ],
-      { typesRegistry }
+      { typesRegistry },
+      { fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
     );
   });
 

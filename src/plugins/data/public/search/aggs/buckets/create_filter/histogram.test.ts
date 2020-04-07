@@ -18,15 +18,19 @@
  */
 
 import { createFilterHistogram } from './histogram';
-import { AggConfigs } from '../../agg_configs';
+import { AggConfigs, AggConfigsDependencies } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
   describe('histogram', () => {
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
+    const aggConfigsDependencies: AggConfigsDependencies = {
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    };
     const getAggConfigs = () => {
       const field = {
         name: 'bytes',
@@ -55,7 +59,8 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        aggConfigsDependencies
       );
     };
 

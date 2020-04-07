@@ -18,14 +18,18 @@
  */
 
 import { createFilter } from './create_filter';
-import { AggConfigs, IAggConfig } from '../aggs';
+import { AggConfigs, IAggConfig, AggConfigsDependencies } from '../aggs';
 import { TabbedTable } from '../tabify';
 import { isRangeFilter, BytesFormat, FieldFormatsGetConfigFn } from '../../../common';
 import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('createFilter', () => {
   let table: TabbedTable;
   let aggConfig: IAggConfig;
+  const aggConfigsDependencies: AggConfigsDependencies = {
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
+  };
 
   const typesRegistry = mockAggTypesRegistry();
 
@@ -58,7 +62,8 @@ describe('createFilter', () => {
           params,
         },
       ],
-      { typesRegistry }
+      { typesRegistry },
+      aggConfigsDependencies
     );
   };
 

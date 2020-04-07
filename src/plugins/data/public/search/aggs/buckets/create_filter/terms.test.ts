@@ -56,9 +56,14 @@ describe('AggConfig Filters', () => {
         indexPattern,
       };
 
-      return new AggConfigs(indexPattern, aggs, {
-        typesRegistry: mockAggTypesRegistry([getTermsBucketAgg(aggTypesDependencies)]),
-      });
+      return new AggConfigs(
+        indexPattern,
+        aggs,
+        {
+          typesRegistry: mockAggTypesRegistry([getTermsBucketAgg(aggTypesDependencies)]),
+        },
+        { fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+      );
     };
 
     test('should return a match_phrase filter for terms', () => {

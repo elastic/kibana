@@ -18,9 +18,10 @@
  */
 
 import { TabbedAggResponseWriter } from './response_writer';
-import { AggConfigs, BUCKET_TYPES } from '../aggs';
+import { AggConfigs, BUCKET_TYPES, AggConfigsDependencies } from '../aggs';
 import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 import { TabbedResponseWriterOptions } from './types';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('TabbedAggResponseWriter class', () => {
   beforeEach(() => {
@@ -30,6 +31,9 @@ describe('TabbedAggResponseWriter class', () => {
   let responseWriter: TabbedAggResponseWriter;
 
   const typesRegistry = mockAggTypesRegistry();
+  const aggConfigsDependencies: AggConfigsDependencies = {
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
+  };
 
   const splitAggConfig = [
     {
@@ -72,9 +76,14 @@ describe('TabbedAggResponseWriter class', () => {
     } as any;
 
     return new TabbedAggResponseWriter(
-      new AggConfigs(indexPattern, aggs, {
-        typesRegistry,
-      }),
+      new AggConfigs(
+        indexPattern,
+        aggs,
+        {
+          typesRegistry,
+        },
+        aggConfigsDependencies
+      ),
       {
         metricsAtAllLevels: false,
         partialRows: false,

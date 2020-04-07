@@ -19,15 +19,19 @@
 
 import { indexBy } from 'lodash';
 import { AggConfig } from './agg_config';
-import { AggConfigs } from './agg_configs';
+import { AggConfigs, AggConfigsDependencies } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPattern, stubIndexPatternWithFields } from '../../../public/stubs';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('AggConfigs', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
+  const aggConfigsDependencies: AggConfigsDependencies = {
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
+  };
 
   beforeEach(() => {
     mockDataServices();
@@ -45,7 +49,12 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       expect(ac.aggs).toHaveLength(1);
     });
 
@@ -70,7 +79,7 @@ describe('AggConfigs', () => {
       ];
 
       const spy = jest.spyOn(AggConfig, 'ensureIds');
-      new AggConfigs(indexPattern, configStates, { typesRegistry });
+      new AggConfigs(indexPattern, configStates, { typesRegistry }, aggConfigsDependencies);
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy.mock.calls[0]).toEqual([configStates]);
       spy.mockRestore();
@@ -92,16 +101,25 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       expect(ac.aggs).toHaveLength(2);
 
       ac.createAggConfig(
-        new AggConfig(ac, {
-          enabled: true,
-          type: typesRegistry.get('terms'),
-          params: {},
-          schema: 'split',
-        })
+        new AggConfig(
+          ac,
+          {
+            enabled: true,
+            type: typesRegistry.get('terms'),
+            params: {},
+            schema: 'split',
+          },
+          aggConfigsDependencies
+        )
       );
       expect(ac.aggs).toHaveLength(3);
     });
@@ -115,7 +133,12 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       expect(ac.aggs).toHaveLength(1);
 
       ac.createAggConfig({
@@ -136,7 +159,12 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       expect(ac.aggs).toHaveLength(1);
 
       ac.createAggConfig(
@@ -164,7 +192,12 @@ describe('AggConfigs', () => {
         { type: 'percentiles', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       const sorted = ac.getRequestAggs();
       const aggs = indexBy(ac.aggs, agg => agg.type.name);
 
@@ -187,7 +220,12 @@ describe('AggConfigs', () => {
         { type: 'count', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       const sorted = ac.getResponseAggs();
       const aggs = indexBy(ac.aggs, agg => agg.type.name);
 
@@ -204,7 +242,12 @@ describe('AggConfigs', () => {
         { type: 'percentiles', enabled: true, params: { percents: [1, 2, 3] }, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       const sorted = ac.getResponseAggs();
       const aggs = indexBy(ac.aggs, agg => agg.type.name);
 
@@ -225,7 +268,12 @@ describe('AggConfigs', () => {
 
     it('uses the sorted aggs', () => {
       const configStates = [{ enabled: true, type: 'avg', params: { field: 'bytes' } }];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       const spy = jest.spyOn(AggConfigs.prototype, 'getRequestAggs');
       ac.toDsl();
       expect(spy).toHaveBeenCalledTimes(1);
@@ -239,9 +287,14 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'count', params: {} },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, {
-        typesRegistry,
-      });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        {
+          typesRegistry,
+        },
+        aggConfigsDependencies
+      );
 
       const aggInfos = ac.aggs.map(aggConfig => {
         const football = {};
@@ -284,7 +337,12 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
       const count = ac.byName('count')[0];
@@ -309,9 +367,14 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, {
-        typesRegistry,
-      });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        {
+          typesRegistry,
+        },
+        aggConfigsDependencies
+      );
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
       const metrics = ac.bySchemaName('metrics');
@@ -336,7 +399,12 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       const topLevelDsl = ac.toDsl(true);
       const buckets = ac.bySchemaName('buckets');
       const metrics = ac.bySchemaName('metrics');
@@ -406,7 +474,12 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry },
+        aggConfigsDependencies
+      );
       const topLevelDsl = ac.toDsl(true)['2'];
 
       expect(Object.keys(topLevelDsl.aggs)).toContain('1');
