@@ -152,6 +152,7 @@ export function SaveQueryForm({
             } else {
               setEnabledSaveButton(true);
             }
+            setFormErrors([]);
             setTitle(event.target.value);
           }}
           data-test-subj="saveQueryFormTitle"
