@@ -17,32 +17,16 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
-
-export { SectionLoading } from './components/section_loading';
-
-export { CronEditor, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './components/cron_editor';
+// Lib is intentionally not included in this barrel export file to separate worker logic
+// from being imported with pure functions
 
 export {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig,
-  UseRequestResponse,
-  sendRequest,
-  useRequest,
-} from './request/np_ready_request';
-
-export { indices } from './indices';
-
-export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
-
-export {
-  installXJsonMode,
-  XJsonMode,
   ElasticsearchSqlHighlightRules,
-  addXJsonToRules,
   ScriptHighlightRules,
   XJsonHighlightRules,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from './console_lang';
+  addXJsonToRules,
+  XJsonMode,
+  installXJsonMode,
+} from './ace/modes';
+
+export { expandLiteralStrings, collapseLiteralStrings } from './lib';

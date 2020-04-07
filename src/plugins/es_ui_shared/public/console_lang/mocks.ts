@@ -17,12 +17,6 @@
  * under the License.
  */
 
-// Lib is intentionally not included in this barrel export file to separate worker logic
-// from being imported with pure functions
-
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-} from './ace/modes';
+jest.mock('./ace/modes/x_json/worker', () => ({
+  workerModule: { id: 'ace/mode/json_worker', src: '' },
+}));

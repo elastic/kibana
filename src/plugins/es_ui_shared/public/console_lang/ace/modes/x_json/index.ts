@@ -16,10 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export {
-  ElasticsearchSqlHighlightRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  addXJsonToRules,
-} from './lexer_rules';
+export { installXJsonMode, XJsonMode } from './x_json';

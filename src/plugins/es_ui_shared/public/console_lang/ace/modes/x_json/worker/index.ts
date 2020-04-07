@@ -17,32 +17,10 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
+// @ts-ignore
+import src from '!!raw-loader!./worker.js';
 
-export { SectionLoading } from './components/section_loading';
-
-export { CronEditor, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './components/cron_editor';
-
-export {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig,
-  UseRequestResponse,
-  sendRequest,
-  useRequest,
-} from './request/np_ready_request';
-
-export { indices } from './indices';
-
-export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
-
-export {
-  installXJsonMode,
-  XJsonMode,
-  ElasticsearchSqlHighlightRules,
-  addXJsonToRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from './console_lang';
+export const workerModule = {
+  id: 'ace/mode/json_worker',
+  src,
+};

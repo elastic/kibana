@@ -17,32 +17,9 @@
  * under the License.
  */
 
-export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
-
-export { SectionLoading } from './components/section_loading';
-
-export { CronEditor, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from './components/cron_editor';
-
-export {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig,
-  UseRequestResponse,
-  sendRequest,
-  useRequest,
-} from './request/np_ready_request';
-
-export { indices } from './indices';
-
-export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
-
-export {
-  installXJsonMode,
-  XJsonMode,
-  ElasticsearchSqlHighlightRules,
-  addXJsonToRules,
-  ScriptHighlightRules,
-  XJsonHighlightRules,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-} from './console_lang';
+// Satisfy TS's requirements that the module be declared per './index.ts'.
+declare module '!!raw-loader!./worker.js' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
