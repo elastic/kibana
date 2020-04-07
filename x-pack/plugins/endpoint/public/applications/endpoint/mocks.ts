@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IngestManagerStart } from '../../../../ingest_manager/public';
+import { ingestManagerPluginMock } from '../../../../ingest_manager/public/mocks';
 import {
   dataPluginMock,
   Start as DataPublicStartMock,
@@ -32,6 +34,7 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
  */
 export interface DepsStartMock {
   data: DataMock;
+  ingestManager: IngestManagerStart;
 }
 
 /**
@@ -52,7 +55,9 @@ export const depsStartMock: () => DepsStartMock = () => {
   }) as DataMock['query']['filterManager']['getUpdates$'];
   dataMock.ui.SearchBar = jest.fn();
 
+  const ingestManagerMock = ingestManagerPluginMock.createStartContract();
   return {
     data: dataMock,
+    ingestManager: ingestManagerMock,
   };
 };

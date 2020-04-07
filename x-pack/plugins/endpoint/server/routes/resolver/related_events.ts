@@ -9,8 +9,7 @@ import { RequestHandler, Logger } from 'kibana/server';
 import { EndpointAppConstants } from '../../../common/types';
 import { getPaginationParams } from './utils/pagination';
 import { RelatedEventsQuery } from './queries/related_events';
-import { IndexPatternService } from '../../../../ingest_manager/server';
-import { IngestIndexPatternRetriever, IndexPatternRetriever } from '../../index_pattern';
+import { IndexPatternRetriever } from '../../index_pattern';
 
 interface RelatedEventsQueryParams {
   after?: string;

@@ -11,15 +11,12 @@ import { schema } from '@kbn/config-schema';
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
 import { HostMetadata, HostResultList, EndpointAppConstants } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
-import { IngestIndexPatternRetriever } from '../../index_pattern';
 
 interface HitSource {
   _source: HostMetadata;
 }
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
-  const log = endpointAppContext.logFactory.get('metadata');
-
   router.post(
     {
       path: '/api/endpoint/metadata',

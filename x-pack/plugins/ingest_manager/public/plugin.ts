@@ -78,7 +78,7 @@ export class IngestManagerPlugin
     });
   }
 
-  public async start(core: CoreStart): Promise<RecursiveReadonly<IngestManagerStart>> {
+  public start(core: CoreStart): RecursiveReadonly<IngestManagerStart> {
     return deepFreeze({
       setup: sendSetup,
       isInitialized: sendIsInitialized,

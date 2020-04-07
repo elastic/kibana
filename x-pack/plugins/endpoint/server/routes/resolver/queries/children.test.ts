@@ -5,7 +5,6 @@
  */
 import { ChildrenQuery } from './children';
 import { EndpointAppConstants } from '../../../../common/types';
-import { IndexPatternRetriever } from '../../../index_pattern';
 
 export const fakeEventIndexPattern = 'events-endpoint-*';
 
