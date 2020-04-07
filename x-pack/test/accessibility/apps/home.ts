@@ -52,14 +52,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // issue - logo images are missing alt -text https://github.com/elastic/kibana/issues/62239
-    it.skip('click on ActiveMQ logs panel to open tutorial meets a11y requirements', async () => {
+    it('click on ActiveMQ logs panel to open tutorial meets a11y requirements', async () => {
       await PageObjects.home.clickOnLogsTutorial();
       await a11y.testAppSnapshot();
     });
 
-    // https://github.com/elastic/kibana/issues/62239
-    it.skip('click on cloud tutorial meets a11y requirements', async () => {
+    it('click on cloud tutorial meets a11y requirements', async () => {
       await PageObjects.home.clickOnCloudTutorial();
       await a11y.testAppSnapshot();
     });

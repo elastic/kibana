@@ -30,6 +30,6 @@ export const useUptimeTelemetry = (page?: UptimePage) => {
       dateEnd: dateRangeEnd,
       autoRefreshEnabled: !autorefreshIsPaused,
     };
-    apiService.post(API_URLS.logPageView, params);
+    apiService.post(API_URLS.LOG_PAGE_VIEW, params);
   }, [autorefreshInterval, autorefreshIsPaused, dateRangeEnd, dateRangeStart, page]);
 };
