@@ -14,8 +14,6 @@ import React, {
   useState
 } from 'react';
 import { debounce } from 'lodash';
-import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
-import { AGENT_NAME } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import {
   animationOptions,
   cytoscapeOptions,
