@@ -32,7 +32,7 @@ Lens supports the following aggregations:
 [[drag-drop]]
 === Drag and drop
 
-The data panel in the left column shows the data fields for the selected time period. When
+The panel shows the data fields for the selected time period. When
 you drag a field from the data panel, Lens highlights where you can drop that field. The first time you drag a data field,
 you'll see two places highlighted in green:
 
@@ -57,7 +57,7 @@ Lens shows you fields based on the <<index-patterns, index patterns>> you have d
 {kib}, and the current time range. When you change the index pattern or time filter,
 the list of fields are updated.
 
-To narrow the list of fields you see in the left panel, you can:
+To narrow the list of fields, you can:
 
 * Enter the field name in *Search field names*.
 
@@ -100,11 +100,7 @@ still allows you to make the change.
 
 Lens allows some customizations of the data for each visualization.
 
-. Change the index pattern.
-
-.. In the left column, click the index pattern name.
-
-.. Select the new index pattern.
+. Click the index pattern name, then select the new index pattern.
 +
 If there is a match, Lens displays the new data. All fields that do not match the index pattern are removed.
 
@@ -147,7 +143,7 @@ Drag and drop your data onto the visualization builder pane.
 
 . On the *New Visualization* window, click *Lens*.
 
-. In the left column, select the *kibana_sample_data_ecommerce* index.
+. Select the *kibana_sample_data_ecommerce* index.
 
 . Click image:images/time-filter-calendar.png[], then click *Last 7 days*. The list of data fields are updated.
 

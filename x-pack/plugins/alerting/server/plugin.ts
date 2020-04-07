@@ -56,6 +56,15 @@ import {
 import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
+import { IEventLogger, IEventLogService } from '../../event_log/server';
+
+const EVENT_LOG_PROVIDER = 'alerting';
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeAction: 'execute-action',
+  newInstance: 'new-instance',
+  resolvedInstance: 'resolved-instance',
+};
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -73,6 +82,7 @@ export interface AlertingPluginsSetup {
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  eventLog: IEventLogService;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -93,6 +103,7 @@ export class AlertingPlugin {
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
+  private eventLogger?: IEventLogger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -131,6 +142,11 @@ export class AlertingPlugin {
         'mutedInstanceIds',
         'updatedBy',
       ]),
+    });
+
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.eventLog.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
     });
 
     const alertTypeRegistry = new AlertTypeRegistry({
@@ -211,6 +227,7 @@ export class AlertingPlugin {
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
+      eventLogger: this.eventLogger!,
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
