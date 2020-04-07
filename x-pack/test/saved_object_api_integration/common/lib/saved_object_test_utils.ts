@@ -106,13 +106,15 @@ export const expectResponses = {
   permitted: async (object: Record<string, any>, testCase: TestCase, expectSuccess?: any) => {
     const { type, id, failure } = testCase;
     if (failure) {
-      let error: any;
+      let error: ReturnType<typeof SavedObjectsErrorHelpers['decorateGeneralError']>;
       if (failure === 400) {
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
       } else if (failure === 404) {
         error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       } else if (failure === 409) {
         error = SavedObjectsErrorHelpers.createConflictError(type, id);
+      } else {
+        throw new Error(`Encountered unexpected error code ${failure}`);
       }
       // should not call permitted with a 403 failure case
       if (object.type && object.id) {
@@ -187,7 +189,7 @@ export const expectResponses = {
  *    { spaceId: SPACE_1_ID, users: {...}, modifier: 'bar' },
  *  ]
  */
-export const getTestScenarios = <T>(modifier?: T[]) => {
+export const getTestScenarios = <T>(modifiers?: T[]) => {
   const commonUsers = {
     noAccess: { ...NOT_A_KIBANA_USER, description: 'user with no access' },
     superuser: { ...SUPERUSER, description: 'superuser' },
@@ -204,10 +206,8 @@ export const getTestScenarios = <T>(modifier?: T[]) => {
     },
   };
 
-  interface Modifier {
+  interface Security {
     modifier?: T;
-  }
-  interface Security extends Modifier {
     users: Record<
       | keyof typeof commonUsers
       | 'allAtDefaultSpace'
@@ -217,19 +217,21 @@ export const getTestScenarios = <T>(modifier?: T[]) => {
       TestUser
     >;
   }
-  interface SecurityAndSpaces extends Modifier {
+  interface SecurityAndSpaces {
+    modifier?: T;
     users: Record<
       keyof typeof commonUsers | 'allAtSpace' | 'readAtSpace' | 'allAtOtherSpace',
       TestUser
     >;
     spaceId: string;
   }
-  interface Spaces extends Modifier {
+  interface Spaces {
+    modifier?: T;
     spaceId: string;
   }
 
-  let spaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map(x => ({ spaceId: x })) as Spaces[];
-  let security = [
+  let spaces: Spaces[] = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map(x => ({ spaceId: x }));
+  let security: Security[] = [
     {
       users: {
         ...commonUsers,
@@ -251,8 +253,8 @@ export const getTestScenarios = <T>(modifier?: T[]) => {
         },
       },
     },
-  ] as Security[];
-  let securityAndSpaces = [
+  ];
+  let securityAndSpaces: SecurityAndSpaces[] = [
     {
       spaceId: DEFAULT_SPACE_ID,
       users: {
@@ -286,10 +288,10 @@ export const getTestScenarios = <T>(modifier?: T[]) => {
         },
       },
     },
-  ] as SecurityAndSpaces[];
-  if (modifier) {
+  ];
+  if (modifiers) {
     const addModifier = <T>(list: T[]) =>
-      list.map(x => modifier.map(y => ({ ...x, modifier: y }))).flat();
+      list.map(x => modifiers.map(modifier => ({ ...x, modifier }))).flat();
     spaces = addModifier(spaces);
     security = addModifier(security);
     securityAndSpaces = addModifier(securityAndSpaces);
