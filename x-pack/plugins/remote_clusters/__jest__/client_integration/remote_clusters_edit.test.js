@@ -61,7 +61,7 @@ describe('Edit Remote cluster', () => {
     });
 
     const formEdit = component.find(RemoteClusterForm);
-    const formAdd = addRemoteClusterTestBed.find(RemoteClusterForm);
+    const formAdd = addRemoteClusterTestBed.component.find(RemoteClusterForm);
 
     expect(formEdit.length).toBe(1);
     expect(formAdd.length).toBe(1);
