@@ -14,6 +14,10 @@ import {
   EuiSelect,
   EuiTitle,
   EuiIconTip,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +35,7 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../common/index_controls';
+import { useXJsonMode } from '../../lib/use_x_json_mode';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -271,9 +276,29 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
   actionParams,
   index,
   editAction,
+  messageVariables,
 }) => {
   const { documents } = actionParams;
-
+  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(
+    documents && documents.length > 0 ? documents[0] : null
+  );
+  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
+  const messageVariablesItems = messageVariables?.map((variable: string, i: number) => (
+    <EuiContextMenuItem
+      key={variable}
+      data-test-subj={`variableMenuButton-${i}`}
+      icon="empty"
+      onClick={() => {
+        const value = (xJson ?? '').concat(` {{${variable}}}`);
+        setXJson(value);
+        // Keep the documents in sync with the editor content
+        onDocumentsChange(convertToJson(value));
+        setIsVariablesPopoverOpen(false);
+      }}
+    >
+      {`{{${variable}}}`}
+    </EuiContextMenuItem>
+  ));
   function onDocumentsChange(updatedDocuments: string) {
     try {
       const documentsJSON = JSON.parse(updatedDocuments);
@@ -291,27 +316,55 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
             defaultMessage: 'Document to index',
           }
         )}
+        labelAppend={
+          // TODO: replace this button with a proper Eui component, when it will be ready
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                data-test-subj="indexDocumentAddVariableButton"
+                onClick={() => setIsVariablesPopoverOpen(true)}
+                iconType="indexOpen"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.addVariableTitle',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.addVariablePopoverButton',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
+              />
+            }
+            isOpen={isVariablesPopoverOpen}
+            closePopover={() => setIsVariablesPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={messageVariablesItems} />
+          </EuiPopover>
+        }
       >
         <EuiCodeEditor
-          aria-label={''}
-          mode={'json'}
+          mode={xJsonMode}
+          width="100%"
+          height="200px"
           theme="github"
           data-test-subj="actionIndexDoc"
-          value={JSON.stringify(documents && documents.length > 0 ? documents[0] : {}, null, 2)}
-          onChange={onDocumentsChange}
-          width="100%"
-          height="auto"
-          minLines={6}
-          maxLines={30}
-          isReadOnly={false}
-          setOptions={{
-            showLineNumbers: true,
-            tabSize: 2,
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
+            {
+              defaultMessage: 'Code editor',
+            }
+          )}
+          value={xJson}
+          onChange={(xjson: string) => {
+            setXJson(xjson);
+            // Keep the documents in sync with the editor content
+            onDocumentsChange(convertToJson(xjson));
           }}
-          editorProps={{
-            $blockScrolling: Infinity,
-          }}
-          showGutter={true}
         />
       </EuiFormRow>
     </Fragment>
