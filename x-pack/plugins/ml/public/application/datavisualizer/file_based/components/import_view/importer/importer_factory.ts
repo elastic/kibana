@@ -6,8 +6,14 @@
 
 import { MessageImporter } from './message_importer';
 import { NdjsonImporter } from './ndjson_importer';
+import { ImportConfig } from './importer';
+import { FindFileStructureResponse } from '../../../../../../../common/types/file_datavisualizer';
 
-export function importerFactory(format, results, settings) {
+export function importerFactory(
+  format: string,
+  results: FindFileStructureResponse,
+  settings: ImportConfig
+) {
   switch (format) {
     // delimited and semi-structured text are both handled by splitting the
     // file into messages, then sending these to ES for further processing
