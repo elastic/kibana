@@ -35,8 +35,12 @@ export class StaticSizeProperty extends StaticStyleProperty {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-size', this._options.size / halfIconPixels);
   }
 
-  syncCircleStrokeWidthWithMb(mbLayerId, mbMap) {
-    mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', this._options.size);
+  syncCircleStrokeWidthWithMb(mbLayerId, mbMap, hasNoRadius) {
+    if (hasNoRadius) {
+      mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', 0);
+    } else {
+      mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', this._options.size);
+    }
   }
 
   syncCircleRadiusWithMb(mbLayerId, mbMap) {

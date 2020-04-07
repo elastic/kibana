@@ -26,8 +26,6 @@ import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
-import { dataPluginMock } from '../../../public/mocks';
-import { setFieldFormats } from '../../../public/services';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
@@ -400,13 +398,6 @@ describe('AggConfig', () => {
 
   describe('#fieldFormatter - custom getFormat handler', () => {
     it('returns formatter from getFormat handler', () => {
-      setFieldFormats({
-        ...dataPluginMock.createStartContract().fieldFormats,
-        getDefaultInstance: jest.fn().mockImplementation(() => ({
-          getConverterFor: jest.fn().mockImplementation(() => (t: string) => t),
-        })) as any,
-      });
-
       const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         enabled: true,
@@ -429,12 +420,6 @@ describe('AggConfig', () => {
     let aggConfig: AggConfig;
 
     beforeEach(() => {
-      setFieldFormats({
-        ...dataPluginMock.createStartContract().fieldFormats,
-        getDefaultInstance: jest.fn().mockImplementation(() => ({
-          getConverterFor: (t?: string) => t || identity,
-        })) as any,
-      });
       indexPattern.fields.getByName = name =>
         ({
           format: {
