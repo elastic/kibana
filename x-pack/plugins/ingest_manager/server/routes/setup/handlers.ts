@@ -34,6 +34,7 @@ export const createFleetSetupHandler: RequestHandler = async (context, request, 
   try {
     const soClient = context.core.savedObjects.client;
     const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+    await setupIngestManager(soClient, callCluster);
     await setupFleet(soClient, callCluster);
 
     return response.ok({
