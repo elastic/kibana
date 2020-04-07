@@ -4532,7 +4532,6 @@
     "xpack.apm.settings.apmIndices.spanIndicesLabel": "跨度索引",
     "xpack.apm.settings.apmIndices.title": "索引",
     "xpack.apm.settings.apmIndices.transactionIndicesLabel": "事务索引",
-    "xpack.apm.settings.customizeUI": "定制 UI",
     "xpack.apm.settings.customizeUI.customLink": "定制链接",
     "xpack.apm.settings.customizeUI.customLink.create.failed": "链接无法保存！",
     "xpack.apm.settings.customizeUI.customLink.create.failed.message": "保存链接时出现了问题。错误：“{errorMessage}”",

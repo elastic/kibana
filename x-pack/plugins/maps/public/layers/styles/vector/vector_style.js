@@ -543,8 +543,11 @@ export class VectorStyle extends AbstractStyle {
   setMBPaintPropertiesForPoints({ alpha, mbMap, pointLayerId }) {
     this._fillColorStyleProperty.syncCircleColorWithMb(pointLayerId, mbMap, alpha);
     this._lineColorStyleProperty.syncCircleStrokeWithMb(pointLayerId, mbMap, alpha);
-    this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(pointLayerId, mbMap);
-    this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
+    const hasNoRadius =
+      !this._iconSizeStyleProperty.isDynamic() &&
+      this._iconSizeStyleProperty.getOptions().size === 0;
+    this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(pointLayerId, mbMap, hasNoRadius);
+    this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap, hasNoRadius);
   }
 
   setMBPropertiesForLabelText({ alpha, mbMap, textLayerId }) {

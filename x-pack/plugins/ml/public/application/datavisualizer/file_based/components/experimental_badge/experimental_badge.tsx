@@ -5,11 +5,11 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiBetaBadge } from '@elastic/eui';
 
-export function ExperimentalBadge({ tooltipContent }) {
+export const ExperimentalBadge: FC<{ tooltipContent: string }> = ({ tooltipContent }) => {
   return (
     <span>
       <EuiBetaBadge
@@ -24,4 +24,4 @@ export function ExperimentalBadge({ tooltipContent }) {
       />
     </span>
   );
-}
+};
