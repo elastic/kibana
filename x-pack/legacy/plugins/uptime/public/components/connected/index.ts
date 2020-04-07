@@ -11,6 +11,7 @@ export { KueryBar } from './kuerybar/kuery_bar_container';
 export { FilterGroup } from './filter_group/filter_group_container';
 export { MonitorStatusDetails } from './monitor/status_details_container';
 export { MonitorStatusBar } from './monitor/status_bar_container';
+export { MonitorList } from './monitor/monitor_list';
 export { MonitorListDrawer } from './monitor/list_drawer_container';
 export { MonitorListActionsPopover } from './monitor/drawer_popover_container';
 export { PingList, PingListProps } from './pings';

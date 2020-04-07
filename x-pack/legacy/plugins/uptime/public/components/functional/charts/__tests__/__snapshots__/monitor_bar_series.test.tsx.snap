@@ -82,7 +82,6 @@ exports[`MonitorBarSeries component shallow renders a series when there are down
   }
 >
   <MonitorBarSeries
-    dangerColor="A danger color"
     histogramSeries={
       Array [
         Object {

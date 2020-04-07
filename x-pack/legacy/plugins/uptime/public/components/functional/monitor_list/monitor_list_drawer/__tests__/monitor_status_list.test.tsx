@@ -29,7 +29,7 @@ describe('MonitorStatusList component', () => {
         observer: {
           geo: {},
         },
-        timestamp: '1570538236414',
+        '@timestamp': 1570538236414,
       },
       {
         monitor: {
@@ -40,7 +40,7 @@ describe('MonitorStatusList component', () => {
         observer: {
           geo: {},
         },
-        timestamp: '1570538236414',
+        '@timestamp': 1570538236414,
       },
       {
         monitor: {
@@ -51,7 +51,7 @@ describe('MonitorStatusList component', () => {
         observer: {
           geo: {},
         },
-        timestamp: '1570538236414',
+        '@timestamp': 1570538236414,
       },
       {
         monitor: {
@@ -62,7 +62,7 @@ describe('MonitorStatusList component', () => {
         observer: {
           geo: {},
         },
-        timestamp: '1570538236414',
+        '@timestamp': 1570538236414,
       },
       {
         monitor: {
@@ -73,7 +73,7 @@ describe('MonitorStatusList component', () => {
         observer: {
           geo: {},
         },
-        timestamp: '1570538236414',
+        '@timestamp': 1570538236414,
       },
       {
         monitor: {
@@ -84,7 +84,7 @@ describe('MonitorStatusList component', () => {
         observer: {
           geo: {},
         },
-        timestamp: '1570538236414',
+        '@timestamp': 1570538236414,
       },
       {
         monitor: {
@@ -95,7 +95,7 @@ describe('MonitorStatusList component', () => {
         observer: {
           geo: {},
         },
-        timestamp: '1570538236414',
+        '@timestamp': 1570538236414,
       },
       {
         monitor: {
@@ -106,7 +106,7 @@ describe('MonitorStatusList component', () => {
         observer: {
           geo: {},
         },
-        timestamp: '1570538236414',
+        '@timestamp': 1570538236414,
       },
     ];
   });

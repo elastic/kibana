@@ -13,7 +13,7 @@ export * from './alerts';
 export { DonutChart } from './charts/donut_chart';
 export { KueryBarComponent } from './kuery_bar/kuery_bar';
 export { MonitorCharts } from './monitor_charts';
-export { MonitorList } from './monitor_list';
+export { MonitorListComponent } from './monitor_list';
 export { OverviewPageParsingErrorCallout } from './overview_page_parsing_error_callout';
 export { PingListComponent } from './ping_list';
 export { PingHistogramComponent } from './charts';

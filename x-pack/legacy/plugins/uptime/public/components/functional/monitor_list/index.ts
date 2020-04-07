@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorList } from './monitor_list';
+export { MonitorListComponent } from './monitor_list';
 export { Criteria, Pagination } from './types';
 export { LocationLink } from './monitor_list_drawer';
