@@ -48,8 +48,8 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
         await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
         await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
       },
-      async openMonitorStatusAlertType() {
-        return testSubjects.click('xpack.uptime.alerts.monitorStatus-SelectOption', 5000);
+      async openMonitorStatusAlertType(alertType: string) {
+        return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`, 5000);
       },
       async setAlertTags(tags: string[]) {
         for (let i = 0; i < tags.length; i += 1) {
