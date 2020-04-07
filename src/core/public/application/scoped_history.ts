@@ -229,9 +229,17 @@ export class ScopedHistory<HistoryLocationState = unknown>
     prependBasePath: boolean = true
   ): Href => {
     this.verifyActive();
-    return this.parentHistory.createHref(
-      prependBasePath ? this.prependBasePath(location) : location
-    );
+    if (prependBasePath) {
+      location = this.prependBasePath(location);
+      if (location.pathname === undefined) {
+        // we always want to create an url relative to the basePath
+        // so if pathname is not present, we use the history's basePath as default
+        // we are doing that here because `prependBasePath` should not
+        // alter pathname for other method calls
+        location.pathname = this.basePath;
+      }
+    }
+    return this.parentHistory.createHref(location);
   };
 
   private prependBasePath(path: Path): Path;
@@ -252,7 +260,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
         pathname:
           pathOrLocation.pathname !== undefined
             ? this.prependBasePathToString(pathOrLocation.pathname)
-            : this.basePath,
+            : undefined,
       };
     }
   }
