@@ -14,7 +14,7 @@ import {
   getUrlPrefix,
   getTestTitle,
 } from '../lib/saved_object_test_utils';
-import { DescribeFn, ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface BulkGetTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string }>;
@@ -80,7 +80,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     ];
   };
 
-  const makeBulkGetTest = (describeFn: DescribeFn) => (
+  const makeBulkGetTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: BulkGetTestSuite
   ) => {

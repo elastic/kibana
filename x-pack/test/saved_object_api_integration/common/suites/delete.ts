@@ -5,6 +5,7 @@
  */
 
 import { SuperTest } from 'supertest';
+import expect from '@kbn/expect/expect.js';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import {
@@ -13,7 +14,7 @@ import {
   getUrlPrefix,
   getTestTitle,
 } from '../lib/saved_object_test_utils';
-import { DescribeFn, ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface DeleteTestDefinition extends TestDefinition {
   request: { type: string; id: string };
@@ -36,7 +37,12 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     } else {
       // permitted
       const object = response.body;
-      await expectResponses.permitted(object, testCase, {});
+      if (testCase.failure) {
+        await expectResponses.permitted(object, testCase);
+      } else {
+        // the success response for `delete` is an empty object
+        expect(object).to.eql({});
+      }
     }
   };
   const createTestDefinitions = (
@@ -60,7 +66,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }));
   };
 
-  const makeDeleteTest = (describeFn: DescribeFn) => (
+  const makeDeleteTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: DeleteTestSuite
   ) => {

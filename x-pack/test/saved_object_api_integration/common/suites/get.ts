@@ -12,7 +12,7 @@ import {
   getUrlPrefix,
   getTestTitle,
 } from '../lib/saved_object_test_utils';
-import { DescribeFn, ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface GetTestDefinition extends TestDefinition {
   request: { type: string; id: string };
@@ -57,7 +57,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     }));
   };
 
-  const makeGetTest = (describeFn: DescribeFn) => (
+  const makeGetTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: GetTestSuite
   ) => {

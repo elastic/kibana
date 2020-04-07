@@ -14,7 +14,6 @@ import {
   getTestTitle,
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import {
-  DescribeFn,
   ExpectResponseBody,
   TestDefinition,
   TestSuite,
@@ -82,7 +81,7 @@ export function shareRemoveTestSuiteFactory(esArchiver: any, supertest: SuperTes
     }));
   };
 
-  const makeShareRemoveTest = (describeFn: DescribeFn) => (
+  const makeShareRemoveTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: ShareRemoveTestSuite
   ) => {

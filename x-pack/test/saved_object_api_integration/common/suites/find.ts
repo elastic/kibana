@@ -10,7 +10,7 @@ import querystring from 'querystring';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
-import { DescribeFn, ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -158,7 +158,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     }));
   };
 
-  const makeFindTest = (describeFn: DescribeFn) => (
+  const makeFindTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: FindTestSuite
   ) => {

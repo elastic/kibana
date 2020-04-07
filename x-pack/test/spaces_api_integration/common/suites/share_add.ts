@@ -13,7 +13,6 @@ import {
   getUrlPrefix,
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import {
-  DescribeFn,
   ExpectResponseBody,
   TestDefinition,
   TestSuite,
@@ -84,7 +83,7 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
     }));
   };
 
-  const makeShareAddTest = (describeFn: DescribeFn) => (
+  const makeShareAddTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: ShareAddTestSuite
   ) => {

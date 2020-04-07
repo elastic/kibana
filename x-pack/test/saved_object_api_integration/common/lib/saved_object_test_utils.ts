@@ -103,7 +103,7 @@ export const expectResponses = {
       message: `Unable to ${action} ${uniqueSorted.join()}`,
     });
   },
-  permitted: async (object: Record<string, any>, testCase: TestCase, expectSuccess?: any) => {
+  permitted: async (object: Record<string, any>, testCase: TestCase) => {
     const { type, id, failure } = testCase;
     if (failure) {
       let error: ReturnType<typeof SavedObjectsErrorHelpers['decorateGeneralError']>;
@@ -128,8 +128,6 @@ export const expectResponses = {
         expect(object.statusCode).to.eql(error.output.payload.statusCode);
         // ignore the error.message, because it can vary for decorated non-bulk errors (e.g., conflict)
       }
-    } else if (expectSuccess) {
-      expect(object).to.eql(expectSuccess);
     } else {
       // fall back to default behavior of testing the success outcome
       expect(object.type).to.eql(type);

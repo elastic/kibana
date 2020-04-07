@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type DescribeFn = (text: string, fn: () => void) => void;
-
 export type ExpectResponseBody = (response: Record<string, any>) => Promise<void>;
 
 export interface TestDefinition {

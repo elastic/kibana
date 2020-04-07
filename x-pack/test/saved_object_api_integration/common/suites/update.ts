@@ -14,7 +14,7 @@ import {
   getUrlPrefix,
   getTestTitle,
 } from '../lib/saved_object_test_utils';
-import { DescribeFn, ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface UpdateTestDefinition extends TestDefinition {
   request: { type: string; id: string };
@@ -66,7 +66,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     }));
   };
 
-  const makeUpdateTest = (describeFn: DescribeFn) => (
+  const makeUpdateTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
     definition: UpdateTestSuite
   ) => {
