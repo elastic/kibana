@@ -79,6 +79,8 @@ export function TodoRefEmbeddableComponentInner({
   );
 }
 
-export const TodoRefEmbeddableComponent = withEmbeddableSubscription(
-  TodoRefEmbeddableComponentInner
-);
+export const TodoRefEmbeddableComponent = withEmbeddableSubscription<
+  TodoRefInput,
+  TodoRefOutput,
+  TodoRefEmbeddable
+>(TodoRefEmbeddableComponentInner);
