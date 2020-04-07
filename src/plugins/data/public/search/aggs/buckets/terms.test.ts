@@ -51,7 +51,7 @@ describe('Terms Agg', () => {
       );
     };
 
-    it('converts object to string type', function() {
+    test('converts object to string type', () => {
       const aggConfigs = getAggConfigs({
         include: {
           pattern: '404',
