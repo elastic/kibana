@@ -9,7 +9,6 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { RENDER_AS } from '../../../../common/constants';
 import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
@@ -155,7 +154,7 @@ export class CreateSourceEditor extends Component {
   }
 
   _renderRenderAsSelect() {
-    if (this.state.requestType === RENDER_AS.HEATMAP || !this.state.indexPattern) {
+    if (!this.state.indexPattern) {
       return null;
     }
 
