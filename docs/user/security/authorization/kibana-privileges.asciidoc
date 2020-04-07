@@ -44,8 +44,8 @@ Assigning a feature privilege grants access to a specific feature.
 `read`:: Grants read-only access.
 
 ===== Sub-feature privileges
-Some features allow for fine-grained access control beyond the `all` and `read` privileges.
-This additional level of control is available with a gold license.
+Some features allow for finer access control than the `all` and `read` privileges.
+This additional level of control is available in the Gold subscription level and higher.
 
 ===== Assigning feature privileges
 From the role management screen:

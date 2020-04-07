@@ -52,7 +52,7 @@ Registering a feature consists of the following fields. For more information, co
 |`subFeatures` (optional)
 |{repo}blob/{branch}/x-pack/plugins/features/common/feature.ts[`FeatureConfig`].
 |See <<example-3-discover,Example 3>>
-|The set of sub-features to enable granular access control beyond the `all` and `read` feature privileges. These options will only be available to clusters running a Gold license or better.
+|The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.
 
 |`icon`
 |`string`
