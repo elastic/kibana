@@ -167,7 +167,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
-      delete jobConfig.analyzed_fields;
       const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
         jobConfig
       );
@@ -340,7 +339,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
+  }, [
+    jobType,
+    sourceIndex,
+    sourceIndexNameEmpty,
+    dependentVariable,
+    trainingPercent,
+    JSON.stringify(excludes),
+  ]);
 
   // Temp effect to close the context menu popover on Clone button click
   useEffect(() => {
