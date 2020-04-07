@@ -34,14 +34,15 @@ import {
   withEmbeddableSubscription,
   ContainerOutput,
   EmbeddableOutput,
+  EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
-import { EmbeddableListItem } from '../list_container/embeddable_list_item';
 import { SearchableListContainer, SearchableContainerInput } from './searchable_list_container';
 
 interface Props {
   embeddable: SearchableListContainer;
   input: SearchableContainerInput;
   output: ContainerOutput;
+  embeddableServices: EmbeddableStart;
 }
 
 interface State {
@@ -111,17 +112,42 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
     });
   };
 
+  private checkMatching = () => {
+    const { input, embeddable } = this.props;
+    const checked: { [key: string]: boolean } = {};
+    Object.values(input.panels).map(panel => {
+      const child = embeddable.getChild(panel.explicitInput.id);
+      const output = child.getOutput();
+      if (hasHasMatchOutput(output) && output.hasMatch) {
+        checked[panel.explicitInput.id] = true;
+      }
+    });
+    this.setState({ checked });
+  };
+
   private toggleCheck = (isChecked: boolean, id: string) => {
     this.setState(prevState => ({ checked: { ...prevState.checked, [id]: isChecked } }));
   };
 
   public renderControls() {
+    const { input } = this.props;
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
             <EuiButton data-test-subj="deleteCheckedTodos" onClick={() => this.deleteChecked()}>
               Delete checked
+            </EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButton
+              data-test-subj="checkMatchingTodos"
+              disabled={input.search === ''}
+              onClick={() => this.checkMatching()}
+            >
+              Check matching
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
@@ -142,36 +168,38 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
   public render() {
     const { embeddable } = this.props;
     return (
-      <div>
-        <h2 data-test-subj="searchableListContainerTitle">{embeddable.getTitle()}</h2>
-        <EuiSpacer size="l" />
-        {this.renderControls()}
-        <EuiSpacer size="l" />
-        {this.renderList()}
-      </div>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>
+          <h2 data-test-subj="searchableListContainerTitle">{embeddable.getTitle()}</h2>
+          <EuiSpacer size="l" />
+          {this.renderControls()}
+          <EuiSpacer size="l" />
+          {this.renderList()}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   private renderList() {
+    const { embeddableServices, input, embeddable } = this.props;
     let id = 0;
-    const list = Object.values(this.props.input.panels).map(panel => {
-      const embeddable = this.props.embeddable.getChild(panel.explicitInput.id);
-      if (this.props.input.search && !this.state.hasMatch[panel.explicitInput.id]) return;
+    const list = Object.values(input.panels).map(panel => {
+      const childEmbeddable = embeddable.getChild(panel.explicitInput.id);
       id++;
-      return embeddable ? (
-        <EuiPanel key={embeddable.id}>
-          <EuiFlexGroup>
+      return childEmbeddable ? (
+        <EuiPanel key={childEmbeddable.id}>
+          <EuiFlexGroup gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiCheckbox
-                data-test-subj={`todoCheckBox-${embeddable.id}`}
-                disabled={!embeddable}
-                id={embeddable ? embeddable.id : ''}
-                checked={this.state.checked[embeddable.id]}
-                onChange={e => this.toggleCheck(e.target.checked, embeddable.id)}
+                data-test-subj={`todoCheckBox-${childEmbeddable.id}`}
+                disabled={!childEmbeddable}
+                id={childEmbeddable ? childEmbeddable.id : ''}
+                checked={this.state.checked[childEmbeddable.id]}
+                onChange={e => this.toggleCheck(e.target.checked, childEmbeddable.id)}
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EmbeddableListItem embeddable={embeddable} />
+              <embeddableServices.EmbeddablePanel embeddable={childEmbeddable} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -183,6 +211,9 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
   }
 }
 
-export const SearchableListContainerComponent = withEmbeddableSubscription(
-  SearchableListContainerComponentInner
-);
+export const SearchableListContainerComponent = withEmbeddableSubscription<
+  SearchableContainerInput,
+  ContainerOutput,
+  SearchableListContainer,
+  { embeddableServices: EmbeddableStart }
+>(SearchableListContainerComponentInner);

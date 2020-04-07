@@ -13,6 +13,7 @@ import {
   euiPaletteForStatus,
   colorPalette,
 } from '@elastic/eui';
+import styled from 'styled-components';
 
 /**
  * Generating from `colorPalette` function: This could potentially
@@ -192,6 +193,7 @@ export const SymbolIds = {
   runningTriggerCube: idGenerator('runningTriggerCube'),
   terminatedProcessCube: idGenerator('terminatedCube'),
   terminatedTriggerCube: idGenerator('terminatedTriggerCube'),
+  processCubeActiveBacking: idGenerator('activeBacking'),
 };
 
 /**
@@ -392,21 +394,38 @@ const SymbolsAndShapes = memo(() => (
         />
       </g>
     </symbol>
+    <symbol viewBox="0 -3 88 106" id={SymbolIds.processCubeActiveBacking}>
+      <title>resolver active backing</title>
+      <path
+        d="m87.521 25.064a3.795 3.795 0 0 0-1.4313-1.4717l-40.164-23.083a3.8338 3.8338 0 0 0-3.8191 0l-40.165 23.083a3.8634 3.8634 0 0 0-1.9097 3.2926v46.165a3.7986 3.7986 0 0 0 1.9097 3.2925l40.164 23.083a3.8342 3.8342 0 0 0 3.8191 0l40.164-23.083a3.7988 3.7988 0 0 0 1.9099-3.2925v-46.165a3.7775 3.7775 0 0 0-0.47857-1.8209z"
+        fill="transparent"
+        strokeWidth="2"
+        stroke="#7E839C"
+      />
+    </symbol>
   </>
 ));
 
 /**
- * This <defs> element is used to define the reusable assets for the Resolver
- * It confers sevral advantages, including but not limited to:
- * 1) Freedom of form for creative assets (beyond box-model constraints)
- * 2) Separation of concerns between creative assets and more functional areas of the app
- * 3) <use> elements can be handled by compositor (faster)
+ * This `<defs>` element is used to define the reusable assets for the Resolver
+ * It confers several advantages, including but not limited to:
+ *  1. Freedom of form for creative assets (beyond box-model constraints)
+ *  2. Separation of concerns between creative assets and more functional areas of the app
+ *  3. `<use>` elements can be handled by compositor (faster)
  */
-export const SymbolDefinitions = memo(() => (
-  <svg>
-    <defs>
-      <PaintServers />
-      <SymbolsAndShapes />
-    </defs>
-  </svg>
-));
+export const SymbolDefinitions = styled(
+  memo(({ className }: { className?: string }) => (
+    <svg className={className}>
+      <defs>
+        <PaintServers />
+        <SymbolsAndShapes />
+      </defs>
+    </svg>
+  ))
+)`
+  position: absolute;
+  left: 100%;
+  top: 100%;
+  width: 0;
+  height: 0;
+`;
