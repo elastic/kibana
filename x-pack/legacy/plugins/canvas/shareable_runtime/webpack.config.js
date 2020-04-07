@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// import * as UiSharedDeps from '@kbn/ui-shared-deps';
+
 const path = require('path');
 const webpack = require('webpack');
+const UiSharedDeps = require('@kbn/ui-shared-deps');
 const { stringifyRequest } = require('loader-utils'); // eslint-disable-line
 
 const {
@@ -228,5 +231,9 @@ module.exports = {
   node: {
     fs: 'empty',
     child_process: 'empty',
+  },
+
+  externals: {
+    ...UiSharedDeps.externals,
   },
 };
