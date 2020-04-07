@@ -33,16 +33,8 @@ export type MapCenterAndZoom = MapCenter & {
   zoom: number;
 };
 
-// TODO replace with map_descriptors.MapExtent. Both define the same thing but with different casing
-type MapBounds = {
-  min_lon: number;
-  max_lon: number;
-  min_lat: number;
-  max_lat: number;
-};
-
 export type Goto = {
-  bounds?: MapBounds;
+  bounds?: MapExtent;
   center?: MapCenterAndZoom;
 };
 
