@@ -142,5 +142,11 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       );
       await createBtn.click();
     },
+    async waitForEditAlertFlyout({ name }: { name: string }) {
+      await retry.try(async () => {
+        const inputValue = await testSubjects.getAttribute('alertNameInput', 'value');
+        expect(inputValue).to.eql(name);
+      });
+    },
   };
 }

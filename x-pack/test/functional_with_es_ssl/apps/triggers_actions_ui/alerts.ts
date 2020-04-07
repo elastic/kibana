@@ -148,6 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
       const editLink = await testSubjects.findAll('alertsTableCell-editLink');
       await editLink[0].click();
+      await pageObjects.triggersActionsUI.waitForEditAlertFlyout({ name: createdAlert.name });
 
       const updatedAlertName = `Changed Alert Name ${generateUniqueKey()}`;
       await testSubjects.setValue('alertNameInput', updatedAlertName);
@@ -202,6 +203,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const editLink = await testSubjects.findAll('alertsTableCell-editLink');
       await editLink[0].click();
+      await pageObjects.triggersActionsUI.waitForEditAlertFlyout({ name: createdAlert.name });
 
       await testSubjects.setValue('throttleInput', '1');
 
@@ -249,6 +251,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const editLink = await testSubjects.findAll('alertsTableCell-editLink');
       await editLink[0].click();
+      await pageObjects.triggersActionsUI.waitForEditAlertFlyout({ name: createdAlert.name });
 
       const throttleInputToUnsetValue = await testSubjects.find('throttleInput');
 
@@ -290,6 +293,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const editLink = await testSubjects.findAll('alertsTableCell-editLink');
       await editLink[0].click();
+      await pageObjects.triggersActionsUI.waitForEditAlertFlyout({ name: createdAlert.name });
 
       const updatedAlertName = `Changed Alert Name ${generateUniqueKey()}`;
       await testSubjects.setValue('alertNameInput', updatedAlertName);
@@ -300,9 +304,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const editLinkPostCancel = await testSubjects.findAll('alertsTableCell-editLink');
       await editLinkPostCancel[0].click();
 
-      const nameInputAfterCancel = await testSubjects.find('alertNameInput');
-      const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
-      expect(textAfterCancel).to.eql(createdAlert.name);
+      // This will assert that the input got reverted to its original value and NOT updatedAlertName
+      await pageObjects.triggersActionsUI.waitForEditAlertFlyout({ name: createdAlert.name });
     });
 
     it('should search for tags', async () => {
