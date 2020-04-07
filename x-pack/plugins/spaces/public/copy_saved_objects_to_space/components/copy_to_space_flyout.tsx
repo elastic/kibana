@@ -25,7 +25,7 @@ import { ToastsStart } from 'src/core/public';
 import {
   ProcessedImportResponse,
   processImportResponse,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/management/sections/objects/lib/process_import_response';
+} from '../../../../../../src/legacy/core_plugins/kibana/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
