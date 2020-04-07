@@ -76,11 +76,3 @@ export {
 } from './state_sync';
 export { removeQueryParam, redirectWhenMissing, ensureDefaultIndexPattern } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
-
-/** dummy plugin, we just want kibanaUtils to have its own bundle */
-export function plugin() {
-  return new (class KibanaUtilsPlugin {
-    setup() {}
-    start() {}
-  })();
-}
