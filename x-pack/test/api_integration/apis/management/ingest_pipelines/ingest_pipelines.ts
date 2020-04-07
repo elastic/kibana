@@ -35,6 +35,14 @@ export default function({ getService }: FtrProviderContext) {
                 },
               },
             ],
+            onFailure: [
+              {
+                set: {
+                  field: 'error.message',
+                  value: '{{ failure_message }}',
+                },
+              },
+            ],
             version: 1,
           })
           .expect(200);

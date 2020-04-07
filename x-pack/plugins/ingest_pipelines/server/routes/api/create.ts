@@ -13,8 +13,9 @@ import { RouteDependencies } from '../../types';
 const bodySchema = schema.object({
   name: schema.string(),
   description: schema.string(),
-  processors: schema.arrayOf(schema.any()), // todo fix
+  processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   version: schema.maybe(schema.number()),
+  onFailure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
 });
 
 export const registerCreateRoute = ({
@@ -33,7 +34,7 @@ export const registerCreateRoute = ({
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const pipeline = req.body as Pipeline;
 
-      const { name, description, processors, version } = pipeline;
+      const { name, description, processors, version, onFailure } = pipeline;
 
       try {
         // Check that a pipeline with the same name doesn't already exist
@@ -62,6 +63,7 @@ export const registerCreateRoute = ({
             description,
             processors,
             version,
+            on_failure: onFailure,
           },
         });
 

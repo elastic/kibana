@@ -11,8 +11,9 @@ import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
   description: schema.string(),
-  processors: schema.arrayOf(schema.any()), // todo fix
+  processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   version: schema.maybe(schema.number()),
+  onFailure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
 });
 
 const paramsSchema = schema.object({
@@ -37,7 +38,7 @@ export const registerUpdateRoute = ({
       const { name } = req.params as typeof paramsSchema.type;
       const pipeline = req.body as Pipeline;
 
-      const { description, processors, version } = pipeline;
+      const { description, processors, version, onFailure } = pipeline;
 
       try {
         // Verify pipeline exists; ES will throw 404 if it doesn't
@@ -49,6 +50,7 @@ export const registerUpdateRoute = ({
             description,
             processors,
             version,
+            on_failure: onFailure,
           },
         });
 
