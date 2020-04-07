@@ -9,7 +9,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
-  describe('Machine Learning', function() {
+  // ML tests need to be disabled in orde to get the ES snapshot with
+  // https://github.com/elastic/elasticsearch/pull/54713 promoted
+  // and should be re-enabled as part of https://github.com/elastic/kibana/pull/61980
+  describe.skip('Machine Learning', function() {
     this.tags(['mlqa']);
 
     before(async () => {
