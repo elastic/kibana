@@ -18,7 +18,7 @@ import { ActionResult, FindActionResult, RawAction, PreConfiguredAction } from '
 import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
 
 // We are assuming there won't be many actions. This is why we will load
-// all the actions in advance and assume the total count to not go over 100 or so.
+// all the actions in advance and assume the total count to not go over 10000.
 // We'll set this max setting assuming it's never reached.
 export const MAX_ACTIONS_RETURNED = 10000;
 
