@@ -8,7 +8,6 @@ import Boom from 'boom';
 import { RequestHandler } from 'src/core/server';
 import { appContextService, datasourceService } from '../../services';
 import { ensureInstalledPackage } from '../../services/epm/packages';
-import * as Registry from '../../services/epm/registry';
 import {
   GetDatasourcesRequestSchema,
   GetOneDatasourceRequestSchema,
@@ -87,10 +86,9 @@ export const createDatasourceHandler: RequestHandler<
         callCluster,
       });
 
-      const pkgKey = `${request.body.package.name}/${request.body.package.version}`;
-      const packageInfo = await Registry.fetchInfo(pkgKey);
+      const pkgkey = `${request.body.package.name}-${request.body.package.version}`;
       newData.inputs = (await datasourceService.assignPackageStream(
-        packageInfo,
+        pkgkey,
         request.body.inputs
       )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
     }
@@ -127,9 +125,8 @@ export const updateDatasourceHandler: RequestHandler<
     const pkg = newData.package || datasource.package;
     const inputs = newData.inputs || datasource.inputs;
     if (pkg && (newData.inputs || newData.package)) {
-      const pkgKey = `${pkg.name}/${pkg.version}`;
-      const packageInfo = await Registry.fetchInfo(pkgKey);
-      newData.inputs = (await datasourceService.assignPackageStream(packageInfo, inputs)) as TypeOf<
+      const pkgkey = `${pkg.name}-${pkg.version}`;
+      newData.inputs = (await datasourceService.assignPackageStream(pkgkey, inputs)) as TypeOf<
         typeof CreateDatasourceRequestSchema.body
       >['inputs'];
     }

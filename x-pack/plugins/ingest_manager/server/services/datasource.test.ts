@@ -5,7 +5,6 @@
  */
 
 import { datasourceService } from './datasource';
-import { RegistryPackage } from '../types';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -27,16 +26,16 @@ paths:
 
 jest.mock('./epm/packages/assets', () => {
   return {
-    getAssetsData: mockedGetAssetsData,
+    getAssetsDataForPackageKey: mockedGetAssetsData,
   };
 });
 
 describe('Datasource service', () => {
-  const pkgInfo = {} as RegistryPackage;
+  const pkgKey = 'package-1.0.0';
 
   describe('assignPackageStream', () => {
     it('should work', async () => {
-      const inputs = await datasourceService.assignPackageStream(pkgInfo, [
+      const inputs = await datasourceService.assignPackageStream(pkgKey, [
         {
           type: 'log',
           enabled: true,

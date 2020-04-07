@@ -9,7 +9,6 @@ import { AuthenticatedUser } from '../../../security/server';
 import {
   DeleteDatasourcesResponse,
   packageToConfigDatasource,
-  RegistryPackage,
   DatasourceInput,
   DatasourceInputStream,
 } from '../../common';
@@ -18,7 +17,7 @@ import { NewDatasource, Datasource, ListWithKuery } from '../types';
 import { agentConfigService } from './agent_config';
 import { findInstalledPackageByName, getPackageInfo } from './epm/packages';
 import { outputService } from './output';
-import { getAssetsData } from './epm/packages/assets';
+import { getAssetsDataForPackageKey } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
@@ -204,33 +203,28 @@ class DatasourceService {
   }
 
   public async assignPackageStream(
-    packageInfo: RegistryPackage,
+    pkgKey: string,
     inputs: DatasourceInput[]
   ): Promise<DatasourceInput[]> {
-    const inputsPromises = inputs.map(input => _assignPackageStreamToInput(packageInfo, input));
+    const inputsPromises = inputs.map(input => _assignPackageStreamToInput(pkgKey, input));
     return Promise.all(inputsPromises);
   }
 }
 const _isAgentStream = (p: string) => !!p.match(/agent\/stream\/stream\.yml/);
 
-async function _assignPackageStreamToInput(packageInfo: RegistryPackage, input: DatasourceInput) {
-  const streamsPromises = input.streams.map(stream =>
-    _assignPackageStreamToStream(packageInfo, stream)
-  );
+async function _assignPackageStreamToInput(pkgKey: string, input: DatasourceInput) {
+  const streamsPromises = input.streams.map(stream => _assignPackageStreamToStream(pkgKey, stream));
 
   const streams = await Promise.all(streamsPromises);
   return { ...input, streams };
 }
 
-async function _assignPackageStreamToStream(
-  packageInfo: RegistryPackage,
-  stream: DatasourceInputStream
-) {
+async function _assignPackageStreamToStream(pkgKey: string, stream: DatasourceInputStream) {
   if (!stream.enabled) {
     return { ...stream, pkg_stream: undefined };
   }
   const dataset = getDataset(stream.dataset);
-  const assetsData = await getAssetsData(packageInfo, _isAgentStream, dataset);
+  const assetsData = await getAssetsDataForPackageKey(pkgKey, _isAgentStream, dataset);
 
   const [pkgStream] = assetsData;
   if (!pkgStream || !pkgStream.buffer) {
