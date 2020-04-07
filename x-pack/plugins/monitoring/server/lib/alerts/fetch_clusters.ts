@@ -4,21 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCommonCluster } from '../../alerts/types';
+import { AlertCluster } from '../../alerts/types';
 
-export async function fetchClusters(
-  callCluster: any,
-  index: string
-): Promise<AlertCommonCluster[]> {
+interface AggregationResult {
+  key: string;
+}
+
+export async function fetchClusters(callCluster: any, index: string): Promise<AlertCluster[]> {
   const params = {
     index,
-    filterPath: [
-      'hits.hits._source.cluster_settings.cluster.metadata.display_name',
-      'hits.hits._source.cluster_uuid',
-      'hits.hits._source.cluster_name',
-    ],
+    filterPath: 'aggregations.clusters.buckets',
     body: {
-      size: 1000,
+      size: 0,
       query: {
         bool: {
           filter: [
@@ -37,21 +34,19 @@ export async function fetchClusters(
           ],
         },
       },
-      collapse: {
-        field: 'cluster_uuid',
+      aggs: {
+        clusters: {
+          terms: {
+            field: 'cluster_uuid',
+            size: 1000,
+          },
+        },
       },
     },
   };
 
   const response = await callCluster('search', params);
-  return get(response, 'hits.hits', []).map((hit: any) => {
-    const clusterName: string =
-      get(hit, '_source.cluster_settings.cluster.metadata.display_name') ||
-      get(hit, '_source.cluster_name') ||
-      get(hit, '_source.cluster_uuid');
-    return {
-      clusterUuid: get(hit, '_source.cluster_uuid'),
-      clusterName,
-    };
-  });
+  return get(response, 'aggregations.clusters.buckets', []).map((bucket: AggregationResult) => ({
+    clusterUuid: bucket.key,
+  }));
 }
