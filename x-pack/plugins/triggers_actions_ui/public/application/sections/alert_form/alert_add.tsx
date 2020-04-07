@@ -83,7 +83,7 @@ export const AlertAdd = ({
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = parseErrors(errors);
 
   const actionsErrors: Array<{
     errors: IErrorObject;
@@ -213,3 +213,9 @@ export const AlertAdd = ({
     </EuiPortal>
   );
 };
+
+const parseErrors: (errors: IErrorObject) => boolean = errors =>
+  !!Object.values(errors).find(errorList => {
+    if (Array.isArray(errorList)) return errorList.length >= 1;
+    return parseErrors(errorList);
+  });
