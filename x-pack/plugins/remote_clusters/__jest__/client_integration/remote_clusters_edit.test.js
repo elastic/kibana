@@ -7,7 +7,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { RemoteClusterForm } from '../../public/application/sections/components/remote_cluster_form';
-import { pageHelpers, setupEnvironment, nextTick } from './helpers';
+import { pageHelpers, setupEnvironment } from './helpers';
 import { REMOTE_CLUSTER_EDIT, REMOTE_CLUSTER_EDIT_NAME } from './helpers/constants';
 
 const { setup } = pageHelpers.remoteClustersEdit;
@@ -32,9 +32,8 @@ describe('Edit Remote cluster', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadRemoteClustersResponse([REMOTE_CLUSTER_EDIT]);
 
-    ({ component, find, exists, waitFor } = setup());
-
     await act(async () => {
+      ({ component, find, exists, waitFor } = setup());
       await waitFor('remoteClusterForm');
     });
   });
@@ -54,15 +53,15 @@ describe('Edit Remote cluster', () => {
    * the form component is indeed shared between the 2 app sections.
    */
   test('should use the same Form component as the "<RemoteClusterAdd />" component', async () => {
-    const { component: addRemoteClusterComponent } = setupRemoteClustersAdd();
+    let addRemoteClusterTestBed;
 
     await act(async () => {
-      await nextTick();
-      addRemoteClusterComponent.update();
+      addRemoteClusterTestBed = setupRemoteClustersAdd();
+      addRemoteClusterTestBed.waitFor('remoteClusterAddPage');
     });
 
     const formEdit = component.find(RemoteClusterForm);
-    const formAdd = addRemoteClusterComponent.find(RemoteClusterForm);
+    const formAdd = addRemoteClusterTestBed.find(RemoteClusterForm);
 
     expect(formEdit.length).toBe(1);
     expect(formAdd.length).toBe(1);

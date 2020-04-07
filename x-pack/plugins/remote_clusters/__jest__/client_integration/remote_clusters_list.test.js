@@ -110,10 +110,9 @@ describe('<RemoteClusterList />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
-      // Mount the component
-      ({ component, find, exists, table, actions, waitFor } = setup());
-
       await act(async () => {
+        ({ component, find, exists, table, actions, waitFor } = setup());
+
         await waitFor('remoteClusterListTable');
       });
 
