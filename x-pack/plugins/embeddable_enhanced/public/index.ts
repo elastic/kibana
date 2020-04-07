@@ -17,3 +17,6 @@ export {
 export function plugin(context: PluginInitializerContext) {
   return new EmbeddableEnhancedPlugin(context);
 }
+
+export { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
+export { isEnhancedEmbeddable } from './embeddables';

@@ -6,8 +6,10 @@
 
 import uuid from 'uuid';
 import {
-  DynamicActionManager,
-  DynamicActionManagerState,
+  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  UiActionsEnhancedDynamicActionManagerState as DynamicActionManagerState,
+} from '../../../../advanced_ui_actions/public';
+import {
   UiActionsSerializedAction,
   TriggerContextMapping,
 } from '../../../../../../src/plugins/ui_actions/public';

@@ -16,8 +16,11 @@ import {
   EmbeddableStart,
   IEmbeddable,
   defaultEmbeddableFactoryProvider,
+  EmbeddableContext,
 } from '../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddable } from './types';
+import { EmbeddableActionStorage } from './embeddables/embeddable_action_storage';
+import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '../../advanced_ui_actions/public';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
@@ -39,6 +42,8 @@ export class EmbeddableEnhancedPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   constructor(protected readonly context: PluginInitializerContext) {}
 
+  private uiActions?: StartDependencies['uiActions'];
+
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
 
@@ -46,6 +51,8 @@ export class EmbeddableEnhancedPlugin
   }
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
+    this.uiActions = plugins.uiActions;
+
     return {};
   }
 
@@ -86,9 +93,17 @@ export class EmbeddableEnhancedPlugin
   ): EnhancedEmbeddable<E> {
     const enhancedEmbeddable = embeddable as EnhancedEmbeddable<E>;
 
+    const storage = new EmbeddableActionStorage(embeddable);
+    const dynamicActions = new DynamicActionManager({
+      isCompatible: async (context: unknown) =>
+        (context as EmbeddableContext).embeddable.runtimeId === embeddable.runtimeId,
+      storage,
+      uiActions: this.uiActions!,
+    });
+
     enhancedEmbeddable.enhancements = {
       ...enhancedEmbeddable.enhancements,
-      dynamicActions: {} as any,
+      dynamicActions,
     };
 
     return enhancedEmbeddable;

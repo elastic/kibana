@@ -5,13 +5,17 @@
  */
 
 import { IEmbeddable } from '../../../../src/plugins/embeddable/public';
-import { UiActionsDynamicActionManager } from '../../../../src/plugins/ui_actions/public';
+import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '../../advanced_ui_actions/public';
 
 export type EnhancedEmbeddable<E extends IEmbeddable = IEmbeddable> = E & {
   enhancements: {
     /**
      * Default implementation of dynamic action manager for embeddables.
      */
-    dynamicActions: UiActionsDynamicActionManager;
+    dynamicActions: DynamicActionManager;
   };
 };
+
+export interface EnhancedEmbeddableContext {
+  embeddable: EnhancedEmbeddable;
+}

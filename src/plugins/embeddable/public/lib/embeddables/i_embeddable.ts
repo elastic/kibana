@@ -18,7 +18,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { UiActionsDynamicActionManager } from '../../../../../plugins/ui_actions/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
@@ -95,11 +94,6 @@ export interface IEmbeddable<
    * Extra abilities added to Embeddable by `*_enhanced` plugins.
    */
   enhancements?: object;
-
-  /**
-   * Default implementation of dynamic action API for embeddables.
-   */
-  dynamicActions?: UiActionsDynamicActionManager;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to

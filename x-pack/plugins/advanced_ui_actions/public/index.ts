@@ -26,3 +26,10 @@ export {
   Configurable as AdvancedUiActionsConfigurable,
   CollectConfigProps as AdvancedUiActionsCollectConfigProps,
 } from './util';
+
+export {
+  AbstractActionStorage as UiActionsEnhancedAbstractActionStorage,
+  DynamicActionManager as UiActionsEnhancedDynamicActionManager,
+  DynamicActionManagerParams as UiActionsEnhancedDynamicActionManagerParams,
+  DynamicActionManagerState as UiActionsEnhancedDynamicActionManagerState,
+} from './dynamic_actions';
