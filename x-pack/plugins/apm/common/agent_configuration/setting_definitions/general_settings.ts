@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { getIntegerRt } from '../runtime_types/integer_rt';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { RawSettingDefinition } from './types';
+import { getDurationRt } from '../runtime_types/duration_rt';
 
 /*
  * Settings added here will show up in the UI and will be validated on the client and server
@@ -143,6 +144,7 @@ export const generalSettings: RawSettingDefinition[] = [
   {
     key: 'span_frames_min_duration',
     type: 'duration',
+    validation: getDurationRt({ min: -1 }),
     defaultValue: '5ms',
     label: i18n.translate('xpack.apm.agentConfig.spanFramesMinDuration.label', {
       defaultMessage: 'Span frames minimum duration'
@@ -154,7 +156,8 @@ export const generalSettings: RawSettingDefinition[] = [
           'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.'
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs']
+    excludeAgents: ['js-base', 'rum-js', 'nodejs'],
+    min: -1
   },
 
   // STACK_TRACE_LIMIT
