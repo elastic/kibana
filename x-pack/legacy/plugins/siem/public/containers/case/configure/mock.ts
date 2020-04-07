@@ -5,73 +5,70 @@
  */
 
 import {
-  CasesConnectorsFindResult,
+  Connector,
   CasesConfigureResponse,
   CasesConfigureRequest,
 } from '../../../../../../../plugins/case/common/api';
 import { CaseConfigure } from './types';
 
-export const connectorsMock: CasesConnectorsFindResult = {
-  page: 1,
-  perPage: 2,
-  total: 2,
-  data: [
-    {
-      id: '123',
-      actionTypeId: '.servicenow',
-      name: 'My Connector',
-      config: {
-        apiUrl: 'https://instance1.service-now.com',
-        casesConfiguration: {
-          mapping: [
-            {
-              source: 'title',
-              target: 'short_description',
-              actionType: 'overwrite',
-            },
-            {
-              source: 'description',
-              target: 'description',
-              actionType: 'append',
-            },
-            {
-              source: 'comments',
-              target: 'comments',
-              actionType: 'append',
-            },
-          ],
-        },
+export const connectorsMock: Connector[] = [
+  {
+    id: '123',
+    actionTypeId: '.servicenow',
+    name: 'My Connector',
+    config: {
+      apiUrl: 'https://instance1.service-now.com',
+      casesConfiguration: {
+        mapping: [
+          {
+            source: 'title',
+            target: 'short_description',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'description',
+            target: 'description',
+            actionType: 'append',
+          },
+          {
+            source: 'comments',
+            target: 'comments',
+            actionType: 'append',
+          },
+        ],
       },
     },
-    {
-      id: '456',
-      actionTypeId: '.servicenow',
-      name: 'My Connector 2',
-      config: {
-        apiUrl: 'https://instance2.service-now.com',
-        casesConfiguration: {
-          mapping: [
-            {
-              source: 'title',
-              target: 'short_description',
-              actionType: 'overwrite',
-            },
-            {
-              source: 'description',
-              target: 'description',
-              actionType: 'overwrite',
-            },
-            {
-              source: 'comments',
-              target: 'comments',
-              actionType: 'append',
-            },
-          ],
-        },
+    isPreconfigured: true,
+  },
+  {
+    id: '456',
+    actionTypeId: '.servicenow',
+    name: 'My Connector 2',
+    config: {
+      apiUrl: 'https://instance2.service-now.com',
+      casesConfiguration: {
+        mapping: [
+          {
+            source: 'title',
+            target: 'short_description',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'description',
+            target: 'description',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'comments',
+            target: 'comments',
+            actionType: 'append',
+          },
+        ],
       },
     },
-  ],
-};
+    isPreconfigured: true,
+  },
+];
 
 export const caseConfigurationResposeMock: CasesConfigureResponse = {
   created_at: '2020-04-06T13:03:18.657Z',
