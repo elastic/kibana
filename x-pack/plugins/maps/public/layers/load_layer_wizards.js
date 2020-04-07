@@ -16,17 +16,30 @@ import { kibanaBasemapLayerWizardConfig } from './sources/kibana_tilemap_source'
 import { tmsLayerWizardConfig } from './sources/xyz_tms_source';
 import { wmsLayerWizardConfig } from './sources/wms_source';
 import { mvtVectorSourceWizardConfig } from './sources/mvt_vector_source/mvt_single_layer_vector_source';
+import { getInjectedVarFunc } from '../kibana_services';
 
 // Registration order determines display order
-registerLayerWizard(uploadLayerWizardConfig);
-registerLayerWizard(esDocumentsLayerWizardConfig);
-registerLayerWizard(clustersLayerWizardConfig);
-registerLayerWizard(heatmapLayerWizardConfig);
-registerLayerWizard(point2PointLayerWizardConfig);
-registerLayerWizard(emsBoundariesLayerWizardConfig);
-registerLayerWizard(emsBaseMapLayerWizardConfig);
-registerLayerWizard(kibanaRegionMapLayerWizardConfig);
-registerLayerWizard(kibanaBasemapLayerWizardConfig);
-registerLayerWizard(tmsLayerWizardConfig);
-registerLayerWizard(wmsLayerWizardConfig);
-registerLayerWizard(mvtVectorSourceWizardConfig);
+let registered = false;
+export function registerLayerWizards() {
+  if (registered) {
+    return;
+  }
+  registerLayerWizard(uploadLayerWizardConfig);
+  registerLayerWizard(esDocumentsLayerWizardConfig);
+  registerLayerWizard(clustersLayerWizardConfig);
+  registerLayerWizard(heatmapLayerWizardConfig);
+  registerLayerWizard(point2PointLayerWizardConfig);
+  registerLayerWizard(emsBoundariesLayerWizardConfig);
+  registerLayerWizard(emsBaseMapLayerWizardConfig);
+  registerLayerWizard(kibanaRegionMapLayerWizardConfig);
+  registerLayerWizard(kibanaBasemapLayerWizardConfig);
+  registerLayerWizard(tmsLayerWizardConfig);
+  registerLayerWizard(wmsLayerWizardConfig);
+
+  const getInjectedVar = getInjectedVarFunc();
+  if (getInjectedVar && getInjectedVar('enableVectorTiles', false)) {
+    console.warn('Vector tiles are an experimental feature and should not be used in production.');
+    registerLayerWizard(mvtVectorSourceWizardConfig);
+  }
+  registered = true;
+}

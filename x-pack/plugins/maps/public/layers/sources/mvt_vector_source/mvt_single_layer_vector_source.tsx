@@ -22,7 +22,7 @@ import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
-  defaultMessage: 'XYZ Vector Tile Layer',
+  defaultMessage: 'Vector Tile Layer',
 });
 
 export class MVTSingleLayerVectorSource extends AbstractSource
