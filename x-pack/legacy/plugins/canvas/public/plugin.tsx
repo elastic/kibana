@@ -60,6 +60,10 @@ export class CanvasPlugin
       id: 'canvas',
       title: 'Canvas App',
       async mount(context, params) {
+        // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
+        const srcPlugin = new CanvasSrcPlugin();
+        await srcPlugin.setup(core, { canvas: canvasApi });
+
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
@@ -83,10 +87,6 @@ export class CanvasPlugin
     canvasApi.addFunctions(legacyRegistries.browserFunctions.getOriginalFns());
     canvasApi.addElements(legacyRegistries.elements.getOriginalFns());
     canvasApi.addTypes(legacyRegistries.types.getOriginalFns());
-
-    // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
-    const srcPlugin = new CanvasSrcPlugin();
-    srcPlugin.setup(core, { canvas: canvasApi });
 
     // Register core canvas stuff
     canvasApi.addFunctions(initFunctions({ typesRegistry: plugins.expressions.__LEGACY.types }));

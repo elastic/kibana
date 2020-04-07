@@ -5,17 +5,18 @@
  */
 import { applyTemplateStrings } from '../../i18n/templates';
 
-import darkTemplate from './theme_dark.json';
-import lightTemplate from './theme_light.json';
-import pitchTemplate from './pitch_presentation.json';
-import statusTemplate from './status_report.json';
-import summaryTemplate from './summary_report.json';
+import darkTemplateUrl from './theme_dark.json';
+import lightTemplateUrl from './theme_light.json';
+import pitchTemplateUrl from './pitch_presentation.json';
+import statusTemplateUrl from './status_report.json';
+import summaryTemplateUrl from './summary_report.json';
 
 // Registry expects a function that returns a spec object
-export const templateSpecs = applyTemplateStrings([
-  darkTemplate,
-  lightTemplate,
-  pitchTemplate,
-  statusTemplate,
-  summaryTemplate,
-]);
+export const asyncTemplateSpecs = async () =>
+  await applyTemplateStrings([
+    darkTemplateUrl,
+    lightTemplateUrl,
+    pitchTemplateUrl,
+    statusTemplateUrl,
+    summaryTemplateUrl,
+  ]);

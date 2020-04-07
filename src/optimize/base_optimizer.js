@@ -349,6 +349,13 @@ export default class BaseOptimizer {
             test: /\.(html|tmpl)$/,
             loader: 'raw-loader',
           },
+          // NOTE: that rule prevents the bundling of json templates on canvas
+          {
+            test: /\.json$/,
+            include: /[\/\\]plugins[\/\\]canvas[\/\\]canvas_plugin_src[\/\\]templates[\/\\].*\.json$/,
+            type: 'javascript/auto',
+            loader: 'file-loader',
+          },
           {
             test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
             loader: 'url-loader',

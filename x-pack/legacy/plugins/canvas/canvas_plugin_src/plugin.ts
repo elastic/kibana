@@ -24,7 +24,7 @@ import { viewSpecs } from './uis/views';
 // @ts-ignore Untyped Local
 import { args as argSpecs } from './uis/arguments';
 import { tagSpecs } from './uis/tags';
-import { templateSpecs } from './templates';
+import { asyncTemplateSpecs } from './templates';
 
 interface SetupDeps {
   canvas: CanvasSetup;
@@ -32,7 +32,9 @@ interface SetupDeps {
 
 /** @internal */
 export class CanvasSrcPlugin implements Plugin<{}, {}, SetupDeps, {}> {
-  public setup(core: CoreSetup, plugins: SetupDeps) {
+  public async setup(core: CoreSetup, plugins: SetupDeps) {
+    const templateSpecs = await asyncTemplateSpecs();
+
     plugins.canvas.addFunctions(functions);
     plugins.canvas.addTypes(typeFunctions);
     plugins.canvas.addRenderers(renderFunctions);
