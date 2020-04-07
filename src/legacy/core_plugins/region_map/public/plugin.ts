@@ -32,7 +32,7 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { IServiceSettings } from '../../../../plugins/maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
@@ -47,7 +47,7 @@ export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   __LEGACY: LegacyDependenciesPlugin;
-  mapsLegacy: any;
+  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 /** @internal */

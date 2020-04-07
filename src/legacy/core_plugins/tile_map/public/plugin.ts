@@ -32,7 +32,7 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
-import { IServiceSettings } from '../../../../plugins/maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 /** @private */
 interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
@@ -47,7 +47,7 @@ interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup
 export interface TileMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  mapsLegacy: any;
+  mapsLegacy: MapsLegacyPluginSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
 
