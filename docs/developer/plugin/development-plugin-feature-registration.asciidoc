@@ -201,6 +201,9 @@ server.route({
 [[example-3-discover]]
 ==== Example 3: Discover
 
+Discover takes advantage of subfeature privileges to allow fine-grained access control. In this example,
+a single "Create Short URLs" subfeature privilege is defined, which allows users to grant access to this feature without having to grant the `all` privilege to Discover. In other words, you can grant `read` access to Discover, and also grant the ability to create short URLs.
+
 ["source","javascript"]
 -----------
 init(server) {
@@ -269,6 +272,3 @@ init(server) {
   });
 }
 -----------
-
-Discover takes advantage of sub-feature privileges to allow fine-grained access control. In this example,
-a single "Create Short URLs" sub-feature privilege is defined, which allows users to grant access to this feature without having to grant the "All" privilege to Discover. To say another way, you can grant "Read" access to Discover, but _additionally_ grant the ability to create Short URLs.
