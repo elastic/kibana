@@ -26,7 +26,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
-import { AlertActionHealthCheck } from '../../components/alert_action_health_check';
+import { HealthCheck } from '../../components/health_check';
 import { PLUGIN } from '../../constants/plugin';
 
 interface AlertEditProps {
@@ -137,16 +137,7 @@ export const AlertEdit = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionHealthCheck
-          docLinks={docLinks}
-          action={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertEdit.securityCalloutAction',
-            {
-              defaultMessage: 'editing',
-            }
-          )}
-          http={http}
-        >
+        <HealthCheck docLinks={docLinks} http={http}>
           <EuiFlyoutBody>
             {hasActionsDisabled && (
               <Fragment>
@@ -208,7 +199,7 @@ export const AlertEdit = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
-        </AlertActionHealthCheck>
+        </HealthCheck>
       </EuiFlyout>
     </EuiPortal>
   );

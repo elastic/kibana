@@ -24,7 +24,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
-import { AlertActionHealthCheck } from '../../components/alert_action_health_check';
+import { HealthCheck } from '../../components/health_check';
 import { PLUGIN } from '../../constants/plugin';
 
 interface AlertAddProps {
@@ -153,16 +153,7 @@ export const AlertAdd = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionHealthCheck
-          docLinks={docLinks}
-          action={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertAdd.securityCalloutAction',
-            {
-              defaultMessage: 'creation',
-            }
-          )}
-          http={http}
-        >
+        <HealthCheck docLinks={docLinks} http={http}>
           <EuiFlyoutBody>
             <AlertForm
               alert={alert}
@@ -209,7 +200,7 @@ export const AlertAdd = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
-        </AlertActionHealthCheck>
+        </HealthCheck>
       </EuiFlyout>
     </EuiPortal>
   );
