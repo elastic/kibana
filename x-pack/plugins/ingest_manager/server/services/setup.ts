@@ -84,10 +84,10 @@ export async function setupFleet(
       ],
     },
   });
-  console.log('created fleet_enroll roll');
+
   const password = generateRandomPassword();
   // Create fleet enroll user
-  const a = await callCluster('transport.request', {
+  await callCluster('transport.request', {
     method: 'PUT',
     path: `/_security/user/${FLEET_ENROLL_USERNAME}`,
     body: {
@@ -95,24 +95,18 @@ export async function setupFleet(
       roles: [FLEET_ENROLL_ROLE],
     },
   });
-  console.log('created fleet_enroll user', a);
+
   // save fleet admin user
-  const b = await outputService.updateOutput(
-    soClient,
-    await outputService.getDefaultOutputId(soClient),
-    {
-      fleet_enroll_username: FLEET_ENROLL_USERNAME,
-      fleet_enroll_password: password,
-    }
-  );
-  console.log('created fleet admin user', b);
+  await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
+    fleet_enroll_username: FLEET_ENROLL_USERNAME,
+    fleet_enroll_password: password,
+  });
 
   // Generate default enrollment key
-  const c = await generateEnrollmentAPIKey(soClient, {
+  await generateEnrollmentAPIKey(soClient, {
     name: 'Default',
     configId: await agentConfigService.getDefaultAgentConfigId(soClient),
   });
-  console.log('generatged default enrollment key', c);
 }
 
 function generateRandomPassword() {

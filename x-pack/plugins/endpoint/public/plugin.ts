@@ -65,9 +65,7 @@ export class EndpointPlugin
     );
   }
 
-  public start(core: CoreStart, deps: EndpointPluginStartDependencies) {
-    console.log('endpoint#start', { core, deps }, deps.ingestManager.isInitialized);
-  }
+  public start(/* core: CoreStart, deps: EndpointPluginStartDependencies*/) {}
 
   public stop() {}
 }
