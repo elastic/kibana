@@ -462,7 +462,7 @@
     "load-grunt-config": "^3.0.1",
     "mocha": "^7.1.1",
     "mock-http-server": "1.3.0",
-    "ms-chromium-edge-driver": "0.1.0-beta2",
+    "ms-chromium-edge-driver": "^0.2.0",
     "multistream": "^2.1.1",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",

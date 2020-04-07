@@ -20733,10 +20733,10 @@ move-concurrently@^1.0.1:
     rimraf "^2.5.4"
     run-queue "^1.0.3"
 
-ms-chromium-edge-driver@0.1.0-beta2:
-  version "0.1.0-beta2"
-  resolved "https://registry.yarnpkg.com/ms-chromium-edge-driver/-/ms-chromium-edge-driver-0.1.0-beta2.tgz#039cc679c490b9a9e704a92b08efa914a5a73809"
-  integrity sha512-gl6GcRU6nzQgb6FT+VIkGzqCnUbP2Wd0KJVDmmx4IJnKz4lTLV3s2JJ/EDfPlq6uxFkzSW0brChDjxrhKKeQnA==
+ms-chromium-edge-driver@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/ms-chromium-edge-driver/-/ms-chromium-edge-driver-0.2.0.tgz#0e0c6fd9fd1d1d36db97b2b3d7e9d4ba4d2de456"
+  integrity sha512-RkDsBPnMLjRna7q4LlvtLb+CHPei9gZapnlxm3ayWKk3Ab6HmDsz/17xG2eyqkKX5UcKeo04YlLZ345tO7OolA==
   dependencies:
     extract-zip "^1.6.7"
     got "^10.6.0"
