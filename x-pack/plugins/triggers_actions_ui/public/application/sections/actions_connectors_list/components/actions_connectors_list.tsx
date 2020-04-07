@@ -30,6 +30,7 @@ import { ActionsConnectorsContextProvider } from '../../../context/actions_conne
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
+import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
@@ -324,51 +325,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     />
   );
 
-  const emptyPrompt = (
-    <EuiEmptyPrompt
-      data-test-subj="createFirstConnectorEmptyPrompt"
-      title={
-        <Fragment>
-          <EuiIcon type="logoSlack" size="xl" className="actConnectorsList__logo" />
-          <EuiIcon type="logoGmail" size="xl" className="actConnectorsList__logo" />
-          <EuiIcon type="logoWebhook" size="xl" className="actConnectorsList__logo" />
-          <EuiSpacer size="s" />
-          <EuiTitle size="m">
-            <h2>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyTitle"
-                defaultMessage="Create your first connector"
-              />
-            </h2>
-          </EuiTitle>
-        </Fragment>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyBody"
-            defaultMessage="Configure email, Slack, Elasticsearch, and third-party services that Kibana can trigger."
-          />
-        </p>
-      }
-      actions={
-        <EuiButton
-          data-test-subj="createFirstActionButton"
-          key="create-action"
-          fill
-          iconType="plusInCircle"
-          iconSide="left"
-          onClick={() => setAddFlyoutVisibility(true)}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-            defaultMessage="Create connector"
-          />
-        </EuiButton>
-      }
-    />
-  );
-
   const noPermissionPrompt = (
     <h2>
       <FormattedMessage
@@ -420,7 +376,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         </EuiFlexGroup>
       )}
       {data.length !== 0 && table}
-      {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && emptyPrompt}
+      {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && (
+        <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
+      )}
       {data.length === 0 && !canSave && noPermissionPrompt}
       <ActionsConnectorsContextProvider
         value={{
