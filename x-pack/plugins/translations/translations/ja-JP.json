@@ -4539,7 +4539,6 @@
     "xpack.apm.settings.apmIndices.spanIndicesLabel": "スパンインデックス",
     "xpack.apm.settings.apmIndices.title": "インデックス",
     "xpack.apm.settings.apmIndices.transactionIndicesLabel": "トランザクションインデックス",
-    "xpack.apm.settings.customizeUI": "UI をカスタマイズ",
     "xpack.apm.settings.customizeUI.customLink": "カスタムリンク",
     "xpack.apm.settings.customizeUI.customLink.create.failed": "リンクを保存できませんでした！",
     "xpack.apm.settings.customizeUI.customLink.create.failed.message": "リンクを保存するときに問題が発生しました。エラー: 「{errorMessage}」",
