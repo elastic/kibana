@@ -37,6 +37,13 @@ const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset'
 const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
+const STATIC_BUNDLE_PLUGINS = [
+  { id: 'data', dirname: 'data' },
+  { id: 'kibanaReact', dirname: 'kibana_react' },
+  { id: 'kibanaUtils', dirname: 'kibana_utils' },
+  { id: 'esUiShared', dirname: 'es_ui_shared' },
+];
+
 /**
  * Determine externals statements for require/import statements by looking
  * for requests resolving to the primary public export of the data, kibanaReact,
@@ -49,23 +56,23 @@ const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
  * @param request the request for a module from a commonjs require() call or import statement
  */
 function dynamicExternals(bundle: Bundle, context: string, request: string) {
-  // don't rely on other static bundles in data, kibanaReact, or kibanaUtils bundles
-  if (bundle.id === 'data' || bundle.id === 'kibanaReact' || bundle.id === 'kibanaUtils') {
+  // ignore imports that have loaders defined
+  if (request.includes('!')) {
     return;
   }
 
-  // ignore imports that have loaders defined
-  if (request.includes('!')) {
+  // don't allow any static bundle to rely on other static bundles
+  if (STATIC_BUNDLE_PLUGINS.some(p => bundle.id === p.id)) {
     return;
   }
 
   // ignore requests that don't include a /data/public, /kibana_react/public, or
   // /kibana_utils/public segment as a cheap way to avoid doing path resolution
   // for paths that couldn't possibly resolve to what we're looking for
-  const inData = request.includes('/data/public');
-  const inReact = !inData && request.includes('/kibana_react/public');
-  const inUtils = !inReact && request.includes('/kibana_utils/public');
-  if (!(inData || inReact || inUtils)) {
+  const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some(p =>
+    request.includes(`/${p.dirname}/public`)
+  );
+  if (!reqToStaticBundle) {
     return;
   }
 
@@ -73,17 +80,14 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
   const rootRelative = normalizePath(
     Path.relative(bundle.sourceRoot, Path.resolve(context, request))
   );
-  if (rootRelative === 'src/plugins/data/public') {
-    return `__kbnBundles__['plugin/data']`;
+  for (const { id, dirname } of STATIC_BUNDLE_PLUGINS) {
+    if (rootRelative === `src/plugins/${dirname}/public`) {
+      return `__kbnBundles__['plugin/${id}']`;
+    }
   }
 
-  if (rootRelative === 'src/plugins/kibana_react/public') {
-    return `__kbnBundles__['plugin/kibanaReact']`;
-  }
-
-  if (rootRelative === 'src/plugins/kibana_utils/public') {
-    return `__kbnBundles__['plugin/kibanaUtils']`;
-  }
+  // import doesn't match a root public import
+  return undefined;
 }
 
 export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {

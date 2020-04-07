@@ -71,8 +71,10 @@ export const loadPluginBundle: LoadPluginBundle = <
   new Promise<PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>>(
     (resolve, reject) => {
       const coreWindow = (window as unknown) as CoreWindow;
+      const exportId = `plugin/${pluginName}`;
+
       const readPluginExport = () => {
-        const PluginExport: any = coreWindow.__kbnBundles__[`plugin/${pluginName}`];
+        const PluginExport: any = coreWindow.__kbnBundles__[exportId];
         if (typeof PluginExport?.plugin !== 'function') {
           reject(
             new Error(`Definition of plugin "${pluginName}" should be a function (${bundlePath}).`)
@@ -84,7 +86,7 @@ export const loadPluginBundle: LoadPluginBundle = <
         }
       };
 
-      if (pluginName === 'data' || pluginName === 'kibanaUtils' || pluginName === 'kibanaReact') {
+      if (coreWindow.__kbnBundles__[exportId]) {
         readPluginExport();
         return;
       }
