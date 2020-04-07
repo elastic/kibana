@@ -14,6 +14,8 @@ export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
+export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
+
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 

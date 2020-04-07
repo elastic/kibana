@@ -30,11 +30,3 @@ For complete control over the start and end times, click the start time or end t
 === Refresh the metrics
 
 You can click *Refresh* to manually refresh the metrics.
-
-[float]
-[[infra-view-go-to-chart]]
-=== Go to a specific chart
-
-The charts available for this component are shown in a list on the left of the page. Click a chart in the list to quickly go to that chart.
-
-

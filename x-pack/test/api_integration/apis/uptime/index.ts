@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ getService, loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function({ getService, loadTestFile }: FtrProviderContext) {
   const es = getService('legacyEs');
 
   describe('uptime', () => {
