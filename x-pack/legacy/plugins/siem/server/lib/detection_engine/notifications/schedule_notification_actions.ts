@@ -15,7 +15,7 @@ type NotificationRuleTypeParams = RuleTypeParams & {
 
 interface ScheduleNotificationActions {
   alertInstance: AlertInstance;
-  signalsCount: string;
+  signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
 }
@@ -23,7 +23,7 @@ interface ScheduleNotificationActions {
 export const scheduleNotificationActions = ({
   alertInstance,
   signalsCount,
-  resultsLink,
+  resultsLink = '',
   ruleParams,
 }: ScheduleNotificationActions): AlertInstance =>
   alertInstance
