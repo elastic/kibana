@@ -31,7 +31,7 @@ import {
   FilterableEmbeddableInput,
 } from '../lib/test_samples';
 // eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '../../../../plugins/inspector/public/mocks';
 import { esFilters } from '../../../../plugins/data/public';
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {

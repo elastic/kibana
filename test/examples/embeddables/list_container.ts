@@ -57,13 +57,12 @@ export default function({ getService }: PluginFunctionalProviderContext) {
       expect(text).to.eql(['HELLO WORLD!']);
     });
 
-    it('searchable container filters multi-task children', async () => {
+    it('searchable container finds matches in multi-task children', async () => {
       await testSubjects.setValue('filterTodos', 'earth');
+      await testSubjects.click('checkMatchingTodos');
+      await testSubjects.click('deleteCheckedTodos');
 
-      await retry.try(async () => {
-        const tasks = await testSubjects.getVisibleTextAll('multiTaskTodoTask');
-        expect(tasks).to.eql(['Watch planet earth']);
-      });
+      await testSubjects.missingOrFail('multiTaskTodoTask');
     });
   });
 }
