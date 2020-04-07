@@ -22,6 +22,7 @@ import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
 import { HeaderNavigation } from './components/header_nav';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
+import { Setup } from './view/setup';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -53,7 +54,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
     history,
     store,
     coreStart: { http, notifications, uiSettings, application },
-    depsStart: { data },
+    depsStart: { data, ingestManager },
   }) => {
     const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
@@ -61,6 +62,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
       <Provider store={store}>
         <I18nProvider>
           <KibanaContextProvider services={{ http, notifications, application, data }}>
+            <Setup ingestManager={ingestManager} notifications={notifications} />
             <EuiThemeProvider darkMode={isDarkMode}>
               <Router history={history}>
                 <RouteCapture>
