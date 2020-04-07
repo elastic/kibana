@@ -16,6 +16,8 @@ import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_reac
 import { TransformId } from '../../../../../../common';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
+import { getErrorMessage } from '../../../../../shared_imports';
+
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
@@ -116,7 +118,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
 
@@ -127,7 +131,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
 
@@ -141,7 +147,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 defaultMessage: 'An error occurred getting the existing index pattern titles:',
               }
             ),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
       })();
