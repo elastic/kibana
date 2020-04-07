@@ -26,7 +26,7 @@ import {
 import { LIST_CONTAINER, ListContainer } from './list_container';
 
 interface StartServices {
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  embeddableServices: EmbeddableStart;
 }
 
 export class ListContainerFactory implements EmbeddableFactoryDefinition {
@@ -40,8 +40,8 @@ export class ListContainerFactory implements EmbeddableFactoryDefinition {
   }
 
   public create = async (initialInput: ContainerInput) => {
-    const { getEmbeddableFactory } = await this.getStartServices();
-    return new ListContainer(initialInput, getEmbeddableFactory);
+    const { embeddableServices } = await this.getStartServices();
+    return new ListContainer(initialInput, embeddableServices);
   };
 
   public getDisplayName() {

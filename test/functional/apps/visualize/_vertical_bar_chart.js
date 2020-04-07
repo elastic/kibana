@@ -48,9 +48,31 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.selectXAxisPosition('left');
         await PageObjects.visEditor.clickGo();
 
-        const leftLabels = await PageObjects.visChart.getXAxisLabels();
+        // the getYAxisLabels helper always returns the labels on the left axis
+        const leftLabels = await PageObjects.visChart.getYAxisLabels();
         log.debug(`${leftLabels.length} tick labels on left x axis`);
         expect(leftLabels.length).to.be.greaterThan(bottomLabels.length * (2 / 3));
+      });
+
+      it('should not filter out first label after rotation of the chart', async function() {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVerticalBarChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.visEditor.clickBucket('X-axis');
+        await PageObjects.visEditor.selectAggregation('Date Range');
+        await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.clickGo();
+        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
+        expect(bottomLabels.length).to.be(1);
+
+        await PageObjects.visEditor.clickMetricsAndAxes();
+        await PageObjects.visEditor.selectXAxisPosition('left');
+        await PageObjects.visEditor.clickGo();
+
+        // the getYAxisLabels helper always returns the labels on the left axis
+        const leftLabels = await PageObjects.visChart.getYAxisLabels();
+        expect(leftLabels.length).to.be(1);
       });
     });
 
