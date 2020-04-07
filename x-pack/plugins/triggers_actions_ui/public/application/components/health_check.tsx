@@ -115,7 +115,7 @@ const EncryptionError = ({
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorTitle"
+          id="xpack.triggersActionsUI.components.healthCheck.encryptionErrorTitle"
           defaultMessage="You must set an encryption key"
         />
       </h2>
@@ -155,7 +155,7 @@ const TlsError = ({
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorTitle"
+          id="xpack.triggersActionsUI.components.healthCheck.tlsErrorTitle"
           defaultMessage="You must enable Transport Layer Security"
         />
       </h2>
