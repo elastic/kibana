@@ -4,13 +4,13 @@
 beta::[]
 
 A service map is a real-time diagram of the interactions occurring in your application’s architecture.
-It allows you to easily visualize data flow, and high-level statistics, like average transaction duration,
-requests per minute, errors per minute, and metrics, allow you to quickly assess the status of services.
+It allows you to easily visualize data flow and high-level statistics, like average transaction duration,
+requests per minute, errors per minute, and metrics, allowing you to quickly assess the status of your services.
 
 Our beta offering creates two types of service maps:
 
 * Global: All services and connections are shown.
-* Localized: Selecting a specific service will highlight it's connections.
+* Service-specific: Selecting a specific service will highlight it's connections.
 
 [role="screenshot"]
 image::apm/images/service-maps.png[Example view of service maps in the APM app in Kibana]
@@ -40,11 +40,9 @@ image::apm/images/service-maps-java.png[Example view of service maps with Java h
 [[service-maps-legend]]
 === Legend
 
-There are four type of icons.
+Nodes appear on the map in one of two shape:
 
-* Services
-* Databases
-* Message queues
-* External (like an external API)
-
-The type and subtype shown for each is based on `span.type`, and `span.subtype`.
+* **Circle**: Instrumented services. Interior icons are based on the language of the agent used.
+* **Diamond**: Databases, external, and messaging. Interior icons represent the generic type,
+with specific icons for known entities, like Elasticsearch.
+Type and subtype are based on `span.type`, and `span.subtype`.
