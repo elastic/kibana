@@ -119,9 +119,16 @@ export class AggConfigs {
       return agg.enabled;
     };
 
-    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
-      typesRegistry: this.typesRegistry,
-    });
+    const aggConfigs = new AggConfigs(
+      this.indexPattern,
+      this.aggs.filter(filterAggs),
+      {
+        typesRegistry: this.typesRegistry,
+      },
+      {
+        fieldFormats: this.fieldFormats,
+      }
+    );
 
     return aggConfigs;
   }
