@@ -80,7 +80,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "isESOUsingEphemeralEncryptionKey": true,
+          "hasPermanentEncryptionKey": false,
           "isSufficientlySecure": true,
         },
       }
@@ -104,7 +104,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "isESOUsingEphemeralEncryptionKey": false,
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
       }
@@ -128,7 +128,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "isESOUsingEphemeralEncryptionKey": false,
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
       }
@@ -154,7 +154,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "isESOUsingEphemeralEncryptionKey": false,
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": false,
         },
       }
@@ -180,7 +180,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "isESOUsingEphemeralEncryptionKey": false,
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": false,
         },
       }
@@ -206,7 +206,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "isESOUsingEphemeralEncryptionKey": false,
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
       }
