@@ -12,30 +12,7 @@
         "config_id": "1",
         "type": "PERMANENT",
         "local_metadata": "{}",
-        "user_provided_metadata": "{}",
-        "actions": [{
-          "id": "37ed51ff-e80f-4f2a-a62d-f4fa975e7d85",
-          "created_at": "2019-09-04T15:04:07+0000",
-          "type": "RESUME"
-        },
-        {
-          "id": "b400439c-bbbf-43d5-83cb-cf8b7e32506f",
-          "type": "PAUSE",
-          "created_at": "2019-09-04T15:01:07+0000",
-          "sent_at": "2019-09-04T15:03:07+0000"
-        },
-        {
-          "created_at" : "2020-03-15T03:47:15.129Z",
-          "id" : "48cebde1-c906-4893-b89f-595d943b72a1",
-          "type" : "CONFIG_CHANGE",
-          "sent_at": "2020-03-04T15:03:07+0000"
-        },
-        {
-          "created_at" : "2020-03-16T03:47:15.129Z",
-          "id" : "48cebde1-c906-4893-b89f-595d943b72a2",
-          "type" : "CONFIG_CHANGE",
-          "sent_at": "2020-03-04T15:03:07+0000"
-        }]
+        "user_provided_metadata": "{}"
       }
     }
   }
@@ -54,8 +31,7 @@
         "shared_id": "agent2_filebeat",
         "type": "PERMANENT",
         "local_metadata": "{}",
-        "user_provided_metadata": "{}",
-        "actions": []
+        "user_provided_metadata": "{}"
       }
     }
   }
@@ -74,8 +50,7 @@
         "shared_id": "agent3_metricbeat",
         "type": "PERMANENT",
         "local_metadata": "{}",
-        "user_provided_metadata": "{}",
-        "actions": []
+        "user_provided_metadata": "{}"
       }
     }
   }
@@ -94,8 +69,7 @@
         "shared_id": "agent4_metricbeat",
         "type": "PERMANENT",
         "local_metadata": "{}",
-        "user_provided_metadata": "{}",
-        "actions": []
+        "user_provided_metadata": "{}"
       }
     }
   }
@@ -153,6 +127,74 @@
         "message": "State changed from RUNNING to STOPPED",
         "payload": "{\"previous_state\": \"RUNNING\"}",
         "timestamp": "2019-09-20T17:30:25.950Z"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "agent_actions:37ed51ff-e80f-4f2a-a62d-f4fa975e7d85",
+    "index": ".kibana",
+    "source": {
+      "type": "agent_actions",
+      "agent_actions": {
+        "agent_id": "agent1",
+        "created_at": "2019-09-04T15:04:07+0000",
+        "type": "RESUME",
+        "sent_at": "2019-09-04T15:03:07+0000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "agent_actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
+    "index": ".kibana",
+    "source": {
+      "type": "agent_actions",
+      "agent_actions": {
+        "agent_id": "agent1",
+        "type": "PAUSE",
+        "created_at": "2019-09-04T15:01:07+0000",
+        "sent_at": "2019-09-04T15:03:07+0000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "agent_actions:48cebde1-c906-4893-b89f-595d943b72a1",
+    "index": ".kibana",
+    "source": {
+      "type": "agent_actions",
+      "agent_actions": {
+        "agent_id": "agent1",
+        "type": "CONFIG_CHANGE",
+        "created_at": "2020-03-15T03:47:15.129Z",
+        "sent_at": "2020-03-04T15:03:07+0000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "agent_actions:48cebde1-c906-4893-b89f-595d943b72a2",
+    "index": ".kibana",
+    "source": {
+      "type": "agent_actions",
+      "agent_actions": {
+        "agent_id": "agent1",
+        "type": "CONFIG_CHANGE",
+        "created_at": "2020-03-15T03:47:15.129Z",
+        "sent_at": "2020-03-04T15:03:07+0000"
       }
     }
   }

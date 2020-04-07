@@ -110,7 +110,6 @@ export class BfetchServerPlugin
           'Content-Type': 'application/x-ndjson',
           Connection: 'keep-alive',
           'Transfer-Encoding': 'chunked',
-          'Cache-Control': 'no-cache',
         };
         return response.ok({
           headers,

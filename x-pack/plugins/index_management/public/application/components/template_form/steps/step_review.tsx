@@ -22,8 +22,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { serializers } from '../../../../shared_imports';
 
-import { serializeTemplate } from '../../../../../common/lib/template_serialization';
-import { Template } from '../../../../../common/types';
+import {
+  serializeV1Template,
+  serializeV2Template,
+} from '../../../../../common/lib/template_serialization';
+import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
+import { doMappingsHaveType } from '../../mappings_editor/lib';
 import { StepProps } from '../types';
 
 const { stripEmptyFields } = serializers;
@@ -52,16 +56,25 @@ const getDescriptionText = (data: any) => {
 };
 
 export const StepReview: React.FunctionComponent<StepProps> = ({ template, updateCurrentStep }) => {
-  const { name, indexPatterns, version, order } = template;
+  const {
+    name,
+    indexPatterns,
+    version,
+    order,
+    _kbnMeta: { formatVersion },
+  } = template!;
 
-  const serializedTemplate = serializeTemplate(stripEmptyFields(template) as Template);
+  const serializedTemplate =
+    formatVersion === 1
+      ? serializeV1Template(stripEmptyFields(template!) as TemplateDeserialized)
+      : serializeV2Template(stripEmptyFields(template!) as TemplateDeserialized);
+
   // Name not included in ES request body
   delete serializedTemplate.name;
-  const {
-    mappings: serializedMappings,
-    settings: serializedSettings,
-    aliases: serializedAliases,
-  } = serializedTemplate;
+
+  const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
+  const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');
+  const serializedAliases = getTemplateParameter(serializedTemplate, 'aliases');
 
   const numIndexPatterns = indexPatterns!.length;
 
@@ -159,7 +172,10 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
   );
 
   const RequestTab = () => {
-    const endpoint = `PUT _template/${name || '<templateName>'}`;
+    const includeTypeName = doMappingsHaveType(template!.template.mappings);
+    const endpoint = `PUT _template/${name || '<templateName>'}${
+      includeTypeName ? '?include_type_name' : ''
+    }`;
     const templateString = JSON.stringify(serializedTemplate, null, 2);
     const request = `${endpoint}\n${templateString}`;
 

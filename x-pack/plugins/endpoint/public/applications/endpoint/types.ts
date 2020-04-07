@@ -12,6 +12,7 @@ import {
   AlertResultList,
   Immutable,
   ImmutableArray,
+  AlertDetails,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
@@ -122,10 +123,8 @@ export interface PolicyConfig {
       process: boolean;
       network: boolean;
     };
-    /** malware mode can be detect, prevent or prevent and notify user */
-    malware: {
-      mode: string;
-    };
+    /** malware mode can be off, detect, prevent or prevent and notify user */
+    malware: MalwareFields;
     logging: {
       stdout: string;
       file: string;
@@ -136,9 +135,7 @@ export interface PolicyConfig {
     events: {
       process: boolean;
     };
-    malware: {
-      mode: string;
-    };
+    malware: MalwareFields;
     logging: {
       stdout: string;
       file: string;
@@ -208,6 +205,44 @@ export enum EventingFields {
   network = 'network',
 }
 
+/**
+ * Returns the keys of an object whose values meet a criteria.
+ *  Ex) interface largeNestedObject = {
+ *         a: {
+ *           food: Foods;
+ *           toiletPaper: true;
+ *         };
+ *         b: {
+ *           food: Foods;
+ *           streamingServices: Streams;
+ *         };
+ *         c: {};
+ *    }
+ *
+ *    type hasFoods = KeysByValueCriteria<largeNestedObject, { food: Foods }>;
+ *    The above type will be: [a, b] only, and will not include c.
+ *
+ */
+export type KeysByValueCriteria<O, Criteria> = {
+  [K in keyof O]: O[K] extends Criteria ? K : never;
+}[keyof O];
+
+/** Returns an array of the policy OSes that have a malware protection field */
+
+export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
+/** Policy: Malware protection fields */
+export interface MalwareFields {
+  mode: ProtectionModes;
+}
+
+/** Policy protection mode options */
+export enum ProtectionModes {
+  detect = 'detect',
+  prevent = 'prevent',
+  preventNotify = 'preventNotify',
+  off = 'off',
+}
+
 export interface GlobalState {
   readonly hostList: HostListState;
   readonly alertList: AlertListState;
@@ -258,7 +293,7 @@ export interface AlertListState {
   readonly location?: Immutable<EndpointAppLocation>;
 
   /** Specific Alert data to be shown in the details view */
-  readonly alertDetails?: Immutable<AlertData>;
+  readonly alertDetails?: Immutable<AlertDetails>;
 
   /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;

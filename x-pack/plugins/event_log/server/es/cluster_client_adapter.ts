@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { reject, isUndefined } from 'lodash';
 import { Logger, ClusterClient } from '../../../../../src/core/server';
+import { IEvent } from '../types';
+import { FindOptionsType } from '../event_log_client';
 
 export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
@@ -12,6 +15,13 @@ export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 export interface ConstructorOpts {
   logger: Logger;
   clusterClient: EsClusterClient;
+}
+
+export interface QueryEventsBySavedObjectResult {
+  page: number;
+  per_page: number;
+  total: number;
+  data: IEvent[];
 }
 
 export class ClusterClientAdapter {
@@ -104,6 +114,87 @@ export class ClusterClientAdapter {
       if (err.body?.error?.type !== 'resource_already_exists_exception') {
         throw new Error(`error creating initial index: ${err.message}`);
       }
+    }
+  }
+
+  public async queryEventsBySavedObject(
+    index: string,
+    type: string,
+    id: string,
+    { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
+  ): Promise<QueryEventsBySavedObjectResult> {
+    try {
+      const {
+        hits: {
+          hits,
+          total: { value: total },
+        },
+      } = await this.callEs('search', {
+        index,
+        body: {
+          size: perPage,
+          from: (page - 1) * perPage,
+          sort: { [sort_field]: { order: sort_order } },
+          query: {
+            bool: {
+              must: reject(
+                [
+                  {
+                    nested: {
+                      path: 'kibana.saved_objects',
+                      query: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'kibana.saved_objects.type': {
+                                  value: type,
+                                },
+                              },
+                            },
+                            {
+                              term: {
+                                'kibana.saved_objects.id': {
+                                  value: id,
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                  start && {
+                    range: {
+                      'event.start': {
+                        gte: start,
+                      },
+                    },
+                  },
+                  end && {
+                    range: {
+                      'event.end': {
+                        lte: end,
+                      },
+                    },
+                  },
+                ],
+                isUndefined
+              ),
+            },
+          },
+        },
+      });
+      return {
+        page,
+        per_page: perPage,
+        total,
+        data: hits.map((hit: any) => hit._source) as IEvent[],
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for type "${type}" and id "${id}" failed with: ${err.message}`
+      );
     }
   }
 

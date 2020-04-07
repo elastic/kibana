@@ -23,5 +23,5 @@ export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;
 export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveType>;
 
 export const defaultDynamicSettings: DynamicSettings = {
-  heartbeatIndices: 'heartbeat*',
+  heartbeatIndices: 'heartbeat-7*',
 };
