@@ -40,7 +40,7 @@ image::apm/images/service-maps-java.png[Example view of service maps with Java h
 [[service-maps-legend]]
 === Legend
 
-Nodes appear on the map in one of two shape:
+Nodes appear on the map in one of two shapes:
 
 * **Circle**: Instrumented services. Interior icons are based on the language of the agent used.
 * **Diamond**: Databases, external, and messaging. Interior icons represent the generic type,
