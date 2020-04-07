@@ -114,7 +114,6 @@ export class VectorStyleEditor extends Component {
   }
 
   _handleSelectedFeatureChange = selectedFeature => {
-    console.log('sel feature change', selectedFeature);
     this.setState({ selectedFeature });
   };
 

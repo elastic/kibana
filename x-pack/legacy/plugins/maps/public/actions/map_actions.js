@@ -861,19 +861,16 @@ export function updateLayerStyle(layerId, styleDescriptor) {
 
 export function updateStyleMeta(layerId) {
   return async (dispatch, getState) => {
-    console.log('update style meta');
     const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
     }
     const sourceDataRequest = layer.getSourceDataRequest();
-    console.log('sourcedatareq', sourceDataRequest);
     const style = layer.getCurrentStyle();
     if (!style || !sourceDataRequest) {
       return;
     }
     const styleMeta = await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-    console.log('style meta', styleMeta);
     dispatch({
       type: SET_LAYER_STYLE_META,
       layerId,
