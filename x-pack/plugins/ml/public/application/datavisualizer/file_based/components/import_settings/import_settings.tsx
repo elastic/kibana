@@ -5,14 +5,32 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
 
-export const ImportSettings = ({
+interface Props {
+  index: string;
+  indexPattern: string;
+  initialized: boolean;
+  onIndexChange(): void;
+  createIndexPattern: boolean;
+  onCreateIndexPatternChange(): void;
+  onIndexPatternChange(): void;
+  indexSettingsString: string;
+  mappingsString: string;
+  pipelineString: string;
+  onIndexSettingsStringChange(): void;
+  onMappingsStringChange(): void;
+  onPipelineStringChange(): void;
+  indexNameError: string;
+  indexPatternNameError: string;
+}
+
+export const ImportSettings: FC<Props> = ({
   index,
   indexPattern,
   initialized,
