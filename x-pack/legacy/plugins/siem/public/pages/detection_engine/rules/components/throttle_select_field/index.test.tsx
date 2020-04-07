@@ -7,38 +7,15 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { useForm } from '../../../../../shared_imports';
 import { ThrottleSelectField } from './index';
+import { useFormFieldMock } from '../../../../../mock';
 
 describe('ThrottleSelectField', () => {
   it('renders correctly', () => {
     const Component = () => {
-      const { form } = useForm();
+      const field = useFormFieldMock();
 
-      return (
-        <ThrottleSelectField
-          field={{
-            path: 'path',
-            type: 'type',
-            errors: [],
-            value: '',
-            isPristine: false,
-            isValidating: false,
-            isValidated: true,
-            isChangingValue: false,
-            form,
-            getErrorsMessages: jest.fn(),
-            onChange: jest.fn(),
-            setValue: jest.fn(),
-            setErrors: jest.fn(),
-            clearErrors: jest.fn(),
-            validate: jest.fn(),
-            reset: jest.fn(),
-            __serializeOutput: jest.fn(),
-          }}
-          euiFieldProps={{ options: [] }}
-        />
-      );
+      return <ThrottleSelectField field={field} euiFieldProps={{ options: [] }} />;
     };
     const wrapper = shallow(<Component />);
 

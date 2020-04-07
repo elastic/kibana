@@ -8,8 +8,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { RuleActionsField } from './index';
-import { useForm } from '../../../../../shared_imports';
 import { useKibana } from '../../../../../lib/kibana';
+import { useFormFieldMock } from '../../../../../mock';
 jest.mock('../../../../../lib/kibana');
 
 describe('RuleActionsField', () => {
@@ -22,32 +22,9 @@ describe('RuleActionsField', () => {
       },
     });
     const Component = () => {
-      const { form } = useForm();
+      const field = useFormFieldMock();
 
-      return (
-        <RuleActionsField
-          euiFieldProps={{ options: [] }}
-          field={{
-            path: 'path',
-            type: 'type',
-            value: [],
-            isPristine: false,
-            isValidating: false,
-            isValidated: false,
-            isChangingValue: false,
-            form,
-            errors: [],
-            getErrorsMessages: jest.fn(),
-            onChange: jest.fn(),
-            setValue: jest.fn(),
-            setErrors: jest.fn(),
-            clearErrors: jest.fn(),
-            validate: jest.fn(),
-            reset: jest.fn(),
-            __serializeOutput: jest.fn(),
-          }}
-        />
-      );
+      return <RuleActionsField euiFieldProps={{ options: [] }} field={field} />;
     };
     const wrapper = shallow(<Component />);
 

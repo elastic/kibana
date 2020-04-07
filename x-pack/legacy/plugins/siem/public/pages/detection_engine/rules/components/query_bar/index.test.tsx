@@ -8,14 +8,14 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { QueryBarDefineRule } from './index';
-import { useForm } from '../../../../../shared_imports';
+import { useFormFieldMock } from '../../../../../mock';
 
 jest.mock('../../../../../lib/kibana');
 
 describe('QueryBarDefineRule', () => {
   it('renders correctly', () => {
     const Component = () => {
-      const { form } = useForm();
+      const field = useFormFieldMock();
 
       return (
         <QueryBarDefineRule
@@ -26,25 +26,7 @@ describe('QueryBarDefineRule', () => {
           openTimelineSearch={true}
           dataTestSubj="query-bar-define-rule"
           idAria="idAria"
-          field={{
-            path: 'path',
-            type: 'type',
-            value: [],
-            isPristine: false,
-            isValidating: false,
-            isValidated: false,
-            isChangingValue: false,
-            form,
-            errors: [],
-            getErrorsMessages: jest.fn(),
-            onChange: jest.fn(),
-            setValue: jest.fn(),
-            setErrors: jest.fn(),
-            clearErrors: jest.fn(),
-            validate: jest.fn(),
-            reset: jest.fn(),
-            __serializeOutput: jest.fn(),
-          }}
+          field={field}
         />
       );
     };

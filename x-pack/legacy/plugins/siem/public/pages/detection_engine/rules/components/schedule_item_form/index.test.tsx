@@ -8,37 +8,19 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScheduleItem } from './index';
-import { useForm } from '../../../../../shared_imports';
+import { useFormFieldMock } from '../../../../../mock';
 
 describe('ScheduleItem', () => {
   it('renders correctly', () => {
     const Component = () => {
-      const { form } = useForm();
+      const field = useFormFieldMock();
 
       return (
         <ScheduleItem
           dataTestSubj="schedule-item"
           idAria="idAria"
           isDisabled={false}
-          field={{
-            path: 'path',
-            type: 'type',
-            value: [],
-            isPristine: false,
-            isValidating: false,
-            isValidated: false,
-            isChangingValue: false,
-            form,
-            errors: [],
-            getErrorsMessages: jest.fn(),
-            onChange: jest.fn(),
-            setValue: jest.fn(),
-            setErrors: jest.fn(),
-            clearErrors: jest.fn(),
-            validate: jest.fn(),
-            reset: jest.fn(),
-            __serializeOutput: jest.fn(),
-          }}
+          field={field}
         />
       );
     };
