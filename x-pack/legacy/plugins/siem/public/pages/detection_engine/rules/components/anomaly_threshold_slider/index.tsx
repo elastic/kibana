@@ -16,10 +16,10 @@ interface AnomalyThresholdSliderProps {
 type Event = React.ChangeEvent<HTMLInputElement>;
 type EventArg = Event | React.MouseEvent<HTMLButtonElement>;
 
-const AnomalyThresholdSliderComponent: React.FC<AnomalyThresholdSliderProps> = ({
+export const AnomalyThresholdSlider = ({
   describedByIds = [],
   field,
-}) => {
+}: AnomalyThresholdSliderProps) => {
   const threshold = field.value as number;
   const onThresholdChange = useCallback(
     (event: EventArg) => {
@@ -51,5 +51,3 @@ const AnomalyThresholdSliderComponent: React.FC<AnomalyThresholdSliderProps> = (
     </EuiFormRow>
   );
 };
-
-export const AnomalyThresholdSlider = React.memo(AnomalyThresholdSliderComponent);
