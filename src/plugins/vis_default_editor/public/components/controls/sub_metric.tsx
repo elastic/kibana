@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMount } from 'react-use';
 
 import { AggParamType, IAggConfig, AggGroupNames } from '../../../../data/public';
 import { useSubAggParamsHandlers } from './utils';
@@ -47,21 +48,14 @@ function SubMetricParamEditor({
 
   const aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
   const aggGroup = type === 'customMetric' ? AggGroupNames.Metrics : AggGroupNames.Buckets;
-  const firstRender = useRef(true);
 
-  useEffect(() => {
-    if (!firstRender.current) {
-      return;
-    }
-
-    firstRender.current = false;
-
+  useMount(() => {
     if (agg.params[type]) {
       setValue(agg.params[type]);
     } else {
       setValue(aggParam.makeAgg(agg));
     }
-  }, [agg, aggParam, setValue, type]);
+  });
 
   const { onAggTypeChange, setAggParamValue } = useSubAggParamsHandlers(
     agg,

@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useMount } from 'react-use';
 
 import {
   isCompatibleAggregation,
@@ -56,14 +57,11 @@ function OrderByParamEditor({
     defaultMessage: 'Order by',
   });
   const isValid = !!value;
-  const firstRender = useRef(true);
 
   useValidation(setValidity, isValid);
-
-  useEffect(() => {
+  useMount(() => {
     // setup the initial value of orderBy
-    if (firstRender.current && !value) {
-      firstRender.current = false;
+    if (!value) {
       let respAgg = { id: DEFAULT_VALUE };
 
       if (metricAggs) {
@@ -72,7 +70,7 @@ function OrderByParamEditor({
 
       setValue(respAgg.id);
     }
-  }, [metricAggs, setValue, value]);
+  });
 
   useFallbackMetric(setValue, termsAggFilter, metricAggs, value, DEFAULT_VALUE);
 

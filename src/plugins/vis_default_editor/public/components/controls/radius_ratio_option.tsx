@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFormRow, EuiIconTip, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useMount } from 'react-use';
 
 import { AggControlProps } from './agg_control_props';
 
@@ -43,14 +44,12 @@ function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: Agg
       />
     </>
   );
-  const firstRender = useRef(true);
 
-  useEffect(() => {
-    if (firstRender.current && !editorStateParams.radiusRatio) {
-      firstRender.current = false;
+  useMount(() => {
+    if (!editorStateParams.radiusRatio) {
       setStateParamValue(PARAM_NAME, DEFAULT_VALUE);
     }
-  }, [editorStateParams.radiusRatio, setStateParamValue]);
+  });
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>

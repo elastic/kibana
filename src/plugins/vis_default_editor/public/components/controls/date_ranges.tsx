@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect, useCallback, useRef } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import {
   htmlIdGenerator,
   EuiButtonIcon,
@@ -36,6 +36,7 @@ import dateMath from '@elastic/datemath';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
+import { useMount } from 'react-use';
 
 import { useKibana } from '../../../../kibana_react/public';
 import { AggParamEditorProps } from '../agg_param_props';
@@ -67,7 +68,6 @@ function DateRangesParamEditor({
   setValidity,
 }: AggParamEditorProps<DateRangeValues[]>) {
   const { services } = useKibana();
-  const firstRender = useRef(true);
   const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
   const hasInvalidRange = value.some(
     ({ from, to }) => (!from && !to) || !validateDateMath(from) || !validateDateMath(to)
@@ -87,13 +87,12 @@ function DateRangesParamEditor({
     updateRanges,
   ]);
 
-  // set up an initial range when there is no default range
-  useEffect(() => {
-    if (firstRender.current && !value.length) {
-      firstRender.current = false;
+  useMount(() => {
+    // set up an initial range when there is no default range
+    if (!value.length) {
       onAddRange();
     }
-  }, [onAddRange, value.length]);
+  });
 
   useEffect(() => {
     // responsible for discarding changes
