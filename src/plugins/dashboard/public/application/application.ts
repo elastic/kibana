@@ -38,10 +38,7 @@ import { EmbeddableStart } from '../../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../navigation/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
-import {
-  KibanaLegacyStart,
-  configureAppAngularModule,
-} from '../../../kibana_legacy/public';
+import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
 import { SavedObjectLoader } from '../../../saved_objects/public';
 
 export interface RenderDeps {
