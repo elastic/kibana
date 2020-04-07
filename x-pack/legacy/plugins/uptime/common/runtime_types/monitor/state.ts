@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 export const CheckMonitorType = t.intersection([
   t.partial({
     name: t.string,
-    ip: t.string,
+    ip: t.union([t.array(t.string), t.string]),
   }),
   t.type({
     status: t.string,
@@ -18,6 +18,9 @@ export const CheckMonitorType = t.intersection([
 
 export const CheckType = t.intersection([
   t.partial({
+    agent: t.partial({
+      id: t.string,
+    }),
     container: t.type({
       id: t.string,
     }),
@@ -38,7 +41,7 @@ export const CheckType = t.intersection([
   }),
   t.type({
     monitor: CheckMonitorType,
-    timestamp: t.string,
+    '@timestamp': t.number,
   }),
 ]);
 
@@ -47,6 +50,11 @@ export type Check = t.TypeOf<typeof CheckType>;
 export const StateType = t.intersection([
   t.partial({
     checks: t.array(CheckType),
+    observer: t.partial({
+      geo: t.partial({
+        name: t.array(t.string),
+      }),
+    }),
     summary: t.partial({
       up: t.number,
       down: t.number,
@@ -60,7 +68,7 @@ export const StateType = t.intersection([
     }),
   }),
   t.type({
-    timestamp: t.number,
+    '@timestamp': t.string,
     url: t.partial({
       domain: t.string,
       full: t.string,
@@ -100,11 +108,11 @@ export type MonitorSummary = t.TypeOf<typeof MonitorSummaryType>;
 
 export const MonitorSummaryResultType = t.intersection([
   t.partial({
-    prevPagePagination: t.string,
-    nextPagePagination: t.string,
     summaries: t.array(MonitorSummaryType),
   }),
   t.type({
+    prevPagePagination: t.union([t.string, t.null]),
+    nextPagePagination: t.union([t.string, t.null]),
     totalSummaryCount: t.number,
   }),
 ]);
@@ -120,8 +128,11 @@ export const FetchMonitorStatesQueryArgsType = t.intersection([
   t.type({
     dateRangeStart: t.string,
     dateRangeEnd: t.string,
+    pageSize: t.number,
   }),
 ]);
+
+export type FetchMonitorStatesQueryArgs = t.TypeOf<typeof FetchMonitorStatesQueryArgsType>;
 
 export enum CursorDirection {
   AFTER = 'AFTER',
