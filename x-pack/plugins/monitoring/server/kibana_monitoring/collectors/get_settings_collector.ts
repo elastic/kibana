@@ -41,7 +41,6 @@ export async function checkForEmailValue(
 export function getSettingsCollector(usageCollection: any, config: MonitoringConfig) {
   return usageCollection.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
-    onlyForCollectionName: 'monitoring',
     isReady: () => true,
     async fetch() {
       let kibanaSettingsData;

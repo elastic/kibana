@@ -24,10 +24,7 @@ export function settingsRoute(server, kbnServer) {
 
       try {
         const { usageCollection } = server.newPlatform.setup.plugins;
-        const settingsCollector = usageCollection.getCollectorByType(
-          KIBANA_SETTINGS_TYPE,
-          'monitoring' // According to its implementtion, this collector only works based on the monitoring config.
-        );
+        const settingsCollector = usageCollection.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
         let settings = await settingsCollector.fetch(callCluster);
         if (!settings) {
