@@ -43,7 +43,26 @@ describe('UtilityBar', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('UtilityBar')).toMatchSnapshot();
+    expect(
+      wrapper
+        .find('UtilityBarText')
+        .children()
+        .text()
+    ).toContain('Test text');
+    expect(
+      wrapper
+        .find('UtilityBarAction')
+        .at(0)
+        .children()
+        .text()
+    ).toContain('Test action');
+    expect(
+      wrapper
+        .find('UtilityBarAction')
+        .at(1)
+        .children()
+        .text()
+    ).toContain('Test action');
   });
 
   test('it applies border styles when border is true', () => {

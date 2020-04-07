@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock/test_providers';
@@ -14,13 +13,6 @@ import { Port } from '.';
 
 describe('Port', () => {
   const mount = useMountAppended();
-
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
-    );
-    expect(wrapper).toMatchSnapshot();
-  });
 
   test('it renders the port', () => {
     const wrapper = mount(

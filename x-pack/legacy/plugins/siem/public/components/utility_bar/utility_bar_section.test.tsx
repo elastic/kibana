@@ -22,6 +22,11 @@ describe('UtilityBarSection', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('UtilityBarSection')).toMatchSnapshot();
+    expect(
+      wrapper
+        .find('UtilityBarText')
+        .children()
+        .text()
+    ).toContain('Test text');
   });
 });

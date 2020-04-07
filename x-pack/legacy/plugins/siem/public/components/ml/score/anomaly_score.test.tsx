@@ -24,7 +24,7 @@ describe('anomaly_scores', () => {
     anomalies = cloneDeep(mockAnomalies);
   });
 
-  test('renders correctly against snapshot', () => {
+  test('renders correctly', () => {
     const wrapper = shallow(
       <AnomalyScoreComponent
         jobKey="job-key-1"
@@ -35,7 +35,9 @@ describe('anomaly_scores', () => {
         narrowDateRange={narrowDateRange}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+
+    expect(wrapper.find('[id="anomaly-scores-job-key-1"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="anomaly-description-list"]')).toHaveLength(1);
   });
 
   test('should not show a popover on initial render', () => {

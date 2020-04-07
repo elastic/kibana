@@ -18,6 +18,11 @@ describe('UtilityBarText', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('UtilityBarText')).toMatchSnapshot();
+    expect(
+      wrapper
+        .find('UtilityBarText')
+        .children()
+        .text()
+    ).toContain('Test text');
   });
 });

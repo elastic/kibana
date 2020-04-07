@@ -25,7 +25,7 @@ describe('anomaly_scores', () => {
     anomalies = cloneDeep(mockAnomalies);
   });
 
-  test('renders correctly against snapshot', () => {
+  test('renders correctly', () => {
     const wrapper = shallow(
       <AnomalyScoresComponent
         anomalies={anomalies}
@@ -35,7 +35,8 @@ describe('anomaly_scores', () => {
         narrowDateRange={narrowDateRange}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+
+    expect(wrapper.find('AnomalyScore')).toHaveLength(2);
   });
 
   test('renders spinner when isLoading is true is passed', () => {

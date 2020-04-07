@@ -12,13 +12,19 @@ import { LinkIcon } from './index';
 
 describe('LinkIcon', () => {
   test('it renders', () => {
+    const children = 'Test link';
     const wrapper = shallow(
       <LinkIcon href="#" iconSide="right" iconSize="xxl" iconType="alert">
-        {'Test link'}
+        {children}
       </LinkIcon>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(
+      wrapper
+        .find('span')
+        .children()
+        .text()
+    ).toContain(children);
   });
 
   test('it renders an action button when onClick is provided', () => {

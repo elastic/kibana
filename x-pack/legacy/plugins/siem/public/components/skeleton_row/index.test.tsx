@@ -13,7 +13,9 @@ import { SkeletonRow } from './index';
 describe('SkeletonRow', () => {
   test('it renders', () => {
     const wrapper = shallow(<SkeletonRow />);
-    expect(wrapper).toMatchSnapshot();
+
+    expect(wrapper.find('Row')).toHaveLength(1);
+    expect(wrapper.find('Cell')).toHaveLength(4);
   });
 
   test('it renders the correct number of cells if cellCount is specified', () => {

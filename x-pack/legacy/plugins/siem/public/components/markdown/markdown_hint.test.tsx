@@ -88,7 +88,7 @@ describe('MarkdownHintComponent ', () => {
     test('it renders the expected hints', () => {
       const wrapper = shallow(<MarkdownHintComponent show={true} />);
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="markdown-hint"]')).toHaveLength(1);
     });
   });
 });

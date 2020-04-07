@@ -28,7 +28,11 @@ describe('HeaderPage', () => {
       </HeaderPage>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('Title')).toHaveLength(1);
+    expect(wrapper.find('Subtitle')).toHaveLength(2);
+    expect(wrapper.find('[data-test-subj="header-page-supplements"] p').text()).toContain(
+      'Test supplement'
+    );
   });
 
   test('it renders the back link when provided', () => {

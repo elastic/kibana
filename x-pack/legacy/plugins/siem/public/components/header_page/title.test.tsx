@@ -22,7 +22,7 @@ describe('Title', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[data-test-subj="header-page-title"]').text()).toContain('Test title');
   });
 
   test('it renders the title', () => {

@@ -25,32 +25,3 @@ exports[`Markdown markdown links it renders the expected content containing a li
   transformLinkUri={[Function]}
 />
 `;
-
-exports[`Markdown markdown tables it renders the expected table content 1`] = `
-<ReactMarkdown
-  astPlugins={Array []}
-  data-test-subj="markdown"
-  escapeHtml={true}
-  linkTarget="_blank"
-  plugins={Array []}
-  rawSourcePos={false}
-  renderers={
-    Object {
-      "blockquote": [Function],
-      "link": [Function],
-      "root": [Function],
-      "table": [Function],
-      "tableCell": [Function],
-      "tableHead": [Function],
-      "tableRow": [Function],
-    }
-  }
-  skipHtml={false}
-  source="| we | support | markdown | tables |
-|---------|---------|------------|--------|
-| because | tables  | are        | pretty |
-| useful  | for     | formatting | data   |"
-  sourcePos={false}
-  transformLinkUri={[Function]}
-/>
-`;

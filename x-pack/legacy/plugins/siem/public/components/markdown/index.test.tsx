@@ -97,7 +97,7 @@ describe('Markdown', () => {
     test('it renders the expected table content', () => {
       const wrapper = shallow(<Markdown raw={rawTable} />);
 
-      expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('ReactMarkdown').prop('source')).toEqual(rawTable);
     });
   });
 

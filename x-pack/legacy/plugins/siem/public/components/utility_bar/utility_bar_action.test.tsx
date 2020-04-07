@@ -18,7 +18,12 @@ describe('UtilityBarAction', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('UtilityBarAction')).toMatchSnapshot();
+    expect(
+      wrapper
+        .find('UtilityBarAction')
+        .children()
+        .text()
+    ).toContain('Test action');
   });
 
   test('it renders a popover', () => {

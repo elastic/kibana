@@ -60,3 +60,5 @@ const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptio
 );
 
 export const Title = React.memo(TitleComponent);
+
+Title.displayName = 'Title';

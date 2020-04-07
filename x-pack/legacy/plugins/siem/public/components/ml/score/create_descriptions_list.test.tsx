@@ -22,7 +22,7 @@ describe('create_description_list', () => {
     narrowDateRange = jest.fn();
   });
 
-  test('renders correctly against snapshot', () => {
+  test('renders correctly', () => {
     const wrapper = shallow(
       <EuiDescriptionList
         listItems={createDescriptionList(
@@ -34,7 +34,9 @@ describe('create_description_list', () => {
         )}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+
+    expect(wrapper.find('EuiDescriptionListTitle')).toHaveLength(5);
+    expect(wrapper.find('EuiDescriptionListDescription')).toHaveLength(5);
   });
 
   test('it calls the narrow date range function on click', () => {

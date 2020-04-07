@@ -126,11 +126,6 @@ describe('Ip Details', () => {
     expect(wrapper.find('[data-test-subj="ip-details-page"]').exists()).toBe(true);
   });
 
-  test('it matches the snapshot', () => {
-    const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
-    expect(wrapper).toMatchSnapshot();
-  });
-
   test('it renders ipv6 headline', async () => {
     localSource[0].result.data.source.status.indicesExist = true;
     const ip = 'fe80--24ce-f7ff-fede-a571';
