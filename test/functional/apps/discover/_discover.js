@@ -44,7 +44,6 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('query', function() {
-      this.tags(['skipFirefox']);
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function() {
@@ -101,8 +100,8 @@ export default function({ getService, getPageObjects }) {
         expect(Math.round(newDurationHours)).to.be(25);
         const rowData = await PageObjects.discover.getDocTableField(1);
         expect(Date.parse(rowData)).to.be.within(
-          Date.parse('Sep 20, 2015 @ 22:00:00.000'),
-          Date.parse('Sep 20, 2015 @ 23:30:00.000')
+          Date.parse('Sep 20, 2015 @ 21:30:00.000'),
+          Date.parse('Sep 20, 2015 @ 23:00:00.000')
         );
       });
 
