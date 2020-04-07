@@ -562,6 +562,12 @@ export class DashboardAppController {
       });
     };
 
+    $scope.onFiltersUpdated = (filters: Filter[]) => {
+      // The filters will automatically be set when the queryFilter emits an update event (see below)
+      queryFilter.setFilters(filters);
+      updateNavBar();
+    };
+
     $scope.onQuerySaved = (savedQuery: SavedQuery) => {
       $scope.savedQuery = savedQuery;
       updateNavBar();
@@ -588,12 +594,6 @@ export class DashboardAppController {
         queryFilter.getGlobalFilters()
       );
       queryFilter.setFilters(queryFilter.getGlobalFilters());
-      updateNavBar();
-    };
-
-    $scope.onFiltersUpdated = (filters: Filter[]) => {
-      // The filters will automatically be set when the queryFilter emits an update event (see below)
-      queryFilter.setFilters(filters);
       updateNavBar();
     };
 
