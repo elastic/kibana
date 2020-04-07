@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphQLSchema } from 'graphql';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   IRouter,
@@ -44,5 +43,4 @@ export interface UptimeCorePlugins {
 
 export interface UMBackendFrameworkAdapter {
   registerRoute(route: UMKibanaRoute): void;
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
 }

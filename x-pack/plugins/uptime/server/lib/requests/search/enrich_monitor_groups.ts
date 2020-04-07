@@ -250,17 +250,12 @@ export const enrichMonitorGroups: MonitorEnricher = async (
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
     const monitorId = get<string>(monitor, 'key.monitor_id');
     monitorIds.push(monitorId);
-    let state = get<any>(monitor, 'state.value');
-    state = {
-      ...state,
-      timestamp: state['@timestamp'],
-    };
+    const state = get<any>(monitor, 'state.value');
     const { checks } = state;
     if (checks) {
       state.checks = sortBy<SortChecks, Check>(checks, checksSortBy);
       state.checks = state.checks.map((check: any) => ({
         ...check,
-        timestamp: check['@timestamp'],
       }));
     } else {
       state.checks = [];

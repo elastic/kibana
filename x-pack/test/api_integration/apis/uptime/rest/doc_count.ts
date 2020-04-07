@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { expectFixtureEql } from '../graphql/helpers/expect_fixture_eql';
+import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export default function({ getService }: FtrProviderContext) {
