@@ -37,14 +37,14 @@ export const getTemplateStrings = (): TemplateStringDict => ({
       defaultMessage: 'Light color themed presentation deck',
     }),
   },
-  Pitch: {
+  /* Pitch: {
     name: i18n.translate('xpack.canvas.templates.pitchName', {
       defaultMessage: 'Pitch',
     }),
     help: i18n.translate('xpack.canvas.templates.pitchHelp', {
       defaultMessage: 'Branded presentation with large photos',
     }),
-  },
+  }, */
   Status: {
     name: i18n.translate('xpack.canvas.templates.statusName', {
       defaultMessage: 'Status',
