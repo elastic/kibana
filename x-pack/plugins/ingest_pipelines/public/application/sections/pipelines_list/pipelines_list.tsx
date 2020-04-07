@@ -132,6 +132,30 @@ export const PipelinesList: React.FunctionComponent = () => {
                   <ExpandableText charLimit={50} text={description} />
                 ),
               },
+              {
+                name: i18n.translate('xpack.ingestPipelines.list.table.actionColumnTitle', {
+                  defaultMessage: 'Actions',
+                }),
+                actions: [
+                  {
+                    name: i18n.translate('xpack.ingestPipelines.list.table.editActionLabel', {
+                      defaultMessage: 'Edit',
+                    }),
+                    icon: 'pencil',
+                    type: 'icon',
+                    onClick: () => {},
+                  },
+                  {
+                    name: i18n.translate('xpack.ingestPipelines.list.table.deleteActionLabel', {
+                      defaultMessage: 'Delete',
+                    }),
+                    type: 'icon',
+                    icon: 'trash',
+                    color: 'danger',
+                    onClick: () => {},
+                  },
+                ],
+              } as any,
             ]}
             items={(data as any) ?? []}
           />
