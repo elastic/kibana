@@ -7,23 +7,25 @@
 import { cloneDeep } from 'lodash';
 import { SimpleSavedObject } from 'src/core/public';
 
-interface RawLensSavedXYObject770 {
+export interface RawLensSavedXYObject770 {
   type: 'lens';
-  attributes: {
+  attributes: Record<string, unknown> & {
     visualizationType: string;
-    state: {
-      datasourceStates?: {
-        indexpattern?: {
-          layers: Record<string, { columns: Record<string, unknown> }>;
+    state: Record<string, unknown> & {
+      datasourceStates?: Record<string, unknown> & {
+        indexpattern?: Record<string, unknown> & {
+          layers: Record<string, Record<string, unknown> & { columns: Record<string, unknown> }>;
         };
       };
-      visualization: {
-        layers: Array<{
-          layerId: string;
-          accessors: string[];
-          xAccessor: string;
-          splitAccessor: string;
-        }>;
+      visualization: Record<string, unknown> & {
+        layers: Array<
+          Record<string, unknown> & {
+            layerId: string;
+            accessors: string[];
+            xAccessor: string;
+            splitAccessor: string;
+          }
+        >;
       };
     };
   };

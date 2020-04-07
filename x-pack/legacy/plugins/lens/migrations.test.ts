@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { migrations } from './migrations';
+import { migrations, RawLensSavedXYObject770 } from './migrations';
+import { SimpleSavedObject } from 'src/core/public';
 
 describe('Lens migrations', () => {
   describe('7.7.0 missing dimensions in XY', () => {
-    const migrate = (doc: unknown) => migrations['7.7.0'](doc);
+    const migrate = (doc: SimpleSavedObject | RawLensSavedXYObject770) => migrations['7.7.0'](doc);
 
-    const example = {
+    const example: RawLensSavedXYObject770 = {
       type: 'lens',
       attributes: {
         expression:
@@ -105,7 +106,7 @@ describe('Lens migrations', () => {
           visualizationType: 'lnsMetric',
         },
       };
-      const result = migrate(target);
+      const result = migrate(target as SimpleSavedObject);
       expect(result).toEqual(target);
     });
 
@@ -123,7 +124,7 @@ describe('Lens migrations', () => {
             },
           },
         },
-      });
+      } as SimpleSavedObject) as RawLensSavedXYObject770;
 
       expect(result.attributes.state.visualization.layers).toEqual([
         {
@@ -139,7 +140,7 @@ describe('Lens migrations', () => {
     });
 
     it('should remove only missing accessors', () => {
-      const result = migrate(example);
+      const result = migrate(example) as RawLensSavedXYObject770;
 
       expect(result.attributes.state.visualization.layers).toEqual([
         {
