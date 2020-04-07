@@ -39,7 +39,6 @@ const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
 const STATIC_BUNDLE_PLUGINS = [
   { id: 'data', dirname: 'data' },
-  { id: 'kibanaReact', dirname: 'kibana_react' },
   { id: 'esUiShared', dirname: 'es_ui_shared' },
 ];
 
