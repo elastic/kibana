@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
@@ -13,13 +14,16 @@ import { createMockReportingCore } from '../../../test_helpers';
 import { LevelLogger } from '../../../server/lib/level_logger';
 import { setFieldFormats } from '../../../server/services';
 import { executeJobFactory } from './execute_job';
+import { JobDocPayloadDiscoverCsv } from '../types';
 
-const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
+const delay = (ms: number) => new Promise(resolve => setTimeout(() => resolve(), ms));
 
 const puid = new Puid();
 const getRandomScrollId = () => {
   return puid.generate();
 };
+
+const getJobDocPayload = (baseObj: any) => baseObj as JobDocPayloadDiscoverCsv;
 
 describe('CSV Execute Job', function() {
   const encryptionKey = 'testEncryptionKey';
@@ -27,21 +31,22 @@ describe('CSV Execute Job', function() {
     sid: 'test',
   };
   const mockLogger = new LevelLogger({
-    get: () => ({
-      debug: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    }),
+    get: () =>
+      ({
+        debug: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+      } as any),
   });
-  let defaultElasticsearchResponse;
-  let encryptedHeaders;
+  let defaultElasticsearchResponse: any;
+  let encryptedHeaders: any;
 
-  let clusterStub;
-  let configGetStub;
-  let mockReportingConfig;
-  let mockReportingPlugin;
-  let callAsCurrentUserStub;
-  let cancellationToken;
+  let clusterStub: any;
+  let configGetStub: any;
+  let mockReportingConfig: any;
+  let mockReportingPlugin: any;
+  let callAsCurrentUserStub: any;
+  let cancellationToken: any;
 
   const mockElasticsearch = {
     dataClient: {
@@ -77,7 +82,7 @@ describe('CSV Execute Job', function() {
       _scroll_id: 'defaultScrollId',
     };
     clusterStub = {
-      callAsCurrentUser: function() {},
+      callAsCurrentUser() {},
     };
 
     callAsCurrentUserStub = sinon
@@ -88,17 +93,19 @@ describe('CSV Execute Job', function() {
     mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(true);
 
     setFieldFormats({
-      fieldFormatServiceFactory: function() {
+      fieldFormatServiceFactory() {
         const uiConfigMock = {};
-        uiConfigMock['format:defaultTypeMap'] = {
+        (uiConfigMock as any)['format:defaultTypeMap'] = {
           _default_: { id: 'string', params: {} },
         };
 
         const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
 
-        fieldFormatsRegistry.init(key => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
+        fieldFormatsRegistry.init(key => (uiConfigMock as any)[key], {}, [
+          fieldFormats.StringFormat,
+        ]);
 
-        return fieldFormatsRegistry;
+        return Promise.resolve(fieldFormatsRegistry);
       },
     });
   });
@@ -108,7 +115,11 @@ describe('CSV Execute Job', function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
-        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
+        getJobDocPayload({
+          headers: encryptedHeaders,
+          fields: [],
+          searchRequest: { index: null, body: null },
+        }),
         cancellationToken
       );
       expect(callAsCurrentUserStub.called).toBe(true);
@@ -122,14 +133,14 @@ describe('CSV Execute Job', function() {
       };
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const job = {
+      const job = getJobDocPayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: {
           index,
           body,
         },
-      };
+      });
 
       await executeJob('job777', job, cancellationToken);
 
@@ -151,7 +162,11 @@ describe('CSV Execute Job', function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
-        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
+        getJobDocPayload({
+          headers: encryptedHeaders,
+          fields: [],
+          searchRequest: { index: null, body: null },
+        }),
         cancellationToken
       );
 
@@ -165,7 +180,11 @@ describe('CSV Execute Job', function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
-        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
+        getJobDocPayload({
+          headers: encryptedHeaders,
+          fields: [],
+          searchRequest: { index: null, body: null },
+        }),
         cancellationToken
       );
 
@@ -195,7 +214,11 @@ describe('CSV Execute Job', function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
-        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
+        getJobDocPayload({
+          headers: encryptedHeaders,
+          fields: [],
+          searchRequest: { index: null, body: null },
+        }),
         cancellationToken
       );
 
@@ -230,7 +253,11 @@ describe('CSV Execute Job', function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       await executeJob(
         'job456',
-        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
+        getJobDocPayload({
+          headers: encryptedHeaders,
+          fields: [],
+          searchRequest: { index: null, body: null },
+        }),
         cancellationToken
       );
 
@@ -256,12 +283,12 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: undefined,
         searchRequest: { index: null, body: null },
-      };
+      });
       await expect(
         executeJob('job123', jobParams, cancellationToken)
       ).rejects.toMatchInlineSnapshot(`[TypeError: Cannot read property 'indexOf' of undefined]`);
@@ -283,12 +310,12 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { csv_contains_formulas: csvContainsFormulas } = await executeJob(
         'job123',
         jobParams,
@@ -308,12 +335,12 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['=SUM(A1:A2)', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { csv_contains_formulas: csvContainsFormulas } = await executeJob(
         'job123',
         jobParams,
@@ -333,12 +360,12 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { csv_contains_formulas: csvContainsFormulas } = await executeJob(
         'job123',
         jobParams,
@@ -358,12 +385,12 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { csv_contains_formulas: csvContainsFormulas } = await executeJob(
         'job123',
         jobParams,
@@ -378,11 +405,11 @@ describe('CSV Execute Job', function() {
     it('should reject Promise if search call errors out', async function() {
       callAsCurrentUserStub.rejects(new Error());
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       await expect(
         executeJob('job123', jobParams, cancellationToken)
       ).rejects.toMatchInlineSnapshot(`[Error]`);
@@ -397,11 +424,11 @@ describe('CSV Execute Job', function() {
       });
       callAsCurrentUserStub.onSecondCall().rejects(new Error());
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       await expect(
         executeJob('job123', jobParams, cancellationToken)
       ).rejects.toMatchInlineSnapshot(`[Error]`);
@@ -418,11 +445,11 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       await expect(
         executeJob('job123', jobParams, cancellationToken)
       ).rejects.toMatchInlineSnapshot(
@@ -439,11 +466,11 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       await expect(
         executeJob('job123', jobParams, cancellationToken)
       ).rejects.toMatchInlineSnapshot(
@@ -467,11 +494,11 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       await expect(
         executeJob('job123', jobParams, cancellationToken)
       ).rejects.toMatchInlineSnapshot(
@@ -495,11 +522,11 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       await expect(
         executeJob('job123', jobParams, cancellationToken)
       ).rejects.toMatchInlineSnapshot(
@@ -533,7 +560,11 @@ describe('CSV Execute Job', function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       executeJob(
         'job345',
-        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
+        getJobDocPayload({
+          headers: encryptedHeaders,
+          fields: [],
+          searchRequest: { index: null, body: null },
+        }),
         cancellationToken
       );
 
@@ -548,13 +579,17 @@ describe('CSV Execute Job', function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       executeJob(
         'job345',
-        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
+        getJobDocPayload({
+          headers: encryptedHeaders,
+          fields: [],
+          searchRequest: { index: null, body: null },
+        }),
         cancellationToken
       );
       cancellationToken.cancel();
 
       for (let i = 0; i < callAsCurrentUserStub.callCount; ++i) {
-        expect(callAsCurrentUserStub.getCall(i).args[1]).to.not.be('clearScroll');
+        expect(callAsCurrentUserStub.getCall(i).args[1]).not.toBe('clearScroll'); // dead code?
       }
     });
 
@@ -562,7 +597,11 @@ describe('CSV Execute Job', function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       executeJob(
         'job345',
-        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } },
+        getJobDocPayload({
+          headers: encryptedHeaders,
+          fields: [],
+          searchRequest: { index: null, body: null },
+        }),
         cancellationToken
       );
       await delay(100);
@@ -578,11 +617,11 @@ describe('CSV Execute Job', function() {
   describe('csv content', function() {
     it('should write column headers to output, even if there are no results', async function() {
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { content } = await executeJob('job123', jobParams, cancellationToken);
       expect(content).toBe(`one,two\n`);
     });
@@ -590,11 +629,11 @@ describe('CSV Execute Job', function() {
     it('should use custom uiSettings csv:separator for header', async function() {
       mockUiSettingsClient.get.withArgs('csv:separator').returns(';');
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { content } = await executeJob('job123', jobParams, cancellationToken);
       expect(content).toBe(`one;two\n`);
     });
@@ -602,11 +641,11 @@ describe('CSV Execute Job', function() {
     it('should escape column headers if uiSettings csv:quoteValues is true', async function() {
       mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(true);
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { content } = await executeJob('job123', jobParams, cancellationToken);
       expect(content).toBe(`"one and a half",two,"three-and-four","five & six"\n`);
     });
@@ -614,11 +653,11 @@ describe('CSV Execute Job', function() {
     it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function() {
       mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(false);
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one and a half', 'two', 'three-and-four', 'five & six'],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { content } = await executeJob('job123', jobParams, cancellationToken);
       expect(content).toBe(`one and a half,two,three-and-four,five & six\n`);
     });
@@ -632,11 +671,11 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { content } = await executeJob('job123', jobParams, cancellationToken);
       const lines = content.split('\n');
       const headerLine = lines[0];
@@ -652,12 +691,12 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { content } = await executeJob('job123', jobParams, cancellationToken);
       const lines = content.split('\n');
       const valuesLine = lines[1];
@@ -679,12 +718,12 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
       const { content } = await executeJob('job123', jobParams, cancellationToken);
       const lines = content.split('\n');
 
@@ -701,7 +740,7 @@ describe('CSV Execute Job', function() {
         _scroll_id: 'scrollId',
       });
 
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
@@ -715,7 +754,7 @@ describe('CSV Execute Job', function() {
             fieldFormatMap: '{"one":{"id":"string","params":{"transform": "upper"}}}',
           },
         },
-      };
+      });
       const { content } = await executeJob('job123', jobParams, cancellationToken);
       const lines = content.split('\n');
 
@@ -729,18 +768,18 @@ describe('CSV Execute Job', function() {
     // tests use these 'simple' characters to make the math easier
 
     describe('when only the headers exceed the maxSizeBytes', function() {
-      let content;
-      let maxSizeReached;
+      let content: string;
+      let maxSizeReached: boolean;
 
       beforeEach(async function() {
         configGetStub.withArgs('csv', 'maxSizeBytes').returns(1);
 
         const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-        const jobParams = {
+        const jobParams = getJobDocPayload({
           headers: encryptedHeaders,
           fields: ['one', 'two'],
           searchRequest: { index: null, body: null },
-        };
+        });
 
         ({ content, max_size_reached: maxSizeReached } = await executeJob(
           'job123',
@@ -759,18 +798,18 @@ describe('CSV Execute Job', function() {
     });
 
     describe('when headers are equal to maxSizeBytes', function() {
-      let content;
-      let maxSizeReached;
+      let content: string;
+      let maxSizeReached: boolean;
 
       beforeEach(async function() {
         configGetStub.withArgs('csv', 'maxSizeBytes').returns(9);
 
         const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-        const jobParams = {
+        const jobParams = getJobDocPayload({
           headers: encryptedHeaders,
           fields: ['one', 'two'],
           searchRequest: { index: null, body: null },
-        };
+        });
 
         ({ content, max_size_reached: maxSizeReached } = await executeJob(
           'job123',
@@ -789,8 +828,8 @@ describe('CSV Execute Job', function() {
     });
 
     describe('when the data exceeds the maxSizeBytes', function() {
-      let content;
-      let maxSizeReached;
+      let content: string;
+      let maxSizeReached: boolean;
 
       beforeEach(async function() {
         configGetStub.withArgs('csv', 'maxSizeBytes').returns(9);
@@ -803,12 +842,12 @@ describe('CSV Execute Job', function() {
         });
 
         const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-        const jobParams = {
+        const jobParams = getJobDocPayload({
           headers: encryptedHeaders,
           fields: ['one', 'two'],
           conflictedTypesFields: [],
           searchRequest: { index: null, body: null },
-        };
+        });
 
         ({ content, max_size_reached: maxSizeReached } = await executeJob(
           'job123',
@@ -827,8 +866,8 @@ describe('CSV Execute Job', function() {
     });
 
     describe('when headers and data equal the maxSizeBytes', function() {
-      let content;
-      let maxSizeReached;
+      let content: string;
+      let maxSizeReached: boolean;
 
       beforeEach(async function() {
         mockReportingPlugin.getUiSettingsServiceFactory = () => mockUiSettingsClient;
@@ -842,12 +881,12 @@ describe('CSV Execute Job', function() {
         });
 
         const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-        const jobParams = {
+        const jobParams = getJobDocPayload({
           headers: encryptedHeaders,
           fields: ['one', 'two'],
           conflictedTypesFields: [],
           searchRequest: { index: null, body: null },
-        };
+        });
 
         ({ content, max_size_reached: maxSizeReached } = await executeJob(
           'job123',
@@ -879,12 +918,12 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
 
       await executeJob('job123', jobParams, cancellationToken);
 
@@ -905,12 +944,12 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
 
       await executeJob('job123', jobParams, cancellationToken);
 
@@ -931,12 +970,12 @@ describe('CSV Execute Job', function() {
       });
 
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
-      const jobParams = {
+      const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
         fields: ['one', 'two'],
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
-      };
+      });
 
       await executeJob('job123', jobParams, cancellationToken);
 
