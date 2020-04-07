@@ -19,35 +19,21 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { AgentConfig, PackageInfo } from '../../../../types';
 import { PackageIcon } from '../../../../components/package_icon';
 import { CreateDatasourceFrom, CreateDatasourceStep } from '../types';
-import { CreateDatasourceStepsNavigation } from './navigation';
 
 export const CreateDatasourcePageLayout: React.FunctionComponent<{
   from: CreateDatasourceFrom;
   basePath: string;
   cancelUrl: string;
   maxStep: CreateDatasourceStep | '';
-  currentStep: CreateDatasourceStep;
   agentConfig?: AgentConfig;
   packageInfo?: PackageInfo;
-  restrictWidth?: number;
-}> = ({
-  from,
-  basePath,
-  cancelUrl,
-  maxStep,
-  currentStep,
-  agentConfig,
-  packageInfo,
-  restrictWidth,
-  children,
-}) => {
+}> = ({ from, basePath, cancelUrl, maxStep, agentConfig, packageInfo, children }) => {
   return (
     <WithHeaderLayout
-      restrictWidth={restrictWidth}
       leftColumn={
         <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
           <EuiFlexItem>
-            <EuiButtonEmpty size="s" iconType="cross" flush="left" href={cancelUrl}>
+            <EuiButtonEmpty size="s" iconType="arrowLeft" flush="left" href={cancelUrl}>
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.cancelLinkText"
                 defaultMessage="Cancel"
@@ -59,7 +45,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
               <h1>
                 <FormattedMessage
                   id="xpack.ingestManager.createDatasource.pageTitle"
-                  defaultMessage="Create data source"
+                  defaultMessage="New data source"
                 />
               </h1>
             </EuiText>
@@ -67,7 +53,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
           <EuiFlexItem>
             <EuiSpacer size="s" />
             <EuiFlexGroup direction={from === 'config' ? 'row' : 'rowReverse'} gutterSize="xl">
-              {agentConfig || from === 'config' ? (
+              {agentConfig && from === 'config' ? (
                 <EuiFlexItem grow={false}>
                   <EuiDescriptionList textStyle="reverse">
                     <EuiDescriptionListTitle>
@@ -82,7 +68,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
                   </EuiDescriptionList>
                 </EuiFlexItem>
               ) : null}
-              {packageInfo || from === 'package' ? (
+              {packageInfo && from === 'package' ? (
                 <EuiFlexItem grow={false}>
                   <EuiDescriptionList textStyle="reverse">
                     <EuiDescriptionListTitle>
@@ -113,16 +99,10 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      rightColumn={
-        <CreateDatasourceStepsNavigation
-          from={from}
-          basePath={basePath}
-          maxStep={maxStep}
-          currentStep={currentStep}
-        />
-      }
     >
-      {children}
+      <EuiFlexGroup style={{ maxWidth: 833 }}>
+        <EuiFlexItem>{children}</EuiFlexItem>
+      </EuiFlexGroup>
     </WithHeaderLayout>
   );
 };

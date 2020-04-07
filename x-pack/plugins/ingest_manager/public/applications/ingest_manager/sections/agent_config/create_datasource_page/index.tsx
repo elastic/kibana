@@ -4,32 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import {
-  useRouteMatch,
-  HashRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-  useHistory,
-} from 'react-router-dom';
+import { useRouteMatch, useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSteps,
+  EuiBottomBar,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
-import { useLink, sendCreateDatasource } from '../../../hooks';
+import { useLink, sendCreateDatasource, useCore } from '../../../hooks';
 import { useLinks as useEPMLinks } from '../../epm/hooks';
 import { CreateDatasourcePageLayout } from './components';
 import { CreateDatasourceFrom, CreateDatasourceStep } from './types';
-import { CREATE_DATASOURCE_STEP_PATHS } from './constants';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
 import { StepConfigureDatasource } from './step_configure_datasource';
-import { StepReviewDatasource } from './step_review';
+
+import { StepDefineDatasource } from './step_define_datasource';
 
 export const CreateDatasourcePage: React.FunctionComponent = () => {
+  const { notifications } = useCore();
   const {
     params: { configId, pkgkey },
-    path: matchPath,
     url: basePath,
   } = useRouteMatch();
   const history = useHistory();
@@ -99,32 +101,23 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   });
   const cancelUrl = from === 'config' ? CONFIG_URL : PACKAGE_URL;
 
-  // Redirect to first step
-  const redirectToFirstStep =
-    from === 'config' ? (
-      <Redirect to={`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`} />
-    ) : (
-      <Redirect to={`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`} />
-    );
-
-  // Url to first and second steps
-  const SELECT_PACKAGE_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`);
-  const SELECT_CONFIG_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`);
-  const CONFIGURE_DATASOURCE_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
-  const firstStepUrl = from === 'config' ? SELECT_PACKAGE_URL : SELECT_CONFIG_URL;
-  const secondStepUrl = CONFIGURE_DATASOURCE_URL;
-
-  // Redirect to second step
-  const redirectToSecondStep = (
-    <Redirect to={`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`} />
-  );
-
   // Save datasource
   const saveDatasource = async () => {
     setIsSaving(true);
     const result = await sendCreateDatasource(datasource);
     setIsSaving(false);
     return result;
+  };
+
+  const onSubmit = async () => {
+    const { error } = await saveDatasource();
+    if (!error) {
+      history.push(`${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`);
+    } else {
+      notifications.toasts.addError(error, {
+        title: 'Error',
+      });
+    }
   };
 
   const layoutProps = {
@@ -134,134 +127,99 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     maxStep,
     agentConfig,
     packageInfo,
-    restrictWidth: 770,
   };
 
+  const steps: EuiStepProps[] = [
+    from === 'package'
+      ? {
+          title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectAgentConfigTitle', {
+            defaultMessage: 'Select an Agent configuration',
+          }),
+          children: (
+            <StepSelectConfig
+              pkgkey={pkgkey}
+              updatePackageInfo={updatePackageInfo}
+              agentConfig={agentConfig}
+              updateAgentConfig={updateAgentConfig}
+            />
+          ),
+        }
+      : {
+          title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectPackageTitle', {
+            defaultMessage: 'Select an integration',
+          }),
+          children: (
+            <StepSelectPackage
+              agentConfigId={configId}
+              updateAgentConfig={updateAgentConfig}
+              packageInfo={packageInfo}
+              updatePackageInfo={updatePackageInfo}
+            />
+          ),
+        },
+    {
+      title: i18n.translate('xpack.ingestManager.createDatasource.stepDefineDatasourceTitle', {
+        defaultMessage: 'Define your data source',
+      }),
+      status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      children:
+        agentConfig && packageInfo ? (
+          <StepDefineDatasource
+            agentConfig={agentConfig}
+            packageInfo={packageInfo}
+            datasource={datasource}
+            updateDatasource={updateDatasource}
+          />
+        ) : null,
+    },
+    {
+      title: i18n.translate('xpack.ingestManager.createDatasource.stepConfgiureDatasourceTitle', {
+        defaultMessage: 'Select the data you want to collect',
+      }),
+      status: !packageInfo || !agentConfig ? 'disabled' : undefined,
+      children:
+        agentConfig && packageInfo ? (
+          <StepConfigureDatasource
+            agentConfig={agentConfig}
+            packageInfo={packageInfo}
+            datasource={datasource}
+            updateDatasource={updateDatasource}
+          />
+        ) : null,
+    },
+  ];
+
   return (
-    <Router>
-      <Switch>
-        {/* Redirect to first step from `/` */}
-        {from === 'config' ? (
-          <Redirect
-            exact
-            from={`${matchPath}`}
-            to={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`}
-          />
-        ) : (
-          <Redirect
-            exact
-            from={`${matchPath}`}
-            to={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`}
-          />
-        )}
-
-        {/* First step, either render select package or select config depending on entry */}
-        {from === 'config' ? (
-          <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`}>
-            <CreateDatasourcePageLayout {...layoutProps} currentStep="selectPackage">
-              <StepSelectPackage
-                agentConfigId={configId}
-                updateAgentConfig={updateAgentConfig}
-                packageInfo={packageInfo}
-                updatePackageInfo={updatePackageInfo}
-                cancelUrl={cancelUrl}
-                onNext={() => {
-                  setMaxStep('selectPackage');
-                  history.push(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
-                }}
-              />
-            </CreateDatasourcePageLayout>
-          </Route>
-        ) : (
-          <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`}>
-            <CreateDatasourcePageLayout {...layoutProps} currentStep="selectConfig">
-              <StepSelectConfig
-                pkgkey={pkgkey}
-                updatePackageInfo={updatePackageInfo}
-                agentConfig={agentConfig}
-                updateAgentConfig={updateAgentConfig}
-                cancelUrl={cancelUrl}
-                onNext={() => {
-                  setMaxStep('selectConfig');
-                  history.push(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
-                }}
-              />
-            </CreateDatasourcePageLayout>
-          </Route>
-        )}
-
-        {/* Second step to configure data source, redirect to first step if agent config */}
-        {/* or package info isn't defined (i.e. after full page reload) */}
-        <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.configure}`}>
-          <CreateDatasourcePageLayout {...layoutProps} currentStep="configure">
-            {!agentConfig || !packageInfo ? (
-              redirectToFirstStep
-            ) : (
-              <StepConfigureDatasource
-                agentConfig={agentConfig}
-                packageInfo={packageInfo}
-                datasource={datasource}
-                updateDatasource={updateDatasource}
-                backLink={
-                  <EuiButtonEmpty href={firstStepUrl} iconType="arrowLeft" iconSide="left">
-                    {from === 'config' ? (
-                      <FormattedMessage
-                        id="xpack.ingestManager.createDatasource.changePackageLinkText"
-                        defaultMessage="Change package"
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.ingestManager.createDatasource.changeConfigLinkText"
-                        defaultMessage="Change configuration"
-                      />
-                    )}
-                  </EuiButtonEmpty>
-                }
-                cancelUrl={cancelUrl}
-                onNext={() => {
-                  setMaxStep('configure');
-                  history.push(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.review}`);
-                }}
-              />
-            )}
-          </CreateDatasourcePageLayout>
-        </Route>
-
-        {/* Third step to review, redirect to second step if data source name is missing */}
-        {/* (i.e. after full page reload) */}
-        <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.review}`}>
-          <CreateDatasourcePageLayout {...layoutProps} currentStep="review">
-            {!agentConfig || !datasource.name ? (
-              redirectToSecondStep
-            ) : (
-              <StepReviewDatasource
-                agentConfig={agentConfig}
-                datasource={datasource}
-                cancelUrl={cancelUrl}
-                isSubmitLoading={isSaving}
-                backLink={
-                  <EuiButtonEmpty href={secondStepUrl} iconType="arrowLeft" iconSide="left">
-                    <FormattedMessage
-                      id="xpack.ingestManager.createDatasource.editDatasourceLinkText"
-                      defaultMessage="Edit data source"
-                    />
-                  </EuiButtonEmpty>
-                }
-                onSubmit={async () => {
-                  const { error } = await saveDatasource();
-                  if (!error) {
-                    history.push(
-                      `${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`
-                    );
-                  } else {
-                    // TODO: Handle save datasource error
-                  }
-                }}
-              />
-            )}
-          </CreateDatasourcePageLayout>
-        </Route>
-      </Switch>
-    </Router>
+    <CreateDatasourcePageLayout {...layoutProps}>
+      <EuiSteps steps={steps} />
+      {packageInfo && agentConfig && (
+        <EuiBottomBar>
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                <FormattedMessage
+                  id="xpack.ingestManager.createDatasource.cancelButton"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={onSubmit}
+                isLoading={isSaving}
+                iconType="save"
+                color="primary"
+                fill
+              >
+                <FormattedMessage
+                  id="xpack.ingestManager.createDatasource.saveButton"
+                  defaultMessage="Save data source"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
+      )}
+    </CreateDatasourcePageLayout>
   );
 };
