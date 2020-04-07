@@ -10,7 +10,7 @@
     "home",
     "data",
     "dataEnhanced",
-    "metrics",
+    "visTypeTimeseries",
     "alerting",
     "triggers_actions_ui"
   ],
