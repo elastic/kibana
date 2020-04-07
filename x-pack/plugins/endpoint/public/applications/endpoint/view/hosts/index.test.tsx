@@ -15,7 +15,10 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { AppAction } from '../../types';
 import { HostList } from './index';
-import { mockHostResultList } from '../../store/hosts/mock_host_result_list';
+import {
+  mockHostDetailsApiResult,
+  mockHostResultList,
+} from '../../store/hosts/mock_host_result_list';
 
 describe('when on the hosts page', () => {
   let render: () => reactTestingLibrary.RenderResult;
@@ -56,7 +59,7 @@ describe('when on the hosts page', () => {
         expect(e).not.toBeNull();
       });
     });
-    describe('when data loads', () => {
+    describe('when list data loads', () => {
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const action: AppAction = {
@@ -100,12 +103,23 @@ describe('when on the hosts page', () => {
           search: '?selected_host=1',
         });
       });
+      reactTestingLibrary.act(() => {
+        store.dispatch({
+          type: 'serverReturnedHostDetails',
+          payload: mockHostDetailsApiResult(),
+        });
+      });
     });
     it('should show the flyout', () => {
       const renderResult = render();
       return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
         expect(flyout).not.toBeNull();
       });
+    });
+    it('should include the link to logs', async () => {
+      const renderResult = render();
+      const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
+      expect(linkToLogs).not.toBeNull();
     });
   });
 });

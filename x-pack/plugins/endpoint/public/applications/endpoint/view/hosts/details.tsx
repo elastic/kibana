@@ -117,7 +117,12 @@ const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       />
       <EuiHorizontalRule margin="s" />
       <p>
-        <LinkToApp appId={appId} appPath={appPath} href={url}>
+        <LinkToApp
+          appId={appId}
+          appPath={appPath}
+          href={url}
+          data-test-subj="hostDetailsLinkToLogs"
+        >
           <FormattedMessage
             id="xpack.endpoint.host.details.linkToLogsTitle"
             defaultMessage="Endpoint Logs"
@@ -185,7 +190,7 @@ export const HostDetailsFlyout = () => {
 const useHostLogsUrl = (hostId: string): { url: string; appId: string; appPath: string } => {
   const { services } = useKibana();
   return useMemo(() => {
-    const appPath = `/stream?logFilter=(expression:host.id:${hostId},kind:kuery)`;
+    const appPath = `/stream?logFilter=(expression:'host.id:${hostId}',kind:kuery)`;
     return {
       url: `${services.application.getUrlForApp('logs')}${appPath}`,
       appId: 'logs',

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostResultList } from '../../../../../common/types';
+import { HostMetadata, HostResultList } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 export const mockHostResultList: (options?: {
@@ -36,4 +36,12 @@ export const mockHostResultList: (options?: {
     request_page_index: requestPageIndex,
   };
   return mock;
+};
+
+/**
+ * returns a mocked API response for retrieving a single host metadata
+ */
+export const mockHostDetailsApiResult = (): HostMetadata => {
+  const generator = new EndpointDocGenerator('seed');
+  return generator.generateHostMetadata();
 };
