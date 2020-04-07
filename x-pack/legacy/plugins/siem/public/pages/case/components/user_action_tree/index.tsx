@@ -52,15 +52,28 @@ export const UserActionTree = React.memo(
     updateCase,
     userCanCrud,
   }: UserActionTreeProps) => {
+    // console.log('userActionTree props', {
+    //   data: caseData,
+    //   caseUserActions,
+    //   fetchUserActions,
+    //   firstIndexPushToService,
+    //   isLoadingDescription,
+    //   isLoadingUserActions,
+    //   lastIndexPushToService,
+    //   onUpdateField,
+    //   updateCase,
+    //   userCanCrud,
+    // });
     const { commentId } = useParams();
     const handlerTimeoutId = useRef(0);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
+    // console.log('useUpdateComment', { isLoadingIds, patchComment })
     const currentUser = useCurrentUser();
+    // console.log('useCurrentUser', currentUser)
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
     const [insertQuote, setInsertQuote] = useState<string | null>(null);
-
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
         if (!manageMarkdownEditIds.includes(id)) {
@@ -237,6 +250,7 @@ export const UserActionTree = React.memo(
               <UserActionItem
                 key={action.actionId}
                 createdAt={action.actionAt}
+                data-test-subj="comment-action"
                 disabled={!userCanCrud}
                 id={action.actionId}
                 isEditable={false}
@@ -264,7 +278,7 @@ export const UserActionTree = React.memo(
         {(isLoadingUserActions || isLoadingIds.includes(NEW_ID)) && (
           <MyEuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
+              <EuiLoadingSpinner data-test-subj="user-actions-loading" size="l" />
             </EuiFlexItem>
           </MyEuiFlexGroup>
         )}

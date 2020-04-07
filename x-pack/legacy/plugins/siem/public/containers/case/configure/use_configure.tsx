@@ -55,7 +55,6 @@ export const useCaseConfigure = ({
         setLoading(true);
         const res = await getCaseConfigure({ signal: abortCtrl.signal });
         if (!didCancel) {
-          setLoading(false);
           if (res != null) {
             setConnector(res.connectorId, res.connectorName);
             if (setClosureType != null) {
@@ -73,6 +72,7 @@ export const useCaseConfigure = ({
               }
             }
           }
+          setLoading(false);
         }
       } catch (error) {
         if (!didCancel) {
@@ -117,7 +117,6 @@ export const useCaseConfigure = ({
                   abortCtrl.signal
                 );
           if (!didCancel) {
-            setPersistLoading(false);
             setConnector(res.connectorId);
             if (setClosureType) {
               setClosureType(res.closureType);
@@ -131,6 +130,7 @@ export const useCaseConfigure = ({
             }
 
             displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
+            setPersistLoading(false);
           }
         } catch (error) {
           if (!didCancel) {
