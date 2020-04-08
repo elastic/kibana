@@ -12,7 +12,9 @@ import {
   ESSearchSourceResponseMeta,
   MapExtent,
   VectorSourceRequestMeta,
+  VectorSourceSyncMeta,
 } from '../../../common/descriptor_types';
+import { VECTOR_SHAPE_TYPES } from './vector_feature_types';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
@@ -31,6 +33,7 @@ export interface IVectorSource extends ISource {
 
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField;
+  getSyncMeta(): VectorSourceSyncMeta;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -43,6 +46,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField;
+  getSyncMeta(): VectorSourceSyncMeta;
   getSupportedShapeTypes(): VECTOR_SHAPE_TYPES[];
   canFormatFeatureProperties(): boolean;
 }

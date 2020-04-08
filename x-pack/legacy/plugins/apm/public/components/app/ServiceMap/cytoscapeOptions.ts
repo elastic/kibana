@@ -83,7 +83,7 @@ const style: cytoscape.Stylesheet[] = [
     style: {
       'curve-style': 'taxi',
       // @ts-ignore
-      'taxi-direction': 'rightward',
+      'taxi-direction': 'auto',
       'line-color': lineColor,
       'overlay-opacity': 0,
       'target-arrow-color': lineColor,
