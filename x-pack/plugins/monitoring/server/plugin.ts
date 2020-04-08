@@ -177,12 +177,7 @@ export class Plugin {
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(
-        plugins.usageCollection,
-        config,
-        core.metrics.getOpsMetrics$(),
-        get(legacyConfig, 'kibana.index')
-      );
+      registerCollectors(plugins.usageCollection, config);
     }
 
     // If collection is enabled, create the bulk uploader
@@ -281,18 +276,23 @@ export class Plugin {
       catalogue: ['monitoring'],
       privileges: null,
       reserved: {
-        privilege: {
-          app: ['monitoring', 'kibana'],
-          catalogue: ['monitoring'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
         }),
+        privileges: [
+          {
+            id: 'monitoring',
+            privilege: {
+              app: ['monitoring', 'kibana'],
+              catalogue: ['monitoring'],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          },
+        ],
       },
     });
   }
