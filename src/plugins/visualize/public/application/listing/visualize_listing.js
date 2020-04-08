@@ -109,7 +109,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
       })
     ).catch(error => {
       toastNotifications.addError(error, {
-        title: i18n.translate('kbn.visualize.visualizeListingDeleteErrorTitle', {
+        title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
           defaultMessage: 'Error deleting visualization',
         }),
       });
@@ -118,7 +118,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
 
   chrome.setBreadcrumbs([
     {
-      text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
+      text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
         defaultMessage: 'Visualize',
       }),
     },

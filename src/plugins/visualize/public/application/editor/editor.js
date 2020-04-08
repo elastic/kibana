@@ -148,15 +148,12 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       ? [
           {
             id: 'save',
-            label: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', {
+            label: i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
               defaultMessage: 'save',
             }),
-            description: i18n.translate(
-              'kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel',
-              {
-                defaultMessage: 'Save Visualization',
-              }
-            ),
+            description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
+              defaultMessage: 'Save Visualization',
+            }),
             testId: 'visualizeSaveButton',
             disableButton() {
               return Boolean($scope.dirty);
@@ -164,7 +161,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
             tooltip() {
               if ($scope.dirty) {
                 return i18n.translate(
-                  'kbn.visualize.topNavMenu.saveVisualizationDisabledButtonTooltip',
+                  'visualize.topNavMenu.saveVisualizationDisabledButtonTooltip',
                   {
                     defaultMessage: 'Apply or Discard your changes before saving',
                   }
@@ -199,7 +196,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
 
               const confirmButtonLabel = $scope.isAddToDashMode() ? (
                 <FormattedMessage
-                  id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+                  id="visualize.saveDialog.saveAndAddToDashboardButtonLabel"
                   defaultMessage="Save and add to dashboard"
                 />
               ) : null;
@@ -223,10 +220,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       : []),
     {
       id: 'share',
-      label: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', {
+      label: i18n.translate('visualize.topNavMenu.shareVisualizationButtonLabel', {
         defaultMessage: 'share',
       }),
-      description: i18n.translate('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
+      description: i18n.translate('visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
         defaultMessage: 'Share Visualization',
       }),
       testId: 'shareTopNavButton',
@@ -251,10 +248,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     },
     {
       id: 'inspector',
-      label: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', {
+      label: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {
         defaultMessage: 'inspect',
       }),
-      description: i18n.translate('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
+      description: i18n.translate('visualize.topNavMenu.openInspectorButtonAriaLabel', {
         defaultMessage: 'Open Inspector for visualization',
       }),
       testId: 'openInspectorButton',
@@ -270,7 +267,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       },
       tooltip() {
         if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
-          return i18n.translate('kbn.visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
+          return i18n.translate('visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
             defaultMessage: `This visualization doesn't support any inspectors.`,
           });
         }
@@ -278,8 +275,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     },
     {
       id: 'refresh',
-      label: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
-      description: i18n.translate('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
+      label: i18n.translate('visualize.topNavMenu.refreshButtonLabel', {
+        defaultMessage: 'refresh',
+      }),
+      description: i18n.translate('visualize.topNavMenu.refreshButtonAriaLabel', {
         defaultMessage: 'Refresh',
       }),
       run: function() {
@@ -326,7 +325,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       stopAllSyncing();
 
       toastNotifications.addWarning({
-        title: i18n.translate('kbn.visualize.visualizationTypeInvalidNotificationMessage', {
+        title: i18n.translate('visualize.visualizationTypeInvalidNotificationMessage', {
           defaultMessage: 'Invalid visualization type',
         }),
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
@@ -629,7 +628,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
           if (id) {
             toastNotifications.addSuccess({
               title: i18n.translate(
-                'kbn.visualize.topNavMenu.saveVisualization.successNotificationText',
+                'visualize.topNavMenu.saveVisualization.successNotificationText',
                 {
                   defaultMessage: `Saved '{visTitle}'`,
                   values: {
@@ -668,15 +667,12 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
         // eslint-disable-next-line
         console.error(error);
         toastNotifications.addDanger({
-          title: i18n.translate(
-            'kbn.visualize.topNavMenu.saveVisualization.failureNotificationText',
-            {
-              defaultMessage: `Error on saving '{visTitle}'`,
-              values: {
-                visTitle: savedVis.title,
-              },
-            }
-          ),
+          title: i18n.translate('visualize.topNavMenu.saveVisualization.failureNotificationText', {
+            defaultMessage: `Error on saving '{visTitle}'`,
+            values: {
+              visTitle: savedVis.title,
+            },
+          }),
           text: error.message,
           'data-test-subj': 'saveVisualizationError',
         });
@@ -699,7 +695,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     });
 
     toastNotifications.addSuccess(
-      i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
+      i18n.translate('visualize.linkedToSearch.unlinkSuccessNotificationText', {
         defaultMessage: `Unlinked from saved search '{searchTitle}'`,
         values: {
           searchTitle: savedSearch.title,
@@ -711,7 +707,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   $scope.getAdditionalMessage = () => {
     return (
       '<i class="kuiIcon fa-flask"></i>' +
-      i18n.translate('kbn.visualize.experimentalVisInfoText', {
+      i18n.translate('visualize.experimentalVisInfoText', {
         defaultMessage: 'This visualization is marked as experimental.',
       }) +
       ' ' +

@@ -106,10 +106,10 @@ export function initVisualizeApp(app, deps) {
         }
 
         return {
-          text: i18n.translate('kbn.visualize.badge.readOnly.text', {
+          text: i18n.translate('visualize.badge.readOnly.text', {
             defaultMessage: 'Read only',
           }),
-          tooltip: i18n.translate('kbn.visualize.badge.readOnly.tooltip', {
+          tooltip: i18n.translate('visualize.badge.readOnly.tooltip', {
             defaultMessage: 'Unable to save visualizations',
           }),
           iconType: 'glasses',
@@ -155,7 +155,7 @@ export function initVisualizeApp(app, deps) {
             if (shouldHaveIndex && !hasIndex) {
               throw new Error(
                 i18n.translate(
-                  'kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage',
+                  'visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage',
                   {
                     defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
                   }

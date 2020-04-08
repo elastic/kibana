@@ -139,7 +139,7 @@ export class VisualizePlugin
       home.featureCatalogue.register({
         id: 'visualize',
         title: 'Visualize',
-        description: i18n.translate('kbn.visualize.visualizeDescription', {
+        description: i18n.translate('visualize.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
         }),
