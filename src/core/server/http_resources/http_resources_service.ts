@@ -16,8 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { RequestHandlerContext } from 'src/core/server';
+
 import { CoreContext } from '../core_context';
-import { IRouter, RouteConfig, InternalHttpServiceSetup } from '../http';
+import {
+  IRouter,
+  RouteConfig,
+  InternalHttpServiceSetup,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '../http';
+
 import { Logger } from '../logging';
 import { InternalRenderingServiceSetup } from '../rendering';
 import { CoreService } from '../../types';
@@ -44,99 +53,108 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
   setup(deps: SetupDeps) {
     this.logger.debug('setting up HttpResourcesService');
-    const cspHeader = deps.http.csp.header;
     return {
-      createRegistrar(router: IRouter): HttpResources {
-        return {
-          registerCoreApp: (
-            route: RouteConfig<unknown, unknown, unknown, 'get'>,
-            options: HttpResourcesRenderOptions = {}
-          ) => {
-            router.get(route, async (context, request, response) => {
-              const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-                includeUserSettings: true,
-              });
-
-              return response.ok({
-                body,
-                headers: { ...options.headers, 'content-security-policy': cspHeader },
-              });
-            });
-          },
-          registerAnonymousCoreApp: (
-            route: RouteConfig<unknown, unknown, unknown, 'get'>,
-            options: HttpResourcesRenderOptions = {}
-          ) => {
-            router.get(route, async (context, request, response) => {
-              const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-                includeUserSettings: false,
-              });
-
-              return response.ok({
-                body,
-                headers: { ...options.headers, 'content-security-policy': cspHeader },
-              });
-            });
-          },
-          register: <P, Q, B>(
-            route: RouteConfig<P, Q, B, 'get'>,
-            handler: HttpResourcesRequestHandler<P, Q, B>
-          ) => {
-            return router.get<P, Q, B>(route, (context, request, response) => {
-              const resourceApi: HttpResourcesServiceToolkit = {
-                async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
-                  const body = await deps.rendering.render(
-                    request,
-                    context.core.uiSettings.client,
-                    { includeUserSettings: true }
-                  );
-
-                  return response.ok({
-                    body,
-                    headers: { ...options.headers, 'content-security-policy': cspHeader },
-                  });
-                },
-                async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
-                  const body = await deps.rendering.render(
-                    request,
-                    context.core.uiSettings.client,
-                    { includeUserSettings: false }
-                  );
-
-                  return response.ok({
-                    body,
-                    headers: { ...options.headers, 'content-security-policy': cspHeader },
-                  });
-                },
-                renderHtml(options: HttpResourcesResponseOptions) {
-                  return response.ok({
-                    body: options.body,
-                    headers: {
-                      ...options.headers,
-                      'content-type': 'text/html',
-                      'content-security-policy': cspHeader,
-                    },
-                  });
-                },
-                renderJs(options: HttpResourcesResponseOptions) {
-                  return response.ok({
-                    body: options.body,
-                    headers: {
-                      ...options.headers,
-                      'content-type': 'text/javascript',
-                      'content-security-policy': cspHeader,
-                    },
-                  });
-                },
-              };
-              return handler(context, request, { ...response, ...resourceApi });
-            });
-          },
-        };
-      },
+      createRegistrar: this.createRegistrar.bind(this, deps),
     };
   }
 
   start() {}
   stop() {}
+
+  private createRegistrar(deps: SetupDeps, router: IRouter): HttpResources {
+    return {
+      registerCoreApp: (
+        route: RouteConfig<unknown, unknown, unknown, 'get'>,
+        options: HttpResourcesRenderOptions = {}
+      ) => {
+        router.get(route, async (context, request, response) => {
+          const body = await deps.rendering.render(request, context.core.uiSettings.client, {
+            includeUserSettings: true,
+          });
+
+          return response.ok({
+            body,
+            headers: { ...options.headers, 'content-security-policy': deps.http.csp.header },
+          });
+        });
+      },
+      registerAnonymousCoreApp: (
+        route: RouteConfig<unknown, unknown, unknown, 'get'>,
+        options: HttpResourcesRenderOptions = {}
+      ) => {
+        router.get(route, async (context, request, response) => {
+          const body = await deps.rendering.render(request, context.core.uiSettings.client, {
+            includeUserSettings: false,
+          });
+
+          return response.ok({
+            body,
+            headers: { ...options.headers, 'content-security-policy': deps.http.csp.header },
+          });
+        });
+      },
+      register: <P, Q, B>(
+        route: RouteConfig<P, Q, B, 'get'>,
+        handler: HttpResourcesRequestHandler<P, Q, B>
+      ) => {
+        return router.get<P, Q, B>(route, (context, request, response) => {
+          return handler(context, request, {
+            ...response,
+            ...this.createResponseToolkit(deps, context, request, response),
+          });
+        });
+      },
+    };
+  }
+
+  private createResponseToolkit(
+    deps: SetupDeps,
+    context: RequestHandlerContext,
+    request: KibanaRequest,
+    response: KibanaResponseFactory
+  ): HttpResourcesServiceToolkit {
+    const cspHeader = deps.http.csp.header;
+    return {
+      async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
+        const body = await deps.rendering.render(request, context.core.uiSettings.client, {
+          includeUserSettings: true,
+        });
+
+        return response.ok({
+          body,
+          headers: { ...options.headers, 'content-security-policy': cspHeader },
+        });
+      },
+      async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
+        const body = await deps.rendering.render(request, context.core.uiSettings.client, {
+          includeUserSettings: false,
+        });
+
+        return response.ok({
+          body,
+          headers: { ...options.headers, 'content-security-policy': cspHeader },
+        });
+      },
+      renderHtml(options: HttpResourcesResponseOptions) {
+        return response.ok({
+          body: options.body,
+          headers: {
+            ...options.headers,
+            'content-type': 'text/html',
+            'content-security-policy': cspHeader,
+          },
+        });
+      },
+      renderJs(options: HttpResourcesResponseOptions) {
+        return response.ok({
+          body: options.body,
+          headers: {
+            ...options.headers,
+            'content-type': 'text/javascript',
+            'content-security-policy': cspHeader,
+          },
+        });
+      },
+    };
+  }
 }
