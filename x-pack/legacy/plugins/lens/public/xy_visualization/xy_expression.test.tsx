@@ -30,6 +30,145 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 const executeTriggerActions = jest.fn();
 
+const dateHistogramData: LensMultiTable = {
+  type: 'lens_multitable',
+  tables: {
+    timeLayer: {
+      type: 'kibana_datatable',
+      rows: [
+        {
+          xAccessorId: 1585758120000,
+          splitAccessorId: "Men's Clothing",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585758360000,
+          splitAccessorId: "Women's Accessories",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585758360000,
+          splitAccessorId: "Women's Clothing",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585759380000,
+          splitAccessorId: "Men's Clothing",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585759380000,
+          splitAccessorId: "Men's Shoes",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585759380000,
+          splitAccessorId: "Women's Clothing",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585760700000,
+          splitAccessorId: "Men's Clothing",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585760760000,
+          splitAccessorId: "Men's Clothing",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585760760000,
+          splitAccessorId: "Men's Shoes",
+          yAccessorId: 1,
+        },
+        {
+          xAccessorId: 1585761120000,
+          splitAccessorId: "Men's Shoes",
+          yAccessorId: 1,
+        },
+      ],
+      columns: [
+        {
+          id: 'xAccessorId',
+          name: 'order_date per minute',
+          meta: {
+            type: 'date_histogram',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {
+              field: 'order_date',
+              timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
+              useNormalizedEsInterval: true,
+              scaleMetricValues: false,
+              interval: '1m',
+              drop_partials: false,
+              min_doc_count: 0,
+              extended_bounds: {},
+            },
+          },
+          formatHint: { id: 'date', params: { pattern: 'HH:mm' } },
+        },
+        {
+          id: 'splitAccessorId',
+          name: 'Top values of category.keyword',
+          meta: {
+            type: 'terms',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {
+              field: 'category.keyword',
+              orderBy: 'yAccessorId',
+              order: 'desc',
+              size: 3,
+              otherBucket: false,
+              otherBucketLabel: 'Other',
+              missingBucket: false,
+              missingBucketLabel: 'Missing',
+            },
+          },
+          formatHint: {
+            id: 'terms',
+            params: {
+              id: 'string',
+              otherBucketLabel: 'Other',
+              missingBucketLabel: 'Missing',
+              parsedUrl: {
+                origin: 'http://localhost:5601',
+                pathname: '/jiy/app/kibana',
+                basePath: '/jiy',
+              },
+            },
+          },
+        },
+        {
+          id: 'yAccessorId',
+          name: 'Count of records',
+          meta: {
+            type: 'count',
+            indexPatternId: 'indexPatternId',
+            aggConfigParams: {},
+          },
+          formatHint: { id: 'number' },
+        },
+      ],
+    },
+  },
+  dateRange: {
+    fromDate: new Date('2020-04-01T16:14:16.246Z'),
+    toDate: new Date('2020-04-01T17:15:41.263Z'),
+  },
+};
+
+const dateHistogramLayer: LayerArgs = {
+  layerId: 'timeLayer',
+  hide: false,
+  xAccessor: 'xAccessorId',
+  yScaleType: 'linear',
+  xScaleType: 'time',
+  isHistogram: true,
+  splitAccessor: 'splitAccessorId',
+  seriesType: 'bar_stacked',
+  accessors: ['yAccessorId'],
+};
+
 const createSampleDatatableWithRows = (rows: KibanaDatatableRow[]): KibanaDatatable => ({
   type: 'kibana_datatable',
   columns: [
@@ -444,145 +583,6 @@ describe('xy_expression', () => {
     test('onBrushEnd returns correct context data', () => {
       const { args } = sampleArgs();
 
-      const dateHistogramData: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          timeLayer: {
-            type: 'kibana_datatable',
-            rows: [
-              {
-                xAccessorId: 1585758120000,
-                splitAccessorId: "Men's Clothing",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585758360000,
-                splitAccessorId: "Women's Accessories",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585758360000,
-                splitAccessorId: "Women's Clothing",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585759380000,
-                splitAccessorId: "Men's Clothing",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585759380000,
-                splitAccessorId: "Men's Shoes",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585759380000,
-                splitAccessorId: "Women's Clothing",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585760700000,
-                splitAccessorId: "Men's Clothing",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585760760000,
-                splitAccessorId: "Men's Clothing",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585760760000,
-                splitAccessorId: "Men's Shoes",
-                yAccessorId: 1,
-              },
-              {
-                xAccessorId: 1585761120000,
-                splitAccessorId: "Men's Shoes",
-                yAccessorId: 1,
-              },
-            ],
-            columns: [
-              {
-                id: 'xAccessorId',
-                name: 'order_date per minute',
-                meta: {
-                  type: 'date_histogram',
-                  indexPatternId: 'indexPatternId',
-                  aggConfigParams: {
-                    field: 'order_date',
-                    timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
-                    useNormalizedEsInterval: true,
-                    scaleMetricValues: false,
-                    interval: '1m',
-                    drop_partials: false,
-                    min_doc_count: 0,
-                    extended_bounds: {},
-                  },
-                },
-                formatHint: { id: 'date', params: { pattern: 'HH:mm' } },
-              },
-              {
-                id: 'splitAccessorId',
-                name: 'Top values of category.keyword',
-                meta: {
-                  type: 'terms',
-                  indexPatternId: 'indexPatternId',
-                  aggConfigParams: {
-                    field: 'category.keyword',
-                    orderBy: 'yAccessorId',
-                    order: 'desc',
-                    size: 3,
-                    otherBucket: false,
-                    otherBucketLabel: 'Other',
-                    missingBucket: false,
-                    missingBucketLabel: 'Missing',
-                  },
-                },
-                formatHint: {
-                  id: 'terms',
-                  params: {
-                    id: 'string',
-                    otherBucketLabel: 'Other',
-                    missingBucketLabel: 'Missing',
-                    parsedUrl: {
-                      origin: 'http://localhost:5601',
-                      pathname: '/jiy/app/kibana',
-                      basePath: '/jiy',
-                    },
-                  },
-                },
-              },
-              {
-                id: 'yAccessorId',
-                name: 'Count of records',
-                meta: {
-                  type: 'count',
-                  indexPatternId: 'indexPatternId',
-                  aggConfigParams: {},
-                },
-                formatHint: { id: 'number' },
-              },
-            ],
-          },
-        },
-        dateRange: {
-          fromDate: new Date('2020-04-01T16:14:16.246Z'),
-          toDate: new Date('2020-04-01T17:15:41.263Z'),
-        },
-      };
-
-      const dateHistogramLayer: LayerArgs = {
-        layerId: 'timeLayer',
-        hide: false,
-        xAccessor: 'xAccessorId',
-        yScaleType: 'linear',
-        xScaleType: 'time',
-        isHistogram: true,
-        splitAccessor: 'splitAccessorId',
-        seriesType: 'bar_stacked',
-        accessors: ['yAccessorId'],
-      };
-
       const wrapper = mountWithIntl(
         <XYChart
           data={dateHistogramData}
@@ -602,37 +602,7 @@ describe('xy_expression', () => {
         .first()
         .prop('onBrushEnd')!(1585757732783, 1585758880838);
 
-      expect(executeTriggerActions).toHaveBeenCalledWith(
-        'SELECT_RANGE_TRIGGER',
-        expect.objectContaining({
-          data: {
-            range: ['2020-04-01T16:15:32.783Z', '2020-04-01T16:34:40.838Z'],
-            data: expect.objectContaining({
-              xAxisOrderedValues: [
-                1585758120000,
-                1585758360000,
-                1585759380000,
-                1585760700000,
-                1585760760000,
-                1585761120000,
-              ],
-              xAxisFormat: { id: 'date', params: { pattern: 'HH:mm' } },
-              xAxisLabel: 'order_date per minute',
-              yAxisFormat: { id: 'number' },
-              yAxisLabel: 'Count of records',
-              series: expect.any(Object),
-              ordered: expect.objectContaining({
-                date: true,
-                intervalESUnit: undefined,
-                intervalESValue: undefined,
-                max: 1585758880838,
-                min: 1585757732783,
-              }),
-            }),
-          },
-          timeFieldName: 'order_date',
-        })
-      );
+      expect(executeTriggerActions.mock.calls[0]).toMatchSnapshot();
     });
 
     test('onElementClick returns correct context data', () => {

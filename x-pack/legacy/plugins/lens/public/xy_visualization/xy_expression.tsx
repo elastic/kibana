@@ -30,9 +30,6 @@ import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaDatatableColumn } from '../../../../../../src/plugins/expressions/public';
-// this will be imported from vis_type_vislib after merging https://github.com/elastic/kibana/pull/61575
-// @ts-ignore
-import { buildPointSeriesData } from '../../../../../../src/legacy/ui/public/agg_response/point_series/point_series.js';
 import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
 import { LensMultiTable, FormatFactory } from '../types';
@@ -203,7 +200,7 @@ export function XYChart({
   // use default number formatter for y axis and use formatting hint if there is just a single y column
   let yAxisFormatter = formatFactory({ id: 'number' });
   let firstYAxisColumn: KibanaDatatableColumn | undefined;
-  if (layers.length === 1 && layers[0].accessors.length === 1) {
+  if (layers.length >= 1 && layers[0].accessors.length === 1) {
     firstYAxisColumn = Object.values(data.tables)[0].columns.find(
       ({ id }) => id === layers[0].accessors[0]
     );
@@ -233,7 +230,7 @@ export function XYChart({
       : undefined;
 
   const onBrushEnd = (min: number, max: number) => {
-    // in the future we want to make it
+    // in the future we want to make it also for histogram
     if (!firstYAxisColumn || !xAxisColumn || xAxisColumn.meta?.type !== 'date_histogram') {
       return;
     }
@@ -244,26 +241,17 @@ export function XYChart({
     const startRange = moment(min).toISOString();
     const endRange = moment(max).toISOString();
 
-    const dimensions = {
-      x: {
-        accessor: table.columns.findIndex(el => el.id === xAxisColumn?.id),
-        label: xAxisColumn.name,
-        format: xAxisColumn.formatHint,
-        params: {
-          date: xAxisColumn.formatHint?.id === 'date',
-          interval: xAxisColumn.meta?.aggConfigParams?.interval,
-          format: xAxisColumn.formatHint,
-          bounds: { min: startRange, max: endRange },
-        },
+    const series = [
+      {
+        values: table.rows.map((row, rowIndex) => ({
+          xRaw: {
+            table,
+            column: table.columns.findIndex(el => el.id === xAxisColumn?.id), // index of X accessor in the table:
+            row: rowIndex,
+          },
+        })),
       },
-      y: {
-        accessor: table.columns.findIndex(el => el.id === firstYAxisColumn?.id), // index of x accessor in table
-        format: firstYAxisColumn.formatHint,
-        label: firstYAxisColumn.name,
-      },
-    };
-
-    const pointSeriesData = buildPointSeriesData(table, dimensions);
+    ];
 
     const xAxisFieldName: string | undefined = xAxisColumn?.meta?.aggConfigParams?.field;
     const timeFieldName = xDomain && xAxisFieldName;
@@ -272,7 +260,10 @@ export function XYChart({
       data: {
         range: [startRange, endRange],
         data: {
-          ...pointSeriesData,
+          ordered: {
+            date: xAxisColumn.formatHint?.id === 'date',
+          },
+          series,
         },
       },
       timeFieldName,
