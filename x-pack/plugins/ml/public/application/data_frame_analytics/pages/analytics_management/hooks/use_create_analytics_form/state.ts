@@ -162,23 +162,25 @@ export const getInitialState = (): State => ({
 const getExcludesFields = (excluded: string[]) => {
   const { fields } = newJobCapsService;
   const updatedExcluded: string[] = [];
-  let regex;
-  let mainField;
-
+  // Loop through excluded fields to check for multiple types of same field
   for (let i = 0; i < excluded.length; i++) {
     const fieldName = excluded[i];
-    // No dot in fieldName - exclude fieldName and others whose names begin with fieldName followed by dot
+    let mainField;
+
+    // No dot in fieldName - it is the main field
     if (fieldName.includes('.') === false) {
       mainField = fieldName;
     } else {
       // Dot in fieldName - check if there's a field whose name equals the fieldName with the last dot suffix removed
-      regex = /\.[^.]*$/;
+      const regex = /\.[^.]*$/;
       const suffixRemovedField = fieldName.replace(regex, '');
       const fieldMatch = newJobCapsService.getFieldById(suffixRemovedField);
 
+      // There's a match - set as the main field
       if (fieldMatch !== null) {
         mainField = suffixRemovedField;
       } else {
+        // No main field to be found - add the fieldName to updatedExcluded array if it's not already there
         if (updatedExcluded.includes(fieldName) === false) {
           updatedExcluded.push(fieldName);
         }
@@ -186,20 +188,20 @@ const getExcludesFields = (excluded: string[]) => {
     }
 
     if (mainField !== undefined) {
+      // Add the main field to the updatedExcluded array if it's not already there
       if (updatedExcluded.includes(mainField) === false) {
         updatedExcluded.push(mainField);
       }
-      regex = new RegExp(`${mainField}\\..+`);
+      // Create regex to find all other fields whose names begin with main field followed by a dot
+      const regex = new RegExp(`${mainField}\\..+`);
 
+      // Loop through fields and add fields matching the pattern to updatedExcluded array
       for (let j = 0; j < fields.length; j++) {
-        const field = fields[j]?.name;
+        const field = fields[j].name;
         if (updatedExcluded.includes(field) === false && field.match(regex) !== null) {
           updatedExcluded.push(field);
         }
       }
-
-      mainField = undefined;
-      regex = undefined;
     }
   }
 
