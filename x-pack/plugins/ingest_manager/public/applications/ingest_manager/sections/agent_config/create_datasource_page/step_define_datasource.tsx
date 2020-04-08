@@ -6,15 +6,12 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiPanel,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiFieldText,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiEmptyPrompt,
   EuiText,
   EuiComboBox,
 } from '@elastic/eui';

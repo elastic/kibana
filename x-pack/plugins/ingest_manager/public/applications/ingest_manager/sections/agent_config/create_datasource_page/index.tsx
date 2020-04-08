@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -18,9 +18,15 @@ import {
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
-import { useLink, sendCreateDatasource, useCore } from '../../../hooks';
+import {
+  useLink,
+  sendCreateDatasource,
+  useCore,
+  useConfig,
+  sendGetAgentStatus,
+} from '../../../hooks';
 import { useLinks as useEPMLinks } from '../../epm/hooks';
-import { CreateDatasourcePageLayout } from './components';
+import { CreateDatasourcePageLayout, ConfirmCreateDatasourceModal } from './components';
 import { CreateDatasourceFrom, CreateDatasourceStep } from './types';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
@@ -31,17 +37,37 @@ import { StepDefineDatasource } from './step_define_datasource';
 export const CreateDatasourcePage: React.FunctionComponent = () => {
   const { notifications } = useCore();
   const {
+    fleet: { enabled: isFleetEnabled },
+  } = useConfig();
+  const {
     params: { configId, pkgkey },
     url: basePath,
   } = useRouteMatch();
   const history = useHistory();
   const from: CreateDatasourceFrom = configId ? 'config' : 'package';
   const [maxStep, setMaxStep] = useState<CreateDatasourceStep | ''>('');
-  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Agent config and package info states
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
+
+  const agentConfigId = agentConfig?.id;
+  // Retrieve agent count
+  useEffect(() => {
+    const getAgentCount = async () => {
+      if (agentConfigId) {
+        const { data } = await sendGetAgentStatus({ configId: agentConfigId });
+        if (data?.results.total) {
+          setAgentCount(data.results.total);
+        }
+      }
+    };
+
+    if (isFleetEnabled && agentConfigId) {
+      getAgentCount();
+    }
+  }, [agentConfigId, isFleetEnabled]);
+  const [agentCount, setAgentCount] = useState<number>(0);
 
   // New datasource state
   const [datasource, setDatasource] = useState<NewDatasource>({
@@ -87,6 +113,9 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     };
     setDatasource(newDatasource);
 
+    if (newDatasource.package && newDatasource.config_id && newDatasource.config_id !== '') {
+      setFormState('VALID');
+    }
     // eslint-disable-next-line no-console
     console.debug('Datasource updated', newDatasource);
   };
@@ -102,14 +131,21 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const cancelUrl = from === 'config' ? CONFIG_URL : PACKAGE_URL;
 
   // Save datasource
+  const [formState, setFormState] = useState<
+    'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED'
+  >('INVALID');
   const saveDatasource = async () => {
-    setIsSaving(true);
+    setFormState('LOADING');
     const result = await sendCreateDatasource(datasource);
-    setIsSaving(false);
+    setFormState('SUBMITTED');
     return result;
   };
 
   const onSubmit = async () => {
+    if (agentCount !== 0 && formState !== 'CONFIRM') {
+      setFormState('CONFIRM');
+      return;
+    }
     const { error } = await saveDatasource();
     if (!error) {
       history.push(`${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`);
@@ -117,6 +153,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       notifications.toasts.addError(error, {
         title: 'Error',
       });
+      setFormState('VALID');
     }
   };
 
@@ -191,35 +228,42 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
 
   return (
     <CreateDatasourcePageLayout {...layoutProps}>
-      <EuiSteps steps={steps} />
-      {packageInfo && agentConfig && (
-        <EuiBottomBar>
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="ghost" href={cancelUrl}>
-                <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.cancelButton"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={onSubmit}
-                isLoading={isSaving}
-                iconType="save"
-                color="primary"
-                fill
-              >
-                <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.saveButton"
-                  defaultMessage="Save data source"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiBottomBar>
+      {formState === 'CONFIRM' && agentConfig && (
+        <ConfirmCreateDatasourceModal
+          agentCount={agentCount}
+          agentConfig={agentConfig}
+          onConfirm={onSubmit}
+          onCancel={() => setFormState('VALID')}
+        />
       )}
+      <EuiSteps steps={steps} />
+      <EuiBottomBar>
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="ghost" href={cancelUrl}>
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.cancelButton"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={onSubmit}
+              isLoading={formState === 'LOADING'}
+              disabled={formState !== 'VALID'}
+              iconType="save"
+              color="primary"
+              fill
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.saveButton"
+                defaultMessage="Save data source"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
     </CreateDatasourcePageLayout>
   );
 };

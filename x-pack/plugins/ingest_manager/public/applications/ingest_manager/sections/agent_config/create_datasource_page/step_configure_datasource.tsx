@@ -3,24 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiSteps,
-  EuiPanel,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiButton,
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import {
   AgentConfig,
   PackageInfo,

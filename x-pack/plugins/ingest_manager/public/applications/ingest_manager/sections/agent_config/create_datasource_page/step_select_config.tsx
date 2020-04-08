@@ -6,17 +6,8 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelectable,
-  EuiSpacer,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { Error } from '../../../components';
-import { AGENT_CONFIG_PATH } from '../../../constants';
-import { useCapabilities, useLink } from '../../../hooks';
 import { AgentConfig, PackageInfo, GetAgentConfigsResponseItem } from '../../../types';
 import { useGetPackageInfoByKey, useGetAgentConfigs, sendGetOneAgentConfig } from '../../../hooks';
 
@@ -26,15 +17,11 @@ export const StepSelectConfig: React.FunctionComponent<{
   agentConfig: AgentConfig | undefined;
   updateAgentConfig: (config: AgentConfig | undefined) => void;
 }> = ({ pkgkey, updatePackageInfo, agentConfig, updateAgentConfig }) => {
-  const hasWriteCapabilites = useCapabilities().write;
   // Selected config state
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(
     agentConfig ? agentConfig.id : undefined
   );
   const [selectedConfigError, setSelectedConfigError] = useState<Error>();
-
-  // Todo: replace with create agent config flyout
-  const CREATE_NEW_CONFIG_URI = useLink(AGENT_CONFIG_PATH);
 
   // Fetch package info
   const { data: packageInfoData, error: packageInfoError } = useGetPackageInfoByKey(pkgkey);
@@ -115,23 +102,6 @@ export const StepSelectConfig: React.FunctionComponent<{
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              isDisabled={!hasWriteCapabilites}
-              iconType="plusInCircle"
-              href={CREATE_NEW_CONFIG_URI}
-              size="s"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.StepSelectConfig.createNewConfigButtonText"
-                defaultMessage="Create new configuration"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
       <EuiFlexItem>
         <EuiSelectable
           searchable

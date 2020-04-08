@@ -5,3 +5,4 @@
  */
 export { CreateDatasourcePageLayout } from './layout';
 export { DatasourceInputPanel } from './datasource_input_panel';
+export { ConfirmCreateDatasourceModal } from './confirm_modal';
