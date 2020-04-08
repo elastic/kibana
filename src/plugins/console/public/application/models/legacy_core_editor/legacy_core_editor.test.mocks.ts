@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../../../../../es_ui_shared/public/mocks';
 
 jest.mock('./mode/worker', () => {
   return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
