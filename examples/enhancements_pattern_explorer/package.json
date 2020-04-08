@@ -1,0 +1,17 @@
+{
+  "name": "enhancements_pattern_explorer",
+  "version": "1.0.0",
+  "main": "target/examples/enhancements_pattern_explorer",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "kbn": "node ../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "3.7.2"
+  }
+}

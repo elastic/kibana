@@ -1,0 +1,10 @@
+{
+  "id": "greetingEnhanced",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["greeting_enhanced"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["greeting"],
+  "optionalPlugins": []
+}

@@ -1,0 +1,10 @@
+{
+  "id": "greeting",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["greeting"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}
