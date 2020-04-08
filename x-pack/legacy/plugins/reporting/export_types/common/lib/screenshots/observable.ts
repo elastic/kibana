@@ -33,10 +33,11 @@ export function screenshotsObservableFactory(
       { viewport: layout.getBrowserViewport(), browserTimezone },
       logger
     );
-    return Rx.from(urls).pipe(
-      concatMap(url => {
-        return create$.pipe(
-          mergeMap(({ driver, exit$ }) => {
+
+    return create$.pipe(
+      mergeMap(({ driver, exit$ }) => {
+        return Rx.from(urls).pipe(
+          concatMap(url => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               takeUntil(exit$),
               mergeMap(() => openUrl(captureConfig, driver, url, conditionalHeaders, logger)),
@@ -88,11 +89,11 @@ export function screenshotsObservableFactory(
               )
             );
           }),
-          first()
+          take(urls.length),
+          toArray()
         );
       }),
-      take(urls.length),
-      toArray()
+      first()
     );
   };
 }
