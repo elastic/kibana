@@ -14,7 +14,7 @@ import {
   mockHostResultList,
 } from '../../store/hosts/mock_host_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
-import { HostMetadata } from '../../../../../common/types';
+import { HostInfo } from '../../../../../common/types';
 
 describe('when on the hosts page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -62,6 +62,16 @@ describe('when on the hosts page', () => {
       describe('when the user clicks the hostname in the table', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
+          const hostDetailsApiResponse = mockHostDetailsApiResult();
+
+          coreStart.http.get.mockReturnValue(Promise.resolve(hostDetailsApiResponse));
+          reactTestingLibrary.act(() => {
+            store.dispatch({
+              type: 'serverReturnedHostDetails',
+              payload: hostDetailsApiResponse,
+            });
+          });
+
           renderResult = render();
           const detailsLink = await renderResult.findByTestId('hostnameCellLink');
           if (detailsLink) {
@@ -79,14 +89,20 @@ describe('when on the hosts page', () => {
   });
 
   describe('when there is a selected host in the url', () => {
-    let hostDetails: HostMetadata;
+    let hostDetails: HostInfo;
     beforeEach(() => {
-      const { host, ...details } = mockHostDetailsApiResult();
+      const {
+        host_status,
+        metadata: { host, ...details },
+      } = mockHostDetailsApiResult();
       hostDetails = {
-        ...details,
-        host: {
-          ...host,
-          id: '1',
+        host_status,
+        metadata: {
+          ...details,
+          host: {
+            ...host,
+            id: '1',
+          },
         },
       };
 
@@ -129,7 +145,9 @@ describe('when on the hosts page', () => {
       beforeEach(async () => {
         const renderResult = render();
         const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
-        reactTestingLibrary.act(() => fireEvent.click(linkToLogs));
+        reactTestingLibrary.act(() => {
+          fireEvent.click(linkToLogs);
+        });
       });
 
       it('should navigate to logs without full page refresh', async () => {
