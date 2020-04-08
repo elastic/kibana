@@ -515,7 +515,7 @@ describe('helpers', () => {
         actions: [],
         enabled: false,
         meta: {
-          kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
+          kibana_siem_app_url: 'http://localhost:5601/app/siem',
         },
         throttle: 'no_actions',
       };
@@ -533,7 +533,7 @@ describe('helpers', () => {
         actions: [],
         enabled: false,
         meta: {
-          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: 'no_actions',
       };
@@ -566,7 +566,7 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: 'rule',
       };
@@ -599,7 +599,7 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: mockStepData.throttle,
       };
@@ -631,7 +631,7 @@ describe('helpers', () => {
         ],
         enabled: false,
         meta: {
-          kibanaSiemAppUrl: mockStepData.kibanaSiemAppUrl,
+          kibana_siem_app_url: mockStepData.kibanaSiemAppUrl,
         },
         throttle: 'no_actions',
       };
