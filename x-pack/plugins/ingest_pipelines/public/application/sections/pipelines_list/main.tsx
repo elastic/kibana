@@ -123,6 +123,8 @@ export const PipelinesList: React.FunctionComponent = () => {
         <PipelineDetails
           pipeline={selectedPipeline}
           onClose={() => setSelectedPipeline(undefined)}
+          onDeleteClick={() => {}}
+          onEditClick={() => {}}
         />
       )}
     </>
