@@ -28,11 +28,11 @@ export const postNewAgentActionHandlerBuilder = function(
 
       const newAgentAction = request.body.action as NewAgentAction;
 
-      const savedAgentAction = await actionsService.updateAgentActions(
-        soClient,
-        agent,
-        newAgentAction
-      );
+      const savedAgentAction = await actionsService.createAgentAction(soClient, {
+        created_at: new Date().toISOString(),
+        ...newAgentAction,
+        agent_id: agent.id,
+      });
 
       const body: PostNewAgentActionResponse = {
         success: true,

@@ -18,25 +18,37 @@ import { Alerts } from '../../components/alerts';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
-import { CODE_PATH_ALERTS } from '../../../common/constants';
+import { CODE_PATH_ALERTS, KIBANA_ALERTING_ENABLED } from '../../../common/constants';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
   const $http = $injector.get('$http');
   const Private = $injector.get('Private');
-  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/legacy_alerts`;
+  const url = KIBANA_ALERTING_ENABLED
+    ? `../api/monitoring/v1/alert_status`
+    : `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/legacy_alerts`;
 
   const timeBounds = timefilter.getBounds();
+  const data = {
+    timeRange: {
+      min: timeBounds.min.toISOString(),
+      max: timeBounds.max.toISOString(),
+    },
+  };
+
+  if (!KIBANA_ALERTING_ENABLED) {
+    data.ccs = globalState.ccs;
+  }
 
   return $http
-    .post(url, {
-      ccs: globalState.ccs,
-      timeRange: {
-        min: timeBounds.min.toISOString(),
-        max: timeBounds.max.toISOString(),
-      },
+    .post(url, data)
+    .then(response => {
+      const result = get(response, 'data', []);
+      if (KIBANA_ALERTING_ENABLED) {
+        return result.alerts;
+      }
+      return result;
     })
-    .then(response => get(response, 'data', []))
     .catch(err => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
