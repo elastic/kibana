@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { getIntegerRt } from '../runtime_types/integer_rt';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { RawSettingDefinition } from './types';
+import { getDurationRt } from '../runtime_types/duration_rt';
 
 /*
  * Settings added here will show up in the UI and will be validated on the client and server
@@ -28,7 +29,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'The maximum total compressed size of the request body which is sent to the APM Server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet']
+    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs']
   },
 
   // API Request Time
@@ -46,7 +47,7 @@ export const generalSettings: RawSettingDefinition[] = [
           "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting."
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet']
+    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs']
   },
 
   // Capture body
@@ -89,7 +90,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
       }
     ),
-    excludeAgents: ['js-base', 'rum-js']
+    excludeAgents: ['js-base', 'rum-js', 'nodejs']
   },
 
   // LOG_LEVEL
@@ -103,7 +104,7 @@ export const generalSettings: RawSettingDefinition[] = [
     description: i18n.translate('xpack.apm.agentConfig.logLevel.description', {
       defaultMessage: 'Sets the logging level for the agent'
     }),
-    excludeAgents: ['js-base', 'rum-js', 'python']
+    includeAgents: ['dotnet', 'ruby']
   },
 
   // Recording
@@ -117,7 +118,8 @@ export const generalSettings: RawSettingDefinition[] = [
     description: i18n.translate('xpack.apm.agentConfig.recording.description', {
       defaultMessage:
         'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When inactive, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when inactivated, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.'
-    })
+    }),
+    excludeAgents: ['nodejs']
   },
 
   // SERVER_TIMEOUT
@@ -135,13 +137,14 @@ export const generalSettings: RawSettingDefinition[] = [
           'If a request to the APM Server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM Server times out.'
       }
     ),
-    includeAgents: ['nodejs', 'java', 'go']
+    includeAgents: ['java']
   },
 
   // SPAN_FRAMES_MIN_DURATION
   {
     key: 'span_frames_min_duration',
     type: 'duration',
+    validation: getDurationRt({ min: -1 }),
     defaultValue: '5ms',
     label: i18n.translate('xpack.apm.agentConfig.spanFramesMinDuration.label', {
       defaultMessage: 'Span frames minimum duration'
@@ -153,7 +156,8 @@ export const generalSettings: RawSettingDefinition[] = [
           'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.'
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs']
+    excludeAgents: ['js-base', 'rum-js', 'nodejs'],
+    min: -1
   },
 
   // STACK_TRACE_LIMIT
@@ -171,7 +175,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.'
       }
     ),
-    includeAgents: ['nodejs', 'java', 'dotnet', 'go']
+    includeAgents: ['java', 'dotnet', 'go']
   },
 
   // Transaction max spans
