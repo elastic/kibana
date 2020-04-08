@@ -65,6 +65,7 @@ interface Props extends PingListProps {
   dateRangeStart: string;
   dateRangeEnd: string;
   getPings: (props: GetPingsParams) => void;
+  lastRefresh: number;
   loading: boolean;
   locations: string[];
   pings: Ping[];
@@ -106,6 +107,7 @@ export const PingListComponent = (props: Props) => {
     dateRangeStart,
     dateRangeEnd,
     getPings,
+    lastRefresh,
     loading,
     locations,
     monitorId,
@@ -122,7 +124,16 @@ export const PingListComponent = (props: Props) => {
       size: pageSize,
       status: status !== 'all' ? status : '',
     });
-  }, [dateRangeStart, dateRangeEnd, getPings, monitorId, selectedLocation, pageSize, status]);
+  }, [
+    dateRangeStart,
+    dateRangeEnd,
+    getPings,
+    monitorId,
+    lastRefresh,
+    selectedLocation,
+    pageSize,
+    status,
+  ]);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 

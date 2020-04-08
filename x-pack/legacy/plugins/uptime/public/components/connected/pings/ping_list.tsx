@@ -18,8 +18,11 @@ export interface PingListProps {
 
 export const PingList = (props: PingListProps) => {
   const {
-    loading,
-    pingList: { locations, pings, total },
+    lastRefresh,
+    pings: {
+      loading,
+      pingList: { locations, pings, total },
+    },
   } = useSelector(selectPingList);
 
   const { dateRangeStart: from, dateRangeEnd: to } = useContext(UptimeSettingsContext);
@@ -45,6 +48,7 @@ export const PingList = (props: PingListProps) => {
       dateRangeStart={from}
       dateRangeEnd={to}
       getPings={getPingsCallback}
+      lastRefresh={lastRefresh}
       loading={loading}
       locations={locations}
       pings={pings}
