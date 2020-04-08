@@ -42,7 +42,7 @@ interface NumberInputOptionProps<ParamName extends string> {
  *
  * @param {number} props.value Should be numeric only
  */
-function NumberInputOption<ParamName extends string>({
+function RequiredNumberInputOption<ParamName extends string>({
   disabled,
   error,
   isInvalid,
@@ -84,4 +84,4 @@ function NumberInputOption<ParamName extends string>({
   );
 }
 
-export { NumberInputOption };
+export { RequiredNumberInputOption };

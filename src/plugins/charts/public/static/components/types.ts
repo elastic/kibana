@@ -17,11 +17,27 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { VisTypeVislibPlugin as Plugin } from './plugin';
+import { ColorSchemas } from '../color_maps';
+import { Rotates } from './collections';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+export interface ColorSchemaVislibParams {
+  colorSchema: ColorSchemas;
+  invertColors: boolean;
 }
 
-export * from './types';
+export interface Labels {
+  color?: string;
+  filter?: boolean;
+  overwriteColor?: boolean;
+  rotate?: Rotates;
+  show: boolean;
+  truncate?: number | null;
+}
+
+export interface Style {
+  bgFill: string;
+  bgColor: boolean;
+  labelColor: boolean;
+  subText: string;
+  fontSize: number;
+}
