@@ -20,11 +20,10 @@
 import React from 'react';
 
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = () => (
-  <div>
+  <>
     <EuiTitle size="s">
       <h3>
         <FormattedMessage
@@ -52,5 +51,5 @@ export const Header = () => (
       </p>
     </EuiText>
     <EuiSpacer size="s" />
-  </div>
+  </>
 );

@@ -17,21 +17,71 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
+  keyCodes,
   EuiInMemoryTable,
   EuiFieldText,
   EuiButtonIcon,
-  keyCodes,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export class Table extends Component {
+import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+
+const filterHeader = i18n.translate('kbn.management.editIndexPattern.source.table.filterHeader', {
+  defaultMessage: 'Filter',
+});
+
+const filterDescription = i18n.translate(
+  'kbn.management.editIndexPattern.source.table.filterDescription',
+  { defaultMessage: 'Filter name' }
+);
+
+const matchesHeader = i18n.translate('kbn.management.editIndexPattern.source.table.matchesHeader', {
+  defaultMessage: 'Matches',
+});
+
+const matchesDescription = i18n.translate(
+  'kbn.management.editIndexPattern.source.table.matchesDescription',
+  { defaultMessage: 'Language used for the field' }
+);
+
+const editAria = i18n.translate('kbn.management.editIndexPattern.source.table.editAria', {
+  defaultMessage: 'Edit',
+});
+
+const saveAria = i18n.translate('kbn.management.editIndexPattern.source.table.saveAria', {
+  defaultMessage: 'Save',
+});
+
+const deleteAria = i18n.translate('kbn.management.editIndexPattern.source.table.deleteAria', {
+  defaultMessage: 'Delete',
+});
+
+const cancelAria = i18n.translate('kbn.management.editIndexPattern.source.table.cancelAria', {
+  defaultMessage: 'Cancel',
+});
+
+export interface SourseFiltersTableProps {
+  indexPattern: IIndexPattern;
+  items: any[];
+  deleteFilter: Function;
+  fieldWildcardMatcher: Function;
+  saveFilter: Function;
+  isSaving: boolean;
+}
+
+export interface SourseFiltersTableState {
+  editingFilterId: string | null;
+  editingFilterValue: string | null;
+}
+
+export class Table extends Component<SourseFiltersTableProps, SourseFiltersTableState> {
   static propTypes = {
     indexPattern: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
@@ -41,7 +91,7 @@ export class Table extends Component {
     isSaving: PropTypes.bool.isRequired,
   };
 
-  constructor(props) {
+  constructor(props: SourseFiltersTableProps) {
     super(props);
     this.state = {
       editingFilterId: null,
@@ -49,12 +99,16 @@ export class Table extends Component {
     };
   }
 
-  startEditingFilter = (id, value) =>
-    this.setState({ editingFilterId: id, editingFilterValue: value });
-  stopEditingFilter = () => this.setState({ editingFilterId: null });
-  onEditingFilterChange = e => this.setState({ editingFilterValue: e.target.value });
+  startEditingFilter = (
+    editingFilterId: SourseFiltersTableState['editingFilterId'],
+    editingFilterValue: SourseFiltersTableState['editingFilterValue']
+  ) => this.setState({ editingFilterId, editingFilterValue });
 
-  onEditFieldKeyDown = ({ keyCode }) => {
+  stopEditingFilter = () => this.setState({ editingFilterId: null });
+  onEditingFilterChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    this.setState({ editingFilterValue: e.target.value });
+
+  onEditFieldKeyDown = ({ keyCode }: React.KeyboardEvent<HTMLInputElement>) => {
     if (keyCodes.ENTER === keyCode) {
       this.props.saveFilter({
         filterId: this.state.editingFilterId,
@@ -73,13 +127,8 @@ export class Table extends Component {
     return [
       {
         field: 'value',
-        name: i18n.translate('kbn.management.editIndexPattern.source.table.filterHeader', {
-          defaultMessage: 'Filter',
-        }),
-        description: i18n.translate(
-          'kbn.management.editIndexPattern.source.table.filterDescription',
-          { defaultMessage: 'Filter name' }
-        ),
+        name: filterHeader,
+        description: filterDescription,
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -99,13 +148,8 @@ export class Table extends Component {
       },
       {
         field: 'value',
-        name: i18n.translate('kbn.management.editIndexPattern.source.table.matchesHeader', {
-          defaultMessage: 'Matches',
-        }),
-        description: i18n.translate(
-          'kbn.management.editIndexPattern.source.table.matchesDescription',
-          { defaultMessage: 'Language used for the field' }
-        ),
+        name: matchesHeader,
+        description: matchesDescription,
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -138,7 +182,7 @@ export class Table extends Component {
         render: filter => {
           if (this.state.editingFilterId === filter.clientId) {
             return (
-              <Fragment>
+              <>
                 <EuiButtonIcon
                   size="s"
                   onClick={() => {
@@ -149,10 +193,7 @@ export class Table extends Component {
                     this.stopEditingFilter();
                   }}
                   iconType="checkInCircleFilled"
-                  aria-label={i18n.translate(
-                    'kbn.management.editIndexPattern.source.table.saveAria',
-                    { defaultMessage: 'Save' }
-                  )}
+                  aria-label={saveAria}
                 />
                 <EuiButtonIcon
                   size="s"
@@ -160,37 +201,28 @@ export class Table extends Component {
                     this.stopEditingFilter();
                   }}
                   iconType="cross"
-                  aria-label={i18n.translate(
-                    'kbn.management.editIndexPattern.source.table.cancelAria',
-                    { defaultMessage: 'Cancel' }
-                  )}
+                  aria-label={cancelAria}
                 />
-              </Fragment>
+              </>
             );
           }
 
           return (
-            <Fragment>
+            <>
               <EuiButtonIcon
                 size="s"
                 color="danger"
                 onClick={() => deleteFilter(filter)}
                 iconType="trash"
-                aria-label={i18n.translate(
-                  'kbn.management.editIndexPattern.source.table.deleteAria',
-                  { defaultMessage: 'Delete' }
-                )}
+                aria-label={deleteAria}
               />
               <EuiButtonIcon
                 size="s"
                 onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
                 iconType="pencil"
-                aria-label={i18n.translate(
-                  'kbn.management.editIndexPattern.source.table.editAria',
-                  { defaultMessage: 'Edit' }
-                )}
+                aria-label={editAria}
               />
-            </Fragment>
+            </>
           );
         },
       },

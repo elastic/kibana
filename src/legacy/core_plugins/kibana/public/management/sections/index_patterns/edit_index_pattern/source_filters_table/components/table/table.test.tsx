@@ -18,18 +18,20 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Table } from '../table';
+import { Table, SourseFiltersTableProps, SourseFiltersTableState } from './table';
 import { keyCodes } from '@elastic/eui';
+import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
 
-const indexPattern = {};
+const indexPattern = {} as IIndexPattern;
 const items = [{ value: 'tim*' }];
+
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
+    const component = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -44,14 +46,14 @@ describe('Table', () => {
   });
 
   it('should render filter matches', async () => {
-    const component = shallowWithI18nProvider(
+    const component = shallow(
       <Table
-        indexPattern={{
+        indexPattern={getIndexPatternMock({
           getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
-        }}
+        })}
         items={items}
         deleteFilter={() => {}}
-        fieldWildcardMatcher={filter => field => field.includes(filter[0])}
+        fieldWildcardMatcher={(filter: string) => (field: string) => field.includes(filter[0])}
         saveFilter={() => {}}
         isSaving={false}
       />
@@ -63,11 +65,11 @@ describe('Table', () => {
 
   describe('editing', () => {
     const saveFilter = jest.fn();
-    const clientId = 1;
-    let component;
+    const clientId = '1';
+    let component: ShallowWrapper<SourseFiltersTableProps, SourseFiltersTableState, Table>;
 
     beforeEach(() => {
-      component = shallowWithI18nProvider(
+      component = shallow(
         <Table
           indexPattern={indexPattern}
           items={items}
@@ -79,8 +81,9 @@ describe('Table', () => {
       );
     });
 
-    it('should show an input field', () => {
+    test('should show an input field', () => {
       // Start the editing process
+
       const editingComponent = shallow(
         // Wrap in a div because: https://github.com/airbnb/enzyme/issues/1213
         <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
@@ -93,13 +96,13 @@ describe('Table', () => {
       component.update();
 
       // Ensure the table cell switches to an input
-      const filterNameTableCell = shallow(
-        component.prop('columns')[0].render('tim*', { clientId })
-      );
+      const colum = component.prop<>('columns')[0];
+      const filterNameTableCell = shallow(colum.render('tim*', { clientId }));
+
       expect(filterNameTableCell).toMatchSnapshot();
     });
 
-    it('should show a save button', () => {
+    test('should show a save button', () => {
       // Start the editing process
       const editingComponent = shallow(
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
@@ -121,15 +124,15 @@ describe('Table', () => {
       expect(saveTableCell).toMatchSnapshot();
     });
 
-    it('should update the matches dynamically as input value is changed', () => {
-      const localComponent = shallowWithI18nProvider(
+    test('should update the matches dynamically as input value is changed', () => {
+      const localComponent = shallow(
         <Table
-          indexPattern={{
+          indexPattern={getIndexPatternMock({
             getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
-          }}
+          })}
           items={items}
           deleteFilter={() => {}}
-          fieldWildcardMatcher={query => () => {
+          fieldWildcardMatcher={(query: string) => () => {
             return query.includes('time*');
           }}
           saveFilter={saveFilter}
@@ -161,7 +164,7 @@ describe('Table', () => {
       expect(matchesTableCell).toMatchSnapshot();
     });
 
-    it('should exit on save', () => {
+    test('should exit on save', () => {
       // Change the value to something else
       component.setState({
         editingFilterId: clientId,
@@ -178,6 +181,8 @@ describe('Table', () => {
         .at(0)
         .simulate('click');
 
+      editingComponent.update();
+
       // Ensure we call saveFilter properly
       expect(saveFilter).toBeCalledWith({
         filterId: clientId,
@@ -189,10 +194,10 @@ describe('Table', () => {
     });
   });
 
-  it('should allow deletes', () => {
+  test('should allow deletes', () => {
     const deleteFilter = jest.fn();
 
-    const component = shallowWithI18nProvider(
+    const component = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -215,11 +220,11 @@ describe('Table', () => {
     expect(deleteFilter).toBeCalled();
   });
 
-  it('should save when in edit mode and the enter key is pressed', () => {
+  test('should save when in edit mode and the enter key is pressed', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
 
-    const component = shallowWithI18nProvider(
+    const component = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -239,7 +244,7 @@ describe('Table', () => {
       .find('EuiButtonIcon')
       .at(1)
       .simulate('click');
-    // Ensure the state change propagates
+
     component.update();
 
     // Get the rendered input cell
@@ -256,11 +261,11 @@ describe('Table', () => {
     expect(component.state('editingFilterId')).toBe(null);
   });
 
-  it('should cancel when in edit mode and the esc key is pressed', () => {
+  test('should cancel when in edit mode and the esc key is pressed', () => {
     const saveFilter = jest.fn();
     const clientId = 1;
 
-    const component = shallowWithI18nProvider(
+    const component = shallow(
       <Table
         indexPattern={indexPattern}
         items={items}
@@ -276,10 +281,12 @@ describe('Table', () => {
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
     );
+
     editingComponent
       .find('EuiButtonIcon')
       .at(1)
       .simulate('click');
+
     // Ensure the state change propagates
     component.update();
 
@@ -289,7 +296,7 @@ describe('Table', () => {
       <div>{component.prop('columns')[0].render('tim*', { clientId })}</div>
     );
 
-    // Press the enter key
+    // Press the ESCAPE key
     filterNameTableCell.find('EuiFieldText').simulate('keydown', { keyCode: keyCodes.ESCAPE });
     expect(saveFilter).not.toBeCalled();
 
