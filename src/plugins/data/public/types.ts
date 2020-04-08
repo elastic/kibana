@@ -24,7 +24,7 @@ import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
-import { createFiltersFromEvent } from './actions';
+import { createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
@@ -49,7 +49,7 @@ export interface DataPublicPluginSetup {
 
 export interface DataPublicPluginStart {
   actions: {
-    createFiltersFromEvent: typeof createFiltersFromEvent;
+    createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
   };
   autocomplete: AutocompleteStart;
   indexPatterns: IndexPatternsContract;

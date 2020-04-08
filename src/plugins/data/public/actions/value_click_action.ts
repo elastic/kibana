@@ -26,21 +26,22 @@ import {
 } from '../../../../plugins/ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
-import { createFiltersFromEvent } from './filters/create_filters_from_event';
+import {
+  createFiltersFromValueClickAction,
+  ValueClickEvent,
+} from './filters/create_filters_from_value_click';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
 export interface ValueClickActionContext {
-  data: any;
+  data: ValueClickEvent;
   timeFieldName: string;
 }
 
 async function isCompatible(context: ValueClickActionContext) {
   try {
-    const filters: Filter[] =
-      (await createFiltersFromEvent(context.data.data || [context.data], context.data.negate)) ||
-      [];
+    const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
     return filters.length > 0;
   } catch {
     return false;
@@ -65,12 +66,11 @@ export function valueClickAction(
         throw new IncompatibleActionError();
       }
 
-      const filters: Filter[] =
-        (await createFiltersFromEvent(data.data || [data], data.negate)) || [];
+      const filters: Filter[] = await createFiltersFromValueClickAction(data);
 
-      let selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
+      let selectedFilters = filters;
 
-      if (selectedFilters.length > 1) {
+      if (filters.length > 1) {
         const indexPatterns = await Promise.all(
           filters.map(filter => {
             return getIndexPatterns().get(filter.meta.index!);

@@ -29,6 +29,11 @@ export interface EventData {
   value: any;
 }
 
+export interface ValueClickEvent {
+  data: EventData[];
+  negate?: boolean;
+}
+
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
  * terms based on a specific cell in the tabified data.
@@ -113,11 +118,11 @@ const createFilter = async (table: EventData['table'], columnIndex: number, rowI
 };
 
 /** @public */
-export const createFiltersFromEvent = async (dataPoints: EventData[], negate?: boolean) => {
+export const createFiltersFromValueClickAction = async ({ data, negate }: ValueClickEvent) => {
   const filters: Filter[] = [];
 
   await Promise.all(
-    dataPoints
+    data
       .filter(point => point)
       .map(async val => {
         const { table, column, row } = val;
@@ -133,5 +138,5 @@ export const createFiltersFromEvent = async (dataPoints: EventData[], negate?: b
       })
   );
 
-  return filters;
+  return esFilters.mapAndFlattenFilters(filters);
 };
