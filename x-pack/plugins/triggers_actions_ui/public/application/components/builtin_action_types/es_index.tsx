@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useXJsonMode } from '../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -35,7 +36,6 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../common/index_controls';
-import { useXJsonMode } from '../../lib/use_x_json_mode';
 
 export function getActionType(): ActionTypeModel {
   return {
