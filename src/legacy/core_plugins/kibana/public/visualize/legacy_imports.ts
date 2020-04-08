@@ -24,7 +24,7 @@
  * directly where they are needed.
  */
 
-export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
+export { DashboardConstants } from '../../../../../plugins/dashboard/public';
 export {
   VisSavedObject,
   VISUALIZE_EMBEDDABLE_TYPE,

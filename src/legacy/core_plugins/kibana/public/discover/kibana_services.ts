@@ -50,8 +50,6 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
 }>('urlTracker');
 
-// EXPORT legacy static dependencies, should be migrated when available in a new version;
-export { wrapInI18nContext } from 'ui/i18n';
 import { search } from '../../../../../plugins/data/public';
 import { createGetterSetter } from '../../../../../plugins/kibana_utils/common';
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
