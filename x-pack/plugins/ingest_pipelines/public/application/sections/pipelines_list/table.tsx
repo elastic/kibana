@@ -9,18 +9,18 @@ import { EuiInMemoryTable, EuiLink } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 
-import { ExpandableText } from '../../components';
-
 export interface Props {
   pipelines: Pipeline[];
   onEditPipelineClick: (pipeline: Pipeline) => void;
   onDeletePipelineClick: (pipeline: Pipeline) => void;
+  onViewPipelineClick: (pipeline: Pipeline) => void;
 }
 
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   onEditPipelineClick,
   onDeletePipelineClick,
+  onViewPipelineClick,
 }) => {
   return (
     <EuiInMemoryTable
@@ -39,14 +39,9 @@ export const PipelineTable: FunctionComponent<Props> = ({
           name: i18n.translate('xpack.ingestPipelines.list.table.nameColumnTitle', {
             defaultMessage: 'Name',
           }),
-          render: (name: any) => <EuiLink onClick={() => {}}>{name}</EuiLink>,
-        },
-        {
-          field: 'description',
-          name: i18n.translate('xpack.ingestPipelines.list.table.descriptionColumnTitle', {
-            defaultMessage: 'Description',
-          }),
-          render: (description: any) => <ExpandableText charLimit={50} text={description} />,
+          render: (name: any, pipeline) => (
+            <EuiLink onClick={() => onViewPipelineClick(pipeline)}>{name}</EuiLink>
+          ),
         },
         {
           name: i18n.translate('xpack.ingestPipelines.list.table.actionColumnTitle', {

@@ -5,18 +5,28 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
+import { i18n } from '@kbn/118n';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { Pipeline } from '../../../../common/types';
 
 export interface Props {
-  visible: boolean;
   pipeline: Pipeline;
+  onClose: () => void;
 }
 
-export const PipelineDetails: FunctionComponent<Props> = ({ pipeline, visible }) => {
-  if (!visible) {
-    return null;
-  }
-
-  return;
+export const PipelineDetails: FunctionComponent<Props> = ({ pipeline, onClose }) => {
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="pipelineDetailsFlyoutTitle"
+      size="m"
+      maxWidth={550}
+    >
+      <EuiFlyoutHeader>
+        <EuiTitle id="pipelineDetailsFlyoutTitle">
+          <h2>{pipeline.name}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+    </EuiFlyout>
+  );
 };
