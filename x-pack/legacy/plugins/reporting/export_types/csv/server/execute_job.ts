@@ -121,6 +121,8 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
     ]);
 
     const generateCsv = createGenerateCsv(jobLogger);
+    const bom = config.get('csv', 'useByteOrderMarkEncoding') ? '\ufeff' : '';
+
     const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
       searchRequest,
       fields,
@@ -139,7 +141,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
 
     return {
       content_type: 'text/csv',
-      content,
+      content: bom + content,
       max_size_reached: maxSizeReached,
       size,
       csv_contains_formulas: csvContainsFormulas,

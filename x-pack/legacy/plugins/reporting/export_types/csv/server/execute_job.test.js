@@ -374,6 +374,50 @@ describe('CSV Execute Job', function() {
     });
   });
 
+  describe('Byte order mark encoding', () => {
+    it('encodes CSVs with BOM', async () => {
+      configGetStub.withArgs('csv', 'useByteOrderMarkEncoding').returns(true);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { one: 'one', two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = {
+        headers: encryptedHeaders,
+        fields: ['one', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      };
+      const { content } = await executeJob('job123', jobParams, cancellationToken);
+
+      expect(content).toEqual('\ufeffone,two\none,bar\n');
+    });
+
+    it('encodes CSVs without BOM', async () => {
+      configGetStub.withArgs('csv', 'useByteOrderMarkEncoding').returns(false);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { one: 'one', two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = {
+        headers: encryptedHeaders,
+        fields: ['one', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      };
+      const { content } = await executeJob('job123', jobParams, cancellationToken);
+
+      expect(content).toEqual('one,two\none,bar\n');
+    });
+  });
+
   describe('Elasticsearch call errors', function() {
     it('should reject Promise if search call errors out', async function() {
       callAsCurrentUserStub.rejects(new Error());
