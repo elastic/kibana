@@ -7,8 +7,9 @@
 import React, { Fragment } from 'react';
 import _ from 'lodash';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { EuiDualRange } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
+import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
 
 export class MVTVectorSourceEditor extends React.Component {
   state = {
@@ -72,17 +73,24 @@ export class MVTVectorSourceEditor extends React.Component {
         <EuiFormRow label="Layer name">
           <EuiFieldText value={this.state.layerName} onChange={this._handleLayerNameInputChange} />
         </EuiFormRow>
-        <EuiFormRow label="Available zoom range of the data">
-          <EuiDualRange
-            step={1}
-            value={[`${this.state.minZoom}`, `${this.state.maxZoom}`]}
-            min={MIN_ZOOM}
-            max={MAX_ZOOM}
-            onChange={this._handleZoomRangeChange}
-            showLabels
-            aria-label={'Zoom level range for data'}
-          />
-        </EuiFormRow>
+        <ValidatedDualRange
+          label={i18n.translate('xpack.maps.source.mvtVectorSource.dataZoomRangeLabel', {
+            defaultMessage: 'Data Range',
+          })}
+          formRowDisplay="columnCompressed"
+          min={MIN_ZOOM}
+          max={MAX_ZOOM}
+          value={[this.state.minZoom, this.state.maxZoom]}
+          showInput="inputWithPopover"
+          showRange
+          showLabels
+          onChange={this._handleZoomRangeChange}
+          allowEmptyRange={false}
+          compressed
+          prepend={i18n.translate('xpack.maps.source.mvtVectorSource.dataZoomRangeMessage', {
+            defaultMessage: 'Zoom levels',
+          })}
+        />
       </Fragment>
     );
   }
