@@ -39,7 +39,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
     })();
   }, [http]);
 
-  const className = inFlyout ? 'alertingFlyoutHealthCheck' : 'alertingFlyoutHealthCheck';
+  const className = inFlyout ? 'alertingFlyoutHealthCheck' : 'alertingHealthCheck';
 
   return pipe(
     alertingHealth,
