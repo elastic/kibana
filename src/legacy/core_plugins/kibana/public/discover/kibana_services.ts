@@ -52,8 +52,6 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
 }>('urlTracker');
 
-// EXPORT legacy static dependencies, should be migrated when available in a new version;
-export { wrapInI18nContext } from 'ui/i18n';
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export {
   unhashUrl,
