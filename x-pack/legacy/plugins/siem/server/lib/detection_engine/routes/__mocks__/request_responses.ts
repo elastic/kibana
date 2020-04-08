@@ -383,6 +383,7 @@ export const createActionResult = (): ActionResult => ({
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+  isPreconfigured: false,
 });
 
 export const nonRuleAlert = () => ({
@@ -512,6 +513,7 @@ export const updateActionResult = (): ActionResult => ({
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+  isPreconfigured: false,
 });
 
 export const getMockPrivilegesResult = () => ({
