@@ -12,7 +12,7 @@ import {
 import { validateDatasource, validationHasErrors } from './validate_datasource';
 
 describe('Ingest Manager - validateDatasource()', () => {
-  const mockPackage: PackageInfo = {
+  const mockPackage = ({
     name: 'mock-package',
     title: 'Mock package',
     version: '0.0.0',
@@ -109,7 +109,7 @@ describe('Ingest Manager - validateDatasource()', () => {
         ],
       },
     ],
-  };
+  } as unknown) as PackageInfo;
 
   const validDatasource: NewDatasource = {
     name: 'datasource1-1',

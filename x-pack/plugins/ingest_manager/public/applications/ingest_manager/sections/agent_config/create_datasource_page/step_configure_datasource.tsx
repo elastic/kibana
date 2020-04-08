@@ -118,7 +118,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                 name: newValue,
               });
             }}
-            errors={validationResults.name}
+            errors={validationResults!.name}
             forceShowErrors={submitAttempted}
           />
         </EuiFlexItem>
@@ -141,7 +141,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                 description: newValue,
               });
             }}
-            errors={validationResults.description}
+            errors={validationResults!.description}
             forceShowErrors={submitAttempted}
           />
         </EuiFlexItem>
@@ -224,7 +224,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                     inputs: newInputs,
                   });
                 }}
-                inputValidationResults={validationResults.inputs[datasourceInput.type]}
+                inputValidationResults={validationResults!.inputs![datasourceInput.type]}
                 forceShowErrors={submitAttempted}
               />
             </EuiFlexItem>
