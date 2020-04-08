@@ -19,6 +19,10 @@ export class AbstractStyle {
     return null;
   }
 
+  getDescriptor() {
+    return this._descriptor;
+  }
+
   getSourceFieldNames() {
     return [];
   }

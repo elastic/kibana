@@ -55,12 +55,11 @@ export class MVTVectorSourceEditor extends React.Component {
   };
 
   _handleZoomRangeChange = e => {
-    console.log(e);
     const minZoom = parseInt(e[0], 10);
     const maxZoom = parseInt(e[1], 10);
 
     if (this.state.minZoom !== minZoom || this.state.maxZoom !== maxZoom) {
-      this.setState({ minZoom, maxZoom });
+      this.setState({ minZoom, maxZoom }, () => this._sourceConfigChange());
     }
   };
 
@@ -73,7 +72,7 @@ export class MVTVectorSourceEditor extends React.Component {
         <EuiFormRow label="Layer name">
           <EuiFieldText value={this.state.layerName} onChange={this._handleLayerNameInputChange} />
         </EuiFormRow>
-        <EuiFormRow label="Layer name">
+        <EuiFormRow label="Available zoom range of the data">
           <EuiDualRange
             step={1}
             value={[`${this.state.minZoom}`, `${this.state.maxZoom}`]}

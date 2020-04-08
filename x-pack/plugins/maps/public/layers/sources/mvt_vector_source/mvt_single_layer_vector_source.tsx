@@ -9,7 +9,7 @@ import uuid from 'uuid/v4';
 import React from 'react';
 import { MVTVectorSourceEditor } from './mvt_vector_source_editor';
 import { AbstractSource } from '../source';
-import { TiledVectorLayer } from '../../tiled_vector_layer';
+import { SingleTiledVectorLayer } from '../../tiled_vector_layer';
 import {
   GeoJsonWithMeta,
   ITiledSingleLayerVectorSource,
@@ -53,8 +53,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   createDefaultLayer(options) {
-    return new TiledVectorLayer({
-      layerDescriptor: TiledVectorLayer.createDescriptor({
+    return new SingleTiledVectorLayer({
+      layerDescriptor: SingleTiledVectorLayer.createDescriptor({
         sourceDescriptor: this._descriptor,
         ...options,
       }),
@@ -83,6 +83,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource
       { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.urlTemplate },
       { label: 'Layer name', value: this._descriptor.layerName },
+      { label: 'Min zoom', value: this._descriptor.minZoom },
+      { label: 'Max zoom', value: this._descriptor.maxZoom },
     ];
   }
 

@@ -63,13 +63,16 @@ export class AddLayerPanel extends Component {
       return;
     }
 
-    const style =
-      this.state.layer && this.state.layer.getCurrentStyle()
-        ? this.state.layer.getCurrentStyle().getDescriptor()
-        : null;
+    let styleDescriptor;
+    if (this.state.layer && this.state.layer.getCurrentStyle()) {
+      const currentStyle = this.state.layer.getCurrentStyle();
+      styleDescriptor = currentStyle.getDescriptor();
+    } else {
+      styleDescriptor = null;
+    }
     const layerInitProps = {
       ...options,
-      style: style,
+      style: styleDescriptor,
     };
     const newLayer = source.createDefaultLayer(layerInitProps, this.props.mapColors);
     if (!this._isMounted) {

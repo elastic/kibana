@@ -9,7 +9,7 @@ import { EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
 import { VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
-import { VectorLayer, VectorLayerArguments } from './vector_layer';
+import { VectorLayer } from './vector_layer';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import {
   ITiledSingleLayerVectorSource,
@@ -17,12 +17,12 @@ import {
 } from './sources/vector_source';
 import { SyncContext } from '../actions/map_actions';
 
-export class TiledVectorLayer extends VectorLayer {
+export class SingleTiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
   static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options, mapColors);
-    layerDescriptor.type = TiledVectorLayer.type;
+    layerDescriptor.type = SingleTiledVectorLayer.type;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
@@ -119,6 +119,8 @@ export class TiledVectorLayer extends VectorLayer {
       mbMap.addSource(sourceId, {
         type: 'vector',
         tiles: [sourceMeta.urlTemplate],
+        minzoom: sourceMeta.minZoom,
+        maxzoom: sourceMeta.maxZoom,
       });
     }
   }
