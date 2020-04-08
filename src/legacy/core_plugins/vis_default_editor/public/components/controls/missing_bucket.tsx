@@ -35,6 +35,7 @@ function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
 
   return (
     <SwitchParamEditor
+      {...props}
       dataTestSubj="missingBucketSwitch"
       displayLabel={i18n.translate('visDefaultEditor.controls.otherBucket.showMissingValuesLabel', {
         defaultMessage: 'Show missing values',
@@ -50,7 +51,6 @@ function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
         }
       )}
       disabled={fieldTypeIsNotString}
-      {...props}
     />
   );
 }
