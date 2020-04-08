@@ -43,3 +43,36 @@ export function clone(policyDetailsConfig: UIPolicyConfig): UIPolicyConfig {
    */
   return clonedConfig as UIPolicyConfig;
 }
+
+/**
+ * Returns cloned `configuration` with `value` set by the `keyPath`.
+ */
+
+export function setIn<
+  K1 extends keyof UIPolicyConfig,
+  K2 extends keyof UIPolicyConfig[K1],
+  K3 extends keyof UIPolicyConfig[K1][K2]
+>(configuration: UIPolicyConfig, keyPath: [K1, K2, K3], value: boolean | string): UIPolicyConfig;
+export function setIn<K1 extends keyof UIPolicyConfig, K2 extends keyof UIPolicyConfig[K1]>(
+  configuration: UIPolicyConfig,
+  keyPath: [K1, K2],
+  value: UIPolicyConfig[K1][K2]
+): UIPolicyConfig;
+export function setIn<K1 extends keyof UIPolicyConfig>(
+  configuration: UIPolicyConfig,
+  keyPath: [K1],
+  value: UIPolicyConfig[K1]
+): UIPolicyConfig;
+export function setIn(
+  configuration: UIPolicyConfig,
+  keyPath: string[],
+  value: boolean | string
+): UIPolicyConfig {
+  const payload = clone(configuration);
+  let current: any = payload;
+  while (keyPath.length > 1) {
+    current = current[keyPath.shift()!];
+  }
+  current[keyPath[0]] = value;
+  return payload;
+}

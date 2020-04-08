@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventingCheckbox } from './checkbox';
-import { OS, EventingFields } from '../../../../types';
+import { OS, UIPolicyConfig } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedMacEventing, totalMacEventing } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
@@ -19,28 +19,36 @@ export const MacEventing = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedMacEventing);
   const total = usePolicyDetailsSelector(totalMacEventing);
 
-  const checkboxes = useMemo(
+  const checkboxes: Array<{
+    name: string;
+    os: 'mac';
+    protectionEvent: keyof UIPolicyConfig['mac'];
+    protectionField: keyof UIPolicyConfig['mac']['events'];
+  }> = useMemo(
     () => [
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.mac.events.file', {
           defaultMessage: 'File',
         }),
         os: OS.mac,
-        protectionField: EventingFields.file,
+        protectionEvent: 'events',
+        protectionField: 'file',
       },
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.mac.events.process', {
           defaultMessage: 'Process',
         }),
         os: OS.mac,
-        protectionField: EventingFields.process,
+        protectionEvent: 'events',
+        protectionField: 'process',
       },
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.mac.events.network', {
           defaultMessage: 'Network',
         }),
         os: OS.mac,
-        protectionField: EventingFields.network,
+        protectionEvent: 'events',
+        protectionField: 'network',
       },
     ],
     []
@@ -65,6 +73,7 @@ export const MacEventing = React.memo(() => {
               name={item.name}
               key={index}
               os={item.os}
+              protectionEvent={item.protectionEvent}
               protectionField={item.protectionField}
             />
           );

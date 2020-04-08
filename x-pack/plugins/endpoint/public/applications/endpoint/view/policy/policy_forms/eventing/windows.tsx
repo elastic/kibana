@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventingCheckbox } from './checkbox';
-import { OS, EventingFields } from '../../../../types';
+import { OS, UIPolicyConfig } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   selectedWindowsEventing,
@@ -21,21 +21,28 @@ export const WindowsEventing = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedWindowsEventing);
   const total = usePolicyDetailsSelector(totalWindowsEventing);
 
-  const checkboxes = useMemo(
+  const checkboxes: Array<{
+    name: string;
+    os: 'windows';
+    protectionEvent: keyof UIPolicyConfig['windows'];
+    protectionField: keyof UIPolicyConfig['windows']['events'];
+  }> = useMemo(
     () => [
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
           defaultMessage: 'Process',
         }),
         os: OS.windows,
-        protectionField: EventingFields.process,
+        protectionEvent: 'events',
+        protectionField: 'process',
       },
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.network', {
           defaultMessage: 'Network',
         }),
         os: OS.windows,
-        protectionField: EventingFields.network,
+        protectionEvent: 'events',
+        protectionField: 'network',
       },
     ],
     []
@@ -60,6 +67,7 @@ export const WindowsEventing = React.memo(() => {
               name={item.name}
               key={index}
               os={item.os}
+              protectionEvent={item.protectionEvent}
               protectionField={item.protectionField}
             />
           );

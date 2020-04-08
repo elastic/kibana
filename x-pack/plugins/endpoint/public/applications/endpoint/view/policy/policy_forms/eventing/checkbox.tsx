@@ -7,48 +7,50 @@
 import React, { useCallback } from 'react';
 import { EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { setIn } from '../../../../models/policy_details_config';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { policyConfig, windowsEventing } from '../../../../store/policy_details/selectors';
+import { policyConfig } from '../../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../../store/policy_details';
 import { UIPolicyConfig } from '../../../../types';
-import { clone } from '../../../../models/policy_details_config';
 
-export const EventingCheckbox = React.memo(function<T extends keyof UIPolicyConfig>({
+export const EventingCheckbox = React.memo(function<
+  T extends keyof UIPolicyConfig,
+  TT extends keyof UIPolicyConfig[T],
+  TTT extends keyof UIPolicyConfig[T][TT]
+>({
   id,
   name,
   os,
+  protectionEvent,
   protectionField,
 }: {
   id: string;
   name: string;
   os: T;
-  protectionField: keyof UIPolicyConfig[T]['events'];
+  protectionEvent: TT;
+  protectionField: TTT;
 }) {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
-  const eventing = usePolicyDetailsSelector(windowsEventing);
+  const selected = policyDetailsConfig[os][protectionEvent][protectionField];
   const dispatch = useDispatch<(action: PolicyDetailsAction) => void>();
 
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (policyDetailsConfig) {
-        const newPayload: UIPolicyConfig = clone(policyDetailsConfig);
-        newPayload[os].events[protectionField] = event.target.checked;
+        const payload = setIn(
+          policyDetailsConfig,
+          [os, protectionEvent, protectionField],
+          event.target.checked
+        );
 
         dispatch({
           type: 'userChangedPolicyConfig',
-          payload: { policyConfig: newPayload },
+          payload: { policyConfig: payload },
         });
       }
     },
-    [dispatch, os, policyDetailsConfig, protectionField]
+    [dispatch, os, policyDetailsConfig, protectionEvent, protectionField]
   );
 
-  return (
-    <EuiCheckbox
-      id={id}
-      label={name}
-      checked={eventing && eventing[protectionField]}
-      onChange={handleCheckboxChange}
-    />
-  );
+  return <EuiCheckbox id={id} label={name} checked={selected} onChange={handleCheckboxChange} />;
 });
