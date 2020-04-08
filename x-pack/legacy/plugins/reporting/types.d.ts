@@ -116,10 +116,6 @@ export interface ConditionalHeadersConditions {
   basePath: string;
 }
 
-export interface CryptoFactory {
-  decrypt: (headers?: string) => any;
-}
-
 export interface IndexPatternSavedObject {
   attributes: {
     fieldFormatMap: string;

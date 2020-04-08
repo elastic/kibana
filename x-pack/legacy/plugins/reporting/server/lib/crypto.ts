@@ -7,5 +7,8 @@
 import nodeCrypto from '@elastic/node-crypto';
 
 export function cryptoFactory(encryptionKey: string | undefined) {
+  if (typeof encryptionKey !== 'string') {
+    throw new Error('Encryption Key required.');
+  }
   return nodeCrypto({ encryptionKey });
 }

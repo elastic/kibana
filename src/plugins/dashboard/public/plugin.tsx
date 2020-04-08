@@ -183,7 +183,7 @@ export class DashboardPlugin
           targetAppName === DashboardConstants.DASHBOARD_ID
         );
       },
-      storageKey: 'lastUrl:dashboard',
+      storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [

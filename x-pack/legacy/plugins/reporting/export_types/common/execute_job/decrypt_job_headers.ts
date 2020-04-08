@@ -25,9 +25,16 @@ export const decryptJobHeaders = async <
   job: JobDocPayloadType;
   logger: Logger;
 }): Promise<Record<string, string>> => {
-  const crypto: CryptoFactory = cryptoFactory(encryptionKey);
   try {
-    const decryptedHeaders: Record<string, string> = await crypto.decrypt(job.headers);
+    if (typeof job.headers !== 'string') {
+      throw new Error(
+        i18n.translate('xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage', {
+          defaultMessage: 'Job headers are missing',
+        })
+      );
+    }
+    const crypto: CryptoFactory = cryptoFactory(encryptionKey);
+    const decryptedHeaders = (await crypto.decrypt(job.headers)) as Record<string, string>;
     return decryptedHeaders;
   } catch (err) {
     logger.error(err);

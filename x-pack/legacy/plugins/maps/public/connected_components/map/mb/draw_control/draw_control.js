@@ -16,7 +16,8 @@ import {
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates,
-} from '../../../../elasticsearch_geo_utils';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../plugins/maps/public/elasticsearch_geo_utils';
 import { DrawTooltip } from './draw_tooltip';
 
 const mbDrawModes = MapboxDraw.modes;
