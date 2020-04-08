@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export { registerGetRoutes } from './get';
-
-export { registerCreateRoute } from './create';
-
-export { registerUpdateRoute } from './update';
+export default function({ loadTestFile }: FtrProviderContext) {
+  describe('Ingest Node Pipelines', () => {
+    loadTestFile(require.resolve('./ingest_pipelines'));
+  });
+}

@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerGetRoutes } from './get';
-
-export { registerCreateRoute } from './create';
-
-export { registerUpdateRoute } from './update';
+export { registerEsHelpers } from './elasticsearch';
