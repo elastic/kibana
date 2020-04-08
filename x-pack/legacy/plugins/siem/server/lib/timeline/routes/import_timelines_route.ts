@@ -10,7 +10,8 @@ import Boom from 'boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { schema } from '@kbn/config-schema';
+
+import { Readable } from 'stream';
 import {
   buildSiemResponse,
   createBulkErrorObject,
@@ -42,10 +43,16 @@ import { Timeline } from '../saved_object';
 import { validate } from '../../detection_engine/routes/rules/validate';
 import { FrameworkRequest } from '../../framework';
 import { throwErrors } from '../../../../../../../plugins/case/common/api';
-
+import { buildRouteValidation } from './schemas/export_timelines_schema';
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 const timelineLib = new Timeline();
+
+interface ImportTimelinesRequestBodySchema {
+  file: Readable & {
+    hapi: { filename: string };
+  };
+}
 
 export const importTimelinesRoute = (
   router: IRouter,
@@ -56,7 +63,11 @@ export const importTimelinesRoute = (
     {
       path: `${TIMELINE_IMPORT_URL}`,
       validate: {
-        body: schema.object({}, { unknowns: 'allow' }),
+        body: buildRouteValidation<
+          ImportTimelinesRequestBodySchema,
+          ImportTimelinesRequestBodySchema,
+          unknown
+        >(ImportTimelinesPayloadSchemaRt),
       },
       options: {
         tags: ['access:siem'],
