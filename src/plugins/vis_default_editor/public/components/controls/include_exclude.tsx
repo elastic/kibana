@@ -21,7 +21,7 @@ import React, { useEffect } from 'react';
 import { isArray } from 'lodash';
 import { AggParamEditorProps } from '../agg_param_props';
 import { StringParamEditor } from './string';
-import { search } from '../../../../../../plugins/data/public/';
+import { search } from '../../../../data/public';
 import { SimpleNumberList } from './components/simple_number_list';
 const { isNumberType } = search.aggs;
 
