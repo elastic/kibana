@@ -39,8 +39,7 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-// the vis_default_editor is about to be moved to NP, this import will be adjusted
-import { DefaultEditorController } from '../../../legacy/core_plugins/vis_default_editor/public';
+import { DefaultEditorController } from '../../vis_default_editor/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -71,7 +70,7 @@ export class VisualizePlugin
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/visualize',
-      storageKey: 'lastUrl:visualize',
+      storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
@@ -122,6 +121,8 @@ export class VisualizePlugin
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           DefaultVisualizationEditor: DefaultEditorController,
+          createVisEmbeddableFromObject:
+            pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
         };
         setServices(deps);
 

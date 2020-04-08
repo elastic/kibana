@@ -10,6 +10,11 @@
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
@@ -54,6 +59,11 @@
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
@@ -97,6 +107,11 @@
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "00000000-0000-0000-0000-000000000000"
@@ -137,6 +152,11 @@
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
+      },
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
       },
       "endpoint": {
         "policy": {
@@ -182,6 +202,11 @@
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
@@ -224,6 +249,11 @@
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "00000000-0000-0000-0000-000000000000"
@@ -265,6 +295,11 @@
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
+      },
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
       },
       "endpoint": {
         "policy": {
@@ -309,6 +344,11 @@
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
@@ -350,6 +390,11 @@
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
+      },
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
       },
       "endpoint": {
         "policy": {

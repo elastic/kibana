@@ -43,7 +43,6 @@ import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
 import './discover/legacy';
-import './dashboard/legacy';
 import './management';
 import './dev_tools';
 import 'ui/agg_response';

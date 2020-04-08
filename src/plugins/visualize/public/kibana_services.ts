@@ -34,8 +34,7 @@ import { DataPublicPluginStart } from '../../data/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { SavedVisualizations } from './application/types';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-// the vis_default_editor is about to be moved to NP, this import will be adjusted
-import { DefaultEditorController } from '../../../legacy/core_plugins/vis_default_editor/public';
+import { DefaultEditorController } from '../../vis_default_editor/public';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
@@ -56,6 +55,7 @@ export interface VisualizeKibanaServices {
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
   DefaultVisualizationEditor: typeof DefaultEditorController;
+  createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
 }
 
 let services: VisualizeKibanaServices | null = null;
