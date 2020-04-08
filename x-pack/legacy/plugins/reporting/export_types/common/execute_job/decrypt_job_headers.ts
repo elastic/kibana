@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { CryptoFactory, Logger } from '../../../types';
+import { Logger } from '../../../types';
 
 interface HasEncryptedHeaders {
   headers?: string;
@@ -33,7 +33,7 @@ export const decryptJobHeaders = async <
         })
       );
     }
-    const crypto: CryptoFactory = cryptoFactory(encryptionKey);
+    const crypto = cryptoFactory(encryptionKey);
     const decryptedHeaders = (await crypto.decrypt(job.headers)) as Record<string, string>;
     return decryptedHeaders;
   } catch (err) {
