@@ -177,12 +177,7 @@ export class Plugin {
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(
-        plugins.usageCollection,
-        config,
-        core.metrics.getOpsMetrics$(),
-        get(legacyConfig, 'kibana.index')
-      );
+      registerCollectors(plugins.usageCollection, config);
     }
 
     // If collection is enabled, create the bulk uploader
