@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { GetCertsParams } from './get_certs';
 import { UMElasticsearchQueryFn } from '../adapters';
 import {
   HistogramResult,
