@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointEvent, LegacyEndpointEvent } from '../types';
+import { EndpointEvent, LegacyEndpointEvent, ResolverEvent } from '../types';
 
 export function isLegacyEvent(
   event: EndpointEvent | LegacyEndpointEvent
@@ -28,4 +28,26 @@ export function eventName(event: EndpointEvent | LegacyEndpointEvent): string {
   } else {
     return event.process.name;
   }
+}
+
+export function eventId(event: ResolverEvent) {
+  if (isLegacyEvent(event)) {
+    return String(event.endgame.serial_event_id);
+  }
+  return event.event.id;
+}
+
+export function entityId(event: ResolverEvent) {
+  if (isLegacyEvent(event)) {
+    return String(event.endgame.unique_pid);
+  }
+  return event.process.entity_id;
+}
+
+export function parentEntityId(event: ResolverEvent) {
+  if (isLegacyEvent(event)) {
+    const ppid = event.endgame.unique_ppid;
+    return String(ppid); // if unique_ppid is undefined return undefined
+  }
+  return event.process.parent?.entity_id;
 }

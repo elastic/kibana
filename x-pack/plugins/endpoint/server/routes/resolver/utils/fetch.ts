@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { extractEntityID, extractParentEntityID } from './normalize';
+import { entityId, parentEntityId } from '../../../../common/models/event';
 import { getPaginationParams } from './pagination';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
@@ -38,12 +38,6 @@ export class Fetcher {
     return tree;
   }
 
-  public async alerts(limit: number, after?: string): Promise<Tree> {
-    const tree = new Tree(this.id);
-    await this.doAlerts(tree, limit, after);
-    return tree;
-  }
-
   public async stats(tree: Tree): Promise<Tree> {
     await this.doStats(tree);
     return tree;
@@ -65,20 +59,10 @@ export class Fetcher {
 
     tree.addAncestor(node, ...results);
 
-    const next = extractParentEntityID(results[0]);
+    const next = parentEntityId(results[0]);
     if (next !== undefined) {
       await this.doAncestors(tree, next, id, levels - 1);
     }
-  }
-
-  private async doAlerts(tree: Tree, limit: number, after?: string) {
-    // uncomment this when we implement `AlertsQuery`
-    //
-    // const query = new AlertsQuery(this.endpointID, getPaginationParams(limit, after));
-    // const { totals, results } = await query.search(this.client, this.id);
-    // tree.addAlert(...results);
-    // tree.paginateAlerts(totals, results);
-    // if (results.length === 0) tree.setNextAlert(null);
   }
 
   private async doEvents(tree: Tree, limit: number, after?: string) {
@@ -108,7 +92,7 @@ export class Fetcher {
       return;
     }
 
-    const childIDs = results.map(extractEntityID);
+    const childIDs = results.map(entityId);
     const children = (await lifecycleQuery.search(this.client, ...childIDs)).results;
 
     tree.addChild(...children);

@@ -6,13 +6,13 @@
 
 import _ from 'lodash';
 import { ResolverEvent, Node, NodeStats, NodePagination } from '../../../../common/types';
-import { extractEntityID, extractParentEntityID } from './normalize';
+import { entityId, parentEntityId } from '../../../../common/models/event';
 import { buildPaginationCursor } from './pagination';
 
 type ExtractFunction = (event: ResolverEvent) => string | undefined;
 
 function createNode(id: string): Node {
-  return { id, children: [], pagination: {}, events: [], alerts: [], lifecycle: [] };
+  return { id, children: [], pagination: {}, events: [], lifecycle: [] };
 }
 
 // This class aids in constructing a tree of process events. It works in the following way:
@@ -57,31 +57,29 @@ export class Tree {
     this.root = root;
   }
 
-  public render() {
+  public render(): Node {
     return this.root;
   }
 
-  public ids() {
+  public ids(): string[] {
     return Object.keys(this.cache);
   }
 
   public static async merge(
     childrenPromise: Promise<Tree>,
     ancestorsPromise: Promise<Tree>,
-    eventsPromise: Promise<Tree>,
-    alertsPromise: Promise<Tree>
-  ) {
-    const [children, ancestors, events, alerts] = await Promise.all([
+    eventsPromise: Promise<Tree>
+  ): Promise<Tree> {
+    const [children, ancestors, events] = await Promise.all([
       childrenPromise,
       ancestorsPromise,
       eventsPromise,
-      alertsPromise,
     ]);
 
     // we only allow for merging when we have partial trees that
     // represent the same root node
     const rootID = children.id;
-    if (rootID !== ancestors.id || rootID !== events.id || rootID !== alerts.id) {
+    if (rootID !== ancestors.id || rootID !== events.id) {
       throw new Error('cannot merge trees with different roots');
     }
 
@@ -95,70 +93,56 @@ export class Tree {
     children.root.lifecycle = ancestors.root.lifecycle; // lifecycle is bound to the ancestors query
     children.root.parent = ancestors.root.parent;
     children.root.events = events.root.events;
-    children.root.alerts = alerts.root.alerts;
 
     // merge the pagination
-    Object.assign(
-      children.root.pagination,
-      ancestors.root.pagination,
-      events.root.pagination,
-      alerts.root.pagination
-    );
+    Object.assign(children.root.pagination, ancestors.root.pagination, events.root.pagination);
 
     return children;
   }
 
-  public addEvent(...events: ResolverEvent[]) {
+  public addEvent(...events: ResolverEvent[]): void {
     events.forEach(event => {
-      const id = extractEntityID(event);
+      const id = entityId(event);
 
       this.ensureCache(id);
       this.cache[id].events.push(event);
     });
   }
 
-  public addAlert(...alerts: ResolverEvent[]) {
-    alerts.forEach(alert => {
-      const id = extractEntityID(alert);
-
-      this.ensureCache(id);
-      this.cache[id].alerts.push(alert);
-    });
-  }
-
-  public addAncestor(id: string, ...events: ResolverEvent[]) {
+  public addAncestor(id: string, ...events: ResolverEvent[]): void {
     events.forEach(event => {
-      const ancestorID = extractEntityID(event);
-
-      if (!this.cache[ancestorID]) {
-        this.cache[ancestorID] = createNode(ancestorID);
-        this.cache[id].parent = this.cache[ancestorID];
+      const ancestorID = parentEntityId(event);
+      if (ancestorID) {
+        if (!this.cache[ancestorID]) {
+          this.cache[ancestorID] = createNode(ancestorID);
+          this.cache[id].parent = this.cache[ancestorID];
+        }
+        this.cache[ancestorID].lifecycle.push(event);
       }
-      this.cache[ancestorID].lifecycle.push(event);
     });
   }
 
-  public addStats(id: string, stats: NodeStats) {
+  public addStats(id: string, stats: NodeStats): void {
     this.ensureCache(id);
     this.cache[id].stats = stats;
   }
 
-  public setNextAncestor(next: string | null) {
+  public setNextAncestor(next: string | null): void {
     this.root.pagination.nextAncestor = next;
   }
 
-  public setNextEvent(next: string | null) {
+  public setNextEvent(next: string | null): void {
     this.root.pagination.nextEvent = next;
   }
 
-  public setNextAlert(next: string | null) {
+  public setNextAlert(next: string | null): void {
     this.root.pagination.nextAlert = next;
   }
 
-  public addChild(...events: ResolverEvent[]) {
+  public addChild(...events: ResolverEvent[]): void {
     events.forEach(event => {
-      const id = extractEntityID(event);
-      const parent = extractParentEntityID(event);
+      const id = entityId(event);
+      const parent = parentEntityId(event);
 
       this.ensureCache(parent);
 
@@ -173,7 +157,7 @@ export class Tree {
     });
   }
 
-  public markLeafNode(...ids: string[]) {
+  public markLeafNode(...ids: string[]): void {
     ids.forEach(id => {
       this.ensureCache(id);
       if (!this.cache[id].pagination.nextChild) {
@@ -182,16 +166,12 @@ export class Tree {
     });
   }
 
-  public paginateEvents(totals: Record<string, number>, events: ResolverEvent[]) {
-    return this.paginate(extractEntityID, 'nextEvent', totals, events);
+  public paginateEvents(totals: Record<string, number>, events: ResolverEvent[]): void {
+    return this.paginate(entityId, 'nextEvent', totals, events);
   }
 
-  public paginateAlerts(totals: Record<string, number>, events: ResolverEvent[]) {
-    return this.paginate(extractEntityID, 'nextAlert', totals, events);
-  }
-
-  public paginateChildren(totals: Record<string, number>, children: ResolverEvent[]) {
-    return this.paginate(extractParentEntityID, 'nextChild', totals, children);
+  public paginateChildren(totals: Record<string, number>, children: ResolverEvent[]): void {
+    return this.paginate(parentEntityId, 'nextChild', totals, children);
   }
 
   private paginate(
@@ -199,7 +179,7 @@ export class Tree {
     attribute: keyof NodePagination,
     totals: Record<string, number>,
     records: ResolverEvent[]
-  ) {
+  ): void {
     const grouped = _.groupBy(records, grouper);
     Object.entries(totals).forEach(([id, total]) => {
       if (this.cache[id]) {
@@ -213,7 +193,7 @@ export class Tree {
     });
   }
 
-  private ensureCache(id: string | undefined) {
+  private ensureCache(id: string | undefined): void {
     if (id === undefined || !this.cache[id]) {
       throw new Error('dangling node');
     }

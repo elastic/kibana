@@ -17,13 +17,13 @@ type MiddlewareFactory<S = ResolverState> = (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
-function extractChildren(children: Node[], events: ResolverEvent[] = []): ResolverEvent[] {
+function descendants(children: Node[], events: ResolverEvent[] = []): ResolverEvent[] {
   return children.reduce((flattenedEvents, currentNode) => {
     if (currentNode.lifecycle && currentNode.lifecycle.length > 0) {
       flattenedEvents.push(...currentNode.lifecycle);
     }
     if (currentNode.children && currentNode.children.length > 0) {
-      return extractChildren(currentNode.children, events);
+      return descendants(currentNode.children, events);
     } else {
       return flattenedEvents;
     }
@@ -43,21 +43,20 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           let lifecycle: ResolverEvent[];
           let children: Node[];
           if (event.isLegacyEvent(action.payload.selectedEvent)) {
-            const uniquePid = action.payload.selectedEvent?.endgame?.unique_pid;
+            const entityId = action.payload.selectedEvent?.endgame?.unique_pid;
             const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
             [{ lifecycle, children }] = await Promise.all([
-              context.services.http.get(`/api/endpoint/resolver/${uniquePid}`, {
+              context.services.http.get(`/api/endpoint/resolver/${entityId}`, {
                 query: { legacyEndpointID },
               }),
             ]);
           } else {
-            const uniquePid = action.payload.selectedEvent.process.entity_id;
+            const entityId = action.payload.selectedEvent.process.entity_id;
             [{ lifecycle, children }] = await Promise.all([
-              context.services.http.get(`/api/endpoint/resolver/${uniquePid}`),
+              context.services.http.get(`/api/endpoint/resolver/${entityId}`),
             ]);
           }
-          const mappedChildren = extractChildren(children);
-          const response: ResolverEvent[] = [...lifecycle, ...mappedChildren];
+          const response: ResolverEvent[] = [...lifecycle, ...descendants(children)];
           api.dispatch({
             type: 'serverReturnedResolverData',
             payload: { data: { result: { search_results: response } } },

@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
-import { extractEventID } from './normalize';
+import { entityId } from '../../../../common/models/event';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export interface PaginationParams {
@@ -27,7 +27,7 @@ interface PaginationCursor {
   eventID: string;
 }
 
-function urlEncodeCursor(data: PaginationCursor) {
+function urlEncodeCursor(data: PaginationCursor): string {
   const value = JSON.stringify(data);
   return Buffer.from(value, 'utf8')
     .toString('base64')
@@ -68,7 +68,7 @@ export function paginate(
   tiebreaker: string,
   aggregator: string,
   query: JsonObject
-) {
+): JsonObject {
   const { size, timestamp, eventID } = pagination;
   query.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
   query.aggs = query.aggs || {};
@@ -85,7 +85,7 @@ export function buildPaginationCursor(total: number, results: ResolverEvent[]): 
     const lastResult = results[results.length - 1];
     const cursor = {
       timestamp: lastResult['@timestamp'],
-      eventID: extractEventID(lastResult),
+      eventID: entityId(lastResult),
     };
     return urlEncodeCursor(cursor);
   }
