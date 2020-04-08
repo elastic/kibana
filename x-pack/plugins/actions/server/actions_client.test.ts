@@ -51,6 +51,7 @@ beforeEach(() => {
     savedObjectsClient,
     scopedClusterClient,
     defaultKibanaIndex,
+    preconfiguredActions: [],
   });
 });
 
@@ -83,6 +84,7 @@ describe('create()', () => {
     });
     expect(result).toEqual({
       id: '1',
+      isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       config: {},
@@ -178,6 +180,7 @@ describe('create()', () => {
     });
     expect(result).toEqual({
       id: '1',
+      isPreconfigured: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       config: {
@@ -226,6 +229,7 @@ describe('create()', () => {
       savedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
+      preconfiguredActions: [],
     });
 
     const savedObjectCreateResult = {
@@ -305,6 +309,7 @@ describe('get()', () => {
     const result = await actionsClient.get({ id: '1' });
     expect(result).toEqual({
       id: '1',
+      isPreconfigured: false,
     });
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -314,9 +319,44 @@ describe('get()', () => {
       ]
     `);
   });
+
+  test('return predefined action with id', async () => {
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      savedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {
+            test: 'test1',
+          },
+          isPreconfigured: true,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+    });
+
+    const result = await actionsClient.get({ id: 'testPreconfigured' });
+    expect(result).toEqual({
+      id: 'testPreconfigured',
+      actionTypeId: '.slack',
+      isPreconfigured: true,
+      name: 'test',
+      config: {
+        foo: 'bar',
+      },
+    });
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+  });
 });
 
-describe('find()', () => {
+describe('getAll()', () => {
   test('calls savedObjectsClient with parameters', async () => {
     const expectedResult = {
       total: 1,
@@ -327,6 +367,7 @@ describe('find()', () => {
           id: '1',
           type: 'type',
           attributes: {
+            name: 'test',
             config: {
               foo: 'bar',
             },
@@ -339,31 +380,50 @@ describe('find()', () => {
     scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
       aggregations: {
         '1': { doc_count: 6 },
+        testPreconfigured: { doc_count: 2 },
       },
     });
-    const result = await actionsClient.find({});
-    expect(result).toEqual({
-      total: 1,
-      perPage: 10,
-      page: 1,
-      data: [
+
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      savedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      preconfiguredActions: [
         {
-          id: '1',
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          name: 'test',
           config: {
             foo: 'bar',
           },
-          referencedByCount: 6,
         },
       ],
     });
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "type": "action",
+    const result = await actionsClient.getAll();
+    expect(result).toEqual([
+      {
+        id: '1',
+        isPreconfigured: false,
+        name: 'test',
+        config: {
+          foo: 'bar',
         },
-      ]
-    `);
+        referencedByCount: 6,
+      },
+      {
+        id: 'testPreconfigured',
+        actionTypeId: '.slack',
+        isPreconfigured: true,
+        name: 'test',
+        config: {
+          foo: 'bar',
+        },
+        referencedByCount: 2,
+      },
+    ]);
   });
 });
 
@@ -420,6 +480,7 @@ describe('update()', () => {
     });
     expect(result).toEqual({
       id: 'my-action',
+      isPreconfigured: false,
       actionTypeId: 'my-action-type',
       name: 'my name',
       config: {},
@@ -524,6 +585,7 @@ describe('update()', () => {
     });
     expect(result).toEqual({
       id: 'my-action',
+      isPreconfigured: false,
       actionTypeId: 'my-action-type',
       name: 'my name',
       config: {

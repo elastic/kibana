@@ -218,6 +218,7 @@ export class AlertingPlugin {
       getSpaceId(request: KibanaRequest) {
         return spaces?.getSpaceId(request);
       },
+      preconfiguredActions: plugins.actions.preconfiguredActions,
     });
 
     taskRunnerFactory.initialize({

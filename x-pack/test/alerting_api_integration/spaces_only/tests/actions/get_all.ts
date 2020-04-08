@@ -9,15 +9,15 @@ import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function getActionTests({ getService }: FtrProviderContext) {
+export default function getAllActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('get', () => {
+  describe('getAll', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
 
-    it('should handle get action request appropriately', async () => {
+    it('should handle get all action request appropriately', async () => {
       const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
@@ -34,20 +34,43 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
 
-      await supertest
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/action/${createdAction.id}`)
-        .expect(200, {
+      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/action/_getAll`).expect(200, [
+        {
           id: createdAction.id,
           isPreconfigured: false,
-          actionTypeId: 'test.index-record',
           name: 'My action',
+          actionTypeId: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
-        });
+          referencedByCount: 0,
+        },
+        {
+          id: 'my-slack1',
+          isPreconfigured: true,
+          actionTypeId: '.slack',
+          name: 'Slack#xyz',
+          config: {
+            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+          },
+          referencedByCount: 0,
+        },
+        {
+          id: 'custom-system-abc-connector',
+          isPreconfigured: true,
+          actionTypeId: 'system-abc-action-type',
+          name: 'SystemABC',
+          config: {
+            xyzConfig1: 'value1',
+            xyzConfig2: 'value2',
+            listOfThings: ['a', 'b', 'c', 'd'],
+          },
+          referencedByCount: 0,
+        },
+      ]);
     });
 
-    it(`action should't be acessible from another space`, async () => {
+    it(`shouldn't get all action from another space`, async () => {
       const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
@@ -64,25 +87,30 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
 
-      await supertest
-        .get(`${getUrlPrefix(Spaces.other.id)}/api/action/${createdAction.id}`)
-        .expect(404, {
-          statusCode: 404,
-          error: 'Not Found',
-          message: `Saved object [action/${createdAction.id}] not found`,
-        });
-    });
-
-    it('should handle get action request from preconfigured list', async () => {
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/action/my-slack1`).expect(200, {
-        id: 'my-slack1',
-        isPreconfigured: true,
-        actionTypeId: '.slack',
-        name: 'Slack#xyz',
-        config: {
-          webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+      await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/action/_getAll`).expect(200, [
+        {
+          id: 'my-slack1',
+          isPreconfigured: true,
+          actionTypeId: '.slack',
+          name: 'Slack#xyz',
+          config: {
+            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+          },
+          referencedByCount: 0,
         },
-      });
+        {
+          id: 'custom-system-abc-connector',
+          isPreconfigured: true,
+          actionTypeId: 'system-abc-action-type',
+          name: 'SystemABC',
+          config: {
+            xyzConfig1: 'value1',
+            xyzConfig2: 'value2',
+            listOfThings: ['a', 'b', 'c', 'd'],
+          },
+          referencedByCount: 0,
+        },
+      ]);
     });
   });
 }

@@ -12,9 +12,9 @@ const createActionsClientMock = () => {
   const mocked: jest.Mocked<ActionsClientContract> = {
     create: jest.fn(),
     get: jest.fn(),
-    find: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
+    getAll: jest.fn(),
   };
   return mocked;
 };
