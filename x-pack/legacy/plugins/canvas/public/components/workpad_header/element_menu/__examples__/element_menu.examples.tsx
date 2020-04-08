@@ -41,6 +41,6 @@ const testElements: { [key: string]: ElementSpec } = {
   },
 };
 
-storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
-  <ElementMenu elements={testElements} addElement={action('addElement')} />
-));
+// storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
+//   <ElementMenu elements={testElements} addElement={action('addElement')} />
+// ));
