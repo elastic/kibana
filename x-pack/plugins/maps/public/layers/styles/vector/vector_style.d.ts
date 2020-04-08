@@ -19,9 +19,7 @@ export interface IVectorStyle {
 }
 
 export class VectorStyle implements IVectorStyle {
-  static createDescriptor(
-    properties: VectorStylePropertiesDescriptor
-  ): VectorStylePropertiesDescriptor;
+  static createDescriptor(properties: VectorStylePropertiesDescriptor): VectorStyleDescriptor;
   static createDefaultStyleProperties(mapColors: string[]): VectorStylePropertiesDescriptor;
   constructor(descriptor: VectorStyleDescriptor, source: IVectorSource, layer: IVectorLayer);
   getSourceFieldNames(): string[];
