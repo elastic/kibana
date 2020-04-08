@@ -88,17 +88,20 @@ export const valueClickActionGetFilters = async (
 }> => {
   if (!(await isCompatible({ timeFieldName, data }))) {
     throw new IncompatibleActionError();
+    // note - the else statement is necessary due to odd compilation behavior
+    // code after the throw statement can't contain await statements
+  } else {
+    const filters: Filter[] =
+      (await createFiltersFromEvent(data.data || [data], data.negate)) || [];
+
+    let selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
+
+    if (selectedFilters.length > 1) {
+      selectedFilters = await filterSelection(filters);
+    }
+
+    return esFilters.extractTimeFilter(timeFieldName || '', selectedFilters);
   }
-
-  const filters: Filter[] = (await createFiltersFromEvent(data.data || [data], data.negate)) || [];
-
-  let selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
-
-  if (selectedFilters.length > 1) {
-    selectedFilters = await filterSelection(filters);
-  }
-
-  return esFilters.extractTimeFilter(timeFieldName || '', selectedFilters);
 };
 
 // gets and applies the filters
