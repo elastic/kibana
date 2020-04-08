@@ -28,6 +28,7 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
   encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.createStart(),
+  preconfiguredActions: [],
 };
 const fakeRequest: Request = {
   headers: {},
@@ -67,6 +68,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsPlugin: alertsClientFactoryParams.encryptedSavedObjectsPlugin,
+    preconfiguredActions: [],
   });
 });
 
