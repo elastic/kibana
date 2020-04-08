@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
@@ -15,12 +16,13 @@ import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../../common/models/event';
 import * as processModel from '../models/process_event';
+import * as selectors from '../store/selectors';
 
 const nodeAssets = {
   runningProcessCube: {
     cubeSymbol: `#${SymbolIds.runningProcessCube}`,
     labelFill: `url(#${PaintServerIds.runningProcess})`,
-    descriptionFill: NamedColors.activeNoWarning,
+    descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
       defaultMessage: 'Running Process',
     }),
@@ -28,7 +30,7 @@ const nodeAssets = {
   runningTriggerCube: {
     cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
     labelFill: `url(#${PaintServerIds.runningTrigger})`,
-    descriptionFill: NamedColors.activeWarning,
+    descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningTrigger', {
       defaultMessage: 'Running Trigger',
     }),
@@ -36,7 +38,7 @@ const nodeAssets = {
   terminatedProcessCube: {
     cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
     labelFill: NamedColors.fullLabelBackground,
-    descriptionFill: NamedColors.inertDescription,
+    descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
     }),
@@ -44,7 +46,7 @@ const nodeAssets = {
   terminatedTriggerCube: {
     cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
     labelFill: NamedColors.fullLabelBackground,
-    descriptionFill: NamedColors.inertDescription,
+    descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedTrigger', {
       defaultMessage: 'Terminated Trigger',
     }),
@@ -82,7 +84,7 @@ export const ProcessEventDot = styled(
       /**
        * map of what nodes are "adjacent" to this one in "up, down, previous, next" directions
        */
-      adjacentNodeMap?: AdjacentProcessMap;
+      adjacentNodeMap: AdjacentProcessMap;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -91,7 +93,10 @@ export const ProcessEventDot = styled(
 
       const [magFactorX] = projectionMatrix;
 
-      const selfId = adjacentNodeMap?.self;
+      const selfId = adjacentNodeMap.self;
+
+      const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+      const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
 
       const nodeViewportStyle = useMemo(
         () => ({
@@ -117,27 +122,34 @@ export const ProcessEventDot = styled(
 
       const labelYHeight = markerSize / 1.7647;
 
-      const levelAttribute = adjacentNodeMap?.level
-        ? {
-            'aria-level': adjacentNodeMap.level,
-          }
-        : {};
+      /**
+       * An element that should be animated when the node is clicked.
+       */
+      const animationTarget: {
+        current:
+          | (SVGAnimationElement & {
+              /**
+               * `beginElement` is by [w3](https://www.w3.org/TR/SVG11/animate.html#__smil__ElementTimeControl__beginElement)
+               * but missing in [TSJS-lib-generator](https://github.com/microsoft/TSJS-lib-generator/blob/15a4678e0ef6de308e79451503e444e9949ee849/inputfiles/addedTypes.json#L1819)
+               */
+              beginElement: () => void;
+            })
+          | null;
+      } = React.createRef();
+      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[
+        nodeType(event)
+      ];
+      const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
-      const flowToAttribute = adjacentNodeMap?.nextSibling
-        ? {
-            'aria-flowto': adjacentNodeMap.nextSibling,
-          }
-        : {};
+      const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
+        resolverNodeIdGenerator,
+        selfId,
+      ]);
+      const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
+      const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
 
-      const nodeType = getNodeType(event);
-      const clickTargetRef: { current: SVGAnimationElement | null } = React.createRef();
-      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[nodeType];
-      const resolverNodeIdGenerator = htmlIdGenerator('resolverNode');
-      const [nodeId, labelId, descriptionId] = [
-        !!selfId ? resolverNodeIdGenerator(String(selfId)) : resolverNodeIdGenerator(),
-        resolverNodeIdGenerator(),
-        resolverNodeIdGenerator(),
-      ] as string[];
+      const isActiveDescendant = nodeId === activeDescendantId;
+      const isSelectedDescendant = nodeId === selectedDescendantId;
 
       const dispatch = useResolverDispatch();
 
@@ -149,18 +161,23 @@ export const ProcessEventDot = styled(
               nodeId,
             },
           });
-          focusEvent.currentTarget.setAttribute('aria-current', 'true');
         },
         [dispatch, nodeId]
       );
 
       const handleClick = useCallback(
         (clickEvent: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
-          if (clickTargetRef.current !== null) {
-            (clickTargetRef.current as any).beginElement();
+          if (animationTarget.current !== null) {
+            (animationTarget.current as any).beginElement();
           }
+          dispatch({
+            type: 'userSelectedResolverNode',
+            payload: {
+              nodeId,
+            },
+          });
         },
-        [clickTargetRef]
+        [animationTarget, dispatch, nodeId]
       );
 
       return (
@@ -171,11 +188,15 @@ export const ProcessEventDot = styled(
             viewBox="-15 -15 90 30"
             preserveAspectRatio="xMidYMid meet"
             role="treeitem"
-            {...levelAttribute}
-            {...flowToAttribute}
+            aria-level={adjacentNodeMap.level}
+            aria-flowto={
+              adjacentNodeMap.nextSibling === null ? undefined : adjacentNodeMap.nextSibling
+            }
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
+            aria-current={isActiveDescendant ? 'true' : undefined}
+            aria-selected={isSelectedDescendant ? 'true' : undefined}
             style={nodeViewportStyle}
             id={nodeId}
             onClick={handleClick}
@@ -183,6 +204,15 @@ export const ProcessEventDot = styled(
             tabIndex={-1}
           >
             <g>
+              <use
+                xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+                x={-11.35}
+                y={-11.35}
+                width={markerSize * 1.5}
+                height={markerSize * 1.5}
+                className="backing"
+              />
+              <rect x="7" y="-12.75" width="15" height="10" fill={NamedColors.resolverBackground} />
               <use
                 role="presentation"
                 xlinkHref={cubeSymbol}
@@ -202,12 +232,12 @@ export const ProcessEventDot = styled(
                   begin="click"
                   repeatCount="1"
                   className="squish"
-                  ref={clickTargetRef}
+                  ref={animationTarget}
                 />
               </use>
               <use
                 role="presentation"
-                xlinkHref={`#${SymbolIds.processNode}`}
+                xlinkHref={`#${SymbolIds.processNodeLabel}`}
                 x={markerPositionOffset + markerSize - 0.5}
                 y={labelYOffset}
                 width={(markerSize / 1.7647) * 5}
@@ -262,6 +292,20 @@ export const ProcessEventDot = styled(
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;
+
+  //dasharray & dashoffset should be equal to "pull" the stroke back
+  //when it is transitioned.
+  //The value is tuned to look good when animated, but to preserve
+  //the effect, it should always be _at least_ the length of the stroke
+  & .backing {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+  }
+  &[aria-current] .backing {
+    transition-property: stroke-dashoffset;
+    transition-duration: 1s;
+    stroke-dashoffset: 0;
+  }
 `;
 
 const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = {
@@ -273,7 +317,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = 
   unknownEvent: 'runningProcessCube',
 };
 
-function getNodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
+function nodeType(processEvent: ResolverEvent): keyof typeof nodeAssets {
   const processType = processModel.eventType(processEvent);
 
   if (processType in processTypeToCube) {

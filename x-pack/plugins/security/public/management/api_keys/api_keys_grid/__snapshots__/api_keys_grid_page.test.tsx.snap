@@ -135,7 +135,9 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
               }
               iconType="securityApp"
               title={
-                <h2>
+                <h2
+                  data-test-subj="apiKeysPermissionDeniedMessage"
+                >
                   <FormattedMessage
                     defaultMessage="You need permission to manage API keys"
                     id="xpack.security.management.apiKeys.deniedPermissionTitle"
@@ -174,6 +176,7 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
                     <EuiTitle>
                       <h2
                         className="euiTitle euiTitle--medium"
+                        data-test-subj="apiKeysPermissionDeniedMessage"
                       >
                         <FormattedMessage
                           defaultMessage="You need permission to manage API keys"

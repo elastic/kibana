@@ -6,14 +6,10 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart, AppMountParameters } from 'kibana/public';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { Route, Switch, BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import { CoreStart, AppMountParameters, ScopedHistory } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { Route, Switch } from 'react-router-dom';
 import { Store } from 'redux';
-import { useObservable } from 'react-use';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { RouteCapture } from './view/route_capture';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
@@ -21,7 +17,7 @@ import { HostList } from './view/hosts';
 import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
 import { HeaderNavigation } from './components/header_nav';
-import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
+import { AppRootProvider } from './view/app_root_provider';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -29,12 +25,11 @@ import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_compon
 export function renderApp(
   coreStart: CoreStart,
   depsStart: EndpointPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
+  { element, history }: AppMountParameters
 ) {
-  coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory({ coreStart, depsStart });
   ReactDOM.render(
-    <AppRoot basename={appBasePath} store={store} coreStart={coreStart} depsStart={depsStart} />,
+    <AppRoot history={history} store={store} coreStart={coreStart} depsStart={depsStart} />,
     element
   );
   return () => {
@@ -43,61 +38,38 @@ export function renderApp(
 }
 
 interface RouterProps {
-  basename: string;
+  history: ScopedHistory;
   store: Store;
   coreStart: CoreStart;
   depsStart: EndpointPluginStartDependencies;
 }
 
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
-  ({
-    basename,
-    store,
-    coreStart: { http, notifications, uiSettings, application },
-    depsStart: { data },
-  }) => {
-    const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
-
+  ({ history, store, coreStart, depsStart }) => {
     return (
-      <Provider store={store}>
-        <I18nProvider>
-          <KibanaContextProvider services={{ http, notifications, application, data }}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <BrowserRouter basename={basename}>
-                <RouteCapture>
-                  <HeaderNavigation basename={basename} />
-                  <Switch>
-                    <Route
-                      exact
-                      path="/"
-                      render={() => (
-                        <h1 data-test-subj="welcomeTitle">
-                          <FormattedMessage
-                            id="xpack.endpoint.welcomeTitle"
-                            defaultMessage="Hello World"
-                          />
-                        </h1>
-                      )}
-                    />
-                    <Route path="/hosts" component={HostList} />
-                    <Route path="/alerts" component={AlertIndex} />
-                    <Route path="/policy" exact component={PolicyList} />
-                    <Route path="/policy/:id" exact component={PolicyDetails} />
-                    <Route
-                      render={() => (
-                        <FormattedMessage
-                          id="xpack.endpoint.notFound"
-                          defaultMessage="Page Not Found"
-                        />
-                      )}
-                    />
-                  </Switch>
-                </RouteCapture>
-              </BrowserRouter>
-            </EuiThemeProvider>
-          </KibanaContextProvider>
-        </I18nProvider>
-      </Provider>
+      <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
+        <HeaderNavigation />
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <h1 data-test-subj="welcomeTitle">
+                <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
+              </h1>
+            )}
+          />
+          <Route path="/hosts" component={HostList} />
+          <Route path="/alerts" component={AlertIndex} />
+          <Route path="/policy" exact component={PolicyList} />
+          <Route path="/policy/:id" exact component={PolicyDetails} />
+          <Route
+            render={() => (
+              <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
+            )}
+          />
+        </Switch>
+      </AppRootProvider>
     );
   }
 );

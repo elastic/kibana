@@ -13,7 +13,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument
 } from '../../../../utils/testHelpers';
-import { CustomLink as CustomLinkType } from '../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import { CustomLink as CustomLinkType } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
@@ -28,7 +28,7 @@ describe('Custom links', () => {
     );
 
     expectTextsInDocument(component, [
-      'No custom links found. Set up your own custom links i.e. a link to a specific Dashboard or external link.'
+      'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.'
     ]);
     expectTextsNotInDocument(component, ['Create']);
   });

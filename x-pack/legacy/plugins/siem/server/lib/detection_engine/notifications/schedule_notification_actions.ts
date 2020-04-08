@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mapKeys, snakeCase } from 'lodash/fp';
 import { AlertInstance } from '../../../../../../../plugins/alerting/server';
 import { RuleTypeParams } from '../types';
 
-type NotificationRuleTypeParams = RuleTypeParams & {
+export type NotificationRuleTypeParams = RuleTypeParams & {
   name: string;
+  id: string;
 };
 
 interface ScheduleNotificationActions {
   alertInstance: AlertInstance;
-  signalsCount: string;
+  signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
 }
@@ -21,14 +23,14 @@ interface ScheduleNotificationActions {
 export const scheduleNotificationActions = ({
   alertInstance,
   signalsCount,
-  resultsLink,
+  resultsLink = '',
   ruleParams,
 }: ScheduleNotificationActions): AlertInstance =>
   alertInstance
     .replaceState({
-      signalsCount,
+      signals_count: signalsCount,
     })
     .scheduleActions('default', {
-      resultsLink,
-      rule: ruleParams,
+      results_link: resultsLink,
+      rule: mapKeys(snakeCase, ruleParams),
     });

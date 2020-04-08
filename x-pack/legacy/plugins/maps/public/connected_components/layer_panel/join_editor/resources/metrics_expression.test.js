@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../../components/metrics_editor', () => ({
+jest.mock('../../../../../../../../plugins/maps/public/components/metric_editor', () => ({
   MetricsEditor: () => {
     return <div>mockMetricsEditor</div>;
   },

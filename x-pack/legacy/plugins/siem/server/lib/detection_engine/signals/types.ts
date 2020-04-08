@@ -158,9 +158,9 @@ export interface AlertAttributes {
   schedule: {
     interval: string;
   };
-  throttle: string | null;
+  throttle: string;
 }
 
 export interface RuleAlertAttributes extends AlertAttributes {
-  params: RuleAlertParams;
+  params: Omit<RuleAlertParams, 'ruleId'> & { ruleId: string };
 }

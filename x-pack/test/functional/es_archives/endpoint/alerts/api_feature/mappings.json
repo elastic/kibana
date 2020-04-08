@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "events-endpoint-1",
     "mappings": {
       "_meta": {
@@ -95,7 +94,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -455,7 +454,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -852,7 +851,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -1497,7 +1496,7 @@
                     }
                   }
                 },
-                "malware_classifier": {
+                "malware_classification": {
                   "properties": {
                     "features": {
                       "properties": {
@@ -1690,7 +1689,7 @@
                     }
                   }
                 },
-                "malware_classifier": {
+                "malware_classification": {
                   "properties": {
                     "features": {
                       "properties": {

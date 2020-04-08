@@ -17,7 +17,25 @@
  * under the License.
  */
 
-import { SavedObjectReference } from 'src/core/public';
+import { SavedObject, SavedObjectReference } from 'src/core/public';
+
+export interface SavedObjectMetadata {
+  icon?: string;
+  title?: string;
+  editUrl?: string;
+  inAppUrl?: { path: string; uiCapabilitiesPath: string };
+}
+
+export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
+  meta: SavedObjectMetadata;
+};
+
+export interface SavedObjectRelation {
+  id: string;
+  type: string;
+  relationship: 'child' | 'parent';
+  meta: SavedObjectMetadata;
+}
 
 export interface ObjectField {
   type: FieldType;

@@ -10,7 +10,7 @@
 search: {
     aggs: {
         AggConfigs: typeof AggConfigs;
-        aggGroupNamesMap: () => Record<"buckets" | "metrics", string>;
+        aggGroupNamesMap: () => Record<"metrics" | "buckets", string>;
         aggTypeFilters: import("./search/aggs/filter/agg_type_filters").AggTypeFilters;
         CidrMask: typeof CidrMask;
         convertDateRangeToString: typeof convertDateRangeToString;
@@ -19,7 +19,7 @@ search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("./search/aggs/buckets/_bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
         } | {
             display: string;
             val: string;

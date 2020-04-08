@@ -52,6 +52,7 @@ describe('config validation', () => {
       ...config,
       index: 'testing-123',
       refresh: false,
+      executionTimeField: null,
     });
 
     config.executionTimeField = 'field-123';
@@ -60,6 +61,14 @@ describe('config validation', () => {
       index: 'testing-123',
       refresh: false,
       executionTimeField: 'field-123',
+    });
+
+    config.executionTimeField = null;
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+      index: 'testing-123',
+      refresh: false,
+      executionTimeField: null,
     });
 
     delete config.index;
@@ -73,9 +82,11 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(actionType, { index: 'testing-123', executionTimeField: true });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [executionTimeField]: expected value of type [string] but got [boolean]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+"error validating action type config: [executionTimeField]: types that failed validation:
+- [executionTimeField.0]: expected value of type [string] but got [boolean]
+- [executionTimeField.1]: expected value to equal [null]"
+`);
 
     delete config.refresh;
     expect(() => {
@@ -138,12 +149,12 @@ describe('params validation', () => {
 describe('execute()', () => {
   test('ensure parameters are as expected', async () => {
     const secrets = {};
-    let config: ActionTypeConfigType;
+    let config: Partial<ActionTypeConfigType>;
     let params: ActionParamsType;
     let executorOptions: ActionTypeExecutorOptions;
 
     // minimal params
-    config = { index: 'index-value', refresh: false, executionTimeField: undefined };
+    config = { index: 'index-value', refresh: false };
     params = {
       documents: [{ jim: 'bob' }],
     };

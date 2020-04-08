@@ -295,18 +295,30 @@ export const getCreateRequest = () =>
     body: typicalPayload(),
   });
 
-export const createMlRuleRequest = () => {
+export const typicalMlRulePayload = () => {
   const { query, language, index, ...mlParams } = typicalPayload();
 
+  return {
+    ...mlParams,
+    type: 'machine_learning',
+    anomaly_threshold: 58,
+    machine_learning_job_id: 'typical-ml-job-id',
+  };
+};
+
+export const createMlRuleRequest = () => {
   return requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: {
-      ...mlParams,
-      type: 'machine_learning',
-      anomaly_threshold: 50,
-      machine_learning_job_id: 'some-uuid',
-    },
+    body: typicalMlRulePayload(),
+  });
+};
+
+export const createBulkMlRuleRequest = () => {
+  return requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_URL,
+    body: [typicalMlRulePayload()],
   });
 };
 
@@ -323,7 +335,7 @@ export const createRuleWithActionsRequest = () => {
         {
           group: 'default',
           id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-          params: { message: 'Rule generated {{state.signalsCount}} signals' },
+          params: { message: 'Rule generated {{state.signals_count}} signals' },
           action_type_id: '.slack',
         },
       ],
@@ -371,6 +383,7 @@ export const createActionResult = (): ActionResult => ({
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+  isPreconfigured: false,
 });
 
 export const nonRuleAlert = () => ({
@@ -438,25 +451,31 @@ export const getResult = (): RuleAlertType => ({
     lists: [
       {
         field: 'source.ip',
-        boolean_operator: 'and',
-        values: [
-          {
-            name: '127.0.0.1',
-            type: 'value',
-          },
-        ],
+        values_operator: 'included',
+        values_type: 'exists',
       },
       {
         field: 'host.name',
-        boolean_operator: 'and not',
+        values_operator: 'excluded',
+        values_type: 'match',
         values: [
           {
             name: 'rock01',
-            type: 'value',
           },
+        ],
+        and: [
           {
-            name: 'mothra',
-            type: 'value',
+            field: 'host.id',
+            values_operator: 'included',
+            values_type: 'match_all',
+            values: [
+              {
+                name: '123',
+              },
+              {
+                name: '678',
+              },
+            ],
           },
         ],
       },
@@ -500,9 +519,10 @@ export const updateActionResult = (): ActionResult => ({
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+  isPreconfigured: false,
 });
 
-export const getMockPrivileges = () => ({
+export const getMockPrivilegesResult = () => ({
   username: 'test-space',
   has_all_requested: false,
   cluster: {
@@ -553,8 +573,6 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
-  is_authenticated: false,
-  has_encryption_key: true,
 });
 
 export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
@@ -580,6 +598,10 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
         lastSuccessAt: '2020-02-18T15:26:49.783Z',
         lastFailureMessage: null,
         lastSuccessMessage: 'succeeded',
+        lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+        gap: '500.32',
+        searchAfterTimeDurations: ['200.00'],
+        bulkCreateTimeDurations: ['800.43'],
       },
       references: [],
       updated_at: '2020-02-18T15:26:51.333Z',
@@ -597,6 +619,10 @@ export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttrib
         lastFailureMessage:
           'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
         lastSuccessMessage: 'succeeded',
+        lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+        gap: '500.32',
+        searchAfterTimeDurations: ['200.00'],
+        bulkCreateTimeDurations: ['800.43'],
       },
       references: [],
       updated_at: '2020-02-18T15:15:58.860Z',
@@ -656,7 +682,8 @@ export const getNotificationResult = (): RuleNotificationAlertType => ({
     {
       actionTypeId: '.slack',
       params: {
-        message: 'Rule generated {{state.signalsCount}} signals\n\n{{rule.name}}\n{{resultsLink}}',
+        message:
+          'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
       },
       group: 'default',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',

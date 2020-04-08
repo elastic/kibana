@@ -11,6 +11,7 @@ import {
   IScopedClusterClient,
   Logger,
   PluginInitializerContext,
+  ICustomClusterClient,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
@@ -49,7 +50,9 @@ declare module 'kibana/server' {
   }
 }
 
-export type MlPluginSetup = SharedServices;
+export interface MlPluginSetup extends SharedServices {
+  mlClient: ICustomClusterClient;
+}
 export type MlPluginStart = void;
 
 export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
@@ -76,19 +79,36 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       catalogue: [PLUGIN_ID],
       privileges: null,
       reserved: {
-        privilege: {
-          app: [PLUGIN_ID, 'kibana'],
-          catalogue: [PLUGIN_ID],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
         description: i18n.translate('xpack.ml.feature.reserved.description', {
           defaultMessage:
             'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.',
         }),
+        privileges: [
+          {
+            id: 'ml_user',
+            privilege: {
+              app: [PLUGIN_ID, 'kibana'],
+              catalogue: [PLUGIN_ID],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          },
+          {
+            id: 'ml_admin',
+            privilege: {
+              app: [PLUGIN_ID, 'kibana'],
+              catalogue: [PLUGIN_ID],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          },
+        ],
       },
     });
 
@@ -135,7 +155,10 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
+    return {
+      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud),
+      mlClient,
+    };
   }
 
   public start(): MlPluginStart {}

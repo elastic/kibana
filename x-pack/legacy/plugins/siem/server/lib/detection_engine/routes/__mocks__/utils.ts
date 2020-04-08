@@ -24,6 +24,21 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
 });
 
 /**
+ * This is a typical ML rule for testing
+ * @param ruleId
+ */
+export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  name: 'Simple Rule Query',
+  description: 'Simple Rule Query',
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  type: 'machine_learning',
+  anomaly_threshold: 44,
+  machine_learning_job_id: 'some_job_id',
+});
+
+/**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
  */
@@ -105,6 +120,7 @@ export const getOutputRuleAlertForRest = (): Omit<
   severity: 'high',
   updated_by: 'elastic',
   tags: [],
+  throttle: 'no_actions',
   threat: [
     {
       framework: 'MITRE ATT&CK',
@@ -125,25 +141,31 @@ export const getOutputRuleAlertForRest = (): Omit<
   lists: [
     {
       field: 'source.ip',
-      boolean_operator: 'and',
-      values: [
-        {
-          name: '127.0.0.1',
-          type: 'value',
-        },
-      ],
+      values_operator: 'included',
+      values_type: 'exists',
     },
     {
       field: 'host.name',
-      boolean_operator: 'and not',
+      values_operator: 'excluded',
+      values_type: 'match',
       values: [
         {
           name: 'rock01',
-          type: 'value',
         },
+      ],
+      and: [
         {
-          name: 'mothra',
-          type: 'value',
+          field: 'host.id',
+          values_operator: 'included',
+          values_type: 'match_all',
+          values: [
+            {
+              name: '123',
+            },
+            {
+              name: '678',
+            },
+          ],
         },
       ],
     },

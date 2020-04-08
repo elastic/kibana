@@ -245,7 +245,13 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
 
   return {
     count_total: totalAlertsCount,
-    count_by_type: results.aggregations.byAlertTypeId.value.types,
+    count_by_type: Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
+      (obj: any, key: string) => ({
+        ...obj,
+        [key.replace('.', '__')]: results.aggregations.byAlertTypeId.value.types[key],
+      }),
+      {}
+    ),
     throttle_time: {
       min: `${results.aggregations.throttleTime.value.min}s`,
       avg: `${
@@ -298,7 +304,13 @@ export async function getTotalCountInUse(callCluster: APICaller, kibanaInex: str
         parseInt(searchResult.aggregations.byAlertTypeId.value.types[key], 0) + total,
       0
     ),
-    countByType: searchResult.aggregations.byAlertTypeId.value.types,
+    countByType: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
+      (obj: any, key: string) => ({
+        ...obj,
+        [key.replace('.', '__')]: searchResult.aggregations.byAlertTypeId.value.types[key],
+      }),
+      {}
+    ),
   };
 }
 
