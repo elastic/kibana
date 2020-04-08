@@ -18,8 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { DefaultEditorSize } from '../../vis_default_editor/public';
+import { DefaultEditorSize } from '../../../../plugins/vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
 import { defaultFeedbackMessage } from '../../../../plugins/kibana_utils/common';

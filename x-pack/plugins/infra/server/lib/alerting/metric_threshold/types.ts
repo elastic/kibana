@@ -28,7 +28,7 @@ export type TimeUnit = 's' | 'm' | 'h' | 'd';
 interface BaseMetricExpressionParams {
   timeSize: number;
   timeUnit: TimeUnit;
-  indexPattern: string;
+  sourceId?: string;
   threshold: number[];
   comparator: Comparator;
 }
