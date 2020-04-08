@@ -339,7 +339,7 @@ export const ActionForm = ({
               <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="s">
+              <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
                     defaultMessage="{actionConnectorName}"
@@ -485,6 +485,14 @@ export const ActionForm = ({
 
   return (
     <Fragment>
+      <EuiTitle size="s">
+        <h4>
+          <FormattedMessage
+            defaultMessage="Actions"
+            id="xpack.triggersActionsUI.sections.alertForm.actionSectionsTitle"
+          />
+        </h4>
+      </EuiTitle>
       {actions.map((actionItem: AlertAction, index: number) => {
         const actionConnector = connectors.find(field => field.id === actionItem.id);
         // connectors doesn't exists
@@ -518,7 +526,7 @@ export const ActionForm = ({
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    defaultMessage="Actions: Select an action type"
+                    defaultMessage="Select an action type"
                     id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
                   />
                 </h5>
