@@ -15,7 +15,7 @@ import {
   ITiledSingleLayerVectorSource,
   TiledSingleLayerVectorSourceMeta,
 } from '../vector_source';
-import { MVT_SINGLE_LAYER } from '../../../../common/constants';
+import { MAX_ZOOM, MIN_ZOOM, MVT_SINGLE_LAYER } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
@@ -37,12 +37,14 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   static icon = 'logoElasticsearch';
 
-  static createDescriptor({ urlTemplate, layerName }) {
+  static createDescriptor({ urlTemplate, layerName, minZoom, maxZoom }) {
     return {
       type: MVTSingleLayerVectorSource.type,
       id: uuid(),
       urlTemplate,
       layerName,
+      minZoom: Math.max(MIN_ZOOM, minZoom),
+      maxZoom: Math.min(MAX_ZOOM, maxZoom),
     };
   }
 
@@ -50,16 +52,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  _createDefaultLayerDescriptor(options) {
-    return TiledVectorLayer.createDescriptor({
-      sourceDescriptor: this._descriptor,
-      ...options,
-    });
-  }
-
   createDefaultLayer(options) {
     return new TiledVectorLayer({
-      layerDescriptor: this._createDefaultLayerDescriptor(options),
+      layerDescriptor: TiledVectorLayer.createDescriptor({
+        sourceDescriptor: this._descriptor,
+        ...options,
+      }),
       source: this,
     });
   }
@@ -96,6 +94,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return {
       urlTemplate: this._descriptor.urlTemplate,
       layerName: this._descriptor.layerName,
+      minZoom: this._descriptor.minZoom,
+      maxZoom: this._descriptor.maxZoom,
     };
   }
 

@@ -50,6 +50,8 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 type TiledSingleLayerVectorSourceMeta = {
   urlTemplate: string;
   layerName: string;
+  minZoom: number;
+  maxZoom: number;
 };
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {

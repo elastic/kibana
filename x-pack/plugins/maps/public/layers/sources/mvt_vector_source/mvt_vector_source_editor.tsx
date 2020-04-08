@@ -7,11 +7,15 @@
 import React, { Fragment } from 'react';
 import _ from 'lodash';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiDualRange } from '@elastic/eui';
+import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 
 export class MVTVectorSourceEditor extends React.Component {
   state = {
     urlTemplate: '',
     layerName: '',
+    minZoom: 0,
+    maxZoom: 16,
     mvtCanPreview: false,
   };
 
@@ -20,11 +24,13 @@ export class MVTVectorSourceEditor extends React.Component {
       this.props.onSourceConfigChange({
         urlTemplate: this.state.urlTemplate,
         layerName: this.state.layerName,
+        minZoom: this.state.minZoom,
+        maxZoom: this.state.maxZoom,
       });
     }
   }, 2000);
 
-  _handleUrlTemplateChange(e) {
+  _handleUrlTemplateChange = e => {
     const url = e.target.value;
 
     const canPreview =
@@ -36,9 +42,9 @@ export class MVTVectorSourceEditor extends React.Component {
       },
       () => this._sourceConfigChange()
     );
-  }
+  };
 
-  _handleLayerNameInputChange(e) {
+  _handleLayerNameInputChange = e => {
     const layerName = e.target.value;
     this.setState(
       {
@@ -46,23 +52,36 @@ export class MVTVectorSourceEditor extends React.Component {
       },
       () => this._sourceConfigChange()
     );
-  }
+  };
+
+  _handleZoomRangeChange = e => {
+    console.log(e);
+    const minZoom = parseInt(e[0], 10);
+    const maxZoom = parseInt(e[1], 10);
+
+    if (this.state.minZoom !== minZoom || this.state.maxZoom !== maxZoom) {
+      this.setState({ minZoom, maxZoom });
+    }
+  };
 
   render() {
-    const example = `https://tiles.maps.elastic.co/data/v3/{z}/{x}/{y}.pbf`;
     return (
       <Fragment>
-        <div>{example}</div>
         <EuiFormRow label="Url">
-          <EuiFieldText
-            value={this.state.urlTemplate}
-            onChange={e => this._handleUrlTemplateChange(e)}
-          />
+          <EuiFieldText value={this.state.urlTemplate} onChange={this._handleUrlTemplateChange} />
         </EuiFormRow>
         <EuiFormRow label="Layer name">
-          <EuiFieldText
-            value={this.state.layerName}
-            onChange={e => this._handleLayerNameInputChange(e)}
+          <EuiFieldText value={this.state.layerName} onChange={this._handleLayerNameInputChange} />
+        </EuiFormRow>
+        <EuiFormRow label="Layer name">
+          <EuiDualRange
+            step={1}
+            value={[`${this.state.minZoom}`, `${this.state.maxZoom}`]}
+            min={MIN_ZOOM}
+            max={MAX_ZOOM}
+            onChange={this._handleZoomRangeChange}
+            showLabels
+            aria-label={'Zoom level range for data'}
           />
         </EuiFormRow>
       </Fragment>
