@@ -17,21 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
-
-// eslint-disable-next-line import/no-default-export
-export default function ManagementPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'stack-management',
-    publicDir: resolve(__dirname, 'public'),
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init: (server: Legacy.Server) => ({}),
-  };
-
-  return new kibana.Plugin(config);
-}
+export {
+  ProcessedImportResponse,
+  processImportResponse,
+} from './management/sections/objects/lib/process_import_response';

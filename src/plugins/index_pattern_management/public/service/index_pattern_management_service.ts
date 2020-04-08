@@ -17,18 +17,12 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../../../../plugins/home/public';
-import { HttpSetup } from '../../../../../../../core/public';
+import { HttpSetup } from '../../../../core/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
 
 interface SetupDependencies {
   httpClient: HttpSetup;
-  home: HomePublicPluginSetup;
 }
 
 /**
@@ -37,31 +31,29 @@ interface SetupDependencies {
  * @internal
  */
 export class IndexPatternManagementService {
-  public setup({ httpClient, home }: SetupDependencies) {
-    const creation = new IndexPatternCreationManager(httpClient);
-    const list = new IndexPatternListManager();
+  indexPatternCreationManager: IndexPatternCreationManager;
+  indexPatternListConfig: IndexPatternListManager;
 
-    creation.add(IndexPatternCreationConfig);
-    list.add(IndexPatternListConfig);
+  constructor() {
+    this.indexPatternCreationManager = new IndexPatternCreationManager();
+    this.indexPatternListConfig = new IndexPatternListManager();
+  }
 
-    home.featureCatalogue.register({
-      id: 'index_patterns',
-      title: i18n.translate('management.indexPatternHeader', {
-        defaultMessage: 'Index Patterns',
-      }),
-      description: i18n.translate('management.indexPatternLabel', {
-        defaultMessage:
-          'Manage the index patterns that help retrieve your data from Elasticsearch.',
-      }),
-      icon: 'indexPatternApp',
-      path: '/app/kibana#/management/kibana/index_patterns',
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.ADMIN,
-    });
+  public setup({ httpClient }: SetupDependencies) {
+    const creationManagerSetup = this.indexPatternCreationManager.setup(httpClient);
+    creationManagerSetup.addCreationConfig(IndexPatternCreationConfig);
+    this.indexPatternListConfig.setup().addListConfig(IndexPatternListConfig);
 
     return {
-      creation,
-      list,
+      creation: creationManagerSetup,
+      list: this.indexPatternListConfig.setup(),
+    };
+  }
+
+  public start() {
+    return {
+      creation: this.indexPatternCreationManager.start(),
+      list: this.indexPatternListConfig.start(),
     };
   }
 
@@ -71,4 +63,5 @@ export class IndexPatternManagementService {
 }
 
 /** @internal */
-export type IndexPatternManagementSetup = ReturnType<IndexPatternManagementService['setup']>;
+export type IndexPatternManagementServiceSetup = ReturnType<IndexPatternManagementService['setup']>;
+export type IndexPatternManagementServiceStart = ReturnType<IndexPatternManagementService['start']>;

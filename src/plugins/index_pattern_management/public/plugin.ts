@@ -17,43 +17,40 @@
  * under the License.
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { IndexPatternManagementService, IndexPatternManagementSetup } from './services';
-
-export interface ManagementPluginSetupDependencies {
-  home: HomePublicPluginSetup;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ManagementPluginStartDependencies {}
-
-export interface ManagementSetup {
-  indexPattern: IndexPatternManagementSetup;
-}
+import {
+  IndexPatternManagementService,
+  IndexPatternManagementServiceSetup,
+  IndexPatternManagementServiceStart,
+} from './service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ManagementStart {}
+export interface IndexPatternManagementSetupDependencies {}
 
-export class ManagementPlugin
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IndexPatternManagementStartDependencies {}
+
+export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
+
+export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
+
+export class IndexPatternManagementPlugin
   implements
     Plugin<
-      ManagementSetup,
-      ManagementStart,
-      ManagementPluginSetupDependencies,
-      ManagementPluginStartDependencies
+      IndexPatternManagementSetup,
+      IndexPatternManagementStart,
+      IndexPatternManagementSetupDependencies,
+      IndexPatternManagementStartDependencies
     > {
   private readonly indexPattern = new IndexPatternManagementService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home }: ManagementPluginSetupDependencies) {
-    return {
-      indexPattern: this.indexPattern.setup({ httpClient: core.http, home }),
-    };
+  public setup(core: CoreSetup) {
+    return this.indexPattern.setup({ httpClient: core.http });
   }
 
-  public start(core: CoreStart, plugins: ManagementPluginStartDependencies) {
-    return {};
+  public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
+    return this.indexPattern.start();
   }
 
   public stop() {
