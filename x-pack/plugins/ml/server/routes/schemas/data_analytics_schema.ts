@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const dataAnalyticsJobConfigSchema = {
+export const dataAnalyticsJobConfigSchema = schema.object({
   description: schema.maybe(schema.string()),
   dest: schema.object({
     index: schema.string(),
@@ -26,9 +26,9 @@ export const dataAnalyticsJobConfigSchema = {
   analysis: schema.any(),
   analyzed_fields: schema.any(),
   model_memory_limit: schema.string(),
-};
+});
 
-export const dataAnalyticsEvaluateSchema = {
+export const dataAnalyticsEvaluateSchema = schema.object({
   index: schema.string(),
   query: schema.maybe(schema.any()),
   evaluation: schema.maybe(
@@ -37,9 +37,9 @@ export const dataAnalyticsEvaluateSchema = {
       classification: schema.maybe(schema.any()),
     })
   ),
-};
+});
 
-export const dataAnalyticsExplainSchema = {
+export const dataAnalyticsExplainSchema = schema.object({
   description: schema.maybe(schema.string()),
   dest: schema.maybe(schema.any()),
   source: schema.object({
@@ -48,4 +48,11 @@ export const dataAnalyticsExplainSchema = {
   analysis: schema.any(),
   analyzed_fields: schema.maybe(schema.any()),
   model_memory_limit: schema.maybe(schema.string()),
-};
+});
+
+export const analyticsIdSchema = schema.object({
+  /**
+   * Analytics ID
+   */
+  analyticsId: schema.string(),
+});

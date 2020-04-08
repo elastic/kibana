@@ -74,8 +74,6 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
    * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get stats for fields
    * @apiName GetStatsForFields
    * @apiDescription Returns fields stats of the index pattern.
-   *
-   * @apiParam {String} indexPatternTitle Index pattern title.
    */
   router.post(
     {
@@ -126,8 +124,6 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
    * @api {post} /api/ml/data_visualizer/get_overall_stats/:indexPatternTitle Get overall stats
    * @apiName GetOverallStats
    * @apiDescription Returns overall stats of the index pattern.
-   *
-   * @apiParam {String} indexPatternTitle Index pattern title.
    */
   router.post(
     {

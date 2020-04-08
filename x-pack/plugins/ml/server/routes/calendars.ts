@@ -8,7 +8,7 @@ import { RequestHandlerContext } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
-import { calendarSchema } from './schemas/calendars_schema';
+import { calendarSchema, calendarIdSchema } from './schemas/calendars_schema';
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 
 function getAllCalendars(context: RequestHandlerContext) {
@@ -92,7 +92,7 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/calendars',
       validate: {
-        body: schema.object({ ...calendarSchema }),
+        body: calendarSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -113,8 +113,8 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
-        params: schema.object({ calendarId: schema.string() }),
-        body: schema.object({ ...calendarSchema }),
+        params: calendarIdSchema,
+        body: calendarSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -136,7 +136,7 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/calendars/{calendarId}',
       validate: {
-        params: schema.object({ calendarId: schema.string() }),
+        params: calendarIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

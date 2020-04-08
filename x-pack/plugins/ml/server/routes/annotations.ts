@@ -5,10 +5,8 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { schema } from '@kbn/config-schema';
 import { SecurityPluginSetup } from '../../../security/server';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
@@ -54,7 +52,7 @@ export function annotationRoutes(
     {
       path: '/api/ml/annotations',
       validate: {
-        body: schema.object(getAnnotationsSchema),
+        body: getAnnotationsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -81,15 +79,12 @@ export function annotationRoutes(
    * @apiDescription Index the annotation.
    *
    * @apiSchema indexAnnotationSchema
-   *
-   * @apiParam {Object} annotation
-   * @apiParam {String} username
    */
   router.put(
     {
       path: '/api/ml/annotations/index',
       validate: {
-        body: schema.object(indexAnnotationSchema),
+        body: indexAnnotationSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -123,19 +118,17 @@ export function annotationRoutes(
   /**
    * @apiGroup Annotations
    *
-   * @api {delete} /api/ml/annotations/index Deletes annotation
+   * @api {delete} /api/ml/annotations/delete/:annotationId Deletes annotation
    * @apiName DeleteAnnotation
    * @apiDescription Deletes specified annotation
    *
    * @apiSchema deleteAnnotationSchema
-   *
-   * @apiParam {String} annotationId
    */
   router.delete(
     {
       path: '/api/ml/annotations/delete/{annotationId}',
       validate: {
-        params: schema.object(deleteAnnotationSchema),
+        params: deleteAnnotationSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

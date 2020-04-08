@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { RequestHandlerContext } from 'kibana/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 import { AnalysisConfig } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -122,12 +122,14 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @api {post} /api/ml/validate/cardinality Validate cardinality
    * @apiName ValidateCardinality
    * @apiDescription Validates cardinality for the given job configuration
+   *
+   * @apiSchema validateCardinalitySchema
    */
   router.post(
     {
       path: '/api/ml/validate/cardinality',
       validate: {
-        body: schema.object(validateCardinalitySchema),
+        body: validateCardinalitySchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -152,6 +154,8 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @api {post} /api/ml/validate/job Validates job
    * @apiName ValidateJob
    * @apiDescription Validates the given job configuration
+   *
+   * @apiSchema validateJobSchema
    */
   router.post(
     {

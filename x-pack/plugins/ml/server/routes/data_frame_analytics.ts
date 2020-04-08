@@ -12,6 +12,7 @@ import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
+  analyticsIdSchema,
 } from './schemas/data_analytics_schema';
 
 /**
@@ -31,9 +32,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
   router.get(
     {
       path: '/api/ml/data_frame/analytics',
-      validate: {
-        params: schema.object({ analyticsId: schema.maybe(schema.string()) }),
-      },
+      validate: false,
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -54,13 +53,13 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName GetDataFrameAnalyticsById
    * @apiDescription Returns the data frame analytics job.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema analyticsIdSchema
    */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
-        params: schema.object({ analyticsId: schema.string() }),
+        params: analyticsIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -111,13 +110,15 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName GetDataFrameAnalyticsStatsById
    * @apiDescription Returns data frame analytics job statistics.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema analyticsIdSchema
+   *
+   * @apiParam {String} analyticsId .
    */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stats',
       validate: {
-        params: schema.object({ analyticsId: schema.string() }),
+        params: analyticsIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -146,16 +147,15 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiDescription This API creates a data frame analytics job that performs an analysis
    *                 on the source index and stores the outcome in a destination index.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema analyticsIdSchema
+   * @apiSchema dataAnalyticsJobConfigSchema
    */
   router.put(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-        }),
-        body: schema.object(dataAnalyticsJobConfigSchema),
+        params: analyticsIdSchema,
+        body: dataAnalyticsJobConfigSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -188,7 +188,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     {
       path: '/api/ml/data_frame/_evaluate',
       validate: {
-        body: schema.object({ ...dataAnalyticsEvaluateSchema }),
+        body: dataAnalyticsEvaluateSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -216,19 +216,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiDescription This API provides explanations for a data frame analytics config
    *                 that either exists already or one that has not been created yet.
    *
-   * @apiParam {String} [description]
-   * @apiParam {Object} [dest]
-   * @apiParam {Object} source
-   * @apiParam {String} source.index
-   * @apiParam {Object} analysis
-   * @apiParam {Object} [analyzed_fields]
-   * @apiParam {String} [model_memory_limit]
    */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/_explain',
       validate: {
-        body: schema.object({ ...dataAnalyticsExplainSchema }),
+        body: dataAnalyticsExplainSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -254,16 +247,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @api {delete} /api/ml/data_frame/analytics/:analyticsId Delete specified analytics job
    * @apiName DeleteDataFrameAnalytics
    * @apiDescription Deletes specified data frame analytics job.
-   *
-   * @apiParam {String} analyticsId Analytics ID.
    */
   router.delete(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-        }),
+        params: analyticsIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -290,16 +279,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @api {post} /api/ml/data_frame/analytics/:analyticsId/_start Start specified analytics job
    * @apiName StartDataFrameAnalyticsJob
    * @apiDescription Starts a data frame analytics job.
-   *
-   * @apiParam {String} analyticsId Analytics ID.
    */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_start',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-        }),
+        params: analyticsIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -330,10 +315,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stop',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-          force: schema.maybe(schema.boolean()),
-        }),
+        params: analyticsIdSchema,
+        query: schema.object({ force: schema.maybe(schema.boolean()) }),
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -366,14 +349,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @api {get} /api/ml/data_frame/analytics/:analyticsId/messages Get analytics job messages
    * @apiName GetDataFrameAnalyticsMessages
    * @apiDescription Returns the list of audit messages for data frame analytics jobs.
-   *
-   * @apiParam {String} analyticsId Analytics ID.
    */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/messages',
       validate: {
-        params: schema.object({ analyticsId: schema.string() }),
+        params: analyticsIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
