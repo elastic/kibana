@@ -18,14 +18,26 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
 
 import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
 
-export const ScriptingHelpFlyout = ({
+import { IndexPattern } from '../../../../../../plugins/data/public';
+import { ExecuteScriptParams } from '../../types';
+
+interface ScriptingHelpFlyoutProps {
+  indexPattern: IndexPattern;
+  lang: string;
+  name?: string;
+  script?: string;
+  executeScript: (params: ExecuteScriptParams) => void;
+  isVisible: boolean;
+  onClose: () => void;
+}
+
+export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
   isVisible = false,
   onClose = () => {},
   indexPattern,
@@ -67,11 +79,3 @@ export const ScriptingHelpFlyout = ({
 };
 
 ScriptingHelpFlyout.displayName = 'ScriptingHelpFlyout';
-
-ScriptingHelpFlyout.propTypes = {
-  indexPattern: PropTypes.object.isRequired,
-  lang: PropTypes.string.isRequired,
-  name: PropTypes.string,
-  script: PropTypes.string,
-  executeScript: PropTypes.func.isRequired,
-};

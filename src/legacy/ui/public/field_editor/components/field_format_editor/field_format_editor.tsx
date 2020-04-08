@@ -18,27 +18,26 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
 
-export class FieldFormatEditor extends PureComponent {
-  static propTypes = {
-    fieldType: PropTypes.string.isRequired,
-    fieldFormat: PropTypes.object.isRequired,
-    fieldFormatId: PropTypes.string.isRequired,
-    fieldFormatParams: PropTypes.object.isRequired,
-    fieldFormatEditors: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired,
-    onError: PropTypes.func.isRequired,
-  };
+interface FieldFormatEditorProps {
+  fieldType: string;
+  fieldFormat: any; // todo
+  fieldFormatId: string;
+  fieldFormatParams: any; // todo
+  fieldFormatEditors: any; // todo
+  onChange: () => void;
+  onError: () => void;
+}
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      EditorComponent: null,
-    };
-  }
+interface FieldFormatEditorState {
+  EditorComponent?: React.FC; // todo
+}
 
-  static getDerivedStateFromProps(nextProps) {
+export class FieldFormatEditor extends PureComponent<
+  FieldFormatEditorProps,
+  FieldFormatEditorState
+> {
+  static getDerivedStateFromProps(nextProps: FieldFormatEditorProps) {
     return {
       EditorComponent: nextProps.fieldFormatEditors.getEditor(nextProps.fieldFormatId) || null,
     };

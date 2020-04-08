@@ -21,23 +21,42 @@ import React, { Fragment } from 'react';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { DefaultFormatEditor } from '../default';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import {
+  DefaultFormatEditor,
+  defaultState,
+  FormatEditorProps,
+  FormatEditorState,
+} from '../default';
 
 import { FormatEditorSamples } from '../../samples';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+interface DurationFormatEditorState {
+  hasDecimalError: boolean;
+}
 
-export class DurationFormatEditor extends DefaultFormatEditor {
+interface DurationFormatEditorFormatParams {
+  outputPrecision: number;
+  inputFormat: any;
+  outputFormat: any; // todo
+}
+
+export class DurationFormatEditor extends DefaultFormatEditor<
+  DurationFormatEditorFormatParams,
+  DurationFormatEditorState
+> {
   static formatId = 'duration';
+  state = {
+    ...defaultState,
+    sampleInputs: [-123, 1, 12, 123, 658, 1988, 3857, 123292, 923528271],
+    hasDecimalError: false,
+  };
 
-  constructor(props) {
-    super(props);
-    this.state.sampleInputs = [-123, 1, 12, 123, 658, 1988, 3857, 123292, 923528271];
-    this.state.hasDecimalError = false;
-  }
-
-  static getDerivedStateFromProps(nextProps, state) {
+  static getDerivedStateFromProps(
+    nextProps: FormatEditorProps<DurationFormatEditorFormatParams>,
+    state: FormatEditorState & DurationFormatEditorState
+  ) {
     const output = super.getDerivedStateFromProps(nextProps, state);
     let error = null;
 
@@ -77,10 +96,10 @@ export class DurationFormatEditor extends DefaultFormatEditor {
         >
           <EuiSelect
             value={formatParams.inputFormat}
-            options={format.type.inputFormats.map(format => {
+            options={format.type.inputFormats.map(fmt => {
               return {
-                value: format.kind,
-                text: format.text,
+                value: fmt.kind,
+                text: fmt.text,
               };
             })}
             onChange={e => {
@@ -100,10 +119,10 @@ export class DurationFormatEditor extends DefaultFormatEditor {
         >
           <EuiSelect
             value={formatParams.outputFormat}
-            options={format.type.outputFormats.map(format => {
+            options={format.type.outputFormats.map(fmt => {
               return {
-                value: format.method,
-                text: format.text,
+                value: fmt.method,
+                text: fmt.text,
               };
             })}
             onChange={e => {

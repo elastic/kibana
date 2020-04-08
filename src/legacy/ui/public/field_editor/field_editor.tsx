@@ -18,18 +18,14 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { intersection, union, get } from 'lodash';
 
+// todo move into ui/field_editor
 import {
   GetEnabledScriptingLanguagesProvider,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from 'ui/scripting_languages';
-
-import { getDocLink } from 'ui/documentation_links';
-
-import { toastNotifications } from 'ui/notify';
 
 import { npStart } from 'ui/new_platform';
 
@@ -56,6 +52,11 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { IndexPattern, IFieldType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
+import { IFieldFormatType } from '../../../../plugins/data/common';
+import { Field } from '../../../../plugins/data/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -68,20 +69,19 @@ import { FieldFormatEditor } from './components/field_format_editor';
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { copyField, executeScript, isScriptValid } from './lib';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 // This loads Ace editor's "groovy" mode, used below to highlight the script.
 import 'brace/mode/groovy';
 
 const getFieldFormats = () => npStart.plugins.data.fieldFormats;
 
-const getFieldTypeFormatsList = (field, defaultFieldFormat) => {
+const getFieldTypeFormatsList = (field: IFieldType, defaultFieldFormat: IFieldFormatType) => {
   const fieldFormats = getFieldFormats();
-  const formatsByType = fieldFormats.getByFieldType(field.type).map(({ id, title }) => ({
-    id,
-    title,
-  }));
+  const formatsByType = fieldFormats
+    .getByFieldType(field.type as KBN_FIELD_TYPES)
+    .map(({ id, title }) => ({
+      id,
+      title,
+    }));
 
   return [
     {
@@ -95,26 +95,47 @@ const getFieldTypeFormatsList = (field, defaultFieldFormat) => {
   ];
 };
 
-export class FieldEditor extends PureComponent {
-  static propTypes = {
-    indexPattern: PropTypes.object.isRequired,
-    field: PropTypes.object.isRequired,
-    helpers: PropTypes.shape({
-      Field: PropTypes.func.isRequired,
-      getConfig: PropTypes.func.isRequired,
-      $http: PropTypes.func.isRequired,
-      fieldFormatEditors: PropTypes.object.isRequired,
-      redirectAway: PropTypes.func.isRequired,
-    }),
-  };
+export interface FieldEditorState {
+  isReady: boolean;
+  isCreating: boolean;
+  isDeprecatedLang: boolean;
+  scriptingLangs: string[];
+  fieldTypes: any[]; // todo
+  fieldTypeFormats: any[];
+  existingFieldNames: string[];
+  field: any;
+  fieldFormatId?: string;
+  fieldFormatParams: any;
+  showScriptingHelp: boolean;
+  showDeleteModal: boolean;
+  hasFormatError: boolean;
+  hasScriptError: boolean;
+  isSaving: boolean;
+  errors?: string[];
+}
 
-  constructor(props) {
+export interface FieldEdiorProps {
+  indexPattern: IndexPattern;
+  field: Field;
+  helpers: {
+    Field: any;
+    getConfig: () => any;
+    $http: () => any;
+    fieldFormatEditors: any;
+    redirectAway: () => void;
+  };
+}
+
+export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
+  supportedLangs: string[] = [];
+  deprecatedLangs: string[] = [];
+  constructor(props: FieldEdiorProps) {
     super(props);
 
     const {
       field,
       indexPattern,
-      helpers: { Field },
+      helpers: { Field: FieldClass },
     } = props;
 
     this.state = {
@@ -124,8 +145,8 @@ export class FieldEditor extends PureComponent {
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.map(f => f.name),
-      field: copyField(field, indexPattern, Field),
+      existingFieldNames: indexPattern.fields.map((f: IFieldType) => f.name),
+      field: copyField(field, indexPattern, FieldClass),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -144,7 +165,7 @@ export class FieldEditor extends PureComponent {
     const { field } = this.state;
     const { indexPattern } = this.props;
 
-    const getEnabledScriptingLanguages = new GetEnabledScriptingLanguagesProvider($http);
+    const getEnabledScriptingLanguages = GetEnabledScriptingLanguagesProvider($http);
     const enabledLangs = await getEnabledScriptingLanguages();
     const scriptingLangs = intersection(
       enabledLangs,
@@ -160,28 +181,28 @@ export class FieldEditor extends PureComponent {
 
     this.setState({
       isReady: true,
-      isCreating: !indexPattern.fields.getByName(field.name),
+      isCreating: !indexPattern.fields.find(f => f.name === field.name),
       isDeprecatedLang: this.deprecatedLangs.includes(field.lang),
       errors: [],
       scriptingLangs,
       fieldTypes,
-      fieldTypeFormats: getFieldTypeFormatsList(field, DefaultFieldFormat),
+      fieldTypeFormats: getFieldTypeFormatsList(field, DefaultFieldFormat as IFieldFormatType),
       fieldFormatId: get(indexPattern, ['fieldFormatMap', field.name, 'type', 'id']),
       fieldFormatParams: field.format.params(),
     });
   }
 
-  onFieldChange = (fieldName, value) => {
+  onFieldChange = (fieldName: string, value: string | number) => {
     const { field } = this.state;
     field[fieldName] = value;
     this.forceUpdate();
   };
 
-  onTypeChange = type => {
+  onTypeChange = (type: KBN_FIELD_TYPES) => {
     const { getConfig } = this.props.helpers;
     const { field } = this.state;
     const fieldFormats = getFieldFormats();
-    const DefaultFieldFormat = fieldFormats.getDefaultType(type);
+    const DefaultFieldFormat = fieldFormats.getDefaultType(type) as IFieldFormatType;
 
     field.type = type;
     field.format = new DefaultFieldFormat(null, getConfig);
@@ -193,7 +214,7 @@ export class FieldEditor extends PureComponent {
     });
   };
 
-  onLangChange = lang => {
+  onLangChange = (lang: string) => {
     const { field } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, lang, DEFAULT_FIELD_TYPES);
     field.lang = lang;
@@ -204,12 +225,12 @@ export class FieldEditor extends PureComponent {
     });
   };
 
-  onFormatChange = (formatId, params) => {
+  onFormatChange = (formatId: string, params?: any) => {
     const fieldFormats = getFieldFormats();
     const { field, fieldTypeFormats } = this.state;
     const FieldFormat = fieldFormats.getType(
       formatId || fieldTypeFormats[0]?.defaultFieldFormat.id
-    );
+    ) as IFieldFormatType;
 
     field.format = new FieldFormat(params, this.props.helpers.getConfig);
 
@@ -219,12 +240,12 @@ export class FieldEditor extends PureComponent {
     });
   };
 
-  onFormatParamsChange = newParams => {
+  onFormatParamsChange = (newParams: { fieldType: string; [key: string]: any }) => {
     const { fieldFormatId } = this.state;
-    this.onFormatChange(fieldFormatId, newParams);
+    this.onFormatChange(fieldFormatId as string, newParams);
   };
 
-  onFormatParamsError = error => {
+  onFormatParamsError = (error: string) => {
     this.setState({
       hasFormatError: !!error,
     });
@@ -317,7 +338,10 @@ export class FieldEditor extends PureComponent {
                 values={{
                   language: <EuiCode>{field.lang}</EuiCode>,
                   painlessLink: (
-                    <EuiLink target="_blank" href={getDocLink('scriptedFields.painless')}>
+                    <EuiLink
+                      target="_blank"
+                      href={npStart.core.docLinks.links.scriptedFields.painless}
+                    >
                       <FormattedMessage
                         id="common.ui.fieldEditor.warningLabel.painlessLinkLabel"
                         defaultMessage="Painless"
@@ -359,7 +383,7 @@ export class FieldEditor extends PureComponent {
           })}
           data-test-subj="editorFieldType"
           onChange={e => {
-            this.onTypeChange(e.target.value);
+            this.onTypeChange(e.target.value as KBN_FIELD_TYPES);
           }}
         />
       </EuiFormRow>
@@ -499,7 +523,7 @@ export class FieldEditor extends PureComponent {
     );
   }
 
-  onScriptChange = value => {
+  onScriptChange = (value: string) => {
     this.setState({
       hasScriptError: false,
     });
@@ -721,7 +745,7 @@ export class FieldEditor extends PureComponent {
           defaultMessage: "Deleted '{fieldName}'",
           values: { fieldName: field.name },
         });
-        toastNotifications.addSuccess(message);
+        npStart.core.notifications.toasts.addSuccess(message);
         redirectAway();
       });
     } else {
@@ -756,7 +780,7 @@ export class FieldEditor extends PureComponent {
     }
 
     const { redirectAway } = this.props.helpers;
-    const index = indexPattern.fields.findIndex(f => f.name === field.name);
+    const index = indexPattern.fields.findIndex((f: IFieldType) => f.name === field.name);
 
     if (index > -1) {
       indexPattern.fields.update(field);
@@ -775,7 +799,7 @@ export class FieldEditor extends PureComponent {
         defaultMessage: "Saved '{fieldName}'",
         values: { fieldName: field.name },
       });
-      toastNotifications.addSuccess(message);
+      npStart.core.notifications.toasts.addSuccess(message);
       redirectAway();
     });
   };

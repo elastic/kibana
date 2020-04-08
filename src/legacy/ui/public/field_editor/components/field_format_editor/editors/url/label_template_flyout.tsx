@@ -132,7 +132,7 @@ export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) =
                        * Justification for dangerouslySetInnerHTML:
                        * Example output produces anchor link.
                        */
-                      dangerouslySetInnerHTML={{ __html: value }} //eslint-disable-line react/no-danger
+                      dangerouslySetInnerHTML={{ __html: value }} // eslint-disable-line react/no-danger
                     />
                   );
                 },

@@ -21,26 +21,28 @@ import React, { Fragment } from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { DefaultFormatEditor } from '../default';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { DefaultFormatEditor, defaultState } from '../default';
 
 import { FormatEditorSamples } from '../../samples';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+interface StringFormatEditorFormatParams {
+  transform: string;
+}
 
-export class StringFormatEditor extends DefaultFormatEditor {
+export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFormatParams> {
   static formatId = 'string';
-
-  constructor(props) {
-    super(props);
-    this.state.sampleInputs = [
+  state = {
+    ...defaultState,
+    sampleInputs: [
       'A Quick Brown Fox.',
       'STAY CALM!',
       'com.organizations.project.ClassName',
       'hostname.net',
       'SGVsbG8gd29ybGQ=',
       '%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98',
-    ];
-  }
+    ],
+  };
 
   render() {
     const { format, formatParams } = this.props;

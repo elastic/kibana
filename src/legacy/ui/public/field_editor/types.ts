@@ -17,30 +17,24 @@
  * under the License.
  */
 
-import chrome from '../chrome';
-import { toastNotifications } from '../notify';
-import { i18n } from '@kbn/i18n';
+import { ReactText } from 'react';
 
-export function getSupportedScriptingLanguages() {
-  return ['painless'];
+export interface Sample {
+  input: ReactText;
+  output: string;
 }
 
-export function getDeprecatedScriptingLanguages() {
-  return [];
+// incomplete
+export interface ExecuteScriptParams {
+  name: string;
+  lang: string;
+  script: string;
+  indexPatternTitle: string;
+  query?: string;
+  additionalFields?: string[];
 }
 
-export function GetEnabledScriptingLanguagesProvider($http) {
-  return () => {
-    return $http
-      .get(chrome.addBasePath('/api/kibana/scripts/languages'))
-      .then(res => res.data)
-      .catch(() => {
-        toastNotifications.addDanger(
-          i18n.translate('common.ui.scriptingLanguages.errorFetchingToastDescription', {
-            defaultMessage: 'Error getting available scripting languages from Elasticsearch',
-          })
-        );
-        return [];
-      });
-  };
+export enum ConverterType {
+  TEXT,
+  HTML,
 }

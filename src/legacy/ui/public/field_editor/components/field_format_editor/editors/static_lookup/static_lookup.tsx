@@ -21,12 +21,19 @@ import React, { Fragment } from 'react';
 
 import { EuiBasicTable, EuiButton, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { DefaultFormatEditor } from '../default';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DefaultFormatEditor } from '../default';
 
-export class StaticLookupFormatEditor extends DefaultFormatEditor {
+interface StaticLookupFormatEditorFormatParams {
+  lookupEntries: Array<{}>;
+  unknownKeyValue: string;
+}
+
+export class StaticLookupFormatEditor extends DefaultFormatEditor<
+  StaticLookupFormatEditorFormatParams
+> {
+  static formatId = 'static_lookup';
   onLookupChange = (newLookupParams, index) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
     lookupEntries[index] = {
@@ -45,7 +52,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
     });
   };
 
-  removeLookup = index => {
+  removeLookup = (index: number) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
     lookupEntries.splice(index, 1);
     this.onChange({
@@ -114,6 +121,10 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
         },
       },
       {
+        field: 'actions',
+        name: i18n.translate('common.ui.fieldEditor.staticLookup.actions', {
+          defaultMessage: 'actions',
+        }),
         actions: [
           {
             name: i18n.translate('common.ui.fieldEditor.staticLookup.deleteAria', {
@@ -172,5 +183,3 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-StaticLookupFormatEditor.formatId = 'static_lookup';

@@ -28,7 +28,9 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import { DefaultFormatEditor } from '../default';
+import chrome from 'ui/chrome';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { DefaultFormatEditor, FormatEditorProps } from '../default';
 
 import { FormatEditorSamples } from '../../samples';
 
@@ -36,15 +38,37 @@ import { LabelTemplateFlyout } from './label_template_flyout';
 
 import { UrlTemplateFlyout } from './url_template_flyout';
 
-import chrome from 'ui/chrome';
+import { ConverterType } from '../../../../types';
+
 import './icons';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+interface OnChangeParam {
+  type: string;
+  width?: string;
+  height?: string;
+  urlTemplate?: string;
+}
 
-export class UrlFormatEditor extends DefaultFormatEditor {
+interface UrlFormatEditorFormatParams {
+  openLinkInCurrentTab: boolean;
+  urlTemplate: string;
+  labelTemplate: string;
+  width: string;
+  height: string;
+}
+
+interface UrlFormatEditorFormatState {
+  showLabelTemplateHelp: boolean;
+  showUrlTemplateHelp: boolean;
+}
+
+export class UrlFormatEditor extends DefaultFormatEditor<
+  UrlFormatEditorFormatParams,
+  UrlFormatEditorFormatState
+> {
   static formatId = 'url';
 
-  constructor(props) {
+  constructor(props: FormatEditorProps<UrlFormatEditorFormatParams>) {
     super(props);
     const bp = chrome.getBasePath();
     this.iconPattern = `${bp}/bundles/src/legacy/ui/public/field_editor/components/field_format_editor/editors/url/icons/{{value}}.png`;
@@ -55,23 +79,23 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         img: ['go', 'stop', ['de', 'ne', 'us', 'ni'], 'cv'],
         audio: ['hello.mp3'],
       },
-      sampleConverterType: 'html',
+      sampleConverterType: ConverterType.HTML,
       showUrlTemplateHelp: false,
       showLabelTemplateHelp: false,
     };
   }
 
-  sanitizeNumericValue = val => {
-    const sanitizedValue = parseInt(val);
+  sanitizeNumericValue = (val: string) => {
+    const sanitizedValue = parseInt(val, 10);
     if (isNaN(sanitizedValue)) {
       return '';
     }
     return sanitizedValue;
   };
 
-  onTypeChange = newType => {
+  onTypeChange = (newType: string) => {
     const { urlTemplate, width, height } = this.props.formatParams;
-    const params = {
+    const params: OnChangeParam = {
       type: newType,
     };
     if (newType === 'img') {
@@ -81,7 +105,7 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         params.urlTemplate = this.iconPattern;
       }
     } else if (newType !== 'img' && urlTemplate === this.iconPattern) {
-      params.urlTemplate = null;
+      params.urlTemplate = undefined;
     }
     this.onChange(params);
   };

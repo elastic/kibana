@@ -21,19 +21,21 @@ import React, { Fragment } from 'react';
 
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
-import { DefaultFormatEditor } from '../default';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { DefaultFormatEditor, defaultState } from '../default';
 
 import { FormatEditorSamples } from '../../samples';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+export interface NumberFormatEditorParams {
+  pattern: string;
+}
 
-export class NumberFormatEditor extends DefaultFormatEditor {
+export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorParams> {
   static formatId = 'number';
-
-  constructor(props) {
-    super(props);
-    this.state.sampleInputs = [10000, 12.345678, -1, -999, 0.52];
-  }
+  state = {
+    ...defaultState,
+    sampleInputs: [10000, 12.345678, -1, -999, 0.52],
+  };
 
   render() {
     const { format, formatParams } = this.props;

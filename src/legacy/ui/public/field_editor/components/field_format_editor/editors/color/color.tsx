@@ -21,22 +21,37 @@ import React, { Fragment } from 'react';
 
 import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
-import { DefaultFormatEditor } from '../default';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { DefaultFormatEditor, FormatEditorProps } from '../default';
 
 import { fieldFormats } from '../../../../../../../../plugins/data/public';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+interface Color {
+  range?: string;
+  regex?: string;
+  text: string;
+  background: string;
+}
 
-export class ColorFormatEditor extends DefaultFormatEditor {
-  constructor(props) {
+interface IndexedColor extends Color {
+  index: number;
+}
+
+interface ColorFormatEditorFormatParams {
+  colors: Color[];
+}
+
+export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorFormatParams> {
+  static formatId = 'color';
+  constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
     super(props);
     this.onChange({
       fieldType: props.fieldType,
     });
   }
 
-  onColorChange = (newColorParams, index) => {
+  onColorChange = (newColorParams: Partial<Color>, index: number) => {
     const colors = [...this.props.formatParams.colors];
     colors[index] = {
       ...colors[index],
@@ -54,7 +69,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
     });
   };
 
-  removeColor = index => {
+  removeColor = (index: number) => {
     const colors = [...this.props.formatParams.colors];
     colors.splice(index, 1);
     this.onChange({
@@ -86,7 +101,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
                 defaultMessage="Pattern (regular expression)"
               />
             ),
-            render: (value, item) => {
+            render: (value: string, item: IndexedColor) => {
               return (
                 <EuiFieldText
                   value={value}
@@ -110,7 +125,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
                 defaultMessage="Range (min:max)"
               />
             ),
-            render: (value, item) => {
+            render: (value: string, item: IndexedColor) => {
               return (
                 <EuiFieldText
                   value={value}
@@ -134,7 +149,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
             defaultMessage="Text color"
           />
         ),
-        render: (color, item) => {
+        render: (color: string, item: IndexedColor) => {
           return (
             <EuiColorPicker
               color={color}
@@ -158,7 +173,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
             defaultMessage="Background color"
           />
         ),
-        render: (color, item) => {
+        render: (color: string, item: IndexedColor) => {
           return (
             <EuiColorPicker
               color={color}
@@ -181,7 +196,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
             defaultMessage="Example"
           />
         ),
-        render: item => {
+        render: (item: IndexedColor) => {
           return (
             <div
               style={{
@@ -195,6 +210,10 @@ export class ColorFormatEditor extends DefaultFormatEditor {
         },
       },
       {
+        field: 'actions',
+        name: i18n.translate('common.ui.fieldEditor.color.actions', {
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
             name: i18n.translate('common.ui.fieldEditor.color.deleteAria', {
@@ -203,7 +222,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
             description: i18n.translate('common.ui.fieldEditor.color.deleteTitle', {
               defaultMessage: 'Delete color format',
             }),
-            onClick: item => {
+            onClick: (item: IndexedColor) => {
               this.removeColor(item.index);
             },
             type: 'icon',
@@ -230,5 +249,3 @@ export class ColorFormatEditor extends DefaultFormatEditor {
     );
   }
 }
-
-ColorFormatEditor.formatId = 'color';

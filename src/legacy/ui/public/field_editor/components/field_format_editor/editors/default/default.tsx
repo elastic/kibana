@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { PureComponent } from 'react';
-import PropTypes from 'prop-types';
+import React, { PureComponent, ReactText } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export const convertSampleInput = (converter, inputs) => {
+import { Sample, ConverterType } from '../../../../types';
+
+export const convertSampleInput = (
+  converter: (input: string | number) => string,
+  inputs: Array<string | number>
+) => {
   let error = null;
-  let samples = [];
+  let samples: Sample[] = [];
 
   try {
     samples = inputs.map(input => {
@@ -45,33 +49,50 @@ export const convertSampleInput = (converter, inputs) => {
   };
 };
 
-export class DefaultFormatEditor extends PureComponent {
-  static propTypes = {
-    fieldType: PropTypes.string.isRequired,
-    format: PropTypes.object.isRequired,
-    formatParams: PropTypes.object.isRequired,
-    onChange: PropTypes.func.isRequired,
-    onError: PropTypes.func.isRequired,
-  };
+interface SampleInputs {
+  [key: string]: Array<ReactText[] | ReactText>;
+}
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      sampleInputs: [],
-      sampleConverterType: 'text',
-      error: null,
-      samples: [],
-    };
-  }
+export interface FormatEditorProps<P> {
+  fieldType: string; // todo change to enum
+  format: any; // todo DecoratedFieldFormat
+  formatParams: { type?: string } & P; // todo
+  onChange: (newParams: any) => void; // todo
+  onError: (error: any) => void; // todo
+}
 
-  static getDerivedStateFromProps(nextProps, state) {
+export interface FormatEditorState {
+  sampleInputs: ReactText[];
+  sampleConverterType?: ConverterType;
+  error: any;
+  samples: Sample[];
+  sampleInputsByType: SampleInputs;
+}
+
+export const defaultState = {
+  sampleInputs: [] as ReactText[],
+  sampleConverterType: ConverterType.TEXT,
+  error: null,
+  samples: [] as Sample[],
+  sampleInputsByType: {},
+};
+
+export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
+  FormatEditorProps<P>,
+  FormatEditorState & S
+> {
+  state = defaultState as FormatEditorState & S;
+
+  static getDerivedStateFromProps(nextProps: FormatEditorProps<{}>, state: FormatEditorState) {
     const { format, formatParams, onError } = nextProps;
     const { sampleInputsByType, sampleInputs, sampleConverterType } = state;
 
     const converter = format.getConverterFor(sampleConverterType);
     const type = typeof sampleInputsByType === 'object' && formatParams.type;
-    const inputs = type ? sampleInputsByType[formatParams.type] || [] : sampleInputs;
+    const inputs = type ? sampleInputsByType[formatParams.type as string] || [] : sampleInputs;
+    // console.log('inputs', inputs);
     const output = convertSampleInput(converter, inputs);
+    // console.log('getDerivedStateFromProps', nextProps, state);
     onError(output.error);
     return output;
   }
@@ -85,6 +106,6 @@ export class DefaultFormatEditor extends PureComponent {
   };
 
   render() {
-    return null;
+    return <></>;
   }
 }

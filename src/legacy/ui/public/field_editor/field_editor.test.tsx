@@ -61,16 +61,6 @@ jest.mock('ui/scripting_languages', () => ({
   getDeprecatedScriptingLanguages: () => ['testlang'],
 }));
 
-jest.mock('ui/documentation_links', () => ({
-  getDocLink: doc => `(docLink for ${doc})`,
-}));
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addSuccess: jest.fn(),
-  },
-}));
-
 jest.mock('./components/scripting_call_outs', () => ({
   ScriptingDisabledCallOut: 'scripting-disabled-callOut',
   ScriptingWarningCallOut: 'scripting-warning-callOut',
@@ -87,12 +77,12 @@ const fields = [
   },
 ];
 fields.getByName = name => {
-  const fields = {
+  const flds = {
     foobar: {
       name: 'foobar',
     },
   };
-  return fields[name];
+  return flds[name];
 };
 
 class Format {
@@ -150,10 +140,10 @@ describe('FieldEditor', () => {
     };
     indexPattern.fields.push(testField);
     indexPattern.fields.getByName = name => {
-      const fields = {
+      const flds = {
         [testField.name]: testField,
       };
-      return fields[name];
+      return flds[name];
     };
 
     const component = shallowWithI18nProvider(
@@ -174,10 +164,10 @@ describe('FieldEditor', () => {
     };
     indexPattern.fields.push(testField);
     indexPattern.fields.getByName = name => {
-      const fields = {
+      const flds = {
         [testField.name]: testField,
       };
-      return fields[name];
+      return flds[name];
     };
 
     const component = shallowWithI18nProvider(

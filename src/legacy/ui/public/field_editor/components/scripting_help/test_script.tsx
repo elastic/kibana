@@ -18,7 +18,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 
 import {
   EuiButton,
@@ -29,6 +28,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -38,9 +38,27 @@ const { SearchBar } = npStart.plugins.data.ui;
 
 const { uiSettings } = npStart.core;
 
-import { esQuery } from '../../../../../../plugins/data/public';
+import { esQuery, IndexPattern } from '../../../../../../plugins/data/public';
+import { ExecuteScriptParams } from '../../types';
 
-export class TestScript extends Component {
+interface TestScriptProps {
+  indexPattern: IndexPattern;
+  lang: string;
+  name?: string;
+  script?: string;
+  executeScript: (params: ExecuteScriptParams) => void;
+}
+
+interface TestScriptState {
+  isLoading: boolean;
+  additionalFields: any[];
+}
+
+export class TestScript extends Component<TestScriptProps, TestScriptState> {
+  defaultProps = {
+    name: 'myScriptedField',
+  };
+
   state = {
     isLoading: false,
     additionalFields: [],
@@ -52,7 +70,8 @@ export class TestScript extends Component {
     }
   }
 
-  previewScript = async searchContext => {
+  // todo type this
+  previewScript = async (searchContext?: any) => {
     const { indexPattern, lang, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
@@ -160,7 +179,7 @@ export class TestScript extends Component {
 
   renderToolbar() {
     const fieldsByTypeMap = new Map();
-    const fields = [];
+    const fields: EuiComboBoxOptionOption[] = [];
 
     this.props.indexPattern.fields
       .filter(field => {
@@ -180,7 +199,7 @@ export class TestScript extends Component {
     fieldsByTypeMap.forEach((fieldsList, fieldType) => {
       fields.push({
         label: fieldType,
-        options: fieldsList.sort().map(fieldName => {
+        options: fieldsList.sort().map((fieldName: string) => {
           return { value: fieldName, label: fieldName };
         }),
       });
@@ -214,6 +233,7 @@ export class TestScript extends Component {
 
         <div className="testScript__searchBar">
           <SearchBar
+            appName={'management'} // todo - how is this used?
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
@@ -266,15 +286,3 @@ export class TestScript extends Component {
     );
   }
 }
-
-TestScript.propTypes = {
-  indexPattern: PropTypes.object.isRequired,
-  lang: PropTypes.string.isRequired,
-  name: PropTypes.string,
-  script: PropTypes.string,
-  executeScript: PropTypes.func.isRequired,
-};
-
-TestScript.defaultProps = {
-  name: 'myScriptedField',
-};

@@ -18,25 +18,21 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 
 import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Sample } from '../../../types';
 
-export class FormatEditorSamples extends PureComponent {
+interface FormatEditorSamplesProps {
+  samples: Sample[];
+  sampleType: 'html' | 'text';
+}
+
+export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps> {
   static defaultProps = {
     sampleType: 'text',
-  };
-  static propTypes = {
-    samples: PropTypes.arrayOf(
-      PropTypes.shape({
-        input: PropTypes.any.isRequired,
-        output: PropTypes.any.isRequired,
-      })
-    ).isRequired,
-    sampleType: PropTypes.oneOf(['html', 'text']),
   };
 
   render() {
@@ -48,7 +44,7 @@ export class FormatEditorSamples extends PureComponent {
         name: i18n.translate('common.ui.fieldEditor.samples.inputHeader', {
           defaultMessage: 'Input',
         }),
-        render: input => {
+        render: (input: any) => {
           return typeof input === 'object' ? JSON.stringify(input) : input;
         },
       },
@@ -57,14 +53,14 @@ export class FormatEditorSamples extends PureComponent {
         name: i18n.translate('common.ui.fieldEditor.samples.outputHeader', {
           defaultMessage: 'Output',
         }),
-        render: output => {
+        render: (output: string) => {
           return sampleType === 'html' ? (
             <div
               /*
                * Justification for dangerouslySetInnerHTML:
                * Sample output may contain HTML tags, like URL image/audio format.
                */
-              dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: output }} // eslint-disable-line react/no-danger
             />
           ) : (
             <div>{output}</div>

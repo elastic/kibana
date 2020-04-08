@@ -18,6 +18,7 @@
  */
 
 import { has } from 'lodash';
+import { IndexPattern, Field, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 /**
  * Fully clones a Field object, so that modifications can be performed on
@@ -29,10 +30,10 @@ import { has } from 'lodash';
  *
  * @param {object} field - Field object to copy
  * @param {object} indexPattern - index pattern object the field belongs to
- * @param {object} Field - Field object type
+ * @param {object} FieldObj - Field object type
  * @return {object} the cloned object
  */
-export const copyField = (field, indexPattern, Field) => {
+export const copyField = (field: Field, indexPattern: IndexPattern, FieldObj: Field) => {
   const changes = {};
   const newFieldProps = {
     // When we are ready to save the copied field back into the index pattern,
@@ -40,7 +41,7 @@ export const copyField = (field, indexPattern, Field) => {
     // its original properties with our "changes" applied.
     toActualField: {
       value: () => {
-        return new Field(indexPattern, {
+        return new FieldObj(indexPattern, {
           ...field.$$spec,
           ...changes,
         });
@@ -69,10 +70,10 @@ export const copyField = (field, indexPattern, Field) => {
 
     newFieldProps[prop] = {
       enumerable: desc.enumerable,
-      get: function() {
+      get() {
         return has(changes, prop) ? changes[prop] : field[prop];
       },
-      set: function(v) {
+      set(v) {
         changes[prop] = v;
       },
     };

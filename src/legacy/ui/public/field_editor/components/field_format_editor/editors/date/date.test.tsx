@@ -20,27 +20,29 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { BytesFormatEditor } from './bytes';
+import { DateFormatEditor } from './date';
 
-const fieldType = 'number';
+const fieldType = 'date';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => input => input * 2),
+  getConverterFor: jest
+    .fn()
+    .mockImplementation(() => (input: string) => `converted date for ${input}`),
   getParamDefaults: jest.fn().mockImplementation(() => {
-    return { pattern: '0,0.[000]b' };
+    return { pattern: 'MMMM Do YYYY, HH:mm:ss.SSS' };
   }),
 };
-const formatParams = {};
+const formatParams = { pattern: '' };
 const onChange = jest.fn();
 const onError = jest.fn();
 
-describe('BytesFormatEditor', () => {
+describe('DateFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(BytesFormatEditor.formatId).toEqual('bytes');
+    expect(DateFormatEditor.formatId).toEqual('date');
   });
 
   it('should render normally', async () => {
     const component = shallow(
-      <BytesFormatEditor
+      <DateFormatEditor
         fieldType={fieldType}
         format={format}
         formatParams={formatParams}
@@ -48,6 +50,15 @@ describe('BytesFormatEditor', () => {
         onError={onError}
       />
     );
+
+    // Date editor samples uses changing values - Date.now() - so we
+    // hardcode samples to avoid ever-changing snapshots
+    component.setState({
+      sampleInputs: [1529097045190, 1514793600000, 1546329599999],
+    });
+
+    component.instance().forceUpdate();
+    component.update();
     expect(component).toMatchSnapshot();
   });
 });

@@ -21,21 +21,23 @@ import React, { Fragment } from 'react';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 
-import { DefaultFormatEditor } from '../default';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { DefaultFormatEditor, defaultState } from '../default';
 
 import { FormatEditorSamples } from '../../samples';
 
 import { sample } from './sample';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+interface TruncateFormatEditorFormatParams {
+  fieldLength: number;
+}
 
-export class TruncateFormatEditor extends DefaultFormatEditor {
+export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEditorFormatParams> {
   static formatId = 'truncate';
-
-  constructor(props) {
-    super(props);
-    this.state.sampleInputs = [sample];
-  }
+  state = {
+    ...defaultState,
+    sampleInputs: [sample],
+  };
 
   render() {
     const { formatParams, onError } = this.props;
