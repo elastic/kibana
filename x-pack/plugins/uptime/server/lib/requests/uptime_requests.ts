@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { GetCertsParams } from './get_certs';
 import { UMElasticsearchQueryFn } from '../adapters';
 import {
   HistogramResult,
@@ -28,6 +29,7 @@ import {
   MonitorLocations,
   Snapshot,
   StatesIndexStatus,
+  Cert,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
@@ -36,6 +38,7 @@ import { MonitorDurationResult } from '../../../../../legacy/plugins/uptime/comm
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
 export interface UptimeRequests {
+  getCerts: ESQ<GetCertsParams, Cert[]>;
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
   getIndexPattern: ESQ<{}, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
