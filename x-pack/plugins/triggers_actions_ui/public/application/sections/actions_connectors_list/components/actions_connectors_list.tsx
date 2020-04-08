@@ -18,6 +18,9 @@ import {
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBetaBadge,
+  EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,6 +33,7 @@ import { ActionsConnectorsContextProvider } from '../../../context/actions_conne
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
+import { PreconfiguredConnectorFlyout } from '../../action_connector_form/preconfigured_connector_flyout';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
@@ -43,6 +47,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [preconfiguredFlyoutVisible, setPreconfiguredFlyoutVisibility] = useState<boolean>(false);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
     []
@@ -127,7 +132,13 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   async function editItem(connectorTableItem: ActionConnectorTableItem) {
     setEditedConnectorItem(connectorTableItem);
-    setEditFlyoutVisibility(true);
+    if (connectorTableItem.isPreconfigured) {
+      setPreconfiguredFlyoutVisibility(true);
+      setEditFlyoutVisibility(false);
+    } else {
+      setEditFlyoutVisibility(true);
+      setPreconfiguredFlyoutVisibility(false);
+    }
   }
 
   const actionsTableColumns = [
@@ -202,31 +213,51 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       },
     },
     {
-      field: '',
+      field: 'isPreconfigured',
       name: '',
-      actions: [
-        {
-          enabled: () => canDelete,
-          'data-test-subj': 'deleteConnector',
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
-            { defaultMessage: 'Delete' }
-          ),
-          description: canDelete
-            ? i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
-                { defaultMessage: 'Delete this connector' }
-              )
-            : i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
-                { defaultMessage: 'Unable to delete connectors' }
-              ),
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          onClick: (item: ActionConnectorTableItem) => setConnectorsToDelete([item.id]),
-        },
-      ],
+      render: (value: number, item: ActionConnectorTableItem) => {
+        if (item.isPreconfigured) {
+          return (
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label="Pre-configured"
+                  tooltipContent="This connector is not allowed to delete."
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+        return (
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  canDelete
+                    ? i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
+                        { defaultMessage: 'Delete this connector' }
+                      )
+                    : i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
+                        { defaultMessage: 'Unable to delete connectors' }
+                      )
+                }
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
+                    { defaultMessage: 'Delete' }
+                  )}
+                  data-test-subj="collapseBtn"
+                  onClick={() => setConnectorsToDelete([item.id])}
+                  iconType={'trash'}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
   ];
 
@@ -436,12 +467,20 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           setAddFlyoutVisibility={setAddFlyoutVisibility}
         />
         {editedConnectorItem ? (
-          <ConnectorEditFlyout
-            key={editedConnectorItem.id}
-            initialConnector={editedConnectorItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
-          />
+          <>
+            <ConnectorEditFlyout
+              key={editedConnectorItem.id}
+              initialConnector={editedConnectorItem}
+              editFlyoutVisible={editFlyoutVisible}
+              setEditFlyoutVisibility={setEditFlyoutVisibility}
+            />
+            <PreconfiguredConnectorFlyout
+              key={`preconfigured${editedConnectorItem.id}`}
+              initialConnector={editedConnectorItem}
+              flyoutVisible={preconfiguredFlyoutVisible}
+              setFlyoutVisibility={setPreconfiguredFlyoutVisibility}
+            />
+          </>
         ) : null}
       </ActionsConnectorsContextProvider>
     </section>

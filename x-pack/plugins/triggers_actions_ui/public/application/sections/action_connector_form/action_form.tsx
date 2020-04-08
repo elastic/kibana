@@ -146,10 +146,11 @@ export const ActionForm = ({
     if (!val) {
       return [];
     }
+    const optionTitle = `${val.name}${val.isPreconfigured ? '(pre-configured)' : ''}`;
     return [
       {
-        label: val.name,
-        value: val.name,
+        label: optionTitle,
+        value: optionTitle,
         id: actionItemId,
       },
     ];
@@ -264,7 +265,9 @@ export const ActionForm = ({
                         defaultMessage="{actionConnectorName}"
                         id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                         values={{
-                          actionConnectorName: actionConnector.name,
+                          actionConnectorName: `${actionConnector.name}${
+                            actionConnector.isPreconfigured ? '(pre-configured)' : ''
+                          }`,
                         }}
                       />
                     </EuiFlexItem>
