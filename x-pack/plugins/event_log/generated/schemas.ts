@@ -56,7 +56,6 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
-        namespace: ecsString(),
         alerting: schema.maybe(
           schema.object({
             instance_id: ecsString(),
@@ -66,6 +65,7 @@ export const EventSchema = schema.maybe(
           schema.arrayOf(
             schema.object({
               store: ecsString(),
+              namespace: ecsString(),
               id: ecsString(),
               type: ecsString(),
             })

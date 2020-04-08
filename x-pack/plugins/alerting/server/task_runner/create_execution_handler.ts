@@ -93,10 +93,9 @@ export function createExecutionHandler({
           alerting: {
             instance_id: alertInstanceId,
           },
-          namespace: spaceId,
           saved_objects: [
-            { type: 'alert', id: alertId },
-            { type: 'action', id: action.id },
+            { type: 'alert', id: alertId, namespace: spaceId },
+            { type: 'action', id: action.id, namespace: spaceId },
           ],
         },
       };

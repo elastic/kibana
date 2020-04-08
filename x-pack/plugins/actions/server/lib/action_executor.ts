@@ -112,7 +112,7 @@ export class ActionExecutor {
     const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { namespace, saved_objects: [{ type: 'action', id: actionId }] },
+      kibana: { saved_objects: [{ type: 'action', id: actionId, namespace }] },
     };
 
     eventLogger.startTiming(event);
