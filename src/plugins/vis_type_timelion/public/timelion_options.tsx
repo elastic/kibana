@@ -19,14 +19,14 @@
 
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { VisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';
 import { KibanaContextProvider } from '../../kibana_react/public';
+import { TimelionVisDependencies } from './plugin';
 
-const TimelionOptions = (uiSettings: IUiSettingsClient) => {
+const TimelionOptions = (dependencies: TimelionVisDependencies) => {
   const TimelionOptionsComponent = ({
     stateParams,
     setValue,
@@ -41,7 +41,7 @@ const TimelionOptions = (uiSettings: IUiSettingsClient) => {
     );
 
     return (
-      <KibanaContextProvider services={{ uiSettings }}>
+      <KibanaContextProvider services={dependencies}>
         <EuiPanel className="visEditorSidebar__timelionOptions" paddingSize="s">
           <TimelionInterval
             value={stateParams.interval}

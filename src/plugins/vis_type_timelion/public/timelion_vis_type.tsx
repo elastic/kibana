@@ -53,7 +53,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
       ),
     },
     editorConfig: {
-      optionsTemplate: TimelionOptions(dependencies.uiSettings),
+      optionsTemplate: TimelionOptions(dependencies),
       defaultSize: DefaultEditorSize.MEDIUM,
     },
     requestHandler: timelionRequestHandler,

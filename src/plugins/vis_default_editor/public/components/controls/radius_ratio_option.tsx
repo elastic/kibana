@@ -44,6 +44,7 @@ function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: Agg
       />
     </>
   );
+
   useMount(() => {
     if (!editorStateParams.radiusRatio) {
       setStateParamValue(PARAM_NAME, DEFAULT_VALUE);

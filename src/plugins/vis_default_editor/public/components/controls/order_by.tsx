@@ -60,13 +60,16 @@ function OrderByParamEditor({
 
   useValidation(setValidity, isValid);
   useMount(() => {
-    let respAgg = { id: DEFAULT_VALUE };
+    // setup the initial value of orderBy
+    if (!value) {
+      let respAgg = { id: DEFAULT_VALUE };
 
-    if (metricAggs) {
-      respAgg = metricAggs.filter(isCompatibleAgg)[0] || respAgg;
+      if (metricAggs) {
+        respAgg = metricAggs.filter(isCompatibleAgg)[0] || respAgg;
+      }
+
+      setValue(respAgg.id);
     }
-
-    setValue(respAgg.id);
   });
 
   useFallbackMetric(setValue, termsAggFilter, metricAggs, value, DEFAULT_VALUE);
