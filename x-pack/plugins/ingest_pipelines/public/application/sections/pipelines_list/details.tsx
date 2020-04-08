@@ -91,7 +91,7 @@ export const PipelineDetails: FunctionComponent<Props> = ({
           <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onEditClick}>
-                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.deleteButtonLabel', {
+                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.editButtonLabel', {
                   defaultMessage: 'Edit',
                 })}
               </EuiButtonEmpty>
