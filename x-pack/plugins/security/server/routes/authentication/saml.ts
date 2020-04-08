@@ -34,9 +34,6 @@ export function defineSAMLRoutes({
           <link rel="icon" href="data:,">
           <script src="${basePath.serverBasePath}/internal/security/saml/capture-url-fragment.js"></script>
         `,
-        headers: {
-          'cache-control': 'private, no-cache, no-store',
-        },
       });
     }
   );
@@ -53,9 +50,6 @@ export function defineSAMLRoutes({
             '${basePath.serverBasePath}/internal/security/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
           );
         `,
-        headers: {
-          'cache-control': 'private, no-cache, no-store',
-        },
       });
     }
   );

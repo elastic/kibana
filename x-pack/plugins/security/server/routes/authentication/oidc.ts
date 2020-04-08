@@ -54,9 +54,6 @@ export function defineOIDCRoutes({
             <link rel="icon" href="data:,">
             <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
           `,
-          headers: {
-            'cache-control': 'private, no-cache, no-store',
-          },
         });
       }
     );
@@ -81,9 +78,6 @@ export function defineOIDCRoutes({
             '${serverBasePath}/api/security/oidc/callback?authenticationResponseURI=' + encodeURIComponent(window.location.href)
           );
         `,
-        headers: {
-          'cache-control': 'private, no-cache, no-store',
-        },
       });
     }
   );
