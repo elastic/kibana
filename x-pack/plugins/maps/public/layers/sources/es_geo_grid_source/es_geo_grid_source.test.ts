@@ -17,7 +17,7 @@ describe('ESGeoGridSource', () => {
       geoField: 'bar',
       metrics: [],
       resolution: GRID_RESOLUTION.COARSE,
-      type: ES_GEO_GRID,
+      type: SOURCE_TYPES.ES_GEO_GRID,
       requestType: RENDER_AS.HEATMAP,
     },
     {}

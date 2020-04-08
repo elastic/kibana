@@ -12,7 +12,7 @@ import { TileLayer } from '../tile_layer';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../common/i18n_getters';
 import _ from 'lodash';
-import { EMS_XYZ } from '../../../common/constants';
+import { SOURCE_TYPES } from '../../../common/constants';
 import { registerSource } from './source_registry';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
@@ -20,7 +20,7 @@ const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
 });
 
 export class XYZTMSSource extends AbstractTMSSource {
-  static type = EMS_XYZ;
+  static type = SOURCE_TYPES.EMS_XYZ;
 
   static createDescriptor({ urlTemplate, attributionText, attributionUrl }) {
     return {
@@ -167,7 +167,7 @@ class XYZTMSEditor extends React.Component {
 
 registerSource({
   ConstructorFunction: XYZTMSSource,
-  type: EMS_XYZ,
+  type: SOURCE_TYPES.EMS_XYZ,
 });
 
 export const tmsLayerWizardConfig = {

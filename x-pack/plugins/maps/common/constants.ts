@@ -56,15 +56,17 @@ export enum SORT_ORDER {
   DESC = 'desc',
 }
 
-export const EMS_TMS = 'EMS_TMS';
-export const EMS_FILE = 'EMS_FILE';
-export const ES_GEO_GRID = 'ES_GEO_GRID';
-export const ES_SEARCH = 'ES_SEARCH';
-export const ES_PEW_PEW = 'ES_PEW_PEW';
-export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
-export const WMS = 'WMS';
-export const KIBANA_TILEMAP = 'KIBANA_TILEMAP';
-export const REGIONMAP_FILE = 'REGIONMAP_FILE';
+export enum SOURCE_TYPES {
+  EMS_TMS = 'EMS_TMS',
+  EMS_FILE = 'EMS_FILE',
+  ES_GEO_GRID = 'ES_GEO_GRID',
+  ES_SEARCH = 'ES_SEARCH',
+  ES_PEW_PEW = 'ES_PEW_PEW',
+  EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
+  WMS = 'WMS',
+  KIBANA_TILEMAP = 'KIBANA_TILEMAP',
+  REGIONMAP_FILE = 'REGIONMAP_FILE',
+}
 
 export enum FIELD_ORIGIN {
   SOURCE = 'source',

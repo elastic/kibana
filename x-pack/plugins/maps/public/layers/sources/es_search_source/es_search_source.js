@@ -17,6 +17,7 @@ import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
+  SOURCE_TYPES,
   ES_SEARCH,
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -570,7 +571,7 @@ export class ESSearchSource extends AbstractESSource {
 
 registerSource({
   ConstructorFunction: ESSearchSource,
-  type: ES_SEARCH,
+  type: SOURCE_TYPES.ES_SEARCH,
 });
 
 export const esDocumentsLayerWizardConfig = {
