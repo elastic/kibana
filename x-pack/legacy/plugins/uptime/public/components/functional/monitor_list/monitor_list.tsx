@@ -33,6 +33,7 @@ import { MonitorList } from '../../../state/reducers/monitor_list';
 import { useUrlParams } from '../../../hooks';
 
 interface Props extends MonitorListProps {
+  lastRefresh: number;
   monitorList: MonitorList;
   getMonitorList: (params: FetchMonitorStatesQueryArgs) => void;
 }
@@ -56,6 +57,7 @@ const getPageSizeValue = () => {
 export const MonitorListComponent: React.FC<Props> = ({
   filters,
   getMonitorList,
+  lastRefresh,
   monitorList: { list, errors, loading },
   linkParameters,
 }) => {
@@ -74,7 +76,16 @@ export const MonitorListComponent: React.FC<Props> = ({
       pagination,
       statusFilter,
     });
-  }, [getMonitorList, dateRangeStart, dateRangeEnd, filters, pageSize, pagination, statusFilter]);
+  }, [
+    getMonitorList,
+    dateRangeStart,
+    dateRangeEnd,
+    filters,
+    lastRefresh,
+    pageSize,
+    pagination,
+    statusFilter,
+  ]);
 
   const items = list.summaries ?? [];
 

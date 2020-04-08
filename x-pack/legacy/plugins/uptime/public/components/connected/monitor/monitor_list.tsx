@@ -24,8 +24,8 @@ export const MonitorList: React.FC<MonitorListProps> = props => {
     },
     [dispatch]
   );
-  const monitorList = useSelector(monitorListSelector);
+  const monitorListState = useSelector(monitorListSelector);
   return (
-    <MonitorListComponent {...props} getMonitorList={dispatchCallback} monitorList={monitorList} />
+    <MonitorListComponent {...props} {...monitorListState} getMonitorList={dispatchCallback} />
   );
 };

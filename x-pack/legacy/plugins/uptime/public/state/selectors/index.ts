@@ -93,4 +93,7 @@ export const indexStatusSelector = ({ indexStatus }: AppState) => {
   return indexStatus.indexStatus;
 };
 
-export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
+export const monitorListSelector = ({ monitorList, ui: { lastRefresh } }: AppState) => ({
+  monitorList,
+  lastRefresh,
+});
