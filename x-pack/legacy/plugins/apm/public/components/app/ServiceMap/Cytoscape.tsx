@@ -171,8 +171,11 @@ export function Cytoscape({
         layout.run();
       }
     };
+    let layoutstopDelayTimeout: NodeJS.Timeout;
     const layoutstopHandler: cytoscape.EventHandler = event => {
-      setTimeout(() => {
+      // This 0ms timer is necessary to prevent a race condition
+      // between the layout finishing rendering and viewport centering
+      layoutstopDelayTimeout = setTimeout(() => {
         if (serviceName) {
           event.cy.animate({
             ...animationOptions,
@@ -187,7 +190,7 @@ export function Cytoscape({
         } else {
           event.cy.fit(undefined, nodeHeight);
         }
-      }, 1);
+      }, 0);
     };
     // debounce hover tracking so it doesn't spam telemetry with redundant events
     const trackNodeEdgeHover = debounce(
@@ -242,6 +245,7 @@ export function Cytoscape({
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', unselectHandler);
       }
+      clearTimeout(layoutstopDelayTimeout);
     };
   }, [cy, height, serviceName, trackApmEvent, width]);
 
