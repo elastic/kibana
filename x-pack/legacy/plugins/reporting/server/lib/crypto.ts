@@ -10,6 +10,10 @@ import { ServerFacade } from '../../types';
 
 function cryptoFn(server: ServerFacade) {
   const encryptionKey = server.config().get('xpack.reporting.encryptionKey');
+  if (typeof encryptionKey !== 'string') {
+    throw new Error('Encryption Key required.');
+  }
+
   return nodeCrypto({ encryptionKey });
 }
 
