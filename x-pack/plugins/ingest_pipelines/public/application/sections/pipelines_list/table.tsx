@@ -5,12 +5,13 @@
  */
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiButton } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 
 export interface Props {
   pipelines: Pipeline[];
+  onReloadClick: () => void;
   onEditPipelineClick: (pipeline: Pipeline) => void;
   onDeletePipelineClick: (pipeline: Pipeline) => void;
   onViewPipelineClick: (pipeline: Pipeline) => void;
@@ -18,6 +19,7 @@ export interface Props {
 
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
+  onReloadClick,
   onEditPipelineClick,
   onDeletePipelineClick,
   onViewPipelineClick,
@@ -25,6 +27,13 @@ export const PipelineTable: FunctionComponent<Props> = ({
   return (
     <EuiInMemoryTable
       search={{
+        toolsRight: (
+          <EuiButton iconType="refresh" color="secondary" onClick={onReloadClick}>
+            {i18n.translate('xpack.ingestPipelines.list.table.reloadButtonLabel', {
+              defaultMessage: 'Reload',
+            })}
+          </EuiButton>
+        ),
         box: {
           incremental: true,
         },

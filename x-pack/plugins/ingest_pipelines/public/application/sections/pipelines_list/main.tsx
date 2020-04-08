@@ -39,7 +39,7 @@ export const PipelinesList: React.FunctionComponent = () => {
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
   }, [services.metric]);
 
-  const { data, isLoading, error } = services.api.useLoadPipelines();
+  const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
 
   let content: React.ReactNode;
 
@@ -54,6 +54,9 @@ export const PipelinesList: React.FunctionComponent = () => {
   } else if (data?.length) {
     content = (
       <PipelineTable
+        onReloadClick={() => {
+          sendRequest();
+        }}
         onEditPipelineClick={() => {}}
         onDeletePipelineClick={() => {}}
         onViewPipelineClick={setSelectedPipeline}
