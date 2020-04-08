@@ -10,16 +10,13 @@ import React from 'react';
 import { MVTVectorSourceEditor } from './mvt_vector_source_editor';
 import { AbstractSource } from '../source';
 import { SingleTiledVectorLayer } from '../../tiled_vector_layer';
-import {
-  GeoJsonWithMeta,
-  ITiledSingleLayerVectorSource,
-  TiledSingleLayerVectorSourceMeta,
-} from '../vector_source';
+import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { MAX_ZOOM, MIN_ZOOM, MVT_SINGLE_LAYER } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
+import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
   defaultMessage: 'Vector Tile Layer',
@@ -92,7 +89,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return this._descriptor.layerName;
   }
 
-  async getUrlTemplateWithMeta(): TiledSingleLayerVectorSourceMeta {
+  async getUrlTemplateWithMeta(): Promise<TiledSingleLayerVectorSourceDescriptor> {
     return {
       urlTemplate: this._descriptor.urlTemplate,
       layerName: this._descriptor.layerName,
@@ -107,6 +104,14 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   canFormatFeatureProperties() {
     return false;
+  }
+
+  getMinZoom() {
+    return this._descriptor.minZoom;
+  }
+
+  getMaxZoom() {
+    return this._descriptor.maxZoom;
   }
 }
 

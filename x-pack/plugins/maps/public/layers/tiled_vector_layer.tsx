@@ -11,11 +11,9 @@ import { VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { VectorLayer } from './vector_layer';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
-import {
-  ITiledSingleLayerVectorSource,
-  TiledSingleLayerVectorSourceMeta,
-} from './sources/vector_source';
+import { ITiledSingleLayerVectorSource } from './sources/vector_source';
 import { SyncContext } from '../actions/map_actions';
+import { TiledSingleLayerVectorSourceDescriptor } from '../../common/descriptor_types';
 
 export class SingleTiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -80,7 +78,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
 
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
     try {
-      const templateWithMeta: TiledSingleLayerVectorSourceMeta = await this._source.getUrlTemplateWithMeta();
+      const templateWithMeta = await this._source.getUrlTemplateWithMeta();
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, templateWithMeta, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
@@ -108,7 +106,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
         return;
       }
 
-      const sourceMeta: TiledSingleLayerVectorSourceMeta = sourceDataRequest.getData() as TiledSingleLayerVectorSourceMeta;
+      const sourceMeta: TiledSingleLayerVectorSourceDescriptor = sourceDataRequest.getData() as TiledSingleLayerVectorSourceDescriptor;
       if (!sourceMeta) {
         return;
       }
@@ -198,5 +196,14 @@ export class SingleTiledVectorLayer extends VectorLayer {
 
   async loadPreIndexedShapeByFeatureId(featureId, meta) {
     return null;
+  }
+
+  getMinZoomForData(): number {
+    return this._source.getMinZoom();
+  }
+
+  getMinZoom() {
+    // higher resolution vector tiles cannot be displayed at lower-res
+    return Math.max(this.getMinZoomForData(), super.getMinZoom());
   }
 }
