@@ -120,10 +120,10 @@ export class TodoRefEmbeddable extends Embeddable<TodoRefInput, TodoRefOutput> {
   }
 
   public render(node: HTMLElement) {
-    this.node = node;
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
+    this.node = node;
     ReactDOM.render(<TodoRefEmbeddableComponent embeddable={this} />, node);
   }
 
