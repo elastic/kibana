@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useReducer, useState } from 'react';
+import { isObject } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -83,7 +84,7 @@ export const AlertAdd = ({
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = parseErrors(errors);
 
   const actionsErrors: Array<{
     errors: IErrorObject;
@@ -213,3 +214,9 @@ export const AlertAdd = ({
     </EuiPortal>
   );
 };
+
+const parseErrors: (errors: IErrorObject) => boolean = errors =>
+  !!Object.values(errors).find(errorList => {
+    if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
+    return errorList.length >= 1;
+  });

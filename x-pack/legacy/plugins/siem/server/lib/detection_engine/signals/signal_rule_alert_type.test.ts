@@ -47,7 +47,7 @@ const getPayload = (
     interval: ruleAlert.schedule.interval,
     name: ruleAlert.name,
     tags: ruleAlert.tags,
-    throttle: ruleAlert.throttle!,
+    throttle: ruleAlert.throttle,
     scrollSize: 10,
     scrollLock: '0',
   },
