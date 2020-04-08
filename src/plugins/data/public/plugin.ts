@@ -18,13 +18,13 @@
  */
 
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   PackageInfo,
+  Plugin,
+  PluginInitializerContext,
 } from 'src/core/public';
-import { Storage, IStorageWrapper } from '../../kibana_utils/public';
+import { IStorageWrapper, Storage } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -51,26 +51,25 @@ import {
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
 import {
+  APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-  APPLY_FILTER_TRIGGER,
 } from '../../ui_actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
-  createFiltersFromEvent,
-  selectRangeActionGetFilters,
-  valueClickActionGetFilters,
+  createFiltersFromValueClickEvent,
+  createFiltersFromBrushEvent,
 } from './actions';
 import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
 import {
+  ACTION_SELECT_RANGE,
   selectRangeAction,
   SelectRangeActionContext,
-  ACTION_SELECT_RANGE,
 } from './actions/select_range_action';
 import {
-  valueClickAction,
   ACTION_VALUE_CLICK,
+  valueClickAction,
   ValueClickActionContext,
 } from './actions/value_click_action';
 
@@ -162,9 +161,8 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const dataServices = {
       actions: {
-        createFiltersFromEvent,
-        selectRangeActionGetFilters,
-        valueClickActionGetFilters,
+        createFiltersFromValueClickEvent,
+        createFiltersFromBrushEvent,
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,

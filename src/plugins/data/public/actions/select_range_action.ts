@@ -23,7 +23,7 @@ import {
   IncompatibleActionError,
   ActionByType,
 } from '../../../../plugins/ui_actions/public';
-import { onBrushEvent } from './filters/brush_event';
+import { createFiltersFromBrushEvent } from './filters/create_filters_from_brush_event';
 import { FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
@@ -35,43 +35,11 @@ export interface SelectRangeActionContext {
 
 async function isCompatible(context: SelectRangeActionContext) {
   try {
-    return Boolean(await onBrushEvent(context.data));
+    return (await createFiltersFromBrushEvent(context.data)).length > 0;
   } catch {
     return false;
   }
 }
-
-export const selectRangeActionGetFilters = async ({
-  timeFieldName,
-  data,
-}: SelectRangeActionContext) => {
-  if (!(await isCompatible({ timeFieldName, data }))) {
-    throw new IncompatibleActionError();
-  }
-
-  const filter = await onBrushEvent(data);
-
-  if (!filter) {
-    return;
-  }
-
-  const selectedFilters = esFilters.mapAndFlattenFilters([filter]);
-
-  return esFilters.extractTimeFilter(timeFieldName || '', selectedFilters);
-};
-
-const selectRangeActionExecute = (
-  filterManager: FilterManager,
-  timeFilter: TimefilterContract
-) => async ({ timeFieldName, data }: SelectRangeActionContext) => {
-  const { timeRangeFilter, restOfFilters } =
-    (await selectRangeActionGetFilters({ timeFieldName, data })) || {};
-
-  filterManager.addFilters(restOfFilters || []);
-  if (timeRangeFilter) {
-    esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
-  }
-};
 
 export function selectRangeAction(
   filterManager: FilterManager,
@@ -87,6 +55,25 @@ export function selectRangeAction(
       });
     },
     isCompatible,
-    execute: selectRangeActionExecute(filterManager, timeFilter),
+    execute: async ({ timeFieldName, data }: SelectRangeActionContext) => {
+      if (!(await isCompatible({ timeFieldName, data }))) {
+        throw new IncompatibleActionError();
+      }
+
+      const selectedFilters = await createFiltersFromBrushEvent(data);
+
+      if (timeFieldName) {
+        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
+          timeFieldName,
+          selectedFilters
+        );
+        filterManager.addFilters(restOfFilters);
+        if (timeRangeFilter) {
+          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+        }
+      } else {
+        filterManager.addFilters(selectedFilters);
+      }
+    },
   });
 }

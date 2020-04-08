@@ -19,7 +19,7 @@
 
 import { get, last } from 'lodash';
 import moment from 'moment';
-import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
+import { esFilters, Filter, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 import { deserializeAggConfig } from '../../search/expressions/utils';
 
@@ -33,18 +33,18 @@ export interface BrushEvent {
   range: number[];
 }
 
-export async function onBrushEvent(event: BrushEvent) {
+export async function createFiltersFromBrushEvent(event: BrushEvent): Promise<Filter[]> {
   const isDate = get(event.data, 'ordered.date');
   const xRaw: Record<string, any> = get(event.data, 'series[0].values[0].xRaw');
 
   if (!xRaw) {
-    return;
+    return [];
   }
 
   const column: Record<string, any> = xRaw.table.columns[xRaw.column];
 
   if (!column || !column.meta) {
-    return;
+    return [];
   }
 
   const indexPattern = await getIndexPatterns().get(column.meta.indexPatternId);
@@ -55,14 +55,14 @@ export async function onBrushEvent(event: BrushEvent) {
   const field: IFieldType = aggConfig.params.field;
 
   if (!field || event.range.length <= 1) {
-    return;
+    return [];
   }
 
   const min = event.range[0];
   const max = last(event.range);
 
   if (min === max) {
-    return;
+    return [];
   }
 
   const range: RangeFilterParams = {
@@ -74,5 +74,6 @@ export async function onBrushEvent(event: BrushEvent) {
     range.format = 'strict_date_optional_time';
   }
 
-  return esFilters.buildRangeFilter(field, range, indexPattern);
+  const rangeFilter = esFilters.buildRangeFilter(field, range, indexPattern);
+  return rangeFilter ? esFilters.mapAndFlattenFilters([rangeFilter]) : [];
 }

@@ -19,14 +19,14 @@
 
 import moment from 'moment';
 
-import { onBrushEvent, BrushEvent } from './brush_event';
+import { createFiltersFromBrushEvent, BrushEvent } from './brush_event';
 
 import { IndexPatternsContract } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns } from '../../../public/services';
 import { mockDataServices } from '../../../public/search/aggs/test_helpers';
 
-describe('brushEvent', () => {
+describe('createFiltersFromBrushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
   let baseEvent: BrushEvent;
@@ -94,11 +94,11 @@ describe('brushEvent', () => {
   });
 
   test('should be a function', () => {
-    expect(typeof onBrushEvent).toBe('function');
+    expect(typeof createFiltersFromBrushEvent).toBe('function');
   });
 
   test('ignores event when data.xAxisField not provided', async () => {
-    const filter = await onBrushEvent(baseEvent);
+    const filter = await createFiltersFromBrushEvent(baseEvent);
     expect(filter).toBeUndefined();
   });
 
@@ -119,13 +119,13 @@ describe('brushEvent', () => {
 
       test('by ignoring the event when range spans zero time', async () => {
         baseEvent.range = [JAN_01_2014, JAN_01_2014];
-        const filter = await onBrushEvent(baseEvent);
+        const filter = await createFiltersFromBrushEvent(baseEvent);
         expect(filter).toBeUndefined();
       });
 
       test('by updating the timefilter', async () => {
         baseEvent.range = [JAN_01_2014, JAN_01_2014 + DAY_IN_MS];
-        const filter = await onBrushEvent(baseEvent);
+        const filter = await createFiltersFromBrushEvent(baseEvent);
         expect(filter).toBeDefined();
 
         if (filter) {
@@ -154,7 +154,7 @@ describe('brushEvent', () => {
         const rangeBegin = JAN_01_2014;
         const rangeEnd = rangeBegin + DAY_IN_MS;
         baseEvent.range = [rangeBegin, rangeEnd];
-        const filter = await onBrushEvent(baseEvent);
+        const filter = await createFiltersFromBrushEvent(baseEvent);
 
         expect(filter).toBeDefined();
 
@@ -184,13 +184,13 @@ describe('brushEvent', () => {
 
     test('by ignoring the event when range does not span at least 2 values', async () => {
       baseEvent.range = [1];
-      const filter = await onBrushEvent(baseEvent);
+      const filter = await createFiltersFromBrushEvent(baseEvent);
       expect(filter).toBeUndefined();
     });
 
     test('by creating a new filter', async () => {
       baseEvent.range = [1, 2, 3, 4];
-      const filter = await onBrushEvent(baseEvent);
+      const filter = await createFiltersFromBrushEvent(baseEvent);
 
       expect(filter).toBeDefined();
 

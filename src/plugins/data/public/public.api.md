@@ -245,7 +245,7 @@ export interface DataPublicPluginSetup {
 export interface DataPublicPluginStart {
     // (undocumented)
     actions: {
-        createFiltersFromEvent: typeof createFiltersFromEvent;
+        createFiltersFromValueClickEvent: typeof createFiltersFromValueClickEvent;
         valueClickActionGetFilters: typeof valueClickActionGetFilters;
         selectRangeActionGetFilters: typeof selectRangeActionGetFilters;
     };
@@ -1903,7 +1903,7 @@ export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearc
 // src/plugins/data/public/index.ts:414:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:33:33 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:37:1 - (ae-forgotten-export) The symbol "QueryStateChange" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:56:5 - (ae-forgotten-export) The symbol "createFiltersFromEvent" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:56:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickEvent" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/types.ts:57:5 - (ae-forgotten-export) The symbol "valueClickActionGetFilters" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/types.ts:58:5 - (ae-forgotten-export) The symbol "selectRangeActionGetFilters" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/types.ts:66:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts

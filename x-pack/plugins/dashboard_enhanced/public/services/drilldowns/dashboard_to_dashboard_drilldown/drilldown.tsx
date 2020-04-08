@@ -62,8 +62,8 @@ export class DashboardToDashboardDrilldown
     const navigateToApp = await this.params.getNavigateToApp();
 
     const {
-      selectRangeActionGetFilters,
-      valueClickActionGetFilters,
+      createFiltersFromValueClickEvent,
+      createFiltersFromBrushEvent,
     } = await this.params.getDataPluginActions();
     const {
       timeRange: currentTimeRange,
@@ -73,7 +73,7 @@ export class DashboardToDashboardDrilldown
 
     // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
     // otherwise preserve only pinned
-    const filters =
+    const existingFilters =
       (config.useCurrentFilters
         ? currentFilters
         : currentFilters?.filter(f => esFilters.isFilterPinned(f))) ?? [];
@@ -82,24 +82,16 @@ export class DashboardToDashboardDrilldown
     // if undefined is passed, then destination dashboard will figure out time range itself
     // for brush event this time range would be overwritten
     let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
+    let filtersFromEvent = context.data.range
+      ? await createFiltersFromBrushEvent(context.data as any)
+      : await createFiltersFromValueClickEvent(context.data as any);
 
-    if (context.data.range) {
-      // look up by range
-      const { restOfFilters, timeRangeFilter } =
-        (await selectRangeActionGetFilters({
-          timeFieldName: context.timeFieldName!,
-          data: context.data,
-        })) || {};
-      filters.push(...(restOfFilters || []));
-      if (timeRangeFilter) {
-        timeRange = esFilters.convertRangeFilterToTimeRangeString(timeRangeFilter);
-      }
-    } else {
-      const { restOfFilters, timeRangeFilter } = await valueClickActionGetFilters({
-        timeFieldName: context.timeFieldName!,
-        data: context.data,
-      });
-      filters.push(...(restOfFilters || []));
+    if (context.timeFieldName) {
+      const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
+        context.timeFieldName,
+        filtersFromEvent
+      );
+      filtersFromEvent = restOfFilters;
       if (timeRangeFilter) {
         timeRange = esFilters.convertRangeFilterToTimeRangeString(timeRangeFilter);
       }
@@ -109,7 +101,7 @@ export class DashboardToDashboardDrilldown
       dashboardId: config.dashboardId,
       query,
       timeRange,
-      filters,
+      filters: [...existingFilters, ...filtersFromEvent],
     });
 
     const dashboardHash = dashboardPath.split('#')[1];

@@ -22,6 +22,12 @@ import { deserializeAggConfig } from '../../search/expressions';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 
+export type ArrayOrItem<T> = T | T[];
+export interface ClickEvent {
+  data: ArrayOrItem<EventData>;
+  negate?: boolean;
+}
+
 export interface EventData {
   table: Pick<KibanaDatatable, 'rows' | 'columns'>;
   column: number;
@@ -113,11 +119,16 @@ const createFilter = async (table: EventData['table'], columnIndex: number, rowI
 };
 
 /** @public */
-export const createFiltersFromEvent = async (dataPoints: EventData[], negate?: boolean) => {
+export const createFiltersFromValueClickEvent = async ({
+  data,
+  negate = false,
+}: ClickEvent): Promise<Filter[]> => {
+  data = Array.isArray(data) ? data : [data];
+
   const filters: Filter[] = [];
 
   await Promise.all(
-    dataPoints
+    data
       .filter(point => point)
       .map(async val => {
         const { table, column, row } = val;
@@ -133,5 +144,5 @@ export const createFiltersFromEvent = async (dataPoints: EventData[], negate?: b
       })
   );
 
-  return filters;
+  return esFilters.mapAndFlattenFilters(filters);
 };

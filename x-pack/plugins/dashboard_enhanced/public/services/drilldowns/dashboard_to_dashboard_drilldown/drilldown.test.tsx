@@ -62,7 +62,7 @@ describe('.execute()', () => {
   async function setupTestBed(
     config: Partial<Config>,
     embeddableInput: { filters?: Filter[]; timeRange?: TimeRange; query?: Query },
-    filtersFromEvent: { restOfFilters?: Filter[]; timeRangeFilter?: RangeFilter },
+    filtersFromEvent: Filter[],
     useRangeEvent = false
   ) {
     const navigateToApp = jest.fn();
@@ -82,21 +82,11 @@ describe('.execute()', () => {
       getSavedObjectsClient: () => Promise.resolve(savedObjectsClient),
     });
     const selectRangeFiltersSpy = jest
-      .spyOn(dataPluginActions, 'selectRangeActionGetFilters')
-      .mockImplementationOnce(() =>
-        Promise.resolve({
-          restOfFilters: filtersFromEvent.restOfFilters || [],
-          timeRangeFilter: filtersFromEvent.timeRangeFilter,
-        })
-      );
+      .spyOn(dataPluginActions, 'createFiltersFromBrushEvent')
+      .mockImplementationOnce(() => Promise.resolve(filtersFromEvent));
     const valueClickFiltersSpy = jest
-      .spyOn(dataPluginActions, 'valueClickActionGetFilters')
-      .mockImplementationOnce(() =>
-        Promise.resolve({
-          restOfFilters: filtersFromEvent.restOfFilters || [],
-          timeRangeFilter: filtersFromEvent.timeRangeFilter,
-        })
-      );
+      .spyOn(dataPluginActions, 'createFiltersFromValueClickEvent')
+      .mockImplementationOnce(() => Promise.resolve(filtersFromEvent));
 
     await drilldown.execute(
       {
@@ -109,6 +99,7 @@ describe('.execute()', () => {
         data: {
           range: useRangeEvent ? {} : undefined,
         },
+        timeFieldName: 'order_date',
         embeddable: {
           getInput: () => ({
             filters: [],
@@ -143,7 +134,7 @@ describe('.execute()', () => {
         dashboardId: testDashboardId,
       },
       {},
-      {},
+      [],
       false
     );
 
@@ -158,7 +149,7 @@ describe('.execute()', () => {
       {
         query: { query: queryString, language: queryLanguage },
       },
-      {},
+      [],
       true
     );
 
@@ -178,9 +169,7 @@ describe('.execute()', () => {
       {
         filters: [getFilter(false, existingAppFilterKey), getFilter(true, existingGlobalFilterKey)],
       },
-      {
-        restOfFilters: [getFilter(false, newAppliedFilterKey)],
-      },
+      [getFilter(false, newAppliedFilterKey)],
       false
     );
 
@@ -201,9 +190,7 @@ describe('.execute()', () => {
       {
         filters: [getFilter(false, existingAppFilterKey), getFilter(true, existingGlobalFilterKey)],
       },
-      {
-        restOfFilters: [getFilter(false, newAppliedFilterKey)],
-      },
+      [getFilter(false, newAppliedFilterKey)],
       false
     );
 
@@ -223,7 +210,7 @@ describe('.execute()', () => {
           to: 'now',
         },
       },
-      {},
+      [],
       false
     );
 
@@ -241,7 +228,7 @@ describe('.execute()', () => {
           to: 'now',
         },
       },
-      {},
+      [],
       false
     );
 
@@ -259,7 +246,7 @@ describe('.execute()', () => {
           to: 'now',
         },
       },
-      { timeRangeFilter: getMockTimeRangeFilter() },
+      [getMockTimeRangeFilter()],
       true
     );
 

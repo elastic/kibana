@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RangeFilter } from 'src/plugins/data/public';
 import { toMountPoint } from '../../../../plugins/kibana_react/public';
 import {
   ActionByType,
@@ -27,7 +26,7 @@ import {
 } from '../../../../plugins/ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
-import { createFiltersFromEvent } from './filters/create_filters_from_event';
+import { createFiltersFromValueClickEvent } from './filters/create_filters_from_value_click_event';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
@@ -39,90 +38,12 @@ export interface ValueClickActionContext {
 
 async function isCompatible(context: ValueClickActionContext) {
   try {
-    const filters: Filter[] =
-      (await createFiltersFromEvent(context.data.data || [context.data], context.data.negate)) ||
-      [];
+    const filters: Filter[] = await createFiltersFromValueClickEvent(context.data);
     return filters.length > 0;
   } catch {
     return false;
   }
 }
-
-// this allows the user to select which filter to use
-const filterSelectionFn = (filters: Filter[]): Promise<Filter[]> =>
-  new Promise(async resolve => {
-    const indexPatterns = await Promise.all(
-      filters.map(filter => {
-        return getIndexPatterns().get(filter.meta.index!);
-      })
-    );
-
-    const overlay = getOverlays().openModal(
-      toMountPoint(
-        applyFiltersPopover(
-          filters,
-          indexPatterns,
-          () => {
-            overlay.close();
-            resolve([]);
-          },
-          (filterSelection: Filter[]) => {
-            overlay.close();
-            resolve(filterSelection);
-          }
-        )
-      ),
-      {
-        'data-test-subj': 'selectFilterOverlay',
-      }
-    );
-  });
-
-// given a ValueClickActionContext, returns timeRangeFilter and Filters
-export const valueClickActionGetFilters = async (
-  { timeFieldName, data }: ValueClickActionContext,
-  filterSelection: (filters: Filter[]) => Promise<Filter[]> = async (filters: Filter[]) => filters
-): Promise<{
-  timeRangeFilter?: RangeFilter;
-  restOfFilters: Filter[];
-}> => {
-  if (!(await isCompatible({ timeFieldName, data }))) {
-    throw new IncompatibleActionError();
-    // note - the else statement is necessary due to odd compilation behavior
-    // code after the throw statement can't contain await statements
-  } else {
-    const filters: Filter[] =
-      (await createFiltersFromEvent(data.data || [data], data.negate)) || [];
-
-    let selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
-
-    if (selectedFilters.length > 1) {
-      selectedFilters = await filterSelection(filters);
-    }
-
-    return esFilters.extractTimeFilter(timeFieldName || '', selectedFilters);
-  }
-};
-
-// gets and applies the filters
-export const valueClickActionExecute = (
-  filterManager: FilterManager,
-  timeFilter: TimefilterContract,
-  filterSelection: (filters: Filter[]) => Promise<Filter[]> = async (filters: Filter[]) => filters
-) => async ({ timeFieldName, data }: ValueClickActionContext) => {
-  const { timeRangeFilter, restOfFilters } = await valueClickActionGetFilters(
-    {
-      timeFieldName,
-      data,
-    },
-    filterSelection
-  );
-
-  filterManager.addFilters(restOfFilters);
-  if (timeRangeFilter) {
-    esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
-  }
-};
 
 export function valueClickAction(
   filterManager: FilterManager,
@@ -138,6 +59,57 @@ export function valueClickAction(
       });
     },
     isCompatible,
-    execute: valueClickActionExecute(filterManager, timeFilter, filterSelectionFn),
+    execute: async ({ timeFieldName, data }: ValueClickActionContext) => {
+      if (!(await isCompatible({ timeFieldName, data }))) {
+        throw new IncompatibleActionError();
+      }
+
+      let selectedFilters = await createFiltersFromValueClickEvent(data);
+
+      if (selectedFilters.length > 1) {
+        const indexPatterns = await Promise.all(
+          selectedFilters.map(filter => {
+            return getIndexPatterns().get(filter.meta.index!);
+          })
+        );
+
+        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
+          const overlay = getOverlays().openModal(
+            toMountPoint(
+              applyFiltersPopover(
+                selectedFilters,
+                indexPatterns,
+                () => {
+                  overlay.close();
+                  resolve([]);
+                },
+                (filterSelection: Filter[]) => {
+                  overlay.close();
+                  resolve(filterSelection);
+                }
+              )
+            ),
+            {
+              'data-test-subj': 'selectFilterOverlay',
+            }
+          );
+        });
+
+        selectedFilters = await filterSelectionPromise;
+      }
+
+      if (timeFieldName) {
+        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
+          timeFieldName,
+          selectedFilters
+        );
+        filterManager.addFilters(restOfFilters);
+        if (timeRangeFilter) {
+          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+        }
+      } else {
+        filterManager.addFilters(selectedFilters);
+      }
+    },
   });
 }

@@ -8,7 +8,7 @@
 
 ```typescript
 actions: {
-        createFiltersFromEvent: typeof createFiltersFromEvent;
+        createFiltersFromValueClickEvent: typeof createFiltersFromValueClickEvent;
         valueClickActionGetFilters: typeof valueClickActionGetFilters;
         selectRangeActionGetFilters: typeof selectRangeActionGetFilters;
     };
