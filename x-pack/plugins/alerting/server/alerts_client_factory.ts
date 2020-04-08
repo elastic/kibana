@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PreConfiguredAction } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
@@ -19,6 +20,7 @@ export interface AlertsClientFactoryOpts {
   getSpaceId: (request: KibanaRequest) => string | undefined;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export class AlertsClientFactory {
@@ -30,6 +32,7 @@ export class AlertsClientFactory {
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsPlugin!: EncryptedSavedObjectsPluginStart;
+  private preconfiguredActions!: PreConfiguredAction[];
 
   public initialize(options: AlertsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -43,6 +46,7 @@ export class AlertsClientFactory {
     this.securityPluginSetup = options.securityPluginSetup;
     this.spaceIdToNamespace = options.spaceIdToNamespace;
     this.encryptedSavedObjectsPlugin = options.encryptedSavedObjectsPlugin;
+    this.preconfiguredActions = options.preconfiguredActions;
   }
 
   public create(
@@ -100,6 +104,7 @@ export class AlertsClientFactory {
           result: invalidateAPIKeyResult,
         };
       },
+      preconfiguredActions: this.preconfiguredActions,
     });
   }
 }

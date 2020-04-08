@@ -10,11 +10,11 @@ import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/l
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function findActionTests({ getService }: FtrProviderContext) {
+export default function getAllActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('find', () => {
+  describe('getAll', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
@@ -22,7 +22,7 @@ export default function findActionTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle find action request appropriately', async () => {
+        it('should handle get all action request appropriately', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -40,11 +40,7 @@ export default function findActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/api/action/_find?search=test.index-record&search_fields=actionTypeId`
-            )
+            .get(`${getUrlPrefix(space.id)}/api/action/_getAll`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -61,90 +57,47 @@ export default function findActionTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                page: 1,
-                perPage: 20,
-                total: 1,
-                data: [
-                  {
-                    id: createdAction.id,
-                    name: 'My action',
-                    actionTypeId: 'test.index-record',
-                    config: {
-                      unencrypted: `This value shouldn't get encrypted`,
-                    },
-                    referencedByCount: 0,
+              expect(response.body).to.eql([
+                {
+                  id: createdAction.id,
+                  isPreconfigured: false,
+                  name: 'My action',
+                  actionTypeId: 'test.index-record',
+                  config: {
+                    unencrypted: `This value shouldn't get encrypted`,
                   },
-                ],
-              });
+                  referencedByCount: 0,
+                },
+                {
+                  id: 'my-slack1',
+                  isPreconfigured: true,
+                  actionTypeId: '.slack',
+                  name: 'Slack#xyz',
+                  config: {
+                    webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+                  },
+                  referencedByCount: 0,
+                },
+                {
+                  id: 'custom-system-abc-connector',
+                  isPreconfigured: true,
+                  actionTypeId: 'system-abc-action-type',
+                  name: 'SystemABC',
+                  config: {
+                    xyzConfig1: 'value1',
+                    xyzConfig2: 'value2',
+                    listOfThings: ['a', 'b', 'c', 'd'],
+                  },
+                  referencedByCount: 0,
+                },
+              ]);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
 
-        it('should handle find action request with filter appropriately', async () => {
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'My action',
-              actionTypeId: 'test.index-record',
-              config: {
-                unencrypted: `This value shouldn't get encrypted`,
-              },
-              secrets: {
-                encrypted: 'This value should be encrypted',
-              },
-            })
-            .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
-
-          const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/api/action/_find?filter=action.attributes.actionTypeId:test.index-record`
-            )
-            .auth(user.username, user.password);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
-            case 'global_read at space1':
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                page: 1,
-                perPage: 20,
-                total: 1,
-                data: [
-                  {
-                    id: createdAction.id,
-                    name: 'My action',
-                    actionTypeId: 'test.index-record',
-                    config: {
-                      unencrypted: `This value shouldn't get encrypted`,
-                    },
-                    referencedByCount: 0,
-                  },
-                ],
-              });
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
-        it('should handle find request appropriately with proper referencedByCount', async () => {
+        it('should handle get all request appropriately with proper referencedByCount', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -172,6 +125,13 @@ export default function findActionTests({ getService }: FtrProviderContext) {
                     id: createdAction.id,
                     params: {},
                   },
+                  {
+                    group: 'default',
+                    id: 'my-slack1',
+                    params: {
+                      message: 'test',
+                    },
+                  },
                 ],
               })
             )
@@ -179,11 +139,7 @@ export default function findActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'alert');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/api/action/_find?filter=action.attributes.actionTypeId:test.index-record`
-            )
+            .get(`${getUrlPrefix(space.id)}/api/action/_getAll`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -200,29 +156,47 @@ export default function findActionTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                page: 1,
-                perPage: 20,
-                total: 1,
-                data: [
-                  {
-                    id: createdAction.id,
-                    name: 'My action',
-                    actionTypeId: 'test.index-record',
-                    config: {
-                      unencrypted: `This value shouldn't get encrypted`,
-                    },
-                    referencedByCount: 1,
+              expect(response.body).to.eql([
+                {
+                  id: createdAction.id,
+                  isPreconfigured: false,
+                  name: 'My action',
+                  actionTypeId: 'test.index-record',
+                  config: {
+                    unencrypted: `This value shouldn't get encrypted`,
                   },
-                ],
-              });
+                  referencedByCount: 1,
+                },
+                {
+                  id: 'my-slack1',
+                  isPreconfigured: true,
+                  actionTypeId: '.slack',
+                  name: 'Slack#xyz',
+                  config: {
+                    webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+                  },
+                  referencedByCount: 1,
+                },
+                {
+                  id: 'custom-system-abc-connector',
+                  isPreconfigured: true,
+                  actionTypeId: 'system-abc-action-type',
+                  name: 'SystemABC',
+                  config: {
+                    xyzConfig1: 'value1',
+                    xyzConfig2: 'value2',
+                    listOfThings: ['a', 'b', 'c', 'd'],
+                  },
+                  referencedByCount: 0,
+                },
+              ]);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
 
-        it(`shouldn't find action from another space`, async () => {
+        it(`shouldn't get actions from another space`, async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
@@ -240,11 +214,7 @@ export default function findActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action');
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                'other'
-              )}/api/action/_find?search=test.index-record&search_fields=actionTypeId`
-            )
+            .get(`${getUrlPrefix('other')}/api/action/_getAll`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -261,12 +231,30 @@ export default function findActionTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql({
-                page: 1,
-                perPage: 20,
-                total: 0,
-                data: [],
-              });
+              expect(response.body).to.eql([
+                {
+                  id: 'my-slack1',
+                  isPreconfigured: true,
+                  actionTypeId: '.slack',
+                  name: 'Slack#xyz',
+                  config: {
+                    webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+                  },
+                  referencedByCount: 0,
+                },
+                {
+                  id: 'custom-system-abc-connector',
+                  isPreconfigured: true,
+                  actionTypeId: 'system-abc-action-type',
+                  name: 'SystemABC',
+                  config: {
+                    xyzConfig1: 'value1',
+                    xyzConfig2: 'value2',
+                    listOfThings: ['a', 'b', 'c', 'd'],
+                  },
+                  referencedByCount: 0,
+                },
+              ]);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
