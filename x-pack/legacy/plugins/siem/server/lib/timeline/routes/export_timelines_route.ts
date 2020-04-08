@@ -16,17 +16,8 @@ import {
   exportTimelinesQuerySchema,
   exportTimelinesRequestBodySchema,
   buildRouteValidation,
-  decodeOrThrow,
 } from './schemas/export_timelines_schema';
-
-interface ExportTimelinesQuery {
-  file_name: string;
-  exclude_export_details: 'true' | 'false';
-}
-
-interface ExportTimelinesRequestBody {
-  ids: string[];
-}
+import { ExportTimelinesQuery, ExportTimelinesRequestBody } from '../types';
 
 export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
   router.post(
