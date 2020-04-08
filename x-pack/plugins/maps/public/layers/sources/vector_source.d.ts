@@ -11,6 +11,7 @@ import { IField } from '../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
+  TiledSingleLayerVectorSourceDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../common/descriptor_types';
@@ -55,7 +56,12 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
-  getUrlTemplateWithMeta(): Promise<TiledSingleLayerVectorSourceMeta>;
+  getUrlTemplateWithMeta(): Promise<{
+    layerName: string;
+    urlTemplate: string;
+    minZoom: number;
+    maxZoom: number;
+  }>;
   getMinZoom(): number;
   getMaxZoom(): number;
 }

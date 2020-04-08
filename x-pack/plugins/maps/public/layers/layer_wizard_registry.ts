@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-type LayerWizard = {
+export type LayerWizard = {
   description: string;
   icon: string;
   isIndexingSource?: boolean;
@@ -14,7 +14,7 @@ type LayerWizard = {
     inspectorAdapters,
   }: {
     onPreviewSource: () => void;
-    inspectorAdapters: unknown;
+    inspectorAdapters: object;
   }): unknown;
   title: string;
 };

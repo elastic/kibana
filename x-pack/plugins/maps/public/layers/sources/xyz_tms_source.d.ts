@@ -5,7 +5,10 @@
  */
 import { AbstractTMSSource } from './tms_source';
 import { XYZTMSSourceDescriptor } from '../../../common/descriptor_types';
+import { LayerWizard } from '../layer_wizard_registry';
 
 export class XYZTMSSource extends AbstractTMSSource {
   constructor(sourceDescriptor: XYZTMSSourceDescriptor, inspectorAdapters: unknown);
 }
+
+export const tmsLayerWizardConfig: LayerWizard;

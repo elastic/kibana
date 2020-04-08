@@ -17,6 +17,7 @@ import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
+import { ILayer } from '../../layer';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
   defaultMessage: 'Vector Tile Layer',
@@ -34,7 +35,17 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   static icon = 'logoElasticsearch';
 
-  static createDescriptor({ urlTemplate, layerName, minZoom, maxZoom }) {
+  static createDescriptor({
+    urlTemplate,
+    layerName,
+    minZoom,
+    maxZoom,
+  }: {
+    urlTemplate: string;
+    layerName: string;
+    minZoom: number;
+    maxZoom: number;
+  }) {
     return {
       type: MVTSingleLayerVectorSource.type,
       id: uuid(),
@@ -45,11 +56,18 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     };
   }
 
-  renderSourceSettingsEditor({ onChange }) {
+  private readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
+
+  constructor(descriptor: TiledSingleLayerVectorSourceDescriptor, adapters: object) {
+    super(descriptor, adapters);
+    this._descriptor = descriptor; // re-assignment is required due to TS-JS transpilation, not the type-system
+  }
+
+  renderSourceSettingsEditor() {
     return null;
   }
 
-  createDefaultLayer(options) {
+  createDefaultLayer(options): ILayer {
     return new SingleTiledVectorLayer({
       layerDescriptor: SingleTiledVectorLayer.createDescriptor({
         sourceDescriptor: this._descriptor,
@@ -71,10 +89,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return [];
   }
 
-  getFieldByName(fieldName: string) {
-    return null;
-  }
-
   async getImmutableProperties() {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
@@ -85,11 +99,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     ];
   }
 
-  getDisplayName(): Promise<string> {
+  async getDisplayName(): Promise<string> {
     return this._descriptor.layerName;
   }
 
-  async getUrlTemplateWithMeta(): Promise<TiledSingleLayerVectorSourceDescriptor> {
+  async getUrlTemplateWithMeta() {
     return {
       urlTemplate: this._descriptor.urlTemplate,
       layerName: this._descriptor.layerName,
@@ -125,9 +139,30 @@ export const mvtVectorSourceWizardConfig = {
     defaultMessage: 'Vector source wizard',
   }),
   icon: 'grid',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
-      const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
+  renderWizard: ({
+    onPreviewSource,
+    inspectorAdapters,
+  }: {
+    onPreviewSource: (source: MVTSingleLayerVectorSource) => void;
+    inspectorAdapters: object;
+  }) => {
+    const onSourceConfigChange = ({
+      urlTemplate,
+      layerName,
+      minZoom,
+      maxZoom,
+    }: {
+      urlTemplate: string;
+      layerName: string;
+      minZoom: number;
+      maxZoom: number;
+    }) => {
+      const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor({
+        urlTemplate,
+        layerName,
+        minZoom,
+        maxZoom,
+      });
       const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };

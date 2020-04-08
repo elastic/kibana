@@ -84,7 +84,7 @@ export type WMSSourceDescriptor = {
   attributionUrl: string;
 };
 
-export type TiledSingleLayerVectorSourceDescriptor = {
+export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & {
   urlTemplate: string;
   layerName: string;
 

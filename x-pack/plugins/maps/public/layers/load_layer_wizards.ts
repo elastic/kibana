@@ -38,6 +38,7 @@ export function registerLayerWizards() {
 
   const getInjectedVar = getInjectedVarFunc();
   if (getInjectedVar && getInjectedVar('enableVectorTiles', false)) {
+    // eslint-disable-next-line no-console
     console.warn('Vector tiles are an experimental feature and should not be used in production.');
     registerLayerWizard(mvtVectorSourceWizardConfig);
   }

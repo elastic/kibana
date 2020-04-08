@@ -15,8 +15,8 @@ export class MVTVectorSourceEditor extends React.Component {
   state = {
     urlTemplate: '',
     layerName: '',
-    minZoom: 0,
-    maxZoom: 16,
+    minZoom: MIN_ZOOM,
+    maxZoom: MAX_ZOOM,
     mvtCanPreview: false,
   };
 
