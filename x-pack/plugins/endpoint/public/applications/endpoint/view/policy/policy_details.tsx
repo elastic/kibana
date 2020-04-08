@@ -149,7 +149,10 @@ export const PolicyDetails = React.memo(() => {
         <VerticalDivider spacing="l" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleBackToListOnClick}>
+        <EuiButtonEmpty
+          onClick={handleBackToListOnClick}
+          data-test-subj="policyDetailsCancelButton"
+        >
           <FormattedMessage id="xpack.endpoint.policy.details.cancel" defaultMessage="Cancel" />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -157,6 +160,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiButton
           fill={true}
           iconType="save"
+          data-test-subj="policyDetailsSaveButton"
           // FIXME: need to disable if User has no write permissions to ingest - see: https://github.com/elastic/endpoint-app-team/issues/296
           onClick={handleSaveOnClick}
           isLoading={isPolicyLoading}
@@ -216,6 +220,7 @@ const ConfirmUpdate = React.memo<{
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
+        data-test-subj="policyDetailsConfirmModal"
         title={i18n.translate('xpack.endpoint.policy.details.updateConfirm.title', {
           defaultMessage: 'Save and deploy changes',
         })}
@@ -237,6 +242,7 @@ const ConfirmUpdate = React.memo<{
         {hostCount > 0 && (
           <>
             <EuiCallOut
+              data-test-subj="policyDetailsWarningCallout"
               title={i18n.translate('xpack.endpoint.policy.details.updateConfirm.warningTitle', {
                 defaultMessage:
                   'This action will update {hostCount, plural, one {# host} other {# hosts}}',

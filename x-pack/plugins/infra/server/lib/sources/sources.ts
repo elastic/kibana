@@ -231,7 +231,7 @@ const mergeSourceConfiguration = (
     first
   );
 
-const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
+export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
   pipe(
     SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
     map(savedSourceConfiguration => ({
