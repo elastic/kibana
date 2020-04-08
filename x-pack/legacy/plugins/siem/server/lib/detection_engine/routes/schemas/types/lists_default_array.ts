@@ -7,10 +7,10 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-import { list } from '../response/schemas';
+import { list_and as listAnd } from '../response/schemas';
 
 export type ListsDefaultArrayC = t.Type<List[], List[], unknown>;
-type List = t.TypeOf<typeof list>;
+type List = t.TypeOf<typeof listAnd>;
 
 /**
  * Types the ListsDefaultArray as:
@@ -18,9 +18,9 @@ type List = t.TypeOf<typeof list>;
  */
 export const ListsDefaultArray: ListsDefaultArrayC = new t.Type<List[], List[], unknown>(
   'listsWithDefaultArray',
-  t.array(list).is,
+  t.array(listAnd).is,
   (input): Either<t.Errors, List[]> =>
-    input == null ? t.success([]) : t.array(list).decode(input),
+    input == null ? t.success([]) : t.array(listAnd).decode(input),
   t.identity
 );
 
