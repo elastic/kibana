@@ -11,9 +11,9 @@ import { getDefaultDynamicProperties } from './styles/vector/vector_style_defaul
 import { IDynamicStyleProperty } from './styles/vector/properties/dynamic_style_property';
 import { IStyleProperty } from './styles/vector/properties/style_property';
 import {
+  SOURCE_TYPES,
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
-  ES_GEO_GRID,
   LAYER_TYPE,
   AGG_TYPE,
   RENDER_AS,
@@ -179,7 +179,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       if (
         requestMeta &&
         requestMeta.sourceType &&
-        requestMeta.sourceType === SOURCE_TYPE.ES_GEO_GRID
+        requestMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
       ) {
         isClustered = true;
       }
