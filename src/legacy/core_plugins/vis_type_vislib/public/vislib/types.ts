@@ -24,7 +24,7 @@ export interface Column {
 }
 
 export interface Row {
-  [key: string]: number | string;
+  [key: string]: number | string | object;
 }
 
 export interface TableParent {

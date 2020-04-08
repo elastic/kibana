@@ -18,7 +18,7 @@
  */
 
 import { uniq } from 'lodash';
-import moment, { Duration } from 'moment';
+import { Duration, Moment } from 'moment';
 import { Unit } from '@elastic/datemath';
 
 import { SerializedFieldFormat } from '../../../../../../../../plugins/expressions/common/types';
@@ -43,9 +43,9 @@ interface HistogramParams {
   intervalESValue: number;
   intervalESUnit: Unit;
   format: string;
-  bounds?: {
-    min: string | number;
-    max: string | number;
+  bounds: {
+    min: Moment;
+    max: Moment;
   };
 }
 export interface Dimension {
@@ -60,11 +60,11 @@ export interface Dimensions {
 
 interface Ordered {
   date: true;
-  interval: Duration | number;
+  interval: Duration;
   intervalESUnit: string;
   intervalESValue: number;
-  min?: number;
-  max?: number;
+  min: Moment;
+  max: Moment;
 }
 export interface Chart {
   values: Array<{
@@ -91,19 +91,12 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   const { intervalESUnit, intervalESValue, interval, bounds } = x.params;
   chart.ordered = {
     date: true,
-    interval: moment.duration(interval),
+    interval,
     intervalESUnit,
     intervalESValue,
+    min: bounds.min,
+    max: bounds.max,
   };
-
-  if (bounds) {
-    chart.ordered.min = isNaN(bounds.min as number)
-      ? Date.parse(bounds.min as string)
-      : (bounds.min as number);
-    chart.ordered.max = isNaN(bounds.max as number)
-      ? Date.parse(bounds.max as string)
-      : (bounds.max as number);
-  }
 
   chart.yAxisLabel = table.columns[y.accessor].name;
 

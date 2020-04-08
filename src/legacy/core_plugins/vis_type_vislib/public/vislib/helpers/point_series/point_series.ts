@@ -86,7 +86,7 @@ type Ordered = (DateHistogramOrdered | HistogramOrdered) & {
 export interface Chart {
   aspects: Aspects;
   series: Serie[];
-  xAxisOrderedValues?: Array<string | number>;
+  xAxisOrderedValues?: Array<string | number | object>;
   xAxisFormat?: Dimension['format'];
   xAxisLabel?: Column['name'];
   yAxisFormat?: Dimension['format'];

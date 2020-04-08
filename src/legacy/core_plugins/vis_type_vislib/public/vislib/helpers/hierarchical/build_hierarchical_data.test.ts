@@ -36,7 +36,7 @@ function tableVisResponseHandler(table: Table, dimensions: Dimensions) {
     let splitIndex = 0;
 
     table.rows.forEach((row, rowIndex) => {
-      const splitValue = row[splitColumn.id];
+      const splitValue = row[splitColumn.id] as string;
 
       if (!splitMap.hasOwnProperty(splitValue)) {
         splitMap[splitValue] = splitIndex++;
@@ -49,15 +49,15 @@ function tableVisResponseHandler(table: Table, dimensions: Dimensions) {
           row: rowIndex,
           table,
           tables: [] as Table[],
-        };
+        } as any;
 
         tableGroup.tables.push({
-          $parent: tableGroup as TableParent,
+          $parent: tableGroup,
           columns: table.columns,
           rows: [],
         });
 
-        converted.tables.push(tableGroup as TableParent);
+        converted.tables.push(tableGroup);
       }
 
       const tableIndex = splitMap[splitValue];
@@ -328,8 +328,8 @@ describe('buildHierarchicalData convertTable', () => {
           { id: 'col-1-1', name: 'Count' },
         ],
         rows: [
-          { 'col-0-agg_2': { gte: 0, lt: 1000 } as any, 'col-1-1': 606 },
-          { 'col-0-agg_2': { gte: 1000, lt: 2000 } as any, 'col-1-1': 298 },
+          { 'col-0-agg_2': { gte: 0, lt: 1000 }, 'col-1-1': 606 },
+          { 'col-0-agg_2': { gte: 1000, lt: 2000 }, 'col-1-1': 298 },
         ],
       };
       dimensions = {

@@ -46,7 +46,7 @@ interface Slice {
     table: Table;
     row: number;
     column: number;
-    value: string | number;
+    value: string | number | object;
   };
 }
 
