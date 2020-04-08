@@ -15,6 +15,9 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     testFiles: [resolve(__dirname, './apps/endpoint')],
+    junit: {
+      reportName: 'X-Pack Endpoint Without Ingest Functional Tests',
+    },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
