@@ -8,7 +8,7 @@ import { IRouter, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
-import { HostMetadata, HostResultList } from '../../../common/types';
+import { HostInfo, HostMetadata, HostResultList, HostStatus } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 
@@ -87,7 +87,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 export async function getHostData(
   context: RequestHandlerContext,
   id: string
-): Promise<HostMetadata | undefined> {
+): Promise<HostInfo | undefined> {
   const query = getESQueryHostMetadataByID(id);
   const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
     'search',
@@ -98,7 +98,7 @@ export async function getHostData(
     return undefined;
   }
 
-  return response.hits.hits[0]._source;
+  return enrichHostMetadata(response.hits.hits[0]._source);
 }
 
 function mapToHostResultList(
@@ -113,7 +113,7 @@ function mapToHostResultList(
       hosts: searchResponse.hits.hits
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
-        .map(entry => entry._source),
+        .map(entry => enrichHostMetadata(entry._source)),
       total: totalNumberOfHosts,
     };
   } else {
@@ -124,4 +124,11 @@ function mapToHostResultList(
       hosts: [],
     };
   }
+}
+
+function enrichHostMetadata(hostMetadata: HostMetadata): HostInfo {
+  return {
+    metadata: hostMetadata,
+    host_status: HostStatus.ERROR,
+  };
 }
