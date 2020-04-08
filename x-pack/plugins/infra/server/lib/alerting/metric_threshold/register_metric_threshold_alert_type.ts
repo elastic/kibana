@@ -29,7 +29,6 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     ]),
     timeUnit: schema.string(),
     timeSize: schema.number(),
-    indexPattern: schema.string(),
   };
 
   const nonCountCriterion = schema.object({
@@ -89,6 +88,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
         criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
         groupBy: schema.maybe(schema.string()),
         filterQuery: schema.maybe(schema.string()),
+        sourceId: schema.string(),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
