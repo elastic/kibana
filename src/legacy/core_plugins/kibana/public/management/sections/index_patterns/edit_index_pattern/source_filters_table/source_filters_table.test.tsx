@@ -20,13 +20,13 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { SourceFiltersTable } from '../source_filters_table';
+import { SourceFiltersTable } from './source_filters_table';
+import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
   EuiTitle: 'eui-title',
   EuiText: 'eui-text',
-  EuiButton: 'eui-button',
   EuiHorizontalRule: 'eui-horizontal-rule',
   EuiSpacer: 'eui-spacer',
   EuiCallOut: 'eui-call-out',
@@ -39,22 +39,28 @@ jest.mock('@elastic/eui', () => ({
     default: () => {},
   },
 }));
-jest.mock('../components/header', () => ({ Header: 'header' }));
-jest.mock('../components/table', () => ({
+jest.mock('./components/header', () => ({ Header: 'header' }));
+jest.mock('./components/table', () => ({
   // Note: this seems to fix React complaining about non lowercase attributes
   Table: () => {
     return 'table';
   },
 }));
 
-const indexPattern = {
-  sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
-};
+const getIndexPatternMock = (mockedFields: any = {}) =>
+  ({
+    sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
+    ...mockedFields,
+  } as IIndexPattern);
 
 describe('SourceFiltersTable', () => {
   it('should render normally', async () => {
     const component = shallow(
-      <SourceFiltersTable indexPattern={indexPattern} fieldWildcardMatcher={() => {}} />
+      <SourceFiltersTable
+        indexPattern={getIndexPatternMock()}
+        fieldWildcardMatcher={() => {}}
+        filterFilter={''}
+      />
     );
 
     expect(component).toMatchSnapshot();
@@ -62,7 +68,11 @@ describe('SourceFiltersTable', () => {
 
   it('should filter based on the query bar', async () => {
     const component = shallow(
-      <SourceFiltersTable indexPattern={indexPattern} fieldWildcardMatcher={() => {}} />
+      <SourceFiltersTable
+        indexPattern={getIndexPatternMock()}
+        fieldWildcardMatcher={() => {}}
+        filterFilter={''}
+      />
     );
 
     component.setProps({ filterFilter: 'ti' });
@@ -72,9 +82,10 @@ describe('SourceFiltersTable', () => {
   it('should should a loading indicator when saving', async () => {
     const component = shallow(
       <SourceFiltersTable
-        indexPattern={{
+        indexPattern={getIndexPatternMock({
           sourceFilters: [{ value: 'tim*' }],
-        }}
+        })}
+        filterFilter={''}
         fieldWildcardMatcher={() => {}}
       />
     );
@@ -86,9 +97,10 @@ describe('SourceFiltersTable', () => {
   it('should show a delete modal', async () => {
     const component = shallow(
       <SourceFiltersTable
-        indexPattern={{
+        indexPattern={getIndexPatternMock({
           sourceFilters: [{ value: 'tim*' }],
-        }}
+        })}
+        filterFilter={''}
         fieldWildcardMatcher={() => {}}
       />
     );
@@ -106,6 +118,7 @@ describe('SourceFiltersTable', () => {
           save,
           sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
         }}
+        filterFilter={''}
         fieldWildcardMatcher={() => {}}
       />
     );
@@ -123,10 +136,11 @@ describe('SourceFiltersTable', () => {
     const save = jest.fn();
     const component = shallow(
       <SourceFiltersTable
-        indexPattern={{
+        indexPattern={getIndexPatternMock({
           save,
           sourceFilters: [{ value: 'tim*' }],
-        }}
+        })}
+        filterFilter={''}
         fieldWildcardMatcher={() => {}}
       />
     );
@@ -142,10 +156,11 @@ describe('SourceFiltersTable', () => {
     const save = jest.fn();
     const component = shallow(
       <SourceFiltersTable
-        indexPattern={{
+        indexPattern={getIndexPatternMock({
           save,
           sourceFilters: [{ value: 'tim*' }],
-        }}
+        })}
+        filterFilter={''}
         fieldWildcardMatcher={() => {}}
       />
     );
