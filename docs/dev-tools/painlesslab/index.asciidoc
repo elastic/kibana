@@ -1,0 +1,22 @@
+[role="xpack"]
+[[painlesslab]]
+== Painless Lab
+
+beta::[]
+
+The Painless Lab is an interactive code editor that lets you test and
+debug Painless scripts in real-time. You can use the Painless scripting
+language to create {kib} scripted fields,
+process reindexed data, define complex Watcher conditions,
+and work with data in other contexts.
+
+To get started, go to *Dev Tools > Painless Lab*.
+
+image::dev-tools/painlesslab/images/painless-lab.png[Painless Lab]
+{empty} +
+
+For more information, refer to these docs:
+
+* <<scripted-fields, Scripted fields>>
+* {ref}/docs-reindex.html[Reindex]
+* <<watcher-create-advanced-watch, Watcher>>
