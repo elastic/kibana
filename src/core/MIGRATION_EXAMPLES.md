@@ -700,23 +700,19 @@ application.register({
 ## Render HTML Content
 
 You can return a blank HTML page bootstrapped with the core application bundle from an HTTP route handler
-via the `rendering` context. You may wish to do this if you are rendering a chromeless application with a
+via the `httpResources` service. You may wish to do this if you are rendering a chromeless application with a
 custom application route or have other custom rendering needs.
 
-```ts
-router.get(
+```typescript
+httpResources.register(
   { path: '/chromeless', validate: false },
   (context, request, response) => {
-    const { http, rendering } = context.core;
-
-    return response.ok({
-      body: await rendering.render(), // generates an HTML document
-      headers: {
-        'content-security-policy': http.csp.header,
-      },
-    });
+    //... some logic
+    return response.renderCoreApp();
   }
 );
+// or if no additional logic required, you can use a shortcut method:
+httpResources.registerCoreApp({ path: '/chromeless' });
 ```
 
 You can also specify to exclude user data from the bundle metadata. User data
@@ -724,20 +720,16 @@ comprises all UI Settings that are *user provided*, then injected into the page.
 You may wish to exclude fetching this data if not authorized or to slim the page
 size.
 
-```ts
-router.get(
-  { path: '/', validate: false },
+```typescript
+httpResources.register(
+  { path: '/', validate: false, options: { authRequired: false } },
   (context, request, response) => {
-    const { http, rendering } = context.core;
-
-    return response.ok({
-      body: await rendering.render({ includeUserSettings: false }),
-      headers: {
-        'content-security-policy': http.csp.header,
-      },
-    });
+    //... some logic
+    return response.renderAnonymousCoreApp();
   }
 );
+// or if no additional logic required, you can use a shortcut method as well:
+httpResources.registerAnonymousCoreApp({ path: '/chromeless' });
 ```
 
 ## Saved Objects types
