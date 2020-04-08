@@ -119,9 +119,7 @@ fi
 echo "\n${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
 yarn wait-on -i 500 -w 500 http://localhost:${KIBANA_PORT}/status > /dev/null
-if [ -n "${JENKINS_URL}" ] ; then
-  node ci/wait-for-login.js
-fi
+
 echo "\n✅ Setup completed successfully. Running tests...\n"
 
 #
