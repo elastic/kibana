@@ -90,6 +90,7 @@ describe('when on the hosts page', () => {
         },
       };
 
+      coreStart.http.get.mockReturnValue(Promise.resolve(hostDetails));
       coreStart.application.getUrlForApp.mockReturnValue('/app/logs');
 
       reactTestingLibrary.act(() => {
@@ -120,16 +121,21 @@ describe('when on the hosts page', () => {
       const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
       expect(linkToLogs).not.toBeNull();
       expect(linkToLogs.textContent).toEqual('Endpoint Logs');
-      expect(linkToLogs.attributes.href.value).toEqual(
+      expect(linkToLogs.getAttribute('href')).toEqual(
         "/app/logs/stream?logFilter=(expression:'host.id:1',kind:kuery)"
       );
     });
-    it.skip('should navigate to logs without full page refresh', async () => {
-      const renderResult = render();
-      const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
-      expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(0);
-      fireEvent.click(linkToLogs);
-      expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
+    describe('when link to logs is clicked', () => {
+      beforeEach(async () => {
+        const renderResult = render();
+        const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
+        reactTestingLibrary.act(() => fireEvent.click(linkToLogs));
+      });
+
+      it('should navigate to logs without full page refresh', async () => {
+        // FIXME: this is not working :(
+        expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
+      });
     });
   });
 });
