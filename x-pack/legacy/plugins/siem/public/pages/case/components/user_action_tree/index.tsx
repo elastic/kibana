@@ -52,26 +52,12 @@ export const UserActionTree = React.memo(
     updateCase,
     userCanCrud,
   }: UserActionTreeProps) => {
-    // console.log('userActionTree props', {
-    //   data: caseData,
-    //   caseUserActions,
-    //   fetchUserActions,
-    //   firstIndexPushToService,
-    //   isLoadingDescription,
-    //   isLoadingUserActions,
-    //   lastIndexPushToService,
-    //   onUpdateField,
-    //   updateCase,
-    //   userCanCrud,
-    // });
     const { commentId } = useParams();
     const handlerTimeoutId = useRef(0);
     const [initLoading, setInitLoading] = useState(true);
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
-    // console.log('useUpdateComment', { isLoadingIds, patchComment })
     const currentUser = useCurrentUser();
-    // console.log('useCurrentUser', currentUser)
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
     const [insertQuote, setInsertQuote] = useState<string | null>(null);
     const handleManageMarkdownEditId = useCallback(
@@ -87,7 +73,7 @@ export const UserActionTree = React.memo(
 
     const handleSaveComment = useCallback(
       ({ id, version }: { id: string; version: string }, content: string) => {
-        handleManageMarkdownEditId(id);
+        // handleManageMarkdownEditId(id);
         patchComment({
           caseId: caseData.id,
           commentId: id,
@@ -148,7 +134,6 @@ export const UserActionTree = React.memo(
           content={caseData.description}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
           onSaveContent={(content: string) => {
-            handleManageMarkdownEditId(DESCRIPTION_ID);
             onUpdateField(DESCRIPTION_ID, content);
           }}
           onChangeEditable={handleManageMarkdownEditId}
@@ -179,7 +164,6 @@ export const UserActionTree = React.memo(
         }
       }
     }, [commentId, initLoading, isLoadingUserActions, isLoadingIds]);
-
     return (
       <>
         <UserActionItem
@@ -207,6 +191,7 @@ export const UserActionTree = React.memo(
                 <UserActionItem
                   key={action.actionId}
                   createdAt={comment.createdAt}
+                  data-test-subj={`comment-create-action`}
                   disabled={!userCanCrud}
                   id={comment.id}
                   idToOutline={selectedOutlineCommentId}
@@ -250,7 +235,7 @@ export const UserActionTree = React.memo(
               <UserActionItem
                 key={action.actionId}
                 createdAt={action.actionAt}
-                data-test-subj="comment-action"
+                data-test-subj={`${action.actionField[0]}-${action.action}-action`}
                 disabled={!userCanCrud}
                 id={action.actionId}
                 isEditable={false}
@@ -283,6 +268,7 @@ export const UserActionTree = React.memo(
           </MyEuiFlexGroup>
         )}
         <UserActionItem
+          data-test-subj={`add-comment`}
           createdAt={new Date().toISOString()}
           disabled={!userCanCrud}
           id={NEW_ID}

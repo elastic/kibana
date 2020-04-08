@@ -32,10 +32,9 @@ describe('TagList ', () => {
     (useForm as jest.Mock).mockImplementation(() => ({ form: formHookMock }));
   });
   it('Renders no tags, and then edit', () => {
-    const props = defaultProps;
     const wrapper = mount(
       <TestProviders>
-        <TagList {...props} />
+        <TagList {...defaultProps} />
       </TestProviders>
     );
     expect(
@@ -62,10 +61,9 @@ describe('TagList ', () => {
     ).toBeTruthy();
   });
   it('Edit tag on submit', async () => {
-    const props = defaultProps;
     const wrapper = mount(
       <TestProviders>
-        <TagList {...props} />
+        <TagList {...defaultProps} />
       </TestProviders>
     );
     wrapper

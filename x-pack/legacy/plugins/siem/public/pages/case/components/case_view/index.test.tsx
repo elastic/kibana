@@ -9,7 +9,12 @@ import { mount } from 'enzyme';
 
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { CaseComponent, CaseView } from './';
-import { caseProps, caseClosedProps, data, dataClosed, caseUserActions } from './__mock__';
+import {
+  basicCaseClosed,
+  caseClosedProps,
+  caseProps,
+  caseUserActions,
+} from '../__mock__/case_data';
 import { TestProviders } from '../../../../mock';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { useGetCase } from '../../../../containers/case/use_get_case';
@@ -29,10 +34,11 @@ describe('CaseView ', () => {
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();
   const updateCase = jest.fn();
+  const data = caseProps.caseData;
   const defaultGetCase = {
     isLoading: false,
     isError: false,
-    data: caseProps.caseData,
+    data,
     updateCase,
     fetchCase,
   };
@@ -126,7 +132,7 @@ describe('CaseView ', () => {
     ).toEqual(data.createdAt);
     expect(
       wrapper
-        .find(`[data-test-subj="case-view-description"]`)
+        .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
         .first()
         .prop('raw')
     ).toEqual(data.description);
@@ -135,7 +141,7 @@ describe('CaseView ', () => {
   it('should show closed indicators in header when case is closed', async () => {
     useUpdateCaseMock.mockImplementation(() => ({
       ...defaultUpdateCaseState,
-      caseData: dataClosed,
+      caseData: basicCaseClosed,
     }));
     const wrapper = mount(
       <TestProviders>
@@ -151,13 +157,13 @@ describe('CaseView ', () => {
         .find(`[data-test-subj="case-view-closedAt"]`)
         .first()
         .prop('value')
-    ).toEqual(dataClosed.closedAt);
+    ).toEqual(basicCaseClosed.closedAt);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-status"]`)
         .first()
         .text()
-    ).toEqual(dataClosed.status);
+    ).toEqual(basicCaseClosed.status);
   });
 
   it('should dispatch update state when button is toggled', async () => {
@@ -173,43 +179,6 @@ describe('CaseView ', () => {
       .find('input[data-test-subj="toggle-case-status"]')
       .simulate('change', { target: { checked: true } });
     expect(updateCaseProperty).toHaveBeenCalled();
-  });
-
-  it('should render comments', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
-      </TestProviders>
-    );
-    await wait();
-    expect(
-      wrapper
-        .find(
-          `div[data-test-subj="user-action-${data.comments[0].id}-avatar"] [data-test-subj="user-action-avatar"]`
-        )
-        .first()
-        .prop('name')
-    ).toEqual(data.comments[0].createdBy.fullName);
-
-    expect(
-      wrapper
-        .find(
-          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="user-action-title"] strong`
-        )
-        .first()
-        .text()
-    ).toEqual(data.comments[0].createdBy.username);
-
-    expect(
-      wrapper
-        .find(
-          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="markdown"]`
-        )
-        .first()
-        .prop('source')
-    ).toEqual(data.comments[0].comment);
   });
 
   it('should display EditableTitle isLoading', () => {

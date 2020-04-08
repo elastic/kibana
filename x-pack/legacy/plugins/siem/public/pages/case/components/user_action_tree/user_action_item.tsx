@@ -147,24 +147,25 @@ export const UserActionItem = ({
           {!isEditable && (
             <MyEuiPanel
               className="userAction__panel"
+              data-test-subj={`user-action-panel`}
               paddingSize="none"
               showoutline={id === idToOutline ? 'true' : 'false'}
             >
               <UserActionTitle
                 createdAt={createdAt}
                 disabled={disabled}
+                fullName={fullName}
                 id={id}
                 isLoading={isLoading}
                 labelEditAction={labelEditAction}
                 labelQuoteAction={labelQuoteAction}
                 labelTitle={labelTitle ?? <></>}
                 linkId={linkId}
-                fullName={fullName}
-                username={username}
-                updatedAt={updatedAt}
                 onEdit={onEdit}
                 onQuote={onQuote}
                 outlineComment={outlineComment}
+                updatedAt={updatedAt}
+                username={username}
               />
               {markdown}
             </MyEuiPanel>

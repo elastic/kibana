@@ -7,36 +7,24 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { Router, routeData, mockHistory } from '../__mock__/router';
+import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
+import { getFormMock } from '../__mock__/form';
+import { useUpdateComment } from '../../../../containers/case/use_update_comment';
+import { basicCase, getUserAction } from '../__mock__/case_data';
 import { UserActionTree } from './';
 import { TestProviders } from '../../../../mock';
-import { UserActionField } from '../../../../../../../../plugins/case/common/api/cases';
+import { useFormMock } from '../create/index.test';
+import { wait } from '../../../../lib/helpers';
+import { act } from 'react-dom/test-utils';
+jest.mock(
+  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
+);
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
 const updateCase = jest.fn();
 const defaultProps = {
-  data: {
-    id: '89bae2b0-74f4-11ea-a8d2-2bcd64fb2cdd',
-    version: 'WzcxNiwxXQ==',
-    comments: [],
-    totalComment: 0,
-    description: 'This looks not so good',
-    title: 'Bad meanie defacing data',
-    tags: ['defacement'],
-    closedAt: null,
-    closedBy: null,
-    createdAt: '2020-04-02T15:13:41.925Z',
-    createdBy: {
-      email: 'Steph.milovic@elastic.co',
-      fullName: 'Steph Milovic',
-      username: 'smilovic',
-    },
-    externalService: null,
-    status: 'open',
-    updatedAt: null,
-    updatedBy: null,
-  },
+  data: basicCase,
   caseUserActions: [],
   firstIndexPushToService: -1,
   isLoadingDescription: false,
@@ -47,39 +35,42 @@ const defaultProps = {
   onUpdateField,
   updateCase,
 };
+const useUpdateCommentMock = useUpdateComment as jest.Mock;
+jest.mock('../../../../containers/case/use_update_comment');
 
-describe.skip('UserActionTree ', () => {
+const patchComment = jest.fn();
+describe('UserActionTree ', () => {
+  const sampleData = {
+    content: 'what a great comment update',
+  };
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.resetAllMocks();
-    jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId: '123' });
+    useUpdateCommentMock.mockImplementation(() => ({
+      isLoadingIds: [],
+      patchComment,
+    }));
+    const formHookMock = getFormMock(sampleData);
+    useFormMock.mockImplementation(() => ({ form: formHookMock }));
+    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
-  it('Loading spinner when user actions loading', async () => {
-    const props = defaultProps;
+  it('Loading spinner when user actions loading', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <UserActionTree {...{ ...props, isLoadingUserActions: true }} />
+          <UserActionTree {...{ ...defaultProps, isLoadingUserActions: true }} />
         </Router>
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toBeTruthy();
   });
-  it.only('Renders user action items', async () => {
-    const commentAction = {
-      actionField: [('comment' as unknown) as UserActionField['comment']],
-      action: 'create',
-      actionAt: '2020-04-06T21:54:19.459Z',
-      actionBy: { email: '', fullName: '', username: 'casetester3' },
-      newValue: 'sdfsd',
-      oldValue: null,
-      actionId: '2b825fb0-7851-11ea-8b3c-092fb98f129e',
-      caseId: '89bae2b0-74f4-11ea-a8d2-2bcd64fb2cdd',
-      commentId: '2adcf7f0-7851-11ea-8b3c-092fb98f129e',
-    };
+
+  it('Outlines comment when update move to link is clicked', () => {
+    const ourActions = [getUserAction(['comment'], 'create'), getUserAction(['comment'], 'update')];
     const props = {
       ...defaultProps,
-      caseUserActions: [commentAction],
+      caseUserActions: ourActions,
     };
     const wrapper = mount(
       <TestProviders>
@@ -90,8 +81,201 @@ describe.skip('UserActionTree ', () => {
     );
     expect(
       wrapper
-        .find(`[data-test-subj="comment-action"] [data-test-subj="user-action-title"] strong`)
-        .text()
-    ).toEqual(commentAction.actionBy.username);
+        .find(`[data-test-subj="comment-create-action"]`)
+        .first()
+        .prop('idToOutline')
+    ).toEqual('');
+    wrapper
+      .find(`[data-test-subj="comment-update-action"] [data-test-subj="move-to-link"]`)
+      .first()
+      .simulate('click');
+    expect(
+      wrapper
+        .find(`[data-test-subj="comment-create-action"]`)
+        .first()
+        .prop('idToOutline')
+    ).toEqual(ourActions[0].commentId);
+  });
+
+  it('Switches to markdown when edit is clicked and back to panel when canceled', () => {
+    const ourActions = [getUserAction(['comment'], 'create')];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(
+          `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+        )
+        .exists()
+    ).toEqual(false);
+    wrapper
+      .find(`[data-test-subj="comment-create-action"] [data-test-subj="property-actions-ellipses"]`)
+      .first()
+      .simulate('click');
+    wrapper
+      .find(`[data-test-subj="comment-create-action"] [data-test-subj="property-actions-pencil"]`)
+      .first()
+      .simulate('click');
+    expect(
+      wrapper
+        .find(
+          `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+        )
+        .exists()
+    ).toEqual(true);
+    wrapper
+      .find(
+        `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-cancel-markdown"]`
+      )
+      .first()
+      .simulate('click');
+    expect(
+      wrapper
+        .find(
+          `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+        )
+        .exists()
+    ).toEqual(false);
+  });
+
+  it('calls update comment when comment markdown is saved', async () => {
+    const ourActions = [getUserAction(['comment'], 'create')];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    wrapper
+      .find(`[data-test-subj="comment-create-action"] [data-test-subj="property-actions-ellipses"]`)
+      .first()
+      .simulate('click');
+    wrapper
+      .find(`[data-test-subj="comment-create-action"] [data-test-subj="property-actions-pencil"]`)
+      .first()
+      .simulate('click');
+    wrapper
+      .find(
+        `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-save-markdown"]`
+      )
+      .first()
+      .simulate('click');
+    await act(async () => {
+      await wait();
+      wrapper.update();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="user-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(patchComment).toBeCalledWith({
+        commentUpdate: sampleData.content,
+        caseId: props.data.id,
+        commentId: props.data.comments[0].id,
+        fetchUserActions,
+        updateCase,
+        version: props.data.comments[0].version,
+      });
+    });
+  });
+
+  it('calls update description when description markdown is saved', async () => {
+    const props = defaultProps;
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .first()
+      .simulate('click');
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-pencil"]`)
+      .first()
+      .simulate('click');
+    wrapper
+      .find(
+        `[data-test-subj="user-action-description"] [data-test-subj="user-action-save-markdown"]`
+      )
+      .first()
+      .simulate('click');
+    await act(async () => {
+      await wait();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="user-action-${props.data.id}"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(onUpdateField).toBeCalledWith('description', sampleData.content);
+    });
+  });
+
+  it('quotes', async () => {
+    const commentData = {
+      comment: '',
+    };
+    const formHookMock = getFormMock(commentData);
+    const setFieldValue = jest.fn();
+    useFormMock.mockImplementation(() => ({ form: { ...formHookMock, setFieldValue } }));
+    const props = defaultProps;
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .first()
+      .simulate('click');
+    wrapper
+      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
+      .first()
+      .simulate('click');
+    expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n`);
+  });
+  it('Outlines comment when url param is provided', () => {
+    const commentId = 'neat-comment-id';
+    const ourActions = [getUserAction(['comment'], 'create')];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
+    jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(`[data-test-subj="comment-create-action"]`)
+        .first()
+        .prop('idToOutline')
+    ).toEqual(commentId);
   });
 });
