@@ -9,7 +9,6 @@
 /src/legacy/server/sample_data/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/visualize/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/legacy/core_plugins/metrics/ @elastic/kibana-app
@@ -19,6 +18,7 @@
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
+/src/plugins/visualize/ @elastic/kibana-app
 
 # Core UI
 # Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
