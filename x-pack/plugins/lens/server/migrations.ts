@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { SimpleSavedObject } from 'src/core/server';
+import { SavedObjectUnsanitizedDoc } from 'src/core/server';
 
 export interface RawLensSavedXYObject770 {
   type: 'lens';
@@ -34,7 +34,7 @@ export interface RawLensSavedXYObject770 {
 type LensSavedXYObjectPost770 = RawLensSavedXYObject770;
 
 function isLensSavedXY770(
-  doc: SimpleSavedObject | RawLensSavedXYObject770
+  doc: SavedObjectUnsanitizedDoc | RawLensSavedXYObject770
 ): doc is RawLensSavedXYObject770 {
   return (
     doc.type === 'lens' &&
@@ -45,8 +45,8 @@ function isLensSavedXY770(
 
 export const migrations = {
   '7.7.0': (
-    doc: SimpleSavedObject | RawLensSavedXYObject770
-  ): SimpleSavedObject | LensSavedXYObjectPost770 => {
+    doc: SavedObjectUnsanitizedDoc | RawLensSavedXYObject770
+  ): SavedObjectUnsanitizedDoc | LensSavedXYObjectPost770 => {
     const newDoc = cloneDeep(doc);
     if (!isLensSavedXY770(newDoc)) {
       return newDoc;
