@@ -19,12 +19,7 @@ import {
 import { DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import {
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-  HttpSetup,
-  CoreSetup,
-} from 'kibana/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';

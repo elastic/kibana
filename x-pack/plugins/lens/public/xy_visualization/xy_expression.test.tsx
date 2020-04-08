@@ -18,10 +18,7 @@ import {
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
-import {
-  KibanaDatatable,
-  KibanaDatatableRow,
-} from '../../../../../src/plugins/expressions/public';
+import { KibanaDatatable, KibanaDatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';

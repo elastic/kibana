@@ -23,10 +23,7 @@ import {
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
-import {
-  IndexPatternAggRestrictions,
-  search,
-} from '../../../../../../../src/plugins/data/public';
+import { IndexPatternAggRestrictions, search } from '../../../../../../../src/plugins/data/public';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';

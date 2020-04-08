@@ -7,10 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import {
-  KibanaDatatable,
-  SerializedFieldFormat,
-} from '../../../../src/plugins/expressions/public';
+import { KibanaDatatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
