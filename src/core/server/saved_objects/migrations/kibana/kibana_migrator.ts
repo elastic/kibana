@@ -125,10 +125,11 @@ export class KibanaMigrator {
   > {
     if (this.migrationResult === undefined || rerun) {
       this.status$.next({ status: 'running' });
-      this.migrationResult = this.runMigrationsInternal();
+      this.migrationResult = this.runMigrationsInternal().then(result => {
+        this.status$.next({ status: 'completed', result });
+        return result;
+      });
     }
-
-    this.migrationResult.then(result => this.status$.next({ status: 'completed', result }));
 
     return this.migrationResult;
   }
