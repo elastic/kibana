@@ -290,6 +290,10 @@ export const npSetup = {
         }),
       },
     },
+    indexPatternManagement: {
+      list: { addListConfig: sinon.fake() },
+      creation: { addCreationConfig: sinon.fake() },
+    },
     discover: {
       docViews: {
         addDocView: sinon.fake(),
@@ -329,6 +333,17 @@ export const npStart = {
         getSection: () => ({
           registerApp: sinon.fake(),
         }),
+      },
+    },
+    indexPatternManagement: {
+      list: {
+        getType: sinon.fake(),
+        getIndexPatternCreationOptions: sinon.fake(),
+      },
+      creation: {
+        getIndexPatternTags: sinon.fake(),
+        getFieldInfo: sinon.fake(),
+        areScriptedFieldsEnabled: sinon.fake(),
       },
     },
     embeddable: {

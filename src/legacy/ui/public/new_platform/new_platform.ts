@@ -47,6 +47,10 @@ import {
   AdvancedSettingsStart,
 } from '../../../../plugins/advanced_settings/public';
 import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
+import {
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+} from '../../../../plugins/index_pattern_management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { TelemetryPluginSetup, TelemetryPluginStart } from '../../../../plugins/telemetry/public';
@@ -88,6 +92,7 @@ export interface PluginsSetup {
   telemetry?: TelemetryPluginSetup;
   savedObjectsManagement: SavedObjectsManagementPluginSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+  indexPatternManagement: IndexPatternManagementSetup;
 }
 
 export interface PluginsStart {
@@ -109,6 +114,7 @@ export interface PluginsStart {
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  indexPatternManagement: IndexPatternManagementStart;
 }
 
 export const npSetup = {
