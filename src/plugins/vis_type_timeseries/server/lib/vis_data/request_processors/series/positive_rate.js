@@ -22,24 +22,24 @@ import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { set } from 'lodash';
 
-export const filter = metric => metric.type === 'growth_rate';
+export const filter = metric => metric.type === 'positive_rate';
 
-export const createGrowthRate = (doc, intervalString, aggRoot) => metric => {
+export const createPositiveRate = (doc, intervalString, aggRoot) => metric => {
   const maxFn = bucketTransform.max;
   const derivativeFn = bucketTransform.derivative;
   const positiveOnlyFn = bucketTransform.positive_only;
 
-  const maxMetric = { id: `${metric.id}-growth-rate-max`, type: 'max', field: metric.field };
+  const maxMetric = { id: `${metric.id}-positive-rate-max`, type: 'max', field: metric.field };
   const derivativeMetric = {
-    id: `${metric.id}-growth-rate-derivative`,
+    id: `${metric.id}-positive-rate-derivative`,
     type: 'derivative',
-    field: `${metric.id}-growth-rate-max`,
+    field: `${metric.id}-positive-rate-max`,
     unit: metric.unit,
   };
   const positiveOnlyMetric = {
     id: metric.id,
     type: 'positive_only',
-    field: `${metric.id}-growth-rate-derivative`,
+    field: `${metric.id}-positive-rate-derivative`,
   };
 
   const fakeSeriesMetrics = [maxMetric, derivativeMetric, positiveOnlyMetric];
@@ -48,19 +48,19 @@ export const createGrowthRate = (doc, intervalString, aggRoot) => metric => {
   const derivativeBucket = derivativeFn(derivativeMetric, fakeSeriesMetrics, intervalString);
   const positiveOnlyBucket = positiveOnlyFn(positiveOnlyMetric, fakeSeriesMetrics, intervalString);
 
-  set(doc, `${aggRoot}.timeseries.aggs.${metric.id}-growth-rate-max`, maxBucket);
-  set(doc, `${aggRoot}.timeseries.aggs.${metric.id}-growth-rate-derivative`, derivativeBucket);
+  set(doc, `${aggRoot}.timeseries.aggs.${metric.id}-positive-rate-max`, maxBucket);
+  set(doc, `${aggRoot}.timeseries.aggs.${metric.id}-positive-rate-derivative`, derivativeBucket);
   set(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, positiveOnlyBucket);
 };
 
-export function growthRate(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
+export function positiveRate(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
   return next => doc => {
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval, capabilities);
     if (series.metrics.some(filter)) {
       series.metrics
         .filter(filter)
-        .forEach(createGrowthRate(doc, intervalString, `aggs.${series.id}.aggs`));
+        .forEach(createPositiveRate(doc, intervalString, `aggs.${series.id}.aggs`));
       return next(doc);
     }
     return next(doc);

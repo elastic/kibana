@@ -26,7 +26,7 @@ import { dateHistogram } from './date_histogram';
 import { metricBuckets } from './metric_buckets';
 import { siblingBuckets } from './sibling_buckets';
 import { ratios as filterRatios } from './filter_ratios';
-import { growthRate } from './growth_rate';
+import { positiveRate } from './positive_rate';
 import { normalizeQuery } from './normalize_query';
 
 export const processors = [
@@ -39,6 +39,6 @@ export const processors = [
   metricBuckets,
   siblingBuckets,
   filterRatios,
-  growthRate,
+  positiveRate,
   normalizeQuery,
 ];

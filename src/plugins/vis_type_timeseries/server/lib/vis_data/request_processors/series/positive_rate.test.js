@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { growthRate } from './growth_rate';
-describe('rate(req, panel, series)', () => {
+import { positiveRate } from './positive_rate';
+describe('positiveRate(req, panel, series)', () => {
   let panel;
   let series;
   let req;
@@ -34,7 +34,7 @@ describe('rate(req, panel, series)', () => {
       metrics: [
         {
           id: 'metric-1',
-          type: 'growth_rate',
+          type: 'positive_rate',
           field: 'system.network.out.bytes',
           unit: '1s',
         },
@@ -52,32 +52,32 @@ describe('rate(req, panel, series)', () => {
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    growthRate(req, panel, series)(next)({});
+    positiveRate(req, panel, series)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('returns growth rate aggs', () => {
+  test('returns positive rate aggs', () => {
     const next = doc => doc;
-    const doc = growthRate(req, panel, series)(next)({});
+    const doc = positiveRate(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
           aggs: {
             timeseries: {
               aggs: {
-                'metric-1-growth-rate-max': {
+                'metric-1-positive-rate-max': {
                   max: { field: 'system.network.out.bytes' },
                 },
-                'metric-1-growth-rate-derivative': {
+                'metric-1-positive-rate-derivative': {
                   derivative: {
-                    buckets_path: 'metric-1-growth-rate-max',
+                    buckets_path: 'metric-1-positive-rate-max',
                     gap_policy: 'skip',
                     unit: '1s',
                   },
                 },
                 'metric-1': {
                   bucket_script: {
-                    buckets_path: { value: 'metric-1-growth-rate-derivative[normalized_value]' },
+                    buckets_path: { value: 'metric-1-positive-rate-derivative[normalized_value]' },
                     script: {
                       source: 'params.value > 0.0 ? params.value : 0.0',
                       lang: 'painless',

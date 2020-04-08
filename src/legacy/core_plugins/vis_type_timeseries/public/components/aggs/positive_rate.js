@@ -68,7 +68,7 @@ const UNIT_OPTIONS = [
   },
 ];
 
-export const GrowthRateAgg = props => {
+export const PositiveRateAgg = props => {
   const defaults = { unit: '' };
   const model = { ...defaults, ...props.model };
 
@@ -95,7 +95,7 @@ export const GrowthRateAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="visTypeTimeseries.growthRate.aggregationLabel"
+              id="visTypeTimeseries.positiveRate.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -114,7 +114,7 @@ export const GrowthRateAgg = props => {
             id={htmlId('field')}
             label={
               <FormattedMessage
-                id="visTypeTimeseries.growthRate.fieldLabel"
+                id="visTypeTimeseries.postiveRate.fieldLabel"
                 defaultMessage="Field"
               />
             }
@@ -137,14 +137,14 @@ export const GrowthRateAgg = props => {
             id={htmlId('units')}
             label={
               <FormattedMessage
-                id="visTypeTimeseries.growthRate.unitsLabel"
+                id="visTypeTimeseries.positiveRate.unitsLabel"
                 defaultMessage="Scale"
               />
             }
             fullWidth
           >
             <EuiComboBox
-              placeholder={i18n.translate('visTypeTimeseries.growthRate.unitSelectPlaceholder', {
+              placeholder={i18n.translate('visTypeTimeseries.positiveRate.unitSelectPlaceholder', {
                 defaultMessage: 'Select scale...',
               })}
               options={UNIT_OPTIONS}
@@ -159,13 +159,13 @@ export const GrowthRateAgg = props => {
       <EuiText size="xs" color="subdued">
         <p>
           <FormattedMessage
-            id="visTypeTimeseries.growthRate.helpText"
+            id="visTypeTimeseries.positiveRate.helpText"
             defaultMessage="This aggregation should only be applied to {link}, it is a shortcut for applying max, derivative and positive only to a field."
             values={{
               link: (
                 <EuiLink href="https://en.wikipedia.org/wiki/Monotonic_function" target="_BLANK">
                   <FormattedMessage
-                    id="visTypeTimeseries.growthRate.helpTextLink"
+                    id="visTypeTimeseries.positiveRate.helpTextLink"
                     defaultMessage="monotonically increasing numbers"
                   />
                 </EuiLink>
@@ -178,7 +178,7 @@ export const GrowthRateAgg = props => {
   );
 };
 
-GrowthRateAgg.propTypes = {
+PositiveRateAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,

@@ -70,9 +70,9 @@ export function calculateLabel(metric, metrics) {
       defaultMessage: 'Filter Ratio',
     });
   }
-  if (metric.type === 'growth_rate') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.growthRateLabel', {
-      defaultMessage: 'Growth Rate of {field}',
+  if (metric.type === 'positive_rate') {
+    return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
+      defaultMessage: 'Positive Rate of {field}',
       values: { field: metric.field },
     });
   }
