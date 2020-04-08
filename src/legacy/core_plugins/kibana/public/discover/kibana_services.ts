@@ -18,6 +18,8 @@
  */
 import angular from 'angular'; // just used in embeddables and discover controller
 import { DiscoverServices } from './build_services';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+import { search } from '../../../../../plugins/data/public';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
@@ -54,8 +56,6 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
-import { search } from '../../../../../plugins/data/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/common';
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export {
   unhashUrl,
