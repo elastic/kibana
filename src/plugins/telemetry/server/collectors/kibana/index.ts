@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { registerOpsStatsCollector } from './get_ops_stats_collector';
+export { registerKibanaUsageCollector } from './kibana_usage_collector';

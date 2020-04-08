@@ -164,7 +164,8 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
       }
 
       this._choroplethLayer.on('select', event => {
-        const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
+        const { rows, columns } = this._chartData;
+        const rowIndex = rows.findIndex(row => row[columns[0].id] === event);
         this._vis.API.events.filter({
           table: this._chartData,
           column: 0,

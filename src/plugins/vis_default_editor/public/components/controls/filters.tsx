@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useMount } from 'react-use';
 
 import { Query } from 'src/plugins/data/public';
 import { useKibana } from '../../../../kibana_react/public';
@@ -40,16 +41,10 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
     value.map(filter => ({ ...filter, id: generateId() }))
   );
 
-  const firstRender = useRef(true);
-
-  useEffect(() => {
-    if (firstRender.current) {
-      // set parsed values into model after initialization
-      firstRender.current = false;
-
-      setValue(filters.map(filter => omit({ ...filter, input: filter.input }, 'id')));
-    }
-  }, [filters, setValue]);
+  useMount(() => {
+    // set parsed values into model after initialization
+    setValue(filters.map(filter => omit({ ...filter, input: filter.input }, 'id')));
+  });
 
   useEffect(() => {
     // responsible for discarding changes

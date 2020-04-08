@@ -18,7 +18,8 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useMount } from 'react-use';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -84,8 +85,7 @@ function FieldParamEditor({
   const showErrorMessage = (showValidation || !indexedFields.length) && !isValid;
 
   useValidation(setValidity, isValid);
-
-  useEffect(() => {
+  useMount(() => {
     // set field if only one available
     if (indexedFields.length !== 1) {
       return;
@@ -98,8 +98,7 @@ function FieldParamEditor({
     } else if (indexedField.options.length === 1) {
       setValue(indexedField.options[0].target);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   const onSearchChange = useCallback(searchValue => setIsDirty(Boolean(searchValue)), []);
 
