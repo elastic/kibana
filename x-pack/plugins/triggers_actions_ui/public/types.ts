@@ -112,5 +112,5 @@ export interface AlertTypeModel {
 }
 
 export interface IErrorObject {
-  [key: string]: string[];
+  [key: string]: string | string[] | IErrorObject;
 }
