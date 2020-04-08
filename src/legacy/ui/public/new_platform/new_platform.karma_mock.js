@@ -88,6 +88,9 @@ const mockCoreStart = {
       get: sinon.fake.returns(''),
     },
   },
+  notifications: {
+    toasts: {},
+  },
   i18n: {},
   overlays: {},
   savedObjects: {
@@ -164,8 +167,11 @@ const mockAggTypesRegistry = () => {
   const registrySetup = registry.setup();
   const aggTypes = getAggTypes({
     uiSettings: mockCoreSetup.uiSettings,
-    notifications: mockCoreStart.notifications,
     query: querySetup,
+    getInternalStartServices: () => ({
+      fieldFormats: getFieldFormatsRegistry(mockCoreStart),
+      notifications: mockCoreStart.notifications,
+    }),
   });
   aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
   aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));

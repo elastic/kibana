@@ -7,6 +7,7 @@
 import { http } from '../http_service';
 
 import { basePath } from './index';
+import { ImportResponse } from '../../../../common/types/file_datavisualizer';
 
 export const fileDatavisualizer = {
   analyzeFile(file: string, params: Record<string, string> = {}) {
@@ -27,7 +28,7 @@ export const fileDatavisualizer = {
     mappings,
     ingestPipeline,
   }: {
-    id: string;
+    id: string | undefined;
     index: string;
     data: any;
     settings: any;
@@ -43,7 +44,7 @@ export const fileDatavisualizer = {
       ingestPipeline,
     });
 
-    return http<any>({
+    return http<ImportResponse>({
       path: `${basePath()}/file_data_visualizer/import`,
       method: 'POST',
       query,
