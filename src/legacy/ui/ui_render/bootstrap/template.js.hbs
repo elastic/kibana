@@ -81,7 +81,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
           '{{regularBundlePath}}/plugin/kibanaReact/kibanaReact.plugin.js'
         ], function() {
           load([
-            '{{regularBundlePath}}/core/core.plugin.js',
+            '{{regularBundlePath}}/core/core.standalone.js',
               {{#each styleSheetPaths}}
                 '{{this}}',
               {{/each}}

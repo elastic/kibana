@@ -85,6 +85,11 @@ it('emits "bundle cached" event when everything is updated', async () => {
     Array [
       Object {
         "bundle": <Bundle>,
+        "reason": "missing optimizer cache key",
+        "type": "bundle not cached",
+      },
+      Object {
+        "bundle": <Bundle>,
         "type": "bundle cached",
       },
     ]
@@ -128,6 +133,11 @@ it('emits "bundle not cached" event when cacheKey is up to date but caching is d
         "reason": "cache disabled",
         "type": "bundle not cached",
       },
+      Object {
+        "bundle": <Bundle>,
+        "reason": "cache disabled",
+        "type": "bundle not cached",
+      },
     ]
   `);
 });
@@ -163,6 +173,11 @@ it('emits "bundle not cached" event when optimizerCacheKey is missing', async ()
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "bundle": <Bundle>,
+        "reason": "missing optimizer cache key",
+        "type": "bundle not cached",
+      },
       Object {
         "bundle": <Bundle>,
         "reason": "missing optimizer cache key",
@@ -213,6 +228,11 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
         "reason": "optimizer cache key mismatch",
         "type": "bundle not cached",
       },
+      Object {
+        "bundle": <Bundle>,
+        "reason": "missing optimizer cache key",
+        "type": "bundle not cached",
+      },
     ]
   `);
 });
@@ -251,6 +271,11 @@ it('emits "bundle not cached" event when cacheKey is missing', async () => {
         "reason": "missing cache key",
         "type": "bundle not cached",
       },
+      Object {
+        "bundle": <Bundle>,
+        "reason": "missing optimizer cache key",
+        "type": "bundle not cached",
+      },
     ]
   `);
 });
@@ -286,6 +311,11 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
 
   expect(cacheEvents).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "bundle": <Bundle>,
+        "reason": "missing optimizer cache key",
+        "type": "bundle not cached",
+      },
       Object {
         "bundle": <Bundle>,
         "diff": "[32m- Expected[39m

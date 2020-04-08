@@ -91,7 +91,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
       msg.state.phase === 'initializing'
   );
-  assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
+  assert('produce three bundle cache events while initializing', bundleCacheStates.length === 3);
 
   const initializedStates = msgs.filter(msg => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
@@ -101,12 +101,12 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   const runningStates = msgs.filter(msg => msg.state.phase === 'running');
   assert(
-    'produce two or three "running" states',
-    runningStates.length === 2 || runningStates.length === 3
+    'produce four or five "running" states',
+    runningStates.length === 4 || runningStates.length === 5
   );
 
   const bundleNotCachedEvents = msgs.filter(msg => msg.event?.type === 'bundle not cached');
-  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
+  assert('produce three "bundle not cached" events', bundleNotCachedEvents.length === 3);
 
   const successStates = msgs.filter(msg => msg.state.phase === 'success');
   assert(
@@ -123,6 +123,13 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       msg.event?.type !== 'bundle not cached'
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
+
+  expect(
+    Fs.readFileSync(
+      Path.resolve(MOCK_REPO_DIR, 'src/core/public/target/public/core.standalone.js'),
+      'utf8'
+    )
+  ).toMatchSnapshot('core bundle');
 
   expect(
     Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/foo.plugin.js'), 'utf8')
@@ -195,6 +202,7 @@ it('uses cache on second run and exist cleanly', async () => {
 
   expect(msgs.map(m => m.state.phase)).toMatchInlineSnapshot(`
     Array [
+      "initializing",
       "initializing",
       "initializing",
       "initializing",

@@ -23,7 +23,7 @@ import { getBundles } from './get_bundles';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer('/repo'));
 
-it('returns a bundle for each plugin', () => {
+it('returns a bundle for core and each plugin', () => {
   expect(
     getBundles(
       [
@@ -47,6 +47,14 @@ it('returns a bundle for each plugin', () => {
     ).map(b => b.toSpec())
   ).toMatchInlineSnapshot(`
     Array [
+      Object {
+        "contextDir": <absolute path>/src/core,
+        "entry": "./public/entry_point",
+        "id": "core",
+        "outputDir": <absolute path>/src/core/public/target/public,
+        "sourceRoot": <absolute path>,
+        "type": "standalone",
+      },
       Object {
         "contextDir": <absolute path>/plugins/foo,
         "entry": "./public/index",
