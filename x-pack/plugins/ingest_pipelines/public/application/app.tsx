@@ -7,7 +7,7 @@
 import React from 'react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 import { BASE_PATH } from '../../common/constants';
-import { PipelinesList } from './sections';
+import { PipelinesList, PipelinesCreate } from './sections';
 
 export const App = () => {
   return (
@@ -20,5 +20,6 @@ export const App = () => {
 export const AppWithoutRouter = () => (
   <Switch>
     <Route exact path={BASE_PATH} component={PipelinesList} />
+    <Route exact path={`${BASE_PATH}/create`} component={PipelinesCreate} />
   </Switch>
 );
