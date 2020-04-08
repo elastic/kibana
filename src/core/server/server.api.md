@@ -1630,8 +1630,6 @@ export interface SavedObjectMigrationContext {
     log: SavedObjectsMigrationLogger;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectUnsanitizedDoc" needs to be exported by the entry point index.d.ts
-//
 // @public
 export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
 
@@ -2226,6 +2224,9 @@ export class SavedObjectTypeRegistry {
     isNamespaceAgnostic(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }
+
+// @public
+export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
 
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
