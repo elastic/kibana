@@ -27,7 +27,12 @@ const options = [
 export function RenderAsSelect(props: {
   renderAs: RENDER_AS;
   onChange: (newValue: RENDER_AS) => void;
+  isColumnCompressed?: boolean;
 }) {
+  if (props.renderAs === RENDER_AS.HEATMAP) {
+    return null;
+  }
+
   function onChange(selectedOptions: Array<EuiComboBoxOptionOption<RENDER_AS>>) {
     if (!selectedOptions || !selectedOptions.length) {
       return;
@@ -46,6 +51,7 @@ export function RenderAsSelect(props: {
       label={i18n.translate('xpack.maps.source.esGeoGrid.showAsLabel', {
         defaultMessage: 'Show as',
       })}
+      display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
     >
       <EuiComboBox
         singleSelection={{ asPlainText: true }}
@@ -53,6 +59,7 @@ export function RenderAsSelect(props: {
         selectedOptions={selectedOptions}
         onChange={onChange}
         isClearable={false}
+        compressed
       />
     </EuiFormRow>
   );

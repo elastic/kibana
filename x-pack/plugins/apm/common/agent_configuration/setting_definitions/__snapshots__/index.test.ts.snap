@@ -118,6 +118,7 @@ Array [
   },
   Object {
     "key": "span_frames_min_duration",
+    "min": -1,
     "type": "duration",
     "units": Array [
       "ms",
