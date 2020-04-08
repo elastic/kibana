@@ -139,7 +139,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: 'my-slack1',
                 actionTypeId: '.slack',
-                name: 'Slack #xyz',
+                name: 'Slack#xyz',
                 isPreconfigured: true,
                 config: {
                   webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',

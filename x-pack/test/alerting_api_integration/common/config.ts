@@ -81,7 +81,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             {
               id: 'my-slack1',
               actionTypeId: '.slack',
-              name: 'Slack #xyz',
+              name: 'Slack#xyz',
               config: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
               },
@@ -89,7 +89,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             {
               id: 'custom-system-abc-connector',
               actionTypeId: 'system-abc-action-type',
-              name: 'System ABC',
+              name: 'SystemABC',
               config: {
                 xyzConfig1: 'value1',
                 xyzConfig2: 'value2',

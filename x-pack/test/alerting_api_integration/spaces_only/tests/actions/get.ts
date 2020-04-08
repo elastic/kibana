@@ -78,7 +78,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         id: 'my-slack1',
         isPreconfigured: true,
         actionTypeId: '.slack',
-        name: 'Slack #xyz',
+        name: 'Slack#xyz',
         config: {
           webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
         },

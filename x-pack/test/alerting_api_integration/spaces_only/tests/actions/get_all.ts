@@ -49,7 +49,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           id: 'my-slack1',
           isPreconfigured: true,
           actionTypeId: '.slack',
-          name: 'Slack #xyz',
+          name: 'Slack#xyz',
           config: {
             webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
           },
@@ -59,7 +59,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           id: 'custom-system-abc-connector',
           isPreconfigured: true,
           actionTypeId: 'system-abc-action-type',
-          name: 'System ABC',
+          name: 'SystemABC',
           config: {
             xyzConfig1: 'value1',
             xyzConfig2: 'value2',
@@ -92,7 +92,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           id: 'my-slack1',
           isPreconfigured: true,
           actionTypeId: '.slack',
-          name: 'Slack #xyz',
+          name: 'Slack#xyz',
           config: {
             webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
           },
@@ -102,7 +102,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           id: 'custom-system-abc-connector',
           isPreconfigured: true,
           actionTypeId: 'system-abc-action-type',
-          name: 'System ABC',
+          name: 'SystemABC',
           config: {
             xyzConfig1: 'value1',
             xyzConfig2: 'value2',
