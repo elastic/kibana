@@ -85,4 +85,8 @@ describe('test alerts route', () => {
     };
     expect(validate).toThrow();
   });
+
+  it('should correctly encode index of origin into alert id', async () => {});
+
+  it('should be able to deconstruct an alert id into index and doc id parts', async () => {});
 });

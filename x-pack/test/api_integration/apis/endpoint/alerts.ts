@@ -407,6 +407,22 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(404);
       });
+
+      it('should set alert status to `open`', async () => {});
+
+      it('should set alert status to `closed`', async () => {});
+
+      it('should return 400 when an invalid status is sent', async () => {});
+
+      it('should return 404 when an invalid alert id is sent', async () => {});
+
+      it('should set multiple alert statuses to `open`', async () => {});
+
+      it('should set multiple alert statuses to `closed`', async () => {});
+
+      it('should return 400 when an invalid status is sent - alert list api', async () => {});
+
+      it('should return 404 when an invalid alert id is sent - alert list api', async () => {});
     });
   });
 }
