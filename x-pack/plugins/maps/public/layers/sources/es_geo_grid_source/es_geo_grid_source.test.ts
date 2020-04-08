@@ -7,7 +7,7 @@ jest.mock('../../../kibana_services', () => {});
 jest.mock('ui/new_platform');
 
 import { ESGeoGridSource } from './es_geo_grid_source';
-import { ES_GEO_GRID, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { GRID_RESOLUTION, RENDER_AS, SOURCE_TYPES } from '../../../../common/constants';
 
 describe('ESGeoGridSource', () => {
   const geogridSource = new ESGeoGridSource(
