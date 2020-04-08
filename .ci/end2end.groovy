@@ -84,8 +84,8 @@ pipeline {
       post {
         always {
           dir("${BASE_DIR}"){
-            archiveArtifacts(allowEmptyArchive: false, artifacts: "${E2E_DIR}/**/screenshots/**,${E2E_DIR}/**/videos/**,${E2E_DIR}/**/test-results/*e2e-tests.xml")
-            junit(allowEmptyResults: true, testResults: "${E2E_DIR}/**/test-results/*e2e-tests.xml")
+            archiveArtifacts(allowEmptyArchive: false, artifacts: "${E2E_DIR}/cypress/screenshots/**,${E2E_DIR}/cypress/videos/**,${E2E_DIR}/cypress/test-results/*e2e-tests.xml")
+            junit(allowEmptyResults: true, testResults: "${E2E_DIR}/cypress/test-results/*e2e-tests.xml")
             dir('tmp/apm-integration-testing'){
               sh 'docker-compose logs > apm-its-docker.log || true'
               sh 'docker-compose down -v || true'
