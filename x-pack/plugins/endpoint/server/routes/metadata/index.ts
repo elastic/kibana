@@ -98,10 +98,7 @@ export async function getHostData(
     return undefined;
   }
 
-  return {
-    metadata: response.hits.hits[0]._source,
-    host_status: HostStatus.ERROR,
-  };
+  return enrichHostMetadata(response.hits.hits[0]._source);
 }
 
 function mapToHostResultList(
@@ -116,13 +113,7 @@ function mapToHostResultList(
       hosts: searchResponse.hits.hits
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
-        .map(entry => {
-          const hostInfo: HostInfo = {
-            metadata: entry._source,
-            host_status: HostStatus.ERROR,
-          };
-          return hostInfo;
-        }),
+        .map(entry => enrichHostMetadata(entry._source)),
       total: totalNumberOfHosts,
     };
   } else {
@@ -133,4 +124,11 @@ function mapToHostResultList(
       hosts: [],
     };
   }
+}
+
+function enrichHostMetadata(hostMetadata: HostMetadata): HostInfo {
+  return {
+    metadata: hostMetadata,
+    host_status: HostStatus.ERROR,
+  };
 }

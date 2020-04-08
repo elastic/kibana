@@ -18,7 +18,7 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { HostInfo, HostMetadata, HostResultList } from '../../../common/types';
+import { HostInfo, HostMetadata, HostResultList, HostStatus } from '../../../common/types';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointConfigSchema } from '../../config';
 import * as data from '../../test_data/all_metadata_data.json';
@@ -230,7 +230,7 @@ describe('test endpoint route', () => {
       expect(message).toEqual('Endpoint Not Found');
     });
 
-    it('should return a single endpoint', async () => {
+    it('should return a single endpoint with status error', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: (data as any).hits.hits[0]._id },
       });
@@ -259,6 +259,7 @@ describe('test endpoint route', () => {
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result).toHaveProperty('metadata.endpoint');
+      expect(result.host_status).toEqual(HostStatus.ERROR);
     });
   });
 });

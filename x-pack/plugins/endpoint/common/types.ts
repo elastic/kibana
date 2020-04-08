@@ -252,8 +252,25 @@ export type AlertData = AlertEvent & AlertMetadata;
 
 export type AlertDetails = AlertData & AlertState;
 
+/**
+ * The status of the host
+ */
 export enum HostStatus {
-  ERROR = 'ERROR',
+  /**
+   * Default state of the host when no host information is present or host information cannot
+   * be retrieved. e.g. API error
+   */
+  ERROR = 'error',
+
+  /**
+   * Host is online as indicated by its checkin status during the last checkin window
+   */
+  ONLINE = 'online',
+
+  /**
+   * Host is offline as indicated by its checkin status during the last checkin window
+   */
+  OFFLINE = 'offline',
 }
 
 export type HostInfo = Immutable<{
