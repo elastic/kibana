@@ -6,11 +6,16 @@
 
 import { TIMELINE_EXPORT_URL, TIMELINE_IMPORT_URL } from '../../../../../common/constants';
 import { requestMock } from '../../../detection_engine/routes/__mocks__';
-
+import stream from 'stream';
+const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_EXPORT_URL,
+    query: {
+      file_name: 'mock_export_timeline.ndjson',
+      exclude_export_details: 'false',
+    },
     body: {
       ids: ['f0e58720-57b6-11ea-b88d-3f1a31716be8', '890b8ae0-57df-11ea-a7c9-3976b7f1cb37'],
     },
@@ -22,7 +27,7 @@ export const getImportTimelinesRequest = (filename?: string) =>
     path: TIMELINE_IMPORT_URL,
     query: { overwrite: false },
     body: {
-      file: { hapi: { filename: filename ?? 'filename.ndjson' } },
+      file: { ...readable, hapi: { filename: filename ?? 'filename.ndjson' } },
     },
   });
 

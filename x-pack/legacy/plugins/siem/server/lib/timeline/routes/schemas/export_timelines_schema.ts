@@ -26,21 +26,15 @@ export const exportTimelinesQuerySchema = rt.type({
 export const exportTimelinesRequestBodySchema = rt.type({
   ids,
 });
-type ErrorFactory = (message: string) => Error;
 
-export const createPlainError = (message: string) => new Error(message);
-
-export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) =>
-  createError(failure(errors).join('\n'));
-
-export const decodeOrThrow = <A, O, I>(
-  runtimeType: rt.Type<A, O, I>,
-  createError: ErrorFactory = createPlainError
-) => (inputValue: I, validationResult: RouteValidationResultFactory) =>
+export const decodeOrThrow = <A, O, I>(runtimeType: rt.Type<A, O, I>) => (
+  inputValue: I,
+  validationResult: RouteValidationResultFactory
+) =>
   pipe(
     runtimeType.decode(inputValue),
     fold<rt.Errors, A, RequestValidationResult<A>>(
-      (errors: rt.Errors) => validationResult.badRequest(throwErrors(createError)(errors)),
+      (errors: rt.Errors) => validationResult.badRequest(failure(errors).join('\n')),
       (validatedInput: A) => validationResult.ok(validatedInput)
     )
   );
