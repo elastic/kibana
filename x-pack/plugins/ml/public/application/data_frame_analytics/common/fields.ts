@@ -267,13 +267,11 @@ export const getDefaultFieldsFromJobCaps = (
   const featureImportanceFields = [];
 
   if ((numTopFeatureImportanceValues ?? 0) > 0) {
-    featureImportanceFields.push(
-      ...fields.map(d => ({
-        id: `${resultsField}.feature_importance.${d.id}`,
-        name: `${resultsField}.feature_importance.${d.name}`,
-        type: KBN_FIELD_TYPES.NUMBER,
-      }))
-    );
+    featureImportanceFields.push({
+      id: `${resultsField}.feature_importance`,
+      name: `${resultsField}.feature_importance`,
+      type: KBN_FIELD_TYPES.NUMBER,
+    });
   }
 
   // Only need to add these fields if we didn't use dest index pattern to get the fields
