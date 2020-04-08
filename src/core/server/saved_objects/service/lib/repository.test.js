@@ -337,7 +337,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when type is not multi-namespace`, async () => {
         const test = async type => {
-          const message = `${type} doesn't support namespaces`;
+          const message = `${type} doesn't support multiple namespaces`;
           await expectBadRequestError(type, id, [newNs1, newNs2], message);
           expect(callAdminCluster).not.toHaveBeenCalled();
         };
@@ -345,17 +345,12 @@ describe('SavedObjectsRepository', () => {
         await test(NAMESPACE_AGNOSTIC_TYPE);
       });
 
-      it(`throws when namespaces is not an array of strings`, async () => {
+      it(`throws when namespaces is an empty array`, async () => {
         const test = async namespaces => {
           const message = 'namespaces must be a non-empty array of strings';
           await expectBadRequestError(type, id, namespaces, message);
           expect(callAdminCluster).not.toHaveBeenCalled();
         };
-        await test('string');
-        await test(123);
-        await test(true);
-        await test(null);
-        await test(undefined);
         await test([]);
       });
 
@@ -2720,7 +2715,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when type is not namespace-agnostic`, async () => {
         const test = async type => {
-          const message = `${type} doesn't support namespaces`;
+          const message = `${type} doesn't support multiple namespaces`;
           await expectBadRequestError(type, id, [namespace1, namespace2], message);
           expect(callAdminCluster).not.toHaveBeenCalled();
         };
@@ -2728,17 +2723,12 @@ describe('SavedObjectsRepository', () => {
         await test(NAMESPACE_AGNOSTIC_TYPE);
       });
 
-      it(`throws when namespaces is not an array of strings`, async () => {
+      it(`throws when namespaces is an empty array`, async () => {
         const test = async namespaces => {
           const message = 'namespaces must be a non-empty array of strings';
           await expectBadRequestError(type, id, namespaces, message);
           expect(callAdminCluster).not.toHaveBeenCalled();
         };
-        await test('string');
-        await test(123);
-        await test(true);
-        await test(null);
-        await test(undefined);
         await test([]);
       });
 

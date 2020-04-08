@@ -920,10 +920,12 @@ export class SavedObjectsRepository {
     }
 
     if (!this._registry.isMultiNamespace(type)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `${type} doesn't support multiple namespaces`
+      );
     }
 
-    if (!Array.isArray(namespaces) || !namespaces.length) {
+    if (!namespaces.length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'namespaces must be a non-empty array of strings'
       );
@@ -978,10 +980,12 @@ export class SavedObjectsRepository {
     }
 
     if (!this._registry.isMultiNamespace(type)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `${type} doesn't support multiple namespaces`
+      );
     }
 
-    if (!namespaces || !Array.isArray(namespaces) || !namespaces.length) {
+    if (!namespaces.length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'namespaces must be a non-empty array of strings'
       );
