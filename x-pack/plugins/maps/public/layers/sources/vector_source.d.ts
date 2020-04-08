@@ -34,6 +34,8 @@ export interface IVectorSource extends ISource {
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField;
   getSyncMeta(): VectorSourceSyncMeta;
+  getFieldNames(): string[];
+  getApplyGlobalQuery(): boolean;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -49,6 +51,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getSyncMeta(): VectorSourceSyncMeta;
   getSupportedShapeTypes(): VECTOR_SHAPE_TYPES[];
   canFormatFeatureProperties(): boolean;
+  getApplyGlobalQuery(): boolean;
 }
 
 type TiledSingleLayerVectorSourceMeta = {

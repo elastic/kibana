@@ -21,7 +21,7 @@ export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
   static createDescriptor(options, mapColors) {
-    const layerDescriptor = super.createDescriptor(options);
+    const layerDescriptor = super.createDescriptor(options, mapColors);
     layerDescriptor.type = TiledVectorLayer.type;
 
     if (!options.style) {
@@ -34,21 +34,12 @@ export class TiledVectorLayer extends VectorLayer {
 
   private readonly _source: ITiledSingleLayerVectorSource; // downcast to the more specific type
 
-  constructor(vectorArgs: VectorLayerArguments) {
-    if (vectorArgs.joins && vectorArgs.joins.length) {
-      throw new Error('Tiled vector layers do not support joins');
-    }
-    super(vectorArgs);
+  constructor({ layerDescriptor, source }) {
+    super({ layerDescriptor, source });
 
     // reassignment is required due since _source is a shadowed property
     // and in the transpiled JS-code, the .source assignment in super() is getting voided in this constructor.
-    this._source = vectorArgs.source;
-  }
-
-  destroy() {
-    if (this._source) {
-      this._source.destroy();
-    }
+    this._source = source as ITiledSingleLayerVectorSource;
   }
 
   getCustomIconAndTooltipContent() {
@@ -75,7 +66,7 @@ export class TiledVectorLayer extends VectorLayer {
     registerCancelCallback,
     dataFilters,
   }: SyncContext) {
-    const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
+    const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
     const canSkip = await canSkipSourceUpdate({

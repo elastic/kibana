@@ -17,6 +17,8 @@ export interface ILayer {
   getSource(): ISource;
   getSourceForEditing(): ISource;
   syncData(syncContext: SyncContext): Promise<void>;
+  isVisible(): boolean;
+  showAtZoomLevel(zoomLevel: number): boolean;
 }
 
 export interface ILayerArguments {
@@ -34,4 +36,6 @@ export class AbstractLayer implements ILayer {
   getSource(): ISource;
   getSourceForEditing(): ISource;
   syncData(syncContext: SyncContext): Promise<void>;
+  isVisible(): boolean;
+  showAtZoomLevel(zoomLevel: number): boolean;
 }

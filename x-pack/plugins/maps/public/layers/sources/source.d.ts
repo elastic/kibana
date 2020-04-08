@@ -33,4 +33,5 @@ export class AbstractSource implements ISource {
   isQueryAware(): boolean;
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
+  getFieldNames(): string[];
 }

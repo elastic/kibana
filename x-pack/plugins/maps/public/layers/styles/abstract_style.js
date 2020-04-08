@@ -15,10 +15,6 @@ export class AbstractStyle {
     return {};
   }
 
-  getDescriptor() {
-    return this._descriptor;
-  }
-
   renderEditor(/* { layer, onStyleDescriptorChange } */) {
     return null;
   }

@@ -17,7 +17,7 @@ export interface IVectorStyle {
 
 export class VectorStyle implements IVectorStyle {
   constructor(descriptor: VectorStyleDescriptor, source: IVectorSource, layer: IVectorLayer);
-
+  getSourceFieldNames(): string[];
   getAllStyleProperties(): IStyleProperty[];
   getDescriptor(): VectorStyleDescriptor;
   getDynamicPropertiesArray(): IDynamicStyleProperty[];
