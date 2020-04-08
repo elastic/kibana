@@ -15,7 +15,7 @@ interface DeleteRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: AlertServices['savedObjectsClient'];
   actions: RuleAlertAction[] | undefined;
-  throttle: string | undefined;
+  throttle: string | null | undefined;
 }
 
 export const updateRuleActionsSavedObject = async ({
@@ -23,7 +23,12 @@ export const updateRuleActionsSavedObject = async ({
   savedObjectsClient,
   actions,
   throttle,
-}: DeleteRuleActionsSavedObject) => {
+}: DeleteRuleActionsSavedObject): Promise<{
+  ruleThrottle: string;
+  alertThrottle: string | null;
+  actions: RuleAlertAction[];
+  id: string;
+} | null> => {
   const ruleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
 
   if (!ruleActions) return null;

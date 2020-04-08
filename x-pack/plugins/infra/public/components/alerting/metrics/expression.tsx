@@ -320,11 +320,11 @@ interface ExpressionRowProps {
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
   display: flex;
   flex-wrap: wrap;
-  margin: 0 -${props => props.theme.eui.euiSizeXS};
+  margin: 0 -4px;
 `;
 
 const StyledExpression = euiStyled.div`
-  padding: 0 ${props => props.theme.eui.euiSizeXS};
+  padding: 0 4px;
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = props => {

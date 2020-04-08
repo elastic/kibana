@@ -70,7 +70,7 @@ const MetaRule = t.intersection([
   }),
   t.partial({
     throttle: t.string,
-    kibanaSiemAppUrl: t.string,
+    kibana_siem_app_url: t.string,
   }),
 ]);
 
