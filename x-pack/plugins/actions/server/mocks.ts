@@ -21,6 +21,7 @@ const createStartMock = () => {
     execute: jest.fn(),
     isActionTypeEnabled: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
+    preconfiguredActions: [],
   };
   return mock;
 };
