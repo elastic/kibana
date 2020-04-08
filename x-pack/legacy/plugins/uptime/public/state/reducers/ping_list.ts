@@ -30,16 +30,19 @@ export const pingListReducer = handleActions<PingListState, PingListPayload>(
   {
     [String(getPings)]: state => ({
       ...state,
+      loading: true,
     }),
 
     [String(getPingsSuccess)]: (state, action: Action<PingsResponse>) => ({
       ...state,
       pingList: { ...action.payload },
+      loading: false,
     }),
 
     [String(getPingsFail)]: (state, action: Action<Error>) => ({
       ...state,
       errors: [...state.errors, action.payload],
+      loading: false,
     }),
   },
   initialState
