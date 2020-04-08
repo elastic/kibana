@@ -106,19 +106,14 @@ export const getIndexSchemaDoc = memoize((index: string) => {
       ...extraSchemaField,
       ...convertSchemaToAssociativeArray(winlogbeatSchema),
     };
-  } else if (index.match('ecs') != null) {
-    return {
-      ...extraSchemaField,
-      ...ecsSchema,
-    };
   }
-  return {};
+  return {
+    ...extraSchemaField,
+    ...convertSchemaToAssociativeArray(ecsSchema),
+  };
 });
 
 export const hasDocumentation = (index: string, path: string): boolean => {
-  if (index === 'unknown') {
-    return false;
-  }
   const splitPath = path.split('.');
   const category = splitPath.length > 0 ? splitPath[0] : null;
   if (category === null) {
@@ -131,16 +126,13 @@ export const hasDocumentation = (index: string, path: string): boolean => {
 };
 
 export const getDocumentation = (index: string, path: string) => {
-  if (index === 'unknown') {
-    return '';
-  }
   const splitPath = path.split('.');
   const category = splitPath.length > 0 ? splitPath[0] : null;
   if (category === null) {
-    return '';
+    return {};
   }
   if (splitPath.length > 1) {
-    return get([category, 'fields', path], getIndexSchemaDoc(index)) || '';
+    return get([category, 'fields', path], getIndexSchemaDoc(index)) || {};
   }
-  return get(category, getIndexSchemaDoc(index)) || '';
+  return get(category, getIndexSchemaDoc(index)) || {};
 };

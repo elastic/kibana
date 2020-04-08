@@ -11,6 +11,15 @@ exports.EcsKibanaExtensionsMappings = {
       type: 'keyword',
       ignore_above: 1024,
     },
+    // alerting specific fields
+    alerting: {
+      properties: {
+        instance_id: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+      },
+    },
     // relevant kibana space
     namespace: {
       type: 'keyword',
@@ -53,6 +62,7 @@ exports.EcsEventLogProperties = [
   'user.name',
   'kibana.server_uuid',
   'kibana.namespace',
+  'kibana.alerting.instance_id',
   'kibana.saved_objects.store',
   'kibana.saved_objects.id',
   'kibana.saved_objects.name',
