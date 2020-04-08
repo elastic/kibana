@@ -536,6 +536,12 @@ yarn test:mocha
 yarn test:karma:debug # remove the debug flag to run them once and close
 ```
 
+### Running Functional Tests 
+
+When executing `node scripts functional_tests_server`, the script will attempt to download a new ES snapshot. This is expected, as tests run their own ES instance to load and unload the data. 
+However, if you wish to avoid that and already have ES snapshot locally, you can point the tests to use the local snapshot. Snapshot will be located in `.es/<latest_master_version>` of your Kibana directory.
+`TEST_ES_FROM=/path/to/my/kibana/.es/<lastest_master_version> node scripts/functional_tests_server.js` will start the functional tests server using the local snapshot.
+
 ### Automated Accessibility Testing
 
 To run the tests locally:
