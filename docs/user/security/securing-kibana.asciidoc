@@ -31,7 +31,7 @@ file:
 
 [source,yaml]
 -----------------------------------------------
-elasticsearch.username: "kibana"
+elasticsearch.username: "kibana_system"
 elasticsearch.password: "kibanapassword"
 -----------------------------------------------
 
