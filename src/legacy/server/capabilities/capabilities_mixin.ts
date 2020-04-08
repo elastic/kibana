@@ -21,26 +21,22 @@ import { Server } from 'hapi';
 import KbnServer from '../kbn_server';
 
 export function capabilitiesMixin(kbnServer: KbnServer, server: Server) {
-  return new Promise(resolve => {
-    const registerLegacyCapabilities = async () => {
-      const capabilitiesList = await Promise.all(
-        kbnServer.pluginSpecs
-          .map(spec => spec.getUiCapabilitiesProvider())
-          .filter(provider => !!provider)
-          .map(provider => provider(server))
-      );
+  const registerLegacyCapabilities = async () => {
+    const capabilitiesList = await Promise.all(
+      kbnServer.pluginSpecs
+        .map(spec => spec.getUiCapabilitiesProvider())
+        .filter(provider => !!provider)
+        .map(provider => provider(server))
+    );
 
-      capabilitiesList.forEach(capabilities => {
-        kbnServer.newPlatform.setup.core.capabilities.registerProvider(() => capabilities);
-      });
-
-      resolve();
-    };
-
-    // Some plugin capabilities are derived from data provided by other plugins,
-    // so we need to wait until after all plugins have been init'd to fetch uiCapabilities.
-    kbnServer.afterPluginsInit(async () => {
-      await registerLegacyCapabilities();
+    capabilitiesList.forEach(capabilities => {
+      kbnServer.newPlatform.setup.core.capabilities.registerProvider(() => capabilities);
     });
+  };
+
+  // Some plugin capabilities are derived from data provided by other plugins,
+  // so we need to wait until after all plugins have been init'd to fetch uiCapabilities.
+  kbnServer.afterPluginsInit(async () => {
+    await registerLegacyCapabilities();
   });
 }

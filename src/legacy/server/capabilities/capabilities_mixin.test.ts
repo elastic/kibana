@@ -27,7 +27,7 @@ describe('capabilitiesMixin', () => {
 
   const getKbnServer = (pluginSpecs: any[] = []) => {
     return ({
-      afterPluginsInit: async (callback: () => Promise<void>) => await callback(),
+      afterPluginsInit: (callback: () => void) => callback(),
       pluginSpecs,
       newPlatform: {
         setup: {
@@ -48,7 +48,7 @@ describe('capabilitiesMixin', () => {
     registerMock = jest.fn();
   });
 
-  it('calls capabilities#registerCapabilitiesProvider for each legacy plugin specs', async () => {
+  it('calls capabilities#registerCapabilitiesProvider for each legacy plugin specs', done => {
     const getPluginSpec = (provider: () => any) => ({
       getUiCapabilitiesProvider: () => provider,
     });
@@ -56,10 +56,13 @@ describe('capabilitiesMixin', () => {
     const capaA = { catalogue: { A: true } };
     const capaB = { catalogue: { B: true } };
     const kbnServer = getKbnServer([getPluginSpec(() => capaA), getPluginSpec(() => capaB)]);
-    await capabilitiesMixin(kbnServer, server);
+    capabilitiesMixin(kbnServer, server);
 
-    expect(registerMock).toHaveBeenCalledTimes(2);
-    expect(registerMock.mock.calls[0][0]()).toEqual(capaA);
-    expect(registerMock.mock.calls[1][0]()).toEqual(capaB);
+    setTimeout(() => {
+      expect(registerMock).toHaveBeenCalledTimes(2);
+      expect(registerMock.mock.calls[0][0]()).toEqual(capaA);
+      expect(registerMock.mock.calls[1][0]()).toEqual(capaB);
+      done();
+    }, 100);
   });
 });
