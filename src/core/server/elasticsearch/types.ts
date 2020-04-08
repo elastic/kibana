@@ -22,6 +22,7 @@ import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { IClusterClient, ICustomClusterClient } from './cluster_client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { ServiceStatus } from '../status';
 
 /**
  * @public
@@ -128,4 +129,11 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
     readonly config$: Observable<ElasticsearchConfig>;
   };
   esNodesCompatibility$: Observable<NodesVersionCompatibility>;
+  status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
+}
+
+/** @public */
+export interface ElasticsearchStatusMeta {
+  warningNodes: NodesVersionCompatibility['warningNodes'];
+  incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
 }
