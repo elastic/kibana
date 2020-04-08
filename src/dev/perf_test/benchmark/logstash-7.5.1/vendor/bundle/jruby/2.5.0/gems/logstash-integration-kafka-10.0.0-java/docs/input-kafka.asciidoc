@@ -1,0 +1,582 @@
+:plugin: kafka
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Kafka input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This input will read events from a Kafka topic.
+
+This plugin uses Kafka Client 2.1.0. For broker compatibility, see the official https://cwiki.apache.org/confluence/display/KAFKA/Compatibility+Matrix[Kafka compatibility reference]. If the linked compatibility wiki is not up-to-date, please contact Kafka support/community to confirm compatibility.
+
+If you require features not yet available in this plugin (including client version upgrades), please file an issue with details about what you need.
+
+This input supports connecting to Kafka over:
+
+* SSL (requires plugin version 3.0.0 or later)
+* Kerberos SASL (requires plugin version 5.1.0 or later) 
+
+By default security is disabled but can be turned on as needed.
+
+The Logstash Kafka consumer handles group management and uses the default offset management
+strategy using Kafka topics.
+
+Logstash instances by default form a single logical group to subscribe to Kafka topics
+Each Logstash Kafka consumer can run multiple threads to increase read throughput. Alternatively, 
+you could run multiple Logstash instances with the same `group_id` to spread the load across
+physical machines. Messages in a topic will be distributed to all Logstash instances with
+the same `group_id`.
+
+Ideally you should have as many threads as the number of partitions for a perfect balance --
+more threads than partitions means that some threads will be idle
+
+For more information see http://kafka.apache.org/documentation.html#theconsumer
+
+Kafka consumer configuration: http://kafka.apache.org/documentation.html#consumerconfigs
+
+==== Metadata fields
+
+The following metadata from Kafka broker are added under the `[@metadata]` field:
+
+* `[@metadata][kafka][topic]`: Original Kafka topic from where the message was consumed.
+* `[@metadata][kafka][consumer_group]`: Consumer group
+* `[@metadata][kafka][partition]`: Partition info for this message.
+* `[@metadata][kafka][offset]`: Original record offset for this message.
+* `[@metadata][kafka][key]`: Record key, if any.
+* `[@metadata][kafka][timestamp]`: Timestamp in the Record. Depending on your broker configuration, this can be either when the record was created (default) or when it was received by the broker. See more about property log.message.timestamp.type at https://kafka.apache.org/10/documentation.html#brokerconfigs
+
+Metadata is only added to the event if the `decorate_events` option is set to true (it defaults to false).
+
+Please note that `@metadata` fields are not part of any of your events at output time. If you need these information to be 
+inserted into your original event, you'll have to use the `mutate` filter to manually copy the required fields into your `event`.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Kafka Input Configuration Options
+
+This plugin supports these configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+NOTE: Some of these options map to a Kafka option. See the
+https://kafka.apache.org/documentation for more details.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-auto_commit_interval_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-auto_offset_reset>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-bootstrap_servers>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-check_crcs>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-client_id>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-connections_max_idle_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-consumer_threads>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-decorate_events>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-enable_auto_commit>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-exclude_internal_topics>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-fetch_max_bytes>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-fetch_max_wait_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-fetch_min_bytes>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-group_id>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-heartbeat_interval_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-jaas_path>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-kerberos_config>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-key_deserializer_class>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-max_partition_fetch_bytes>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-max_poll_interval_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-max_poll_records>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-metadata_max_age_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-partition_assignment_strategy>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-poll_timeout_ms>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-receive_buffer_bytes>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-reconnect_backoff_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-request_timeout_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-retry_backoff_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-sasl_jaas_config>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-sasl_kerberos_service_name>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-sasl_mechanism>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-security_protocol>> |<<string,string>>, one of `["PLAINTEXT", "SSL", "SASL_PLAINTEXT", "SASL_SSL"]`|No
+| <<plugins-{type}s-{plugin}-send_buffer_bytes>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-session_timeout_ms>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-ssl_endpoint_identification_algorithm>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-ssl_key_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-ssl_keystore_location>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-ssl_keystore_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-ssl_keystore_type>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-ssl_truststore_location>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-ssl_truststore_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-ssl_truststore_type>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-topics>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-topics_pattern>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-value_deserializer_class>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-auto_commit_interval_ms"]
+===== `auto_commit_interval_ms` 
+
+  * Value type is <<string,string>>
+  * Default value is `"5000"`
+
+The frequency in milliseconds that the consumer offsets are committed to Kafka.
+
+[id="plugins-{type}s-{plugin}-auto_offset_reset"]
+===== `auto_offset_reset` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+What to do when there is no initial offset in Kafka or if an offset is out of range:
+
+* earliest: automatically reset the offset to the earliest offset
+* latest: automatically reset the offset to the latest offset
+* none: throw exception to the consumer if no previous offset is found for the consumer's group
+* anything else: throw exception to the consumer.
+
+[id="plugins-{type}s-{plugin}-bootstrap_servers"]
+===== `bootstrap_servers` 
+
+  * Value type is <<string,string>>
+  * Default value is `"localhost:9092"`
+
+A list of URLs of Kafka instances to use for establishing the initial connection to the cluster.
+This list should be in the form of `host1:port1,host2:port2` These urls are just used
+for the initial connection to discover the full cluster membership (which may change dynamically)
+so this list need not contain the full set of servers (you may want more than one, though, in
+case a server is down).
+
+[id="plugins-{type}s-{plugin}-check_crcs"]
+===== `check_crcs` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Automatically check the CRC32 of the records consumed. This ensures no on-the-wire or on-disk
+corruption to the messages occurred. This check adds some overhead, so it may be
+disabled in cases seeking extreme performance.
+
+[id="plugins-{type}s-{plugin}-client_id"]
+===== `client_id` 
+
+  * Value type is <<string,string>>
+  * Default value is `"logstash"`
+
+The id string to pass to the server when making requests. The purpose of this
+is to be able to track the source of requests beyond just ip/port by allowing
+a logical application name to be included.
+
+[id="plugins-{type}s-{plugin}-connections_max_idle_ms"]
+===== `connections_max_idle_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Close idle connections after the number of milliseconds specified by this config.
+
+[id="plugins-{type}s-{plugin}-consumer_threads"]
+===== `consumer_threads` 
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+Ideally you should have as many threads as the number of partitions for a perfect
+balance — more threads than partitions means that some threads will be idle
+
+[id="plugins-{type}s-{plugin}-decorate_events"]
+===== `decorate_events` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Option to add Kafka metadata like topic, message size to the event.
+This will add a field named `kafka` to the logstash event containing the following attributes:
+
+* `topic`: The topic this message is associated with
+* `consumer_group`: The consumer group used to read in this event
+* `partition`: The partition this message is associated with
+* `offset`: The offset from the partition this message is associated with
+* `key`: A ByteBuffer containing the message key
+
+[id="plugins-{type}s-{plugin}-enable_auto_commit"]
+===== `enable_auto_commit` 
+
+  * Value type is <<string,string>>
+  * Default value is `"true"`
+
+If true, periodically commit to Kafka the offsets of messages already returned by the consumer. 
+This committed offset will be used when the process fails as the position from
+which the consumption will begin.
+
+[id="plugins-{type}s-{plugin}-exclude_internal_topics"]
+===== `exclude_internal_topics` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Whether records from internal topics (such as offsets) should be exposed to the consumer.
+If set to true the only way to receive records from an internal topic is subscribing to it.
+
+[id="plugins-{type}s-{plugin}-fetch_max_bytes"]
+===== `fetch_max_bytes` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The maximum amount of data the server should return for a fetch request. This is not an 
+absolute maximum, if the first message in the first non-empty partition of the fetch is larger 
+than this value, the message will still be returned to ensure that the consumer can make progress.
+
+[id="plugins-{type}s-{plugin}-fetch_max_wait_ms"]
+===== `fetch_max_wait_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The maximum amount of time the server will block before answering the fetch request if
+there isn't sufficient data to immediately satisfy `fetch_min_bytes`. This
+should be less than or equal to the timeout used in `poll_timeout_ms`
+
+[id="plugins-{type}s-{plugin}-fetch_min_bytes"]
+===== `fetch_min_bytes` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The minimum amount of data the server should return for a fetch request. If insufficient
+data is available the request will wait for that much data to accumulate
+before answering the request.
+
+[id="plugins-{type}s-{plugin}-group_id"]
+===== `group_id` 
+
+  * Value type is <<string,string>>
+  * Default value is `"logstash"`
+
+The identifier of the group this consumer belongs to. Consumer group is a single logical subscriber
+that happens to be made up of multiple processors. Messages in a topic will be distributed to all
+Logstash instances with the same `group_id`
+
+[id="plugins-{type}s-{plugin}-heartbeat_interval_ms"]
+===== `heartbeat_interval_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The expected time between heartbeats to the consumer coordinator. Heartbeats are used to ensure 
+that the consumer's session stays active and to facilitate rebalancing when new
+consumers join or leave the group. The value must be set lower than
+`session.timeout.ms`, but typically should be set no higher than 1/3 of that value.
+It can be adjusted even lower to control the expected time for normal rebalances.
+
+[id="plugins-{type}s-{plugin}-jaas_path"]
+===== `jaas_path` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+The Java Authentication and Authorization Service (JAAS) API supplies user authentication and authorization 
+services for Kafka. This setting provides the path to the JAAS file. Sample JAAS file for Kafka client:
+[source,java]
+----------------------------------
+KafkaClient {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useTicketCache=true
+  renewTicket=true
+  serviceName="kafka";
+  };
+----------------------------------
+
+Please note that specifying `jaas_path` and `kerberos_config` in the config file will add these  
+to the global JVM system properties. This means if you have multiple Kafka inputs, all of them would be sharing the same 
+`jaas_path` and `kerberos_config`. If this is not desirable, you would have to run separate instances of Logstash on 
+different JVM instances.
+
+[id="plugins-{type}s-{plugin}-kerberos_config"]
+===== `kerberos_config` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+Optional path to kerberos config file. This is krb5.conf style as detailed in https://web.mit.edu/kerberos/krb5-1.12/doc/admin/conf_files/krb5_conf.html
+
+[id="plugins-{type}s-{plugin}-key_deserializer_class"]
+===== `key_deserializer_class` 
+
+  * Value type is <<string,string>>
+  * Default value is `"org.apache.kafka.common.serialization.StringDeserializer"`
+
+Java Class used to deserialize the record's key
+
+[id="plugins-{type}s-{plugin}-max_partition_fetch_bytes"]
+===== `max_partition_fetch_bytes` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The maximum amount of data per-partition the server will return. The maximum total memory used for a
+request will be `#partitions * max.partition.fetch.bytes`. This size must be at least
+as large as the maximum message size the server allows or else it is possible for the producer to
+send messages larger than the consumer can fetch. If that happens, the consumer can get stuck trying
+to fetch a large message on a certain partition.
+
+[id="plugins-{type}s-{plugin}-max_poll_interval_ms"]
+===== `max_poll_interval_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The maximum delay between invocations of poll() when using consumer group management. This places 
+an upper bound on the amount of time that the consumer can be idle before fetching more records. 
+If poll() is not called before expiration of this timeout, then the consumer is considered failed and 
+the group will rebalance in order to reassign the partitions to another member.
+The value of the configuration `request_timeout_ms` must always be larger than max_poll_interval_ms
+
+[id="plugins-{type}s-{plugin}-max_poll_records"]
+===== `max_poll_records` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The maximum number of records returned in a single call to poll().
+
+[id="plugins-{type}s-{plugin}-metadata_max_age_ms"]
+===== `metadata_max_age_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The period of time in milliseconds after which we force a refresh of metadata even if
+we haven't seen any partition leadership changes to proactively discover any new brokers or partitions
+
+[id="plugins-{type}s-{plugin}-partition_assignment_strategy"]
+===== `partition_assignment_strategy` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The class name of the partition assignment strategy that the client uses to
+distribute partition ownership amongst consumer instances. Maps to
+the Kafka `partition.assignment.strategy` setting, which defaults to
+`org.apache.kafka.clients.consumer.RangeAssignor`.
+
+[id="plugins-{type}s-{plugin}-poll_timeout_ms"]
+===== `poll_timeout_ms` 
+
+  * Value type is <<number,number>>
+  * Default value is `100`
+
+Time kafka consumer will wait to receive new messages from topics
+
+[id="plugins-{type}s-{plugin}-receive_buffer_bytes"]
+===== `receive_buffer_bytes` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The size of the TCP receive buffer (SO_RCVBUF) to use when reading data.
+
+[id="plugins-{type}s-{plugin}-reconnect_backoff_ms"]
+===== `reconnect_backoff_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The amount of time to wait before attempting to reconnect to a given host.
+This avoids repeatedly connecting to a host in a tight loop.
+This backoff applies to all requests sent by the consumer to the broker.
+
+[id="plugins-{type}s-{plugin}-request_timeout_ms"]
+===== `request_timeout_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The configuration controls the maximum amount of time the client will wait
+for the response of a request. If the response is not received before the timeout
+elapses the client will resend the request if necessary or fail the request if
+retries are exhausted.
+
+[id="plugins-{type}s-{plugin}-retry_backoff_ms"]
+===== `retry_backoff_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The amount of time to wait before attempting to retry a failed fetch request
+to a given topic partition. This avoids repeated fetching-and-failing in a tight loop.
+
+[id="plugins-{type}s-{plugin}-sasl_jaas_config"]
+===== `sasl_jaas_config` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+JAAS configuration setting local to this plugin instance, as opposed to settings using config file configured using `jaas_path`, which are shared across the JVM. This allows each plugin instance to have its own configuration. 
+
+If both `sasl_jaas_config` and `jaas_path` configurations are set, the setting here takes precedence.
+
+Example (setting for Azure Event Hub):
+[source,ruby]
+    input {
+      kafka {
+        sasl_jaas_config => "org.apache.kafka.common.security.plain.PlainLoginModule required username='auser'  password='apassword';"
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-sasl_kerberos_service_name"]
+===== `sasl_kerberos_service_name` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The Kerberos principal name that Kafka broker runs as. 
+This can be defined either in Kafka's JAAS config or in Kafka's config.
+
+[id="plugins-{type}s-{plugin}-sasl_mechanism"]
+===== `sasl_mechanism` 
+
+  * Value type is <<string,string>>
+  * Default value is `"GSSAPI"`
+
+http://kafka.apache.org/documentation.html#security_sasl[SASL mechanism] used for client connections. 
+This may be any mechanism for which a security provider is available.
+GSSAPI is the default mechanism.
+
+[id="plugins-{type}s-{plugin}-security_protocol"]
+===== `security_protocol` 
+
+  * Value can be any of: `PLAINTEXT`, `SSL`, `SASL_PLAINTEXT`, `SASL_SSL`
+  * Default value is `"PLAINTEXT"`
+
+Security protocol to use, which can be either of PLAINTEXT,SSL,SASL_PLAINTEXT,SASL_SSL
+
+[id="plugins-{type}s-{plugin}-send_buffer_bytes"]
+===== `send_buffer_bytes` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The size of the TCP send buffer (SO_SNDBUF) to use when sending data
+
+[id="plugins-{type}s-{plugin}-session_timeout_ms"]
+===== `session_timeout_ms` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The timeout after which, if the `poll_timeout_ms` is not invoked, the consumer is marked dead
+and a rebalance operation is triggered for the group identified by `group_id`
+
+[id="plugins-{type}s-{plugin}-ssl_endpoint_identification_algorithm"]
+===== `ssl_endpoint_identification_algorithm`
+
+  * Value type is <<string,string>>
+  * Default value is `"https"`
+
+The endpoint identification algorithm, defaults to `"https"`. Set to empty string `""` to disable endpoint verification
+
+
+[id="plugins-{type}s-{plugin}-ssl_key_password"]
+===== `ssl_key_password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+The password of the private key in the key store file.
+
+[id="plugins-{type}s-{plugin}-ssl_keystore_location"]
+===== `ssl_keystore_location` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If client authentication is required, this setting stores the keystore path.
+
+[id="plugins-{type}s-{plugin}-ssl_keystore_password"]
+===== `ssl_keystore_password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+If client authentication is required, this setting stores the keystore password
+
+[id="plugins-{type}s-{plugin}-ssl_keystore_type"]
+===== `ssl_keystore_type` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The keystore type.
+
+[id="plugins-{type}s-{plugin}-ssl_truststore_location"]
+===== `ssl_truststore_location` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+The JKS truststore path to validate the Kafka broker's certificate.
+
+[id="plugins-{type}s-{plugin}-ssl_truststore_password"]
+===== `ssl_truststore_password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+The truststore password
+
+[id="plugins-{type}s-{plugin}-ssl_truststore_type"]
+===== `ssl_truststore_type` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The truststore type.
+
+[id="plugins-{type}s-{plugin}-topics"]
+===== `topics` 
+
+  * Value type is <<array,array>>
+  * Default value is `["logstash"]`
+
+A list of topics to subscribe to, defaults to ["logstash"].
+
+[id="plugins-{type}s-{plugin}-topics_pattern"]
+===== `topics_pattern` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+A topic regex pattern to subscribe to. 
+The topics configuration will be ignored when using this configuration.
+
+[id="plugins-{type}s-{plugin}-value_deserializer_class"]
+===== `value_deserializer_class` 
+
+  * Value type is <<string,string>>
+  * Default value is `"org.apache.kafka.common.serialization.StringDeserializer"`
+
+Java Class used to deserialize the record's value
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

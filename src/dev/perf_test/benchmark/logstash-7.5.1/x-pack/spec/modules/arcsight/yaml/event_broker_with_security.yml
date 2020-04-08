@@ -1,0 +1,22 @@
+modules:
+  - name: arcsight
+    var.inputs: "kafka"
+    var.input.kafka.security_protocol: "SASL_SSL"
+    var.input.kafka.ssl_truststore_type: "foo"
+    var.input.kafka.ssl_truststore_location: "/some/path/to/a/file"
+    var.input.kafka.ssl_truststore_password: "foobar"
+    var.input.kafka.ssl_keystore_type: "bar"
+    var.input.kafka.ssl_keystore_location: "/some/path/to/a/file"
+    var.input.kafka.ssl_keystore_password: "barfoo"
+    var.input.kafka.ssl_key_password: "foobaz"
+    var.input.kafka.sasl_mechanism: "GSSAPI"
+    var.input.kafka.sasl_kerberos_service_name: "baz"
+    var.input.kafka.jaas_path: "/some/path/to/a/file"
+    var.input.kafka.kerberos_config: "/some/path/to/a/file"
+    var.input.kafka.bootstrap_servers: "kcluster.local:1234"
+    var.input.kafka.topics: ["foo", "bar", "baz"]
+
+# although this file is named eventbroker..., the arcsight config ERB
+# file duplicates the eventbroker based settings to be kafka based ones
+# plus, the arcsight_module_config_helper's module methods expect
+# kafka based settings

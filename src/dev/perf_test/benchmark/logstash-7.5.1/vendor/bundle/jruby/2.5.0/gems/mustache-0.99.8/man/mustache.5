@@ -1,0 +1,539 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "MUSTACHE" "5" "October 2014" "DEFUNKT" "Mustache Manual"
+.
+.SH "NAME"
+\fBmustache\fR \- Logic\-less templates\.
+.
+.SH "SYNOPSIS"
+A typical Mustache template:
+.
+.IP "" 4
+.
+.nf
+
+Hello {{name}}
+You have just won {{value}} dollars!
+{{#in_ca}}
+Well, {{taxed_value}} dollars, after taxes\.
+{{/in_ca}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Given the following hash:
+.
+.IP "" 4
+.
+.nf
+
+{
+  "name": "Chris",
+  "value": 10000,
+  "taxed_value": 10000 \- (10000 * 0\.4),
+  "in_ca": true
+}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Will produce the following:
+.
+.IP "" 4
+.
+.nf
+
+Hello Chris
+You have just won 10000 dollars!
+Well, 6000\.0 dollars, after taxes\.
+.
+.fi
+.
+.IP "" 0
+.
+.SH "DESCRIPTION"
+Mustache can be used for HTML, config files, source code \- anything\. It works by expanding tags in a template using values provided in a hash or object\.
+.
+.P
+We call it "logic\-less" because there are no if statements, else clauses, or for loops\. Instead there are only tags\. Some tags are replaced with a value, some nothing, and others a series of values\. This document explains the different types of Mustache tags\.
+.
+.SH "TAG TYPES"
+Tags are indicated by the double mustaches\. \fB{{person}}\fR is a tag, as is \fB{{#person}}\fR\. In both examples, we\'d refer to \fBperson\fR as the key or tag key\. Let\'s talk about the different types of tags\.
+.
+.SS "Variables"
+The most basic tag type is the variable\. A \fB{{name}}\fR tag in a basic template will try to find the \fBname\fR key in the current context\. If there is no \fBname\fR key, the parent contexts will be checked recursively\. If the top context is reached and the \fBname\fR key is still not found, nothing will be rendered\.
+.
+.P
+All variables are HTML escaped by default\. If you want to return unescaped HTML, use the triple mustache: \fB{{{name}}}\fR\.
+.
+.P
+You can also use \fB&\fR to unescape a variable: \fB{{& name}}\fR\. This may be useful when changing delimiters (see "Set Delimiter" below)\.
+.
+.P
+By default a variable "miss" returns an empty string\. This can usually be configured in your Mustache library\. The Ruby version of Mustache supports raising an exception in this situation, for instance\.
+.
+.P
+Template:
+.
+.IP "" 4
+.
+.nf
+
+* {{name}}
+* {{age}}
+* {{company}}
+* {{{company}}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Hash:
+.
+.IP "" 4
+.
+.nf
+
+{
+  "name": "Chris",
+  "company": "<b>GitHub</b>"
+}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Output:
+.
+.IP "" 4
+.
+.nf
+
+* Chris
+*
+* &lt;b&gt;GitHub&lt;/b&gt;
+* <b>GitHub</b>
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Sections"
+Sections render blocks of text zero or more times, depending on the value of the key in the current context\.
+.
+.P
+A section begins with a pound and ends with a slash\. That is, \fB{{#person}}\fR begins a "person" section while \fB{{/person}}\fR ends it\.
+.
+.P
+The behavior of the section is determined by the value of the key\.
+.
+.P
+\fBFalse Values or Empty Lists\fR
+.
+.P
+If the \fBperson\fR key exists and has a value of false or an empty list, the HTML between the pound and slash will not be displayed\.
+.
+.P
+Template:
+.
+.IP "" 4
+.
+.nf
+
+Shown\.
+{{#person}}
+  Never shown!
+{{/person}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Hash:
+.
+.IP "" 4
+.
+.nf
+
+{
+  "person": false
+}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Output:
+.
+.IP "" 4
+.
+.nf
+
+Shown\.
+.
+.fi
+.
+.IP "" 0
+.
+.P
+\fBNon\-Empty Lists\fR
+.
+.P
+If the \fBperson\fR key exists and has a non\-false value, the HTML between the pound and slash will be rendered and displayed one or more times\.
+.
+.P
+When the value is a non\-empty list, the text in the block will be displayed once for each item in the list\. The context of the block will be set to the current item for each iteration\. In this way we can loop over collections\.
+.
+.P
+Template:
+.
+.IP "" 4
+.
+.nf
+
+{{#repo}}
+  <b>{{name}}</b>
+{{/repo}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Hash:
+.
+.IP "" 4
+.
+.nf
+
+{
+  "repo": [
+    { "name": "resque" },
+    { "name": "hub" },
+    { "name": "rip" }
+  ]
+}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Output:
+.
+.IP "" 4
+.
+.nf
+
+<b>resque</b>
+<b>hub</b>
+<b>rip</b>
+.
+.fi
+.
+.IP "" 0
+.
+.P
+\fBLambdas\fR
+.
+.P
+When the value is a callable object, such as a function or lambda, the object will be invoked and passed the block of text\. The text passed is the literal block, unrendered\. \fB{{tags}}\fR will not have been expanded \- the lambda should do that on its own\. In this way you can implement filters or caching\.
+.
+.P
+Template:
+.
+.IP "" 4
+.
+.nf
+
+{{#wrapped}}
+  {{name}} is awesome\.
+{{/wrapped}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Hash:
+.
+.IP "" 4
+.
+.nf
+
+{
+  "name": "Willy",
+  "wrapped": function() {
+    return function(text, render) {
+      return "<b>" + render(text) + "</b>"
+    }
+  }
+}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Output:
+.
+.IP "" 4
+.
+.nf
+
+<b>Willy is awesome\.</b>
+.
+.fi
+.
+.IP "" 0
+.
+.P
+\fBNon\-False Values\fR
+.
+.P
+When the value is non\-false but not a list, it will be used as the context for a single rendering of the block\.
+.
+.P
+Template:
+.
+.IP "" 4
+.
+.nf
+
+{{#person?}}
+  Hi {{name}}!
+{{/person?}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Hash:
+.
+.IP "" 4
+.
+.nf
+
+{
+  "person?": { "name": "Jon" }
+}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Output:
+.
+.IP "" 4
+.
+.nf
+
+Hi Jon!
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Inverted Sections"
+An inverted section begins with a caret (hat) and ends with a slash\. That is \fB{{^person}}\fR begins a "person" inverted section while \fB{{/person}}\fR ends it\.
+.
+.P
+While sections can be used to render text zero or more times based on the value of the key, inverted sections may render text once based on the inverse value of the key\. That is, they will be rendered if the key doesn\'t exist, is false, or is an empty list\.
+.
+.P
+Template:
+.
+.IP "" 4
+.
+.nf
+
+{{#repo}}
+  <b>{{name}}</b>
+{{/repo}}
+{{^repo}}
+  No repos :(
+{{/repo}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Hash:
+.
+.IP "" 4
+.
+.nf
+
+{
+  "repo": []
+}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Output:
+.
+.IP "" 4
+.
+.nf
+
+No repos :(
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Comments"
+Comments begin with a bang and are ignored\. The following template:
+.
+.IP "" 4
+.
+.nf
+
+<h1>Today{{! ignore me }}\.</h1>
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Will render as follows:
+.
+.IP "" 4
+.
+.nf
+
+<h1>Today\.</h1>
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Comments may contain newlines\.
+.
+.SS "Partials"
+Partials begin with a greater than sign, like \fB{{> box}}\fR\.
+.
+.P
+Partials are rendered at runtime (as opposed to compile time), so recursive partials are possible\. Just avoid infinite loops\.
+.
+.P
+They also inherit the calling context\. Whereas in ERB you may have this:
+.
+.IP "" 4
+.
+.nf
+
+<%= partial :next_more, :start => start, :size => size %>
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Mustache requires only this:
+.
+.IP "" 4
+.
+.nf
+
+{{> next_more}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Why? Because the \fBnext_more\.mustache\fR file will inherit the \fBsize\fR and \fBstart\fR methods from the calling context\.
+.
+.P
+In this way you may want to think of partials as includes, or template expansion, even though it\'s not literally true\.
+.
+.P
+For example, this template and partial:
+.
+.IP "" 4
+.
+.nf
+
+base\.mustache:
+<h2>Names</h2>
+{{#names}}
+  {{> user}}
+{{/names}}
+
+user\.mustache:
+<strong>{{name}}</strong>
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Can be thought of as a single, expanded template:
+.
+.IP "" 4
+.
+.nf
+
+<h2>Names</h2>
+{{#names}}
+  <strong>{{name}}</strong>
+{{/names}}
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Set Delimiter"
+Set Delimiter tags start with an equal sign and change the tag delimiters from \fB{{\fR and \fB}}\fR to custom strings\.
+.
+.P
+Consider the following contrived example:
+.
+.IP "" 4
+.
+.nf
+
+* {{default_tags}}
+{{=<% %>=}}
+* <% erb_style_tags %>
+<%={{ }}=%>
+* {{ default_tags_again }}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Here we have a list with three items\. The first item uses the default tag style, the second uses erb style as defined by the Set Delimiter tag, and the third returns to the default style after yet another Set Delimiter declaration\.
+.
+.P
+According to ctemplates \fIhttp://google\-ctemplate\.googlecode\.com/svn/trunk/doc/howto\.html\fR, this "is useful for languages like TeX, where double\-braces may occur in the text and are awkward to use for markup\."
+.
+.P
+Custom delimiters may not contain whitespace or the equals sign\.
+.
+.SH "COPYRIGHT"
+Mustache is Copyright (C) 2009 Chris Wanstrath
+.
+.P
+Original CTemplate by Google
+.
+.SH "SEE ALSO"
+mustache(1), \fIhttp://mustache\.github\.io/\fR

@@ -1,0 +1,73 @@
+#!/usr/bin/env jruby
+#
+# IRB in swing
+#
+# Damian Steer (pldms@mac.com)
+
+require 'jruby'
+require 'irb'
+require 'irb/completion'
+
+java_import java.awt.Color
+java_import java.awt.Font
+java_import javax.swing.JFrame
+
+# default options, esp. useful for jrubyw
+ARGV << '--readline' << '--prompt' << 'inf-ruby' if ARGV.empty?
+
+DEFAULT_FONT = ['Monospaced', Font::PLAIN, 14, 'Monaco', 'Andale Mono']
+HEADER = " Welcome to the JRuby IRB Console [#{JRUBY_VERSION} (#{RUBY_VERSION})]\n\n"
+FRAME_TITLE = 'JRuby IRB Console (tab will autocomplete)'
+
+# Try to find preferred font family, use otherwise -- err --  otherwise
+def find_font(otherwise, style, size, *families)
+  avail_families = java.awt.GraphicsEnvironment.local_graphics_environment.available_font_family_names
+  fontname = families.find(proc {otherwise}) { |name| avail_families.include? name }
+  Font.new(fontname, style, size)
+end
+
+frame = JFrame.new(FRAME_TITLE).tap do |frame|
+  frame.default_close_operation = JFrame::EXIT_ON_CLOSE
+  frame.set_size(700, 600)
+  frame.content_pane.add(javax.swing.JScrollPane.new.tap do |pane|
+    pane.viewport_view = javax.swing.JTextPane.new.tap do |text|
+      text.font = find_font *DEFAULT_FONT
+      text.margin = java.awt.Insets.new(8,8,8,8)
+      text.caret_color = Color.new(0xa4, 0x00, 0x00)
+      text.background = Color.new(0xf2, 0xf2, 0xf2)
+      text.foreground = Color.new(0xa4, 0x00, 0x00)
+
+      tar = org.jruby.demo.readline.TextAreaReadline.new(text, HEADER)
+      tar.hook_into_runtime_with_streams(JRuby.runtime)
+
+      # Ruby does not like redefining constants but we do not want the warnings
+      # readline reads constants and not the globals so we need to reassign
+      # the globals.
+      saved_verbose = $VERBOSE
+      $VERBOSE = nil
+      STDIN = $stdin
+      STDOUT = $stdout
+      STDERR = $stderr
+      $VERBOSE = saved_verbose
+    end
+  end)
+  
+  # We need to show the frame on EDT to avoid deadlocks.
+  java.awt.EventQueue.invoke_later {  frame.visible = true }
+end
+
+JRuby.objectspace = true # useful for code completion
+
+# From vanilla IRB
+if __FILE__.sub(/file:/, '') == $0.sub(/file:/, '')
+  IRB.start(__FILE__)
+else
+  # check -e option
+  if /^-e$/ =~ $0
+    IRB.start(__FILE__)
+  else
+    IRB.setup(__FILE__)
+  end
+end
+
+frame.dispose

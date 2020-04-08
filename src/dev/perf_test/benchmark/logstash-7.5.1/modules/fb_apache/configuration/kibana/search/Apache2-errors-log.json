@@ -1,0 +1,19 @@
+{
+  "sort": [
+    "@timestamp", 
+    "desc"
+  ], 
+  "hits": 0, 
+  "description": "", 
+  "title": "Apache2 errors log", 
+  "version": 1, 
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"fb_apache-*\",\"query\":{\"query_string\":{\"query\":\"_exists_:apache2.error\",\"analyze_wildcard\":true}},\"filter\":[],\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"require_field_match\":false,\"fragment_size\":2147483647}}"
+  }, 
+  "columns": [
+    "apache2.error.client", 
+    "apache2.error.level", 
+    "apache2.error.module", 
+    "apache2.error.message"
+  ]
+}

@@ -1,0 +1,2426 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:target_prefix: SimpleWorkflowService.
+:api_version: '2012-01-25'
+:operations:
+- :name: CountClosedWorkflowExecutions
+  :method: :count_closed_workflow_executions
+  :inputs:
+    domain:
+    - :string
+    - :required
+    startTimeFilter:
+    - :structure:
+        oldestDate:
+        - :timestamp
+        - :required
+        latestDate:
+        - :timestamp
+    closeTimeFilter:
+    - :structure:
+        oldestDate:
+        - :timestamp
+        - :required
+        latestDate:
+        - :timestamp
+    executionFilter:
+    - :structure:
+        workflowId:
+        - :string
+        - :required
+    typeFilter:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+    tagFilter:
+    - :structure:
+        tag:
+        - :string
+        - :required
+    closeStatusFilter:
+    - :structure:
+        status:
+        - :string
+        - :required
+  :outputs:
+    count:
+      :type: :integer
+    truncated:
+      :type: :boolean
+- :name: CountOpenWorkflowExecutions
+  :method: :count_open_workflow_executions
+  :inputs:
+    domain:
+    - :string
+    - :required
+    startTimeFilter:
+    - :structure:
+        oldestDate:
+        - :timestamp
+        - :required
+        latestDate:
+        - :timestamp
+    - :required
+    typeFilter:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+    tagFilter:
+    - :structure:
+        tag:
+        - :string
+        - :required
+    executionFilter:
+    - :structure:
+        workflowId:
+        - :string
+        - :required
+  :outputs:
+    count:
+      :type: :integer
+    truncated:
+      :type: :boolean
+- :name: CountPendingActivityTasks
+  :method: :count_pending_activity_tasks
+  :inputs:
+    domain:
+    - :string
+    - :required
+    taskList:
+    - :structure:
+        name:
+        - :string
+        - :required
+    - :required
+  :outputs:
+    count:
+      :type: :integer
+    truncated:
+      :type: :boolean
+- :name: CountPendingDecisionTasks
+  :method: :count_pending_decision_tasks
+  :inputs:
+    domain:
+    - :string
+    - :required
+    taskList:
+    - :structure:
+        name:
+        - :string
+        - :required
+    - :required
+  :outputs:
+    count:
+      :type: :integer
+    truncated:
+      :type: :boolean
+- :name: DeprecateActivityType
+  :method: :deprecate_activity_type
+  :inputs:
+    domain:
+    - :string
+    - :required
+    activityType:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+        - :required
+    - :required
+  :outputs: {}
+- :name: DeprecateDomain
+  :method: :deprecate_domain
+  :inputs:
+    name:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeprecateWorkflowType
+  :method: :deprecate_workflow_type
+  :inputs:
+    domain:
+    - :string
+    - :required
+    workflowType:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+        - :required
+    - :required
+  :outputs: {}
+- :name: DescribeActivityType
+  :method: :describe_activity_type
+  :inputs:
+    domain:
+    - :string
+    - :required
+    activityType:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+        - :required
+    - :required
+  :outputs:
+    typeInfo:
+      :type: :hash
+      :members:
+        activityType:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+            version:
+              :type: :string
+        status:
+          :type: :string
+        description:
+          :type: :string
+        creationDate:
+          :type: :time
+        deprecationDate:
+          :type: :time
+    configuration:
+      :type: :hash
+      :members:
+        defaultTaskStartToCloseTimeout:
+          :type: :string
+        defaultTaskHeartbeatTimeout:
+          :type: :string
+        defaultTaskList:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+        defaultTaskPriority:
+          :type: :string
+        defaultTaskScheduleToStartTimeout:
+          :type: :string
+        defaultTaskScheduleToCloseTimeout:
+          :type: :string
+- :name: DescribeDomain
+  :method: :describe_domain
+  :inputs:
+    name:
+    - :string
+    - :required
+  :outputs:
+    domainInfo:
+      :type: :hash
+      :members:
+        name:
+          :type: :string
+        status:
+          :type: :string
+        description:
+          :type: :string
+    configuration:
+      :type: :hash
+      :members:
+        workflowExecutionRetentionPeriodInDays:
+          :type: :string
+- :name: DescribeWorkflowExecution
+  :method: :describe_workflow_execution
+  :inputs:
+    domain:
+    - :string
+    - :required
+    execution:
+    - :structure:
+        workflowId:
+        - :string
+        - :required
+        runId:
+        - :string
+        - :required
+    - :required
+  :outputs:
+    executionInfo:
+      :type: :hash
+      :members:
+        execution:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+        workflowType:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+            version:
+              :type: :string
+        startTimestamp:
+          :type: :time
+        closeTimestamp:
+          :type: :time
+        executionStatus:
+          :type: :string
+        closeStatus:
+          :type: :string
+        parent:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+        tagList:
+          :type: :string
+        cancelRequested:
+          :type: :boolean
+    executionConfiguration:
+      :type: :hash
+      :members:
+        taskStartToCloseTimeout:
+          :type: :string
+        executionStartToCloseTimeout:
+          :type: :string
+        taskList:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+        taskPriority:
+          :type: :string
+        childPolicy:
+          :type: :string
+    openCounts:
+      :type: :hash
+      :members:
+        openActivityTasks:
+          :type: :integer
+        openDecisionTasks:
+          :type: :integer
+        openTimers:
+          :type: :integer
+        openChildWorkflowExecutions:
+          :type: :integer
+    latestActivityTaskTimestamp:
+      :type: :time
+    latestExecutionContext:
+      :type: :string
+- :name: DescribeWorkflowType
+  :method: :describe_workflow_type
+  :inputs:
+    domain:
+    - :string
+    - :required
+    workflowType:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+        - :required
+    - :required
+  :outputs:
+    typeInfo:
+      :type: :hash
+      :members:
+        workflowType:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+            version:
+              :type: :string
+        status:
+          :type: :string
+        description:
+          :type: :string
+        creationDate:
+          :type: :time
+        deprecationDate:
+          :type: :time
+    configuration:
+      :type: :hash
+      :members:
+        defaultTaskStartToCloseTimeout:
+          :type: :string
+        defaultExecutionStartToCloseTimeout:
+          :type: :string
+        defaultTaskList:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+        defaultTaskPriority:
+          :type: :string
+        defaultChildPolicy:
+          :type: :string
+- :name: GetWorkflowExecutionHistory
+  :method: :get_workflow_execution_history
+  :inputs:
+    domain:
+    - :string
+    - :required
+    execution:
+    - :structure:
+        workflowId:
+        - :string
+        - :required
+        runId:
+        - :string
+        - :required
+    - :required
+    nextPageToken:
+    - :string
+    maximumPageSize:
+    - :integer
+    reverseOrder:
+    - :boolean
+  :outputs:
+    events:
+      :type: :hash
+      :members:
+        eventTimestamp:
+          :type: :time
+        eventType:
+          :type: :string
+        eventId:
+          :type: :integer
+        workflowExecutionStartedEventAttributes:
+          :type: :hash
+          :members:
+            input:
+              :type: :string
+            executionStartToCloseTimeout:
+              :type: :string
+            taskStartToCloseTimeout:
+              :type: :string
+            childPolicy:
+              :type: :string
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            tagList:
+              :type: :string
+            taskPriority:
+              :type: :string
+            continuedExecutionRunId:
+              :type: :string
+            parentWorkflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            parentInitiatedEventId:
+              :type: :integer
+        workflowExecutionCompletedEventAttributes:
+          :type: :hash
+          :members:
+            result:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        completeWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        workflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            reason:
+              :type: :string
+            details:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        failWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        workflowExecutionTimedOutEventAttributes:
+          :type: :hash
+          :members:
+            timeoutType:
+              :type: :string
+            childPolicy:
+              :type: :string
+        workflowExecutionCanceledEventAttributes:
+          :type: :hash
+          :members:
+            details:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        cancelWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        workflowExecutionContinuedAsNewEventAttributes:
+          :type: :hash
+          :members:
+            input:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            newExecutionRunId:
+              :type: :string
+            executionStartToCloseTimeout:
+              :type: :string
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            taskPriority:
+              :type: :string
+            taskStartToCloseTimeout:
+              :type: :string
+            childPolicy:
+              :type: :string
+            tagList:
+              :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+        continueAsNewWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        workflowExecutionTerminatedEventAttributes:
+          :type: :hash
+          :members:
+            reason:
+              :type: :string
+            details:
+              :type: :string
+            childPolicy:
+              :type: :string
+            cause:
+              :type: :string
+        workflowExecutionCancelRequestedEventAttributes:
+          :type: :hash
+          :members:
+            externalWorkflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            externalInitiatedEventId:
+              :type: :integer
+            cause:
+              :type: :string
+        decisionTaskScheduledEventAttributes:
+          :type: :hash
+          :members:
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            taskPriority:
+              :type: :string
+            startToCloseTimeout:
+              :type: :string
+        decisionTaskStartedEventAttributes:
+          :type: :hash
+          :members:
+            identity:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+        decisionTaskCompletedEventAttributes:
+          :type: :hash
+          :members:
+            executionContext:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        decisionTaskTimedOutEventAttributes:
+          :type: :hash
+          :members:
+            timeoutType:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        activityTaskScheduledEventAttributes:
+          :type: :hash
+          :members:
+            activityType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            activityId:
+              :type: :string
+            input:
+              :type: :string
+            control:
+              :type: :string
+            scheduleToStartTimeout:
+              :type: :string
+            scheduleToCloseTimeout:
+              :type: :string
+            startToCloseTimeout:
+              :type: :string
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            taskPriority:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            heartbeatTimeout:
+              :type: :string
+        activityTaskStartedEventAttributes:
+          :type: :hash
+          :members:
+            identity:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+        activityTaskCompletedEventAttributes:
+          :type: :hash
+          :members:
+            result:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        activityTaskFailedEventAttributes:
+          :type: :hash
+          :members:
+            reason:
+              :type: :string
+            details:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        activityTaskTimedOutEventAttributes:
+          :type: :hash
+          :members:
+            timeoutType:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+            details:
+              :type: :string
+        activityTaskCanceledEventAttributes:
+          :type: :hash
+          :members:
+            details:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+            latestCancelRequestedEventId:
+              :type: :integer
+        activityTaskCancelRequestedEventAttributes:
+          :type: :hash
+          :members:
+            decisionTaskCompletedEventId:
+              :type: :integer
+            activityId:
+              :type: :string
+        workflowExecutionSignaledEventAttributes:
+          :type: :hash
+          :members:
+            signalName:
+              :type: :string
+            input:
+              :type: :string
+            externalWorkflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            externalInitiatedEventId:
+              :type: :integer
+        markerRecordedEventAttributes:
+          :type: :hash
+          :members:
+            markerName:
+              :type: :string
+            details:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        recordMarkerFailedEventAttributes:
+          :type: :hash
+          :members:
+            markerName:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        timerStartedEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            control:
+              :type: :string
+            startToFireTimeout:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        timerFiredEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            startedEventId:
+              :type: :integer
+        timerCanceledEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            startedEventId:
+              :type: :integer
+            decisionTaskCompletedEventId:
+              :type: :integer
+        startChildWorkflowExecutionInitiatedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            control:
+              :type: :string
+            input:
+              :type: :string
+            executionStartToCloseTimeout:
+              :type: :string
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            taskPriority:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            childPolicy:
+              :type: :string
+            taskStartToCloseTimeout:
+              :type: :string
+            tagList:
+              :type: :string
+        childWorkflowExecutionStartedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            initiatedEventId:
+              :type: :integer
+        childWorkflowExecutionCompletedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            result:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        childWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            reason:
+              :type: :string
+            details:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        childWorkflowExecutionTimedOutEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            timeoutType:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        childWorkflowExecutionCanceledEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            details:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        childWorkflowExecutionTerminatedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        signalExternalWorkflowExecutionInitiatedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+            signalName:
+              :type: :string
+            input:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+        externalWorkflowExecutionSignaledEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            initiatedEventId:
+              :type: :integer
+        signalExternalWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+            cause:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+        externalWorkflowExecutionCancelRequestedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            initiatedEventId:
+              :type: :integer
+        requestCancelExternalWorkflowExecutionInitiatedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+        requestCancelExternalWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+            cause:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+        scheduleActivityTaskFailedEventAttributes:
+          :type: :hash
+          :members:
+            activityType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            activityId:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        requestCancelActivityTaskFailedEventAttributes:
+          :type: :hash
+          :members:
+            activityId:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        startTimerFailedEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        cancelTimerFailedEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        startChildWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            cause:
+              :type: :string
+            workflowId:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+    nextPageToken:
+      :type: :string
+- :name: ListActivityTypes
+  :method: :list_activity_types
+  :inputs:
+    domain:
+    - :string
+    - :required
+    name:
+    - :string
+    registrationStatus:
+    - :string
+    - :required
+    nextPageToken:
+    - :string
+    maximumPageSize:
+    - :integer
+    reverseOrder:
+    - :boolean
+  :outputs:
+    typeInfos:
+      :type: :hash
+      :members:
+        activityType:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+            version:
+              :type: :string
+        status:
+          :type: :string
+        description:
+          :type: :string
+        creationDate:
+          :type: :time
+        deprecationDate:
+          :type: :time
+    nextPageToken:
+      :type: :string
+- :name: ListClosedWorkflowExecutions
+  :method: :list_closed_workflow_executions
+  :inputs:
+    domain:
+    - :string
+    - :required
+    startTimeFilter:
+    - :structure:
+        oldestDate:
+        - :timestamp
+        - :required
+        latestDate:
+        - :timestamp
+    closeTimeFilter:
+    - :structure:
+        oldestDate:
+        - :timestamp
+        - :required
+        latestDate:
+        - :timestamp
+    executionFilter:
+    - :structure:
+        workflowId:
+        - :string
+        - :required
+    closeStatusFilter:
+    - :structure:
+        status:
+        - :string
+        - :required
+    typeFilter:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+    tagFilter:
+    - :structure:
+        tag:
+        - :string
+        - :required
+    nextPageToken:
+    - :string
+    maximumPageSize:
+    - :integer
+    reverseOrder:
+    - :boolean
+  :outputs:
+    executionInfos:
+      :type: :hash
+      :members:
+        execution:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+        workflowType:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+            version:
+              :type: :string
+        startTimestamp:
+          :type: :time
+        closeTimestamp:
+          :type: :time
+        executionStatus:
+          :type: :string
+        closeStatus:
+          :type: :string
+        parent:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+        tagList:
+          :type: :string
+        cancelRequested:
+          :type: :boolean
+    nextPageToken:
+      :type: :string
+- :name: ListDomains
+  :method: :list_domains
+  :inputs:
+    nextPageToken:
+    - :string
+    registrationStatus:
+    - :string
+    - :required
+    maximumPageSize:
+    - :integer
+    reverseOrder:
+    - :boolean
+  :outputs:
+    domainInfos:
+      :type: :hash
+      :members:
+        name:
+          :type: :string
+        status:
+          :type: :string
+        description:
+          :type: :string
+    nextPageToken:
+      :type: :string
+- :name: ListOpenWorkflowExecutions
+  :method: :list_open_workflow_executions
+  :inputs:
+    domain:
+    - :string
+    - :required
+    startTimeFilter:
+    - :structure:
+        oldestDate:
+        - :timestamp
+        - :required
+        latestDate:
+        - :timestamp
+    - :required
+    typeFilter:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+    tagFilter:
+    - :structure:
+        tag:
+        - :string
+        - :required
+    nextPageToken:
+    - :string
+    maximumPageSize:
+    - :integer
+    reverseOrder:
+    - :boolean
+    executionFilter:
+    - :structure:
+        workflowId:
+        - :string
+        - :required
+  :outputs:
+    executionInfos:
+      :type: :hash
+      :members:
+        execution:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+        workflowType:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+            version:
+              :type: :string
+        startTimestamp:
+          :type: :time
+        closeTimestamp:
+          :type: :time
+        executionStatus:
+          :type: :string
+        closeStatus:
+          :type: :string
+        parent:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+        tagList:
+          :type: :string
+        cancelRequested:
+          :type: :boolean
+    nextPageToken:
+      :type: :string
+- :name: ListWorkflowTypes
+  :method: :list_workflow_types
+  :inputs:
+    domain:
+    - :string
+    - :required
+    name:
+    - :string
+    registrationStatus:
+    - :string
+    - :required
+    nextPageToken:
+    - :string
+    maximumPageSize:
+    - :integer
+    reverseOrder:
+    - :boolean
+  :outputs:
+    typeInfos:
+      :type: :hash
+      :members:
+        workflowType:
+          :type: :hash
+          :members:
+            name:
+              :type: :string
+            version:
+              :type: :string
+        status:
+          :type: :string
+        description:
+          :type: :string
+        creationDate:
+          :type: :time
+        deprecationDate:
+          :type: :time
+    nextPageToken:
+      :type: :string
+- :name: PollForActivityTask
+  :method: :poll_for_activity_task
+  :inputs:
+    domain:
+    - :string
+    - :required
+    taskList:
+    - :structure:
+        name:
+        - :string
+        - :required
+    - :required
+    identity:
+    - :string
+  :outputs:
+    taskToken:
+      :type: :string
+    activityId:
+      :type: :string
+    startedEventId:
+      :type: :integer
+    workflowExecution:
+      :type: :hash
+      :members:
+        workflowId:
+          :type: :string
+        runId:
+          :type: :string
+    activityType:
+      :type: :hash
+      :members:
+        name:
+          :type: :string
+        version:
+          :type: :string
+    input:
+      :type: :string
+- :name: PollForDecisionTask
+  :method: :poll_for_decision_task
+  :inputs:
+    domain:
+    - :string
+    - :required
+    taskList:
+    - :structure:
+        name:
+        - :string
+        - :required
+    - :required
+    identity:
+    - :string
+    nextPageToken:
+    - :string
+    maximumPageSize:
+    - :integer
+    reverseOrder:
+    - :boolean
+  :outputs:
+    taskToken:
+      :type: :string
+    startedEventId:
+      :type: :integer
+    workflowExecution:
+      :type: :hash
+      :members:
+        workflowId:
+          :type: :string
+        runId:
+          :type: :string
+    workflowType:
+      :type: :hash
+      :members:
+        name:
+          :type: :string
+        version:
+          :type: :string
+    events:
+      :type: :hash
+      :members:
+        eventTimestamp:
+          :type: :time
+        eventType:
+          :type: :string
+        eventId:
+          :type: :integer
+        workflowExecutionStartedEventAttributes:
+          :type: :hash
+          :members:
+            input:
+              :type: :string
+            executionStartToCloseTimeout:
+              :type: :string
+            taskStartToCloseTimeout:
+              :type: :string
+            childPolicy:
+              :type: :string
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            tagList:
+              :type: :string
+            taskPriority:
+              :type: :string
+            continuedExecutionRunId:
+              :type: :string
+            parentWorkflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            parentInitiatedEventId:
+              :type: :integer
+        workflowExecutionCompletedEventAttributes:
+          :type: :hash
+          :members:
+            result:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        completeWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        workflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            reason:
+              :type: :string
+            details:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        failWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        workflowExecutionTimedOutEventAttributes:
+          :type: :hash
+          :members:
+            timeoutType:
+              :type: :string
+            childPolicy:
+              :type: :string
+        workflowExecutionCanceledEventAttributes:
+          :type: :hash
+          :members:
+            details:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        cancelWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        workflowExecutionContinuedAsNewEventAttributes:
+          :type: :hash
+          :members:
+            input:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            newExecutionRunId:
+              :type: :string
+            executionStartToCloseTimeout:
+              :type: :string
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            taskPriority:
+              :type: :string
+            taskStartToCloseTimeout:
+              :type: :string
+            childPolicy:
+              :type: :string
+            tagList:
+              :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+        continueAsNewWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        workflowExecutionTerminatedEventAttributes:
+          :type: :hash
+          :members:
+            reason:
+              :type: :string
+            details:
+              :type: :string
+            childPolicy:
+              :type: :string
+            cause:
+              :type: :string
+        workflowExecutionCancelRequestedEventAttributes:
+          :type: :hash
+          :members:
+            externalWorkflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            externalInitiatedEventId:
+              :type: :integer
+            cause:
+              :type: :string
+        decisionTaskScheduledEventAttributes:
+          :type: :hash
+          :members:
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            taskPriority:
+              :type: :string
+            startToCloseTimeout:
+              :type: :string
+        decisionTaskStartedEventAttributes:
+          :type: :hash
+          :members:
+            identity:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+        decisionTaskCompletedEventAttributes:
+          :type: :hash
+          :members:
+            executionContext:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        decisionTaskTimedOutEventAttributes:
+          :type: :hash
+          :members:
+            timeoutType:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        activityTaskScheduledEventAttributes:
+          :type: :hash
+          :members:
+            activityType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            activityId:
+              :type: :string
+            input:
+              :type: :string
+            control:
+              :type: :string
+            scheduleToStartTimeout:
+              :type: :string
+            scheduleToCloseTimeout:
+              :type: :string
+            startToCloseTimeout:
+              :type: :string
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            taskPriority:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            heartbeatTimeout:
+              :type: :string
+        activityTaskStartedEventAttributes:
+          :type: :hash
+          :members:
+            identity:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+        activityTaskCompletedEventAttributes:
+          :type: :hash
+          :members:
+            result:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        activityTaskFailedEventAttributes:
+          :type: :hash
+          :members:
+            reason:
+              :type: :string
+            details:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        activityTaskTimedOutEventAttributes:
+          :type: :hash
+          :members:
+            timeoutType:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+            details:
+              :type: :string
+        activityTaskCanceledEventAttributes:
+          :type: :hash
+          :members:
+            details:
+              :type: :string
+            scheduledEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+            latestCancelRequestedEventId:
+              :type: :integer
+        activityTaskCancelRequestedEventAttributes:
+          :type: :hash
+          :members:
+            decisionTaskCompletedEventId:
+              :type: :integer
+            activityId:
+              :type: :string
+        workflowExecutionSignaledEventAttributes:
+          :type: :hash
+          :members:
+            signalName:
+              :type: :string
+            input:
+              :type: :string
+            externalWorkflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            externalInitiatedEventId:
+              :type: :integer
+        markerRecordedEventAttributes:
+          :type: :hash
+          :members:
+            markerName:
+              :type: :string
+            details:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        recordMarkerFailedEventAttributes:
+          :type: :hash
+          :members:
+            markerName:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        timerStartedEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            control:
+              :type: :string
+            startToFireTimeout:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        timerFiredEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            startedEventId:
+              :type: :integer
+        timerCanceledEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            startedEventId:
+              :type: :integer
+            decisionTaskCompletedEventId:
+              :type: :integer
+        startChildWorkflowExecutionInitiatedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            control:
+              :type: :string
+            input:
+              :type: :string
+            executionStartToCloseTimeout:
+              :type: :string
+            taskList:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+            taskPriority:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            childPolicy:
+              :type: :string
+            taskStartToCloseTimeout:
+              :type: :string
+            tagList:
+              :type: :string
+        childWorkflowExecutionStartedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            initiatedEventId:
+              :type: :integer
+        childWorkflowExecutionCompletedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            result:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        childWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            reason:
+              :type: :string
+            details:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        childWorkflowExecutionTimedOutEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            timeoutType:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        childWorkflowExecutionCanceledEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            details:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        childWorkflowExecutionTerminatedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            initiatedEventId:
+              :type: :integer
+            startedEventId:
+              :type: :integer
+        signalExternalWorkflowExecutionInitiatedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+            signalName:
+              :type: :string
+            input:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+        externalWorkflowExecutionSignaledEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            initiatedEventId:
+              :type: :integer
+        signalExternalWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+            cause:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+        externalWorkflowExecutionCancelRequestedEventAttributes:
+          :type: :hash
+          :members:
+            workflowExecution:
+              :type: :hash
+              :members:
+                workflowId:
+                  :type: :string
+                runId:
+                  :type: :string
+            initiatedEventId:
+              :type: :integer
+        requestCancelExternalWorkflowExecutionInitiatedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+        requestCancelExternalWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            workflowId:
+              :type: :string
+            runId:
+              :type: :string
+            cause:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+        scheduleActivityTaskFailedEventAttributes:
+          :type: :hash
+          :members:
+            activityType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            activityId:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        requestCancelActivityTaskFailedEventAttributes:
+          :type: :hash
+          :members:
+            activityId:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        startTimerFailedEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        cancelTimerFailedEventAttributes:
+          :type: :hash
+          :members:
+            timerId:
+              :type: :string
+            cause:
+              :type: :string
+            decisionTaskCompletedEventId:
+              :type: :integer
+        startChildWorkflowExecutionFailedEventAttributes:
+          :type: :hash
+          :members:
+            workflowType:
+              :type: :hash
+              :members:
+                name:
+                  :type: :string
+                version:
+                  :type: :string
+            cause:
+              :type: :string
+            workflowId:
+              :type: :string
+            initiatedEventId:
+              :type: :integer
+            decisionTaskCompletedEventId:
+              :type: :integer
+            control:
+              :type: :string
+    nextPageToken:
+      :type: :string
+    previousStartedEventId:
+      :type: :integer
+- :name: RecordActivityTaskHeartbeat
+  :method: :record_activity_task_heartbeat
+  :inputs:
+    taskToken:
+    - :string
+    - :required
+    details:
+    - :string
+  :outputs:
+    cancelRequested:
+      :type: :boolean
+- :name: RegisterActivityType
+  :method: :register_activity_type
+  :inputs:
+    domain:
+    - :string
+    - :required
+    name:
+    - :string
+    - :required
+    version:
+    - :string
+    - :required
+    description:
+    - :string
+    defaultTaskStartToCloseTimeout:
+    - :string
+    defaultTaskHeartbeatTimeout:
+    - :string
+    defaultTaskList:
+    - :structure:
+        name:
+        - :string
+        - :required
+    defaultTaskPriority:
+    - :string
+    defaultTaskScheduleToStartTimeout:
+    - :string
+    defaultTaskScheduleToCloseTimeout:
+    - :string
+  :outputs: {}
+- :name: RegisterDomain
+  :method: :register_domain
+  :inputs:
+    name:
+    - :string
+    - :required
+    description:
+    - :string
+    workflowExecutionRetentionPeriodInDays:
+    - :string
+    - :required
+  :outputs: {}
+- :name: RegisterWorkflowType
+  :method: :register_workflow_type
+  :inputs:
+    domain:
+    - :string
+    - :required
+    name:
+    - :string
+    - :required
+    version:
+    - :string
+    - :required
+    description:
+    - :string
+    defaultTaskStartToCloseTimeout:
+    - :string
+    defaultExecutionStartToCloseTimeout:
+    - :string
+    defaultTaskList:
+    - :structure:
+        name:
+        - :string
+        - :required
+    defaultTaskPriority:
+    - :string
+    defaultChildPolicy:
+    - :string
+  :outputs: {}
+- :name: RequestCancelWorkflowExecution
+  :method: :request_cancel_workflow_execution
+  :inputs:
+    domain:
+    - :string
+    - :required
+    workflowId:
+    - :string
+    - :required
+    runId:
+    - :string
+  :outputs: {}
+- :name: RespondActivityTaskCanceled
+  :method: :respond_activity_task_canceled
+  :inputs:
+    taskToken:
+    - :string
+    - :required
+    details:
+    - :string
+  :outputs: {}
+- :name: RespondActivityTaskCompleted
+  :method: :respond_activity_task_completed
+  :inputs:
+    taskToken:
+    - :string
+    - :required
+    result:
+    - :string
+  :outputs: {}
+- :name: RespondActivityTaskFailed
+  :method: :respond_activity_task_failed
+  :inputs:
+    taskToken:
+    - :string
+    - :required
+    reason:
+    - :string
+    details:
+    - :string
+  :outputs: {}
+- :name: RespondDecisionTaskCompleted
+  :method: :respond_decision_task_completed
+  :inputs:
+    taskToken:
+    - :string
+    - :required
+    decisions:
+    - :list:
+      - :structure:
+          decisionType:
+          - :string
+          - :required
+          scheduleActivityTaskDecisionAttributes:
+          - :structure:
+              activityType:
+              - :structure:
+                  name:
+                  - :string
+                  - :required
+                  version:
+                  - :string
+                  - :required
+              - :required
+              activityId:
+              - :string
+              - :required
+              control:
+              - :string
+              input:
+              - :string
+              scheduleToCloseTimeout:
+              - :string
+              taskList:
+              - :structure:
+                  name:
+                  - :string
+                  - :required
+              taskPriority:
+              - :string
+              scheduleToStartTimeout:
+              - :string
+              startToCloseTimeout:
+              - :string
+              heartbeatTimeout:
+              - :string
+          requestCancelActivityTaskDecisionAttributes:
+          - :structure:
+              activityId:
+              - :string
+              - :required
+          completeWorkflowExecutionDecisionAttributes:
+          - :structure:
+              result:
+              - :string
+          failWorkflowExecutionDecisionAttributes:
+          - :structure:
+              reason:
+              - :string
+              details:
+              - :string
+          cancelWorkflowExecutionDecisionAttributes:
+          - :structure:
+              details:
+              - :string
+          continueAsNewWorkflowExecutionDecisionAttributes:
+          - :structure:
+              input:
+              - :string
+              executionStartToCloseTimeout:
+              - :string
+              taskList:
+              - :structure:
+                  name:
+                  - :string
+                  - :required
+              taskPriority:
+              - :string
+              taskStartToCloseTimeout:
+              - :string
+              childPolicy:
+              - :string
+              tagList:
+              - :list:
+                - :string
+              workflowTypeVersion:
+              - :string
+          recordMarkerDecisionAttributes:
+          - :structure:
+              markerName:
+              - :string
+              - :required
+              details:
+              - :string
+          startTimerDecisionAttributes:
+          - :structure:
+              timerId:
+              - :string
+              - :required
+              control:
+              - :string
+              startToFireTimeout:
+              - :string
+              - :required
+          cancelTimerDecisionAttributes:
+          - :structure:
+              timerId:
+              - :string
+              - :required
+          signalExternalWorkflowExecutionDecisionAttributes:
+          - :structure:
+              workflowId:
+              - :string
+              - :required
+              runId:
+              - :string
+              signalName:
+              - :string
+              - :required
+              input:
+              - :string
+              control:
+              - :string
+          requestCancelExternalWorkflowExecutionDecisionAttributes:
+          - :structure:
+              workflowId:
+              - :string
+              - :required
+              runId:
+              - :string
+              control:
+              - :string
+          startChildWorkflowExecutionDecisionAttributes:
+          - :structure:
+              workflowType:
+              - :structure:
+                  name:
+                  - :string
+                  - :required
+                  version:
+                  - :string
+                  - :required
+              - :required
+              workflowId:
+              - :string
+              - :required
+              control:
+              - :string
+              input:
+              - :string
+              executionStartToCloseTimeout:
+              - :string
+              taskList:
+              - :structure:
+                  name:
+                  - :string
+                  - :required
+              taskPriority:
+              - :string
+              taskStartToCloseTimeout:
+              - :string
+              childPolicy:
+              - :string
+              tagList:
+              - :list:
+                - :string
+    executionContext:
+    - :string
+  :outputs: {}
+- :name: SignalWorkflowExecution
+  :method: :signal_workflow_execution
+  :inputs:
+    domain:
+    - :string
+    - :required
+    workflowId:
+    - :string
+    - :required
+    runId:
+    - :string
+    signalName:
+    - :string
+    - :required
+    input:
+    - :string
+  :outputs: {}
+- :name: StartWorkflowExecution
+  :method: :start_workflow_execution
+  :inputs:
+    domain:
+    - :string
+    - :required
+    workflowId:
+    - :string
+    - :required
+    workflowType:
+    - :structure:
+        name:
+        - :string
+        - :required
+        version:
+        - :string
+        - :required
+    - :required
+    taskList:
+    - :structure:
+        name:
+        - :string
+        - :required
+    taskPriority:
+    - :string
+    input:
+    - :string
+    executionStartToCloseTimeout:
+    - :string
+    tagList:
+    - :list:
+      - :string
+    taskStartToCloseTimeout:
+    - :string
+    childPolicy:
+    - :string
+  :outputs:
+    runId:
+      :type: :string
+- :name: TerminateWorkflowExecution
+  :method: :terminate_workflow_execution
+  :inputs:
+    domain:
+    - :string
+    - :required
+    workflowId:
+    - :string
+    - :required
+    runId:
+    - :string
+    reason:
+    - :string
+    details:
+    - :string
+    childPolicy:
+    - :string
+  :outputs: {}

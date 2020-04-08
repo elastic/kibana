@@ -1,0 +1,1912 @@
+---
+:api_version: '2010-05-08'
+:operations:
+- :name: AddClientIDToOpenIDConnectProvider
+  :method: :add_client_id_to_open_id_connect_provider
+  :inputs:
+    OpenIDConnectProviderArn:
+    - :string
+    - :required
+    ClientID:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AddClientIDToOpenIDConnectProviderResult:
+        :ignore: true
+- :name: AddRoleToInstanceProfile
+  :method: :add_role_to_instance_profile
+  :inputs:
+    InstanceProfileName:
+    - :string
+    - :required
+    RoleName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AddRoleToInstanceProfileResult:
+        :ignore: true
+- :name: AddUserToGroup
+  :method: :add_user_to_group
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    UserName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AddUserToGroupResult:
+        :ignore: true
+- :name: AttachGroupPolicy
+  :method: :attach_group_policy
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    PolicyArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AttachGroupPolicyResult:
+        :ignore: true
+- :name: AttachRolePolicy
+  :method: :attach_role_policy
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    PolicyArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AttachRolePolicyResult:
+        :ignore: true
+- :name: AttachUserPolicy
+  :method: :attach_user_policy
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    PolicyArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AttachUserPolicyResult:
+        :ignore: true
+- :name: ChangePassword
+  :method: :change_password
+  :inputs:
+    OldPassword:
+    - :string
+    - :required
+    NewPassword:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      ChangePasswordResult:
+        :ignore: true
+- :name: CreateAccessKey
+  :method: :create_access_key
+  :inputs:
+    UserName:
+    - :string
+  :outputs:
+    :children:
+      CreateAccessKeyResult:
+        :ignore: true
+        :children:
+          AccessKey:
+            :children:
+              CreateDate:
+                :type: :time
+- :name: CreateAccountAlias
+  :method: :create_account_alias
+  :inputs:
+    AccountAlias:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateAccountAliasResult:
+        :ignore: true
+- :name: CreateGroup
+  :method: :create_group
+  :inputs:
+    Path:
+    - :string
+    GroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateGroupResult:
+        :ignore: true
+        :children:
+          Group:
+            :children:
+              CreateDate:
+                :type: :time
+- :name: CreateInstanceProfile
+  :method: :create_instance_profile
+  :inputs:
+    InstanceProfileName:
+    - :string
+    - :required
+    Path:
+    - :string
+  :outputs:
+    :children:
+      CreateInstanceProfileResult:
+        :ignore: true
+        :children:
+          InstanceProfile:
+            :children:
+              CreateDate:
+                :type: :time
+              Roles:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :roles
+                    :list: true
+                    :children:
+                      CreateDate:
+                        :type: :time
+- :name: CreateLoginProfile
+  :method: :create_login_profile
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    Password:
+    - :string
+    - :required
+    PasswordResetRequired:
+    - :boolean
+  :outputs:
+    :children:
+      CreateLoginProfileResult:
+        :ignore: true
+        :children:
+          LoginProfile:
+            :children:
+              CreateDate:
+                :type: :time
+              PasswordResetRequired:
+                :type: :boolean
+- :name: CreateOpenIDConnectProvider
+  :method: :create_open_id_connect_provider
+  :inputs:
+    Url:
+    - :string
+    - :required
+    ClientIDList:
+    - :list:
+      - :string
+    ThumbprintList:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      CreateOpenIDConnectProviderResult:
+        :ignore: true
+- :name: CreatePolicy
+  :method: :create_policy
+  :inputs:
+    PolicyName:
+    - :string
+    - :required
+    Path:
+    - :string
+    PolicyDocument:
+    - :string
+    - :required
+    Description:
+    - :string
+  :outputs:
+    :children:
+      CreatePolicyResult:
+        :ignore: true
+        :children:
+          Policy:
+            :children:
+              AttachmentCount:
+                :type: :integer
+              IsAttachable:
+                :type: :boolean
+              CreateDate:
+                :type: :time
+              UpdateDate:
+                :type: :time
+- :name: CreatePolicyVersion
+  :method: :create_policy_version
+  :inputs:
+    PolicyArn:
+    - :string
+    - :required
+    PolicyDocument:
+    - :string
+    - :required
+    SetAsDefault:
+    - :boolean
+  :outputs:
+    :children:
+      CreatePolicyVersionResult:
+        :ignore: true
+        :children:
+          PolicyVersion:
+            :children:
+              IsDefaultVersion:
+                :type: :boolean
+              CreateDate:
+                :type: :time
+- :name: CreateRole
+  :method: :create_role
+  :inputs:
+    Path:
+    - :string
+    RoleName:
+    - :string
+    - :required
+    AssumeRolePolicyDocument:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateRoleResult:
+        :ignore: true
+        :children:
+          Role:
+            :children:
+              CreateDate:
+                :type: :time
+- :name: CreateSAMLProvider
+  :method: :create_saml_provider
+  :inputs:
+    SAMLMetadataDocument:
+    - :string
+    - :required
+    Name:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateSAMLProviderResult:
+        :ignore: true
+- :name: CreateUser
+  :method: :create_user
+  :inputs:
+    Path:
+    - :string
+    UserName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateUserResult:
+        :ignore: true
+        :children:
+          User:
+            :children:
+              CreateDate:
+                :type: :time
+              PasswordLastUsed:
+                :type: :time
+- :name: CreateVirtualMFADevice
+  :method: :create_virtual_mfa_device
+  :inputs:
+    Path:
+    - :string
+    VirtualMFADeviceName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateVirtualMFADeviceResult:
+        :ignore: true
+        :children:
+          VirtualMFADevice:
+            :children:
+              Base32StringSeed:
+                :type: :blob
+              QRCodePNG:
+                :type: :blob
+              User:
+                :children:
+                  CreateDate:
+                    :type: :time
+                  PasswordLastUsed:
+                    :type: :time
+              EnableDate:
+                :type: :time
+- :name: DeactivateMFADevice
+  :method: :deactivate_mfa_device
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    SerialNumber:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeactivateMFADeviceResult:
+        :ignore: true
+- :name: DeleteAccessKey
+  :method: :delete_access_key
+  :inputs:
+    UserName:
+    - :string
+    AccessKeyId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteAccessKeyResult:
+        :ignore: true
+- :name: DeleteAccountAlias
+  :method: :delete_account_alias
+  :inputs:
+    AccountAlias:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteAccountAliasResult:
+        :ignore: true
+- :name: DeleteAccountPasswordPolicy
+  :method: :delete_account_password_policy
+  :inputs: {}
+  :outputs:
+    :children:
+      DeleteAccountPasswordPolicyResult:
+        :ignore: true
+- :name: DeleteGroup
+  :method: :delete_group
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteGroupResult:
+        :ignore: true
+- :name: DeleteGroupPolicy
+  :method: :delete_group_policy
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteGroupPolicyResult:
+        :ignore: true
+- :name: DeleteInstanceProfile
+  :method: :delete_instance_profile
+  :inputs:
+    InstanceProfileName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteInstanceProfileResult:
+        :ignore: true
+- :name: DeleteLoginProfile
+  :method: :delete_login_profile
+  :inputs:
+    UserName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteLoginProfileResult:
+        :ignore: true
+- :name: DeleteOpenIDConnectProvider
+  :method: :delete_open_id_connect_provider
+  :inputs:
+    OpenIDConnectProviderArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteOpenIDConnectProviderResult:
+        :ignore: true
+- :name: DeletePolicy
+  :method: :delete_policy
+  :inputs:
+    PolicyArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeletePolicyResult:
+        :ignore: true
+- :name: DeletePolicyVersion
+  :method: :delete_policy_version
+  :inputs:
+    PolicyArn:
+    - :string
+    - :required
+    VersionId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeletePolicyVersionResult:
+        :ignore: true
+- :name: DeleteRole
+  :method: :delete_role
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteRoleResult:
+        :ignore: true
+- :name: DeleteRolePolicy
+  :method: :delete_role_policy
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteRolePolicyResult:
+        :ignore: true
+- :name: DeleteSAMLProvider
+  :method: :delete_saml_provider
+  :inputs:
+    SAMLProviderArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteSAMLProviderResult:
+        :ignore: true
+- :name: DeleteServerCertificate
+  :method: :delete_server_certificate
+  :inputs:
+    ServerCertificateName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteServerCertificateResult:
+        :ignore: true
+- :name: DeleteSigningCertificate
+  :method: :delete_signing_certificate
+  :inputs:
+    UserName:
+    - :string
+    CertificateId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteSigningCertificateResult:
+        :ignore: true
+- :name: DeleteUser
+  :method: :delete_user
+  :inputs:
+    UserName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteUserResult:
+        :ignore: true
+- :name: DeleteUserPolicy
+  :method: :delete_user_policy
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteUserPolicyResult:
+        :ignore: true
+- :name: DeleteVirtualMFADevice
+  :method: :delete_virtual_mfa_device
+  :inputs:
+    SerialNumber:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteVirtualMFADeviceResult:
+        :ignore: true
+- :name: DetachGroupPolicy
+  :method: :detach_group_policy
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    PolicyArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DetachGroupPolicyResult:
+        :ignore: true
+- :name: DetachRolePolicy
+  :method: :detach_role_policy
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    PolicyArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DetachRolePolicyResult:
+        :ignore: true
+- :name: DetachUserPolicy
+  :method: :detach_user_policy
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    PolicyArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DetachUserPolicyResult:
+        :ignore: true
+- :name: EnableMFADevice
+  :method: :enable_mfa_device
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    SerialNumber:
+    - :string
+    - :required
+    AuthenticationCode1:
+    - :string
+    - :required
+    AuthenticationCode2:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      EnableMFADeviceResult:
+        :ignore: true
+- :name: GenerateCredentialReport
+  :method: :generate_credential_report
+  :inputs: {}
+  :outputs:
+    :children:
+      GenerateCredentialReportResult:
+        :ignore: true
+- :name: GetAccountAuthorizationDetails
+  :method: :get_account_authorization_details
+  :inputs:
+    Filter:
+    - :list:
+      - :string
+    MaxItems:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      GetAccountAuthorizationDetailsResult:
+        :ignore: true
+        :children:
+          UserDetailList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :user_detail_list
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+                  UserPolicyList:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :user_policy_list
+                        :list: true
+                  GroupList:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :group_list
+                        :list: true
+          GroupDetailList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :group_detail_list
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+                  GroupPolicyList:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :group_policy_list
+                        :list: true
+          RoleDetailList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :role_detail_list
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+                  InstanceProfileList:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :instance_profile_list
+                        :list: true
+                        :children:
+                          CreateDate:
+                            :type: :time
+                          Roles:
+                            :ignore: true
+                            :children:
+                              member:
+                                :rename: :roles
+                                :list: true
+                                :children:
+                                  CreateDate:
+                                    :type: :time
+                  RolePolicyList:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :role_policy_list
+                        :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: GetAccountPasswordPolicy
+  :method: :get_account_password_policy
+  :inputs: {}
+  :outputs:
+    :children:
+      GetAccountPasswordPolicyResult:
+        :ignore: true
+        :children:
+          PasswordPolicy:
+            :children:
+              MinimumPasswordLength:
+                :type: :integer
+              RequireSymbols:
+                :type: :boolean
+              RequireNumbers:
+                :type: :boolean
+              RequireUppercaseCharacters:
+                :type: :boolean
+              RequireLowercaseCharacters:
+                :type: :boolean
+              AllowUsersToChangePassword:
+                :type: :boolean
+              ExpirePasswords:
+                :type: :boolean
+              MaxPasswordAge:
+                :type: :integer
+              PasswordReusePrevention:
+                :type: :integer
+              HardExpiry:
+                :type: :boolean
+- :name: GetAccountSummary
+  :method: :get_account_summary
+  :inputs: {}
+  :outputs:
+    :children:
+      GetAccountSummaryResult:
+        :ignore: true
+        :children:
+          SummaryMap:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :summary_map
+                :map:
+                - key
+                - value
+                :children:
+                  value:
+                    :type: :integer
+- :name: GetCredentialReport
+  :method: :get_credential_report
+  :inputs: {}
+  :outputs:
+    :children:
+      GetCredentialReportResult:
+        :ignore: true
+        :children:
+          Content:
+            :type: :blob
+          GeneratedTime:
+            :type: :time
+- :name: GetGroup
+  :method: :get_group
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      GetGroupResult:
+        :ignore: true
+        :children:
+          Group:
+            :children:
+              CreateDate:
+                :type: :time
+          Users:
+            :ignore: true
+            :children:
+              member:
+                :rename: :users
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+                  PasswordLastUsed:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: GetGroupPolicy
+  :method: :get_group_policy
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetGroupPolicyResult:
+        :ignore: true
+- :name: GetInstanceProfile
+  :method: :get_instance_profile
+  :inputs:
+    InstanceProfileName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetInstanceProfileResult:
+        :ignore: true
+        :children:
+          InstanceProfile:
+            :children:
+              CreateDate:
+                :type: :time
+              Roles:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :roles
+                    :list: true
+                    :children:
+                      CreateDate:
+                        :type: :time
+- :name: GetLoginProfile
+  :method: :get_login_profile
+  :inputs:
+    UserName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetLoginProfileResult:
+        :ignore: true
+        :children:
+          LoginProfile:
+            :children:
+              CreateDate:
+                :type: :time
+              PasswordResetRequired:
+                :type: :boolean
+- :name: GetOpenIDConnectProvider
+  :method: :get_open_id_connect_provider
+  :inputs:
+    OpenIDConnectProviderArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetOpenIDConnectProviderResult:
+        :ignore: true
+        :children:
+          ClientIDList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :client_id_list
+                :list: true
+          ThumbprintList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :thumbprint_list
+                :list: true
+          CreateDate:
+            :type: :time
+- :name: GetPolicy
+  :method: :get_policy
+  :inputs:
+    PolicyArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetPolicyResult:
+        :ignore: true
+        :children:
+          Policy:
+            :children:
+              AttachmentCount:
+                :type: :integer
+              IsAttachable:
+                :type: :boolean
+              CreateDate:
+                :type: :time
+              UpdateDate:
+                :type: :time
+- :name: GetPolicyVersion
+  :method: :get_policy_version
+  :inputs:
+    PolicyArn:
+    - :string
+    - :required
+    VersionId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetPolicyVersionResult:
+        :ignore: true
+        :children:
+          PolicyVersion:
+            :children:
+              IsDefaultVersion:
+                :type: :boolean
+              CreateDate:
+                :type: :time
+- :name: GetRole
+  :method: :get_role
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetRoleResult:
+        :ignore: true
+        :children:
+          Role:
+            :children:
+              CreateDate:
+                :type: :time
+- :name: GetRolePolicy
+  :method: :get_role_policy
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetRolePolicyResult:
+        :ignore: true
+- :name: GetSAMLProvider
+  :method: :get_saml_provider
+  :inputs:
+    SAMLProviderArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetSAMLProviderResult:
+        :ignore: true
+        :children:
+          CreateDate:
+            :type: :time
+          ValidUntil:
+            :type: :time
+- :name: GetServerCertificate
+  :method: :get_server_certificate
+  :inputs:
+    ServerCertificateName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetServerCertificateResult:
+        :ignore: true
+        :children:
+          ServerCertificate:
+            :children:
+              ServerCertificateMetadata:
+                :children:
+                  UploadDate:
+                    :type: :time
+                  Expiration:
+                    :type: :time
+- :name: GetUser
+  :method: :get_user
+  :inputs:
+    UserName:
+    - :string
+  :outputs:
+    :children:
+      GetUserResult:
+        :ignore: true
+        :children:
+          User:
+            :children:
+              CreateDate:
+                :type: :time
+              PasswordLastUsed:
+                :type: :time
+- :name: GetUserPolicy
+  :method: :get_user_policy
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetUserPolicyResult:
+        :ignore: true
+- :name: ListAccessKeys
+  :method: :list_access_keys
+  :inputs:
+    UserName:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListAccessKeysResult:
+        :ignore: true
+        :children:
+          AccessKeyMetadata:
+            :ignore: true
+            :children:
+              member:
+                :rename: :access_key_metadata
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListAccountAliases
+  :method: :list_account_aliases
+  :inputs:
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListAccountAliasesResult:
+        :ignore: true
+        :children:
+          AccountAliases:
+            :ignore: true
+            :children:
+              member:
+                :rename: :account_aliases
+                :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: ListAttachedGroupPolicies
+  :method: :list_attached_group_policies
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListAttachedGroupPoliciesResult:
+        :ignore: true
+        :children:
+          AttachedPolicies:
+            :ignore: true
+            :children:
+              member:
+                :rename: :attached_policies
+                :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: ListAttachedRolePolicies
+  :method: :list_attached_role_policies
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListAttachedRolePoliciesResult:
+        :ignore: true
+        :children:
+          AttachedPolicies:
+            :ignore: true
+            :children:
+              member:
+                :rename: :attached_policies
+                :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: ListAttachedUserPolicies
+  :method: :list_attached_user_policies
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListAttachedUserPoliciesResult:
+        :ignore: true
+        :children:
+          AttachedPolicies:
+            :ignore: true
+            :children:
+              member:
+                :rename: :attached_policies
+                :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: ListEntitiesForPolicy
+  :method: :list_entities_for_policy
+  :inputs:
+    PolicyArn:
+    - :string
+    - :required
+    EntityFilter:
+    - :string
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListEntitiesForPolicyResult:
+        :ignore: true
+        :children:
+          PolicyGroups:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policy_groups
+                :list: true
+          PolicyUsers:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policy_users
+                :list: true
+          PolicyRoles:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policy_roles
+                :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: ListGroupPolicies
+  :method: :list_group_policies
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListGroupPoliciesResult:
+        :ignore: true
+        :children:
+          PolicyNames:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policy_names
+                :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: ListGroups
+  :method: :list_groups
+  :inputs:
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListGroupsResult:
+        :ignore: true
+        :children:
+          Groups:
+            :ignore: true
+            :children:
+              member:
+                :rename: :groups
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListGroupsForUser
+  :method: :list_groups_for_user
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListGroupsForUserResult:
+        :ignore: true
+        :children:
+          Groups:
+            :ignore: true
+            :children:
+              member:
+                :rename: :groups
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListInstanceProfiles
+  :method: :list_instance_profiles
+  :inputs:
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListInstanceProfilesResult:
+        :ignore: true
+        :children:
+          InstanceProfiles:
+            :ignore: true
+            :children:
+              member:
+                :rename: :instance_profiles
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+                  Roles:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :roles
+                        :list: true
+                        :children:
+                          CreateDate:
+                            :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListInstanceProfilesForRole
+  :method: :list_instance_profiles_for_role
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListInstanceProfilesForRoleResult:
+        :ignore: true
+        :children:
+          InstanceProfiles:
+            :ignore: true
+            :children:
+              member:
+                :rename: :instance_profiles
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+                  Roles:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :roles
+                        :list: true
+                        :children:
+                          CreateDate:
+                            :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListMFADevices
+  :method: :list_mfa_devices
+  :inputs:
+    UserName:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListMFADevicesResult:
+        :ignore: true
+        :children:
+          MFADevices:
+            :ignore: true
+            :children:
+              member:
+                :rename: :mfa_devices
+                :list: true
+                :children:
+                  EnableDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListOpenIDConnectProviders
+  :method: :list_open_id_connect_providers
+  :inputs: {}
+  :outputs:
+    :children:
+      ListOpenIDConnectProvidersResult:
+        :ignore: true
+        :children:
+          OpenIDConnectProviderList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :open_id_connect_provider_list
+                :list: true
+- :name: ListPolicies
+  :method: :list_policies
+  :inputs:
+    Scope:
+    - :string
+    OnlyAttached:
+    - :boolean
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListPoliciesResult:
+        :ignore: true
+        :children:
+          Policies:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policies
+                :list: true
+                :children:
+                  AttachmentCount:
+                    :type: :integer
+                  IsAttachable:
+                    :type: :boolean
+                  CreateDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListPolicyVersions
+  :method: :list_policy_versions
+  :inputs:
+    PolicyArn:
+    - :string
+    - :required
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListPolicyVersionsResult:
+        :ignore: true
+        :children:
+          Versions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :versions
+                :list: true
+                :children:
+                  IsDefaultVersion:
+                    :type: :boolean
+                  CreateDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListRolePolicies
+  :method: :list_role_policies
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListRolePoliciesResult:
+        :ignore: true
+        :children:
+          PolicyNames:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policy_names
+                :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: ListRoles
+  :method: :list_roles
+  :inputs:
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListRolesResult:
+        :ignore: true
+        :children:
+          Roles:
+            :ignore: true
+            :children:
+              member:
+                :rename: :roles
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListSAMLProviders
+  :method: :list_saml_providers
+  :inputs: {}
+  :outputs:
+    :children:
+      ListSAMLProvidersResult:
+        :ignore: true
+        :children:
+          SAMLProviderList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :saml_provider_list
+                :list: true
+                :children:
+                  ValidUntil:
+                    :type: :time
+                  CreateDate:
+                    :type: :time
+- :name: ListServerCertificates
+  :method: :list_server_certificates
+  :inputs:
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListServerCertificatesResult:
+        :ignore: true
+        :children:
+          ServerCertificateMetadataList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :server_certificate_metadata_list
+                :list: true
+                :children:
+                  UploadDate:
+                    :type: :time
+                  Expiration:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListSigningCertificates
+  :method: :list_signing_certificates
+  :inputs:
+    UserName:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListSigningCertificatesResult:
+        :ignore: true
+        :children:
+          Certificates:
+            :ignore: true
+            :children:
+              member:
+                :rename: :certificates
+                :list: true
+                :children:
+                  UploadDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListUserPolicies
+  :method: :list_user_policies
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListUserPoliciesResult:
+        :ignore: true
+        :children:
+          PolicyNames:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policy_names
+                :list: true
+          IsTruncated:
+            :type: :boolean
+- :name: ListUsers
+  :method: :list_users
+  :inputs:
+    PathPrefix:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListUsersResult:
+        :ignore: true
+        :children:
+          Users:
+            :ignore: true
+            :children:
+              member:
+                :rename: :users
+                :list: true
+                :children:
+                  CreateDate:
+                    :type: :time
+                  PasswordLastUsed:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: ListVirtualMFADevices
+  :method: :list_virtual_mfa_devices
+  :inputs:
+    AssignmentStatus:
+    - :string
+    Marker:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListVirtualMFADevicesResult:
+        :ignore: true
+        :children:
+          VirtualMFADevices:
+            :ignore: true
+            :children:
+              member:
+                :rename: :virtual_mfa_devices
+                :list: true
+                :children:
+                  Base32StringSeed:
+                    :type: :blob
+                  QRCodePNG:
+                    :type: :blob
+                  User:
+                    :children:
+                      CreateDate:
+                        :type: :time
+                      PasswordLastUsed:
+                        :type: :time
+                  EnableDate:
+                    :type: :time
+          IsTruncated:
+            :type: :boolean
+- :name: PutGroupPolicy
+  :method: :put_group_policy
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+    PolicyDocument:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      PutGroupPolicyResult:
+        :ignore: true
+- :name: PutRolePolicy
+  :method: :put_role_policy
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+    PolicyDocument:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      PutRolePolicyResult:
+        :ignore: true
+- :name: PutUserPolicy
+  :method: :put_user_policy
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+    PolicyDocument:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      PutUserPolicyResult:
+        :ignore: true
+- :name: RemoveClientIDFromOpenIDConnectProvider
+  :method: :remove_client_id_from_open_id_connect_provider
+  :inputs:
+    OpenIDConnectProviderArn:
+    - :string
+    - :required
+    ClientID:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RemoveClientIDFromOpenIDConnectProviderResult:
+        :ignore: true
+- :name: RemoveRoleFromInstanceProfile
+  :method: :remove_role_from_instance_profile
+  :inputs:
+    InstanceProfileName:
+    - :string
+    - :required
+    RoleName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RemoveRoleFromInstanceProfileResult:
+        :ignore: true
+- :name: RemoveUserFromGroup
+  :method: :remove_user_from_group
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    UserName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RemoveUserFromGroupResult:
+        :ignore: true
+- :name: ResyncMFADevice
+  :method: :resync_mfa_device
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    SerialNumber:
+    - :string
+    - :required
+    AuthenticationCode1:
+    - :string
+    - :required
+    AuthenticationCode2:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      ResyncMFADeviceResult:
+        :ignore: true
+- :name: SetDefaultPolicyVersion
+  :method: :set_default_policy_version
+  :inputs:
+    PolicyArn:
+    - :string
+    - :required
+    VersionId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      SetDefaultPolicyVersionResult:
+        :ignore: true
+- :name: UpdateAccessKey
+  :method: :update_access_key
+  :inputs:
+    UserName:
+    - :string
+    AccessKeyId:
+    - :string
+    - :required
+    Status:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateAccessKeyResult:
+        :ignore: true
+- :name: UpdateAccountPasswordPolicy
+  :method: :update_account_password_policy
+  :inputs:
+    MinimumPasswordLength:
+    - :integer
+    RequireSymbols:
+    - :boolean
+    RequireNumbers:
+    - :boolean
+    RequireUppercaseCharacters:
+    - :boolean
+    RequireLowercaseCharacters:
+    - :boolean
+    AllowUsersToChangePassword:
+    - :boolean
+    MaxPasswordAge:
+    - :integer
+    PasswordReusePrevention:
+    - :integer
+    HardExpiry:
+    - :boolean
+  :outputs:
+    :children:
+      UpdateAccountPasswordPolicyResult:
+        :ignore: true
+- :name: UpdateAssumeRolePolicy
+  :method: :update_assume_role_policy
+  :inputs:
+    RoleName:
+    - :string
+    - :required
+    PolicyDocument:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateAssumeRolePolicyResult:
+        :ignore: true
+- :name: UpdateGroup
+  :method: :update_group
+  :inputs:
+    GroupName:
+    - :string
+    - :required
+    NewPath:
+    - :string
+    NewGroupName:
+    - :string
+  :outputs:
+    :children:
+      UpdateGroupResult:
+        :ignore: true
+- :name: UpdateLoginProfile
+  :method: :update_login_profile
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    Password:
+    - :string
+    PasswordResetRequired:
+    - :boolean
+  :outputs:
+    :children:
+      UpdateLoginProfileResult:
+        :ignore: true
+- :name: UpdateOpenIDConnectProviderThumbprint
+  :method: :update_open_id_connect_provider_thumbprint
+  :inputs:
+    OpenIDConnectProviderArn:
+    - :string
+    - :required
+    ThumbprintList:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateOpenIDConnectProviderThumbprintResult:
+        :ignore: true
+- :name: UpdateSAMLProvider
+  :method: :update_saml_provider
+  :inputs:
+    SAMLMetadataDocument:
+    - :string
+    - :required
+    SAMLProviderArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateSAMLProviderResult:
+        :ignore: true
+- :name: UpdateServerCertificate
+  :method: :update_server_certificate
+  :inputs:
+    ServerCertificateName:
+    - :string
+    - :required
+    NewPath:
+    - :string
+    NewServerCertificateName:
+    - :string
+  :outputs:
+    :children:
+      UpdateServerCertificateResult:
+        :ignore: true
+- :name: UpdateSigningCertificate
+  :method: :update_signing_certificate
+  :inputs:
+    UserName:
+    - :string
+    CertificateId:
+    - :string
+    - :required
+    Status:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateSigningCertificateResult:
+        :ignore: true
+- :name: UpdateUser
+  :method: :update_user
+  :inputs:
+    UserName:
+    - :string
+    - :required
+    NewPath:
+    - :string
+    NewUserName:
+    - :string
+  :outputs:
+    :children:
+      UpdateUserResult:
+        :ignore: true
+- :name: UploadServerCertificate
+  :method: :upload_server_certificate
+  :inputs:
+    Path:
+    - :string
+    ServerCertificateName:
+    - :string
+    - :required
+    CertificateBody:
+    - :string
+    - :required
+    PrivateKey:
+    - :string
+    - :required
+    CertificateChain:
+    - :string
+  :outputs:
+    :children:
+      UploadServerCertificateResult:
+        :ignore: true
+        :children:
+          ServerCertificateMetadata:
+            :children:
+              UploadDate:
+                :type: :time
+              Expiration:
+                :type: :time
+- :name: UploadSigningCertificate
+  :method: :upload_signing_certificate
+  :inputs:
+    UserName:
+    - :string
+    CertificateBody:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UploadSigningCertificateResult:
+        :ignore: true
+        :children:
+          Certificate:
+            :children:
+              UploadDate:
+                :type: :time

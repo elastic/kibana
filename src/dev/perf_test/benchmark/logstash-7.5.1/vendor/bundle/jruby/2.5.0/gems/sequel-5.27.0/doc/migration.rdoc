@@ -1,0 +1,639 @@
+= Migrations
+
+This guide is based on http://guides.rubyonrails.org/migrations.html
+
+== Overview
+
+Migrations make it easy to alter your database's schema in a systematic manner.
+They make it easier to coordinate with other developers and make sure that
+all developers are using the same database schema.
+
+Migrations are optional, you don't have to use them.  You can always just
+create the necessary database structure manually using Sequel's schema
+modification methods or another database tool.  However, if you are dealing
+with other developers, you'll have to send them all of the changes you are
+making.  Even if you aren't dealing with other developers, you generally have
+to make the schema changes in 3 places (development, testing, and
+production), and it's probably easier to use the migrations system to apply
+the schema changes than it is to keep track of the changes manually and
+execute them manually at the appropriate time.
+
+Sequel tracks which migrations you have already run, so to apply migrations
+you generally need to run Sequel's migrator with <tt>bin/sequel -m</tt>:
+
+  sequel -m path/to/migrations postgres://host/database
+
+Migrations in Sequel use a DSL via the <tt>Sequel.migration</tt>
+method, and inside the DSL, use the <tt>Sequel::Database</tt> schema
+modification methods such as +create_table+ and +alter_table+.
+See the {schema modification guide}[rdoc-ref:doc/schema_modification.rdoc]
+for details on the schema modification methods you can use.
+
+== A Basic Migration
+
+Here is a fairly basic Sequel migration:
+
+  Sequel.migration do
+    up do
+      create_table(:artists) do
+        primary_key :id
+        String :name, null: false
+      end
+    end
+
+    down do
+      drop_table(:artists)
+    end
+  end
+
+This migration has an +up+ block which adds an artist table with an integer primary key named id,
+and a varchar or text column (depending on the database) named +name+ that doesn't accept +NULL+ values.
+Migrations should include both up and +down+ blocks, with the +down+ block reversing
+the change made by up.  However, if you never need to be able to migrate down,
+you can leave out the +down+ block.  In this case, the +down+ block just reverses the changes made by up,
+dropping the table.
+
+You can simplify the migration given above by using a reversible migration with a +change+
+block:
+
+  Sequel.migration do
+    change do
+      create_table(:artists) do
+        primary_key :id
+        String :name, null: false
+      end
+    end
+  end
+
+The +change+ block acts exactly like an +up+ block.  The only difference is that
+it will attempt to create a +down+ block for you, assuming that it knows how to
+reverse the given migration.  The +change+ block can usually correctly reverse
+the following methods:
+
+* +create_table+
+* +create_join_table+
+* +create_view+
+* +add_column+
+* +add_index+
+* +rename_column+
+* +rename_table+
+* +alter_table+ (supporting the following methods in the +alter_table+ block):
+  * +add_column+
+  * +add_constraint+
+  * +add_foreign_key+ (with a symbol, not an array)
+  * +add_primary_key+ (with a symbol, not an array)
+  * +add_index+
+  * +add_full_text_index+
+  * +add_spatial_index+
+  * +rename_column+
+
+If you use any other methods, you should create your own +down+ block.
+
+In normal usage, when Sequel's migrator runs, it runs the +up+ blocks for all
+migrations that have not yet been applied.  However, you can use the <tt>-M</tt>
+switch to specify the version to which to migrate, and if it is lower than the
+current version, Sequel will run the +down+ block on the appropriate migrations.
+
+You are not limited to creating tables inside a migration, you can alter existing tables
+as well as modify data.  Let's say your artist database originally only included artists
+from Sacramento, CA, USA, but now you want to branch out and include artists in any city:
+
+  Sequel.migration do
+    up do
+      add_column :artists, :location, String
+      from(:artists).update(location: 'Sacramento')
+    end
+
+    down do
+      drop_column :artists, :location
+    end
+  end
+
+This migration adds a +location+ column to the +artists+ table, and sets the +location+ column
+to <tt>'Sacramento'</tt> for all existing artists.  It doesn't use a default on the column,
+because future artists should not be assumed to come from Sacramento.  In the +down+ block, it
+just drops the +location+ column from the +artists+ table, reversing the actions of the up
+block.
+
+Note that when updating the +artists+ table in the update, a plain dataset is used, <tt>from(:artists)</tt>.
+This may look a little strange, but you need to be aware that inside an up or +down+ block in a migration,
+self always refers to the <tt>Sequel::Database</tt> object that the migration is being applied to.
+Since <tt>Database#from</tt> creates datasets, using <tt>from(:artists)</tt> inside the +up+ block creates
+a dataset on the database representing all columns in the +artists+ table, and updates it to set the
++location+ column to <tt>'Sacramento'</tt>.  You should avoid referencing the <tt>Sequel::Database</tt>
+object directly in your migration, and always use self to reference it, otherwise you may run into problems.
+
+== The +migration+ extension
+
+The migration code is not technically part of the core of Sequel.  It's not loaded by default as it
+is only useful in specific cases.  It is one of the extensions that ship with Sequel, which receive the same
+level of support as Sequel's core.
+
+If you want to play with Sequel's migration tools without using the <tt>bin/sequel</tt> tool, you
+need to load the migration extension manually:
+
+  Sequel.extension :migration
+
+== Schema methods
+
+Migrations themselves do not contain any schema modification methods, but they make it easy to call
+any of the <tt>Sequel::Database</tt> modification methods, of which there are many.  The main
+ones are +create_table+ and +alter_table+, but Sequel also comes with numerous other schema
+modification methods, most of which are shortcuts for +alter_table+ (all of these methods are
+described in more detail in the {schema modification guide}[rdoc-ref:doc/schema_modification.rdoc]):
+
+* add_column
+* add_index
+* create_view
+* drop_column
+* drop_index
+* drop_table
+* drop_view
+* rename_table
+* rename_column
+* set_column_default
+* set_column_type
+
+These methods handle the vast majority of cross database schema modification SQL.  If you
+need to drop down to SQL to execute some database specific code, you can use the +run+
+method:
+
+  Sequel.migration do
+    up{run 'CREATE TRIGGER ...'}
+    down{run 'DROP TRIGGER ...'}
+  end
+
+In this case, we are using { and } instead of do and end to define the blocks. Just as
+before, the +run+ methods inside the blocks are called on the +Database+ object,
+which just executes the code on the underlying database.
+
+== Errors when running migrations
+
+Sequel attempts to run migrations inside of a transaction if the database supports
+transactional DDL statements.  On the databases that don't support transactional DDL
+statements, if there is an error while running a migration, it will not rollback the
+previous schema changes made by the migration.  In that case, you will
+need to update the database by hand.
+
+It's recommended to always run migrations on a test database and ensure they work
+before running them on any production database.
+
+== Transactions
+
+You can manually specify to use transactions on a per migration basis.  For example,
+if you want to force transaction use for a particular migration, call the transaction
+method in the Sequel.migration block:
+
+  Sequel.migration do
+    transaction
+    change do
+      # ...
+    end
+  end
+
+Likewise, you can disable transaction use via no_transaction:
+
+  Sequel.migration do
+    no_transaction
+    change do
+      # ...
+    end
+  end
+
+This is necessary in some cases, such as when attempting to use CREATE INDEX CONCURRENTLY
+on PostgreSQL (which supports transactional schema, but not that statement inside a
+transaction).
+
+You can also override the transactions setting at the migrator level, either by forcing
+transactions even if no_transaction is set, or by disabling transactions all together:
+
+  # Force transaction use
+  Sequel::Migrator.run(DB, '/path/to/migrations/dir', :use_transactions=>true)
+
+  # Disable use of transactions
+  Sequel::Migrator.run(DB, '/path/to/migrations/dir', :use_transactions=>false)
+
+== Migration files
+
+While you can create migration objects yourself and apply them manually, most of the
+benefit to using migrations come from using Sequel's +Migrator+, which is what the
+<tt>bin/sequel -m</tt> switch does.  Sequel's +Migrator+ expects that each migration
+will be in a separate file in a specific directory.  The <tt>-m</tt> switch requires an
+argument be specified that is the path to the directory containing the migration files.
+For example:
+
+  sequel -m db/migrations postgres://localhost/sequel_test
+
+will look in the <tt>db/migrations</tt> folder relative to the current directory,
+and run unapplied migrations on the PostgreSQL database sequel_test running on localhost.
+
+== Two separate migrators
+
+Sequel actually ships with two separate migrators.  One is the +IntegerMigrator+, the other is
+the +TimestampMigrator+.  They both have plusses and minuses:
+
+=== +IntegerMigrator+
+
+* Simpler, uses migration versions starting with 1
+* Doesn't allow duplicate migrations
+* Doesn't allow missing migrations by default
+* Just stores the version of the last migration run
+* Good for single developer or small teams with close communication
+* Lower risk of undetected conflicting migrations
+* Requires manual merging of simultaneous migrations
+
+=== +TimeStampMigrator+
+
+* More complex, uses migration versions where the version should represent a timestamp
+* Allows duplicate migrations (since you could have multiple in a given second)
+* Allows missing migrations (since you obviously don't have one every second)
+* Stores the file names of all applied migrations
+* Good for large teams without close communication
+* Higher risk of undetected conflicting migrations
+* Does not require manual merging of simultaneous migrations
+
+=== Filenames
+
+In order for migration files to work with the Sequel, they must be specified as follows:
+
+  version_name.rb
+
+where <tt>version</tt> is an integer and <tt>name</tt> is a string which should be a very brief
+description of what the migration does.  Each migration class should contain 1 and only 1
+call to <tt>Sequel.migration</tt>.
+
+=== +IntegerMigrator+ Filenames
+
+These are valid migration names for the +IntegerMigrator+:
+
+  1_create_artists.rb
+  2_add_artist_location.rb
+
+The only problem with this naming format is that if you have more than 9 migrations, the 10th
+one will look a bit odd:
+
+  1_create_artists.rb
+  2_add_artist_location.rb
+  ...
+  9_do_something.rb
+  10_do_something_else.rb
+
+For this reasons, it's often best to start with 001 instead of 1, as that means you don't need
+to worry about that issue until the 1000th migration:
+
+  001_create_artists.rb
+  002_add_artist_location.rb
+  ...
+  009_do_something.rb
+  010_do_something_else.rb
+
+Migrations start at 1, not 0.  The migration version number 0
+is important though, as it is used to mean that all migrations should be unapplied (i.e. all
++down+ blocks run).  In Sequel, you can do that with:
+
+  sequel -m db/migrations -M 0 postgres://localhost/sequel_test
+
+=== +TimestampMigrator+ Filenames
+
+With the +TimestampMigrator+, the version integer should represent a timestamp, though this isn't strictly
+required.
+
+For example, for <tt>5/10/2010 12:00:00pm</tt>, you could use any of the following formats:
+
+  # Date
+  20100510_create_artists.rb
+
+  # Date and Time
+  20100510120000_create_artists.rb
+
+  # Unix Epoch Time Integer
+  1273518000_create_artists.rb
+
+The important thing is that all migration files should be in the same format, otherwise when you
+update, it'll be difficult to make sure migrations are applied in the correct order, as well as
+be difficult to unapply some the affected migrations correctly.
+
+The +TimestampMigrator+ will be used if any filename in the migrations directory has a version
+greater than 20000101.  Otherwise, the +IntegerMigrator+ will be used.
+
+You can force the use of the +TimestampMigrator+ in the API by calling TimestampMigrator.apply
+instead of Migrator.apply.
+
+=== How to choose
+
+Basically, unless you need the features provided by the +TimestampMigrator+, stick with the
++IntegerMigrator+, as it is simpler and makes it easier to detect possible errors.
+
+For a single developer, the +TimestampMigrator+ has no real benefits, so I would always recommend
+the +IntegerMigrator+.  When dealing with multiple developers, it depends on the size of the
+development team, the team's communication level, and the level of overlap between developers.
+
+Let's say Alice works on a new feature that requires a migration at the same time Bob works
+on a separate feature that requires an unrelated migration.  If both developers are committing
+to their own private respositories, when it comes time to merge, the +TimestampMigrator+ will not
+require any manually changes.  That's because Alice will have a migration such as
+<tt>20100512_do_this.rb</tt> and Bob will have one such as <tt>20100512_do_that.rb</tt>.
+
+If the +IntegerMigrator+ was used, Alice would have <tt>34_do_this.rb</tt> and Bob would have
+<tt>34_do_that.rb</tt>.  When the +IntegerMigrator+ was used, it would raise an exception due to
+the duplicate migration version.  The only way to fix it would be to renumber one of the two
+migrations, and have the affected developer manually modify their database.
+
+So for unrelated migrations, the +TimestampMigrator+ works fine.  However, let's say that the
+migrations are related, in such a way that if Bob's is run first, Alice's will fail.  In this
+case, the +TimestampMigrator+ would not raise an error when Bob merges Alice's changes, since
+Bob ran his migration first.  However, it would raise an error when Alice runs Bob's migration,
+and could leave the database in an inconsistent state if the database doesn't support transactional
+schema changes.
+
+With the +TimestampMigrator+, you are trading reliability for convenience.  That's possibly a valid
+trade, especially if simultaneous related schema changes by separate developers are unlikely, but
+you should give it some thought before using it.
+
+== Ignoring missing migrations
+
+In some cases, you may want to allow a migration in the database that does not exist in the filesystem (deploying to an older version of code without running a down migration when deploy auto-migrates, for example). If required, you can pass <tt>allow_missing_migration_files: true</tt> as an option. This will stop errors from being raised if there are migrations in the database that do not exist in the filesystem.
+
+== Modifying existing migrations
+
+Just don't do it.
+
+In general, you should not modify any migration that has been run on the database and been committed to
+the source control repository, unless the migration contains an error that causes data loss.  As long
+as it is possible to undo the migration without losing data, you should just add another migration
+that undoes the actions of the previous bad migration, and does the correct action afterward.
+
+The main problem with modifying existing migrations is that you will have to manually modify any
+databases that ran the migration before it was modified.  If you are a single developer, that may be
+an option, but certainly if you have multiple developers, it's a lot more work.
+
+== Creating a migration
+
+Sequel doesn't come with generators that create migrations for you.  However, creating a migration
+is as simple as creating a file with the appropriate filename in your migrations directory that
+contains a <tt>Sequel.migration</tt> call.  The minimal do-nothing migration is:
+
+  Sequel.migration{}
+
+However, the migrations you write should contain an +up+ block that does something, and a +down+ block that
+reverses the changes made by the +up+ block:
+
+  Sequel.migration do
+    up{}
+    down{}
+  end
+
+or they should use the reversible migrations feature with a +change+ block:
+
+  Sequel.migration do
+    change{}
+  end
+
+== What to put in your migration's +down+ block
+
+It's usually easy to determine what you should put in your migration's +up+ block,
+as it's whatever change you want to make to the database.  The +down+ block is
+less obvious.  In general, it should reverse the changes made by the +up+ block, which means
+it should execute the opposite of what the +up+ block does in the reverse order in which
+the +up+ block does it.  Here's an example where you are switching from having a single
+artist per album to multiple artists per album:
+
+  Sequel.migration do
+    up do
+      # Create albums_artists table
+      create_join_table(album_id: :albums, artist_id: :artists)
+
+      # Insert one row in the albums_artists table
+      # for each row in the albums table where there
+      # is an associated artist
+      from(:albums_artists).insert([:album_id, :artist_id],
+       from(:albums).select(:id, :artist_id).exclude(artist_id: nil))
+
+      # Drop the now unnecesssary column from the albums table
+      drop_column :albums, :artist_id
+    end
+    down do
+      # Add the foreign key column back to the artists table
+      alter_table(:albums){add_foreign_key :artist_id, :artists}
+
+      # If possible, associate each album with one of the artists
+      # it was associated with.  This loses information, but
+      # there's no way around that.
+      from(:albums).update(artist_id: from(:albums_artists).
+        select{max(artist_id)}.
+        where(album_id: Sequel[:albums][:id])
+      )
+
+      # Drop the albums_artists table
+      drop_join_table(album_id: :albums, artist_id: :artists)
+    end
+  end
+
+Note that the operations performed in the +down+ block are performed in the
+reverse order of how they are performed in the +up+ block.  Also note how it
+isn't always possible to reverse exactly what was done in the +up+ block.  You
+should try to do so as much as possible, but if you can't, you may want to have
+your +down+ block raise a <tt>Sequel::Error</tt> exception saying why the
+migration cannot be reverted.
+
+== Running migrations
+
+You can run migrations using the +sequel+ command line program that
+comes with Sequel.  If you use the <tt>-m</tt> switch, +sequel+ will
+run the migrator instead of giving you an IRB session.  The <tt>-m</tt>
+switch requires an argument that should be a path to a directory of migration
+files:
+
+  sequel -m relative/path/to/migrations postgres://host/database
+  sequel -m /absolute/path/to/migrations postgres://host/database
+
+If you do not provide a <tt>-M</tt> switch, +sequel+ will migrate to the latest
+version in the directory.  If you provide a <tt>-M</tt> switch, it should specify
+an integer version to which to migrate.
+
+  # Migrate all the way down
+  sequel -m db/migrations -M 0 postgres://host/database
+
+  # Migrate to version 10 (IntegerMigrator style migrations)
+  sequel -m db/migrations -M 10 postgres://host/database
+
+  # Migrate to version 20100510 (TimestampMigrator migrations using YYYYMMDD)
+  sequel -m db/migrations -M 20100510 postgres://host/database
+
+Whether or not migrations use the +up+ or +down+ block depends on the version
+to which you are migrating.  If you don't provide a <tt>-M</tt> switch, all
+unapplied migrations will be migrated up.  If you provide a <tt>-M</tt>, it will
+depend on which migrations that have been applied.  Applied migrations greater
+than that version will be migrated down, while unapplied migrations less than
+or equal to that version will be migrated up.
+
+== Running migrations from a Rake task
+
+You can also incorporate migrations into a Rakefile:
+
+  namespace :db do
+    desc "Run migrations"
+    task :migrate, [:version] do |t, args|
+      require "sequel/core"
+      Sequel.extension :migration
+      version = args[:version].to_i if args[:version]
+      Sequel.connect(ENV.fetch("DATABASE_URL")) do |db|
+        Sequel::Migrator.run(db, "db/migrations", target: version)
+      end
+    end
+  end
+
+To migrate to the latest version, run:
+
+  rake db:migrate
+
+This Rake task takes an optional argument specifying the target
+version. To migrate to version 42, run:
+
+  rake db:migrate[42]
+
+== Verbose migrations
+
+By default, <tt>sequel -m</tt> operates as a well behaved command line utility
+should, printing out nothing if there is no error.  If you want to see the SQL
+being executed during a migration, as well as the amount of time that each
+migration takes, you can use the <tt>-E</tt> option to +sequel+ to set up a
++Database+ logger that logs to +STDOUT+.  You can also log that same output to
+a file using the <tt>-l</tt> option with a log file name.
+
+If you want to include a logger in the rake task above, add a +:logger+ option
+when calling Sequel.connect:
+
+  require "logger"
+  Sequel.connect(ENV.fetch("DATABASE_URL"), logger: Logger.new($stderr))
+
+== Using models in your migrations
+
+Just don't do it.
+
+It can be tempting to use models in your migrations, especially since it's easy
+to load them at the same time using the <tt>-L</tt> option to +sequel+.  However,
+this ties your migrations to your models, and makes it so that changes in your
+models can break old migrations.
+
+With Sequel, it should be easy to use plain datasets to accomplish pretty much
+anything you would want to accomplish in a migration.  Even if you have to
+copy some code from a model method into a migration itself, it's better than
+having your migration use models and call model methods.
+
+== Dumping the current schema as a migration
+
+Sequel comes with a +schema_dumper+ extension that dumps the current schema of
+the database as a migration to +STDOUT+ (which you can redirect to a file using
+>).  This is exposed in the +sequel+ command line tool with the <tt>-d</tt> and
+<tt>-D</tt> switches.  <tt>-d</tt> dumps the schema in database independent
+format, while <tt>-D</tt> dumps the schema using a non-portable format, useful
+if you are using nonportable columns such as +inet+ in your database.
+
+Let's say you have an existing database and want to create a migration that
+would recreate the database's schema:
+
+  sequel -d postgres://host/database > db/migrations/001_start.rb
+
+or using a nonportable format:
+
+  sequel -D postgres://host/database > db/migrations/001_start.rb
+
+The main difference between the two is that <tt>-d</tt> will use the type methods
+with the database independent ruby class types, while <tt>-D</tt> will use
+the +column+ method with string types.
+
+Note that Sequel cannot dump constraints other than primary key and possibly
+foreign key constraints.  If you are using database features such
+as constraints or triggers, you should use your database's dump and restore
+programs instead of Sequel's schema dumper.
+
+You can take the migration created by the schema dumper to another computer
+with an empty database, and attempt to recreate the schema using:
+
+  sequel -m db/migrations postgres://host/database
+
+== Checking for Current Migrations
+
+In your application code, you may want to check that you are up to date in
+regards to migrations (i.e. you don't have any unapplied migrations).  Sequel
+offers two separate methods to do that.  The first is Sequel::Migrator.check_current.
+This method raises an exception if there are outstanding migrations that need to
+be run.  The second is Sequel::Migrator.is_current?, which returns true if there
+are no outstanding migrations, and false if there are outstanding migrations.
+
+If you want to ensure that your application code is up to date, you may want to
+add the following code after connecting to your database:
+
+  Sequel.extension :migration
+  Sequel::Migrator.check_current(DB, '/path/to/migrations')
+
+This will cause your application to raise an error when you start it if you have
+any outstanding migrations.
+
+== Old-style migration classes
+
+Before the <tt>Sequel.migration</tt> DSL was introduced, Sequel used classes
+for Migrations:
+
+  Class.new(Sequel::Migration) do
+    def up
+    end
+    def down
+    end
+  end
+
+or:
+
+  class DoSomething < Sequel::Migration
+    def up
+    end
+    def down
+    end
+  end
+
+This usage is discouraged in new code, but will continue to be supported indefinitely.
+It is not recommended to convert old-style migration classes to the <tt>Sequel.migration</tt>
+DSL, but it is recommended to use the <tt>Sequel.migration</tt> DSL for all new migrations.
+
+== Database-specific migrations
+
+While not a recommended practice, it is sometimes necessary to have parts of migrations be
+database-specific .  You can use the Sequel::Database#database_type method to check which
+database the migration is being run on, and operate accordingly:
+
+  Sequel.migration do
+    up do
+      if database_type == :mysql
+        run 'MySQL specific code'
+      else
+        run 'Generic SQL code'
+      end
+    end
+  
+    down do
+      if database_type == :mysql
+        run 'MySQL specific code'
+      else
+        run 'Generic SQL code'
+      end
+    end
+  end
+
+== Using Database Extensions in Migrations
+
+If you need to use database extensions in migrations (e.g. +:pg_enum+), you should load the extension in the up or down block as appropriate.
+
+  Sequel.migration do
+    up do
+      extension :pg_enum
+
+      # migration here
+    end
+
+    down do
+      extension :pg_enum
+
+      # migration here
+    end
+  end

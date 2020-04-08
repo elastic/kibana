@@ -1,0 +1,116 @@
+= New Features
+
+* Sequel::Model::Model() has been added, which allows for
+  Sequel::Model() like behavior where the base class used is a
+  subclass of Sequel::Model.  To make it easier to use,
+  Sequel::Model.def_Model has also been added, which takes a module
+  and adds a Model() method to the module that calls Model() on the
+  receiver.
+
+  A :class_namespace association option has been added to make it
+  possible to set a default namespace for the :class option if given
+  as a symbol or string.
+
+  Sequel::Model.Model.cache_anonymous_models has been added and
+  controls whether to cache anonymous model subclasses created by
+  Sequel::Model::Model() on a per-class basis.
+
+  These changes are designed to make it easier to use namespaced
+  models, for example:
+
+    module Foo
+       Model = Class.new(Sequel::Model)
+       Model.def_Model(self)
+       DB = Model.db = Sequel.connect(ENV['FOO_DATABASE_URL'])
+       Model.plugin :prepared_statements
+       Model.default_association_options[:class_namespace] = 'Foo'
+
+       class Bar < Model
+         # Uses Foo::DB[:bars] as dataset
+
+         # Implicitly uses Foo::Baz as associated class
+         one_to_many :bazes
+
+         # Uses Foo::Baz due to :class_namespace option
+         one_to_many :oldest_bazes, :class=>:Baz, :order=>:id
+       end
+
+       class Baz < Model(:my_baz)
+         # Uses Foo::DB[:my_baz] as dataset
+
+         # Implicitly uses Foo::Bar as associated class
+         one_to_many :bars
+
+         # Uses Foo::Bar due to :class_namespace option
+         one_to_many :oldest_bars, :class=>:Bar, :order=>:id
+       end
+     end
+
+* A string_agg extension has been added for aggregate string
+  concatentation support on PostgreSQL 9+, SQLAnywhere 12+,
+  Oracle11g+, DB 9.7+, MySQL, HSQLDB, H2, and CUBRID:
+
+    DB.extension :string_agg
+    ds = DB[:table]
+    ds.get(Sequel.string_agg(:c))             # ',' default separator
+    ds.get(Sequel.string_agg(:c, ' - '))      # custom separator
+    ds.get(Sequel.string_agg(:c).order(:bar)) # force order
+    ds.get(Sequel.string_agg(:c).distinct)    # remove duplicates
+
+* A connection_expiration extension has been added, for automatically
+  removing connections from the connection pool after they have been
+  open for a given amount of time (4 hours by default).
+
+* Support for <, <=, >, and >= operator validations when using integer
+  and string arguments has been added to the constraint_validations
+  extension and plugin.
+
+* Sequel::SQL::Function#order has been added to support ordered
+  aggregate functions:
+
+    Sequel.function(:foo, :bar).order(:baz)
+    # foo(bar ORDER BY baz)
+
+= Other Improvements
+
+* The validates_operator validation in validation_helpers now
+  considers nil values as invalid unless :allow_nil or a similar
+  option is used.  Previously, using validates_operator with a nil
+  value would probably raise a NoMethodError.  This makes
+  validates_operator more similar to other validations.
+
+* The threaded connection pools no longer hold the pool mutex when
+  disconnecting connections, which is useful if the driver blocks
+  when disconnecting connections.
+
+* The connection_validator extension no longer holds a reference
+  to connections that have been disconnected.
+
+* The connection_validator extension no longer overwrites the
+  connection_validation_timeout if loaded a second time.
+
+* Sequel now closes cursors as soon as it is done using them in the
+  oracle adapter, instead of waiting for GC to clean them up.
+
+* Sequel now handles disconnect errors that occur when literalizing
+  strings in the mysql2 and postgres adapters.
+
+= Backwards Compatibility
+
+* Using the Bignum class as a generic type is now deprecated.  As
+  announced in the 4.35.0 release notes, ruby 2.4 is unifying the
+  Fixnum and Bignum classes into Integer, which results in the
+  behavior of the Bignum class changing.  4.35.0 added support for
+  using the :Bignum symbol as a generic 64-bit integer type, and
+  Sequel users now need to switch to that to avoid the deprecation
+  warning.
+
+  Sequel 4.41.0 (to be released in December), will drop support
+  for using the Bignum class as a generic type.  This is being done
+  before the release of ruby 2.4 to hopefully make it unlikely that
+  users will be subject to a behavior changes when upgrading ruby
+  versions.
+
+  Related to this change, external adapters need to switch from
+  overriding Database#type_literal_generic_bignum to 
+  Database#type_literal_generic_bignum_symbol.

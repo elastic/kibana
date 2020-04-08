@@ -1,0 +1,10 @@
+{
+  "title": "Select Database Query Combo [Azure Monitor][SQL DB]",
+  "visState": "{\"title\":\"Select Database Query Combo [Azure Monitor][SQL DB]\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1519014869989\",\"indexPattern\":\"azure-*\",\"fieldName\":\"azure.db_unique_id.keyword\",\"label\":\"Database\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":20,\"order\":\"desc\"}},{\"id\":\"1517598395667\",\"indexPattern\":\"azure-*\",\"fieldName\":\"sql_diagnostics_QueryStoreRuntimeStatistics_properties.query_id\",\"label\":\"Query ID\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":false,\"size\":20,\"order\":\"desc\"}}],\"updateFiltersOnChange\":true,\"useTimeFilter\":false},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

@@ -1,0 +1,37 @@
+= New Features
+
+* Overriding the :limit and :eager_limit_strategy association options
+  can now be done on a per-call basis when eager loading, by using an
+  eager block callback and setting the :eager_limit or
+  :eager_limit_strategy dataset options. Example:
+
+    Album.eager(:tracks=>proc{|ds| ds.clone(:eager_limit=>5)}).all
+
+* Dataset#insert_conflict and #insert_ignore have been added on
+  SQLite, adding support for the INSERT OR ... SQL syntax:
+
+    DB[:table].insert_ignore.insert(:a=>1, :b=>2)
+    # INSERT OR IGNORE INTO TABLE (a, b) VALUES (1, 2)  
+
+    DB[:table].insert_conflict(:replace).insert(:a=>1, :b=>2)
+    # INSERT OR REPLACE INTO TABLE (a, b) VALUES (1, 2)
+
+* An identifier_columns plugin has been added, which allows
+  Sequel::Model#save to work when column names contain double
+  underscores.
+
+= Other Improvements
+
+* IPv6 addresses can now be used in connection URLs when using
+  ruby 1.9.3+.
+
+* The :db_type entries in column schema hashes now include sizes
+  for string and decimal types on DB2 and when using the jdbc
+  adapter's generic schema parsing.
+
+* Database#row_type in the pg_row extension now handles different
+  formats of specifying schema qualified types.  So a row type
+  registered via :schema__type can be found using
+  Sequel.qualify(:schema, :type).
+
+* Another disconnect error is recognized in the tinytds adapter.

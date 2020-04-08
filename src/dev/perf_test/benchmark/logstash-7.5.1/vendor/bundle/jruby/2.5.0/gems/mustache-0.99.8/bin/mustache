@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+
+require 'yaml'
+require 'optparse'
+
+require 'mustache'
+require 'mustache/version'
+
+class Mustache
+  class CLI
+    # Return a structure describing the options.
+    def self.parse_options(args)
+      opts = OptionParser.new do |opts|
+        opts.banner = "Usage: mustache [-c] [-t] [-r library] FILE ..."
+
+        opts.separator " "
+
+        opts.separator "Examples:"
+        opts.separator "  $ mustache data.yml template.mustache"
+        opts.separator "  $ cat data.yml | mustache - template.mustache"
+        opts.separator "  $ mustache -c template.mustache"
+
+        opts.separator " "
+
+        opts.separator "  See mustache(1) or " +
+          "http://mustache.github.com/mustache.1.html"
+        opts.separator "  for more details."
+
+        opts.separator " "
+        opts.separator "Options:"
+
+        opts.on("-c", "--compile FILE",
+          "Print the compiled Ruby for a given template.") do |file|
+          puts Mustache::Template.new(File.read(file)).compile
+          exit
+        end
+
+        opts.on("-t", "--tokens FILE",
+          "Print the tokenized form of a given template.") do |file|
+          require 'pp'
+          pp Mustache::Template.new(File.read(file)).tokens
+          exit
+        end
+
+        opts.on('-r', '--require LIB', 'Require a Ruby library before running.') do |lib|
+          require lib
+        end
+
+        opts.separator "Common Options:"
+
+        opts.on("-v", "--version", "Print the version") do |v|
+          puts "Mustache v#{Mustache::Version}"
+          exit
+        end
+
+        opts.on_tail("-h", "--help", "Show this message") do
+          puts opts
+          exit
+        end
+      end
+
+      opts.separator ""
+
+      opts.parse!(args)
+    end
+
+    # Does the dirty work of reading files from the command line then
+    # processing them. The meat of this script, if you will.
+    def self.process_files(input_files)
+      doc = input_files.file.read
+
+      yaml = nil
+      begin
+        yaml = YAML.load_stream(doc)
+      rescue
+        abort "Unable to parse yaml!"
+      end
+
+      if yaml.nil?
+        puts Mustache.render(doc)
+      else
+        template = input_files.skip.file.read
+
+        puts Mustache.render template, yaml.compact.reduce(&:merge)
+      end
+    end
+  end
+end
+
+# Help is the default.
+ARGV << '-h' if ARGV.empty? && $stdin.tty?
+
+# Process options
+Mustache::CLI.parse_options(ARGV) if $stdin.tty?
+
+# Still here - process rest of ARGF
+Mustache::CLI.process_files(ARGF)
+

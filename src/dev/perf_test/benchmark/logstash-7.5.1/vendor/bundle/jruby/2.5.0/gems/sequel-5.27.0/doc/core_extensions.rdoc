@@ -1,0 +1,405 @@
+= Sequel's Core Extensions
+
+== Background
+
+Historically, Sequel added methods to many of the core classes, and usage of those methods was the primary and recommended way to use Sequel.  For example:
+
+  DB[:table].select(:column.cast(Integer)). # Symbol#cast 
+    where(:column.like('A%')).              # Symbol#like
+    order({1=>2}.case(0, :a))               # Hash#case
+
+While Sequel never overrode any methods defined by ruby, it is possible that other libraries could define the same methods that Sequel defines, which could cause problems.  Also, some rubyists do not like using libraries that add methods to the core classes.
+
+Alternatives for the core extension methods were added to Sequel, so the query above could be written as:
+
+  DB[:table].select(Sequel.cast(:column, Integer)).
+    where(Sequel.like(:column, 'A%')).
+    order(Sequel.case({1=>2}, 0, :a))
+
+or with virtual rows:
+
+  DB[:table].select{column.as(Integer)}.
+    where{column.like('A%')}.
+    order(Sequel.case({1=>2}, 0, :a))
+
+Almost all of the core extension methods have a replacement on the Sequel module.  So it is now up to the user which style to use.  Using the methods on the Sequel module results in slightly more verbose code, but allows the code to work without modifications to the core classes.
+
+== Issues
+
+There is no recommendation on whether the core_extensions should be used or not.  It is very rare that any of the methods added by core_extensions actually causes a problem, but some of them can make it more difficult to find other problems.  For example, if you type:
+
+  do_something if value | other_value
+
+while meaning to type:
+
+  do_something if value || other_value
+
+and value is a Symbol, instead of a NoMethodError being raised because Symbol#| is not implemented by default, <tt>value | other_value</tt> will return a Sequel expression object, which if will evaluate as true, and do_something will be called.
+
+== Usage
+
+All of Sequel's extensions to the core classes are stored in Sequel's core_extensions extension, which you can load via:
+
+  Sequel.extension :core_extensions
+
+== No Internal Dependency
+
+Sequel has no internal dependency on the core extensions.  This includes Sequel's core, Sequel::Model, and all plugins and extensions that ship with Sequel.  However, it is possible that external plugins and extensions will depend on the core extensions.  Such plugins and extensions should be updated so that they no longer depend on the core extensions.
+
+== Refinements
+
+Most of the these extensions can be added on a per-file basis using refinements (if you are using Ruby 2.0+).  To use refinements, first load them:
+
+  Sequel.extension :core_refinements
+
+Then for each file where you want to use the refinements:
+
+  using Sequel::CoreRefinements
+
+== Core Extension Methods
+
+This section will briefly describe all of the methods added to the core classes, and what the alternative method is that doesn't require the core extensions.
+
+=== Symbol & String
+
+==== as
+
+Symbol#as and String#as return Sequel aliased expressions using the provided alias:
+
+  :a.as(:b)  # SQL: a AS b
+  'a'.as(:b) # SQL: 'a' AS b
+
+Alternatives:
+
+  Sequel[:a].as(:b)
+  Sequel.as(:a, :b)
+
+==== cast
+
+Symbol#cast and String#cast return Sequel cast expressions for typecasting in the database:
+
+  :a.cast(Integer)  # SQL: CAST(a AS integer)
+  'a'.cast(Integer) # SQL: CAST('a' AS integer)
+
+Alternatives:
+
+  Sequel[:a].cast(Integer)
+  Sequel.cast(:a, Integer)
+
+==== cast_numeric
+
+Symbol#cast_numeric and String#cast_numeric return Sequel cast expressions for typecasting in the database, defaulting to integers, where the returned expression is treated as an numeric value:
+
+  :a.cast_numeric         # SQL: CAST(a AS integer)
+  'a'.cast_numeric(Float) # SQL: CAST('a' AS double precision)
+
+Alternative:
+
+  Sequel[:a].cast_numeric
+  Sequel.cast_numeric(:a)
+
+==== cast_string
+
+Symbol#cast_string and String#cast_string return Sequel cast expressions for typecasting in the database, defaulting to strings, where the returned expression is treated as a string value:
+
+  :a.cast_string         # SQL: CAST(a AS varchar(255))
+  'a'.cast_string(:text) # SQL: CAST('a' AS text)
+
+Alternatives:
+
+  Sequel[:a].cast_string
+  Sequel.cast_string(:a)
+
+=== Symbol
+
+==== identifier
+
+Symbol#identifier wraps the symbol in an Sequel identifier object.  If symbol splitting is enabled (no longer the default), it also makes sure the symbol will not be split.  If symbol splitting is disabled (the default), there is little reason to use this).
+
+  :column.identifier # SQL: column
+
+Alternatives:
+
+  Sequel[:column]
+  Sequel.identifier(:column)
+
+==== asc
+
+Symbol#asc is used to define an ascending order on a column.  It exists mostly for consistency with #desc, since ascending is the default order:
+
+  :a.asc # SQL: a ASC
+
+Alternatives:
+
+  Sequel[:a].asc
+  Sequel.asc(:a)
+
+==== desc
+
+Symbol#desc is used to defined a descending order on a column.  The returned value is usually passed to one of the dataset order methods.
+
+  :a.desc # SQL: a DESC
+
+Alternatives:
+
+  Sequel[:a].desc
+  Sequel.desc(:a)
+
+==== +, -, *, /
+
+The standard mathematical operators are defined on Symbol, and return a Sequel numeric expression object representing the operation:
+
+    :a + :b # SQL: a + b
+    :a - :b # SQL: a - b
+    :a * :b # SQL: a * b
+    :a / :b # SQL: a / b 
+    :a ** :b # SQL: power(a, b)
+
+Sequel also supports ruby's coercion protocols on symbols (note that this does not work when using refinements):
+
+    1 + :b # SQL: 1 + b
+
+Alternatives:
+
+    Sequel[:a] + :b
+    Sequel[:a] - :b
+    Sequel[:a] * :b
+    Sequel[:a] / :b
+    Sequel[:a] ** :b
+
+    Sequel.+(:a, :b)
+    Sequel.-(:a, :b)
+    Sequel.*(:a, :b)
+    Sequel./(:a, :b)
+    Sequel.**(:a, :b)
+
+==== *
+
+The * operator is overloaded on Symbol such that if it is called with no arguments, it represents a selection of all columns in the table:
+
+  :a.* # SQL: a.*
+
+Alternative:
+
+  Sequel[:a].*
+
+==== qualify
+
+Symbol#qualify qualifies the identifier (e.g. a column) with a another identifier (e.g. a table):
+
+  :column.qualify(:table) # SQL: table.column
+
+Alternative:
+
+  Sequel[:table][:column]
+
+Note the reversed order of the arguments.  For the Symbol#qualify method, the argument is the qualifier, while for Sequel[][], the first [] is the qualifier, and the second [] is the identifier.
+
+==== like
+
+Symbol#like returns a case sensitive LIKE expression between the identifier and the given argument:
+
+  :a.like('b%') # SQL: a LIKE 'b%' ESCAPE '\'
+
+Alternatives:
+
+  Sequel[:a].like('b%')
+  Sequel.like(:a, 'b%')
+
+==== ilike
+
+Symbol#ilike returns a case insensitive LIKE expression between the identifier and the given argument:
+
+  :a.ilike('b%') # SQL: a ILIKE 'b%' ESCAPE '\'
+
+Alternatives:
+
+  Sequel[:a].ilike('b%')
+  Sequel.ilike(:a, 'b%')
+
+==== sql_subscript
+
+Symbol#sql_subscript returns a Sequel expression representing an SQL array access:
+
+  :a.sql_subscript(1) # SQL: a[1]
+
+Alternatives:
+
+  Sequel[:a].sql_subscript(1)
+  Sequel.subscript(:a, 1)
+
+==== extract
+
+Symbol#extract does a datetime part extraction from the receiver:
+
+  :a.extract(:year) # SQL: extract(year FROM a)
+
+Alternatives:
+
+  Sequel[:a].extract(:year)
+  Sequel.extract(:year, :a)
+
+==== sql_boolean, sql_number, sql_string
+
+These Symbol methods are used to force the treating of the object as a specific SQL type, instead of as a general SQL type.  For example:
+
+  :a.sql_boolean + 1  # NoMethodError
+  :a.sql_number << 1  # SQL: a << 1
+  :a.sql_string + 'a' # SQL: a || 'a'
+
+Alternatives:
+
+  Sequel[:a].sql_boolean
+  Sequel[:a].sql_number
+  Sequel[:a].sql_string
+
+==== sql_function
+
+Symbol#sql_function returns an SQL function call expression object:
+
+  :now.sql_function # SQL: now()
+  :sum.sql_function(:a) # SQL: sum(a)
+  :concat.sql_function(:a, :b) # SQL: concat(a, b)
+
+Alternatives:
+
+  Sequel[:sum].function(:a)
+  Sequel.function(:sum, :a)
+
+=== String
+
+==== lit
+
+String#lit creates a literal string, using placeholders if any arguments are given.  Literal strings are not escaped, they are treated as SQL code, not as an SQL string:
+
+  'a'.lit          # SQL: a
+  '"a" = ?'.lit(1) # SQL: "a" = 1
+
+Alternatives:
+
+  Sequel.lit('a')
+  Sequel.lit('a = ?', 1)
+
+==== to_sequel_blob
+
+String#to_sequel_blob returns the string wrapper in Sequel blob object.  Often blobs need to be handled differently than regular strings by the database adapters.
+
+  "a\0".to_sequel_blob # SQL: X'6100'
+
+Alternative:
+
+  Sequel.blob("a\0")
+
+=== Hash, Array, & Symbol
+
+==== ~
+
+Array#~, Hash#~, and Symbol#~ treat the receiver as a conditions specifier, not matching all of the conditions:
+
+  ~{a: 1, b: [2, 3]}       # SQL: a != 1 OR b NOT IN (2, 3)
+  ~[[:a, 1], [:b, [1, 2]]] # SQL: a != 1 OR b NOT IN (1, 2)
+
+Alternatives:
+
+   ~Sequel[a: 1, b: [2, 3]]
+   Sequel.~(a: 1, b: [2, 3])
+
+=== Hash & Array
+
+==== case
+
+Array#case and Hash#case return an SQL CASE expression, where the keys are conditions and the values are results:
+
+  {{a: [2,3]} => 1}.case(0) # SQL: CASE WHEN a IN (2, 3) THEN 1 ELSE 0 END
+  [[{a: [2,3]}, 1]].case(0) # SQL: CASE WHEN a IN (2, 3) THEN 1 ELSE 0 END
+
+Alternative:
+
+  Sequel.case({{a: [2,3]}=>1}, 0)
+
+==== sql_expr
+
+Array#sql_expr and Hash#sql_expr treat the receiver as a conditions specifier, matching all of the conditions in the array.
+
+  {a: 1, b: [2, 3]}.sql_expr     # SQL: a = 1 AND b IN (2, 3)
+  [[:a, 1], [:b, [2, 3]]].sql_expr # SQL: a = 1 AND b IN (2, 3)
+
+Alternative:
+
+  Sequel[a: 1, b: [2, 3]]
+
+==== sql_negate
+
+Array#sql_negate and Hash#sql_negate treat the receiver as a conditions specifier, matching none of the conditions in the array:
+
+  {a: 1, b: [2, 3]}.sql_negate       # SQL: a != 1 AND b NOT IN (2, 3)
+  [[:a, 1], [:b, [2, 3]]].sql_negate # SQL: a != 1 AND b NOT IN (2, 3)
+
+Alternative:
+
+  Sequel.negate(a: 1, b: [2, 3])
+
+==== sql_or
+
+Array#sql_or nd Hash#sql_or treat the receiver as a conditions specifier, matching any of the conditions in the array:
+
+  {a: 1, b: [2, 3]}.sql_or       # SQL: a = 1 OR b IN (2, 3)
+  [[:a, 1], [:b, [2, 3]]].sql_or # SQL: a = 1 OR b IN (2, 3)
+
+Alternative:
+
+  Sequel.or(a: 1, b: [2, 3])
+
+=== Array
+
+==== sql_value_list
+
+Array#sql_value_list wraps the array in an array subclass, which Sequel will always treat as a value list and not a conditions specifier.  By default, Sequel treats arrays of two element arrays as a conditions specifier.
+
+  DB[:a].where('(a, b) IN ?', [[1, 2], [3, 4]])                # SQL: (a, b) IN ((1 = 2) AND (3 = 4))
+  DB[:a].where('(a, b) IN ?', [[1, 2], [3, 4]].sql_value_list) # SQL: (a, b) IN ((1, 2), (3, 4))
+
+Alternative:
+
+  Sequel.value_list([[1, 2], [3, 4]])
+
+==== sql_string_join
+
+Array#sql_string_join joins all of the elements in the array in an SQL string concatentation expression:
+
+  [:a].sql_string_join           # SQL: a
+  [:a, :b].sql_string_join       # SQL: a || b
+  [:a, 'b'].sql_string_join      # SQL: a || 'b'
+  ['a', :b].sql_string_join(' ') # SQL: 'a' || ' ' || b
+
+Alternative:
+
+  Sequel.join(['a', :b], ' ')
+
+=== Hash & Symbol
+
+==== &
+
+Hash#& and Symbol#& return a Sequel boolean expression, matching the condition specified by the receiver and the condition specified by the given argument:
+
+  :a & :b        # SQL: a AND b
+  {a: 1} & :b    # SQL: a = 1 AND b
+  {a: true} & :b # SQL: a IS TRUE AND b
+
+Alternatives:
+
+  Sequel[a: 1] & :b
+  Sequel.&({a: 1}, :b)
+
+==== |
+
+Hash#| returns a Sequel boolean expression, matching the condition specified by the receiver or the condition specified by the given argument:
+
+  :a | :b        # SQL: a OR b
+  {a: 1} | :b    # SQL: a = 1 OR b
+  {a: true} | :b # SQL: a IS TRUE OR b
+
+Alternative:
+
+  Sequel[a: 1] | :b
+  Sequel.|({a: 1}, :b)

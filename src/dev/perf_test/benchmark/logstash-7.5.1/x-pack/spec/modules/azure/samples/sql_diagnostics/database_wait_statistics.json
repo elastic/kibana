@@ -1,0 +1,20 @@
+{
+  "ResourceGroup":"go5rg",
+  "time":"2017-09-15T13:25:50.5770000Z",
+  "LogicalServerName":"go5rS",
+  "SubscriptionId":"741fd6f5-9fb8-462c-97c3-3hf4ch23hc2a",
+  "category":"DatabaseWaitStatistics",
+  "operationName":"DatabaseWaitStatistcsEvent",
+  "properties":{
+    "start_utc_date":"2017-09-15T13:25:50.5770000Z",
+    "end_utc_date":"2017-09-15T13:30:50.5770000Z",
+    "delta_signal_wait_time_ms":111567,
+    "ElasticPoolName":"RecommendedStandardPool1",
+    "wait_type":"SOS_SCHEDULER_YIELD",
+    "DatabaseName":"WorkGO5",
+    "delta_max_wait_time_ms":0,
+    "delta_waiting_tasks_count":5429,
+    "delta_wait_time_ms":111567
+  },
+  "resourceId":"/SUBSCRIPTIONS/741fd6f5-9fb8-462c-97c3-3hf4ch23hc2a/RESOURCEGROUPS/go5rg/PROVIDERS/MICROSOFT.SQL/SERVERS/go5rS/DATABASES/WORKGO5"
+}

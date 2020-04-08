@@ -1,0 +1,1025 @@
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:json_version: '1.1'
+:target_prefix: StorageGateway_20130630.
+:api_version: '2013-06-30'
+:operations:
+- :name: ActivateGateway
+  :method: :activate_gateway
+  :inputs:
+    ActivationKey:
+    - :string
+    - :required
+    GatewayName:
+    - :string
+    - :required
+    GatewayTimezone:
+    - :string
+    - :required
+    GatewayRegion:
+    - :string
+    - :required
+    GatewayType:
+    - :string
+    TapeDriveType:
+    - :string
+    MediumChangerType:
+    - :string
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: AddCache
+  :method: :add_cache
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    DiskIds:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: AddUploadBuffer
+  :method: :add_upload_buffer
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    DiskIds:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: AddWorkingStorage
+  :method: :add_working_storage
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    DiskIds:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: CancelArchival
+  :method: :cancel_archival
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    TapeARN:
+    - :string
+    - :required
+  :outputs:
+    TapeARN:
+      :sym: :tape_arn
+      :type: :string
+- :name: CancelRetrieval
+  :method: :cancel_retrieval
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    TapeARN:
+    - :string
+    - :required
+  :outputs:
+    TapeARN:
+      :sym: :tape_arn
+      :type: :string
+- :name: CreateCachediSCSIVolume
+  :method: :create_cachedi_scsi_volume
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    VolumeSizeInBytes:
+    - :long
+    - :required
+    SnapshotId:
+    - :string
+    TargetName:
+    - :string
+    - :required
+    NetworkInterfaceId:
+    - :string
+    - :required
+    ClientToken:
+    - :string
+    - :required
+  :outputs:
+    VolumeARN:
+      :sym: :volume_arn
+      :type: :string
+    TargetARN:
+      :sym: :target_arn
+      :type: :string
+- :name: CreateSnapshot
+  :method: :create_snapshot
+  :inputs:
+    VolumeARN:
+    - :string
+    - :required
+    SnapshotDescription:
+    - :string
+    - :required
+  :outputs:
+    VolumeARN:
+      :sym: :volume_arn
+      :type: :string
+    SnapshotId:
+      :sym: :snapshot_id
+      :type: :string
+- :name: CreateSnapshotFromVolumeRecoveryPoint
+  :method: :create_snapshot_from_volume_recovery_point
+  :inputs:
+    VolumeARN:
+    - :string
+    - :required
+    SnapshotDescription:
+    - :string
+    - :required
+  :outputs:
+    SnapshotId:
+      :sym: :snapshot_id
+      :type: :string
+    VolumeARN:
+      :sym: :volume_arn
+      :type: :string
+    VolumeRecoveryPointTime:
+      :sym: :volume_recovery_point_time
+      :type: :string
+- :name: CreateStorediSCSIVolume
+  :method: :create_storedi_scsi_volume
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    DiskId:
+    - :string
+    - :required
+    SnapshotId:
+    - :string
+    PreserveExistingData:
+    - :boolean
+    - :required
+    TargetName:
+    - :string
+    - :required
+    NetworkInterfaceId:
+    - :string
+    - :required
+  :outputs:
+    VolumeARN:
+      :sym: :volume_arn
+      :type: :string
+    VolumeSizeInBytes:
+      :sym: :volume_size_in_bytes
+      :type: :integer
+    TargetARN:
+      :sym: :target_arn
+      :type: :string
+- :name: CreateTapes
+  :method: :create_tapes
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    TapeSizeInBytes:
+    - :long
+    - :required
+    ClientToken:
+    - :string
+    - :required
+    NumTapesToCreate:
+    - :integer
+    - :required
+    TapeBarcodePrefix:
+    - :string
+    - :required
+  :outputs:
+    TapeARNs:
+      :sym: :tape_ar_ns
+      :type: :string
+- :name: DeleteBandwidthRateLimit
+  :method: :delete_bandwidth_rate_limit
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    BandwidthType:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: DeleteChapCredentials
+  :method: :delete_chap_credentials
+  :inputs:
+    TargetARN:
+    - :string
+    - :required
+    InitiatorName:
+    - :string
+    - :required
+  :outputs:
+    TargetARN:
+      :sym: :target_arn
+      :type: :string
+    InitiatorName:
+      :sym: :initiator_name
+      :type: :string
+- :name: DeleteGateway
+  :method: :delete_gateway
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: DeleteSnapshotSchedule
+  :method: :delete_snapshot_schedule
+  :inputs:
+    VolumeARN:
+    - :string
+    - :required
+  :outputs:
+    VolumeARN:
+      :sym: :volume_arn
+      :type: :string
+- :name: DeleteTape
+  :method: :delete_tape
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    TapeARN:
+    - :string
+    - :required
+  :outputs:
+    TapeARN:
+      :sym: :tape_arn
+      :type: :string
+- :name: DeleteTapeArchive
+  :method: :delete_tape_archive
+  :inputs:
+    TapeARN:
+    - :string
+    - :required
+  :outputs:
+    TapeARN:
+      :sym: :tape_arn
+      :type: :string
+- :name: DeleteVolume
+  :method: :delete_volume
+  :inputs:
+    VolumeARN:
+    - :string
+    - :required
+  :outputs:
+    VolumeARN:
+      :sym: :volume_arn
+      :type: :string
+- :name: DescribeBandwidthRateLimit
+  :method: :describe_bandwidth_rate_limit
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    AverageUploadRateLimitInBitsPerSec:
+      :sym: :average_upload_rate_limit_in_bits_per_sec
+      :type: :integer
+    AverageDownloadRateLimitInBitsPerSec:
+      :sym: :average_download_rate_limit_in_bits_per_sec
+      :type: :integer
+- :name: DescribeCache
+  :method: :describe_cache
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    DiskIds:
+      :sym: :disk_ids
+      :type: :string
+    CacheAllocatedInBytes:
+      :sym: :cache_allocated_in_bytes
+      :type: :integer
+    CacheUsedPercentage:
+      :sym: :cache_used_percentage
+      :type: :float
+    CacheDirtyPercentage:
+      :sym: :cache_dirty_percentage
+      :type: :float
+    CacheHitPercentage:
+      :sym: :cache_hit_percentage
+      :type: :float
+    CacheMissPercentage:
+      :sym: :cache_miss_percentage
+      :type: :float
+- :name: DescribeCachediSCSIVolumes
+  :method: :describe_cachedi_scsi_volumes
+  :inputs:
+    VolumeARNs:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    CachediSCSIVolumes:
+      :sym: :cachedi_scsi_volumes
+      :type: :hash
+      :members:
+        VolumeARN:
+          :sym: :volume_arn
+          :type: :string
+        VolumeId:
+          :sym: :volume_id
+          :type: :string
+        VolumeType:
+          :sym: :volume_type
+          :type: :string
+        VolumeStatus:
+          :sym: :volume_status
+          :type: :string
+        VolumeSizeInBytes:
+          :sym: :volume_size_in_bytes
+          :type: :integer
+        VolumeProgress:
+          :sym: :volume_progress
+          :type: :float
+        SourceSnapshotId:
+          :sym: :source_snapshot_id
+          :type: :string
+        VolumeiSCSIAttributes:
+          :sym: :volumei_scsi_attributes
+          :type: :hash
+          :members:
+            TargetARN:
+              :sym: :target_arn
+              :type: :string
+            NetworkInterfaceId:
+              :sym: :network_interface_id
+              :type: :string
+            NetworkInterfacePort:
+              :sym: :network_interface_port
+              :type: :integer
+            LunNumber:
+              :sym: :lun_number
+              :type: :integer
+            ChapEnabled:
+              :sym: :chap_enabled
+              :type: :boolean
+- :name: DescribeChapCredentials
+  :method: :describe_chap_credentials
+  :inputs:
+    TargetARN:
+    - :string
+    - :required
+  :outputs:
+    ChapCredentials:
+      :sym: :chap_credentials
+      :type: :hash
+      :members:
+        TargetARN:
+          :sym: :target_arn
+          :type: :string
+        SecretToAuthenticateInitiator:
+          :sym: :secret_to_authenticate_initiator
+          :type: :string
+        InitiatorName:
+          :sym: :initiator_name
+          :type: :string
+        SecretToAuthenticateTarget:
+          :sym: :secret_to_authenticate_target
+          :type: :string
+- :name: DescribeGatewayInformation
+  :method: :describe_gateway_information
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    GatewayId:
+      :sym: :gateway_id
+      :type: :string
+    GatewayTimezone:
+      :sym: :gateway_timezone
+      :type: :string
+    GatewayState:
+      :sym: :gateway_state
+      :type: :string
+    GatewayNetworkInterfaces:
+      :sym: :gateway_network_interfaces
+      :type: :hash
+      :members:
+        Ipv4Address:
+          :sym: :ipv_4_address
+          :type: :string
+        MacAddress:
+          :sym: :mac_address
+          :type: :string
+        Ipv6Address:
+          :sym: :ipv_6_address
+          :type: :string
+    GatewayType:
+      :sym: :gateway_type
+      :type: :string
+    NextUpdateAvailabilityDate:
+      :sym: :next_update_availability_date
+      :type: :string
+- :name: DescribeMaintenanceStartTime
+  :method: :describe_maintenance_start_time
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    HourOfDay:
+      :sym: :hour_of_day
+      :type: :integer
+    MinuteOfHour:
+      :sym: :minute_of_hour
+      :type: :integer
+    DayOfWeek:
+      :sym: :day_of_week
+      :type: :integer
+    Timezone:
+      :sym: :timezone
+      :type: :string
+- :name: DescribeSnapshotSchedule
+  :method: :describe_snapshot_schedule
+  :inputs:
+    VolumeARN:
+    - :string
+    - :required
+  :outputs:
+    VolumeARN:
+      :sym: :volume_arn
+      :type: :string
+    StartAt:
+      :sym: :start_at
+      :type: :integer
+    RecurrenceInHours:
+      :sym: :recurrence_in_hours
+      :type: :integer
+    Description:
+      :sym: :description
+      :type: :string
+    Timezone:
+      :sym: :timezone
+      :type: :string
+- :name: DescribeStorediSCSIVolumes
+  :method: :describe_storedi_scsi_volumes
+  :inputs:
+    VolumeARNs:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    StorediSCSIVolumes:
+      :sym: :storedi_scsi_volumes
+      :type: :hash
+      :members:
+        VolumeARN:
+          :sym: :volume_arn
+          :type: :string
+        VolumeId:
+          :sym: :volume_id
+          :type: :string
+        VolumeType:
+          :sym: :volume_type
+          :type: :string
+        VolumeStatus:
+          :sym: :volume_status
+          :type: :string
+        VolumeSizeInBytes:
+          :sym: :volume_size_in_bytes
+          :type: :integer
+        VolumeProgress:
+          :sym: :volume_progress
+          :type: :float
+        VolumeDiskId:
+          :sym: :volume_disk_id
+          :type: :string
+        SourceSnapshotId:
+          :sym: :source_snapshot_id
+          :type: :string
+        PreservedExistingData:
+          :sym: :preserved_existing_data
+          :type: :boolean
+        VolumeiSCSIAttributes:
+          :sym: :volumei_scsi_attributes
+          :type: :hash
+          :members:
+            TargetARN:
+              :sym: :target_arn
+              :type: :string
+            NetworkInterfaceId:
+              :sym: :network_interface_id
+              :type: :string
+            NetworkInterfacePort:
+              :sym: :network_interface_port
+              :type: :integer
+            LunNumber:
+              :sym: :lun_number
+              :type: :integer
+            ChapEnabled:
+              :sym: :chap_enabled
+              :type: :boolean
+- :name: DescribeTapeArchives
+  :method: :describe_tape_archives
+  :inputs:
+    TapeARNs:
+    - :list:
+      - :string
+    Marker:
+    - :string
+    Limit:
+    - :integer
+  :outputs:
+    TapeArchives:
+      :sym: :tape_archives
+      :type: :hash
+      :members:
+        TapeARN:
+          :sym: :tape_arn
+          :type: :string
+        TapeBarcode:
+          :sym: :tape_barcode
+          :type: :string
+        TapeSizeInBytes:
+          :sym: :tape_size_in_bytes
+          :type: :integer
+        CompletionTime:
+          :sym: :completion_time
+          :type: :time
+        RetrievedTo:
+          :sym: :retrieved_to
+          :type: :string
+        TapeStatus:
+          :sym: :tape_status
+          :type: :string
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: DescribeTapeRecoveryPoints
+  :method: :describe_tape_recovery_points
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    Marker:
+    - :string
+    Limit:
+    - :integer
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    TapeRecoveryPointInfos:
+      :sym: :tape_recovery_point_infos
+      :type: :hash
+      :members:
+        TapeARN:
+          :sym: :tape_arn
+          :type: :string
+        TapeRecoveryPointTime:
+          :sym: :tape_recovery_point_time
+          :type: :time
+        TapeSizeInBytes:
+          :sym: :tape_size_in_bytes
+          :type: :integer
+        TapeStatus:
+          :sym: :tape_status
+          :type: :string
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: DescribeTapes
+  :method: :describe_tapes
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    TapeARNs:
+    - :list:
+      - :string
+    Marker:
+    - :string
+    Limit:
+    - :integer
+  :outputs:
+    Tapes:
+      :sym: :tapes
+      :type: :hash
+      :members:
+        TapeARN:
+          :sym: :tape_arn
+          :type: :string
+        TapeBarcode:
+          :sym: :tape_barcode
+          :type: :string
+        TapeSizeInBytes:
+          :sym: :tape_size_in_bytes
+          :type: :integer
+        TapeStatus:
+          :sym: :tape_status
+          :type: :string
+        VTLDevice:
+          :sym: :vtl_device
+          :type: :string
+        Progress:
+          :sym: :progress
+          :type: :float
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: DescribeUploadBuffer
+  :method: :describe_upload_buffer
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    DiskIds:
+      :sym: :disk_ids
+      :type: :string
+    UploadBufferUsedInBytes:
+      :sym: :upload_buffer_used_in_bytes
+      :type: :integer
+    UploadBufferAllocatedInBytes:
+      :sym: :upload_buffer_allocated_in_bytes
+      :type: :integer
+- :name: DescribeVTLDevices
+  :method: :describe_vtl_devices
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    VTLDeviceARNs:
+    - :list:
+      - :string
+    Marker:
+    - :string
+    Limit:
+    - :integer
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    VTLDevices:
+      :sym: :vtl_devices
+      :type: :hash
+      :members:
+        VTLDeviceARN:
+          :sym: :vtl_device_arn
+          :type: :string
+        VTLDeviceType:
+          :sym: :vtl_device_type
+          :type: :string
+        VTLDeviceVendor:
+          :sym: :vtl_device_vendor
+          :type: :string
+        VTLDeviceProductIdentifier:
+          :sym: :vtl_device_product_identifier
+          :type: :string
+        DeviceiSCSIAttributes:
+          :sym: :devicei_scsi_attributes
+          :type: :hash
+          :members:
+            TargetARN:
+              :sym: :target_arn
+              :type: :string
+            NetworkInterfaceId:
+              :sym: :network_interface_id
+              :type: :string
+            NetworkInterfacePort:
+              :sym: :network_interface_port
+              :type: :integer
+            ChapEnabled:
+              :sym: :chap_enabled
+              :type: :boolean
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: DescribeWorkingStorage
+  :method: :describe_working_storage
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    DiskIds:
+      :sym: :disk_ids
+      :type: :string
+    WorkingStorageUsedInBytes:
+      :sym: :working_storage_used_in_bytes
+      :type: :integer
+    WorkingStorageAllocatedInBytes:
+      :sym: :working_storage_allocated_in_bytes
+      :type: :integer
+- :name: DisableGateway
+  :method: :disable_gateway
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: ListGateways
+  :method: :list_gateways
+  :inputs:
+    Marker:
+    - :string
+    Limit:
+    - :integer
+  :outputs:
+    Gateways:
+      :sym: :gateways
+      :type: :hash
+      :members:
+        GatewayARN:
+          :sym: :gateway_arn
+          :type: :string
+        GatewayType:
+          :sym: :gateway_type
+          :type: :string
+        GatewayOperationalState:
+          :sym: :gateway_operational_state
+          :type: :string
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: ListLocalDisks
+  :method: :list_local_disks
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    Disks:
+      :sym: :disks
+      :type: :hash
+      :members:
+        DiskId:
+          :sym: :disk_id
+          :type: :string
+        DiskPath:
+          :sym: :disk_path
+          :type: :string
+        DiskNode:
+          :sym: :disk_node
+          :type: :string
+        DiskSizeInBytes:
+          :sym: :disk_size_in_bytes
+          :type: :integer
+        DiskAllocationType:
+          :sym: :disk_allocation_type
+          :type: :string
+        DiskAllocationResource:
+          :sym: :disk_allocation_resource
+          :type: :string
+- :name: ListVolumeRecoveryPoints
+  :method: :list_volume_recovery_points
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    VolumeRecoveryPointInfos:
+      :sym: :volume_recovery_point_infos
+      :type: :hash
+      :members:
+        VolumeARN:
+          :sym: :volume_arn
+          :type: :string
+        VolumeSizeInBytes:
+          :sym: :volume_size_in_bytes
+          :type: :integer
+        VolumeUsageInBytes:
+          :sym: :volume_usage_in_bytes
+          :type: :integer
+        VolumeRecoveryPointTime:
+          :sym: :volume_recovery_point_time
+          :type: :string
+- :name: ListVolumes
+  :method: :list_volumes
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    Marker:
+    - :string
+    Limit:
+    - :integer
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+    Marker:
+      :sym: :marker
+      :type: :string
+    VolumeInfos:
+      :sym: :volume_infos
+      :type: :hash
+      :members:
+        VolumeARN:
+          :sym: :volume_arn
+          :type: :string
+        VolumeType:
+          :sym: :volume_type
+          :type: :string
+- :name: RetrieveTapeArchive
+  :method: :retrieve_tape_archive
+  :inputs:
+    TapeARN:
+    - :string
+    - :required
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    TapeARN:
+      :sym: :tape_arn
+      :type: :string
+- :name: RetrieveTapeRecoveryPoint
+  :method: :retrieve_tape_recovery_point
+  :inputs:
+    TapeARN:
+    - :string
+    - :required
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    TapeARN:
+      :sym: :tape_arn
+      :type: :string
+- :name: ShutdownGateway
+  :method: :shutdown_gateway
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: StartGateway
+  :method: :start_gateway
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: UpdateBandwidthRateLimit
+  :method: :update_bandwidth_rate_limit
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    AverageUploadRateLimitInBitsPerSec:
+    - :long
+    AverageDownloadRateLimitInBitsPerSec:
+    - :long
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: UpdateChapCredentials
+  :method: :update_chap_credentials
+  :inputs:
+    TargetARN:
+    - :string
+    - :required
+    SecretToAuthenticateInitiator:
+    - :string
+    - :required
+    InitiatorName:
+    - :string
+    - :required
+    SecretToAuthenticateTarget:
+    - :string
+  :outputs:
+    TargetARN:
+      :sym: :target_arn
+      :type: :string
+    InitiatorName:
+      :sym: :initiator_name
+      :type: :string
+- :name: UpdateGatewayInformation
+  :method: :update_gateway_information
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    GatewayName:
+    - :string
+    GatewayTimezone:
+    - :string
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: UpdateGatewaySoftwareNow
+  :method: :update_gateway_software_now
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: UpdateMaintenanceStartTime
+  :method: :update_maintenance_start_time
+  :inputs:
+    GatewayARN:
+    - :string
+    - :required
+    HourOfDay:
+    - :integer
+    - :required
+    MinuteOfHour:
+    - :integer
+    - :required
+    DayOfWeek:
+    - :integer
+    - :required
+  :outputs:
+    GatewayARN:
+      :sym: :gateway_arn
+      :type: :string
+- :name: UpdateSnapshotSchedule
+  :method: :update_snapshot_schedule
+  :inputs:
+    VolumeARN:
+    - :string
+    - :required
+    StartAt:
+    - :integer
+    - :required
+    RecurrenceInHours:
+    - :integer
+    - :required
+    Description:
+    - :string
+  :outputs:
+    VolumeARN:
+      :sym: :volume_arn
+      :type: :string

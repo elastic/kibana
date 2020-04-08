@@ -1,0 +1,105 @@
+= New Features
+
+* Database#schema now includes :max_length entries for string
+  columns, specifying the size of the string field.  The
+  auto_validations plugin now uses this information to
+  automatically set up max_length validations on those fields.
+
+* The Dataset join methods now support a :reset_implicit_qualifier
+  option.  If set to false, this makes the join not reset the
+  implicit qualifier, so that the next join will not consider this
+  table as the last table joined.  Example:
+
+    DB[:a].join(:b, :c=>:d).
+      join(:e, :f=>:g)
+    # SELECT * FROM a
+    # INNER JOIN b ON (b.c = a.d)
+    # INNER JOIN e ON (e.f = b.g)
+
+    DB[:a].join(:b, {:c=>:d}, :reset_implicit_qualifier=>false).
+      join(:e, :f=>:g)
+    # SELECT * FROM a
+    # INNER JOIN b ON (b.c = a.d)
+    # INNER JOIN e ON (e.f = a.g)
+
+* The Dataset cross and natural join methods now accept an options
+  hash. Example:
+
+    DB[:a].cross_join(:b, :table_alias=>:c)
+    # SELECT * FROM a CROSS JOIN b AS c
+
+* Model#set_nested_attributes has been added to the nested_attributes
+  plugin, which allows you to to set the nested_attributes options to
+  use per-call.  This is very helpful if you have multiple forms that
+  handle associated objects, but with different input fields used
+  for the associated objects depending on the form.  Example:
+
+    album.set_nested_attributes(:tracks,
+      params[:track_attributes],
+      :fields=>[:a, :b, :c])
+
+* Database#values has been added on PostgreSQL, which creates a
+  dataset that uses VALUES instead of SELECT.  Just as PostgreSQL
+  allows, you can also use orders, limits, and offsets with this
+  dataset.
+
+* A :notice_receiver option is now supported in the postgres adapter
+  if the pg driver is used.  This should be a proc, which will be
+  passed to the pg connection's set_notice_receiver method.
+
+* A Database :readonly option is now supported in the sqlite adapter,
+  which opens the database in a read-only mode, causing an error
+  if a query is issued that would modify the database.
+
+* A :before_thread_exit option has been added to
+  Database#listen_for_static_cache_updates in the
+  pg_static_cache_updater extension, allowing you to run code before
+  the created thread exits.
+
+= Other Improvements
+
+* Eager loading limited associations using a UNION now works
+  correctly when an association block is used.  This fixes a
+  regression that first occurred in 4.10.0, when the union
+  eager loader became the default eager loader.
+
+* When creating a new associated object in the nested_attributes
+  plugin, where the reciprocal association is a many_to_one
+  association, set the cached reciprocal object in the new
+  associated object before saving it.
+
+  This fixes issues when validations in the associated object
+  require access to the current object, which may not yet be
+  saved in the database.
+
+* The prepared_statements and prepared_statements_associations
+  plugins now automatically use explicit column references when
+  preparing statements.  This fixes issues on PostgreSQL when a
+  column is added to a table while a prepared statement exists
+  that selects * from the table.  Previously, all further attempts
+  to use the prepared statement will fail.
+
+  This allows you to run migrations that add columns to tables
+  while concurrently running an application that uses the
+  prepared statements plugins.  Note that many other schema
+  modifications can cause issues when running migrations
+  while concurrently running an application, but most of those
+  are not specific to usage of prepared statements.
+
+* Dataset#insert_select on PostgreSQL now respects an existing
+  RETURNING clause, and won't override it to use RETURNING *.
+
+  A similar fix was applied to the generalized prepared statements
+  support as well.
+
+* The interval parser in the pg_interval extension now supports
+  intervals with 2-10 digits for hours.  Previously, it only
+  supported using 2 digits for hours.
+
+= Backwards Compatibility
+
+* The methods and classes deprecated in 4.11.0 have been removed.
+
+* The nested_attributes internal API has changed significantly. If
+  you were calling any private nested_attributes methods, you'll
+  probably need to update your code.

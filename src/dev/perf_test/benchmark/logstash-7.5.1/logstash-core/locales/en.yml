@@ -1,0 +1,371 @@
+# YAML notes
+#   |- means 'scalar block' useful for formatted text
+#   > means 'scalar block' but it chomps all newlines. Useful
+#     for unformatted text.
+en:
+  oops: |-
+    An unexpected error occurred!
+  logstash:
+    error: >-
+      Error: %{error}
+    bootstrap_check:
+      persisted_queue_config:
+        page-capacity: >-
+          Invalid configuration, 'queue.page_capacity' must be less than or equal to 'queue.max_bytes'
+    environment:
+      jruby-required:  >-
+        JRuby is required
+      missing-jars: >-
+        Could not find jar files under %{pattern}
+    pipeline:
+      worker-error: |-
+        A plugin had an unrecoverable error. Will restart this plugin.
+          Pipeline_id:%{pipeline_id}
+          Plugin: %{plugin}
+          Error: %{error}
+      worker-error-debug: |-
+        A plugin had an unrecoverable error. Will restart this plugin.
+          Pipeline_id:%{pipeline_id}
+          Plugin: %{plugin}
+          Error: %{error}
+          Exception: %{exception}
+          Stack: %{stacktrace}
+      plugin-loading-error: >-
+        Couldn't find any %{type} plugin named '%{name}'. Are you
+        sure this is correct? Trying to load the %{name} %{type} plugin
+        resulted in this error: %{error}
+      plugin-type-loading-error: >-
+        Could not find any plugin type named '%{type}'. Check for typos.
+        Valid plugin types are 'input' 'filter' and 'output'
+      output-worker-unsupported: >-
+        %{plugin} output plugin: setting 'workers => %{worker_count}' is not
+        supported by this plugin. I will continue working as if you had not set
+        this setting.
+      output-worker-unsupported-with-message: >-
+        %{plugin} output plugin: setting 'workers => %{worker_count}' is not
+        supported by this plugin. I will continue working as if you had not set
+        this setting. Reason: %{message}
+    plugin:
+      deprecated_milestone: >-
+        %{plugin} plugin is using the 'milestone' method to declare the version
+        of the plugin this method is deprecated in favor of declaring the
+        version inside the gemspec.
+      version:
+        0-9-x:
+         Using version 0.9.x %{type} plugin '%{name}'. This plugin should work but
+         would benefit from use by folks like you. Please let us know if you
+         find bugs or have suggestions on how to improve this plugin.
+        0-1-x: >-
+         Using version 0.1.x %{type} plugin '%{name}'. This plugin isn't well
+         supported by the community and likely has no maintainer.
+    agent:
+      sighup: >-
+        SIGHUP received.
+      sigint: >-
+        SIGINT received. Shutting down.
+      sigterm: >-
+        SIGTERM received. Shutting down.
+      slow_shutdown: |-
+        Received shutdown signal, but pipeline is still waiting for in-flight events
+        to be processed. Sending another ^C will force quit Logstash, but this may cause
+        data loss.
+      forced_sigint: >-
+        SIGINT received. Terminating immediately..
+      non_reloadable_config_reload: >-
+        Unable to reload configuration because it does not support dynamic reloading
+      non_reloadable_config_register: |-
+        Logstash is not able to start since configuration auto reloading was enabled but the configuration contains plugins that don't support it. Quitting...
+    web_api:
+      cant_bind_to_port: |-
+        Logstash tried to bind to port %{port}, but the port is already in use. You can specify a new port by launching logstash with the --http.port option."
+      cant_bind_to_port_in_range: |-
+        Logstash tried to bind to port range %{http_ports}, but all the ports are already in use. You can specify a new port by launching logstash with the --http.port option."
+      hot_threads:
+        title: |-
+          ::: {%{hostname}}
+          Hot threads at %{time}, busiestThreads=%{top_count}:
+        thread_title: |-
+          %{percent_of_cpu_time} % of cpu usage, state: %{thread_state}, thread name: '%{thread_name}', thread id: %{thread_id}
+      logging:
+        unrecognized_option: |-
+          unrecognized option [%{option}]
+    modules:
+      configuration:
+        parse-failed: |-
+          Failed to parse the module configuration: [%{error}]
+        modules-must-be-unique: >-
+          Only a single instance of any module can be run at a time. Duplicate
+          modules: %{duplicate_modules}
+        modules-invalid-name: >-
+          Invalid module name: %{module_name}
+        modules-variables-malformed: >-
+          Failed to parse module variable %{rawvar}.  Must be in -M
+          "MODULE_NAME.KEY.SUBKEY=VALUE" format
+        modules-unavailable: >-
+          The modules specified are not available yet.
+          Specified modules: %{specified_modules}
+          Available modules: %{available_modules}
+        elasticsearch_connection_failed: >-
+          Failed to import module configurations to Elasticsearch and/or Kibana.
+          Module: %{module_name} has Elasticsearch hosts: %{elasticsearch_hosts} and Kibana hosts: %{kibana_hosts}
+        modules-too-many-specified: >-
+          Too many modules specified. Maximum allowed: %{max}, specified: %{specified_modules}
+
+    runner:
+      short-help: |-
+        usage:
+          bin/logstash -f CONFIG_PATH [-t] [-r] [] [-w COUNT] [-l LOG]
+          bin/logstash --modules MODULE_NAME [-M "MODULE_NAME.var.PLUGIN_TYPE.PLUGIN_NAME.VARIABLE_NAME=VALUE"] [-t] [-w COUNT] [-l LOG]
+          bin/logstash -e CONFIG_STR [-t] [--log.level fatal|error|warn|info|debug|trace] [-w COUNT] [-l LOG]
+          bin/logstash -i SHELL [--log.level fatal|error|warn|info|debug|trace]
+          bin/logstash -V [--log.level fatal|error|warn|info|debug|trace]
+          bin/logstash --help
+      invalid-configuration: >-
+        The given configuration is invalid. Reason: %{error}
+      missing-configuration: >-
+        No configuration file was specified. Perhaps you forgot to provide
+        the '-f yourlogstash.conf' flag?
+      config-string-path-exclusive:
+        Settings 'path.config' (-f) and 'config.string' (-e) can't be used simultaneously.
+      config-module-exclusive: >-
+        Settings 'path.config' (-f) or 'config.string' (-e) can't be used in conjunction with
+        (--modules) or the "modules:" block in the logstash.yml file.
+      reload-with-modules: >-
+        Configuration reloading can't be used with command-line or logstash.yml specified modules.
+      cli-module-override: >-
+        Both command-line and logstash.yml modules configurations detected.
+        Using command-line module configuration to override logstash.yml module configuration.
+      config-pipelines-failed-read: >-
+        Failed to read pipelines yaml file. Location: %{path}
+      config-pipelines-empty: >-
+        Pipelines YAML file is empty. Location: %{path}
+      config-pipelines-invalid: >-
+        Pipelines YAML file must contain an array of pipeline configs. Found "%{invalid_class}" in %{path}
+      reload-without-config-path: >-
+        Configuration reloading also requires passing a configuration path with '-f yourlogstash.conf'
+      reload-with-config-string: >-
+        Configuration reloading can't be used with 'config.string' (-e).
+      locked-data-path: >-
+        Logstash could not be started because there is already another instance using the configured data directory.  If you wish to run multiple instances, you must change the "path.data" setting.
+      invalid-shell: >-
+        Invalid option for interactive Ruby shell. Use either "irb" or "pry"
+      configtest-flag-information: |-
+        You may be interested in the '--configtest' flag which you can use to validate
+        logstash's configuration before you choose to restart a running system.
+      configuration:
+        obsolete: >-
+          The setting `%{name}` in plugin `%{plugin}` is obsolete and is no
+          longer available. %{extra} If you have any questions about this, you
+          are invited to visit https://discuss.elastic.co/c/logstash and ask.
+        file-not-found: |-
+          No config files found: %{path}. Can you make sure this path is a logstash config file?
+        scheme-not-supported: |-
+          URI scheme not supported: %{path}
+          Either pass a local file path or "file|http://" URI
+        fetch-failed: |-
+          Unable to fetch config from: %{path}
+          Reason: %{message}
+        setting_missing: |-
+          Missing a required setting for the %{plugin} %{type} plugin:
+
+            %{type} {
+              %{plugin} {
+                %{setting} => # SETTING MISSING
+                ...
+              }
+            }
+        setting_invalid: |-
+          Invalid setting for %{plugin} %{type} plugin:
+
+            %{type} {
+              %{plugin} {
+                # This setting must be a %{value_type}
+                # %{note}
+                %{setting} => %{value}
+                ...
+              }
+            }
+        invalid_plugin_settings: >-
+          Something is wrong with your configuration.
+        invalid_plugin_settings_duplicate_keys: |-
+          Duplicate keys found in your configuration: [%{keys}]
+          At line: %{line}, column %{column} (byte %{byte})
+          after %{after}
+        invalid_plugin_register: >-
+          Cannot register %{plugin} %{type} plugin.
+          The error reported is:
+            %{error}
+        plugin_path_missing: >-
+          You specified a plugin path that does not exist: %{path}
+        no_plugins_found: |-
+          Could not find any plugins in "%{path}"
+          I tried to find files matching the following, but found none:
+            %{plugin_glob}
+        log_file_failed: |-
+          Failed to open %{path} for writing: %{error}
+
+          This is often a permissions issue, or the wrong
+          path was specified?
+      flag:
+        # Note: Wrap these at 55 chars so they display nicely when clamp emits
+        # them in an 80-character terminal
+        config: |+
+          Load the logstash config from a specific file
+          or directory.  If a directory is given, all
+          files in that directory will be concatenated
+          in lexicographical order and then parsed as a
+          single config file. You can also specify
+          wildcards (globs) and any matched files will
+          be loaded in the order described above.
+        config-string: |+
+          Use the given string as the configuration
+          data. Same syntax as the config file. If no
+          input is specified, then the following is
+          used as the default input:
+          "%{default_input}"
+          and if no output is specified, then the
+          following is used as the default output:
+          "%{default_output}"
+          If you wish to use both defaults, please use
+          the empty string for the '-e' flag.
+        field-reference-parser: |+
+          (DEPRECATED) This option is no longer
+          configurable.
+
+          Use the given MODE when parsing field
+          references.
+
+          The field reference parser is used to expand
+          field references in your pipeline configs,
+          and has become more strict to better handle
+          ambiguous- and illegal-syntax inputs.
+
+          The only available MODE is:
+           - `STRICT`: parse in a strict manner; when
+             given ambiguous- or illegal-syntax input,
+             raises a runtime exception that should
+             be handled by the calling plugin.
+
+        modules: |+
+          Load Logstash modules.
+          Modules can be defined using multiple instances
+          '--modules module1 --modules module2',
+             or comma-separated syntax
+          '--modules=module1,module2'
+          Cannot be used in conjunction with '-e' or '-f'
+          Use of '--modules' will override modules declared
+          in the 'logstash.yml' file.
+        modules_variable: |+
+          Load variables for module template.
+          Multiple instances of '-M' or
+          '--modules.variable' are supported.
+          Ignored if '--modules' flag is not used.
+          Should be in the format of
+          '-M "MODULE_NAME.var.PLUGIN_TYPE.PLUGIN_NAME.VARIABLE_NAME=VALUE"'
+          as in
+          '-M "example.var.filter.mutate.fieldname=fieldvalue"'
+        modules_setup: |+
+          Load index template into Elasticsearch, and saved searches, 
+          index-pattern, visualizations, and dashboards into Kibana when
+          running modules.
+        cloud_id: |+
+          Sets the elasticsearch and kibana host settings for
+          module connections in Elastic Cloud.
+          Your Elastic Cloud User interface or the Cloud support
+          team should provide this.
+          Add an optional label prefix '<label>:' to help you
+          identify multiple cloud.ids.
+          e.g. 'staging:dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRub3RhcmVhbCRpZGVudGlmaWVy'
+        cloud_auth: |+
+          Sets the elasticsearch and kibana username and password
+          for module connections in Elastic Cloud
+          e.g. 'username:<password>'
+        configtest: |+
+          Check configuration for valid syntax and then exit.
+        http_host: Web API binding host
+        http_port: Web API http port
+        pipeline-id: |+
+          Sets the ID of the pipeline.
+        pipeline-workers: |+
+          Sets the number of pipeline workers to run.
+        java-execution: |+
+          Use Java execution engine.
+        plugin-classloaders: |+
+          (Beta) Load Java plugins in independent classloaders to isolate their dependencies.
+        pipeline-batch-size: |+
+          Size of batches the pipeline is to work in.
+        pipeline-batch-delay: |+
+          When creating pipeline batches, how long to wait while polling
+          for the next event.
+        path_settings: |+
+          Directory containing logstash.yml file. This can also be
+          set through the LS_SETTINGS_DIR environment variable.
+        path_logs: |+
+            Directory to Write Logstash internal logs to.
+        auto_reload: |+
+          Monitor configuration changes and reload
+          whenever it is changed.
+          NOTE: use SIGHUP to manually reload the config
+        reload_interval: |+
+          How frequently to poll the configuration location
+          for changes, in seconds.
+        log: |+
+          Write logstash internal logs to the given
+          file. Without this flag, logstash will emit
+          logs to standard output.
+        verbosity: |+
+          Increase verbosity of logstash internal logs.
+          Specifying once will show 'informational'
+          logs. Specifying twice will show 'debug'
+          logs. This flag is deprecated. You should use
+          --log-level=info or --log-level=debug instead.
+        version: |+
+          Emit the version of logstash and its friends,
+          then exit.
+        datapath: |+
+          This should point to a writable directory. Logstash
+          will use this directory whenever it needs to store
+          data. Plugins will also have access to this path.
+        pluginpath: |+
+          A path of where to find plugins. This flag
+          can be given multiple times to include
+          multiple paths. Plugins are expected to be
+          in a specific directory hierarchy:
+          'PATH/logstash/TYPE/NAME.rb' where TYPE is
+          'inputs' 'filters', 'outputs' or 'codecs'
+          and NAME is the name of the plugin.
+        log_level: |+
+          Set the log level for logstash. Possible values are:
+            - fatal
+            - error
+            - warn
+            - info
+            - debug
+            - trace
+        unsafe_shutdown: |+
+          Force logstash to exit during shutdown even
+          if there are still inflight events in memory.
+          By default, logstash will refuse to quit until all
+          received events have been pushed to the outputs.
+        rubyshell: |+
+          Drop to shell instead of running as normal.
+          Valid shells are "irb" and "pry"
+        name: |+
+          Specify the name of this logstash instance, if no value is given
+          it will default to the current hostname.
+        config_debug: |+
+          Print the compiled config ruby code out as a debug log (you must also have --log.level=debug enabled).
+          WARNING: This will include any 'password' options passed to plugin configs as plaintext, and may result
+          in plaintext passwords appearing in your logs!
+        log_format: |+
+          Specify if Logstash should write its own logs in JSON form (one
+          event per line) or in plain text (using Ruby's Object#inspect)
+        debug: |+
+          Set the log level to debug.
+          DEPRECATED: use --log.level=debug instead.
+        verbose: |+
+          Set the log level to info.
+          DEPRECATED: use --log.level=info instead.
+        quiet: |+
+          Set the log level to info.
+          DEPRECATED: use --log.level=info instead.

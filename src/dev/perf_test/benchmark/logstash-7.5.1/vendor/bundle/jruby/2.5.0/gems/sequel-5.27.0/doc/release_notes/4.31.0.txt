@@ -1,0 +1,57 @@
+= Improvements
+
+* Sequel now works with ruby 2.3's --enable-frozen-string-literal,
+  and all of the library files are set to use frozen string
+  literals by default.
+
+  A couple adapters and extensions depend on libraries that have
+  issues with frozen string literals.  Pull requests have been sent
+  to each of those dependencies.
+
+* The migrators will now raise an exception if a migration file
+  contains no migrations or more than one migration.
+
+* The jdbc/postgresql adapter now supports using PostgreSQL specific
+  types in bound variables.  Note that the current version of
+  jdbc-postgres (9.4.1204) has regressions that affect this, users
+  who need this support should stick with jdbc-postgres 9.4.1200 or
+  below.
+
+* The jdbc/postgresql adapter now works around a regression in Java
+  method lookup in JRuby 9.0.5.0
+
+* The setter methods added by the association_pks plugin now do type
+  casting immediately, instead of right before the data will be used.
+  This makes them more similar to column setter methods, and ensures
+  that future calls to the getters that use cached values will
+  return correctly typecast data.
+
+* The PostgreSQL array parser in the pg_array extension now handles
+  arrays with explicit bounds.  The explicit bounds are ignored, so
+  such values do not round trip, and there is currently no support for
+  creating arrays with explicit bounds.
+
+* Creating a table with a simple non-incrementing primary key and a
+  self-referential foreign key now works correctly on MySQL:
+
+    DB.create_table!(:table) do
+      Integer :id, :primary_key=>true
+      foreign_key :fk, :table
+    end
+
+* Database#disconnect in the oracle adapter now works correctly on
+  more recent versions of oci8 where #logoff can raise OCIException
+  instead of OCIInvalidHandle.
+
+= Backwards Compatibility
+
+* The pg_array extension no longer defines
+  Sequel::Postgres::PGArray::JSONCreator.  This should only affect
+  backwards compatibility if you were accessing the constant directly.
+  The :parser option to Sequel::Postgres::PGArray.register is also no
+  longer respected, but that should not affect backwards compatibility.
+
+* The Sequel::Model#convert_cpk_array private method that was added by
+  the association_pks plugin has been removed.
+  Sequel::Model#convert_pk_array handles both simple and composite
+  primary keys now.

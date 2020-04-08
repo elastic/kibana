@@ -1,0 +1,229 @@
+:plugin: twitter
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Twitter input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Ingest events from the Twitter Streaming API.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Twitter Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-consumer_key>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-consumer_secret>> |<<password,password>>|Yes
+| <<plugins-{type}s-{plugin}-follows>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-full_tweet>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-ignore_retweets>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-keywords>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-languages>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-locations>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-oauth_token>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-oauth_token_secret>> |<<password,password>>|Yes
+| <<plugins-{type}s-{plugin}-proxy_address>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-proxy_port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-rate_limit_reset_in>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-use_proxy>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-use_samples>> |<<boolean,boolean>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-consumer_key"]
+===== `consumer_key` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Your Twitter App's consumer key
+
+Don't know what this is? You need to create an "application"
+on Twitter, see this url: <https://dev.twitter.com/apps/new>
+
+[id="plugins-{type}s-{plugin}-consumer_secret"]
+===== `consumer_secret` 
+
+  * This is a required setting.
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+Your Twitter App's consumer secret
+
+If you don't have one of these, you can create one by
+registering a new application with Twitter:
+<https://dev.twitter.com/apps/new>
+
+[id="plugins-{type}s-{plugin}-follows"]
+===== `follows` 
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+A comma separated list of user IDs, indicating the users to
+return statuses for in the Twitter stream.
+See https://developer.twitter.com/en/docs/tweets/filter-realtime/guides/basic-stream-parameters
+for more details.
+
+[id="plugins-{type}s-{plugin}-full_tweet"]
+===== `full_tweet` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Record full tweet object as given to us by the Twitter Streaming API.
+
+[id="plugins-{type}s-{plugin}-ignore_retweets"]
+===== `ignore_retweets` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Lets you ignore the retweets coming out of the Twitter API. Default => false
+
+[id="plugins-{type}s-{plugin}-keywords"]
+===== `keywords` 
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Any keywords to track in the Twitter stream. For multiple keywords, use
+the syntax ["foo", "bar"]. There's a logical OR between each keyword 
+string listed and a logical AND between words separated by spaces per
+keyword string.
+See https://dev.twitter.com/streaming/overview/request-parameters#track 
+for more details.
+
+The wildcard "*" option is not supported. To ingest a sample stream of 
+all tweets, the use_samples option is recommended. 
+
+[id="plugins-{type}s-{plugin}-languages"]
+===== `languages` 
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+A list of BCP 47 language identifiers corresponding to any of the languages listed
+on Twitter’s advanced search page will only return tweets that have been detected 
+as being written in the specified languages.
+
+[id="plugins-{type}s-{plugin}-locations"]
+===== `locations` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+A comma-separated list of longitude, latitude pairs specifying a set
+of bounding boxes to filter tweets by.
+See https://dev.twitter.com/streaming/overview/request-parameters#locations
+for more details.
+
+[id="plugins-{type}s-{plugin}-oauth_token"]
+===== `oauth_token` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Your oauth token.
+
+To get this, login to Twitter with whatever account you want,
+then visit <https://dev.twitter.com/apps>
+
+Click on your app (used with the consumer_key and consumer_secret settings)
+Then at the bottom of the page, click 'Create my access token' which
+will create an oauth token and secret bound to your account and that
+application.
+
+[id="plugins-{type}s-{plugin}-oauth_token_secret"]
+===== `oauth_token_secret` 
+
+  * This is a required setting.
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+Your oauth token secret.
+
+To get this, login to Twitter with whatever account you want,
+then visit <https://dev.twitter.com/apps>
+
+Click on your app (used with the consumer_key and consumer_secret settings)
+Then at the bottom of the page, click 'Create my access token' which
+will create an oauth token and secret bound to your account and that
+application.
+
+[id="plugins-{type}s-{plugin}-proxy_address"]
+===== `proxy_address` 
+
+  * Value type is <<string,string>>
+  * Default value is `"127.0.0.1"`
+
+Location of the proxy, by default the same machine as the one running this LS instance
+
+[id="plugins-{type}s-{plugin}-proxy_port"]
+===== `proxy_port` 
+
+  * Value type is <<number,number>>
+  * Default value is `3128`
+
+Port where the proxy is listening, by default 3128 (squid)
+
+[id="plugins-{type}s-{plugin}-rate_limit_reset_in"]
+===== `rate_limit_reset_in` 
+
+  * Value type is <<number,number>>
+  * Default value is `300`
+
+Duration in seconds to wait before retrying a connection when twitter responds with a 429 TooManyRequests
+In some cases the 'x-rate-limit-reset' header is not set in the response and <error>.rate_limit.reset_in
+is nil. If this occurs then we use the integer specified here. The default is 5 minutes.
+
+[id="plugins-{type}s-{plugin}-use_proxy"]
+===== `use_proxy` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+When to use a proxy to handle the connections
+
+[id="plugins-{type}s-{plugin}-use_samples"]
+===== `use_samples` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Returns a small random sample of all public statuses. The tweets returned
+by the default access level are the same, so if two different clients connect
+to this endpoint, they will see the same tweets. If set to true, the keywords, 
+follows, locations, and languages options will be ignored. Default => false
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

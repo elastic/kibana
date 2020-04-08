@@ -1,0 +1,34 @@
+# TODO(sissel): implement 'anti' class for this package.
+class <%= name %>::package {
+  $version = "<%= version %>"
+  $iteration = "<%= iteration %>"
+
+  file {
+<% paths.each do |path|
+     stat = File.lstat(path)
+     params = {}
+     if stat.directory?
+       params[:ensure] = "directory"
+     elsif stat.symlink?
+       params[:ensure] = "link"
+       params[:target] = File.readlink(path)
+       stat = File.stat(path)
+     else
+       params[:ensure] = "file"
+       params[:source] = "puppet:///modules/#{name}/#{path}"
+     end
+
+     if params[:ensure] != "link"
+       params[:owner] = uid2user(stat.uid)
+       params[:group] = gid2group(stat.gid)
+       params[:mode] = sprintf("%04o", stat.mode & 0777)
+     end
+
+     settings = puppetsort(params).collect { |k,v| "#{k} => \"#{v}\"" }.join(",\n      ")
+-%>
+    # <%= stat.inspect %>
+    "<%= fixpath(path) %>":
+      <%= settings %>;
+<% end # paths.each -%>
+  }
+}

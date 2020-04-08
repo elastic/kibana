@@ -1,0 +1,91 @@
+:plugin: snmptrap
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Snmptrap input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Read snmp trap messages as events
+
+Resulting `@message` looks like :
+[source,ruby]
+  #<SNMP::SNMPv1_Trap:0x6f1a7a4 @varbind_list=[#<SNMP::VarBind:0x2d7bcd8f @value="teststring",
+  @name=[1.11.12.13.14.15]>], @timestamp=#<SNMP::TimeTicks:0x1af47e9d @value=55>, @generic_trap=6,
+  @enterprise=[1.2.3.4.5.6], @source_ip="127.0.0.1", @agent_addr=#<SNMP::IpAddress:0x29a4833e @value="\xC0\xC1\xC2\xC3">,
+  @specific_trap=99>
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Snmptrap Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-community>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-yamlmibdir>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-community"]
+===== `community` 
+
+  * Value type is <<array,array>>
+  * Default value is `"public"`
+
+SNMP Community String to listen for.
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * Value type is <<string,string>>
+  * Default value is `"0.0.0.0"`
+
+The address to listen on
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * Value type is <<number,number>>
+  * Default value is `1062`
+
+The port to listen on. Remember that ports less than 1024 (privileged
+ports) may require root to use. hence the default of 1062.
+
+[id="plugins-{type}s-{plugin}-yamlmibdir"]
+===== `yamlmibdir` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+directory of YAML MIB maps  (same format ruby-snmp uses)
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

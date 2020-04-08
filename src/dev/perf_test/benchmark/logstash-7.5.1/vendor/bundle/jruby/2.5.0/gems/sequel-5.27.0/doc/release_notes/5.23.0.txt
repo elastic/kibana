@@ -1,0 +1,56 @@
+= New Features
+
+* An insert_conflict plugin has been added for automatically handling
+  constraint conflicts when saving new model instances.  It is
+  supported on PostgreSQL 9.5+ and SQLite 3.24.0+.
+
+    Album.new(name: 'Foo', copies_sold: 1000).
+      insert_conflict(
+        target: :name,
+        update: {copies_sold: Sequel[:excluded][:b]}
+      ).
+      save
+
+* On Microsoft SQL Server, the Database :ansi option has been added,
+  which sets the following ANSI related options:
+
+  * ANSI_NULLS
+  * ANSI_PADDING
+  * ANSI_WARNINGS
+  * ANSI_NULL_DFLT_ON
+  * QUOTED_IDENTIFIER
+  * CONCAT_NULL_YIELDS_NULL
+
+= Other Improvements
+
+* Sequel.datetime_class = Time is now supported when using the
+  named_timezones extension.  For backwards compatibility, the
+  named_timezones extension still sets
+  Sequel.datetime_class = DateTime.  When using Ruby 2.6+, the
+  Time instances have the timezone set on them using Ruby 2.6+'s
+  timezone support, but basic support works correctly in earlier
+  versions of Ruby.
+
+* On Microsoft SQL Server, Sequel now handles parsing schema for
+  tables in another database on the same server or in a database
+  on a linked server.
+
+* The pg_json extension now correctly handles subclasses of core
+  classes when wrapping objects.  This stopped working in Sequel
+  5.21.0, when support for wrapping JSON primitives was added.
+
+* Sequel now works around a couple bugs in jdbc-sqlite 3.27.2.1,
+  allowing schema parsing and foreign key parsing to work.
+
+* Dataset#execute* private methods now respect an explicitly given
+  :server option, fixing Dataset#paged_each in the postgres adapter
+  when using sharding.
+
+* Timezone offsets are now handled correctly when typecasting an array
+  or hash to datetime when Sequel.datetime_class = Time.
+
+* Sequel now avoids errors when parsing schema when using the mock
+  SQLite adapter.
+
+* A minor thread-safety issue has been fixed in the named_timezones
+  extension.

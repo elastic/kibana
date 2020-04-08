@@ -1,0 +1,85 @@
+:plugin: syslog_pri
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Syslog_pri filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Filter plugin for logstash to parse the `PRI` field from the front
+of a Syslog (RFC3164) message.  If no priority is set, it will
+default to 13 (per RFC).
+
+This filter is based on the original `syslog.rb` code shipped
+with logstash.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Syslog_pri Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-facility_labels>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-severity_labels>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-syslog_pri_field_name>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-use_labels>> |<<boolean,boolean>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-facility_labels"]
+===== `facility_labels` 
+
+  * Value type is <<array,array>>
+  * Default value is `["kernel", "user-level", "mail", "daemon", "security/authorization", "syslogd", "line printer", "network news", "uucp", "clock", "security/authorization", "ftp", "ntp", "log audit", "log alert", "clock", "local0", "local1", "local2", "local3", "local4", "local5", "local6", "local7"]`
+
+Labels for facility levels. This comes from RFC3164.
+
+[id="plugins-{type}s-{plugin}-severity_labels"]
+===== `severity_labels` 
+
+  * Value type is <<array,array>>
+  * Default value is `["emergency", "alert", "critical", "error", "warning", "notice", "informational", "debug"]`
+
+Labels for severity levels. This comes from RFC3164.
+
+[id="plugins-{type}s-{plugin}-syslog_pri_field_name"]
+===== `syslog_pri_field_name` 
+
+  * Value type is <<string,string>>
+  * Default value is `"syslog_pri"`
+
+Name of field which passes in the extracted PRI part of the syslog message
+
+[id="plugins-{type}s-{plugin}-use_labels"]
+===== `use_labels` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+set the status to experimental/beta/stable
+Add human-readable names after parsing severity and facility from PRI
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

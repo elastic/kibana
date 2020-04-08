@@ -1,0 +1,36 @@
+= New Features
+
+* An :auto_increment key has been added to the schema information for
+  primary key columns on JDBC, PostgreSQL, MySQL, MSSQL, DB2, and
+  SQLite.  This fixes issues in the schema_dumper extension where
+  non-auto-incrementing integer primary keys are no longer dumped as
+  auto-incrementing.
+
+  For adapters that don't have specific support for detecting
+  auto incrementing primary keys, Sequel now assumes a primary key
+  is auto incrementing only if it is not a composite primary key
+  and the type contains int (e.g. int, integer, bigint).
+
+= Other Improvements
+
+* Dataset#empty? now ignores any order on the dataset.  Previously,
+  calling empty? on a dataset ordered by an alias in the SELECT list
+  could raise an exception.
+
+* Schema qualified tables are now handled correctly in
+  many_through_many associations.
+
+* Using a hash as the value for the :eager association option now
+  works correctly.
+
+* All PG::ConnectionBad exceptions are now treated as disconnect
+  errors in the postgres adapter.  This should be more robust than
+  the previous method of trying to recognize disconnect errors by
+  trying to parse the exception message.
+
+* Sequel now skips a hash allocation when issuing queries through
+  datasets if sharding is not used.
+
+* Sequel no longer uses the JDBC schema parsing in the jdbc/sqlserver
+  adapter.  Instead, it uses the MSSQL schema parsing, which should
+  be more accurate than the generic JDBC schema parsing.

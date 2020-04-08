@@ -1,0 +1,10 @@
+<applet
+  code="org.jruby.JRubyApplet.class"
+  codebase="../lib/"
+  archive="jruby-complete.jar"
+  width="700" height="500">
+<param name="jruby.banner" value="Welcome to JRuby on the Web!" />
+<param name="jruby.console" value="true" />
+<param name="jruby.objectspace" value="true" />
+<param name="jruby.eval" value="ARGV << '-f' << '--readline' << '--prompt' << 'simple'; require 'irb' ; require 'irb/completion' ; Thread.new { IRB.start }" />
+</applet>

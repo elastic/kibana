@@ -1,0 +1,50 @@
+= New Features
+
+* Database#values has been added on SQLite#3.8.3+, operating similarly
+  to the support on PostgreSQL:
+
+    DB.values([[1, 2], [3, 4]]).select_map([:column1, :column2])
+    # => [[1, 2], [3, 4]]
+
+* Regular expressions in dataset filters are now supported on Oracle
+  10g+:
+
+    DB[:t].where(:c=>/re/)
+    # SELECT * FROM "T" WHERE REGEXP_LIKE("C",'re')
+
+= Other Improvements
+
+* Sequel now supports the use of native prepared statements and bound
+  variables in the mysql2 adapter, when mysql2 0.4+ is used.
+  Previously, the mysql2 adapter supported database prepared
+  statements, but variables were always literalized.  That is still
+  supported when mysql2 <0.4 is used.
+
+* The connection pool now removes connections if it detects a
+  disconnect error that is not raised as a
+  Sequel::DatabaseDisconnectError.  Such exceptions are reraised
+  without converted them to Sequel::DatabaseDisconnectError, but the
+  related connection is now removed from the pool.
+
+* The reversible migration support now handles add_constraint with an
+  options hash as the first argument.
+
+* ASTTransformer now handles Sequel.extract, allowing Dataset#qualify
+  and other uses of ASTTransformer to work with such values.
+
+* The create_view :columns option is now suppported on SQLite 3.9.0+.
+
+* An additional disconnect error is now recognized in the postgres
+  adapter.
+
+* A frozen string literal issue has been fixed when multiple different 
+  database connection approaches have failed in the jdbc adapter.
+
+= Backwards Compatibility
+
+* External database adapters need to make sure that
+  Database#database_error_classes returns a valid result if called
+  during Database#initialize.  If you have an external adapter where
+  one of the error classes depends on an argument given when
+  connecting (such as the connection string), you may have to make
+  some changes.

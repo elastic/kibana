@@ -1,0 +1,573 @@
+:plugin: jdbc
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Jdbc input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This plugin was created as a way to ingest data in any database
+with a JDBC interface into Logstash. You can periodically schedule ingestion
+using a cron syntax (see `schedule` setting) or run the query one time to load
+data into Logstash. Each row in the resultset becomes a single event.
+Columns in the resultset are converted into fields in the event.
+
+==== Drivers
+
+This plugin does not come packaged with JDBC driver libraries. The desired
+jdbc driver library must be explicitly passed in to the plugin using the
+`jdbc_driver_library` configuration option.
+
+See the <<plugins-{type}s-{plugin}-jdbc_driver_library>> and <<plugins-{type}s-{plugin}-jdbc_driver_class>>
+options for more info.
+
+==== Scheduling
+
+Input from this plugin can be scheduled to run periodically according to a specific
+schedule. This scheduling syntax is powered by https://github.com/jmettraux/rufus-scheduler[rufus-scheduler].
+The syntax is cron-like with some extensions specific to Rufus (e.g. timezone support ).
+
+Examples:
+
+|==========================================================
+| `* 5 * 1-3 *`               | will execute every minute of 5am every day of January through March.
+| `0 * * * *`                 | will execute on the 0th minute of every hour every day.
+| `0 6 * * * America/Chicago` | will execute at 6:00am (UTC/GMT -5) every day.
+|==========================================================
+
+
+Further documentation describing this syntax can be found https://github.com/jmettraux/rufus-scheduler#parsing-cronlines-and-time-strings[here].
+
+==== State
+
+The plugin will persist the `sql_last_value` parameter in the form of a
+metadata file stored in the configured `last_run_metadata_path`. Upon query execution,
+this file will be updated with the current value of `sql_last_value`. Next time
+the pipeline starts up, this value will be updated by reading from the file. If
+`clean_run` is set to true, this value will be ignored and `sql_last_value` will be
+set to Jan 1, 1970, or 0 if `use_column_value` is true, as if no query has ever been executed.
+
+==== Dealing With Large Result-sets
+
+Many JDBC drivers use the `fetch_size` parameter to limit how many
+results are pre-fetched at a time from the cursor into the client's cache
+before retrieving more results from the result-set. This is configured in
+this plugin using the `jdbc_fetch_size` configuration option. No fetch size
+is set by default in this plugin, so the specific driver's default size will
+be used.
+
+==== Usage:
+
+Here is an example of setting up the plugin to fetch data from a MySQL database.
+First, we place the appropriate JDBC driver library in our current
+path (this can be placed anywhere on your filesystem). In this example, we connect to
+the 'mydb' database using the user: 'mysql' and wish to input all rows in the 'songs'
+table that match a specific artist. The following examples demonstrates a possible
+Logstash configuration for this. The `schedule` option in this example will
+instruct the plugin to execute this input statement on the minute, every minute.
+
+[source,ruby]
+------------------------------------------------------------------------------
+input {
+  jdbc {
+    jdbc_driver_library => "mysql-connector-java-5.1.36-bin.jar"
+    jdbc_driver_class => "com.mysql.jdbc.Driver"
+    jdbc_connection_string => "jdbc:mysql://localhost:3306/mydb"
+    jdbc_user => "mysql"
+    parameters => { "favorite_artist" => "Beethoven" }
+    schedule => "* * * * *"
+    statement => "SELECT * from songs where artist = :favorite_artist"
+  }
+}
+------------------------------------------------------------------------------
+
+==== Configuring SQL statement
+
+A sql statement is required for this input. This can be passed-in via a
+statement option in the form of a string, or read from a file (`statement_filepath`). File
+option is typically used when the SQL statement is large or cumbersome to supply in the config.
+The file option only supports one SQL statement. The plugin will only accept one of the options.
+It cannot read a statement from a file as well as from the `statement` configuration parameter.
+
+==== Configuring multiple SQL statements
+
+Configuring multiple SQL statements is useful when there is a need to query and ingest data
+from different database tables or views. It is possible to define separate Logstash
+configuration files for each statement or to define multiple statements in a single configuration
+file. When using multiple statements in a single Logstash configuration file, each statement
+has to be defined as a separate jdbc input (including jdbc driver, connection string and other
+required parameters).
+
+Please note that if any of the statements use the `sql_last_value` parameter (e.g. for
+ingesting only data changed since last run), each input should define its own
+`last_run_metadata_path` parameter. Failure to do so will result in undesired behaviour, as
+all inputs will store their state to the same (default) metadata file, effectively
+overwriting each other's `sql_last_value`.
+
+==== Predefined Parameters
+
+Some parameters are built-in and can be used from within your queries.
+Here is the list:
+
+|==========================================================
+|sql_last_value | The value used to calculate which rows to query. Before any query is run,
+this is set to Thursday, 1 January 1970, or 0 if `use_column_value` is true and
+`tracking_column` is set. It is updated accordingly after subsequent queries are run.
+|==========================================================
+
+Example:
+[source,ruby]
+---------------------------------------------------------------------------------------------------
+input {
+  jdbc {
+    statement => "SELECT id, mycolumn1, mycolumn2 FROM my_table WHERE id > :sql_last_value"
+    use_column_value => true
+    tracking_column => "id"
+    # ... other configuration bits
+  }
+}
+---------------------------------------------------------------------------------------------------
+
+==== Prepared Statements
+
+Using server side prepared statements can speed up execution times as the server optimises the query plan and execution.
+
+NOTE: Not all JDBC accessible technologies will support prepared statements.
+
+With the introduction of Prepared Statement support comes a different code execution path and some new settings. Most of the existing settings are still useful but there are several new settings for Prepared Statements to read up on.
+Use the boolean setting `use_prepared_statements` to enable this execution mode. Use the `prepared_statement_name` setting to specify a name for the Prepared Statement, this identifies the prepared statement locally and remotely and it should be unique in your config and on the database. Use the `prepared_statement_bind_values` array setting to specify the bind values, use the exact string `:sql_last_value` (multiple times if necessary) for the predefined parameter mentioned before. The `statement` (or `statement_path`) setting still holds the SQL statement but to use bind variables you must use the `?` character as a placeholder in the exact order found in the `prepared_statement_bind_values` array.
+
+NOTE: Building count queries around a prepared statement is not supported at this time and because jdbc paging uses count queries under the hood, jdbc paging is not supported with prepared statements at this time either. Therefore, `jdbc_paging_enabled`, `jdbc_page_size` settings are ignored when using prepared statements.
+
+Example:
+[source,ruby]
+---------------------------------------------------------------------------------------------------
+input {
+  jdbc {
+    statement => "SELECT * FROM mgd.seq_sequence WHERE _sequence_key > ? AND _sequence_key < ? + ? ORDER BY _sequence_key ASC"
+    prepared_statement_bind_values => [":sql_last_value", ":sql_last_value", 4]
+    prepared_statement_name => "foobar"
+    use_prepared_statements => true
+    use_column_value => true
+    tracking_column_type => "numeric"
+    tracking_column => "_sequence_key"
+    last_run_metadata_path => "/elastic/tmp/testing/confs/test-jdbc-int-sql_last_value.yml"
+    # ... other configuration bits
+  }
+}
+---------------------------------------------------------------------------------------------------
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Jdbc Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-clean_run>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-columns_charset>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-connection_retry_attempts>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-connection_retry_attempts_wait_time>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-jdbc_connection_string>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-jdbc_default_timezone>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-jdbc_driver_class>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-jdbc_driver_library>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-jdbc_fetch_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-jdbc_page_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-jdbc_paging_enabled>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-jdbc_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-jdbc_password_filepath>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-jdbc_pool_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-jdbc_user>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-jdbc_validate_connection>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-jdbc_validation_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-last_run_metadata_path>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-lowercase_column_names>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-parameters>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-plugin_timezone>> |<<string,string>>, one of `["local", "utc"]`|No
+| <<plugins-{type}s-{plugin}-prepared_statement_bind_values>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-prepared_statement_name>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-record_last_run>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-schedule>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-sequel_opts>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-sql_log_level>> |<<string,string>>, one of `["fatal", "error", "warn", "info", "debug"]`|No
+| <<plugins-{type}s-{plugin}-statement>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-statement_filepath>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-tracking_column>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-tracking_column_type>> |<<string,string>>, one of `["numeric", "timestamp"]`|No
+| <<plugins-{type}s-{plugin}-use_column_value>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-use_prepared_statements>> |<<boolean,boolean>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-clean_run"]
+===== `clean_run`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Whether the previous run state should be preserved
+
+[id="plugins-{type}s-{plugin}-columns_charset"]
+===== `columns_charset`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+The character encoding for specific columns. This option will override the `:charset` option
+for the specified columns.
+
+Example:
+[source,ruby]
+-------------------------------------------------------
+input {
+  jdbc {
+    ...
+    columns_charset => { "column0" => "ISO-8859-1" }
+    ...
+  }
+}
+-------------------------------------------------------
+this will only convert column0 that has ISO-8859-1 as an original encoding.
+
+[id="plugins-{type}s-{plugin}-connection_retry_attempts"]
+===== `connection_retry_attempts`
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+Maximum number of times to try connecting to database
+
+[id="plugins-{type}s-{plugin}-connection_retry_attempts_wait_time"]
+===== `connection_retry_attempts_wait_time`
+
+  * Value type is <<number,number>>
+  * Default value is `0.5`
+
+Number of seconds to sleep between connection attempts
+
+[id="plugins-{type}s-{plugin}-jdbc_connection_string"]
+===== `jdbc_connection_string`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+JDBC connection string
+
+[id="plugins-{type}s-{plugin}-jdbc_default_timezone"]
+===== `jdbc_default_timezone`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Timezone conversion.
+Logstash (and Elasticsearch) expects that timestamps are expressed in UTC terms.
+If your database has recorded timestamps that are relative to another timezone,
+the database timezone if you will, then set this setting to be the timezone that
+the database is using. However, as SQL does not allow for timezone data in
+timestamp fields we can't figure this out on a record by record basis.  This plugin
+will automatically convert your SQL timestamp fields to Logstash timestamps,
+in relative UTC time in ISO8601 format.
+
+Using this setting will manually assign a specified timezone offset, instead
+of using the timezone setting of the local machine.  You must use a canonical
+timezone, *America/Denver*, for example.
+
+[id="plugins-{type}s-{plugin}-plugin_timezone"]
+===== `plugin_timezone`
+
+  * Value can be any of: `utc`, `local`
+  * Default value is `"utc"`
+
+If you want this plugin to offset timestamps to a timezone other than UTC, you
+can set this setting to `local` and the plugin will use the OS timezone for offset
+adjustments.
+
+Note: when specifying `plugin_timezone` and/or `jdbc_default_timezone`, offset
+adjustments are made in two places, if `sql_last_value` is a timestamp and it
+is used as a parameter in the statement then offset adjustment is done from the
+plugin timezone into the data timezone and while records are processed, timestamps
+are offset adjusted from the database timezone to the plugin timezone. If your
+database timezone is UTC then you do not need to set either of these settings.
+
+[id="plugins-{type}s-{plugin}-jdbc_driver_class"]
+===== `jdbc_driver_class`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+JDBC driver class to load, for example, "org.apache.derby.jdbc.ClientDriver"
+
+NOTE: Per https://github.com/logstash-plugins/logstash-input-jdbc/issues/43, prepending `Java::` to the driver class
+ may be required if it appears that the driver is not being loaded correctly despite relevant jar(s) being provided by
+ either via the `jdbc_driver_library` setting or being placed in the Logstash  Java classpath. This is known to be the
+ case for the Oracle JDBC driver (ojdbc6.jar), where the correct `jdbc_driver_class` is
+ `"Java::oracle.jdbc.driver.OracleDriver"`, and may also be the case for other JDBC drivers.
+
+[id="plugins-{type}s-{plugin}-jdbc_driver_library"]
+===== `jdbc_driver_library`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+JDBC driver library path to third party driver library. In case of multiple libraries being
+required you can pass them separated by a comma.
+
+NOTE: If not provided, Plugin will look for the driver class in the Logstash Java classpath. Additionally, if the library
+ does not appear to be being loaded correctly via this setting, placing the relevant jar(s) in the Logstash Java
+ classpath rather than via this setting may help.
+
+[id="plugins-{type}s-{plugin}-jdbc_fetch_size"]
+===== `jdbc_fetch_size`
+
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+JDBC fetch size. if not provided, respective driver's default will be used
+
+[id="plugins-{type}s-{plugin}-jdbc_page_size"]
+===== `jdbc_page_size`
+
+  * Value type is <<number,number>>
+  * Default value is `100000`
+
+JDBC page size
+
+[id="plugins-{type}s-{plugin}-jdbc_paging_enabled"]
+===== `jdbc_paging_enabled`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+JDBC enable paging
+
+This will cause a sql statement to be broken up into multiple queries.
+Each query will use limits and offsets to collectively retrieve the full
+result-set. The limit size is set with `jdbc_page_size`.
+
+Be aware that ordering is not guaranteed between queries.
+
+[id="plugins-{type}s-{plugin}-jdbc_password"]
+===== `jdbc_password`
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+JDBC password
+
+[id="plugins-{type}s-{plugin}-jdbc_password_filepath"]
+===== `jdbc_password_filepath`
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+JDBC password filename
+
+[id="plugins-{type}s-{plugin}-jdbc_pool_timeout"]
+===== `jdbc_pool_timeout`
+
+  * Value type is <<number,number>>
+  * Default value is `5`
+
+Connection pool configuration.
+The amount of seconds to wait to acquire a connection before raising a PoolTimeoutError (default 5)
+
+[id="plugins-{type}s-{plugin}-jdbc_user"]
+===== `jdbc_user`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+JDBC user
+
+[id="plugins-{type}s-{plugin}-jdbc_validate_connection"]
+===== `jdbc_validate_connection`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Connection pool configuration.
+Validate connection before use.
+
+[id="plugins-{type}s-{plugin}-jdbc_validation_timeout"]
+===== `jdbc_validation_timeout`
+
+  * Value type is <<number,number>>
+  * Default value is `3600`
+
+Connection pool configuration.
+How often to validate a connection (in seconds)
+
+[id="plugins-{type}s-{plugin}-last_run_metadata_path"]
+===== `last_run_metadata_path`
+
+  * Value type is <<string,string>>
+  * Default value is `"$HOME/.logstash_jdbc_last_run"`
+
+Path to file with last run time
+
+[id="plugins-{type}s-{plugin}-lowercase_column_names"]
+===== `lowercase_column_names`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Whether to force the lowercasing of identifier fields
+
+[id="plugins-{type}s-{plugin}-parameters"]
+===== `parameters`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+Hash of query parameter, for example `{ "target_id" => "321" }`
+
+[id="plugins-{type}s-{plugin}-prepared_statement_bind_values"]
+===== `prepared_statement_bind_values`
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+Array of bind values for the prepared statement. `:sql_last_value` is a reserved predefined string
+
+[id="plugins-{type}s-{plugin}-prepared_statement_name"]
+===== `prepared_statement_name`
+
+  * Value type is <<string,string>>
+  * Default value is `""`
+
+Name given to the prepared statement. It must be unique in your config and in the database
+
+[id="plugins-{type}s-{plugin}-record_last_run"]
+===== `record_last_run`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Whether to save state or not in <<plugins-{type}s-{plugin}-last_run_metadata_path>>
+
+[id="plugins-{type}s-{plugin}-schedule"]
+===== `schedule`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Schedule of when to periodically run statement, in Cron format
+for example: "* * * * *" (execute query every minute, on the minute)
+
+There is no schedule by default. If no schedule is given, then the statement is run
+exactly once.
+
+[id="plugins-{type}s-{plugin}-sequel_opts"]
+===== `sequel_opts`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+General/Vendor-specific Sequel configuration options.
+
+An example of an optional connection pool configuration
+   max_connections - The maximum number of connections the connection pool
+
+examples of vendor-specific options can be found in this
+documentation page: https://github.com/jeremyevans/sequel/blob/master/doc/opening_databases.rdoc
+
+[id="plugins-{type}s-{plugin}-sql_log_level"]
+===== `sql_log_level`
+
+  * Value can be any of: `fatal`, `error`, `warn`, `info`, `debug`
+  * Default value is `"info"`
+
+Log level at which to log SQL queries, the accepted values are the common ones fatal, error, warn,
+info and debug. The default value is info.
+
+[id="plugins-{type}s-{plugin}-statement"]
+===== `statement`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+If undefined, Logstash will complain, even if codec is unused.
+Statement to execute
+
+To use parameters, use named parameter syntax.
+For example:
+
+[source, ruby]
+-----------------------------------------------
+"SELECT * FROM MYTABLE WHERE id = :target_id"
+-----------------------------------------------
+
+here, ":target_id" is a named parameter. You can configure named parameters
+with the `parameters` setting.
+
+[id="plugins-{type}s-{plugin}-statement_filepath"]
+===== `statement_filepath`
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+Path of file containing statement to execute
+
+[id="plugins-{type}s-{plugin}-tracking_column"]
+===== `tracking_column`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The column whose value is to be tracked if `use_column_value` is set to `true`
+
+[id="plugins-{type}s-{plugin}-tracking_column_type"]
+===== `tracking_column_type`
+
+  * Value can be any of: `numeric`, `timestamp`
+  * Default value is `"numeric"`
+
+Type of tracking column. Currently only "numeric" and "timestamp"
+
+[id="plugins-{type}s-{plugin}-use_column_value"]
+===== `use_column_value`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+When set to `true`, uses the defined
+<<plugins-{type}s-{plugin}-tracking_column>> value as the `:sql_last_value`. When set
+to `false`, `:sql_last_value` reflects the last time the query was executed.
+
+[id="plugins-{type}s-{plugin}-use_prepared_statements"]
+===== `use_prepared_statements`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+When set to `true`, enables prepare statement usage
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

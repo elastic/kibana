@@ -1,0 +1,386 @@
+:plugin: mutate
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Mutate filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The mutate filter allows you to perform general mutations on fields. You
+can rename, remove, replace, and modify fields in your events.
+
+[id="plugins-{type}s-{plugin}-proc_order"]
+===== Processing order
+
+Mutations in a config file are executed in this order:
+
+* coerce
+* rename
+* update
+* replace
+* convert
+* gsub
+* uppercase
+* capitalize
+* lowercase
+* strip
+* remove
+* split
+* join
+* merge
+* copy
+
+You can control the order by using separate mutate blocks.
+
+Example:
+[source,ruby]
+-----
+filter {
+    mutate {
+        split => ["hostname", "."]
+        add_field => { "shortHostname" => "%{hostname[0]}" }
+    }
+
+    mutate {    
+        rename => ["shortHostname", "hostname" ]
+    }
+}
+-----
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Mutate Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-convert>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-copy>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-gsub>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-join>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-lowercase>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-merge>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-coerce>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-rename>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-replace>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-split>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-strip>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-update>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-uppercase>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-capitalize>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-tag_on_failure>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-convert"]
+===== `convert`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Convert a field's value to a different type, like turning a string to an
+integer. If the field value is an array, all members will be converted.
+If the field is a hash no action will be taken.
+
+Valid conversion targets, and their expected behaviour with different inputs are:
+
+ * `integer`:
+   - strings are parsed; comma-separators are supported (e.g., the string `"1,000"` produces an integer with value of one thousand); when strings have decimal parts, they are _truncated_.
+   - floats and decimals are _truncated_ (e.g., `3.99` becomes `3`, `-2.7` becomes `-2`)
+   - boolean true and boolean false are converted to `1` and `0` respectively
+ * `integer_eu`:
+   - same as `integer`, except string values support dot-separators and comma-decimals (e.g., `"1.000"` produces an integer with value of one thousand)
+ * `float`:
+   - integers are converted to floats
+   - strings are parsed; comma-separators and dot-decimals are supported (e.g., `"1,000.5"` produces an integer with value of one thousand and one half)
+   - boolean true and boolean false are converted to `1.0` and `0.0` respectively
+ * `float_eu`:
+   - same as `float`, except string values support dot-separators and comma-decimals (e.g., `"1.000,5"` produces an integer with value of one thousand and one half)
+ * `string`:
+   - all values are stringified and encoded with UTF-8
+ * `boolean`:
+   - integer 0 is converted to boolean `false`
+   - integer 1 is converted to boolean `true`
+   - float 0.0 is converted to boolean `false`
+   - float 1.0 is converted to boolean `true`
+   - strings `"true"`, `"t"`, `"yes"`, `"y"`, `"1"`and `"1.0"` are converted to boolean `true`
+   - strings `"false"`, `"f"`, `"no"`, `"n"`, `"0"` and `"0.0"` are converted to boolean `false`
+   - empty strings are converted to boolean `false`
+   - all other values pass straight through without conversion and log a warning message
+   - for arrays each value gets processed separately using rules above
+
+This plugin can convert multiple fields in the same document, see the example below.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        convert => { 
+          "fieldname" => "integer"
+          "booleanfield" => "boolean"
+        }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-copy"]
+===== `copy`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Copy an existing field to another field. Existing target field will be overriden.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+         copy => { "source_field" => "dest_field" }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-gsub"]
+===== `gsub`
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Match a regular expression against a field value and replace all matches
+with a replacement string. Only fields that are strings or arrays of
+strings are supported. For other kinds of fields no action will be taken.
+
+This configuration takes an array consisting of 3 elements per
+field/substitution.
+
+Be aware of escaping any backslash in the config file.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        gsub => [
+          # replace all forward slashes with underscore
+          "fieldname", "/", "_",
+          # replace backslashes, question marks, hashes, and minuses
+          # with a dot "."
+          "fieldname2", "[\\?#-]", "."
+        ]
+      }
+    }
+
+
+[id="plugins-{type}s-{plugin}-join"]
+===== `join`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Join an array with a separator character. Does nothing on non-array fields.
+
+Example:
+[source,ruby]
+   filter {
+     mutate {
+       join => { "fieldname" => "," }
+     }
+   }
+
+[id="plugins-{type}s-{plugin}-lowercase"]
+===== `lowercase`
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Convert a string to its lowercase equivalent.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        lowercase => [ "fieldname" ]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-merge"]
+===== `merge`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Merge two fields of arrays or hashes.
+String fields will be automatically be converted into an array, so:
+==========================
+  `array` + `string` will work
+  `string` + `string` will result in an 2 entry array in `dest_field`
+  `array` and `hash` will not work
+==========================
+Example:
+[source,ruby]
+    filter {
+      mutate {
+         merge => { "dest_field" => "added_field" }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-coerce"]
+===== `coerce`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Set the default value of a field that exists but is null
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        # Sets the default value of the 'field1' field to 'default_value'
+        coerce => { "field1" => "default_value" }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-rename"]
+===== `rename`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Rename one or more fields.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        # Renames the 'HOSTORIP' field to 'client_ip'
+        rename => { "HOSTORIP" => "client_ip" }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-replace"]
+===== `replace`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Replace the value of a field with a new value. The new value can include `%{foo}` strings
+to help you build a new value from other parts of the event.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        replace => { "message" => "%{source_host}: My new message" }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-split"]
+===== `split`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Split a field to an array using a separator character. Only works on string
+fields.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+         split => { "fieldname" => "," }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-strip"]
+===== `strip`
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Strip whitespace from field. NOTE: this only works on leading and trailing whitespace.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+         strip => ["field1", "field2"]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-update"]
+===== `update`
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Update an existing field with a new value. If the field does not exist,
+then no action will be taken.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        update => { "sample" => "My new message" }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-uppercase"]
+===== `uppercase`
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Convert a string to its uppercase equivalent.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        uppercase => [ "fieldname" ]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-capitalize"]
+===== `capitalize`
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Convert a string to its capitalized equivalent.
+
+Example:
+[source,ruby]
+    filter {
+      mutate {
+        capitalize => [ "fieldname" ]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-tag_on_failure"]
+===== `tag_on_failure`
+
+  * Value type is <<string,string>>
+  * The default value for this setting is `_mutate_error`
+
+If a failure occurs during the application of this mutate filter, the rest of
+the operations are aborted and the provided tag is added to the event.
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

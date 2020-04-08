@@ -1,0 +1,34 @@
+--- 
+schedMIB: 1.3.6.1.2.1.63
+schedObjects: 1.3.6.1.2.1.63.1
+schedLocalTime: 1.3.6.1.2.1.63.1.1
+schedTable: 1.3.6.1.2.1.63.1.2
+schedEntry: 1.3.6.1.2.1.63.1.2.1
+schedOwner: 1.3.6.1.2.1.63.1.2.1.1
+schedName: 1.3.6.1.2.1.63.1.2.1.2
+schedDescr: 1.3.6.1.2.1.63.1.2.1.3
+schedInterval: 1.3.6.1.2.1.63.1.2.1.4
+schedWeekDay: 1.3.6.1.2.1.63.1.2.1.5
+schedMonth: 1.3.6.1.2.1.63.1.2.1.6
+schedDay: 1.3.6.1.2.1.63.1.2.1.7
+schedHour: 1.3.6.1.2.1.63.1.2.1.8
+schedMinute: 1.3.6.1.2.1.63.1.2.1.9
+schedContextName: 1.3.6.1.2.1.63.1.2.1.10
+schedVariable: 1.3.6.1.2.1.63.1.2.1.11
+schedValue: 1.3.6.1.2.1.63.1.2.1.12
+schedType: 1.3.6.1.2.1.63.1.2.1.13
+schedAdminStatus: 1.3.6.1.2.1.63.1.2.1.14
+schedOperStatus: 1.3.6.1.2.1.63.1.2.1.15
+schedFailures: 1.3.6.1.2.1.63.1.2.1.16
+schedLastFailure: 1.3.6.1.2.1.63.1.2.1.17
+schedLastFailed: 1.3.6.1.2.1.63.1.2.1.18
+schedStorageType: 1.3.6.1.2.1.63.1.2.1.19
+schedRowStatus: 1.3.6.1.2.1.63.1.2.1.20
+schedTriggers: 1.3.6.1.2.1.63.1.2.1.21
+schedNotifications: 1.3.6.1.2.1.63.2
+schedTraps: 1.3.6.1.2.1.63.2.0
+schedConformance: 1.3.6.1.2.1.63.3
+schedCompliances: 1.3.6.1.2.1.63.3.1
+schedGroups: 1.3.6.1.2.1.63.3.2
+schedActionFailure: 1.3.6.1.2.1.63.2.0.1
+

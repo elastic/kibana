@@ -1,0 +1,547 @@
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2012-12-12'
+:namespace: https://route53.amazonaws.com/doc/2012-12-12/
+:operations:
+- :name: ChangeResourceRecordSets
+  :method: :change_resource_record_sets
+  :http:
+    :verb: POST
+    :uri: /2012-12-12/hostedzone/:hosted_zone_id/rrset/
+  :inputs:
+    :hosted_zone_id:
+      :type: :string
+      :required: true
+      :position: 0
+      :lstrip: /hostedzone/
+    :change_batch:
+      :name: ChangeBatch
+      :type: :hash
+      :required: true
+      :position: 1
+      :members:
+        :comment:
+          :name: Comment
+          :type: :string
+          :position: 0
+        :changes:
+          :name: Changes
+          :type: :array
+          :required: true
+          :position: 1
+          :members:
+            :name: Change
+            :type: :hash
+            :members:
+              :action:
+                :name: Action
+                :type: :string
+                :required: true
+                :position: 0
+              :resource_record_set:
+                :name: ResourceRecordSet
+                :type: :hash
+                :required: true
+                :position: 1
+                :members:
+                  :name:
+                    :name: Name
+                    :type: :string
+                    :required: true
+                    :position: 0
+                  :type:
+                    :name: Type
+                    :type: :string
+                    :required: true
+                    :position: 1
+                  :set_identifier:
+                    :name: SetIdentifier
+                    :type: :string
+                    :position: 2
+                  :weight:
+                    :name: Weight
+                    :type: :integer
+                    :position: 3
+                  :region:
+                    :name: Region
+                    :type: :string
+                    :position: 4
+                  :failover:
+                    :name: Failover
+                    :type: :string
+                    :position: 5
+                  :ttl:
+                    :name: TTL
+                    :type: :integer
+                    :position: 6
+                  :resource_records:
+                    :name: ResourceRecords
+                    :type: :array
+                    :position: 7
+                    :members:
+                      :name: ResourceRecord
+                      :type: :hash
+                      :members:
+                        :value:
+                          :name: Value
+                          :type: :string
+                          :required: true
+                          :position: 0
+                  :alias_target:
+                    :name: AliasTarget
+                    :type: :hash
+                    :position: 8
+                    :members:
+                      :hosted_zone_id:
+                        :name: HostedZoneId
+                        :type: :string
+                        :required: true
+                        :position: 0
+                        :lstrip: /hostedzone/
+                      :dns_name:
+                        :name: DNSName
+                        :type: :string
+                        :required: true
+                        :position: 1
+                      :evaluate_target_health:
+                        :name: EvaluateTargetHealth
+                        :type: :boolean
+                        :required: true
+                        :position: 2
+                  :health_check_id:
+                    :name: HealthCheckId
+                    :type: :string
+                    :position: 9
+  :outputs:
+    :children:
+      ChangeInfo:
+        :children:
+          Id:
+            :type: :string
+          Status:
+            :type: :string
+          SubmittedAt:
+            :type: :time
+          Comment:
+            :type: :string
+- :name: CreateHealthCheck
+  :method: :create_health_check
+  :http:
+    :verb: POST
+    :uri: /2012-12-12/healthcheck
+    :response_code: 201
+    :response_headers:
+      :location: Location
+  :inputs:
+    :caller_reference:
+      :name: CallerReference
+      :type: :string
+      :required: true
+      :position: 0
+    :health_check_config:
+      :name: HealthCheckConfig
+      :type: :hash
+      :required: true
+      :position: 1
+      :members:
+        :ip_address:
+          :name: IPAddress
+          :type: :string
+          :required: true
+          :position: 0
+        :port:
+          :name: Port
+          :type: :integer
+          :position: 1
+        :type:
+          :name: Type
+          :type: :string
+          :required: true
+          :position: 2
+        :resource_path:
+          :name: ResourcePath
+          :type: :string
+          :position: 3
+        :fully_qualified_domain_name:
+          :name: FullyQualifiedDomainName
+          :type: :string
+          :position: 4
+  :outputs:
+    :children:
+      HealthCheck:
+        :children:
+          Id:
+            :type: :string
+          CallerReference:
+            :type: :string
+          HealthCheckConfig:
+            :children:
+              IPAddress:
+                :type: :string
+              Port:
+                :type: :integer
+              Type:
+                :type: :string
+              ResourcePath:
+                :type: :string
+              FullyQualifiedDomainName:
+                :type: :string
+- :name: CreateHostedZone
+  :method: :create_hosted_zone
+  :http:
+    :verb: POST
+    :uri: /2012-12-12/hostedzone
+    :response_code: 201
+    :response_headers:
+      :location: Location
+  :inputs:
+    :name:
+      :name: Name
+      :type: :string
+      :required: true
+      :position: 0
+    :caller_reference:
+      :name: CallerReference
+      :type: :string
+      :required: true
+      :position: 1
+    :hosted_zone_config:
+      :name: HostedZoneConfig
+      :type: :hash
+      :position: 2
+      :members:
+        :comment:
+          :name: Comment
+          :type: :string
+          :position: 0
+  :outputs:
+    :children:
+      HostedZone:
+        :children:
+          Id:
+            :type: :string
+          Name:
+            :type: :string
+          CallerReference:
+            :type: :string
+          Config:
+            :children:
+              Comment:
+                :type: :string
+          ResourceRecordSetCount:
+            :type: :integer
+      ChangeInfo:
+        :children:
+          Id:
+            :type: :string
+          Status:
+            :type: :string
+          SubmittedAt:
+            :type: :time
+          Comment:
+            :type: :string
+      DelegationSet:
+        :children:
+          NameServers:
+            :ignore: true
+            :children:
+              NameServer:
+                :rename: :name_servers
+                :list: true
+                :type: :string
+- :name: DeleteHealthCheck
+  :method: :delete_health_check
+  :http:
+    :verb: DELETE
+    :uri: /2012-12-12/healthcheck/:health_check_id
+  :inputs:
+    :health_check_id:
+      :type: :string
+      :required: true
+      :position: 0
+  :outputs: {}
+- :name: DeleteHostedZone
+  :method: :delete_hosted_zone
+  :http:
+    :verb: DELETE
+    :uri: /2012-12-12/hostedzone/:id
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+      :position: 0
+      :lstrip: /hostedzone/
+  :outputs:
+    :children:
+      ChangeInfo:
+        :children:
+          Id:
+            :type: :string
+          Status:
+            :type: :string
+          SubmittedAt:
+            :type: :time
+          Comment:
+            :type: :string
+- :name: GetChange
+  :method: :get_change
+  :http:
+    :verb: GET
+    :uri: /2012-12-12/change/:id
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+      :position: 0
+      :lstrip: /change/
+  :outputs:
+    :children:
+      ChangeInfo:
+        :children:
+          Id:
+            :type: :string
+          Status:
+            :type: :string
+          SubmittedAt:
+            :type: :time
+          Comment:
+            :type: :string
+- :name: GetHealthCheck
+  :method: :get_health_check
+  :http:
+    :verb: GET
+    :uri: /2012-12-12/healthcheck/:health_check_id
+  :inputs:
+    :health_check_id:
+      :type: :string
+      :required: true
+      :position: 0
+  :outputs:
+    :children:
+      HealthCheck:
+        :children:
+          Id:
+            :type: :string
+          CallerReference:
+            :type: :string
+          HealthCheckConfig:
+            :children:
+              IPAddress:
+                :type: :string
+              Port:
+                :type: :integer
+              Type:
+                :type: :string
+              ResourcePath:
+                :type: :string
+              FullyQualifiedDomainName:
+                :type: :string
+- :name: GetHostedZone
+  :method: :get_hosted_zone
+  :http:
+    :verb: GET
+    :uri: /2012-12-12/hostedzone/:id
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+      :position: 0
+      :lstrip: /hostedzone/
+  :outputs:
+    :children:
+      HostedZone:
+        :children:
+          Id:
+            :type: :string
+          Name:
+            :type: :string
+          CallerReference:
+            :type: :string
+          Config:
+            :children:
+              Comment:
+                :type: :string
+          ResourceRecordSetCount:
+            :type: :integer
+      DelegationSet:
+        :children:
+          NameServers:
+            :ignore: true
+            :children:
+              NameServer:
+                :rename: :name_servers
+                :list: true
+                :type: :string
+- :name: ListHealthChecks
+  :method: :list_health_checks
+  :http:
+    :verb: GET
+    :uri: /2012-12-12/healthcheck?marker=:marker&maxitems=:max_items
+  :inputs:
+    :marker:
+      :type: :string
+      :position: 0
+    :max_items:
+      :type: :integer
+      :position: 1
+  :outputs:
+    :children:
+      HealthChecks:
+        :ignore: true
+        :children:
+          HealthCheck:
+            :rename: :health_checks
+            :list: true
+            :children:
+              Id:
+                :type: :string
+              CallerReference:
+                :type: :string
+              HealthCheckConfig:
+                :children:
+                  IPAddress:
+                    :type: :string
+                  Port:
+                    :type: :integer
+                  Type:
+                    :type: :string
+                  ResourcePath:
+                    :type: :string
+                  FullyQualifiedDomainName:
+                    :type: :string
+      Marker:
+        :type: :string
+      IsTruncated:
+        :type: :boolean
+      NextMarker:
+        :type: :string
+      MaxItems:
+        :type: :string
+- :name: ListHostedZones
+  :method: :list_hosted_zones
+  :http:
+    :verb: GET
+    :uri: /2012-12-12/hostedzone?marker=:marker&maxitems=:max_items
+  :inputs:
+    :marker:
+      :type: :string
+      :position: 0
+    :max_items:
+      :type: :integer
+      :position: 1
+  :outputs:
+    :children:
+      HostedZones:
+        :ignore: true
+        :children:
+          HostedZone:
+            :rename: :hosted_zones
+            :list: true
+            :children:
+              Id:
+                :type: :string
+              Name:
+                :type: :string
+              CallerReference:
+                :type: :string
+              Config:
+                :children:
+                  Comment:
+                    :type: :string
+              ResourceRecordSetCount:
+                :type: :integer
+      Marker:
+        :type: :string
+      IsTruncated:
+        :type: :boolean
+      NextMarker:
+        :type: :string
+      MaxItems:
+        :type: :integer
+- :name: ListResourceRecordSets
+  :method: :list_resource_record_sets
+  :http:
+    :verb: GET
+    :uri: /2012-12-12/hostedzone/:hosted_zone_id/rrset?type=:start_record_type&name=:start_record_name&identifier=:start_record_identifier&maxitems=:max_items
+  :inputs:
+    :hosted_zone_id:
+      :type: :string
+      :required: true
+      :position: 0
+      :lstrip: /hostedzone/
+    :start_record_name:
+      :type: :string
+      :position: 1
+    :start_record_type:
+      :type: :string
+      :position: 2
+    :start_record_identifier:
+      :type: :string
+      :position: 3
+    :max_items:
+      :type: :integer
+      :position: 4
+  :outputs:
+    :children:
+      ResourceRecordSets:
+        :ignore: true
+        :children:
+          ResourceRecordSet:
+            :rename: :resource_record_sets
+            :list: true
+            :children:
+              Name:
+                :type: :string
+              Type:
+                :type: :string
+              SetIdentifier:
+                :type: :string
+              Weight:
+                :type: :integer
+              Region:
+                :type: :string
+              Failover:
+                :type: :string
+              TTL:
+                :type: :integer
+              ResourceRecords:
+                :ignore: true
+                :children:
+                  ResourceRecord:
+                    :rename: :resource_records
+                    :list: true
+                    :children:
+                      Value:
+                        :type: :string
+              AliasTarget:
+                :children:
+                  HostedZoneId:
+                    :type: :string
+                  DNSName:
+                    :type: :string
+                  EvaluateTargetHealth:
+                    :type: :boolean
+              HealthCheckId:
+                :type: :string
+      IsTruncated:
+        :type: :boolean
+      NextRecordName:
+        :type: :string
+      NextRecordType:
+        :type: :string
+      NextRecordIdentifier:
+        :type: :string
+      MaxItems:
+        :type: :integer

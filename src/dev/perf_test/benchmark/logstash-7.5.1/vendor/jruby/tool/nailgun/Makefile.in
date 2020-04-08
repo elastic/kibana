@@ -1,0 +1,23 @@
+SRC      = src/c/ng.c
+CC       = @CC@
+WIN32_CC = /usr/local/mingw32/bin/mingw32-gcc
+
+CFLAGS = @CFLAGS@ @LIBS@ -s -O3
+
+ng: Makefile $(SRC)
+	@echo "Building ng client.  To build a Windows binary, type 'make ng.exe'"
+	${CC} ${CFLAGS} -o ng src/c/ng.c
+
+ng.exe: $(SRC)
+	# any idea why the command line is so sensitive to the order of
+	# the arguments?  If CFLAGS is at the beginning, it won't link.
+	${WIN32_CC} -o ng.exe src/c/ng.c ${CFLAGS}
+	
+clean:
+	@echo "If you have a Windows binary, 'make clean' won't delete it."
+	@echo "You must remove this manually.  Most users won't have MinGW"
+	@echo "installed - so I'd rather not delete something they can't rebuild."
+	rm -rf ng ng.dSYM config.status config.log Makefile
+#	rm ng.exe
+
+Makefile: Makefile.in

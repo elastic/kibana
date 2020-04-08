@@ -1,0 +1,13 @@
+class <%= name %>::package::remove {
+  $version = "<%= version %>"
+  $iteration = "<%= iteration %>"
+
+  fail("DO NOT USE THIS. IT IS NOT WELL DEFINED YET.")
+
+  file {
+<% paths.each do |path| -%>
+    "<%= fixpath(path) %>":
+      ensure => absent;
+<% end # paths.each -%>
+  }
+}

@@ -1,0 +1,414 @@
+= Connecting to a database
+
+All Sequel activity begins with connecting to a database, which creates a
+Sequel::Database object. The Database object is used to create datasets and execute
+queries. Sequel provides a powerful and flexible mechanism for connecting to
+databases.  There are two main ways to establish database connections:
+
+1. Using the Sequel.connect method
+2. Using the specialized adapter method (Sequel.sqlite, Sequel.postgres, etc.)
+
+The connection options needed depend on the adapter being used, though most adapters
+share the same basic connection options.
+
+If you are only connecting to a single database, it is recommended that you store the
+database object in a constant named DB.  This is not required, but it is the
+convention that most Sequel code uses.
+
+== Using the Sequel.connect method
+
+The connect method usually takes a well-formed URI, which is parsed into connection options needed to open
+the database connection.  The scheme/protocol part of the URI is used to determine the adapter to use:
+
+  DB = Sequel.connect('postgres://user:password@localhost/blog') # Uses the postgres adapter
+
+You can use URI query parameters to specify options:
+
+  DB = Sequel.connect('postgres://localhost/blog?user=user&password=password')
+
+You can also pass an additional option hash with the connection string:
+
+  DB = Sequel.connect('postgres://localhost/blog', user: 'user', password: 'password')
+
+You can also just use an options hash without a connection string.  If you do this, you must
+provide the adapter to use:
+
+  DB = Sequel.connect(adapter: 'postgres', host: 'localhost', database: 'blog', user: 'user', password: 'password')
+
+All of the above statements are equivalent.
+
+== Using the specialized adapter method
+
+The specialized adapter method is similar to Sequel.connect with an options hash, except that it
+automatically populates the :adapter option and assumes the first argument is the :database option,
+unless the first argument is a hash. So the following statements are equivalent to the previous statements.
+
+  DB = Sequel.postgres('blog', host: 'localhost', user: 'user', password: 'password')
+  DB = Sequel.postgres(host: 'localhost', user: 'user', password: 'password', database: 'blog')
+
+Note that using an adapter method forces the use of the specified adapter, not a database type, even
+though some adapters have the same name as the database type.  So if you
+want to connect to SQLite, for example, you can do so using the sqlite, amalgalite, and jdbc adapters.
+If you want to connect to SQLite on JRuby using the jdbc adapter, you should not use <tt>Sequel.sqlite</tt>
+for example, as that uses the C-based sqlite3 gem. Instead, the <tt>Sequel.jdbc</tt> would be appropriate (though
+as mentioned below, using <tt>Sequel.connect</tt> is recommended instead of <tt>Sequel.jdbc</tt>). 
+
+== Passing a block to either method
+
+Both the Sequel.connect method and the specialized adapter methods take a block.  If you
+provide a block to the method, Sequel will create a Database object and pass it as an argument
+to the block.  When the block returns, Sequel will disconnect the database connection.
+For example:
+
+  Sequel.connect('sqlite://blog.db'){|db| puts db[:users].count}  
+
+Note that if you do not pass a block to Sequel.connect, Sequel will automatically retain a
+reference to the object in the <tt>Sequel::DATABASES</tt> array.  So calling +Sequel.connect+
+multiple times (say once per request), can result in a memory leak.  For any application where
+database access is needed for a long period of time, it's best to store the result of
+Sequel.connection in a constant, as recommended above.
+
+== Using the Sequel.connect method
+== General connection options
+
+These options are shared by all adapters unless otherwise noted.
+
+:adapter :: The adapter to use
+:database :: The name of the database to which to connect
+:extensions :: Extensions to load into this Database instance.  Can be a symbol, array of symbols,
+               or string with extensions separated by columns.  These extensions are loaded after
+               connections are made by the :preconnect option.
+:cache_schema :: Whether schema should be cached for this database (true by default)
+:default_string_column_size :: The default size for string columns (255 by default)
+:host :: The hostname of the database server to which to connect
+:keep_reference :: Whether to keep a reference to the database in Sequel::DATABASES (true by default)
+:logger :: A specific SQL logger to log to
+:loggers :: An array of SQL loggers to log to
+:log_connection_info :: Whether to include connection information in log messages (false by default)
+:log_warn_duration :: The amount of seconds after which the queries are logged at :warn level
+:password :: The password for the user account
+:preconnect :: Whether to automatically make the maximum number of connections when setting up the pool.
+               Can be set to "concurrently" to connect in parallel.
+:preconnect_extensions :: Similar to the :extensions option, but loads the extensions before the
+                          connections are made by the :preconnect option.
+:quote_identifiers :: Whether to quote identifiers.
+:servers :: A hash with symbol keys and hash or proc values, used with primary/replica and sharded database configurations
+:sql_log_level :: The level at which to issue queries to the loggers (:info by default)
+:test :: Whether to test that a valid database connection can be made (true by default)
+:user :: The user account name to use logging in
+
+The following options can be specified and are passed to the database's internal connection pool.
+
+:after_connect :: A callable object called after each new connection is made, with the
+                  connection object (and server argument if the callable accepts 2 arguments),
+                  useful for customizations that you want to apply to all connections (nil by default).
+:max_connections :: The maximum size of the connection pool (4 connections by default on most databases)
+:pool_timeout :: The number of seconds to wait if a connection cannot be acquired before raising an error (5 seconds by default)
+:single_threaded :: Whether to use a single-threaded (non-thread safe) connection pool
+
+== Adapter specific connection options
+
+The following sections explain the options and behavior specific to each adapter.
+If the library the adapter requires is different from the name of the adapter
+scheme, it is listed specifically, otherwise you can assume that is requires the
+library with the same name.
+
+=== ado
+
+Requires: win32ole 
+
+The ADO adapter provides connectivity to ADO databases in Windows. It relies
+on WIN32OLE library, so it isn't usable on other operating systems (except
+possibly through WINE, but that's unlikely).
+
+The following options are supported:
+
+:command_timeout :: Sets the time in seconds to wait while attempting
+                    to execute a command before cancelling the attempt and generating
+                    an error. Specifically, it sets the ADO CommandTimeout property.
+:driver :: The driver to use in the ADO connection string.  If not provided, a default
+           of "SQL Server" is used.
+:conn_string :: The full ADO connection string.  If this is provided,
+                the usual options are ignored.
+:provider :: Sets the Provider of this ADO connection (for example, "SQLOLEDB").
+             If you don't specify a provider, the default one used by WIN32OLE
+             has major problems, such as creating a new native database connection
+             for every query, which breaks things such as transactions and temporary tables.
+
+Pay special attention to the :provider option, as without specifying a provider,
+many things will be broken.  The SQLNCLI10 and SQLNCLI11 providers work well if you
+are connecting to Microsoft SQL Server, but it is not the default as it depends on
+those providers being installed.
+
+Example connections:
+
+  # SQL Server
+  Sequel.connect('ado:///sequel_test?host=server%5cdb_instance')
+  Sequel.connect('ado://user:password@server/database?host=server%5cdb_instance&provider=SQLNCLI10')
+  # Access 2007
+  Sequel.ado(conn_string: 'Provider=Microsoft.ACE.OLEDB.12.0;Data Source=drive:\\path\\filename.accdb')
+  # Access 2000
+  Sequel.ado(conn_string: 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=drive:\\path\\filename.mdb')
+  # Excel 2000 (for table names, use a dollar after the sheet name, e.g. Sheet1$)
+  Sequel.ado(conn_string: 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=drive:\\path\\filename.xls;Extended Properties=Excel 8.0;')
+
+=== amalgalite 
+
+Amalgalite is an ruby extension that provides self contained access to SQLite,
+so you don't need to install SQLite separately.  As amalgalite is a file backed
+database, the :host, :user, and :password options are not used.
+
+:database :: The name of the database file
+:timeout :: The busy timeout period given in milliseconds
+
+Without a database argument, assumes a memory database, so you can do:
+
+  Sequel.amalgalite
+
+Handles paths in the connection string similar to the SQLite adapter, so see
+the sqlite section below for details.
+
+=== ibmdb
+
+requires 'ibm_db'
+
+This connects to DB2 using IBM_DB.  This is the recommended adapter if you are
+using a C-based ruby to connect to DB2.
+
+=== jdbc 
+
+Requires: java
+
+Houses Sequel's JDBC support when running on JRuby.
+Support for individual database types is done using subadapters.
+There are currently subadapters for DB2, Derby, H2, HSQLDB, JTDS,
+MySQL, Oracle, PostgreSQL, SQLAnywhere, SQLite, and SQL Server.
+For Derby, H2, HSQLDB, JTDS, MySQL, Postgres, SQLite3
+the adapters can use the `jdbc-*` gem, for the others you need to have the `.jar` in your CLASSPATH
+or load the Java class manually before calling Sequel.connect.
+
+Note that when using a JDBC adapter, the best way to use Sequel
+is via Sequel.connect using a connection string, NOT Sequel.jdbc.  Use the JDBC connection
+string when connecting, which will be in a different format than
+the native connection string.  The connection string should start
+with 'jdbc:'.  For PostgreSQL, use 'jdbc:postgresql:', and for
+SQLite you do not need 2 preceding slashes for the database name
+(use no preceding slashes for a relative path, and one preceding
+slash for an absolute path).
+
+Sequel does no preprocessing of JDBC connection strings, it passes them directly to JDBC.
+So if you have problems getting a connection string to work, look up the 
+documentation for the JDBC driver.
+
+The jdbc adapter does not handle common options such as +:host+,
++:user+, and +:port+.  If you must use a hash of options when connecting,
+provide the full JDBC connection string as the :uri option.
+
+Example connection strings:
+
+  jdbc:sqlite::memory:
+  jdbc:postgresql://localhost/database?user=username
+  jdbc:mysql://localhost/test?user=root&password=root
+  jdbc:h2:mem:
+  jdbc:hsqldb:mem:mymemdb
+  jdbc:derby:memory:myDb;create=true
+  jdbc:sqlserver://localhost;database=sequel_test;integratedSecurity=true
+  jdbc:jtds:sqlserver://localhost/sequel_test;user=sequel_test;password=sequel_test
+  jdbc:oracle:thin:user/password@localhost:1521:database
+  jdbc:db2://localhost:3700/database:user=user;password=password;
+  jdbc:sqlanywhere://localhost?DBN=Test;UID=user;PWD=password
+
+You can also use JNDI connection strings:
+
+  jdbc:jndi:java:comp/env/jndi_resource_name
+
+The following additional options are supported:
+
+:convert_types :: If set to false, does not attempt to convert some Java types to ruby types.
+                  Setting to false roughly doubles performance when selecting large numbers of rows.
+                  Note that you can't provide this option inside the connection string (as that is passed
+                  directly to JDBC), you have to pass it as a separate option.
+:driver :: Specify the Java driver class to use to connect to the database.  This only has
+           an effect if the database type is not recognized from the connection string,
+           and only helps cases where <tt>java.sql.DriverManager.getConnection</tt> does not
+           return a connection.
+:login_timeout :: Set the login timeout on the JDBC connection (in seconds).
+:jdbc_properties :: A hash for properties to set, skips the normal connection process of using
+                    java.sql.drivermanager.getconnection and tries the backup process of using
+                    driver.new.connect for the appropriate driver.
+
+There are a few issues with specific jdbc driver gems:
+
+jdbc-h2 :: jdbc-h2 versions greater than 1.3.175 have issues with ORDER BY not working correctly in some cases.
+
+=== mysql 
+
+Requires: mysql
+
+The MySQL adapter does not support the pure-ruby mysql.rb driver, it requires the C-extension driver.
+
+The following additional options are supported:
+
+:auto_is_null :: If set to true, makes "WHERE primary_key IS NULL" select the last inserted id.
+:charset :: Same as :encoding, :encoding takes precedence.
+:compress :: Whether to compress data sent/received via the socket connection.
+:config_default_group :: The default group to read from the in the MySQL config file, defaults to "client")
+:config_local_infile :: If provided, sets the Mysql::OPT_LOCAL_INFILE option on the connection with the given value.
+:encoding :: Specify the encoding/character set to use for the connection.
+:fractional_seconds :: On MySQL 5.6.5+, this option is recognized and will include fractional seconds in
+                       time/timestamp values, as well as have the schema method create columns that can contain
+                       fractional seconds by deafult.  This option is also supported on other adapters that connect
+                       to MySQL.
+:socket :: Can be used to specify a Unix socket file to connect to instead of a TCP host and port.
+:sql_mode :: Set the sql_mode(s) for a given connection.  Can be single symbol or string,
+             or an array of symbols or strings (e.g. <tt>:sql_mode=>[:no_zero_date, :pipes_as_concat]</tt>).
+:timeout :: Sets the wait_timeout for the connection, defaults to 1 month.
+:read_timeout :: Set the timeout in seconds for reading back results to a query.
+:connect_timeout :: Set the timeout in seconds before a connection attempt is abandoned
+                    (may not be supported when using MariaDB 10.2+ client libraries).
+
+The :sslkey, :sslcert, :sslca, :sslcapath, and :sslca options (in that order) are passed to Mysql#ssl_set method
+if either the :sslca or :sslkey option is given.
+
+=== mysql2
+
+This is a newer MySQL adapter that does typecasting in C, so it is often faster than the
+mysql adapter.  The options given are passed to Mysql2::Client.new, see the mysql2 documentation
+for details on what options are supported.
+
+=== odbc 
+
+The ODBC adapter allows you to connect to any database with the appropriate ODBC drivers installed.  
+The :database option given ODBC database should be the DSN (Descriptive Service Name) from the ODBC configuration.
+
+  Sequel.odbc('mydb', :user => "user", :password => "password")
+
+The :host and :port options are not respected. The following additional options are supported:
+
+:db_type :: Can be specified as 'mssql', 'progress', or 'db2' to use SQL syntax specific to those databases.
+:drvconnect :: Can be given an ODBC connection string, and will use ODBC::Database#drvconnect to
+               do the connection.  Typical usage would be: <tt>Sequel.odbc(:drvconnect=>'driver={...};...')</tt>
+
+=== oracle 
+
+Requires: oci8
+
+The following additional options are supported:
+
+:autosequence :: Set to true to use Sequel's conventions to guess the sequence to use for datasets.  False
+                 by default.
+:prefetch_rows :: The number of rows to prefetch.  Defaults to 100, a larger number can be specified
+                  and may improve performance when retrieving a large number of rows.
+:privilege :: The Oracle privilege level.
+
+=== postgres
+
+Requires: pg (or postgres-pr/postgres-compat if pg is not available)
+
+The Sequel postgres adapter works with the pg and postgres-pr ruby libraries.
+The pg library is the best supported, as it supports real bound variables and prepared statements.
+If the pg library is being used, Sequel will also attempt to load the sequel_pg library, which is
+a C extension that optimizes performance when Sequel is used with pg.  All users of Sequel who
+use pg are encouraged to install sequel_pg.  For users who want to use postgres-pr to avoid issues
+with C extensions, it is recommended to use jeremyevans-postgres-pr, which fixes many issues in
+the upstream postgres-pr gem, and is regularly tested with Sequel.
+
+The following additional options are supported:
+
+:charset :: Same as :encoding, :encoding takes precedence
+:convert_infinite_timestamps :: Whether infinite timestamps/dates should be converted on retrieval.  By default, no
+                                conversion is done, so an error is raised if you attempt to retrieve an infinite
+                                timestamp/date.  You can set this to :nil to convert to nil, :string to leave
+                                as a string, or :float to convert to an infinite float.
+:conn_str :: Use connection string (in form of `host=x port=y ...`). Ignores all other options, only supported with pg
+             library. See https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING and 
+             https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS for format and list of supported
+             options.
+:connect_timeout :: Set the number of seconds to wait for a connection (default 20, only respected
+                    if using the pg library).
+:driver_options :: A hash of options to pass to the underlying driver (only respected if using the pg library)
+:encoding :: Set the client_encoding to the given string
+:notice_receiver :: A proc that be called with the PGresult objects that have notice or warning messages.
+                    The default notice receiver just prints the messages to stderr, but this can be used
+                    to handle notice/warning messages differently.  Only respected if using the pg library).
+:sslmode :: Set to 'disable', 'allow', 'prefer', 'require', 'verify-ca', or 'verify-full' to choose how to treat SSL (only
+            respected if using the pg library)
+:sslrootcert :: Specify the path to the root SSL certificate to use.
+:search_path :: Set to the schema search_path.  This can either be a single string containing the schemas
+                separated by commas (for use via a URL: <tt>postgres:///?search_path=schema1,schema2</tt>), or it
+                can be an array of strings (for use via an option:
+                <tt>Sequel.postgres(:search_path=>['schema1', 'schema2'])</tt>).
+:use_iso_date_format :: This can be set to false to not force the ISO date format.  Sequel forces
+                        it by default to allow for an optimization.
+
+=== sqlanywhere
+
+The sqlanywhere driver works off connection strings, so a connection string
+is built based on the url/options hash provided.  The following additional
+options are respected:
+
+:commlinks :: specify the CommLinks connection string option
+:conn_string :: specify the connection string to use, ignoring all other options
+:connection_name :: specify the ConnectionName connection string option
+:encoding :: specify the CharSet connection string option
+
+=== sqlite
+
+Requires: sqlite3
+
+As SQLite is a file-based database, the :host and :port options are ignored, and
+the :database option should be a path to the file.
+
+Examples:
+
+  # In Memory databases:
+  Sequel.sqlite
+  Sequel.connect('sqlite:/') 
+  Sequel.sqlite(':memory:')
+
+  # Relative Path
+  Sequel.sqlite('blog.db')
+  Sequel.sqlite('./blog.db')
+  Sequel.connect('sqlite://blog.db')
+
+  # Absolute Path
+  Sequel.sqlite('/var/sqlite/blog.db')
+  Sequel.connect('sqlite:///var/sqlite/blog.db') 
+
+The following additional options are supported:
+
+:readonly :: open database in read-only mode
+:timeout :: the busy timeout to use in milliseconds (default: 5000).
+
+Note that SQLite memory databases are restricted to a single connection by
+default.  This is because SQLite does not allow multiple connections to
+a single memory database.  For this reason, Sequel sets the maximum number
+of connections in the connection pool to 1 by default when an SQLite memory
+database is used.  Attempts to force the use of more than 1 connection
+can result in weird behavior, since the connections will be to separate
+memory databases.
+
+=== tinytds
+
+Requires: tiny_tds
+
+The connection options are passed directly
+to tiny_tds, except that the tiny_tds :username option is set to
+the Sequel :user option.  If you want to use an entry in the freetds.conf file, you
+should specify the :dataserver option with that name as the value.  Some other
+options that you may want to set are :login_timeout, :timeout, :tds_version, :azure,
+:appname, and :encoding, see the tiny_tds README for details.
+
+Other Sequel specific options:
+
+:ansi :: Set to true to enable the ANSI compatibility settings when connecting
+         (ANSI_NULLS, ANSI_PADDING, ANSI_WARNINGS, ANSI_NULL_DFLT_ON, QUOTED_IDENTIFIER,
+         CONCAT_NULL_YIELDS_NULL).
+:server_version :: Override the server version to use (9000000 = SQL Server 2005).
+                   This also works on any other adapter that connects to Microsoft
+                   SQL Server.
+:textsize :: Override the default TEXTSIZE setting for this connection.  The FreeTDS
+             default is small (around 64000 bytes), but can be set up to around 2GB.
+             This should be specified as an integer.  If you plan on setting large
+             text or blob values via tinytds, you should use this option or modify
+             your freetds.conf file.

@@ -1,0 +1,31 @@
+= Improvements
+
+* Database#copy_into in the jdbc/postgresql adapter now works
+  correctly when using multibyte characters in strings.
+
+* The alter_table add_foreign_key method is now reversible when the
+  :foreign_key_constraint_name option is used.
+
+* The jdbc/h2 and jdbc/hsqldb adapters now respect the
+  :foreign_key_constraint_name option.
+
+* Calling Model.freeze on an already frozen model no longer raises
+  an error.
+
+* An unnecessary database query is now avoided when loading the
+  pg_inet extension when the pg_array extension is already loaded.
+
+* A better exception message is now used when migrating with an
+  empty migration directory.
+
+= Backwards Compatibility
+
+* Model.allowed_columns has been removed. Use the whitelist_security
+  plugin if you want to call it.
+
+* Model use_after_commit_rollback class and instance accessors have
+  been removed.
+
+* Support for the Model#_before_validation method has been removed.
+
+* The private Model.plugin_module_defined? method has been removed.

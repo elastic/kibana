@@ -1,0 +1,99 @@
+#!/bin/bash
+
+unset CDPATH
+. "$(cd `dirname $0`/..; pwd)/bin/logstash.lib.sh"
+setup
+
+if [ -z "$1" ]; then
+  if [ -r /etc/logstash/startup.options ]; then
+    OPTIONS_PATH=/etc/logstash/startup.options
+  elif [ -r "${LOGSTASH_HOME}"/config/startup.options ]; then
+    OPTIONS_PATH="${LOGSTASH_HOME}"/config/startup.options
+  fi
+elif [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+  echo "Usage: system-install [OPTIONSFILE] [STARTUPTYPE] [VERSION]"
+  echo
+  echo "NOTE: These arguments are ordered, and co-dependent"
+  echo
+  echo "OPTIONSFILE: Full path to a startup.options file"
+  echo "OPTIONSFILE is required if STARTUPTYPE is specified, but otherwise looks first"
+  echo "in $LOGSTASH_HOME/config/startup.options and then /etc/logstash/startup.options"
+  echo "Last match wins"
+  echo
+  echo "STARTUPTYPE: e.g. sysv, upstart, systemd, etc."
+  echo "OPTIONSFILE is required to specify a STARTUPTYPE."
+  echo
+  echo "VERSION: The specified version of STARTUPTYPE to use.  The default is usually"
+  echo "preferred here, so it can safely be omitted."
+  echo "Both OPTIONSFILE & STARTUPTYPE are required to specify a VERSION."
+  echo
+  echo "For more information, see https://github.com/jordansissel/pleaserun"
+  exit 0
+else
+  if [ -r "$1" ]; then
+    echo "Using provided startup.options file: ${1}"
+    OPTIONS_PATH="$1"
+  else
+    echo "$1 is not a file path"
+    echo "To manually specify a startup style, put the path to startup.options as the "
+    echo "first argument, followed by the startup style (sysv, upstart, systemd)"
+    exit 1
+  fi
+fi
+
+# Read in the env vars in the selected startup.options file...
+. "${OPTIONS_PATH}"
+
+old_IFS=$IFS
+IFS=$'\n'
+lines=($(grep -v ^# ${OPTIONS_PATH} | tr -d '"' | grep -v '^LS_OPTS=' | grep \= | grep -v '\=$' | grep -v '\=\"\"$'))
+IFS=$old_IFS
+
+ENV_VAR_ARGS=()
+
+for line in ${lines[@]}; do
+  var=$(echo $line | awk -F\= '{print $1}')
+  if [ "x${!var}" != "x" ]; then
+    ENV_VAR_ARGS+=('--environment-variables')
+    ENV_VAR_ARGS+=("${var}=${!var}")
+  fi
+done
+
+# bin/logstash-plugin is a short lived ruby script thus we can use aggressive "faster starting JRuby options"
+# see https://github.com/jruby/jruby/wiki/Improving-startup-time
+export JRUBY_OPTS="$JRUBY_OPTS -J-XX:+TieredCompilation -J-XX:TieredStopAtLevel=1 -J-noverify -X-C -Xcompile.invokedynamic=false"
+
+tempfile=$(mktemp)
+if [ "x${PRESTART}" == "x" ]; then
+  opts=("--log" "$tempfile" "--overwrite" "--install" "--name" "${SERVICE_NAME}" "--user" "${LS_USER}" "--group" "${LS_GROUP}" "--description" "${SERVICE_DESCRIPTION}" "--nice" "${LS_NICE}" "--limit-open-files" "${LS_OPEN_FILES}")
+else
+  opts=("--log" "$tempfile" "--overwrite" "--install" "--name" "${SERVICE_NAME}" "--user" "${LS_USER}" "--group" "${LS_GROUP}" "--description" "${SERVICE_DESCRIPTION}" "--nice" "${LS_NICE}" "--limit-open-files" "${LS_OPEN_FILES}" "--prestart" "${PRESTART}")
+fi
+
+if [[ $2 ]]; then
+  echo "Manually creating startup for specified platform: ${2}"
+  opts+=('--platform')
+  opts+=($2)
+fi
+
+if [[ $3 ]]; then
+  echo "Manually creating startup for specified platform (${2}) version: ${3}"
+  opts+=('--version')
+  opts+=($3)
+fi
+
+allopts=("${ENV_VAR_ARGS[@]}" "${opts[@]}")
+program="$(cd `dirname $0`/..; pwd)/bin/logstash"
+
+$(ruby_exec "${LOGSTASH_HOME}/lib/systeminstall/pleasewrap.rb" "${allopts[@]}" ${program} ${LS_OPTS})
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+  cat $tempfile
+  echo "Unable to install system startup script for Logstash."
+else
+  echo "Successfully created system startup script for Logstash"
+fi
+rm $tempfile
+
+exit $exit_code

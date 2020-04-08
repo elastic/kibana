@@ -1,0 +1,132 @@
+= New Features
+
+* A no_auto_literal_strings extension has been added, which removes the
+  automatic usage of strings in filter arguments as literal SQL code.
+  By default, if you do:
+
+    DB[:albums].where("name > 'N'")
+
+  By default Sequel will treat "name > 'N'" as SQL code.  However,
+  this makes it much easier to introduce SQL injection:
+
+    # SQL Injection vulnerability in default Sequel
+    DB[:albums].where("name > 'params[:letter]'")
+
+  Sequel does support using placeholders when using literal strings:
+
+    # Safe in default Sequel
+    DB[:albums].where("name > ?", params[:letter])
+
+  However, if you forget to use placeholders, you can end up with SQL
+  injection.  Accidental usage of filter strings derived from user
+  input as literal SQL code is probably the most common SQL injection
+  vector in applications using Sequel.
+
+  With the no_auto_literal_strings extension, passing a plain string
+  as the first or only argument to a filter method raises an
+  exception.  If you want to use literal SQL code, you have to do so
+  explicitly:
+
+    DB[:albums].where(Sequel.lit("name > 'N'"))
+
+  You can also specify placeholders when using Sequel.lit:
+
+    DB[:albums].where(Sequel.lit("name > ?", params[:letter]))
+
+  Note that in many cases, you can avoid using literal SQL strings
+  completely:
+
+    DB[:albums].where{|v| v.name > params[:letter]}
+
+* one_through_one associations now support a setter method:
+
+    Foo.one_through_one :bar
+
+    foo = Foo[1]
+    foo.bar = Bar[2]
+    foo.bar = nil
+
+  This will check the current entry in the join table, and based on
+  the argument and the current entry, run a DELETE, INSERT, or UPDATE
+  query, or take no action if the join table is already in the
+  correct state.
+
+* Model.default_association_options has been added, which supports
+  default options for all future associations.  You can use this to
+  do:
+
+    Model.default_association_options = {:read_only=>true}
+
+  Which makes associations not create modification methods by default.
+  You could still create the modification methods by passing
+  :read_only=>true when creating association.
+
+* The tactical_eager_loading plugin now supports two additional
+  options when calling an association method: :eager and
+  :eager_reload. Example:
+
+    artist = Artist.all.first
+
+    # Loads all albums for all of the artists,
+    # and all tracks for all of those albums
+    artist.albums(:eager=>:tracks)
+
+    # Reload the artists association for all artists
+    artist.albums(:eager_reload=>true)
+
+  You can also use the :eager option for an eager loading callback:
+
+    # Eagerly load the albums with names starting with A-M
+    artist.albums(:eager=>proc{|ds| ds.where(:name > 'N')})
+
+* The association_pks plugin now supports an :association_pks_nil
+  association option in the association_pks setter, for determining
+  how nil values should be handled.
+
+  In Sequel <4.31.0, if you provided nil, it would either raise an
+  exception immediately if :delay_pks was not set, or on saving if
+  :delay_pks was set.
+
+  In Sequel 4.31.0, if :delay_pks was not set, it would remove all
+  associated rows.  If :delay_pks was set, it would do nothing.
+
+  You can now set :association_pks_nil=>:remove to remove all
+  associated values on nil, or :association_pks_nil=>:ignore to ignore
+  a nil value passed to the method.  Without :association_pks_nil set,
+  an exception will be raised.
+
+* Dataset#delete_from has been added on MySQL, allowing deletions from
+  multiple tables in a single query:
+
+    DB[:a].join(:b, :a_id=>:id).delete_from(:a, :b).delete
+    # DELETE a, b FROM a INNER JOIN b ON (b.a_id = a.id)
+
+* The JDBC schema parser now includes a :remarks entry for each
+  column, which contains comments on the column.
+
+= Other Improvements
+
+* The setter method added by the association_pks plugin now handles
+  the empty array correctly when :delay_pks is set.  Previously, if
+  the empty array was passed, Sequel made no modifications in this
+  case.  Sequel now correctly removes all associated values if an
+  empty array is passed.
+
+* The eager_each plugin now handles eager loading when using
+  Dataset#first and related methods.  Previously, the behavior was
+  unspecified. In Sequel <4.27.0 Dataset#first did eager loading
+  correctly in the eager case, but incorrectly in the eager_graph
+  case.  In Sequel 4.27.0-4.31.0, it did not do eager loading in
+  either case.
+
+* The tactical_eager_loading plugin will not automatically eager load
+  if passing a proc or block to an association method, since the proc
+  or block could be specific to the receiver.
+
+* Sequel now uses a mutex to synchronize access to the association
+  cache on MRI, as it does on other ruby implementations.
+
+= Backwards Compatibility
+
+* See above for changes in eager_each and association_pks plugin
+  behavior.

@@ -1,0 +1,4 @@
+#!/usr/bin/env jruby
+
+# Just load jgem, since that's what RubyGems updates.
+load File.join(File.dirname(__FILE__), 'jgem')

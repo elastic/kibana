@@ -1,0 +1,53 @@
+{
+  "_comment": "Auto scale example from https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-activity-log-schema",
+  "caller": "Microsoft.Insights/autoscaleSettings",
+  "channels": "Admin, Operation",
+  "claims": {
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/spn": "Microsoft.Insights/autoscaleSettings"
+  },
+  "correlationId": "fc6a7ff5-ff68-4bb7-81b4-3629212d03d0",
+  "description": "The autoscale engine attempting to scale resource '/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/Microsoft.ClassicCompute/domainNames/myResourceGroup/slots/Production/roles/myResource' from 3 instances count to 2 instances count.",
+  "eventDataId": "a5b92075-1de9-42f1-b52e-6f3e4945a7c7",
+  "eventName": {
+    "value": "AutoscaleAction",
+    "localizedValue": "AutoscaleAction"
+  },
+  "category": {
+    "value": "Autoscale",
+    "localizedValue": "Autoscale"
+  },
+  "id": "/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/microsoft.insights/autoscalesettings/myResourceGroup-Production-myResource-myResourceGroup/events/a5b92075-1de9-42f1-b52e-6f3e4945a7c7/ticks/636361956518681572",
+  "level": "Informational",
+  "resourceGroupName": "myResourceGroup",
+  "resourceProviderName": {
+    "value": "microsoft.insights",
+    "localizedValue": "microsoft.insights"
+  },
+  "resourceId": "/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/microsoft.insights/autoscalesettings/myResourceGroup-Production-myResource-myResourceGroup",
+  "resourceType": {
+    "value": "microsoft.insights/autoscalesettings",
+    "localizedValue": "microsoft.insights/autoscalesettings"
+  },
+  "operationId": "fc6a7ff5-ff68-4bb7-81b4-3629212d03d0",
+  "operationName": {
+    "value": "Microsoft.Insights/AutoscaleSettings/Scaledown/Action",
+    "localizedValue": "Microsoft.Insights/AutoscaleSettings/Scaledown/Action"
+  },
+  "properties": {
+    "Description": "The autoscale engine attempting to scale resource '/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/Microsoft.ClassicCompute/domainNames/myResourceGroup/slots/Production/roles/myResource' from 3 instances count to 2 instances count.",
+    "ResourceName": "/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/Microsoft.ClassicCompute/domainNames/myResourceGroup/slots/Production/roles/myResource",
+    "OldInstancesCount": "3",
+    "NewInstancesCount": "2",
+    "LastScaleActionTime": "Fri, 21 Jul 2017 01:00:51 GMT"
+  },
+  "status": {
+    "value": "Succeeded",
+    "localizedValue": "Succeeded"
+  },
+  "subStatus": {
+    "value": null
+  },
+  "eventTimestamp": "2017-07-21T01:00:51.8681572Z",
+  "submissionTimestamp": "2017-07-21T01:00:52.3008754Z",
+  "subscriptionId": "mySubscriptionID"
+}

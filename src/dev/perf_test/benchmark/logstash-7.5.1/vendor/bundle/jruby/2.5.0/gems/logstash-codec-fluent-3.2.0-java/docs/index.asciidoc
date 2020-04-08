@@ -1,0 +1,43 @@
+:plugin: fluent
+:type: codec
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Fluent codec plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This codec handles fluentd's msgpack schema.
+
+For example, you can receive logs from `fluent-logger-ruby` with:
+[source,ruby]
+    input {
+      tcp {
+        codec => fluent
+        port => 4000
+      }
+    }
+
+And from your ruby code in your own application:
+[source,ruby]
+    logger = Fluent::Logger::FluentLogger.new(nil, :host => "example.log", :port => 4000)
+    logger.post("some_tag", { "your" => "data", "here" => "yay!" })
+
+Notes:
+
+* the fluent uses a second-precision time for events, so you will never see
+  subsecond precision on events processed by this codec.
+

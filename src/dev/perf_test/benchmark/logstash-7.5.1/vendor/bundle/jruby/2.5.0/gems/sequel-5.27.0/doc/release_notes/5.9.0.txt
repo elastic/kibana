@@ -1,0 +1,99 @@
+= New Features
+
+* An escaped_like extension has been added, for the creation of
+  LIKE/ILIKE expressions with placeholders in patterns without
+  access to a dataset.  This adds escaped_like and escaped_ilike
+  methods to the same Sequel expression objects that support like
+  and ilike.  These methods take two arguments, the first being
+  the pattern, with ? placeholders, and the second being the
+  placeholder value (which can be an array for multiple
+  placeholders):
+
+    Sequel.extension :escaped_like
+    DB[:table].where{string_column.escaped_like('?%', user_input)}
+    # user_input is 'foo':
+    #  SELECT * FROM table WHERE string_column LIKE 'foo%'
+    # user_input is '%foo':
+    #  SELECT * FROM table WHERE string_column LIKE '\%foo%'
+
+* Generated columns on MySQL 5.7+ and MariaDB 5.2+ are now supported
+  using the :generated_always_as option when creating the column.
+  The :generated_type option can also be used to specify the type of
+  generated column (virtual or stored).  Examples:
+
+    DB.add_column :t, :c, Integer, generated_always_as: Sequel[:a]+'b'
+    # ALTER TABLE `t` ADD COLUMN `c` varchar(255)
+    # GENERATED ALWAYS AS (CONCAT(`a`, 'b'))
+
+    DB.add_column :t, :c, Integer, generated_always_as: Sequel[:a]+'b',
+      generated_type: :virtual
+    # ALTER TABLE `t` ADD COLUMN `c` varchar(255)
+    # GENERATED ALWAYS AS (CONCAT(`a`, 'b')) VIRTUAL
+
+    DB.add_column :t, :c, Integer, generated_always_as: Sequel[:a]+'b',
+      generated_type: :stored
+    # ALTER TABLE `t` ADD COLUMN `c` varchar(255)
+    # GENERATED ALWAYS AS (CONCAT(`a`, 'b')) STORED
+
+* Sequel::Model.has_dataset? has been added for checking whether the
+  model class has an associated dataset.  This will generally be true
+  for most model classes, but will be false for abstract model
+  classes (such as Sequel::Model itself).
+
+* Sequel::VERSION_NUMBER has been added for easier future version
+  comparisons.  The version number for 5.9.0 is 50090.
+
+= Other Improvements
+
+* When disconnecting connections in the threaded connection pools,
+  the disconnection is performed without holding the connection
+  pool mutex, since disconnection may block.
+
+* The sharded threaded connection pool no longer deadlocks when
+  disconnecting connections if the connection_validator or
+  connection_expiration extension is used.
+
+* If a thread dies and does not check a connection back into the
+  connection pool, Sequel now disconnects the connection when it
+  detects the dead thread, instead of assuming the connection is
+  safe to be reused.
+
+* When using eager_graph with cascaded associations, a unique
+  object is now used instead of a shared object in cases where
+  using a shared object may cause further cascaded associated
+  objects to be duplicated.
+
+* On PostgreSQL, the ESCAPE modifier to the LIKE/ILIKE operators is
+  no longer used, since the default ESCAPE value is the one Sequel
+  uses.  This change was made in order to allow the LIKE/ILIKE
+  operators to work with the ANY function, as PostgreSQL does not
+  support the use of the ESCAPE modifier in such cases.
+
+* A hash argument passed to Model.nested_attributes in the
+  nested_attributes plugin is now no longer modified.
+
+* Internal data structures for eager and eager_graph datasets are now
+  frozen to avoid unintentional modification.
+
+* Nondeterministic behavior in Database#foreign_key_list with the
+  :reverse option on PostgreSQL is now avoided by using an
+  unambiguous order.
+
+* Performance has been improved slightly by avoiding unnecessary
+  hash allocations.
+
+* Performance has been improved slightly by using while instead
+  of Kernel#loop.
+
+* BigDecimal() is now used instead of BigDecimal.new(), as the
+  latter has been deprecated.
+
+* The jdbc adapter now avoids referencing ::NativeException on JRuby
+  9.2+, since JRuby has deprecated it.  It is still used on older
+  versions of JRuby, since some JRuby 1.7 code may still require it.
+
+* Sequel now works around multiple Date/Time conversion bugs in
+  JRuby 9.2.0.0 for BC dates in the pg_extended_date_support
+  extension.  These bugs have already been fixed in JRuby, and
+  the workarounds will be removed after the release of JRuby
+  9.2.1.0.

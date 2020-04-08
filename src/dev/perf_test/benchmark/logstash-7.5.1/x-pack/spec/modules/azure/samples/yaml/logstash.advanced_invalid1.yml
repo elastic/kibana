@@ -1,0 +1,9 @@
+modules:
+  - name: azure
+    var.input.azure_event_hubs.threads: 8
+    var.input.azure_event_hubs.decorate_events: true
+    var.input.azure_event_hubs.consumer_group: logstash
+    var.input.azure_event_hubs.event_hubs:
+      - "Endpoint=sb://example1...EntityPath=insights-logs-errors"
+      - "Endpoint=sb://example2...EntityPath=insights-metrics-pt1m"
+

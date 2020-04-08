@@ -1,0 +1,11 @@
+{
+  "title": "Overall Time Range",
+  "visState": "{\"title\":\"Overall Time Range\",\"type\":\"metric\",\"params\":{\"handleNoResults\":true,\"fontSize\":\"15\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"min\",\"schema\":\"metric\",\"params\":{\"field\":\"deviceReceiptTime\",\"customLabel\":\"Start Time\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"deviceReceiptTime\",\"customLabel\":\"End Time\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "savedSearchId": "6315e7a0-34be-11e7-95dc-4f6090d732f6",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

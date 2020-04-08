@@ -1,0 +1,68 @@
+:plugin: udp
+:type: output
+:default_codec: json
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Udp output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Send events over UDP
+
+Keep in mind that UDP will lose messages.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Udp Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|Yes
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The address to send messages to
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * This is a required setting.
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+The port to send messages on
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

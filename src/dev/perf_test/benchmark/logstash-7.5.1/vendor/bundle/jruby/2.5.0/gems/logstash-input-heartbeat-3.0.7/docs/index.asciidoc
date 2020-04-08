@@ -1,0 +1,100 @@
+:plugin: heartbeat
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Heartbeat input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Generate heartbeat messages.
+
+The general intention of this is to test the performance and
+availability of Logstash.
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Heartbeat Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-count>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-message>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-threads>> |<<number,number>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-count"]
+===== `count` 
+
+  * Value type is <<number,number>>
+  * Default value is `-1`
+
+How many times to iterate.
+This is typically used only for testing purposes.
+
+[id="plugins-{type}s-{plugin}-interval"]
+===== `interval` 
+
+  * Value type is <<number,number>>
+  * Default value is `60`
+
+Set how frequently messages should be sent.
+
+The default, `60`, means send a message every 60 seconds.
+
+[id="plugins-{type}s-{plugin}-message"]
+===== `message` 
+
+  * Value type is <<string,string>>
+  * Default value is `"ok"`
+
+The message string to use in the event.
+
+If you set this to `epoch` then this plugin will use the current
+timestamp in unix timestamp (which is by definition, UTC).  It will
+output this value into a field called `clock`
+
+If you set this to `sequence` then this plugin will send a sequence of
+numbers beginning at 0 and incrementing each interval.  It will
+output this value into a field called `clock`
+
+Otherwise, this value will be used verbatim as the event message. It
+will output this value into a field called `message`
+
+[id="plugins-{type}s-{plugin}-threads"]
+===== `threads` 
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

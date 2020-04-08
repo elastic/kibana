@@ -1,0 +1,275 @@
+---
+:json_version: '1.1'
+:target_prefix: Kinesis_20131202.
+:api_version: '2013-12-02'
+:operations:
+- :name: AddTagsToStream
+  :method: :add_tags_to_stream
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    Tags:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    - :required
+  :outputs: {}
+- :name: CreateStream
+  :method: :create_stream
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    ShardCount:
+    - :integer
+    - :required
+  :outputs: {}
+- :name: DeleteStream
+  :method: :delete_stream
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DescribeStream
+  :method: :describe_stream
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    Limit:
+    - :integer
+    ExclusiveStartShardId:
+    - :string
+  :outputs:
+    StreamDescription:
+      :sym: :stream_description
+      :type: :hash
+      :members:
+        StreamName:
+          :sym: :stream_name
+          :type: :string
+        StreamARN:
+          :sym: :stream_arn
+          :type: :string
+        StreamStatus:
+          :sym: :stream_status
+          :type: :string
+        Shards:
+          :sym: :shards
+          :type: :hash
+          :members:
+            ShardId:
+              :sym: :shard_id
+              :type: :string
+            ParentShardId:
+              :sym: :parent_shard_id
+              :type: :string
+            AdjacentParentShardId:
+              :sym: :adjacent_parent_shard_id
+              :type: :string
+            HashKeyRange:
+              :sym: :hash_key_range
+              :type: :hash
+              :members:
+                StartingHashKey:
+                  :sym: :starting_hash_key
+                  :type: :string
+                EndingHashKey:
+                  :sym: :ending_hash_key
+                  :type: :string
+            SequenceNumberRange:
+              :sym: :sequence_number_range
+              :type: :hash
+              :members:
+                StartingSequenceNumber:
+                  :sym: :starting_sequence_number
+                  :type: :string
+                EndingSequenceNumber:
+                  :sym: :ending_sequence_number
+                  :type: :string
+        HasMoreShards:
+          :sym: :has_more_shards
+          :type: :boolean
+- :name: GetRecords
+  :method: :get_records
+  :inputs:
+    ShardIterator:
+    - :string
+    - :required
+    Limit:
+    - :integer
+  :outputs:
+    Records:
+      :sym: :records
+      :type: :hash
+      :members:
+        SequenceNumber:
+          :sym: :sequence_number
+          :type: :string
+        Data:
+          :sym: :data
+          :type: :blob
+        PartitionKey:
+          :sym: :partition_key
+          :type: :string
+    NextShardIterator:
+      :sym: :next_shard_iterator
+      :type: :string
+- :name: GetShardIterator
+  :method: :get_shard_iterator
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    ShardId:
+    - :string
+    - :required
+    ShardIteratorType:
+    - :string
+    - :required
+    StartingSequenceNumber:
+    - :string
+  :outputs:
+    ShardIterator:
+      :sym: :shard_iterator
+      :type: :string
+- :name: ListStreams
+  :method: :list_streams
+  :inputs:
+    Limit:
+    - :integer
+    ExclusiveStartStreamName:
+    - :string
+  :outputs:
+    StreamNames:
+      :sym: :stream_names
+      :type: :string
+    HasMoreStreams:
+      :sym: :has_more_streams
+      :type: :boolean
+- :name: ListTagsForStream
+  :method: :list_tags_for_stream
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    ExclusiveStartTagKey:
+    - :string
+    Limit:
+    - :integer
+  :outputs:
+    Tags:
+      :sym: :tags
+      :type: :hash
+      :members:
+        Key:
+          :sym: :key
+          :type: :string
+        Value:
+          :sym: :value
+          :type: :string
+    HasMoreTags:
+      :sym: :has_more_tags
+      :type: :boolean
+- :name: MergeShards
+  :method: :merge_shards
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    ShardToMerge:
+    - :string
+    - :required
+    AdjacentShardToMerge:
+    - :string
+    - :required
+  :outputs: {}
+- :name: PutRecord
+  :method: :put_record
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    Data:
+    - :blob
+    - :required
+    PartitionKey:
+    - :string
+    - :required
+    ExplicitHashKey:
+    - :string
+    SequenceNumberForOrdering:
+    - :string
+  :outputs:
+    ShardId:
+      :sym: :shard_id
+      :type: :string
+    SequenceNumber:
+      :sym: :sequence_number
+      :type: :string
+- :name: PutRecords
+  :method: :put_records
+  :inputs:
+    Records:
+    - :list:
+      - :structure:
+          Data:
+          - :blob
+          - :required
+          ExplicitHashKey:
+          - :string
+          PartitionKey:
+          - :string
+          - :required
+    - :required
+    StreamName:
+    - :string
+    - :required
+  :outputs:
+    FailedRecordCount:
+      :sym: :failed_record_count
+      :type: :integer
+    Records:
+      :sym: :records
+      :type: :hash
+      :members:
+        SequenceNumber:
+          :sym: :sequence_number
+          :type: :string
+        ShardId:
+          :sym: :shard_id
+          :type: :string
+        ErrorCode:
+          :sym: :error_code
+          :type: :string
+        ErrorMessage:
+          :sym: :error_message
+          :type: :string
+- :name: RemoveTagsFromStream
+  :method: :remove_tags_from_stream
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    TagKeys:
+    - :list:
+      - :string
+    - :required
+  :outputs: {}
+- :name: SplitShard
+  :method: :split_shard
+  :inputs:
+    StreamName:
+    - :string
+    - :required
+    ShardToSplit:
+    - :string
+    - :required
+    NewStartingHashKey:
+    - :string
+    - :required
+  :outputs: {}

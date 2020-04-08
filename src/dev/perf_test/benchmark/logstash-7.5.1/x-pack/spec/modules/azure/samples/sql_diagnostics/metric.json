@@ -1,0 +1,11 @@
+{
+  "resourceId": "/SUBSCRIPTIONS/D427EE51-17CB-441A-9363-07390D5DC79E/RESOURCEGROUPS/RG5/PROVIDERS/MICROSOFT.SQL/SERVERS/SRV12/DATABASES/DJFU48",
+  "time": "2018-01-29T01:11:00.0000000Z",
+  "metricName": "cpu_percent",
+  "maximum": 0.265,
+  "total": 0.956,
+  "minimum": 0.227,
+  "average": 0.239,
+  "timeGrain": "PT1M",
+  "count": 4
+}

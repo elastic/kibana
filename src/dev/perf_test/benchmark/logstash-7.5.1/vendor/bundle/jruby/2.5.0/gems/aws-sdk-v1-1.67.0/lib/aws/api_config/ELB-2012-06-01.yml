@@ -1,0 +1,785 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2012-06-01'
+:operations:
+- :name: AddTags
+  :method: :add_tags
+  :inputs:
+    LoadBalancerNames:
+    - :membered_list:
+      - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          - :required
+          Value:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      AddTagsResult:
+        :ignore: true
+- :name: ApplySecurityGroupsToLoadBalancer
+  :method: :apply_security_groups_to_load_balancer
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    SecurityGroups:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      ApplySecurityGroupsToLoadBalancerResult:
+        :ignore: true
+        :children:
+          SecurityGroups:
+            :ignore: true
+            :children:
+              member:
+                :rename: :security_groups
+                :list: true
+- :name: AttachLoadBalancerToSubnets
+  :method: :attach_load_balancer_to_subnets
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    Subnets:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      AttachLoadBalancerToSubnetsResult:
+        :ignore: true
+        :children:
+          Subnets:
+            :ignore: true
+            :children:
+              member:
+                :rename: :subnets
+                :list: true
+- :name: ConfigureHealthCheck
+  :method: :configure_health_check
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    HealthCheck:
+    - :structure:
+        Target:
+        - :string
+        - :required
+        Interval:
+        - :integer
+        - :required
+        Timeout:
+        - :integer
+        - :required
+        UnhealthyThreshold:
+        - :integer
+        - :required
+        HealthyThreshold:
+        - :integer
+        - :required
+    - :required
+  :outputs:
+    :children:
+      ConfigureHealthCheckResult:
+        :ignore: true
+        :children:
+          HealthCheck:
+            :children:
+              Interval:
+                :type: :integer
+              Timeout:
+                :type: :integer
+              UnhealthyThreshold:
+                :type: :integer
+              HealthyThreshold:
+                :type: :integer
+- :name: CreateAppCookieStickinessPolicy
+  :method: :create_app_cookie_stickiness_policy
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+    CookieName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateAppCookieStickinessPolicyResult:
+        :ignore: true
+- :name: CreateLBCookieStickinessPolicy
+  :method: :create_lb_cookie_stickiness_policy
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+    CookieExpirationPeriod:
+    - :long
+  :outputs:
+    :children:
+      CreateLBCookieStickinessPolicyResult:
+        :ignore: true
+- :name: CreateLoadBalancer
+  :method: :create_load_balancer
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    Listeners:
+    - :membered_list:
+      - :structure:
+          Protocol:
+          - :string
+          - :required
+          LoadBalancerPort:
+          - :integer
+          - :required
+          InstanceProtocol:
+          - :string
+          InstancePort:
+          - :integer
+          - :required
+          SSLCertificateId:
+          - :string
+    - :required
+    AvailabilityZones:
+    - :membered_list:
+      - :string
+    Subnets:
+    - :membered_list:
+      - :string
+    SecurityGroups:
+    - :membered_list:
+      - :string
+    Scheme:
+    - :string
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          - :required
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateLoadBalancerResult:
+        :ignore: true
+- :name: CreateLoadBalancerListeners
+  :method: :create_load_balancer_listeners
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    Listeners:
+    - :membered_list:
+      - :structure:
+          Protocol:
+          - :string
+          - :required
+          LoadBalancerPort:
+          - :integer
+          - :required
+          InstanceProtocol:
+          - :string
+          InstancePort:
+          - :integer
+          - :required
+          SSLCertificateId:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      CreateLoadBalancerListenersResult:
+        :ignore: true
+- :name: CreateLoadBalancerPolicy
+  :method: :create_load_balancer_policy
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+    PolicyTypeName:
+    - :string
+    - :required
+    PolicyAttributes:
+    - :membered_list:
+      - :structure:
+          AttributeName:
+          - :string
+          AttributeValue:
+          - :string
+  :outputs:
+    :children:
+      CreateLoadBalancerPolicyResult:
+        :ignore: true
+- :name: DeleteLoadBalancer
+  :method: :delete_load_balancer
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteLoadBalancerResult:
+        :ignore: true
+- :name: DeleteLoadBalancerListeners
+  :method: :delete_load_balancer_listeners
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    LoadBalancerPorts:
+    - :membered_list:
+      - :integer
+    - :required
+  :outputs:
+    :children:
+      DeleteLoadBalancerListenersResult:
+        :ignore: true
+- :name: DeleteLoadBalancerPolicy
+  :method: :delete_load_balancer_policy
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteLoadBalancerPolicyResult:
+        :ignore: true
+- :name: DeregisterInstancesFromLoadBalancer
+  :method: :deregister_instances_from_load_balancer
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    Instances:
+    - :membered_list:
+      - :structure:
+          InstanceId:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      DeregisterInstancesFromLoadBalancerResult:
+        :ignore: true
+        :children:
+          Instances:
+            :ignore: true
+            :children:
+              member:
+                :rename: :instances
+                :list: true
+- :name: DescribeInstanceHealth
+  :method: :describe_instance_health
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    Instances:
+    - :membered_list:
+      - :structure:
+          InstanceId:
+          - :string
+  :outputs:
+    :children:
+      DescribeInstanceHealthResult:
+        :ignore: true
+        :children:
+          InstanceStates:
+            :ignore: true
+            :children:
+              member:
+                :rename: :instance_states
+                :list: true
+- :name: DescribeLoadBalancerAttributes
+  :method: :describe_load_balancer_attributes
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeLoadBalancerAttributesResult:
+        :ignore: true
+        :children:
+          LoadBalancerAttributes:
+            :children:
+              CrossZoneLoadBalancing:
+                :children:
+                  Enabled:
+                    :type: :boolean
+              AccessLog:
+                :children:
+                  Enabled:
+                    :type: :boolean
+                  EmitInterval:
+                    :type: :integer
+              ConnectionDraining:
+                :children:
+                  Enabled:
+                    :type: :boolean
+                  Timeout:
+                    :type: :integer
+              ConnectionSettings:
+                :children:
+                  IdleTimeout:
+                    :type: :integer
+              AdditionalAttributes:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :additional_attributes
+                    :list: true
+- :name: DescribeLoadBalancerPolicies
+  :method: :describe_load_balancer_policies
+  :inputs:
+    LoadBalancerName:
+    - :string
+    PolicyNames:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeLoadBalancerPoliciesResult:
+        :ignore: true
+        :children:
+          PolicyDescriptions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policy_descriptions
+                :list: true
+                :children:
+                  PolicyAttributeDescriptions:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :policy_attribute_descriptions
+                        :list: true
+- :name: DescribeLoadBalancerPolicyTypes
+  :method: :describe_load_balancer_policy_types
+  :inputs:
+    PolicyTypeNames:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeLoadBalancerPolicyTypesResult:
+        :ignore: true
+        :children:
+          PolicyTypeDescriptions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :policy_type_descriptions
+                :list: true
+                :children:
+                  PolicyAttributeTypeDescriptions:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :policy_attribute_type_descriptions
+                        :list: true
+- :name: DescribeLoadBalancers
+  :method: :describe_load_balancers
+  :inputs:
+    LoadBalancerNames:
+    - :membered_list:
+      - :string
+    Marker:
+    - :string
+    PageSize:
+    - :integer
+  :outputs:
+    :children:
+      DescribeLoadBalancersResult:
+        :ignore: true
+        :children:
+          LoadBalancerDescriptions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :load_balancer_descriptions
+                :list: true
+                :children:
+                  ListenerDescriptions:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :listener_descriptions
+                        :list: true
+                        :children:
+                          Listener:
+                            :children:
+                              LoadBalancerPort:
+                                :type: :integer
+                              InstancePort:
+                                :type: :integer
+                          PolicyNames:
+                            :ignore: true
+                            :children:
+                              member:
+                                :rename: :policy_names
+                                :list: true
+                  Policies:
+                    :children:
+                      AppCookieStickinessPolicies:
+                        :ignore: true
+                        :children:
+                          member:
+                            :rename: :app_cookie_stickiness_policies
+                            :list: true
+                      LBCookieStickinessPolicies:
+                        :ignore: true
+                        :children:
+                          member:
+                            :rename: :lb_cookie_stickiness_policies
+                            :list: true
+                            :children:
+                              CookieExpirationPeriod:
+                                :type: :integer
+                      OtherPolicies:
+                        :ignore: true
+                        :children:
+                          member:
+                            :rename: :other_policies
+                            :list: true
+                  BackendServerDescriptions:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :backend_server_descriptions
+                        :list: true
+                        :children:
+                          InstancePort:
+                            :type: :integer
+                          PolicyNames:
+                            :ignore: true
+                            :children:
+                              member:
+                                :rename: :policy_names
+                                :list: true
+                  AvailabilityZones:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :availability_zones
+                        :list: true
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :subnets
+                        :list: true
+                  Instances:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :instances
+                        :list: true
+                  HealthCheck:
+                    :children:
+                      Interval:
+                        :type: :integer
+                      Timeout:
+                        :type: :integer
+                      UnhealthyThreshold:
+                        :type: :integer
+                      HealthyThreshold:
+                        :type: :integer
+                  SecurityGroups:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :security_groups
+                        :list: true
+                  CreatedTime:
+                    :type: :time
+- :name: DescribeTags
+  :method: :describe_tags
+  :inputs:
+    LoadBalancerNames:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeTagsResult:
+        :ignore: true
+        :children:
+          TagDescriptions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :tag_descriptions
+                :list: true
+                :children:
+                  Tags:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :tags
+                        :list: true
+- :name: DetachLoadBalancerFromSubnets
+  :method: :detach_load_balancer_from_subnets
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    Subnets:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      DetachLoadBalancerFromSubnetsResult:
+        :ignore: true
+        :children:
+          Subnets:
+            :ignore: true
+            :children:
+              member:
+                :rename: :subnets
+                :list: true
+- :name: DisableAvailabilityZonesForLoadBalancer
+  :method: :disable_availability_zones_for_load_balancer
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    AvailabilityZones:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      DisableAvailabilityZonesForLoadBalancerResult:
+        :ignore: true
+        :children:
+          AvailabilityZones:
+            :ignore: true
+            :children:
+              member:
+                :rename: :availability_zones
+                :list: true
+- :name: EnableAvailabilityZonesForLoadBalancer
+  :method: :enable_availability_zones_for_load_balancer
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    AvailabilityZones:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      EnableAvailabilityZonesForLoadBalancerResult:
+        :ignore: true
+        :children:
+          AvailabilityZones:
+            :ignore: true
+            :children:
+              member:
+                :rename: :availability_zones
+                :list: true
+- :name: ModifyLoadBalancerAttributes
+  :method: :modify_load_balancer_attributes
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    LoadBalancerAttributes:
+    - :structure:
+        CrossZoneLoadBalancing:
+        - :structure:
+            Enabled:
+            - :boolean
+            - :required
+        AccessLog:
+        - :structure:
+            Enabled:
+            - :boolean
+            - :required
+            S3BucketName:
+            - :string
+            EmitInterval:
+            - :integer
+            S3BucketPrefix:
+            - :string
+        ConnectionDraining:
+        - :structure:
+            Enabled:
+            - :boolean
+            - :required
+            Timeout:
+            - :integer
+        ConnectionSettings:
+        - :structure:
+            IdleTimeout:
+            - :integer
+            - :required
+        AdditionalAttributes:
+        - :membered_list:
+          - :structure:
+              Key:
+              - :string
+              Value:
+              - :string
+    - :required
+  :outputs:
+    :children:
+      ModifyLoadBalancerAttributesResult:
+        :ignore: true
+        :children:
+          LoadBalancerAttributes:
+            :children:
+              CrossZoneLoadBalancing:
+                :children:
+                  Enabled:
+                    :type: :boolean
+              AccessLog:
+                :children:
+                  Enabled:
+                    :type: :boolean
+                  EmitInterval:
+                    :type: :integer
+              ConnectionDraining:
+                :children:
+                  Enabled:
+                    :type: :boolean
+                  Timeout:
+                    :type: :integer
+              ConnectionSettings:
+                :children:
+                  IdleTimeout:
+                    :type: :integer
+              AdditionalAttributes:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :additional_attributes
+                    :list: true
+- :name: RegisterInstancesWithLoadBalancer
+  :method: :register_instances_with_load_balancer
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    Instances:
+    - :membered_list:
+      - :structure:
+          InstanceId:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      RegisterInstancesWithLoadBalancerResult:
+        :ignore: true
+        :children:
+          Instances:
+            :ignore: true
+            :children:
+              member:
+                :rename: :instances
+                :list: true
+- :name: RemoveTags
+  :method: :remove_tags
+  :inputs:
+    LoadBalancerNames:
+    - :membered_list:
+      - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      RemoveTagsResult:
+        :ignore: true
+- :name: SetLoadBalancerListenerSSLCertificate
+  :method: :set_load_balancer_listener_ssl_certificate
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    LoadBalancerPort:
+    - :integer
+    - :required
+    SSLCertificateId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      SetLoadBalancerListenerSSLCertificateResult:
+        :ignore: true
+- :name: SetLoadBalancerPoliciesForBackendServer
+  :method: :set_load_balancer_policies_for_backend_server
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    InstancePort:
+    - :integer
+    - :required
+    PolicyNames:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      SetLoadBalancerPoliciesForBackendServerResult:
+        :ignore: true
+- :name: SetLoadBalancerPoliciesOfListener
+  :method: :set_load_balancer_policies_of_listener
+  :inputs:
+    LoadBalancerName:
+    - :string
+    - :required
+    LoadBalancerPort:
+    - :integer
+    - :required
+    PolicyNames:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      SetLoadBalancerPoliciesOfListenerResult:
+        :ignore: true

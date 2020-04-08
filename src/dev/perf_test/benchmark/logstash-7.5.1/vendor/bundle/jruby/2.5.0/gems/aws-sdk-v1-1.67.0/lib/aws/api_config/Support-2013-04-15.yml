@@ -1,0 +1,489 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:json_version: '1.1'
+:target_prefix: AWSSupport_20130415.
+:api_version: '2013-04-15'
+:operations:
+- :name: AddAttachmentsToSet
+  :method: :add_attachments_to_set
+  :inputs:
+    attachmentSetId:
+    - :string
+    attachments:
+    - :list:
+      - :structure:
+          fileName:
+          - :string
+          data:
+          - :blob
+    - :required
+  :outputs:
+    attachmentSetId:
+      :sym: :attachment_set_id
+      :type: :string
+    expiryTime:
+      :sym: :expiry_time
+      :type: :string
+- :name: AddCommunicationToCase
+  :method: :add_communication_to_case
+  :inputs:
+    caseId:
+    - :string
+    communicationBody:
+    - :string
+    - :required
+    ccEmailAddresses:
+    - :list:
+      - :string
+    attachmentSetId:
+    - :string
+  :outputs:
+    result:
+      :sym: :result
+      :type: :boolean
+- :name: CreateCase
+  :method: :create_case
+  :inputs:
+    subject:
+    - :string
+    - :required
+    serviceCode:
+    - :string
+    severityCode:
+    - :string
+    categoryCode:
+    - :string
+    communicationBody:
+    - :string
+    - :required
+    ccEmailAddresses:
+    - :list:
+      - :string
+    language:
+    - :string
+    issueType:
+    - :string
+    attachmentSetId:
+    - :string
+  :outputs:
+    caseId:
+      :sym: :case_id
+      :type: :string
+- :name: DescribeAttachment
+  :method: :describe_attachment
+  :inputs:
+    attachmentId:
+    - :string
+    - :required
+  :outputs:
+    attachment:
+      :sym: :attachment
+      :type: :hash
+      :members:
+        fileName:
+          :sym: :file_name
+          :type: :string
+        data:
+          :sym: :data
+          :type: :blob
+- :name: DescribeCases
+  :method: :describe_cases
+  :inputs:
+    caseIdList:
+    - :list:
+      - :string
+    displayId:
+    - :string
+    afterTime:
+    - :string
+    beforeTime:
+    - :string
+    includeResolvedCases:
+    - :boolean
+    nextToken:
+    - :string
+    maxResults:
+    - :integer
+    language:
+    - :string
+    includeCommunications:
+    - :boolean
+  :outputs:
+    cases:
+      :sym: :cases
+      :type: :hash
+      :members:
+        caseId:
+          :sym: :case_id
+          :type: :string
+        displayId:
+          :sym: :display_id
+          :type: :string
+        subject:
+          :sym: :subject
+          :type: :string
+        status:
+          :sym: :status
+          :type: :string
+        serviceCode:
+          :sym: :service_code
+          :type: :string
+        categoryCode:
+          :sym: :category_code
+          :type: :string
+        severityCode:
+          :sym: :severity_code
+          :type: :string
+        submittedBy:
+          :sym: :submitted_by
+          :type: :string
+        timeCreated:
+          :sym: :time_created
+          :type: :string
+        recentCommunications:
+          :sym: :recent_communications
+          :type: :hash
+          :members:
+            communications:
+              :sym: :communications
+              :type: :hash
+              :members:
+                caseId:
+                  :sym: :case_id
+                  :type: :string
+                body:
+                  :sym: :body
+                  :type: :string
+                submittedBy:
+                  :sym: :submitted_by
+                  :type: :string
+                timeCreated:
+                  :sym: :time_created
+                  :type: :string
+                attachmentSet:
+                  :sym: :attachment_set
+                  :type: :hash
+                  :members:
+                    attachmentId:
+                      :sym: :attachment_id
+                      :type: :string
+                    fileName:
+                      :sym: :file_name
+                      :type: :string
+            nextToken:
+              :sym: :next_token
+              :type: :string
+        ccEmailAddresses:
+          :sym: :cc_email_addresses
+          :type: :string
+        language:
+          :sym: :language
+          :type: :string
+    nextToken:
+      :sym: :next_token
+      :type: :string
+- :name: DescribeCommunications
+  :method: :describe_communications
+  :inputs:
+    caseId:
+    - :string
+    - :required
+    beforeTime:
+    - :string
+    afterTime:
+    - :string
+    nextToken:
+    - :string
+    maxResults:
+    - :integer
+  :outputs:
+    communications:
+      :sym: :communications
+      :type: :hash
+      :members:
+        caseId:
+          :sym: :case_id
+          :type: :string
+        body:
+          :sym: :body
+          :type: :string
+        submittedBy:
+          :sym: :submitted_by
+          :type: :string
+        timeCreated:
+          :sym: :time_created
+          :type: :string
+        attachmentSet:
+          :sym: :attachment_set
+          :type: :hash
+          :members:
+            attachmentId:
+              :sym: :attachment_id
+              :type: :string
+            fileName:
+              :sym: :file_name
+              :type: :string
+    nextToken:
+      :sym: :next_token
+      :type: :string
+- :name: DescribeServices
+  :method: :describe_services
+  :inputs:
+    serviceCodeList:
+    - :list:
+      - :string
+    language:
+    - :string
+  :outputs:
+    services:
+      :sym: :services
+      :type: :hash
+      :members:
+        code:
+          :sym: :code
+          :type: :string
+        name:
+          :sym: :name
+          :type: :string
+        categories:
+          :sym: :categories
+          :type: :hash
+          :members:
+            code:
+              :sym: :code
+              :type: :string
+            name:
+              :sym: :name
+              :type: :string
+- :name: DescribeSeverityLevels
+  :method: :describe_severity_levels
+  :inputs:
+    language:
+    - :string
+  :outputs:
+    severityLevels:
+      :sym: :severity_levels
+      :type: :hash
+      :members:
+        code:
+          :sym: :code
+          :type: :string
+        name:
+          :sym: :name
+          :type: :string
+- :name: DescribeTrustedAdvisorCheckRefreshStatuses
+  :method: :describe_trusted_advisor_check_refresh_statuses
+  :inputs:
+    checkIds:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    statuses:
+      :sym: :statuses
+      :type: :hash
+      :members:
+        checkId:
+          :sym: :check_id
+          :type: :string
+        status:
+          :sym: :status
+          :type: :string
+        millisUntilNextRefreshable:
+          :sym: :millis_until_next_refreshable
+          :type: :integer
+- :name: DescribeTrustedAdvisorCheckResult
+  :method: :describe_trusted_advisor_check_result
+  :inputs:
+    checkId:
+    - :string
+    - :required
+    language:
+    - :string
+  :outputs:
+    result:
+      :sym: :result
+      :type: :hash
+      :members:
+        checkId:
+          :sym: :check_id
+          :type: :string
+        timestamp:
+          :sym: :timestamp
+          :type: :string
+        status:
+          :sym: :status
+          :type: :string
+        resourcesSummary:
+          :sym: :resources_summary
+          :type: :hash
+          :members:
+            resourcesProcessed:
+              :sym: :resources_processed
+              :type: :integer
+            resourcesFlagged:
+              :sym: :resources_flagged
+              :type: :integer
+            resourcesIgnored:
+              :sym: :resources_ignored
+              :type: :integer
+            resourcesSuppressed:
+              :sym: :resources_suppressed
+              :type: :integer
+        categorySpecificSummary:
+          :sym: :category_specific_summary
+          :type: :hash
+          :members:
+            costOptimizing:
+              :sym: :cost_optimizing
+              :type: :hash
+              :members:
+                estimatedMonthlySavings:
+                  :sym: :estimated_monthly_savings
+                  :type: :float
+                estimatedPercentMonthlySavings:
+                  :sym: :estimated_percent_monthly_savings
+                  :type: :float
+        flaggedResources:
+          :sym: :flagged_resources
+          :type: :hash
+          :members:
+            status:
+              :sym: :status
+              :type: :string
+            region:
+              :sym: :region
+              :type: :string
+            resourceId:
+              :sym: :resource_id
+              :type: :string
+            isSuppressed:
+              :sym: :is_suppressed
+              :type: :boolean
+            metadata:
+              :sym: :metadata
+              :type: :string
+- :name: DescribeTrustedAdvisorCheckSummaries
+  :method: :describe_trusted_advisor_check_summaries
+  :inputs:
+    checkIds:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    summaries:
+      :sym: :summaries
+      :type: :hash
+      :members:
+        checkId:
+          :sym: :check_id
+          :type: :string
+        timestamp:
+          :sym: :timestamp
+          :type: :string
+        status:
+          :sym: :status
+          :type: :string
+        hasFlaggedResources:
+          :sym: :has_flagged_resources
+          :type: :boolean
+        resourcesSummary:
+          :sym: :resources_summary
+          :type: :hash
+          :members:
+            resourcesProcessed:
+              :sym: :resources_processed
+              :type: :integer
+            resourcesFlagged:
+              :sym: :resources_flagged
+              :type: :integer
+            resourcesIgnored:
+              :sym: :resources_ignored
+              :type: :integer
+            resourcesSuppressed:
+              :sym: :resources_suppressed
+              :type: :integer
+        categorySpecificSummary:
+          :sym: :category_specific_summary
+          :type: :hash
+          :members:
+            costOptimizing:
+              :sym: :cost_optimizing
+              :type: :hash
+              :members:
+                estimatedMonthlySavings:
+                  :sym: :estimated_monthly_savings
+                  :type: :float
+                estimatedPercentMonthlySavings:
+                  :sym: :estimated_percent_monthly_savings
+                  :type: :float
+- :name: DescribeTrustedAdvisorChecks
+  :method: :describe_trusted_advisor_checks
+  :inputs:
+    language:
+    - :string
+    - :required
+  :outputs:
+    checks:
+      :sym: :checks
+      :type: :hash
+      :members:
+        id:
+          :sym: :id
+          :type: :string
+        name:
+          :sym: :name
+          :type: :string
+        description:
+          :sym: :description
+          :type: :string
+        category:
+          :sym: :category
+          :type: :string
+        metadata:
+          :sym: :metadata
+          :type: :string
+- :name: RefreshTrustedAdvisorCheck
+  :method: :refresh_trusted_advisor_check
+  :inputs:
+    checkId:
+    - :string
+    - :required
+  :outputs:
+    status:
+      :sym: :status
+      :type: :hash
+      :members:
+        checkId:
+          :sym: :check_id
+          :type: :string
+        status:
+          :sym: :status
+          :type: :string
+        millisUntilNextRefreshable:
+          :sym: :millis_until_next_refreshable
+          :type: :integer
+- :name: ResolveCase
+  :method: :resolve_case
+  :inputs:
+    caseId:
+    - :string
+  :outputs:
+    initialCaseStatus:
+      :sym: :initial_case_status
+      :type: :string
+    finalCaseStatus:
+      :sym: :final_case_status
+      :type: :string

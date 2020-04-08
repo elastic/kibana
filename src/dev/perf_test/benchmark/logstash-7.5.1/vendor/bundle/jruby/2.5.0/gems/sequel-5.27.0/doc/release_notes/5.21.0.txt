@@ -1,0 +1,87 @@
+= New Features
+
+* The pg_json extension now adds a Database#wrap_json_primitives
+  accessor.  When set to true, JSON primitive values (string, number,
+  true, false, and null) will be wrapped by delegate Ruby objects
+  instead of using Ruby primitives.  This allows the values to round
+  trip, so the following code will work even for primitive values in
+  json_column:
+
+    DB.extension :pg_json
+    DB.wrap_json_primitives = true
+    value = DB[:table].get(:json_column)
+    DB[:other_table].insert(json_column: value)
+
+  This should be enabled with care, especially in cases where false
+  and null JSON values are used, as the behavior will change if
+  the objects are used in a boolean context in Ruby, as only false
+  and nil in Ruby are treated as false:
+
+    # assume JSON false or null value
+    value = DB[:table].get(:json_column)
+
+    if value
+      # executed if wrap_json_primitives is true
+    else
+      # executed by default
+    end
+
+  When typecasting input in model objects to a JSON type, string
+  input will still be parsed as JSON.  However, you can set the
+  Database#typecast_json_strings accessor to true, and then string
+  input will be considered as a JSON string instead of parsing the
+  string as JSON.
+
+  To prevent backwards compatibility issues, Sequel.pg_json/pg_jsonb
+  behavior has not changed.  To support wrapping Ruby primitives in
+  the delegate objects, new Sequel.pg_json_wrap/pg_jsonb_wrap methods
+  have been added.  These methods only handle the Ruby primitives,
+  they cannot be used if the existing object is already a delegate
+  object.
+
+  As model objects always consider a nil value as SQL NULL and do
+  not typecast it, if you want to explicitly set a JSON null value,
+  you need to wrap it explicitly:
+
+    model_object.json_column = Sequel.pg_json_wrap(nil)
+
+= Other Improvements
+
+* Sequel now supports window function options :window, :exclude, and
+  :frame :type=>:groups, :start, and :end on SQLite 3.28.0+.
+
+* The server_block extension now respects the :servers_hash Database
+  option.  This makes it more similar to Sequel's default behavior.
+  However, that means by default, the server_block extension will
+  default to handling unknown shards as the default shard, instead
+  of raising an error for them.
+
+* The rcte_tree plugin now disallows eager graphing of the ancestors
+  and descendants associations.  Previously, eager graphing of these
+  associations generated incorrect results.  It is not possible to
+  eager graph these extensions, but normal eager loading does work.
+
+* The ado adapter's performance has been improved by using faster
+  callables for type conversion and a more efficient inner loop.
+
+* The sqlite adapter now converts a :timeout option given as a string
+  to an integer.  This allows you to use the option inside of a
+  connection string.
+
+* The mysql and mysql2 adapters now recognize an additional
+  DatabaseLockTimeout error.
+
+* The jdbc/mysql adapter now works correctly when using JRuby with
+  Java 11.
+
+* The ado adapter now handles numeric values when using locales that
+  use comma instead of period as the decimal separator.
+
+= Backwards Compatibility
+
+* In the pg_json extension, the following singleton methods of
+  Sequel::Postgres::JSONDatabaseMethods are now deprecated:
+
+  * parse_json
+  * db_parse_json
+  * db_parse_jsonb 

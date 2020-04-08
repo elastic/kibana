@@ -1,0 +1,43 @@
+= Stored Procedures in MSSQL
+
+This guide documents the workaround implemented to allow executing stored procedures
+in MSSQL, as well as getting the value of output variables.
+
+== Simple Execution
+
+The following stored procedure is used as an example:
+
+  CREATE PROCEDURE dbo.SequelTest(
+    @Input varchar(25),
+    @Output int OUTPUT
+  )
+  AS
+    SET @Output = LEN(@Input)
+    RETURN 0
+
+Execute it as follows:
+
+  DB.call_mssql_sproc(:SequelTest, {args: ['Input String', :output]})
+
+Use the +:output+ symbol to denote an output variable. The result will contain a
+hash of the output variables, as well as the result code and number of affected rows:
+
+  {:result => 0, :numrows => 1, :var1 => "1"}
+
+Output variables will be strings by default. To specify their type, include the
+SQL type:
+
+  DB.call_mssql_sproc(:SequelTest, {args: ['Input String', [:output, 'int']]})
+
+Result:
+
+  {:result => 0, :numrows => 1, :var1 => 1}
+
+Output variables will be named +var#{n}+ where n is their zero indexed position
+in the parameter list. To name the output variable, include their name:
+
+  DB.call_mssql_sproc(:SequelTest, {args: ['Input String', [:output, nil, 'Output']]})
+
+Result:
+
+  {:result => 0, :numrows => 1, :output => "1"}

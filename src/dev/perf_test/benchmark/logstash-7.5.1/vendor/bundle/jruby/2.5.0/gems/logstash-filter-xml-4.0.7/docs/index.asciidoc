@@ -1,0 +1,187 @@
+:plugin: xml
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Xml filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+XML filter. Takes a field that contains XML and expands it into
+an actual datastructure.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Xml Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-force_array>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-force_content>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-namespaces>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-remove_namespaces>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-source>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-store_xml>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-suppress_empty>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-xpath>> |<<hash,hash>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-force_array"]
+===== `force_array` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+By default the filter will force single elements to be arrays. Setting this to 
+false will prevent storing single elements in arrays.
+
+[id="plugins-{type}s-{plugin}-force_content"]
+===== `force_content` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+By default the filter will expand attributes differently from content inside
+of tags. This option allows you to force text content and attributes to always
+parse to a hash value.
+
+[id="plugins-{type}s-{plugin}-namespaces"]
+===== `namespaces` 
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+By default only namespaces declarations on the root element are considered.
+This allows to configure all namespace declarations to parse the XML document.
+
+Example:
+
+[source,ruby]
+filter {
+  xml {
+    namespaces => {
+      "xsl" => "http://www.w3.org/1999/XSL/Transform"
+      "xhtml" => "http://www.w3.org/1999/xhtml"
+    }
+  }
+}
+
+
+[id="plugins-{type}s-{plugin}-remove_namespaces"]
+===== `remove_namespaces` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Remove all namespaces from all nodes in the document.
+Of course, if the document had nodes with the same names but different namespaces, they will now be ambiguous.
+
+[id="plugins-{type}s-{plugin}-source"]
+===== `source` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Config for xml to hash is:
+[source,ruby]
+    source => source_field
+
+For example, if you have the whole XML document in your `message` field:
+[source,ruby]
+    filter {
+      xml {
+        source => "message"
+      }
+    }
+
+The above would parse the XML from the `message` field.
+
+[id="plugins-{type}s-{plugin}-store_xml"]
+===== `store_xml` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+By default the filter will store the whole parsed XML in the destination
+field as described above. Setting this to false will prevent that.
+
+[id="plugins-{type}s-{plugin}-suppress_empty"]
+===== `suppress_empty` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+By default, output nothing if the element is empty.
+If set to `false`, empty element will result in an empty hash object.
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Define target for placing the data
+
+For example if you want the data to be put in the `doc` field:
+[source,ruby]
+    filter {
+      xml {
+        target => "doc"
+      }
+    }
+
+XML in the value of the source field will be expanded into a
+datastructure in the `target` field.
+Note: if the `target` field already exists, it will be overridden.
+Required if `store_xml` is true (which is the default).
+
+[id="plugins-{type}s-{plugin}-xpath"]
+===== `xpath` 
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+xpath will additionally select string values (non-strings will be
+converted to strings with Ruby's `to_s` function) from parsed XML
+(using each source field defined using the method above) and place
+those values in the destination fields. Configuration:
+[source,ruby]
+xpath => [ "xpath-syntax", "destination-field" ]
+
+Values returned by XPath parsing from `xpath-syntax` will be put in the
+destination field. Multiple values returned will be pushed onto the
+destination field as an array. As such, multiple matches across
+multiple source fields will produce duplicate entries in the field.
+
+More on XPath: http://www.w3schools.com/xml/xml_xpath.asp
+
+The XPath functions are particularly powerful:
+http://www.w3schools.com/xsl/xsl_functions.asp
+
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

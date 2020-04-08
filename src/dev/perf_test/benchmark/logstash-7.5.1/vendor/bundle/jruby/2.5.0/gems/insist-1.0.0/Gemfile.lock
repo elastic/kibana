@@ -1,0 +1,25 @@
+PATH
+  remote: .
+  specs:
+    insist (0.0.5)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    diff-lcs (1.1.3)
+    rspec (2.8.0)
+      rspec-core (~> 2.8.0)
+      rspec-expectations (~> 2.8.0)
+      rspec-mocks (~> 2.8.0)
+    rspec-core (2.8.0)
+    rspec-expectations (2.8.0)
+      diff-lcs (~> 1.1.2)
+    rspec-mocks (2.8.0)
+
+PLATFORMS
+  java
+  ruby
+
+DEPENDENCIES
+  insist!
+  rspec (~> 2.8.0)

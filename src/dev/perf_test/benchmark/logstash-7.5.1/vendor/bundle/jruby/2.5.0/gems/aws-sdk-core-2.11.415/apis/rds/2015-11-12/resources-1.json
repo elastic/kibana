@@ -1,0 +1,3272 @@
+{
+    "service": {
+        "actions": {
+            "CreateDBCluster": {
+                "request": { "operation": "CreateDBCluster" },
+                "resource": {
+                    "type": "DBCluster",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "requestParameter",
+                            "path": "DBCluster.DBClusterIdentifier"
+                        }
+                    ],
+                    "path": "DBCluster"
+                }
+            },
+            "CreateDBClusterParameterGroup": {
+                "request": { "operation": "CreateDBClusterParameterGroup" },
+                "resource": {
+                    "type": "DBClusterParameterGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "DBClusterParameterGroup.DBClusterParameterGroupName"
+                        }
+                    ],
+                    "path": "DBClusterParameterGroup"
+                }
+            },
+            "CreateDBInstance": {
+                "request": { "operation": "CreateDBInstance" },
+                "resource": {
+                    "type": "DBInstance",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "response",
+                            "path": "DBInstance.DBInstanceIdentifier"
+                        }
+                    ],
+                    "path": "DBInstance"
+                }
+            },
+            "CreateDBParameterGroup": {
+                "request": { "operation": "CreateDBParameterGroup" },
+                "resource": {
+                    "type": "DBParameterGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "DBParameterGroup.DBParameterGroupName"
+                        }
+                    ],
+                    "path": "DBParameterGroup"
+                }
+            },
+            "CreateDBSecurityGroup": {
+                "request": { "operation": "CreateDBSecurityGroup" },
+                "resource": {
+                    "type": "DBSecurityGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "DBSecurityGroup.DBSecurityGroupName"
+                        }
+                    ],
+                    "path": "DBSecurityGroup"
+                }
+            },
+            "CreateDBSubnetGroup": {
+                "request": { "operation": "CreateDBSubnetGroup" },
+                "resource": {
+                    "type": "DBSubnetGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "DBSubnetGroup.DBSubnetGroupName"
+                        }
+                    ],
+                    "path": "DBSubnetGroup"
+                }
+            },
+            "CreateEventSubscription": {
+                "request": { "operation": "CreateEventSubscription" },
+                "resource": {
+                    "type": "EventSubscription",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "EventSubscription.CustSubscriptionId"
+                        }
+                    ],
+                    "path": "EventSubscription"
+                }
+            },
+            "CreateOptionGroup": {
+                "request": { "operation": "CreateOptionGroup" },
+                "resource": {
+                    "type": "OptionGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "OptionGroup.OptionGroupName"
+                        }
+                    ],
+                    "path": "OptionGroup"
+                }
+            }
+        },
+        "has": {
+            "Certificate": {
+                "resource": {
+                    "type": "Certificate",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBCluster": {
+                "resource": {
+                    "type": "DBCluster",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBClusterParameterGroup": {
+                "resource": {
+                    "type": "DBClusterParameterGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBEngineVersion": {
+                "resource": {
+                    "type": "DBEngineVersion",
+                    "identifiers": [
+                        {
+                            "target": "EngineName",
+                            "source": "input"
+                        },
+                        {
+                            "target": "Version",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBEngine": {
+                "resource": {
+                    "type": "DBEngine",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBInstance": {
+                "resource": {
+                    "type": "DBInstance",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBParameterGroup": {
+                "resource": {
+                    "type": "DBParameterGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBParameterGroupFamily": {
+                "resource": {
+                    "type": "DBParameterGroupFamily",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBSecurityGroup": {
+                "resource": {
+                    "type": "DBSecurityGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "DBSubnetGroup": {
+                "resource": {
+                    "type": "DBSubnetGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "EventCategoryMap": {
+                "resource": {
+                    "type": "EventCategoryMap",
+                    "identifiers": [
+                        {
+                            "target": "SourceType",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "EventSubscription": {
+                "resource": {
+                    "type": "EventSubscription",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "OptionGroup": {
+                "resource": {
+                    "type": "OptionGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "PendingMaintenanceAction": {
+                "resource": {
+                    "type": "PendingMaintenanceAction",
+                    "identifiers": [
+                        {
+                            "target": "TargetARN",
+                            "source": "input"
+                        },
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "ReservedDBInstance": {
+                "resource": {
+                    "type": "ReservedDBInstance",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "ReservedDBInstancesOffering": {
+                "resource": {
+                    "type": "ReservedDBInstancesOffering",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "ResourceWithPendingMaintenanceActions": {
+                "resource": {
+                    "type": "ResourcePendingMaintenanceActionList",
+                    "identifiers": [
+                        {
+                            "target": "ARN",
+                            "source": "input"
+                        }
+                    ]
+                }
+            }
+        },
+        "hasMany": {
+            "AccountQuotas": {
+                "request": { "operation": "DescribeAccountAttributes" },
+                "resource": {
+                    "type": "AccountQuota",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "AccountQuotas[].AccountQuotaName"
+                        }
+                    ],
+                    "path": "AccountQuotas[]"
+                }
+            },
+            "Certificates": {
+                "request": { "operation": "DescribeCertificates" },
+                "resource": {
+                    "type": "Certificate",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "response",
+                            "path": "Certificates[].CertificateIdentifier"
+                        }
+                    ],
+                    "path": "Certificates[]"
+                }
+            },
+            "DBClusters": {
+                "request": { "operation": "DescribeDBClusters" },
+                "resource": {
+                    "type": "DBCluster",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "response",
+                            "path": "DBClusters[].DBClusterIdentifier"
+                        }
+                    ],
+                    "path": "DBClusters[]"
+                }
+            },
+            "DBClusterParameterGroups": {
+                "request": { "operation": "DescribeDBClusterParameterGroups" },
+                "resource": {
+                    "type": "DBClusterParameterGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "DBClusterParameterGroups[].DBClusterParameterGroupName"
+                        }
+                    ],
+                    "path": "DBClusterParameterGroups[]"
+                }
+            },
+            "DBEngineVersions": {
+                "request": { "operation": "DescribeDBEngineVersions" },
+                "resource": {
+                    "type": "DBEngineVersion",
+                    "identifiers": [
+                        {
+                            "target": "EngineName",
+                            "source": "response",
+                            "path": "DBEngineVersions[].Engine"
+                        },
+                        {
+                            "target": "Version",
+                            "source": "response",
+                            "path": "DBEngineVersions[].EngineVersion"
+                        }
+                    ],
+                    "path": "DBEngineVersions[]"
+                }
+            },
+            "DBInstances": {
+                "request": { "operation": "DescribeDBInstances" },
+                "resource": {
+                    "type": "DBInstance",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "response",
+                            "path": "DBInstances[].DBInstanceIdentifier"
+                        }
+                    ],
+                    "path": "DBInstances[]"
+                }
+            },
+            "DBParameterGroups": {
+                "request": { "operation": "DescribeDBParameterGroups" },
+                "resource": {
+                    "type": "DBParameterGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "DBParameterGroups[].DBParameterGroupName"
+                        }
+                    ],
+                    "path": "DBParameterGroups[]"
+                }
+            },
+            "DBSecurityGroups": {
+                "request": { "operation": "DescribeDBSecurityGroups" },
+                "resource": {
+                    "type": "DBSecurityGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "DBSecurityGroups[].DBSecurityGroupName"
+                        }
+                    ],
+                    "path": "DBSecurityGroups[]"
+                }
+            },
+            "DBSnapshots": {
+                "request": { "operation": "DescribeDBSnapshots" },
+                "resource": {
+                    "type": "DBSnapshot",
+                    "identifiers": [
+                        {
+                            "target": "InstanceId",
+                            "source": "response",
+                            "path": "DBSnapshots[].DBInstanceIdentifier"
+                        },
+                        {
+                            "target": "SnapshotId",
+                            "source": "response",
+                            "path": "DBSnapshots[].DBSnapshotIdentifier"
+                        }
+                    ],
+                    "path": "DBSnapshots[]"
+                }
+            },
+            "DBSubnetGroups": {
+                "request": { "operation": "DescribeDBSubnetGroups" },
+                "resource": {
+                    "type": "DBSubnetGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "DBSubnetGroups[].DBSubnetGroupName"
+                        }
+                    ],
+                    "path": "DBSubnetGroups[]"
+                }
+            },
+            "EventCategoryMaps": {
+                "request": { "operation": "DescribeEventCategories" },
+                "resource": {
+                    "type": "EventCategoryMap",
+                    "identifiers": [
+                        {
+                            "target": "SourceType",
+                            "source": "response",
+                            "path": "EventCategoriesMapList[].SourceType"
+                        }
+                    ],
+                    "path": "EventCategoriesMapList[]"
+                }
+            },
+            "Events": {
+                "request": { "operation": "DescribeEvents" },
+                "resource": {
+                    "type": "Event",
+                    "identifiers": [
+                        {
+                            "target": "SourceId",
+                            "source": "response",
+                            "path": "Events[].SourceIdentifier"
+                        },
+                        {
+                            "target": "Date",
+                            "source": "response",
+                            "path": "Events[].Date"
+                        }
+                    ],
+                    "path": "Events[]"
+                }
+            },
+            "EventSubscriptions": {
+                "request": { "operation": "DescribeEventSubscriptions" },
+                "resource": {
+                    "type": "EventSubscription",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "EventSubscriptionsList[].CustSubscriptionId"
+                        }
+                    ],
+                    "path": "EventSubscriptionsList[]"
+                }
+            },
+            "OptionGroups": {
+                "request": { "operation": "DescribeOptionGroups" },
+                "resource": {
+                    "type": "OptionGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "OptionGroupsList[].OptionGroupName"
+                        }
+                    ],
+                    "path": "OptionGroupsList[]"
+                }
+            },
+            "ReservedDBInstancesOfferings": {
+                "request": { "operation": "DescribeReservedDBInstancesOfferings" },
+                "resource": {
+                    "type": "ReservedDBInstancesOffering",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "response",
+                            "path": "ReservedDBInstancesOfferings[].ReservedDBInstancesOfferingId"
+                        }
+                    ],
+                    "path": "ReservedDBInstancesOfferings[]"
+                }
+            },
+            "ReservedDBInstances": {
+                "request": { "operation": "DescribeReservedDBInstances" },
+                "resource": {
+                    "type": "ReservedDBInstance",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "response",
+                            "path": "ReservedDBInstances[].ReservedDBInstanceId"
+                        }
+                    ],
+                    "path": "ReservedDBInstances[]"
+                }
+            },
+            "ResourcesWithPendingMaintenanceActions": {
+                "request": { "operation": "DescribePendingMaintenanceActions" },
+                "resource": {
+                    "type": "ResourcePendingMaintenanceActionList",
+                    "identifiers": [
+                        {
+                            "target": "ARN",
+                            "source": "response",
+                            "path": "PendingMaintenanceActions[].ResourceIdentifier"
+                        }
+                    ],
+                    "path": "PendingMaintenanceActions[]"
+                }
+            }
+        }
+    },
+    "resources": {
+        "AccountQuota": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "AccountQuotaName"
+                }
+            ],
+            "shape": "AccountQuota"
+        },
+        "Certificate": {
+            "identifiers": [
+                {
+                    "name": "Id",
+                    "memberName": "CertificateIdentifier"
+                }
+            ],
+            "shape": "Certificate",
+            "load": {
+                "request": {
+                    "operation": "DescribeCertificates",
+                    "params": [
+                        {
+                            "target": "CertificateIdentifier",
+                            "source": "identifier",
+                            "name": "Id"
+                        }
+                    ]
+                },
+                "path": "Certificates[0]"
+            }
+        },
+        "DBCluster": {
+            "identifiers": [
+                {
+                    "name": "Id",
+                    "memberName": "DBClusterIdentifier"
+                }
+            ],
+            "shape": "DBCluster",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBClusters",
+                    "params": [
+                        {
+                            "target": "DBClusterIdentifier",
+                            "source": "identifier",
+                            "name": "Id"
+                        }
+                    ]
+                },
+                "path": "DBClusters[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateDBCluster",
+                        "params": [
+                            {
+                                "target": "DBClusterIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBCluster",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBCluster.DBClusterIdentifier"
+                            }
+                        ],
+                        "path": "DBCluster"
+                    }
+                },
+                "CreateSnapshot": {
+                    "request": {
+                        "operation": "CreateDBClusterSnapshot",
+                        "params": [
+                            {
+                                "target": "DBClusterIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBClusterSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "ClusterId",
+                                "source": "response",
+                                "path": "DBClusterSnapshot.DBClusterIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBClusterSnapshot.DBClusterSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBClusterSnapshot"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteDBCluster",
+                        "params": [
+                            {
+                                "target": "DBClusterIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBCluster",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBCluster.DBClusterIdentifier"
+                            }
+                        ],
+                        "path": "DBCluster"
+                    }
+                },
+                "Failover": {
+                    "request": {
+                        "operation": "FailoverDBCluster",
+                        "params": [
+                            {
+                                "target": "DBClusterIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBCluster",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBCluster.DBClusterIdentifier"
+                            }
+                        ],
+                        "path": "DBCluster"
+                    }
+                },
+                "Modify": {
+                    "request": {
+                        "operation": "ModifyDBCluster",
+                        "params": [
+                            {
+                                "target": "DBClusterIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBCluster",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBCluster.DBClusterIdentifier"
+                            }
+                        ],
+                        "path": "DBCluster"
+                    }
+                },
+                "Restore": {
+                    "request": {
+                        "operation": "RestoreDBClusterToPointInTime",
+                        "params": [
+                            {
+                                "target": "SourceDBClusterIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBCluster",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBCluster.DBClusterIdentifier"
+                            }
+                        ],
+                        "path": "DBCluster"
+                    }
+                }
+            },
+            "has": {
+                "Members": {
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "data",
+                                "path": "DBClusterMembers[].DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBClusterMembers[]"
+                    }
+                },
+                "OptionGroups": {
+                    "resource": {
+                        "type": "OptionGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "DBClusterOptionGroupMemberships[].DBClusterOptionGroupName"
+                            }
+                        ],
+                        "path": "DBClusterOptionGroupMemberships[]"
+                    }
+                },
+                "ParameterGroup": {
+                    "resource": {
+                        "type": "DBClusterParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "DBClusterParameterGroup"
+                            }
+                        ]
+                    }
+                },
+                "SubnetGroup": {
+                    "resource": {
+                        "type": "DBSubnetGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "DBSubnetGroup"
+                            }
+                        ]
+                    }
+                }
+            },
+            "hasMany": {
+                "Events": {
+                    "request": {
+                        "operation": "DescribeEvents",
+                        "params": [
+                            {
+                                "target": "SourceType",
+                                "source": "string",
+                                "value": "db-cluster"
+                            },
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Event",
+                        "identifiers": [
+                            {
+                                "target": "SourceId",
+                                "source": "response",
+                                "path": "Events[].SourceIdentifier"
+                            },
+                            {
+                                "target": "Date",
+                                "source": "response",
+                                "path": "Events[].Date"
+                            }
+                        ],
+                        "path": "Events[]"
+                    }
+                },
+                "Snapshots": {
+                    "request": {
+                        "operation": "DescribeDBClusterSnapshots",
+                        "params": [
+                            {
+                                "target": "DBClusterIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBClusterSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "ClusterId",
+                                "source": "identifier",
+                                "name": "Id"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBClusterSnapshots[].DBClusterSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBClusterSnapshots[]"
+                    }
+                }
+            }
+        },
+        "DBClusterParameterGroup": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "DBClusterParameterGroupName"
+                }
+            ],
+            "shape": "DBClusterParameterGroup",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBClusterParameterGroups",
+                    "params": [
+                        {
+                            "target": "DBClusterParameterGroupName",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "DBClusterParameterGroups[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateDBClusterParameterGroup",
+                        "params": [
+                            {
+                                "target": "DBClusterParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBClusterParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBClusterParameterGroup.DBClusterParameterGroupName"
+                            }
+                        ],
+                        "path": "DBClusterParameterGroup"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteDBClusterParameterGroup",
+                        "params": [
+                            {
+                                "target": "DBClusterParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Modify": {
+                    "request": {
+                        "operation": "ModifyDBClusterParameterGroup",
+                        "params": [
+                            {
+                                "target": "DBClusterParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBClusterParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBClusterParameterGroupName"
+                            }
+                        ]
+                    }
+                },
+                "Reset": {
+                    "request": {
+                        "operation": "ResetDBClusterParameterGroup",
+                        "params": [
+                            {
+                                "target": "DBClusterParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBClusterParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBClusterParameterGroupName"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "DBClusterSnapshot": {
+            "identifiers": [
+                {
+                    "name": "ClusterId",
+                    "memberName": "DBClusterIdentifier"
+                },
+                {
+                    "name": "SnapshotId",
+                    "memberName": "DBClusterSnapshotIdentifier"
+                }
+            ],
+            "shape": "DBClusterSnapshot",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBClusterSnapshots",
+                    "params": [
+                        {
+                            "target": "DBClusterSnapshotIdentifier",
+                            "source": "identifier",
+                            "name": "SnapshotId"
+                        }
+                    ]
+                },
+                "path": "DBClusterSnapshots[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateDBClusterSnapshot",
+                        "params": [
+                            {
+                                "target": "DBClusterIdentifier",
+                                "source": "identifier",
+                                "name": "ClusterId"
+                            },
+                            {
+                                "target": "DBClusterSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBClusterSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "ClusterId",
+                                "source": "response",
+                                "path": "DBClusterSnapshot.DBClusterIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBClusterSnapshot.DBClusterSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBClusterSnapshot"
+                    }
+                },
+                "Copy": {
+                    "request": {
+                        "operation": "CopyDBClusterSnapshot",
+                        "params": [
+                            {
+                                "target": "SourceDBClusterSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBClusterSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "ClusterId",
+                                "source": "response",
+                                "path": "DBClusterSnapshot.DBClusterIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBClusterSnapshot.DBClusterSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBClusterSnapshot"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteDBClusterSnapshot",
+                        "params": [
+                            {
+                                "target": "DBClusterSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBClusterSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "ClusterId",
+                                "source": "response",
+                                "path": "DBClusterSnapshot.DBClusterIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBClusterSnapshot.DBClusterSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBClusterSnapshot"
+                    }
+                },
+                "Restore": {
+                    "request": {
+                        "operation": "RestoreDBClusterFromSnapshot",
+                        "params": [
+                            {
+                                "target": "SnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBCluster",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBCluster.DBClusterIdentifier"
+                            }
+                        ],
+                        "path": "DBCluster"
+                    }
+                }
+            },
+            "has": {
+                "Cluster": {
+                    "resource": {
+                        "type": "DBCluster",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "identifier",
+                                "name": "ClusterId"
+                            }
+                        ]
+                    }
+                }
+            },
+            "hasMany": {
+                "Events": {
+                    "request": {
+                        "operation": "DescribeEvents",
+                        "params": [
+                            {
+                                "target": "SourceType",
+                                "source": "string",
+                                "value": "db-cluster-snapshot"
+                            },
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Event",
+                        "identifiers": [
+                            {
+                                "target": "SourceId",
+                                "source": "response",
+                                "path": "Events[].SourceIdentifier"
+                            },
+                            {
+                                "target": "Date",
+                                "source": "response",
+                                "path": "Events[].Date"
+                            }
+                        ],
+                        "path": "Events[]"
+                    }
+                }
+            }
+        },
+        "DBEngine": {
+            "identifiers": [{ "name": "Name" }],
+            "has": {
+                "Version": {
+                    "resource": {
+                        "type": "DBEngineVersion",
+                        "identifiers": [
+                            {
+                                "target": "EngineName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "Version",
+                                "source": "input"
+                            }
+                        ]
+                    }
+                }
+            },
+            "hasMany": {
+                "OptionGroupOptions": {
+                    "request": {
+                        "operation": "DescribeOptionGroupOptions",
+                        "params": [
+                            {
+                                "target": "EngineName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "OptionGroupOption",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "OptionGroupOptions[].Name"
+                            }
+                        ],
+                        "path": "OptionGroupOptions[]"
+                    }
+                },
+                "OptionGroups": {
+                    "request": {
+                        "operation": "DescribeOptionGroups",
+                        "params": [
+                            {
+                                "target": "EngineName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "OptionGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "OptionGroupsList[].OptionGroupName"
+                            }
+                        ],
+                        "path": "OptionGroupsList[]"
+                    }
+                },
+                "Versions": {
+                    "request": {
+                        "operation": "DescribeDBEngineVersions",
+                        "params": [
+                            {
+                                "target": "Engine",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBEngineVersion",
+                        "identifiers": [
+                            {
+                                "target": "EngineName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "Version",
+                                "source": "response",
+                                "path": "DBEngineVersions[].EngineVersion"
+                            }
+                        ],
+                        "path": "DBEngineVersions[]"
+                    }
+                }
+            }
+        },
+        "DBEngineVersion": {
+            "identifiers": [
+                {
+                    "name": "EngineName",
+                    "memberName": "Engine"
+                },
+                {
+                    "name": "Version",
+                    "memberName": "EngineVersion"
+                }
+            ],
+            "shape": "DBEngineVersion",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBEngineVersions",
+                    "params": [
+                        {
+                            "target": "Engine",
+                            "source": "identifier",
+                            "name": "EngineName"
+                        },
+                        {
+                            "target": "EngineVersion",
+                            "source": "identifier",
+                            "name": "Version"
+                        }
+                    ]
+                },
+                "path": "DBEngineVersions[0]"
+            },
+            "has": {
+                "Engine": {
+                    "resource": {
+                        "type": "DBEngine",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "identifier",
+                                "name": "Engine"
+                            }
+                        ]
+                    }
+                },
+                "ParameterGroupFamily": {
+                    "resource": {
+                        "type": "DBParameterGroupFamily",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "DBParameterGroupFamily"
+                            }
+                        ]
+                    }
+                }
+            },
+            "hasMany": {
+                "OptionGroupOptions": {
+                    "request": {
+                        "operation": "DescribeOptionGroupOptions",
+                        "params": [
+                            {
+                                "target": "EngineName",
+                                "source": "identifier",
+                                "name": "Engine"
+                            },
+                            {
+                                "target": "MajorEngineVersion",
+                                "source": "identifier",
+                                "name": "Version"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "OptionGroupOption",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "OptionGroupOptions[].Name"
+                            }
+                        ],
+                        "path": "OptionGroupOptions[]"
+                    }
+                },
+                "OptionGroups": {
+                    "request": {
+                        "operation": "DescribeOptionGroups",
+                        "params": [
+                            {
+                                "target": "EngineName",
+                                "source": "identifier",
+                                "name": "Engine"
+                            },
+                            {
+                                "target": "MajorEngineVersion",
+                                "source": "identifier",
+                                "name": "Version"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "OptionGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "OptionGroupsList[].OptionGroupName"
+                            }
+                        ],
+                        "path": "OptionGroupsList[]"
+                    }
+                }
+            }
+        },
+        "DBInstance": {
+            "identifiers": [
+                {
+                    "name": "Id",
+                    "memberName": "DBInstanceIdentifier"
+                }
+            ],
+            "shape": "DBInstance",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBInstances",
+                    "params": [
+                        {
+                            "target": "DBInstanceIdentifier",
+                            "source": "identifier",
+                            "name": "Id"
+                        }
+                    ]
+                },
+                "path": "DBInstances[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateDBInstance",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBInstance.DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBInstance"
+                    }
+                },
+                "CreateReadReplica": {
+                    "request": {
+                        "operation": "CreateDBInstanceReadReplica",
+                        "params": [
+                            {
+                                "target": "SourceDBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBInstance.DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBInstance"
+                    }
+                },
+                "CreateSnapshot": {
+                    "request": {
+                        "operation": "CreateDBSnapshot",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "InstanceId",
+                                "source": "response",
+                                "path": "DBSnapshot.DBInstanceIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBSnapshot.DBSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBSnapshot"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteDBInstance",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBInstance.DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBInstance"
+                    }
+                },
+                "Modify": {
+                    "request": {
+                        "operation": "ModifyDBInstance",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBInstance.DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBInstance"
+                    }
+                },
+                "Promote": {
+                    "request": {
+                        "operation": "PromoteReadReplica",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBInstance.DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBInstance"
+                    }
+                },
+                "Reboot": {
+                    "request": {
+                        "operation": "RebootDBInstance",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBInstance.DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBInstance"
+                    }
+                },
+                "Restore": {
+                    "request": {
+                        "operation": "RestoreDBInstanceToPointInTime",
+                        "params": [
+                            {
+                                "target": "SourceDBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBInstance.DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBInstance"
+                    }
+                },
+                "SubscribeTo": {
+                    "request": {
+                        "operation": "AddSourceIdentifierToSubscription",
+                        "params": [
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                },
+                "UnsubscribeFrom": {
+                    "request": {
+                        "operation": "RemoveSourceIdentifierFromSubscription",
+                        "params": [
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                }
+            },
+            "has": {
+                "Certificate": {
+                    "resource": {
+                        "type": "Certificate",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "data",
+                                "path": "CACertificateIdentifier"
+                            }
+                        ]
+                    }
+                },
+                "Cluster": {
+                    "resource": {
+                        "type": "DBCluster",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "data",
+                                "path": "DBClusterIdentifier"
+                            }
+                        ]
+                    }
+                },
+                "OptionGroups": {
+                    "resource": {
+                        "type": "OptionGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "OptionGroupMemberships[].OptionGroupName"
+                            }
+                        ]
+                    }
+                },
+                "ParameterGroups": {
+                    "resource": {
+                        "type": "DBParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "DBParameterGroups[].DBParameterGroupName"
+                            }
+                        ]
+                    }
+                },
+                "ReadReplicas": {
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "data",
+                                "path": "ReadReplicaDBInstanceIdentifiers[]"
+                            }
+                        ]
+                    }
+                },
+                "SecurityGroups": {
+                    "resource": {
+                        "type": "DBSecurityGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "DBSecurityGroups[].DBSecurityGroupName"
+                            }
+                        ]
+                    }
+                },
+                "Source": {
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "data",
+                                "path": "ReadReplicaSourceDBInstanceIdentifier"
+                            }
+                        ]
+                    }
+                },
+                "SubnetGroup": {
+                    "resource": {
+                        "type": "DBSubnetGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "DBSubnetGroup.DBSubnetGroupName"
+                            }
+                        ]
+                    }
+                }
+            },
+            "hasMany": {
+                "Events": {
+                    "request": {
+                        "operation": "DescribeEvents",
+                        "params": [
+                            {
+                                "target": "SourceType",
+                                "source": "string",
+                                "value": "db-instance"
+                            },
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Event",
+                        "identifiers": [
+                            {
+                                "target": "SourceId",
+                                "source": "response",
+                                "path": "Events[].SourceIdentifier"
+                            },
+                            {
+                                "target": "Date",
+                                "source": "response",
+                                "path": "Events[].Date"
+                            }
+                        ],
+                        "path": "Events[]"
+                    }
+                },
+                "LogFiles": {
+                    "request": {
+                        "operation": "DescribeDBLogFiles",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBLogFile",
+                        "identifiers": [
+                            {
+                                "target": "InstanceId",
+                                "source": "identifier",
+                                "name": "Id"
+                            },
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DescribeDBLogFiles[].LogFileName"
+                            }
+                        ],
+                        "path": "DescribeDBLogFiles[]"
+                    }
+                },
+                "PendingMaintenanceActions": {
+                    "request": {
+                        "operation": "DescribePendingMaintenanceActions",
+                        "params": [
+                            {
+                                "target": "Filters[0].Name",
+                                "source": "string",
+                                "value": "db-instance-id"
+                            },
+                            {
+                                "target": "Filters[0].Values[]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "PendingMaintenanceAction",
+                        "identifiers": [
+                            {
+                                "target": "TargetARN",
+                                "source": "response",
+                                "path": "PendingMaintenanceActions[0].ResourceIdentifier"
+                            },
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "PendingMaintenanceActions[0].PendingMaintenanceActionDetails[].Action"
+                            }
+                        ],
+                        "path": "PendingMaintenanceActions[0].PendingMaintenanceActionDetails[]"
+                    }
+                },
+                "Snapshots": {
+                    "request": {
+                        "operation": "DescribeDBSnapshots",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "InstanceId",
+                                "source": "requestParameter",
+                                "path": "DBInstanceIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBSnapshots[].DBSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBSnapshots[]"
+                    }
+                }
+            }
+        },
+        "DBLogFile": {
+            "identifiers": [
+                { "name": "InstanceId" },
+                {
+                    "name": "Name",
+                    "memberName": "LogFileName"
+                }
+            ],
+            "shape": "DescribeDBLogFilesDetails",
+            "actions": {
+                "Download": {
+                    "request": {
+                        "operation": "DownloadDBLogFilePortion",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "InstanceId"
+                            },
+                            {
+                                "target": "LogFileName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "DBParameterGroup": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "DBParameterGroupName"
+                }
+            ],
+            "shape": "DBParameterGroup",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBParameterGroups",
+                    "params": [
+                        {
+                            "target": "DBParameterGroupName",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "DBParameterGroups[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateDBParameterGroup",
+                        "params": [
+                            {
+                                "target": "DBParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBParameterGroup.DBParameterGroupName"
+                            }
+                        ],
+                        "path": "DBParameterGroup"
+                    }
+                },
+                "Copy": {
+                    "request": {
+                        "operation": "CopyDBParameterGroup",
+                        "params": [
+                            {
+                                "target": "SourceDBParameterGroupIdentifier",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBParameterGroup.DBParameterGroupName"
+                            }
+                        ],
+                        "path": "DBParameterGroup"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteDBParameterGroup",
+                        "params": [
+                            {
+                                "target": "DBParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Modify": {
+                    "request": {
+                        "operation": "ModifyDBParameterGroup",
+                        "params": [
+                            {
+                                "target": "DBParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBParameterGroupName"
+                            }
+                        ]
+                    }
+                },
+                "Reset": {
+                    "request": {
+                        "operation": "ResetDBParameterGroup",
+                        "params": [
+                            {
+                                "target": "DBParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBParameterGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBParameterGroupName"
+                            }
+                        ]
+                    }
+                },
+                "SubscribeTo": {
+                    "request": {
+                        "operation": "AddSourceIdentifierToSubscription",
+                        "params": [
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                },
+                "UnsubscribeFrom": {
+                    "request": {
+                        "operation": "RemoveSourceIdentifierFromSubscription",
+                        "params": [
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                }
+            },
+            "hasMany": {
+                "Events": {
+                    "request": {
+                        "operation": "DescribeEvents",
+                        "params": [
+                            {
+                                "target": "SourceType",
+                                "source": "string",
+                                "value": "db-parameter-group"
+                            },
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Event",
+                        "identifiers": [
+                            {
+                                "target": "SourceId",
+                                "source": "response",
+                                "path": "Events[].SourceIdentifier"
+                            },
+                            {
+                                "target": "Date",
+                                "source": "response",
+                                "path": "Events[].Date"
+                            }
+                        ],
+                        "path": "Events[]"
+                    }
+                },
+                "Parameters": {
+                    "request": {
+                        "operation": "DescribeDBParameters",
+                        "params": [
+                            {
+                                "target": "DBParameterGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Parameter",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "Parameters[].ParameterName"
+                            }
+                        ],
+                        "path": "Parameters[]"
+                    }
+                }
+            }
+        },
+        "DBParameterGroupFamily": {
+            "identifiers": [{ "name": "Name" }],
+            "hasMany": {
+                "EngineDefaultClusterParameters": {
+                    "request": {
+                        "operation": "DescribeEngineDefaultClusterParameters",
+                        "params": [
+                            {
+                                "target": "DBParameterGroupFamily",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Parameter",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EngineDefaults.Parameters[].ParameterName"
+                            }
+                        ],
+                        "path": "EngineDefaults.Parameters[]"
+                    }
+                },
+                "EngineDefaultParameters": {
+                    "request": {
+                        "operation": "DescribeEngineDefaultParameters",
+                        "params": [
+                            {
+                                "target": "DBParameterGroupFamily",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Parameter",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EngineDefaults.Parameters[].ParameterName"
+                            }
+                        ],
+                        "path": "EngineDefaults.Parameters[]"
+                    }
+                }
+            }
+        },
+        "DBSecurityGroup": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "DBSecurityGroupName"
+                }
+            ],
+            "shape": "DBSecurityGroup",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBSecurityGroups",
+                    "params": [
+                        {
+                            "target": "DBSecurityGroupName",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "DBSecurityGroups[0]"
+            },
+            "actions": {
+                "AuthorizeIngress": {
+                    "request": {
+                        "operation": "AuthorizeDBSecurityGroupIngress",
+                        "params": [
+                            {
+                                "target": "DBSecurityGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSecurityGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBSecurityGroup.DBSecurityGroupName"
+                            }
+                        ],
+                        "path": "DBSecurityGroup"
+                    }
+                },
+                "Create": {
+                    "request": {
+                        "operation": "CreateDBSecurityGroup",
+                        "params": [
+                            {
+                                "target": "DBSecurityGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSecurityGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBSecurityGroup.DBSecurityGroupName"
+                            }
+                        ],
+                        "path": "DBSecurityGroup"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteDBSecurityGroup",
+                        "params": [
+                            {
+                                "target": "DBSecurityGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "RevokeIngress": {
+                    "request": {
+                        "operation": "RevokeDBSecurityGroupIngress",
+                        "params": [
+                            {
+                                "target": "DBSecurityGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSecurityGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBSecurityGroup.DBSecurityGroupName"
+                            }
+                        ],
+                        "path": "DBSecurityGroup"
+                    }
+                },
+                "SubscribeTo": {
+                    "request": {
+                        "operation": "AddSourceIdentifierToSubscription",
+                        "params": [
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                },
+                "UnsubscribeFrom": {
+                    "request": {
+                        "operation": "RemoveSourceIdentifierFromSubscription",
+                        "params": [
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                }
+            },
+            "hasMany": {
+                "Events": {
+                    "request": {
+                        "operation": "DescribeEvents",
+                        "params": [
+                            {
+                                "target": "SourceType",
+                                "source": "string",
+                                "value": "db-security-group"
+                            },
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Event",
+                        "identifiers": [
+                            {
+                                "target": "SourceId",
+                                "source": "response",
+                                "path": "Events[].SourceIdentifier"
+                            },
+                            {
+                                "target": "Date",
+                                "source": "response",
+                                "path": "Events[].Date"
+                            }
+                        ],
+                        "path": "Events[]"
+                    }
+                }
+            }
+        },
+        "DBSnapshot": {
+            "identifiers": [
+                {
+                    "name": "InstanceId",
+                    "memberName": "DBInstanceIdentifier"
+                },
+                {
+                    "name": "SnapshotId",
+                    "memberName": "DBSnapshotIdentifier"
+                }
+            ],
+            "shape": "DBSnapshot",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBSnapshots",
+                    "params": [
+                        {
+                            "target": "DBSnapshotIdentifier",
+                            "source": "identifier",
+                            "name": "SnapshotId"
+                        }
+                    ]
+                },
+                "path": "DBSnapshots[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateDBSnapshot",
+                        "params": [
+                            {
+                                "target": "DBInstanceIdentifier",
+                                "source": "identifier",
+                                "name": "InstanceId"
+                            },
+                            {
+                                "target": "DBSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "InstanceId",
+                                "source": "response",
+                                "path": "DBSnapshot.DBInstanceIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBSnapshot.DBSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBSnapshot"
+                    }
+                },
+                "Copy": {
+                    "request": {
+                        "operation": "CopyDBSnapshot",
+                        "params": [
+                            {
+                                "target": "SourceDBSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "InstanceId",
+                                "source": "response",
+                                "path": "DBSnapshot.DBInstanceIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBSnapshot.DBSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBSnapshot"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteDBSnapshot",
+                        "params": [
+                            {
+                                "target": "DBSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSnapshot",
+                        "identifiers": [
+                            {
+                                "target": "InstanceId",
+                                "source": "response",
+                                "path": "DBSnapshot.DBInstanceIdentifier"
+                            },
+                            {
+                                "target": "SnapshotId",
+                                "source": "response",
+                                "path": "DBSnapshot.DBSnapshotIdentifier"
+                            }
+                        ],
+                        "path": "DBSnapshot"
+                    }
+                },
+                "Restore": {
+                    "request": {
+                        "operation": "RestoreDBInstanceFromDBSnapshot",
+                        "params": [
+                            {
+                                "target": "DBSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "DBInstance.DBInstanceIdentifier"
+                            }
+                        ],
+                        "path": "DBInstance"
+                    }
+                },
+                "SubscribeTo": {
+                    "request": {
+                        "operation": "AddSourceIdentifierToSubscription",
+                        "params": [
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                },
+                "UnsubscribeFrom": {
+                    "request": {
+                        "operation": "RemoveSourceIdentifierFromSubscription",
+                        "params": [
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                }
+            },
+            "has": {
+                "Instance": {
+                    "resource": {
+                        "type": "DBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "identifier",
+                                "name": "InstanceId"
+                            }
+                        ]
+                    }
+                },
+                "OptionGroup": {
+                    "resource": {
+                        "type": "OptionGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "DBSnapshot.OptionGroupName"
+                            }
+                        ]
+                    }
+                }
+            },
+            "hasMany": {
+                "Attributes": {
+                    "request": {
+                        "operation": "DescribeDBSnapshotAttributes",
+                        "params": [
+                            {
+                                "target": "DBSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSnapshotAttribute",
+                        "identifiers": [
+                            {
+                                "target": "SnapshotId",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            },
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBSnapshotAttributesResult.DBSnapshotAttributes[].AttributeName"
+                            }
+                        ],
+                        "path": "DBSnapshotAttributesResult.DBSnapshotAttributes[]"
+                    }
+                },
+                "Events": {
+                    "request": {
+                        "operation": "DescribeEvents",
+                        "params": [
+                            {
+                                "target": "SourceType",
+                                "source": "string",
+                                "value": "db-snapshot"
+                            },
+                            {
+                                "target": "SourceIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Event",
+                        "identifiers": [
+                            {
+                                "target": "SourceId",
+                                "source": "response",
+                                "path": "Events[].SourceIdentifier"
+                            },
+                            {
+                                "target": "Date",
+                                "source": "response",
+                                "path": "Events[].Date"
+                            }
+                        ],
+                        "path": "Events[]"
+                    }
+                }
+            }
+        },
+        "DBSnapshotAttribute": {
+            "identifiers": [
+                { "name": "SnapshotId" },
+                {
+                    "name": "Name",
+                    "memberName": "AttributeName"
+                }
+            ],
+            "shape": "DBSnapshotAttribute",
+            "actions": {
+                "Modify": {
+                    "request": {
+                        "operation": "ModifyDBSnapshotAttribute",
+                        "params": [
+                            {
+                                "target": "AttributeName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "DBSnapshotIdentifier",
+                                "source": "identifier",
+                                "name": "SnapshotId"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "DBSubnetGroup": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "DBSubnetGroupName"
+                }
+            ],
+            "shape": "DBSubnetGroup",
+            "load": {
+                "request": {
+                    "operation": "DescribeDBSubnetGroups",
+                    "params": [
+                        {
+                            "target": "DBSubnetGroupName",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "DBSubnetGroups[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateDBSubnetGroup",
+                        "params": [
+                            {
+                                "target": "DBSubnetGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSubnetGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBSubnetGroup.DBSubnetGroupName"
+                            }
+                        ],
+                        "path": "DBSubnetGroup"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteDBSubnetGroup",
+                        "params": [
+                            {
+                                "target": "DBSubnetGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Modify": {
+                    "request": {
+                        "operation": "ModifyDBSubnetGroup",
+                        "params": [
+                            {
+                                "target": "DBSubnetGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "DBSubnetGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "DBSubnetGroup.DBSubnetGroupName"
+                            }
+                        ],
+                        "path": "DBSubnetGroup"
+                    }
+                }
+            }
+        },
+        "EventCategoryMap": {
+            "identifiers": [
+                {
+                    "name": "SourceType",
+                    "memberName": "SourceType"
+                }
+            ],
+            "shape": "EventCategoriesMap",
+            "load": {
+                "request": {
+                    "operation": "DescribeEventCategories",
+                    "params": [
+                        {
+                            "target": "SourceType",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "EventCategoriesMapList[0]"
+            }
+        },
+        "Event": {
+            "identifiers": [
+                {
+                    "name": "SourceId",
+                    "memberName": "SourceIdentifier"
+                },
+                {
+                    "name": "Date",
+                    "memberName": "Date"
+                }
+            ],
+            "shape": "Event"
+        },
+        "EventSubscription": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "CustSubscriptionId"
+                }
+            ],
+            "shape": "EventSubscription",
+            "load": {
+                "request": {
+                    "operation": "DescribeEventSubscriptions",
+                    "params": [
+                        {
+                            "target": "SubscriptionName",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "EventSubscriptionsList[0]"
+            },
+            "actions": {
+                "AddSubscriber": {
+                    "request": {
+                        "operation": "AddSourceIdentifierToSubscription",
+                        "params": [
+                            {
+                                "target": "SubscriptionName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                },
+                "Create": {
+                    "request": {
+                        "operation": "CreateEventSubscription",
+                        "params": [
+                            {
+                                "target": "SubscriptionName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteEventSubscription",
+                        "params": [
+                            {
+                                "target": "SubscriptionName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                },
+                "Modify": {
+                    "request": {
+                        "operation": "ModifyEventSubscription",
+                        "params": [
+                            {
+                                "target": "SubscriptionName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                },
+                "RemoveSubscriber": {
+                    "request": {
+                        "operation": "RemoveSourceIdentifierFromSubscription",
+                        "params": [
+                            {
+                                "target": "SubscriptionName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "EventSubscription",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "EventSubscription.CustSubscriptionId"
+                            }
+                        ],
+                        "path": "EventSubscription"
+                    }
+                }
+            }
+        },
+        "OptionGroup": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "OptionGroupName"
+                }
+            ],
+            "shape": "OptionGroup",
+            "load": {
+                "request": {
+                    "operation": "DescribeOptionGroups",
+                    "params": [
+                        {
+                            "target": "OptionGroupName",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "OptionGroupsList[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateOptionGroup",
+                        "params": [
+                            {
+                                "target": "OptionGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "OptionGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "OptionGroup.OptionGroupName"
+                            }
+                        ],
+                        "path": "OptionGroup"
+                    }
+                },
+                "Copy": {
+                    "request": {
+                        "operation": "CopyOptionGroup",
+                        "params": [
+                            {
+                                "target": "SourceOptionGroupIdentifier",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "OptionGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "OptionGroup.OptionGroupName"
+                            }
+                        ],
+                        "path": "OptionGroup"
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteOptionGroup",
+                        "params": [
+                            {
+                                "target": "OptionGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Modify": {
+                    "request": {
+                        "operation": "ModifyOptionGroup",
+                        "params": [
+                            {
+                                "target": "OptionGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "OptionGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "OptionGroup.OptionGroupName"
+                            }
+                        ],
+                        "path": "OptionGroup"
+                    }
+                }
+            }
+        },
+        "OptionGroupOption": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "Name"
+                }
+            ],
+            "shape": "OptionGroupOption"
+        },
+        "Parameter": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "ParameterName"
+                }
+            ],
+            "shape": "Parameter"
+        },
+        "PendingMaintenanceAction": {
+            "identifiers": [
+                {"name": "TargetARN"},
+                {
+                    "name": "Name",
+                    "memberName": "Action"
+                }
+            ],
+            "shape": "PendingMaintenanceAction",
+            "actions": {
+                "ApplyImmediately": {
+                    "request": {
+                        "operation": "ApplyPendingMaintenanceAction",
+                        "params": [
+                            {
+                                "target": "ApplyAction",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "ResourceIdentifier",
+                                "source": "identifier",
+                                "name": "TargetARN"
+                            },
+                            {
+                                "target": "OptInType",
+                                "source": "string",
+                                "value": "immediate"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "ResourcePendingMaintenanceActionList",
+                        "identifiers": [
+                            {
+                                "target": "ARN",
+                                "source": "response",
+                                "path": "ResourcePendingMaintenanceActions.ResourceIdentifier"
+                            }
+                        ],
+                        "path": "ResourcePendingMaintenanceActions"
+                    }
+                },
+                "UndoOptIn": {
+                    "request": {
+                        "operation": "ApplyPendingMaintenanceAction",
+                        "params": [
+                            {
+                                "target": "ApplyAction",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "ResourceIdentifier",
+                                "source": "identifier",
+                                "name": "TargetARN"
+                            },
+                            {
+                                "target": "OptInType",
+                                "source": "string",
+                                "value": "undo-opt-in"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "ResourcePendingMaintenanceActionList",
+                        "identifiers": [
+                            {
+                                "target": "ARN",
+                                "source": "response",
+                                "path": "ResourcePendingMaintenanceActions.ResourceIdentifier"
+                            }
+                        ],
+                        "path": "ResourcePendingMaintenanceActions"
+                    }
+                },
+                "ApplyOnNextMaintenance": {
+                    "request": {
+                        "operation": "ApplyPendingMaintenanceAction",
+                        "params": [
+                            {
+                                "target": "ApplyAction",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "ResourceIdentifier",
+                                "source": "identifier",
+                                "name": "TargetARN"
+                            },
+                            {
+                                "target": "OptInType",
+                                "source": "string",
+                                "value": "next-maintenance"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "ResourcePendingMaintenanceActionList",
+                        "identifiers": [
+                            {
+                                "target": "ARN",
+                                "source": "response",
+                                "path": "ResourcePendingMaintenanceActions.ResourceIdentifier"
+                            }
+                        ],
+                        "path": "ResourcePendingMaintenanceActions"
+                    }
+                }
+            }
+        },
+        "ReservedDBInstance": {
+            "identifiers": [
+                {
+                    "name": "Id",
+                    "memberName": "ReservedDBInstanceId"
+                }
+            ],
+            "shape": "ReservedDBInstance",
+            "load": {
+                "request": {
+                    "operation": "DescribeReservedDBInstances",
+                    "params": [
+                        {
+                            "target": "ReservedDBInstanceId",
+                            "source": "identifier",
+                            "name": "Id"
+                        }
+                    ]
+                },
+                "path": "ReservedDBInstances[0]"
+            },
+            "has": {
+                "Offering": {
+                    "resource": {
+                        "type": "ReservedDBInstancesOffering",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "data",
+                                "path": "ReservedDBInstancesOfferingId"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "ReservedDBInstancesOffering": {
+            "identifiers": [
+                {
+                    "name": "Id",
+                    "memberName": "ReservedDBInstancesOfferingId"
+                }
+            ],
+            "shape": "ReservedDBInstancesOffering",
+            "load": {
+                "request": {
+                    "operation": "DescribeReservedDBInstancesOfferings",
+                    "params": [
+                        {
+                            "target": "ReservedDBInstancesOfferingId",
+                            "source": "identifier",
+                            "name": "Id"
+                        }
+                    ]
+                },
+                "path": "ReservedDBInstancesOfferings[0]"
+            },
+            "actions": {
+                "Purchase": {
+                    "request": {
+                        "operation": "PurchaseReservedDBInstancesOffering",
+                        "params": [
+                            {
+                                "target": "ReservedDBInstancesOfferingId",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "ReservedDBInstance",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "ReservedDBInstance.ReservedDBInstanceId"
+                            }
+                        ],
+                        "path": "ReservedDBInstance"
+                    }
+                }
+            }
+        },
+        "ResourcePendingMaintenanceActionList": {
+            "identifiers": [
+                {
+                    "name": "ARN",
+                    "memberName": "ResourceIdentifier"
+                }
+            ],
+            "shape": "ResourcePendingMaintenanceActions",
+            "has": {
+                "PendingMaintenanceActions": {
+                    "resource": {
+                        "type": "PendingMaintenanceAction",
+                        "identifiers": [
+                            {
+                                "target": "TargetARN",
+                                "source": "identifier",
+                                "name": "ARN"
+                            },
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "PendingMaintenanceActionDetails[].Action"
+                            }
+                        ],
+                        "path": "PendingMaintenanceActionDetails[]"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,20 @@
+{
+  "title": "[ArcSight] Endpoint OS Activity Dashboard",
+  "hits": 0,
+  "description": "",
+  "panelsJSON": "[{\"col\":1,\"id\":\"c9e333a0-4550-11e7-86b6-95298e9da6dc\",\"panelIndex\":3,\"row\":8,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"463fc740-454e-11e7-86b6-95298e9da6dc\",\"panelIndex\":4,\"row\":2,\"size_x\":10,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"8f8d6230-454f-11e7-86b6-95298e9da6dc\",\"panelIndex\":5,\"row\":8,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"f0664070-4551-11e7-86b6-95298e9da6dc\",\"panelIndex\":7,\"row\":6,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"d8314510-454f-11e7-86b6-95298e9da6dc\",\"panelIndex\":8,\"row\":14,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"2b369910-4553-11e7-83ea-67cb6920446d\",\"panelIndex\":9,\"row\":11,\"size_x\":6,\"size_y\":6,\"type\":\"visualization\"},{\"col\":7,\"id\":\"9141cc20-4553-11e7-83ea-67cb6920446d\",\"panelIndex\":10,\"row\":11,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"31b85570-454a-11e7-86b6-95298e9da6dc\",\"panelIndex\":11,\"row\":1,\"size_x\":12,\"size_y\":1,\"type\":\"visualization\"},{\"col\":11,\"id\":\"0e4558b0-4552-11e7-86b6-95298e9da6dc\",\"panelIndex\":12,\"row\":2,\"size_x\":2,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"47c2a140-454f-11e7-86b6-95298e9da6dc\",\"panelIndex\":13,\"row\":4,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":9,\"id\":\"68180c80-4556-11e7-83ea-67cb6920446d\",\"panelIndex\":14,\"row\":17,\"size_x\":4,\"size_y\":5,\"type\":\"visualization\"},{\"col\":9,\"id\":\"08ee04d0-4556-11e7-83ea-67cb6920446d\",\"panelIndex\":15,\"row\":22,\"size_x\":4,\"size_y\":6,\"type\":\"visualization\"},{\"col\":1,\"id\":\"b897ce70-4556-11e7-83ea-67cb6920446d\",\"panelIndex\":16,\"row\":21,\"size_x\":8,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"93531890-4556-11e7-83ea-67cb6920446d\",\"panelIndex\":17,\"row\":26,\"size_x\":8,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"a8ce0ef0-4556-11e7-83ea-67cb6920446d\",\"panelIndex\":18,\"row\":17,\"size_x\":8,\"size_y\":4,\"type\":\"visualization\"},{\"col\":1,\"id\":\"82caeb10-4556-11e7-83ea-67cb6920446d\",\"panelIndex\":19,\"row\":24,\"size_x\":8,\"size_y\":2,\"type\":\"visualization\"}]",
+  "optionsJSON": "{\"darkTheme\":false}",
+  "uiStateJSON": "{\"P-13\":{\"vis\":{\"colors\":{\"Destination Users\":\"#E24D42\",\"Event Count\":\"#64B0C8\"}}},\"P-14\":{\"vis\":{\"legendOpen\":false}},\"P-15\":{\"vis\":{\"legendOpen\":false}},\"P-2\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"P-3\":{\"vis\":{\"colors\":{\"Count\":\"#64B0C8\",\"Destination User Names\":\"#E24D42\",\"Event Types\":\"#EF843C\"},\"legendOpen\":true}},\"P-4\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"P-5\":{\"vis\":{\"defaultColors\":{\"0 - 55k\":\"rgb(255,255,204)\",\"55k - 110k\":\"rgb(255,241,170)\",\"110k - 165k\":\"rgb(254,225,135)\",\"165k - 220k\":\"rgb(254,201,101)\",\"220k - 275k\":\"rgb(254,171,73)\",\"275k - 330k\":\"rgb(253,141,60)\",\"330k - 385k\":\"rgb(252,91,46)\",\"385k - 440k\":\"rgb(237,47,34)\",\"440k - 495k\":\"rgb(212,16,32)\",\"495k - 550k\":\"rgb(176,0,38)\"},\"legendOpen\":false}},\"P-8\":{\"vis\":{\"colors\":{\"/Attempt\":\"#447EBC\",\"/Failure\":\"#E24D42\",\"/Success\":\"#7EB26D\"}}},\"P-9\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}}",
+  "version": 1,
+  "timeRestore": true,
+  "timeTo": "now",
+  "timeFrom": "now-24h",
+  "refreshInterval": {
+    "display": "Off",
+    "pause": false,
+    "value": 0
+  },
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}],\"highlightAll\":true,\"version\":true}"
+  }
+}

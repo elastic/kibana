@@ -1,0 +1,118 @@
+:plugin: useragent
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Useragent filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Parse user agent strings into structured data based on BrowserScope data
+
+UserAgent filter, adds information about user agent like family, operating
+system, version, and device
+
+Logstash releases ship with the regexes.yaml database made available from
+ua-parser with an Apache 2.0 license. For more details on ua-parser, see
+<https://github.com/tobie/ua-parser/>.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Useragent Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-lru_cache_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-prefix>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-regexes>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-source>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-lru_cache_size"]
+===== `lru_cache_size` 
+
+  * Value type is <<number,number>>
+  * Default value is `1000`
+
+UA parsing is surprisingly expensive. This filter uses an LRU cache to take advantage of the fact that
+user agents are often found adjacent to one another in log files and rarely have a random distribution.
+The higher you set this the more likely an item is to be in the cache and the faster this filter will run.
+However, if you set this too high you can use more memory than desired.
+
+Experiment with different values for this option to find the best performance for your dataset.
+
+This MUST be set to a value > 0. There is really no reason to not want this behavior, the overhead is minimal
+and the speed gains are large.
+
+It is important to note that this config value is global. That is to say all instances of the user agent filter
+share the same cache. The last declared cache size will 'win'. The reason for this is that there would be no benefit
+to having multiple caches for different instances at different points in the pipeline, that would just increase the
+number of cache misses and waste memory.
+
+[id="plugins-{type}s-{plugin}-prefix"]
+===== `prefix` 
+
+  * Value type is <<string,string>>
+  * Default value is `""`
+
+A string to prepend to all of the extracted keys
+
+[id="plugins-{type}s-{plugin}-regexes"]
+===== `regexes` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+`regexes.yaml` file to use
+
+If not specified, this will default to the `regexes.yaml` that ships
+with logstash.
+
+You can find the latest version of this here:
+<https://github.com/ua-parser/uap-core/blob/master/regexes.yaml>
+
+[id="plugins-{type}s-{plugin}-source"]
+===== `source` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The field containing the user agent string. If this field is an
+array, only the first value will be used.
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The name of the field to assign user agent data into.
+
+If not specified user agent data will be stored in the root of the event.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

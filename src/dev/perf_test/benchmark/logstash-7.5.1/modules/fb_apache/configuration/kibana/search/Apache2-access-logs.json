@@ -1,0 +1,19 @@
+{
+  "sort": [
+    "@timestamp", 
+    "desc"
+  ], 
+  "hits": 0, 
+  "description": "", 
+  "title": "Apache2 access logs", 
+  "version": 1, 
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"fb_apache-*\",\"query\":{\"query_string\":{\"query\":\"_exists_:apache2.access\",\"analyze_wildcard\":true}},\"filter\":[],\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"require_field_match\":false,\"fragment_size\":2147483647}}"
+  }, 
+  "columns": [
+    "apache2.access.remote_ip", 
+    "apache2.access.method", 
+    "apache2.access.url", 
+    "apache2.access.response_code"
+  ]
+}

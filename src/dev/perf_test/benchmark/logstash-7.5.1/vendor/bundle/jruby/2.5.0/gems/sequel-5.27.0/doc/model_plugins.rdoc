@@ -1,0 +1,270 @@
+= Model Plugins
+
+Sequel::Model (and Sequel in general) is designed around the idea of a small core, to which application-specific behavior can easily be added.  Sequel::Model implements this design using a plugin system.  Plugins are modules that include submodules for model class methods, model instance methods, and model dataset methods.  All plugins can override the class, instance, and dataset methods added by earlier plugins, and call super to get the behavior before the plugin was added.
+
+== Default Plugins
+
+The Sequel::Model class is completely empty by default, in that it has no class methods or instance methods.  Sequel::Model is itself a plugin, and it is the first plugin loaded, and it is loaded into itself (meta!).  So methods in Sequel::Model::ClassMethods become Sequel::Model class methods, methods in Sequel::Model::InstanceMethods become Sequel::Model instance methods, and methods in Sequel::Model::DatasetMethods become Sequel::Model dataset methods. The Sequel::Model plugin is often referred to as the base plugin. 
+
+By default, the Sequel::Model class also has the Sequel::Model::Associations plugin loaded by default, though it is possible to disable this. 
+
+== Loading Plugins
+
+Loading a plugin into a model class is generally as simple as calling the Sequel::Model.plugin method with the name of the plugin, for example:
+
+  Sequel::Model.plugin :subclasses
+
+What is does is require the <tt>sequel/plugins/subclasses</tt> file, and then assumes that that file defines the <tt>Sequel::Plugins::Subclasses</tt> plugin module.
+
+It's possible to pass module instances to the plugin method to load plugins that are stored in arbitrary files or namespaces:
+
+  Sequel::Model.plugin MyApp::Plugins::Foo
+
+In the examples shown above, the plugin is loaded into Sequel::Model, which means it is loaded into all subclasses that are created afterward.  With many plugins, you are not going to want to add them to Sequel::Model, but to a specific subclass:
+
+  class Node < Sequel::Model
+    plugin :tree
+  end
+
+Doing this, only Node and future subclasses of Node will have the tree plugin loaded.
+
+== Plugin Arguments/Options
+
+Some plugins require arguments and/or support options.  For example, the single_table_inheritance plugin requires an argument containing the column that specifies the class to use, and options:
+
+  class Employee < Sequel::Model
+    plugin :single_table_inheritance, :type_id, model_map: {1=>:Staff, 2=>:Manager}
+  end
+
+You should read the documentation for the plugin to determine if it requires arguments and what if any options are supported.
+
+== Creating Plugins
+
+The simplest possible plugin is an empty module in a file stored in <tt>sequel/plugins/plugin_name</tt> somewhere in ruby's load path:
+
+  module Sequel
+    module Plugins
+      module PluginName
+      end
+    end
+  end
+
+Well, technically, that's not the simplest possible plugin, but it is the simplest one you can load by name.  The absolute simplest plugin would be an empty module:
+
+  Sequel::Model.plugin Module.new
+
+== Example Formatting
+
+In general, loading plugins by module instead of by name is not recommended, so this guide will assume that plugins are loaded by name.  For simplicity, we'll also use the following format for example plugin code (and assume a plugin named Foo stored in <tt>sequel/plugins/foo</tt>):
+
+  module Sequel::Plugins::Foo
+  end
+
+This saves 4 lines per example.  However, it's recommended that you use the nested example displayed earlier for production code.
+
+The examples also assume that the following model class exists:
+
+  class Bar < Sequel::Model
+  end
+
+== Adding Class Methods
+
+If you want your plugin to add class methods to the model class it is loaded into, define a ClassMethods module under the plugin module:
+
+  module Sequel::Plugins::Foo
+    module ClassMethods
+      def a
+        1
+      end
+    end
+  end
+
+This allows a plugin user to do:
+
+  Bar.plugin :foo
+  Bar.a # => 1
+
+== Adding Instance Methods
+
+If you want your plugin to add instance methods to the model class it is loaded into, define an InstanceMethods module under the plugin module:
+
+  module Sequel::Plugins::Foo
+    module InstanceMethods
+      def a
+        1
+      end
+    end
+  end
+
+This allows a plugin user to do:
+
+  Bar.plugin :foo
+  Bar.new.a # => 1
+
+== Adding Dataset Methods
+
+If you want your plugin to add methods to the dataset of the model class it is loaded into, define a DatasetMethods module under the plugin module:
+
+  module Sequel::Plugins::Foo
+    module DatasetMethods
+      def a
+        1
+      end
+    end
+  end
+
+This allows a plugin user to do:
+
+  Bar.plugin :foo
+  Bar.dataset.a # => 1
+
+== Calling super to get Previous Behavior
+
+No matter if you are dealing with class, instance, or dataset methods, you can call super inside the method to get the previous behavior.  This makes it easy to hook into the method, add your own behavior, but still get the previous behavior:
+
+  module Sequel::Plugins::Foo
+    module InstanceMethods
+      def save
+        if allow_saving?
+          super
+        else
+          raise Sequel::Error, 'saving not allowed for this object'
+        end
+      end
+
+      private
+
+      def allow_saving?
+        moon =~ /Waxing/
+      end
+    end
+  end
+
+== Running Code When the Plugin is Loaded
+
+Some plugins require more than just adding methods.  Any plugin that requires state is going to have to initialize that state and store it somewhere (generally in the model class itself).  If you want to run code when a plugin is loaded (usually to initialize state, but possibly for other reasons), there are two methods you can define to do so.  The first method is apply, and it is called only the first time the plugin is loaded into the class, before it is loaded into the class.  This is generally only used if a plugin depends on another plugin or for initializing state.  You define this method as a singleton method of the plugin module:
+
+  module Sequel::Plugins::Foo
+    def self.apply(model)
+      model.instance_eval do
+        plugin :plugin_that_foo_depends_on
+        @foo_states = {}
+      end
+    end
+  end
+
+The other method is called configure, and it is called everytime the plugin is loaded into the class, after it is loaded into the class:
+
+  module Sequel::Plugins::Foo
+    def self.configure(model)
+      model.instance_eval do
+        @foo_states[:initial] ||= :baz
+      end
+    end
+  end
+
+Note that in the configure method, you know apply has already been called at least once (so @foo_state will definitely exist).
+
+If you want your plugin to take arguments and/or support options, you handle that by making your apply and configure methods take arguments and/or an options hash.  For example, if you want the user to be able to set the initial state via an option, you can do:
+
+  module Sequel::Plugins::Foo
+    def self.apply(model, opts={})
+      model.instance_eval do
+        plugin :plugin_foo_depends_on
+        @foo_states = {}
+      end
+    end
+
+    def self.configure(model, opts={})
+      model.instance_eval do
+        @foo_states[:initial] = opts[:initial_state] || @foo_states[:initial] || :baz
+      end
+    end
+  end
+
+This allows a user of the plugin to do either of the following
+
+  Bar.plugin :foo
+  Bar.plugin :foo, initial_state: :quux
+
+If you want to require the initial state to be provided as an argument:
+
+  module Sequel::Plugins::Foo
+    def self.apply(model, initial_state)
+      model.instance_eval do
+        plugin :plugin_foo_depends_on
+        @foo_states = {}
+      end
+    end
+
+    def self.configure(model, initial_state)
+      model.instance_eval do
+        @foo_states[:initial] = initial_state
+      end
+    end
+  end
+
+This requires that the user of the plugin specify the argument:
+
+  Bar.plugin :foo, :quux
+
+In general you should only require plugin arguments if you absolutely must have a value and there is no good default.
+
+== Handling Subclasses
+
+Sequel::Model uses a copy-on-subclassing approach to model state.  So instead of model subclasses asking their parent class for a value if they don't have it defined, the value is automatically copied from the parent class to the subclass when the subclass is created.  While you can do this by overriding the inherited class method, there is a available shortcut that handles most cases:
+
+  module Sequel::Plugins::Foo
+    module ClassMethods
+      Sequel::Plugins.inherited_instance_variables(self, :@foo_states => :dup)
+    end
+  end
+
+Inside the ClassMethods submodule, you call the Sequel::Plugins.inherited_instance_variables method with the first argument being self.  The second argument should be a hash describing how to copy the value from the parent class into the subclass.  The keys of this hash are instance variable names, including the @ symbol (e.g. :@foo_state).  The values of this hash describe how to copy it:
+
+nil :: Use the value directly.
+:dup :: Call dup on the value.
+:hash_dup :: Create a new hash with the same keys, but a dup of all the values.
+Proc :: An arbitrary proc that is called with the parent class value and should return the value to set into the subclass.
+
+== Handling Changes to the Model's Dataset
+
+In many plugins, if the model class changes the dataset, you need to change the state for the plugin.  While you can do this by overriding the set_dataset class method, there is an available shortcut:
+
+  module Sequel::Plugins::Foo
+    module ClassMethods
+      Sequel::Plugins.after_set_dataset(self, :set_foo_table)
+      
+      private
+
+      def set_foo_table
+        @foo_states[:table] = table_name
+      end
+    end
+  end
+
+With this code, any time the model's dataset changes, the state of the plugin will be updated to set the correct table name.  This is also called when creating a new model class with a dataset.
+
+== Making Dataset Methods Callable as Class Methods
+
+In some cases, when dataset methods are added, you want to also create a model class method that will call the dataset method, so you can write:
+
+  Model.method
+
+instead of:
+
+  Model.dataset.method
+
+There is an available shortcut that automatically creates the class methods:
+
+  module Sequel::Plugins::Foo
+    module ClassMethods
+      Sequel::Plugins.def_dataset_methods(self, :quux)
+    end
+
+    module DatasetMethods
+      def quux
+        2
+      end
+    end
+  end

@@ -1,0 +1,40 @@
+= New Features
+
+* The tree and rcte_tree plugins now support composite keys.
+
+* An error_sql Database extension has been added.  This extension
+  adds the DatabaseError#sql method, which should return the
+  database query that caused the error.  This is useful for
+  drivers that don't include the SQL used as part of the error
+  message.
+
+= Other Improvements
+
+* Empty blobs are now literalized correctly on MySQL.
+
+* Empty arrays are now literalized correctly on PostgreSQL <8.4.
+
+* In the pagination extension, Dataset#page_count is now 1 even if
+  the dataset is empty.  This fixes issues with last_page? and
+  page_range returning bad values for empty datasets.
+
+* In the pagination extension, calling Dataset#each_page without a
+  block now returns an Enumerator.
+
+* Dataset#qualify and Sequel.delay now work together, qualifying
+  the object returned by the delayed evaluation.
+
+* Migrator.migrator_class is now a public method.
+
+* The PostgreSQL citext type is now recognized as a string.
+
+* Another disconnect error is now recognized in the jdbc/as400
+  adapter.
+
+* Guides about using and creating Sequel extensions and model
+  plugins have been added.
+
+= Backwards Compatibility
+
+* If you were expecting Dataset#page_count on a empty paginated
+  dataset to return 0, you need to update your code.

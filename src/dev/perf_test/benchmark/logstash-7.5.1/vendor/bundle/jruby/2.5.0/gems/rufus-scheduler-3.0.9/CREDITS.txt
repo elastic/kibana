@@ -1,0 +1,80 @@
+
+= CREDITS.txt
+
+
+== Contributors
+
+- Sterling Paramore (https://github.com/gnilrets) underscore TZ fix
+- ecin (https://github.com/ecin) new lock mecha
+- Adam Jonas (https://github.com/adamjonas) migrate specs to "expect"
+- Yassen Bantchev (https://github.com/yassenb) CronLine#previous_time rewrite
+- Eric Lindvall (https://github.com/eric) Zookeeper locked example
+- Ted Pennings (https://github.com/tedpennings) typo in post_install_message
+- Tobias Kraze (https://github.com/kratob) timeout vs mutex fix
+- Patrick Farrell (https://github.com/pfarrell) pointing at deprecated start_new
+- Thomas Sevestre (https://github.com/thomassevestre) :exception option
+- Matteo Cerutti - last_time / previous_time idea (and initial implementation)
+- Aimee Rose (https://github.com/AimeeRose) cronline and > 24
+- Lucy Fu (https://github.com/lfu) arg error on <= 0 "every" freq
+- Rainux Luo (https://github.com/rainux) multiple mutexes
+- Andrew Davey (https://github.com/asdavey) "L" in cron lines
+- Stig Kleppe-Jørgensen (https://github.com/stigkj)
+- Danny "northox" Fullerton (https://github.com/northox) negative time strings
+- Marcus Brito (https://github.com/pazustep) CronLine proofing
+- André Luis Leal Cardoso Junior (https://github.com/andrehjr) 1.9.3 patch
+- Anthony Lewis (https://github.com/anthonylewis) cron lines and 09 issue
+- concept47 (https://github.com/concept47) every and :discard_past
+- Chris Kampemeier (http://github.com/chrisk) rspec 2.0 refinements
+- Tanzeeb Khalili (http://github.com/tanzeeb) cron and timezones
+- Adam Davies (http://github.com/adz), :allow_overlapping => false
+- Klaas Jan Wierenga, at/every/in stress tests (1.0 and 2.0)
+- TobyH (http://github.com/tobyh), faster and cleaner CronLine#next_time
+
+
+== Feedback
+
+- junhanamaki - https://github.com/junhanamaki - #next_time and dst ambiguities
+- kreynolds (tossrock) - inspiration for #occurrences
+- Matteo - https://github.com/m4ce - dst and cron issue
+- Tobias Bielohlawek - https://github.com/rngtng - missing assertion
+- Joe Taylor and Agis Anastasopoulos -
+  http://stackoverflow.com/questions/21280870 - :first => :now and Job#call
+- Gatis Tomsons - https://github.io/gacha - heavy work threads and lock errors
+- https://github.com/joast - missing .to_time_string alias (code and doc)
+- Tamir Duberstein - https://github.com/tamird - rdoc inaccuracies
+- Kevin Bouwkamp - https://github.com/bmxpert1 - first_at issues
+- Daniel Beauchamp - https://github.com/pushmatrix - pre/post trigger callbacks
+- Arthur Maltson - https://github.com/amaltson - readme fixes
+- skrd - https://github.com/skrd - "/10 * * * *" cron issue
+- Hongli Lai - Scheduler#stop(:terminate => true) request
+- Tero Tilus - raises on unsupported/unknown options
+- Louis Coilliot - Scheduler#running_jobs
+- Henrique G. Testa - pause/resume concept
+- Sam Gibson - https://github.com/samfoo - exception handling hardening
+- sha1dy - https://github.com/sha1dy - every and overlapping exception issue
+- Defusal - unschedule_by_tag
+- pickerel - https://github.com/pickerel
+- Gonzalo Suarez - parse_time_string(s) issue
+- Tony Day - http://github.com/tonyday - every and overlapping timeout issue
+- Nate Wiger (Schedulable call/trigger issue)
+- Aldric (readme errors)
+- Kenneth Kalmer (daemon-kit)
+- Chris Evans, :timeout tests on JRuby
+- Tim Uckun, :timeout concept
+- K Liu, for the note about CronLine#next_time
+- Xianhang Zhang, find_jobs(tag=nil) patch
+- Yi Wen, for lib/rufus-scheduler.rb
+- Adam Green and Rael Dornfest for the Taskr breaking issue feedback
+- Sean Liu, unschedule_every issue
+- Manfred Usselman (no cronjobs on sundays bug)
+- Michael Goth, tests with precision > 1s
+
+* many people gave feedback previously, see
+  http://openwferu.rubyforge.org/svn/trunk/openwfe-ruby/CREDITS.txt
+
+
+== and finally
+
+- many thanks to the author and contributors of the tzinfo gem (http://tzinfo.github.io/)
+- many thanks to the EventMachine team (especially Aman Gupta)
+

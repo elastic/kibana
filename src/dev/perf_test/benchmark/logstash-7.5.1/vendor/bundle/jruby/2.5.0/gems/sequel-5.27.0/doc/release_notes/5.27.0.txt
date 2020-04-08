@@ -1,0 +1,21 @@
+= New Features
+
+* Sequel::DEFAULT has been added a constant for the DEFAULT expression,
+  useful in inserts and especially updates:
+
+    DB[:a].where(:id=>1).update(:b=>Sequel::DEFAULT)
+    # UPDATE "a" SET "b" = DEFAULT WHERE "id" = 1
+
+* SQL::Function#filter for filtered aggregate functions is now
+  supported on all databases.  On databases not supporting it natively
+  (all except PostgreSQL 9.4+ and SQLite 3.30+), a CASE statement is
+  used to emulate the support.
+
+= Other Improvements
+
+* NULLS FIRST/LAST is now used without emulation on SQLite 3.30+.
+
+* The pg_enum extension now works correctly on PostgreSQL 8.3-9.0.
+
+* Postgres::ArrayOp#join in the pg_array_ops extension now works
+  correctly on PostgreSQL <9.1.

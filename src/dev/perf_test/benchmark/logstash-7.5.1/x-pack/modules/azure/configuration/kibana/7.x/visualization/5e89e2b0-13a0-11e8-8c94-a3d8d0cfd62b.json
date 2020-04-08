@@ -1,0 +1,10 @@
+{
+  "title": "Select Combo [Azure Monitor]",
+  "visState": "{\"title\":\"Select Combo [Azure Monitor]\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1517598395667\",\"indexPattern\":\"azure-*\",\"fieldName\":\"azure.subscription.keyword\",\"label\":\"Subscription\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}},{\"id\":\"1518843942322\",\"indexPattern\":\"azure-*\",\"fieldName\":\"identity.claims.http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name.keyword\",\"label\":\"User Email\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}}],\"updateFiltersOnChange\":true,\"useTimeFilter\":false},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

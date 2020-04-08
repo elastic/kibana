@@ -1,0 +1,83 @@
+= New Features
+
+* Sequel now supports more window frame specification types when
+  using window functions.  You can now provide the window frame
+  specification as a hash, and Sequel will format the correct
+  SQL.  Specifically, this adds support for RANGE and GROUPS,
+  numeric offsets, and EXCLUDE on a database that supports it
+  (e.g. PostgreSQL 11+).  Examples:
+
+    DB[:albums].select{function(c1).over(:partition=>c2, :order=>:c3,
+      :frame=>{:type=>:range, :start=>1, :end=>1})}
+    # SELECT function(c1) OVER (PARTITION BY c2 ORDER BY c3
+    # RANGE BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM albums
+
+    DB[:albums].select{function(c1).over(:partition=>c2, :order=>:c3,
+      :frame=>{:type=>:groups, :start=>[2, :preceding], :end=>[1, :preceding]})}
+    # SELECT function(c1) OVER (PARTITION BY c2 ORDER BY c3
+    # GROUPS BETWEEN 2 PRECEDING AND 1 PRECEDING) FROM albums
+
+    DB[:albums].select{function(c1).over(:partition=>c2, :order=>:c3,
+      :frame=>{:type=>:range, :start=>:preceding, :exclude=>:current})}
+    # SELECT function(c1) OVER (PARTITION BY c2 ORDER BY c3
+    # RANGE UNBOUNDED PRECEDING EXCLUDE CURRENT ROW) FROM albums
+
+* The SQLite 3.24+ ON CONFLICT clause to INSERT is now supported.
+  This support is very similar to the PostgreSQL support for the
+  same feature, also known as  UPSERT (UPDATE if the row already
+  exists, INSERT if it does not).  This support is different than
+  the previous support for INSERT ON CONFLICT REPLACE (also known as
+  INSERT OR REPLACE), but it uses the same method name in order to
+  be compatible with the PostgreSQL support.  The new syntax requires
+  passing a hash to Dataset#insert_conflict.  Examples:
+
+    DB[:table].insert_conflict({}).insert(a: 1, b: 2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT DO NOTHING
+ 
+    DB[:table].insert_conflict(target: :a).insert(a: 1, b: 2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT (a) DO NOTHING
+ 
+    DB[:table].insert_conflict(target: :a,
+      conflict_where: {c: true}).insert(a: 1, b: 2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT (a) WHERE (c IS TRUE) DO NOTHING
+ 
+    DB[:table].insert_conflict(target: :a,
+      update: {b: Sequel[:excluded][:b]}).insert(a: 1, b: 2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT (a) DO UPDATE SET b = excluded.b
+ 
+    DB[:table].insert_conflict(target: :a,
+      update: {b: Sequel[:excluded][:b]},
+      update_where: {Sequel[:table][:status_id] => 1}).insert(a: 1, b: 2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2) ON CONFLICT (a)
+    # DO UPDATE SET b = excluded.b WHERE (table.status_id = 1)
+
+* Dataset#window for the WINDOW clause has been moved from the
+  PostgreSQL-specific support to core, and has been enabled on
+  MySQL 8+ and SQLAnywhere.  This allows you to specify a shared
+  window specification in a query, which can be used by multiple
+  window functions.
+
+= Other Improvements
+
+* When using the static_cache plugin, Model.first when called without
+  a block and without arguments or with a single Integer argument now
+  uses the cached values instead of issuing a query.
+
+* Using set_column_default with a nil value now correctly removes an
+  existing default value on MySQL when the column is NOT NULL.
+
+* Window function support has been enabled on SQLAnywhere, since it
+  works correctly.
+
+* Dumping schema for numeric/decimal columns with default values
+  now works correctly.  This was broken starting in Sequel 5.9.0
+  due to changes to use BigDecimal() instead of BigDecimal.new().
+
+* The jdbc/sqlserver adapter now works correctly on JRuby 9.2+.
+
+* An additional check constraint violation failure message is now
+  recognized on SQLite.

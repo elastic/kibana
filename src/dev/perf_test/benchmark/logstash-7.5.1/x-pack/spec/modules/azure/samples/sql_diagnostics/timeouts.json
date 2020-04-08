@@ -1,0 +1,16 @@
+{
+  "ResourceGroup": "St76",
+  "time": "2017-09-18T22:39:52.1234940Z",
+  "LogicalServerName": "St76",
+  "SubscriptionId": "e3e7f07f-161e-4591-bb76-711473d4940c",
+  "category": "Timeouts",
+  "operationName": "TimeoutEvent",
+  "properties": {
+    "error_state": 173,
+    "query_hash": "8136230709041743099",
+    "ElasticPoolName": "RecommendedStandardPool1",
+    "query_plan_hash": "-1",
+    "DatabaseName": "DB9977"
+  },
+  "resourceId": "/SUBSCRIPTIONS/e3e7f07f-161e-4591-bb76-711473d4940c/RESOURCEGROUPS/St76/PROVIDERS/MICROSOFT.SQL/SERVERS/St76/DATABASES/DB9977"
+}

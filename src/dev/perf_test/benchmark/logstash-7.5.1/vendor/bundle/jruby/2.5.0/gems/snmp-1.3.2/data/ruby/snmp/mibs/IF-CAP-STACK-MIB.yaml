@@ -1,0 +1,13 @@
+--- 
+ifCapStackMIB: 1.3.6.1.2.1.166
+ifCapStackObjects: 1.3.6.1.2.1.166.1
+ifCapStackTable: 1.3.6.1.2.1.166.1.1
+ifCapStackEntry: 1.3.6.1.2.1.166.1.1.1
+ifCapStackStatus: 1.3.6.1.2.1.166.1.1.1.1
+ifInvCapStackTable: 1.3.6.1.2.1.166.1.2
+ifInvCapStackEntry: 1.3.6.1.2.1.166.1.2.1
+ifInvCapStackStatus: 1.3.6.1.2.1.166.1.2.1.1
+ifCapStackConformance: 1.3.6.1.2.1.166.2
+ifCapStackGroups: 1.3.6.1.2.1.166.2.1
+ifCapStackCompliances: 1.3.6.1.2.1.166.2.2
+

@@ -1,0 +1,36 @@
+:plugin: null
+:type: output
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Null output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+A null output. This is useful for testing logstash inputs and filters for
+performance.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Null Output Configuration Options
+
+There are no special configuration options for this plugin,
+but it does support the <<plugins-{type}s-{plugin}-common-options>>.
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

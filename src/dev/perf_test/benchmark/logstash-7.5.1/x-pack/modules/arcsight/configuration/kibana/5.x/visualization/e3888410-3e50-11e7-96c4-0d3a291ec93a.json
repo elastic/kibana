@@ -1,0 +1,10 @@
+{
+  "title": "Events by Severity [ArcSight]",
+  "visState": "{\"title\":\"Events by Severity [ArcSight]\",\"type\":\"metrics\",\"params\":{\"id\":\"69a9f020-3e50-11e7-96c4-0d3a291ec93a\",\"type\":\"top_n\",\"series\":[{\"id\":\"69a9f021-3e50-11e7-96c4-0d3a291ec93a\",\"color\":\"#68BC00\",\"split_mode\":\"filters\",\"metrics\":[{\"id\":\"69a9f022-3e50-11e7-96c4-0d3a291ec93a\",\"type\":\"count\"},{\"sigma\":\"\",\"id\":\"7bb17f50-76f3-11e7-82d9-83ee5c3338ae\",\"type\":\"sum_bucket\",\"field\":\"69a9f022-3e50-11e7-96c4-0d3a291ec93a\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0.0[0]a\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"split_filters\":[{\"filter\":\"severity:\\\"Low\\\" OR severity:\\\"0\\\"\",\"label\":\"LOW\",\"color\":\"rgba(104,204,202,1)\",\"id\":\"8819d6b0-3e50-11e7-96c4-0d3a291ec93a\"},{\"filter\":\"severity:\\\"Medium\\\"\",\"label\":\"MEDIUM\",\"color\":\"rgba(252,220,0,1)\",\"id\":\"9a4f6610-3e50-11e7-96c4-0d3a291ec93a\"},{\"filter\":\"severity:\\\"High\\\"\",\"label\":\"HIGH\",\"color\":\"rgba(254,146,0,1)\",\"id\":\"a3de4c50-3e50-11e7-96c4-0d3a291ec93a\"},{\"filter\":\"severity:\\\"Very-High\\\"\",\"label\":\"VERY HIGH\",\"color\":\"rgba(244,78,59,1)\",\"id\":\"a9926960-3e50-11e7-96c4-0d3a291ec93a\"}],\"label\":\"Event by Severities\"}],\"time_field\":\"deviceReceiptTime\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"bar_color_rules\":[{\"id\":\"6ed9c200-3e50-11e7-96c4-0d3a291ec93a\"}],\"filter\":\"categoryDeviceGroup:\\\"/Firewall\\\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

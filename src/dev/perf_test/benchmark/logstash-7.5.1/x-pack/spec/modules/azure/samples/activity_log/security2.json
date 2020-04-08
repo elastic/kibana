@@ -1,0 +1,12 @@
+{
+  "comment": "as observed",
+  "time": "2017-12-21T10:55:48.6238832Z",
+  "resourceId": "/SUBSCRIPTIONS/F628BA4C-F07B-4AEB-86CB-C89784BBD9B3",
+  "correlationId": "54ade416-3c64-42ba-994f-1f6309efc989",
+  "operationName": "Microsoft.Security/tasks/write",
+  "level": "Information",
+  "resultType": "Succeeded",
+  "category": "Action",
+  "location": "global",
+  "properties": {"eventCategory":"Recommendation","eventName":"New Recommendation","operationId":"e447c42f-af43-40ca-962b-c3740893f100"}
+}

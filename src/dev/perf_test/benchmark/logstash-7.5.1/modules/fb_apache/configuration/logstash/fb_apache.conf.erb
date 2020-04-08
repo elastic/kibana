@@ -1,0 +1,32 @@
+input {
+  beats {
+    port => <%= setting('var.input.beats.port', '5044') %>
+  }
+}
+
+filter {
+  grok {
+    match => { "message" => [ '%{IPORHOST:apache2.access.remote_ip} - %{DATA:apache2.access.user_name} \[%{HTTPDATE:apache2.access.time}\] "%{WORD:apache2.access.method} %{DATA:apache2.access.url} HTTP/%{NUMBER:apache2.access.http_version}" %{NUMBER:apache2.access.response_code} (?:%{NUMBER:apache2.access.body_sent.bytes}|-)( "%{DATA:apache2.access.referrer}")?( "%{DATA:apache2.access.agent}")?', '%{IPORHOST:apache2.access.remote_ip} - %{DATA:apache2.access.user_name} \[%{HTTPDATE:apache2.access.time}\] "-" %{NUMBER:apache2.access.response_code} -'] }
+    remove_field => [ "message" ]
+  }
+
+  date {
+    match => [ "apache2.access.time", "dd/MMM/YYYY:HH:mm:ss Z" ]
+    remove_field => [ "apache2.access.time" ]
+  }
+
+  useragent {
+    source => "apache2.access.agent"
+    target => "apache2.access.user_agent"
+    remove_field => [ "apache2.access.agent" ]
+  }
+
+  geoip {
+    source => "apache2.access.remote_ip"
+    target => "apache2.access.geoip"
+  }
+}
+
+output {
+  <%= elasticsearch_output_config() %>
+}

@@ -1,0 +1,89 @@
+= New Features
+
+* Database#after_commit and #after_rollback transaction hook methods
+  now support a :savepoint option.  Using the :savepoint option makes
+  the hooks savepoint-aware, so after_commit will only be called if
+  all enclosing savepoints and the transaction are committed, and
+  after_rollback will be called when any of the enclosing savepoints
+  are rolled back (which may be before transaction commit/rollback).
+  Examples:
+
+    x = nil
+    DB.transaction do # BEGIN
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.after_commit(savepoint: true){x = 1}
+        DB.after_rollback(savepoint: true){x = 2}
+        x # nil
+      end # RELEASE SAVEPOINT
+      x # nil
+    end # COMMIT
+    x # 1
+
+    x = nil
+    DB.transaction do  # BEGIN
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.after_commit(savepoint: true){x = 1}
+        DB.after_rollback(savepoint: true){x = 2}
+        x # nil
+        raise Sequel::Rollback
+      end # ROLLBACK TO SAVEPOINT
+      x # 2
+    end # COMMIT
+    x # 2
+  
+    x = nil
+    DB.transaction do # BEGIN
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.after_commit(savepoint: true){x = 1}
+        DB.after_rollback(savepoint: true){x = 2}
+      end # RELEASE SAVEPOINT
+      x # nil
+      raise Sequel::Rollback
+    end
+    x # 2
+
+* The pg_auto_constraint_validations plugin now supports a
+  pg_auto_constraint_validation_override method for overriding
+  the columns and message for a specific constraint.  This is
+  useful if the database cannot determine the columns (due
+  to the constraint containing a database function call), or
+  if you would like to customize the message per constraint.
+
+= Other Improvements
+
+* The one_to_one association setter now works with models that use
+  joined datasets, such as child models when using the
+  class_table_inheritance plugin.
+
+* Database#check_constraints on PostgreSQL now also includes CHECK
+  constraints where the related columns are not known.  The :columns
+  entry in the hash will be an empty array in such cases.  The
+  exclusion of such constraints in previous versions was not
+  intentional, and the documentation implied that all CHECK
+  constraints were returned.
+
+* Many cases where instance_exec was previously used on model
+  instances have been changed so that instance methods are defined
+  and called instead.  This avoids the creation of singleton classes
+  for model instances, and can significantly improve performance in
+  some cases.  This affects all associations as well as the
+  following plugins:
+
+  * composition
+  * hook_class_methods
+  * validation_class_methods
+
+  Other cases where instance_exec is now avoided and a different
+  approach is used:
+
+  * association_dependencies plugin
+  * PlaceholderLiteralString#with_dataset
+
+* The auto_validations plugin now works with child models when using
+  the class_table_inheritance plugin.
+
+* Database#server_version now works correctly in the mysql2 adapter
+  when using the MySQL driver with MariaDB 10+.
+
+* The float unsigned type is now recognized and supported in the
+  schema parser and schema_dumper extension.

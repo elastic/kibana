@@ -1,0 +1,14 @@
+--- 
+intSrvGuaranteed: 1.3.6.1.2.1.52.5
+intSrvGuaranteedObjects: 1.3.6.1.2.1.52.5.1
+intSrvGuaranteedIfTable: 1.3.6.1.2.1.52.5.1.1
+intSrvGuaranteedIfEntry: 1.3.6.1.2.1.52.5.1.1.1
+intSrvGuaranteedIfBacklog: 1.3.6.1.2.1.52.5.1.1.1.1
+intSrvGuaranteedIfDelay: 1.3.6.1.2.1.52.5.1.1.1.2
+intSrvGuaranteedIfSlack: 1.3.6.1.2.1.52.5.1.1.1.3
+intSrvGuaranteedIfStatus: 1.3.6.1.2.1.52.5.1.1.1.4
+intSrvGuaranteedNotifications: 1.3.6.1.2.1.52.5.2
+intSrvGuaranteedConformance: 1.3.6.1.2.1.52.5.3
+intSrvGuaranteedGroups: 1.3.6.1.2.1.52.5.3.1
+intSrvGuaranteedCompliances: 1.3.6.1.2.1.52.5.3.2
+

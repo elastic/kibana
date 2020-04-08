@@ -1,0 +1,98 @@
+= Sequel::Model Mass Assignment
+
+Most Model methods that take a hash of attribute keys and values, including <tt>Model.new</tt>,
+<tt>Model.create</tt>, <tt>Model#set</tt> and <tt>Model#update</tt> are subject to Sequel's mass assignment rules.
+
+If you have an instance of a plain Sequel::Model class:
+
+  class Post < Sequel::Model
+  end
+  post = Post.new
+
+and you call a mass assignment method with a hash:
+
+  post.set(title: 'T', body: 'B')
+
+the mass assignment method will go through each key in the hash, append <tt>=</tt> to it to determine the
+setter method, and if the setter method is defined and access to it is not restricted, Sequel will call the
+setter method with the hash value.  So if we assume that the posts table has title and body columns, what
+the above mass assignment call actually does is:
+
+  post.title=('T')
+  post.body=('B')
+
+By default, there are two types of setter methods that are restricted.
+The first is methods like <tt>typecast_on_assignment=</tt> and <tt>==</tt>, which don't affect columns.
+These methods cannot be enabled for mass assignment.
+The second is primary key setters.
+
+So if you do:
+
+  post = Post.new(id: 1)
+
+Sequel will raise a Sequel::MassAssignmentRestriction exception, since by default setting the primary key is not allowed.
+
+To enable use of primary key setters, you need to call +unrestrict_primary_key+ for that model:
+
+  Post.unrestrict_primary_key
+
+If you want to change mass assignment so it ignores attempts to access restricted setter methods, you can do:
+
+  # Global default
+  Sequel::Model.strict_param_setting = false
+  # Class level
+  Post.strict_param_setting = false
+  # Instance level
+  post.strict_param_setting = false
+
+Since mass assignment by default allows modification of all column values except for primary key columns, it can be a security risk in some cases.
+If you are dealing with untrusted input, you are generally going to want to restrict what should be updated.
+
+Sequel has <tt>Model#set_fields</tt> and <tt>Model#update_fields</tt> methods, which are designed to be used with untrused input.
+These methods take two arguments, the untrusted hash as the first argument, and a trusted array of field names as the second argument:
+
+  post.set_fields({title: 'T', body: 'B'}, [:title, :body])
+
+Instead of looking at every key in the untrusted hash, +set_fields+ will iterate over the trusted field names, looking each up in the hash, and
+calling the setter method appropriately with the result.  +set_fields+ basically translates the above method call to:
+
+  post.title=('T')
+  post.body=('B')
+
+By using this method, you can be sure that the mass assignment method only sets the fields you expect it to set.
+
+Note that if one of the fields does not exist in the hash:
+
+  post.set_fields({title: 'T'}, [:title, :body])
+
++set_fields+ will set the value to nil (the default hash value) by default, with behavior equivalent to:
+
+  post.title=('T')
+  post.body=(nil)
+
+You can use the :missing option to +set_fields+ to change the behavior:
+
+  post.set_fields({title: 'T'}, [:title, :body], missing: :skip)
+  # post.title=('T') # only
+
+  post.set_fields({title: 'T'}, [:title, :body], missing: :raise)
+  # raises Sequel::Error
+
+If you want to set a model level default for the +set_fields+ options, you can use the +default_set_fields_options+ class accessor:
+
+  # Global default
+  Sequel::Model.default_set_fields_options[:missing] = :skip
+  # Class level
+  Post.default_set_fields_options[:missing] = :skip
+
+Here's a table describing Sequel's default mass assignment methods:
+
+Model.new(hash) :: Creates a new model instance, then calls Model#set(hash)
+Model.create(hash) :: Calls Model.new(hash).save
+Model#set(hash) :: Calls related setter method (unless access is restricted) for each key in the hash, then returns self
+Model#update(hash) :: Calls set(hash).save_changes
+Model#set_fields(hash, columns, options) :: For each column in columns, looks up related entry in hash, and calls the related setter method
+Model#update_fields(hash, columns, options) :: Calls set_fields(hash, columns, options).save_changes
+
+For backwards compatibility, Sequel also ships with a whitelist_security and blacklist_security plugins that offer additional mass assignment
+methods, but it is recommended to use +set_fields+ or +update_fields+ for untrusted input, and the other methods for trusted input.

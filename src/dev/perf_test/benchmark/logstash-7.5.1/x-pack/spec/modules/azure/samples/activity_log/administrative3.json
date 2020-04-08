@@ -1,0 +1,53 @@
+{
+  "_comment":"as observed, missing the resource group",
+  "callerIpAddress": "100.14.28.29",
+  "FAILURE": true,
+  "time": "2017-12-19T00:01:04.4382629Z",
+  "identity": {
+    "claims": {
+      "http://schemas.microsoft.com/identity/claims/objectidentifier": "2d43f8b4-a732-4570-a3a2-3f1ab49e30ac",
+      "http://schemas.microsoft.com/claims/authnmethodsreferences": "pwd,mfa",
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": "bill.gates@microsoft.com",
+      "iat": "1513639560",
+      "http://schemas.microsoft.com/claims/authnclassreference": "1",
+      "nbf": "1513639560",
+      "http://schemas.microsoft.com/identity/claims/scope": "user_impersonation",
+      "http://schemas.microsoft.com/identity/claims/tenantid": "95BD959B-A8C2-4AB8-9188-2A5647689841",
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": "2_2WJr9rionVzG7dYMqKH-VC3UWhPVXngLPpXPQYog0",
+      "aud": "https://management.core.windows.net/",
+      "in_corp": "true",
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn": "bill.gates@microsoft.com",
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname": "billy bob",
+      "ver": "1.0",
+      "appid": "c44b4083-3bb0-49c1-b47d-974e53vbtf3c",
+      "uti": "1UWEqubsQ0OCsnLug3AMAA",
+      "_claim_names": "{\"groups\":\"src1\"}",
+      "_claim_sources": "{\"src1\":{\"endpoint\":\"https://graph.windows.net/95BD959B-A8C2-4AB8-9188-2A5147989841/users/2d43f8b4-a732-4570-a3a2-3f1ab49f30ac/getMemberObjects\"}}",
+      "iss": "https://sts.windows.net/95BD959B-A8C2-4AB8-9188-2A5147989841/",
+      "exp": "1513643460",
+      "aio": "Y2NgYOC5He38sHp9h/8vrfchqS2NZ0918+0vETD9+inoRjxDgTsA",
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname": "Robinson",
+      "onprem_sid": "S-1-5-21-2127521184-1604012920-1887927527-15292006",
+      "e_exp": "262800",
+      "puid": "100300008BB08AB6",
+      "name": "John Smith",
+      "ipaddr": "252.69.73.240",
+      "appidacr": "2"
+    },
+    "authorization": {
+      "action": "Microsoft.Advisor/generateRecommendations/action",
+      "scope": "/subscriptions/872F2E12-6CCC-4EAD-8D3C-AC833009C1A4"
+    }
+  },
+  "correlationId": "7f206be7-2639-4417-9776-2aa9eb0e78db",
+  "@version": "1",
+  "resultType": "Start",
+  "location": "global",
+  "category": "Action",
+  "@timestamp": "2018-02-12T20:18:27.319Z",
+  "level": "Information",
+  "durationMs": 0,
+  "resultSignature": "Started.",
+  "resourceId": "/SUBSCRIPTIONS/872F2E12-6CCC-4EAD-8D3C-AC833009C1A4/PROVIDERS/MICROSOFT.ADVISOR",
+  "operationName": "MICROSOFT.ADVISOR/GENERATERECOMMENDATIONS/ACTION"
+}

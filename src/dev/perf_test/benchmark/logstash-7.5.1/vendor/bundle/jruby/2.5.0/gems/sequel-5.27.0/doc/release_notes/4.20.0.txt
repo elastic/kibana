@@ -1,0 +1,79 @@
+= New Features
+
+* A :before_retry option has been added to Database#transaction, which
+  specifies a proc to call when retrying if the :retry_on option
+  is used.  This can be used to implement additional logging, sleeping
+  between retries, or other things.
+
+* The to_json method :root option in the json_serializer plugin can now
+  be a string value to specify the name for the object key, instead of
+  using the underscored model name.
+
+* Dataset#paged_each now returns an enumerator if not passed a block.
+
+* You can now set the :instance_specific association option to false.
+  Previously, it was automatically set to true in some cases.  If you
+  know the association does not depend on anything instance-specific
+  other than the foreign/primary key, setting this option can allow
+  Sequel to perform some additional optimizations.
+
+= Other Improvements
+
+* Eager loading queries are now skipped if there are no matching keys.
+  There was code to check this previously, but it was accidently
+  removed in an earlier refactoring.
+
+* Eager loading an association with a limit and an eager block and
+  cascaded associations now works correctly when the window_function
+  limit strategy is used (the default on databases that support
+  window functions).
+
+* Eager loading an association with a limit with an eager block now
+  works correctly on databases do not support window functions but do
+  support correlated subqueries.
+
+* The parent association is now set on associated objects when loading
+  descendants in the rcte_tree plugin.  This allows the parent method
+  on any of the descendants to work without issuing a database query.
+
+* The prepared_statements_associations plugin now only uses prepared
+  statements if association metadata is being cached.  Previously, it
+  would use prepared statements even if association metadata was not
+  cached, which could leak the prepared statements.
+
+* Model#dup now duplicates the associations hash for the object.
+
+* Model#freeze no longer validates an object if the the errors for the
+  object are already frozen.  The static_cache plugin now freezes the
+  errors before freezing the object, so that it doesn't validate the
+  object.  This can skip many database queries when the
+  auto_validations plugin is used and there is a unique constraint or
+  index on the related table.
+
+* AUTOINCREMENT is now used again on SQLite by default for primary
+  keys.  It was removed when :auto_increment was added to the schema
+  hashes, but the removal changed SQLite's behavior.  This restores
+  the previous behavior.
+
+* Microsoft SQL Server's bit type is now recognized as a boolean type
+  by the schema dumper.
+
+* The pg_enum extension's create_enum method can now be used in
+  reversible migrations.
+
+* set_column_type with the :auto_increment=>true option once again
+  works on MySQL.  It had been broken since Sequel started adding
+  :auto_increment to the schema hashes.
+
+* The mysql2 adapter now recognizes the :charset option as a synonym
+  for :encoding.
+
+* The swift adapter now respects database and application timezone
+  settings.
+
+= Backwards Compatibility
+
+* AssociationReflection#apply_ruby_eager_limit_strategy no longer
+  checks that the strategy is :ruby, callers are now expected to
+  check the value themselves.  This should only matter if you are
+  using custom association types.

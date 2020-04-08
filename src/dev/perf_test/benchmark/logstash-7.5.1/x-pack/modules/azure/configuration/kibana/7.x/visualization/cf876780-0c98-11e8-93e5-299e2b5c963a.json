@@ -1,0 +1,10 @@
+{
+  "title": "Timeouts [Azure Monitor]",
+  "visState": "{\"title\":\"Timeouts [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(233,228,16,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\",\"field\":\"sql_diagnostics_query_store_runtime_stats_properties.logical_io_reads\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"dfe3d0d0-0808-11e8-b19d-a7e960a5b5ca\",\"type\":\"moving_average\",\"field\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0.0a\",\"chart_type\":\"line\",\"line_width\":\"3\",\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"Timeouts\"},{\"id\":\"b9a2f290-0806-11e8-b19d-a7e960a5b5ca\",\"color\":\"rgba(104,188,0,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"b9a2f291-0806-11e8-b19d-a7e960a5b5ca\",\"type\":\"count\",\"field\":\"sql_diagnostics_query_store_runtime_stats_properties.logical_io_writes\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"f0b3dcc0-0808-11e8-b19d-a7e960a5b5ca\",\"type\":\"moving_average\",\"field\":\"b9a2f291-0806-11e8-b19d-a7e960a5b5ca\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0.0a\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":\"0.2\",\"stacked\":\"none\",\"label\":\"\",\"terms_field\":\"resource_name.keyword\"}],\"time_field\":\"data.time\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":0,\"show_grid\":1,\"filter\":\"data.category:Timeouts\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

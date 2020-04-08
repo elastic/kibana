@@ -1,0 +1,17 @@
+--- 
+entitySensorMIB: 1.3.6.1.2.1.99
+entitySensorObjects: 1.3.6.1.2.1.99.1
+entPhySensorTable: 1.3.6.1.2.1.99.1.1
+entPhySensorEntry: 1.3.6.1.2.1.99.1.1.1
+entPhySensorType: 1.3.6.1.2.1.99.1.1.1.1
+entPhySensorScale: 1.3.6.1.2.1.99.1.1.1.2
+entPhySensorPrecision: 1.3.6.1.2.1.99.1.1.1.3
+entPhySensorValue: 1.3.6.1.2.1.99.1.1.1.4
+entPhySensorOperStatus: 1.3.6.1.2.1.99.1.1.1.5
+entPhySensorUnitsDisplay: 1.3.6.1.2.1.99.1.1.1.6
+entPhySensorValueTimeStamp: 1.3.6.1.2.1.99.1.1.1.7
+entPhySensorValueUpdateRate: 1.3.6.1.2.1.99.1.1.1.8
+entitySensorConformance: 1.3.6.1.2.1.99.3
+entitySensorCompliances: 1.3.6.1.2.1.99.3.1
+entitySensorGroups: 1.3.6.1.2.1.99.3.2
+

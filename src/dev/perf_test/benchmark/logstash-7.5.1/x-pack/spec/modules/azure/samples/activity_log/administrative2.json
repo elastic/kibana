@@ -1,0 +1,15 @@
+{
+  "comment": "as observed",
+  "time": "2018-01-14T17:01:30.0206739Z",
+  "resourceId": "/SUBSCRIPTIONS/9103C2E0-A392-4CE3-BADD-E50F19378DEB/RESOURCEGROUPS/MYLINUXVMRG/PROVIDERS/MICROSOFT.STORAGE/STORAGEACCOUNTS/store835G",
+  "operationName": "MICROSOFT.STORAGE/STORAGEACCOUNTS/LISTKEYS/ACTION",
+  "category": "Administrative",
+  "resultType": "Start",
+  "resultSignature": "Started.",
+  "durationMs": 0,
+  "callerIpAddress": "96.238.111.0",
+  "correlationId": "db84350f-c0bd-4531-a2bf-810a857d287e",
+  "identity": {"authorization":{"scope":"/subscriptions/9103C2E0-A392-4CE3-BADD-E50F19378DEB/resourceGroups/MyLinuxVMRG/providers/Microsoft.Storage/storageAccounts/store835G","action":"Microsoft.Storage/storageAccounts/listKeys/action","evidence":{"role":"Insights Management Service Role","roleAssignmentScope":"/subscriptions/9103C2E0-A392-4CE3-BADD-E50F19378DEB","roleAssignmentId":"126C0FC827F94412B3F8CD170A670569","roleDefinitionId":"A1E4B681D228474FB8C9417FA51EA1DD","principalId":"305CF1ABA4AA418BA44CFBBD096C0C1A","principalType":"ServicePrincipal"}},"claims":{"aud":"https://management.azure.com/","iss":"https://sts.windows.net/C4520330-BEAB-4A22-8FD4-59FF78196A05/","iat":"1515948989","nbf":"1515948989","exp":"1515952889","aio":"Y2NgYJgW3OHjWydaGi3vL5iRpVIPAA==","appid":"11c174dc-1945-4a9a-a36b-c79a0f246b9b","appidacr":"2","e_exp":"262800","http://schemas.microsoft.com/identity/claims/identityprovider":"https://sts.windows.net/C45203C0-CEAB-4A22-8FD4-59FFF8196A05/","http://schemas.microsoft.com/identity/claims/objectidentifier":"79D0CC17-AF3F-4CCC-A23C-A3FCC18475B4","http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier":"79D0CC17-AF3F-4CCC-A23C-A3FCC18475B4","http://schemas.microsoft.com/identity/claims/tenantid":"C4520330-BEAB-4B22-8FD4-59FF78196A05","uti":"Ztcp1xZ4t0S0Cb_v0j0kAA","ver":"1.0"}},
+  "level": "Information",
+  "location": "global"
+}

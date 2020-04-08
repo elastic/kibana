@@ -1,0 +1,221 @@
+= New Features
+
+* There have been numerous improvements this release related to
+  frozen datasets.  Frozen datasets now work in almost all cases,
+  except when calling a dataset mutation method.
+
+  When using ruby 2.4, Sequel uses the new support for
+  clone(:freeze=>false) to actually freeze datasets while allowing
+  them to copy singleton classes/extended modules from the dataset
+  calling clone.  On earlier versions of ruby, the dataset opts
+  are now frozen, preventing more types of accidental modification.
+
+  The dataset internals were refactored to reduce the number of
+  instance variables.  Now, datasets store all of their state
+  in opts.  Additionally, all datasets now use a thread-safe
+  cache for storing cached state such as the dataset's columns.
+  Previously, accessing/setting the columns was not thread-safe,
+  unless the ruby interpreter used thread-safe methods for
+  instance variable getting/setting.
+
+  Frozen datasets use this new cache to optimize repeated method
+  calls, resulting in substantial performance speedups.  This can
+  include caching returned and/or intermediate datasets, SELECT and
+  DELETE SQL generated, as well as internal objects designed to
+  optimize the building of SQL strings with different arguments.
+
+  Even for fairly simple datasets, this can result in up to 10x
+  performance improvements for dataset methods that don't require
+  database access, and up to 3x performance improvements for dataset
+  methods that do require database access.
+
+* A freeze_datasets Database extension has been added which
+  automatically freezes all datasets for the Database instance.
+  This also enables dataset caching when creating datasets using
+  Database#[] and #from using a single symbol, such as
+  DB[:table_name].  In addition to speeding up the methods
+  themselves, this also allows code such as:
+
+    DB[:foo].for_update.first
+
+  To run much faster by avoiding any dataset creation or SQL
+  string building after the first call.
+
+  The freeze_datasets extension makes #dup an alias of #clone,
+  ensuring that all cloned datasets that were originally created
+  by the Database instance are frozen.
+
+  It is highly recommended that you start using the
+  freeze_datasets extension in your applications using Sequel,
+  as this extension will become the default and only behavior
+  in Sequel 5.  Unfrozen datasets and dataset mutation will
+  not be supported in Sequel 5.
+
+* The dataset methods created by Model#subset and
+  Model::DatasetModule#subset now cache the returned dataset if the
+  current dataset is frozen, none of the arguments are Procs, and a
+  block is not provided.  This can result in up to a 3x performance 
+  improvement for method chains that use subsets, such as:
+
+    ModelClass.subset1.subset2.subset3.first
+
+* Model::DatasetModule has had the following methods added to it:
+  distinct, exclude, exclude_having, grep, group, group_and_count,
+  group_append, having, limit, offset, order, order_append,
+  order_prepend, select, select_all, select_append, select_group,
+  where, and server. These methods create dataset methods that
+  when called call the dataset method with the same name on the
+  receiver.  Example:
+
+    class ModelClass < Sequel::Model
+      dataset_module do
+        select :with_id_and_name, :id, :name
+        where :active, :active
+        order :by_name, :name
+      end
+    end
+
+    ModelClass.active.by_name.with_id_and_name.all
+    # SELECT id, name FROM model_classes WHERE active ORDER BY name
+    # Equivalent to:
+    ModelClass.
+      where(:active).
+      order(:name).
+      select(:id, :name).
+      all
+
+  In addition to being easier than defining the methods manually, this
+  also enables caching of the datasets in most cases, so that the
+  above method chain does not create any additional datasets after the
+  first call.
+
+* Dataset#with_extend now accepts a block and will create a module
+  with that block that will be used to extend the object, after any
+  modules given as arguments have been applied:
+
+    DB[:table].with_extend{def foo; 1 end}.foo => 1
+
+* The identifier mangling support for datasets
+  (identifier_input_method and identifier_output_method) has been
+  moved to a identifier_mangling database extension, but it is still
+  loaded by default.  You can disable the loading of this extension
+  by using the :identifier_mangling=>false Database option.  Sequel
+  5 will stop loading of this extension by default, requiring you to
+  load it manually via Database#extension if you need it.
+
+  Sequel's default remains the same as before, to convert identifiers
+  to uppercase on input and lowercase on output on databases that
+  fold unquoted identifiers to uppercase (per the SQL standard), and
+  to not mangle identifiers at all on databases that fold unquoted
+  identifiers to lowercase (MySQL, PostgreSQL, SQLite).  The
+  identifier_mangling extension just allows you to change the default
+  behavior.
+
+* On DB2, Dataset#with_convert_smallint_to_bool has been added,
+  which returns a modified dataset with the
+  convert_smallint_to_bool setting changed.  Previously,
+  chaging the smallint_to_bool setting required mutating a
+  dataset.
+
+* The mock adapter now supports Dataset#with_{autoid,fetch,numrows},
+  allowing mocking of results when using frozen datasets.
+
+= Other Improvements
+
+* Using an eager load callback when eager loading a one_to_one
+  association that uses an order or offset now works correctly
+  on databases that do not support window functions.
+
+* Dataset#== and Dataset#hash are now faster as they don't need
+  to generate SQL.  As all internal state is now stored in the
+  opts, it just considers the class, db, and opts.
+
+* The prepared statement/bound variable internals were heavily
+  refactored to be simpler and more robust, to more easily
+  support native prepared statements, and to work with frozen
+  datasets.
+
+* When emulating alter table operations on SQLite, integer
+  primary keys now use AUTOINCREMENT, since that is Sequel's
+  default when creating tables on SQLite.
+
+* On SQLite, Database#schema no longer uses :auto_increment entries
+  when the table has a composite primary key.
+
+* Most dataset opts values are now frozen to prevent accidental
+  modification and allow for thread-safe access.
+
+* SQL::Expression subclass instances are now always frozen.
+
+* Dataset::PlaceholderLiteralizer and 
+  Dataset::PlaceholderLiteralizer::Argument instances are now
+  always frozen.
+
+* Dataset#ungraphed now works on a frozen model dataset.
+
+* Model#set_server now works when the model uses a frozen dataset.
+
+* The pagination and null_dataset extensions now work on frozen
+  datasets.
+
+* Dataset#server now works for frozen model datasets when the
+  model uses the sharding plugin.
+
+* Calling eager_graph or association_join on a model dataset
+  is now deprecated if it would ignore the association's
+  :conditions option and the :graph_conditions, :graph_block,
+  or :graph_only_conditions association option is not used.
+
+* Using the :eager_limit dataset option in an eager_load
+  callback with a singular association now raises an Error.
+  Previously, the behavior was undefined.
+
+* Calling Dataset#prepare without a name argument is now
+  deprecated.  Previously, it raised an Error in the mysql, mysql2,
+  and postgres adapters, but was allowed on other adapters.
+
+* The looser_typecasting extension now handles the strict
+  BigDecimal parsing introduced in ruby 2.4.
+
+* When using the duplicate_columns_handler extension with
+  :on_duplicate_columns=>:warn, the warning message is now
+  prepend with the file and line.
+
+* Internally, Sequel uses Dataset#where instead of #filter,
+  reverse instead of reverse_order, and select_append instead
+  of select_more to save a method call and array creation.
+
+* Dataset#db= and #opts= in the sequel_3_dataset_methods
+  extension now raise a RuntimeError if the dataset is frozen.
+
+* Sequel's tests now run without warnings when using Minitest
+  5.10.
+
+* Sequel now issues a deprecation message instead of a warning
+  when used with PostgreSQL <8.2.
+
+= Backwards Compatibility
+
+* Any external dataset extensions or adapters that modified or
+  directly accessed dataset instance variables other than @db and
+  @opts (such as @columns) needs to be updated to work with the
+  new dataset internals.
+
+* Any external adapters that implemented native prepared statements/
+  bound variables need to be updated to work with the new internal
+  prepared statement API.
+
+* Model.set_dataset and .dataset= now operate on a clone of the
+  dataset given, instead of mutating the dataset that is passed in.
+  This allows them to work with frozen datasets, but can change
+  the behavior if you mutate a dataset after passing it to one
+  of these methods.  Anyone doing that needs to change their code
+  to get the current copy of the model's dataset, and mutate that,
+  or better yet, avoid mutating datasets at all.
+
+* Dataset#columns now calls #columns! instead of the other way around,
+  which may require external plugins/extensions that override #columns
+  to switch to overriding #columns!.
+
+* External adapters that want to disable identifier mangling by
+  default need to be updated.

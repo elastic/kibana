@@ -1,0 +1,20 @@
+--- 
+transportAddressMIB: 1.3.6.1.2.1.100
+transportDomains: 1.3.6.1.2.1.100.1
+transportDomainUdpIpv4: 1.3.6.1.2.1.100.1.1
+transportDomainUdpIpv6: 1.3.6.1.2.1.100.1.2
+transportDomainUdpIpv4z: 1.3.6.1.2.1.100.1.3
+transportDomainUdpIpv6z: 1.3.6.1.2.1.100.1.4
+transportDomainTcpIpv4: 1.3.6.1.2.1.100.1.5
+transportDomainTcpIpv6: 1.3.6.1.2.1.100.1.6
+transportDomainTcpIpv4z: 1.3.6.1.2.1.100.1.7
+transportDomainTcpIpv6z: 1.3.6.1.2.1.100.1.8
+transportDomainSctpIpv4: 1.3.6.1.2.1.100.1.9
+transportDomainSctpIpv6: 1.3.6.1.2.1.100.1.10
+transportDomainSctpIpv4z: 1.3.6.1.2.1.100.1.11
+transportDomainSctpIpv6z: 1.3.6.1.2.1.100.1.12
+transportDomainLocal: 1.3.6.1.2.1.100.1.13
+transportDomainUdpDns: 1.3.6.1.2.1.100.1.14
+transportDomainTcpDns: 1.3.6.1.2.1.100.1.15
+transportDomainSctpDns: 1.3.6.1.2.1.100.1.16
+

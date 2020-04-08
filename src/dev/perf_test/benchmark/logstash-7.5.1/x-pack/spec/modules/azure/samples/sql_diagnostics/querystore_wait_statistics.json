@@ -1,0 +1,29 @@
+{
+  "ResourceGroup": "W66PT",
+  "time": "2017-09-24T09:39:33.7960000Z",
+  "LogicalServerName": "W66PT",
+  "SubscriptionId": "70e322ab-5b33-40c7-ad1e-88b2b7cfa236",
+  "category": "QueryStoreWaitStatistics",
+  "operationName": "QueryStoreWaitStatisticsEvent",
+  "properties": {
+    "query_id": 102871,
+    "query_param_type": 0,
+    "interval_end_time": 184683604528000,
+    "statement_key_hash": "4015210136",
+    "total_query_wait_time_ms": 29015,
+    "interval_start_time": 184683603448000,
+    "wait_category": "UNKNOWN",
+    "statement_type": "x_estypSelect",
+    "query_hash": "0x70E9B2B8E70EC4FB",
+    "ElasticPoolName": "RecommendedStandardPool1",
+    "query_plan_hash": "0xEBF8F8853BAC4D2C",
+    "DatabaseName": "DB45",
+    "count_executions": 14.0,
+    "statement_sql_handle": "0x0900D010687B69843F347EF35B3FE15D5F9F0000000000000000000000000000000000000000000000000000",
+    "plan_id": 288,
+    "is_parameterizable": "true",
+    "exec_type": 0,
+    "max_query_wait_time_ms": 2610
+  },
+  "resourceId": "/SUBSCRIPTIONS/70e322ab-5b33-40c7-ad1e-88b2b7cfa236/RESOURCEGROUPS/W66PT/PROVIDERS/MICROSOFT.SQL/SERVERS/W66PT/DATABASES/DB45"
+}

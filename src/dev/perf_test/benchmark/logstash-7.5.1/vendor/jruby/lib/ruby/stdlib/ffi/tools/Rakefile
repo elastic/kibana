@@ -1,0 +1,58 @@
+$VERBOSE = true
+$verbose = Rake.application.options.trace
+
+require 'ffi'
+require 'ffi/tools/struct_generator'
+require 'ffi/tools/const_generator'
+require 'ffi/tools/types_generator'
+require 'ffi/tools/generator'
+require 'fileutils'
+require 'rbconfig'
+
+arches = [ ]
+arch_options = {}
+conf_files = []
+
+if FFI::Platform.mac?
+  osx_arches = [ "ppc", "i386" ]
+  osx_arches << "x86_64" if RbConfig::CONFIG['host_cpu'] == 'x86_64'
+  osx_arches.each do |arch|
+    arches << arch
+    platform_dir = File.join(FFI::Platform::FFI_DIR, "platform", "#{arch}-darwin")
+    arch_options[arch] = { :platform_dir => platform_dir, :cppflags => "-arch #{arch}"}
+  end
+else
+  arches = [ FFI::Platform::ARCH ]
+  arch_options[FFI::Platform::ARCH] = {
+    :platform_dir => FFI::Platform::CONF_DIR,
+    :cppflags => FFI::Platform.solaris? ? "-m#{FFI::Platform::ADDRESS_SIZE}" : ""
+    }
+end
+arches.each { |arch|
+  options = arch_options[arch]
+  platform_conf = File.join(options[:platform_dir], "platform.conf")
+  types_conf = File.join(options[:platform_dir], "types.conf")
+  conf_files << platform_conf
+  file platform_conf do |task|
+    FileUtils.mkdir_p(File.dirname(task.name), { :mode => 0755 })
+    gen_platform_conf task, { :cppflags => options[:cppflags]}
+  end
+  file types_conf do |task|
+    FileUtils.mkdir_p(File.dirname(task.name), { :mode => 0755 })
+    File.open(task.name, "w") do |f|
+      f.puts FFI::TypesGenerator.generate(:cppflags => options[:cppflags])
+    end
+  end
+  task "gen_ffi_files_#{arch}" do |task|
+    Dir["#{File.join(FFI::Platform::FFI_DIR, 'platform')}/*.rb.ffi"].each do |file|
+      rb_name = File.join(options[:platform_dir], File.basename(file, '.ffi'))
+      FFI::Generator.new file, rb_name, { :cppflags => options[:cppflags] }
+    end unless FFI::Platform.windows?
+  end
+  task "#{arch}" => [ platform_conf, types_conf, "gen_ffi_files_#{arch}" ]
+}
+
+task :default => :build
+task :build => arches
+
+load 'ffi/tools/platform.rake'

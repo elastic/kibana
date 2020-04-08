@@ -1,0 +1,22 @@
+{
+  "title": "Endpoint Event Explorer [ArcSight]",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "categoryDeviceGroup",
+    "categoryTechnique",
+    "categoryOutcome",
+    "categorySignificance",
+    "categoryObject",
+    "categoryBehavior",
+    "categoryDeviceType"
+  ],
+  "sort": [
+    "deviceReceiptTime",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"arcsight-*\",\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"categoryDeviceGroup:\\\"/Operating System\\\" OR categoryDeviceGroup:\\\"/IDS/Host\\\" OR categoryDeviceGroup:\\\"/Application\\\"\",\"analyze_wildcard\":true}}}"
+  }
+}

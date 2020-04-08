@@ -1,0 +1,185 @@
+:plugin: geoip
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Geoip filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The GeoIP filter adds information about the geographical location of IP addresses,
+based on data from the Maxmind GeoLite2 databases.
+
+==== Supported Databases
+
+This plugin is bundled with https://dev.maxmind.com/geoip/geoip2/geolite2[GeoLite2] City database out of the box. From Maxmind's description --
+"GeoLite2 databases are free IP geolocation databases comparable to, but less accurate than, MaxMind’s
+GeoIP2 databases". Please see GeoIP Lite2 license for more details.
+
+https://www.maxmind.com/en/geoip2-databases[Commercial databases] from Maxmind are also supported in this plugin.
+
+If you need to use databases other than the bundled GeoLite2 City, you can download them directly
+from Maxmind's website and use the `database` option to specify their location. The GeoLite2 databases
+can be https://dev.maxmind.com/geoip/geoip2/geolite2[downloaded from here].
+
+If you would like to get Autonomous System Number(ASN) information, you can use the GeoLite2-ASN database.
+
+==== Details
+
+A `[geoip][location]` field is created if
+the GeoIP lookup returns a latitude and longitude. The field is stored in
+http://geojson.org/geojson-spec.html[GeoJSON] format. Additionally,
+the default Elasticsearch template provided with the
+{logstash-ref}/plugins-outputs-elasticsearch.html[elasticsearch output] maps
+the `[geoip][location]` field to an {ref}/geo-point.html[Elasticsearch Geo_point datatype].
+
+As this field is a `geo_point` _and_ it is still valid GeoJSON, you get
+the awesomeness of Elasticsearch's geospatial query, facet and filter functions
+and the flexibility of having GeoJSON for all other applications (like Kibana's
+map visualization).
+
+[NOTE]
+--
+This product includes GeoLite2 data created by MaxMind, available from
+http://www.maxmind.com. This database is licensed under
+http://creativecommons.org/licenses/by-sa/4.0/[Creative Commons Attribution-ShareAlike 4.0 International License].
+
+Versions 4.0.0 and later of the GeoIP filter use the MaxMind GeoLite2 database
+and support both IPv4 and IPv6 lookups. Versions prior to 4.0.0 use the legacy
+MaxMind GeoLite database and support IPv4 lookups only.
+--
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Geoip Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-cache_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-database>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-default_database_type>> |`City` or `ASN`|No
+| <<plugins-{type}s-{plugin}-fields>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-source>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-tag_on_failure>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-cache_size"]
+===== `cache_size`
+
+  * Value type is <<number,number>>
+  * Default value is `1000`
+
+GeoIP lookup is surprisingly expensive. This filter uses an cache to take advantage of the fact that
+IPs agents are often found adjacent to one another in log files and rarely have a random distribution.
+The higher you set this the more likely an item is to be in the cache and the faster this filter will run.
+However, if you set this too high you can use more memory than desired.
+Since the Geoip API upgraded to v2, there is not any eviction policy so far, if cache is full, no more record can be added.
+Experiment with different values for this option to find the best performance for your dataset.
+
+This MUST be set to a value > 0. There is really no reason to not want this behavior, the overhead is minimal
+and the speed gains are large.
+
+It is important to note that this config value is global to the geoip_type. That is to say all instances of the geoip filter
+of the same geoip_type share the same cache. The last declared cache size will 'win'. The reason for this is that there would be no benefit
+to having multiple caches for different instances at different points in the pipeline, that would just increase the
+number of cache misses and waste memory.
+
+[id="plugins-{type}s-{plugin}-database"]
+===== `database`
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+The path to Maxmind's database file that Logstash should use. The default database is GeoLite2-City.
+GeoLite2-City, GeoLite2-Country, GeoLite2-ASN are the free databases from Maxmind that are supported.
+GeoIP2-City, GeoIP2-ISP, GeoIP2-Country are the commercial databases from Maxmind that are supported.
+
+If not specified, this will default to the GeoLite2 City database that ships
+with Logstash.
+
+[id="plugins-{type}s-{plugin}-default_database_type"]
+===== `default_database_type`
+
+This plugin now includes both the GeoLite2-City and GeoLite2-ASN databases.  If `database` and `default_database_type` are unset, the GeoLite2-City database will be selected.  To use the included GeoLite2-ASN database, set `default_database_type` to `ASN`.
+
+  * Value type is <<string,string>>
+  * The default value is `City`
+  * The only acceptable values are `City` and `ASN`
+
+[id="plugins-{type}s-{plugin}-fields"]
+===== `fields`
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+An array of geoip fields to be included in the event.
+
+Possible fields depend on the database type. By default, all geoip fields
+are included in the event.
+
+For the built-in GeoLite2 City database, the following are available:
+`city_name`, `continent_code`, `country_code2`, `country_code3`, `country_name`,
+`dma_code`, `ip`, `latitude`, `longitude`, `postal_code`, `region_code`,
+`region_name` and `timezone`.
+
+[id="plugins-{type}s-{plugin}-source"]
+===== `source`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The field containing the IP address or hostname to map via geoip. If
+this field is an array, only the first value will be used.
+
+[id="plugins-{type}s-{plugin}-tag_on_failure"]
+===== `tag_on_failure`
+
+  * Value type is <<array,array>>
+  * Default value is `["_geoip_lookup_failure"]`
+
+Tags the event on failure to look up geo information. This can be used in later analysis.
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target`
+
+  * Value type is <<string,string>>
+  * Default value is `"geoip"`
+
+Specify the field into which Logstash should store the geoip data.
+This can be useful, for example, if you have `src_ip` and `dst_ip` fields and
+would like the GeoIP information of both IPs.
+
+If you save the data to a target field other than `geoip` and want to use the
+`geo_point` related functions in Elasticsearch, you need to alter the template
+provided with the Elasticsearch output and configure the output to use the
+new template.
+
+Even if you don't use the `geo_point` mapping, the `[target][location]` field
+is still valid GeoJSON.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

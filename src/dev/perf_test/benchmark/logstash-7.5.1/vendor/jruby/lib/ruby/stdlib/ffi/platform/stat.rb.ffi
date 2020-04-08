@@ -1,0 +1,53 @@
+module Platform
+  module Stat
+    class Stat < FFI::Struct
+      @@@
+      struct do |s|
+        s.include "sys/types.h"
+        s.include "sys/stat.h"
+
+        s.name "struct stat"
+        s.field :st_dev, :dev_t
+        s.field :st_ino, :ino_t
+        s.field :st_nlink, :nlink_t
+        s.field :st_mode, :mode_t
+        s.field :st_uid, :uid_t
+        s.field :st_gid, :gid_t
+        s.field :st_size, :off_t
+        s.field :st_blocks, :blkcnt_t
+        s.field :st_atime, :time_t
+        s.field :st_mtime, :time_t
+        s.field :st_ctime, :time_t
+      end
+      @@@
+    end
+    module Constants
+      @@@
+      constants do |cg|
+        cg.include "sys/types.h"
+        cg.include "sys/stat.h"
+        %w[
+          S_ISUID
+          S_ISGID
+          S_IRUSR
+          S_IWUSR
+          S_IXUSR
+          S_IRWXU
+          S_IREAD
+          S_IWRITE
+          S_IEXEC
+          S_IRGRP
+          S_IWGRP
+          S_IXGRP
+          S_IRWXG
+          S_IROTH
+          S_IWOTH
+          S_IXOTH
+          S_IRWXO
+        ].each {|c| cg.const(c, "%#x", "(unsigned int)") }
+      end
+      @@@
+    end
+    include Constants
+  end
+end

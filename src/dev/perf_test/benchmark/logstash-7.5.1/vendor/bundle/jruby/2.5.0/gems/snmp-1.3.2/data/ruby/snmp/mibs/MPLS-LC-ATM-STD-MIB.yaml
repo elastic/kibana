@@ -1,0 +1,19 @@
+--- 
+mplsLcAtmStdMIB: 1.3.6.1.2.1.10.166.9
+mplsLcAtmStdNotifications: 1.3.6.1.2.1.10.166.9.0
+mplsLcAtmStdObjects: 1.3.6.1.2.1.10.166.9.1
+mplsLcAtmStdInterfaceConfTable: 1.3.6.1.2.1.10.166.9.1.1
+mplsLcAtmStdInterfaceConfEntry: 1.3.6.1.2.1.10.166.9.1.1.1
+mplsLcAtmStdCtrlVpi: 1.3.6.1.2.1.10.166.9.1.1.1.1
+mplsLcAtmStdCtrlVci: 1.3.6.1.2.1.10.166.9.1.1.1.2
+mplsLcAtmStdUnlabTrafVpi: 1.3.6.1.2.1.10.166.9.1.1.1.3
+mplsLcAtmStdUnlabTrafVci: 1.3.6.1.2.1.10.166.9.1.1.1.4
+mplsLcAtmStdVcMerge: 1.3.6.1.2.1.10.166.9.1.1.1.5
+mplsLcAtmVcDirectlyConnected: 1.3.6.1.2.1.10.166.9.1.1.1.6
+mplsLcAtmLcAtmVPI: 1.3.6.1.2.1.10.166.9.1.1.1.7
+mplsLcAtmStdIfConfRowStatus: 1.3.6.1.2.1.10.166.9.1.1.1.8
+mplsLcAtmStdIfConfStorageType: 1.3.6.1.2.1.10.166.9.1.1.1.9
+mplsLcAtmStdConformance: 1.3.6.1.2.1.10.166.9.2
+mplsLcAtmStdCompliances: 1.3.6.1.2.1.10.166.9.2.1
+mplsLcAtmStdGroups: 1.3.6.1.2.1.10.166.9.2.2
+

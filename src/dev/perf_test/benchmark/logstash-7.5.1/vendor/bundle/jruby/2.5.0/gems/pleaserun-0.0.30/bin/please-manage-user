@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+
+libdir = File.expand_path("../lib", File.dirname(__FILE__))
+$LOAD_PATH << libdir if File.exist?(File.join(libdir, "pleaserun", "user", "base.rb"))
+
+require "pleaserun/user/base"
+require "fileutils"
+require "clamp"
+
+# A PoC to do user management scripting
+#
+# This is targeted at fpm's `--after-install` and friends, but it is certainly
+# not limited to that.
+class PleaseRun::ManageUserCLI < Clamp::Command
+  class ConfigurationError < StandardError; end
+  option "--platform", "PLATFORM", "The platform to target ('linux', etc)", :default => "linux"
+  option "--version", "VERSION", "The version of the platform to target"
+  option "--output", "PATH", "The destination directory to write the management scripts", :required => true
+
+  parameter "USERNAME", "The username to manage"
+
+  def execute
+    validate
+    File.write(File.join(output, "installer.sh"), user.render_installer)
+    File.write(File.join(output, "remover.sh"), user.render_remover)
+  end
+
+  def user
+    return @user if @user
+    @user = PleaseRun::User::Base.new
+    @user.name = username
+    @user.platform = platform
+    @user.version = version
+    return @user
+  end
+
+  def validate
+    if File.exist?(output)
+      if !File.directory?(output)
+        raise ConfigurationError, "The output path exists but is not a directory. I cannot continue. Path is #{output}"
+      end
+    else
+      FileUtils.mkdir_p(output)
+    end
+  end
+end 
+
+PleaseRun::ManageUserCLI.run

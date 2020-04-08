@@ -1,0 +1,29 @@
+:plugin: rabbitmq
+:type: integration
+:no_codec:
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Rabbitmq Integration Plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The RabbitMQ Integration Plugin provides integrated plugins for working with http://www.rabbitmq.com/[RabbitMQ].
+
+ - {logstash-ref}/plugins-inputs-rabbitmq.html[RabbitMQ Input Plugin]
+ - {logstash-ref}/plugins-outputs-rabbitmq.html[RabbitMQ Output Plugin]
+
+:no_codec!:

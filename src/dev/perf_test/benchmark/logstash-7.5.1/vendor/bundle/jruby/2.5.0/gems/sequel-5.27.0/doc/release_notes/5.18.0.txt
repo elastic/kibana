@@ -1,0 +1,69 @@
+= New Features
+
+* A throw_failures plugin has been added for throwing ValidationFailed
+  and HookFailed exceptions instead of raising them.  This can improve
+  performance by up to 10x on JRuby and 10-15% on CRuby.  However,
+  you would need to modify your exception handling from:
+
+    begin
+      # model.save
+    rescue Sequel::ValidationFailed => e
+      # handle failure
+    end
+
+  to:
+
+    e = catch(Sequel::ValidationFailed) do
+      # model.save
+    end
+    if e.is_a?(Sequel::ValidationFailed)
+      # handle failure
+    end
+
+  The throw_failures plugin will still work if you are not catching
+  the exception, falling back to the default behavior of raising
+  the exception.
+
+* SQL::Blob.call has been added, so that SQL::Blob can be used
+  directly as a callable to create a new instance, resulting in
+  better performance in cases where a callable is needed.
+
+= Other Improvements
+
+* Type conversion is many adapters is now faster by switching from
+  Proc/Method instances to using singleton call methods on plain
+  objects.  This can improve performance of row fetching by up to
+  10% in some cases.
+
+* Row fetching is slightly faster in the jdbc and sqlite adapters,
+  by switching from each to while.
+
+* tzinfo 2 is now supported when using the named_timezones extension.
+  tzinfo 1 remains supported.
+
+* The optimized Dataset#paged_each methods in the postgres and mysql2
+  adapters now support being called without a block, returning an
+  Enumerator in that case, to mirror the behavior of the default
+  Dataset#paged_each method.
+
+* Sequel no longer uses flow-control exceptions in the
+  connection_expiration and connection_validator extensions,
+  significantly improving performance on JRuby.
+
+* The after_initialize plugin no longer makes the argument to
+  Model.call optional.
+
+= Backwards Compatibility
+
+* Some internal by not private constants and methods previously used
+  for type conversion in adapters have been removed:
+
+  * JDBC::Oracle.OracleDecimal
+  * JDBC::Oracle.OracleClob
+  * JDBC::Postgres.RubyPGArray
+  * JDBC::Postgres.RubyPGHstore
+  * JDBC::SqlAnywhere.SqlAnywhereBoolean
+  * JDBC::SQLServer.MSSQLRubyTime
+  * MySQL::TYPE_TRANSLATOR
+  * Postgres::TYPE_TRANSLATOR
+

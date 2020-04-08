@@ -1,0 +1,10 @@
+{
+  "title": "DNS - Event Throughput [ArcSight]",
+  "visState": "{\"title\":\"DNS - Event Throughput [ArcSight]\",\"type\":\"metrics\",\"params\":{\"id\":\"429af7e0-3d5b-11e7-8b9d-ddc45b5f6d00\",\"type\":\"gauge\",\"series\":[{\"id\":\"429af7e1-3d5b-11e7-8b9d-ddc45b5f6d00\",\"color\":\"rgba(0,156,224,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"429af7e2-3d5b-11e7-8b9d-ddc45b5f6d00\",\"type\":\"count\"},{\"id\":\"6497aaa0-7dc5-11e7-95f6-690ab80d4e85\",\"type\":\"cumulative_sum\",\"field\":\"429af7e2-3d5b-11e7-8b9d-ddc45b5f6d00\"},{\"unit\":\"1s\",\"id\":\"6800ed50-7dc5-11e7-95f6-690ab80d4e85\",\"type\":\"derivative\",\"field\":\"6497aaa0-7dc5-11e7-95f6-690ab80d4e85\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"6cf98290-7dc5-11e7-95f6-690ab80d4e85\",\"type\":\"moving_average\",\"field\":\"6800ed50-7dc5-11e7-95f6-690ab80d4e85\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Event Throughput\",\"value_template\":\"{{value}}  / s\"}],\"time_field\":\"deviceReceiptTime\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"filter\":\"deviceProduct:\\\"DNS Trace Log\\\"\",\"bar_color_rules\":[{\"id\":\"77dd4e80-3d5b-11e7-8b9d-ddc45b5f6d00\"}],\"background_color_rules\":[{\"id\":\"798c5e10-3d5b-11e7-8b9d-ddc45b5f6d00\"}],\"gauge_color_rules\":[{\"value\":0,\"id\":\"988f35d0-3d5b-11e7-8b9d-ddc45b5f6d00\",\"gauge\":null}],\"gauge_width\":10,\"gauge_inner_width\":10,\"gauge_style\":\"half\",\"gauge_max\":\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

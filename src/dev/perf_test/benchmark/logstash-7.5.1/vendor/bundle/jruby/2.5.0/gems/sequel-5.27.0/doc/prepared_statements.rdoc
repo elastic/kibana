@@ -1,0 +1,144 @@
+= Prepared Statements and Bound Variables
+
+Sequel has support for prepared statements and bound variables.  No matter which
+database you are using, the Sequel prepared statement/bound variable API remains
+the same.  There is native support for prepared statements/bound variables on
+the following adapters:
+
+* ibmdb (prepared statements only)
+* jdbc
+* mysql (server prepared statements using literalized connection variables)
+* mysql2 (full support on 0.4+, otherwise server prepared statements using literalized connection variables)
+* oracle (requires type specifiers for nil/NULL values)
+* postgres (when using the pg driver)
+* sqlite
+* tinytds
+
+Support on other adapters is emulated.
+
+You can use the prepared_statements model plugin to automatically use prepared
+statements for some common model actions such as saving or deleting a model
+instance, or looking up a model based on a primary key.
+
+== Placeholders
+
+Generally, when using prepared statements (and certainly when using bound
+variables), you need to put placeholders in your SQL to indicate where you
+want your bound arguments to appear.  Database support and syntax vary
+significantly for placeholders (e.g. :name, $1, ?).  Sequel abstracts all of
+that and allows you to specify placeholders by using the :$name format for
+placeholders, e.g.:
+
+  ds = DB[:items].where(name: :$n)
+
+You can use these placeholders in most places where you can use the value
+directly.  For example, if you want to use placeholders while also using
+raw SQL, you can do:
+
+  ds = DB["SELECT * FROM items WHERE name = ?", :$n]
+
+== Bound Variables
+
+Using bound variables for this query is simple:
+
+  ds.call(:select, n: 'Jim')
+
+This will do the equivalent of selecting records that have the name 'Jim'. It
+returns all records, and can take a block that is passed to <tt>Dataset#all</tt>.
+
+Deleting or returning the first record works similarly:
+
+  ds.call(:first, n: 'Jim') # First record with name 'Jim'
+  ds.call(:delete, n: 'Jim') # Delete records with name 'Jim'
+
+For inserting/updating records, you should also specify a value hash, which
+may itself contain placeholders:
+
+  # Insert record with 'Jim', note that the previous filter is ignored
+  ds.call(:insert, {n: 'Jim'}, name: :$n)
+  # Change name to 'Bob' for all records with name of 'Jim'
+  ds.call(:update, {n: 'Jim', new_n: 'Bob'}, name: :$new_n)
+
+== Prepared Statements
+
+Prepared statement support is similar to bound variable support, but you
+use <tt>Dataset#prepare</tt> with a name, and <tt>Dataset#call</tt> or <tt>Database#call</tt> later with the values:
+
+  ds = DB[:items].where(name: :$n)
+  ps = ds.prepare(:select, :select_by_name)
+
+  ps.call(n: 'Jim')
+  DB.call(:select_by_name, n: 'Jim') # same
+
+The <tt>Dataset#prepare</tt> method returns a prepared statement, and also stores a
+copy of the prepared statement in the database for later use.  For insert
+and update queries, the hash to insert/update is passed to +prepare+:
+
+  ps1 = DB[:items].prepare(:insert, :insert_with_name, name: :$n)
+
+  ps1.call(n: 'Jim')
+  DB.call(:insert_with_name, n: 'Jim') # same
+
+  ds = DB[:items].where(name: :$n)
+  ps2 = ds.prepare(:update, :update_name, name: :$new_n)
+
+  ps2.call(n: 'Jim', new_n: 'Bob')
+  DB.call(:update_name, n: 'Jim', new_n: 'Bob') # same
+
+== Implementation Issues
+
+Currently, creating a prepared statement uses Object#extend, which can hurt
+performance.  For high performance applications, it's recommended to create
+all of your prepared statements upon application initialization, and not
+to create prepared statements dynamically at runtime.
+
+== Database support
+
+=== PostgreSQL
+
+If you are using the postgres-pr driver, PostgreSQL uses the
+default emulated support.  If you are using ruby-pg, there is native support
+for both prepared statements and bound variables.  Prepared statements are
+always server side.
+
+=== SQLite
+
+SQLite supports both prepared statements and bound variables.
+
+=== MySQL/Mysql2
+
+The MySQL and Mysql2 <0.4 ruby drivers do not support bound variables, so the bound
+variable methods are emulated.  It uses server side prepared statements.
+
+Mysql2 0.4+ supports both prepared statements and bound variables.
+
+=== JDBC
+
+JDBC supports both prepared statements and bound variables.  Whether these
+are server side or client side depends on the JDBC driver.  For PostgreSQL
+over JDBC, you can add the prepareThreshold=N parameter to the connection
+string, which will use a server side prepared statement after N calls to
+the prepared statement.
+
+=== TinyTDS
+
+Uses the sp_executesql stored procedure with bound variables, since
+Microsoft SQL Server doesn't support true prepared statements.
+
+=== IBM_DB
+
+DB2 supports both prepared statements and bound variables.
+
+=== Oracle
+
+Oracle supports both prepared statements and bound variables.  Prepared
+statements (OCI8::Cursor objects) are cached per connection.  If you
+ever plan to use a nil/NULL value as a bound variable/prepared statement
+value, you must specify the type in the placeholder using a __* suffix.
+You can use any of the schema types that Sequel supports, such as
+:$name__string or :$num__integer.  Using blobs as bound variables is
+not currently supported.
+
+=== All Others
+
+Support is emulated.

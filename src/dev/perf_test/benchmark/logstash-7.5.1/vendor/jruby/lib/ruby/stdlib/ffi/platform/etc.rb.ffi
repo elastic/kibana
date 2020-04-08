@@ -1,0 +1,31 @@
+module Platform; end
+module Platform::Etc
+  class Passwd < FFI::Struct
+    @@@
+    struct do |s|
+      s.include "sys/types.h"
+      s.include "pwd.h"
+
+      s.name "struct passwd"
+      s.field :pw_name, :string
+      s.field :pw_passwd, :string
+      s.field :pw_uid, :uint
+      s.field :pw_gid, :uint
+      s.field :pw_dir, :string
+      s.field :pw_shell, :string
+    end
+    @@@
+  end
+  class Group < FFI::Struct
+    @@@
+    struct do |s|
+      s.include "sys/types.h"
+      s.include "grp.h"
+
+      s.name "struct group"
+      s.field :gr_name, :string
+      s.field :gr_gid, :uint
+    end
+    @@@
+  end
+end

@@ -1,0 +1,229 @@
+# Hello packaging friend!
+#
+# If you find yourself using this 'fpm --edit' feature frequently, it is
+# a sign that fpm is missing a feature! I welcome your feature requests!
+# Please visit the following URL and ask for a feature that helps you never
+# need to edit this file again! :)
+#   https://github.com/jordansissel/fpm/issues
+# ------------------------------------------------------------------------
+
+# Disable the stupid stuff rpm distros include in the build process by default:
+<% %w(prep build install clean).each do |step| -%>
+<%# These definitions have to be non-empty... I guess... -%>
+#   Disable any <%= step %> shell actions. replace them with simply 'true'
+%define __spec_<%= step %>_post true
+%define __spec_<%= step %>_pre true
+<% end -%>
+# Disable checking for unpackaged files ?
+#%undefine __check_files
+
+# Use <%= attributes[:rpm_digest] %> file digest method
+%define _binary_filedigest_algorithm <%= digest_algorithm %>
+
+# Use <%= attributes[:rpm_compression] %> payload compression
+%define _binary_payload <%= payload_compression %> 
+
+<% (attributes[:rpm_filter_from_requires] or []).each do |reqfilter| -%>
+%filter_from_requires <%= reqfilter %>
+<% end -%>
+<% (attributes[:rpm_filter_from_provides] or []).each do |provfilter| -%>
+%filter_from_provides <%= provfilter %>
+<% end -%>
+<% if !(attributes[:rpm_filter_from_requires] or []).empty? or !(attributes[:rpm_filter_from_provides] or []).empty?-%>
+%filter_setup
+<% end -%>
+
+Name: <%= name %>
+Version: <%= version %>
+<% if epoch -%>
+Epoch: <%= epoch %>
+<% end -%>
+Release: <%= iteration or 1 %>
+<%# use the first line of the description as the summary -%>
+Summary: <%= description.split("\n").first.empty? ? "_" :  description.split("\n").first %>
+<% if !attributes[:rpm_autoreqprov?] -%>
+AutoReqProv: no
+<% else -%>
+AutoReqProv: yes
+<% end -%>
+<% if attributes[:rpm_autoreq?] -%>
+AutoReq: yes
+<% end -%>
+<% if attributes[:rpm_autoprov?] -%>
+AutoProv: yes
+<% end -%>
+# Seems specifying BuildRoot is required on older rpmbuild (like on CentOS 5)
+# fpm passes '--define buildroot ...' on the commandline, so just reuse that.
+BuildRoot: %buildroot
+# Add prefix, must not end with /
+<% if !prefix.nil? and !prefix.empty? %>
+Prefix: <%= prefix.gsub(/([^\/]+)(\/$)/, '') %>
+<% end -%>
+
+Group: <%= category %>
+<%# Sometimes the 'license' field has multiple lines... Hack around it. 
+  # While technically yes this means we are 'modifying' the license,
+  # since the job of FPM is to get shit done and that this is  only
+  # modifying whitespace, it should be reasonably OK. -%>
+License: <%= license.gsub("\n", " ") %>
+<% if !vendor.nil? and !vendor.empty? -%>
+Vendor: <%= vendor %>
+<% end -%>
+<% if !url.nil? and !url.empty? -%>
+URL: <%= url %>
+<%else -%>
+URL: http://nourlgiven.example.com/
+<% end -%>
+Packager: <%= maintainer %>
+
+<% if !attributes[:no_depends?] -%>
+<% dependencies.each do |req| -%>
+Requires: <%= req %>
+<% end -%>
+<% end -%>
+<% provides.each do |prov| -%>
+Provides: <%= prov %>
+<% end -%>
+<% conflicts.each do |conflict| -%>
+Conflicts: <%= conflict %>
+<% end -%>
+<% replaces.each do |repl| -%>
+<%# The closes equivalent in RPM to "replaces" is "Obsoletes" -%>
+Obsoletes: <%= repl %>
+<% end -%>
+<%# rpm rejects descriptions with blank lines (even between content), so hack
+    around it by replacing blank lines with ' .' -%>
+%description
+<%= description.gsub(/^\s*$/, " .") %>
+
+%prep
+# noop
+
+%build
+# noop
+
+%install
+# noop
+
+%clean
+# noop
+
+<%# This next section puts any %pre, %post, %preun, %postun, %verifyscript, %pretrans or %posttrans scripts %>
+<%
+  scriptmap = {
+    :rpm_verifyscript => "verifyscript",
+    :rpm_posttrans => "posttrans",
+    :rpm_pretrans => "pretrans"
+  }
+-%>
+<% if script?(:before_upgrade) or script?(:after_upgrade) -%>
+<%   if script?(:before_upgrade) or script?(:before_install) -%>
+%pre
+upgrade() {
+<%     if script?(:before_upgrade) -%>
+<%=      script(:before_upgrade) %>
+<%     end -%>
+}
+install() {
+<%     if script?(:before_install) -%>
+<%=      script(:before_install) %>
+<%     end -%>
+}
+if [ "${1}" -eq 1 ]
+then
+    install
+    # "before install" goes here
+elif [ "${1}" -gt 1 ]
+then
+    upgrade
+fi
+<%   end -%>
+<%   if script?(:after_upgrade) or script?(:after_install) -%>
+%pre
+upgrade() {
+<%     if script?(:after_upgrade) -%>
+<%=      script(:after_upgrade) %>
+<%     end -%>
+}
+install() {
+<%     if script?(:after_install) -%>
+<%=      script(:after_install) %>
+<%     end -%>
+}
+if [ "${1}" -eq 1 ]
+then
+    install
+    # "before install" goes here
+elif [ "${1}" -gt 1 ]
+then
+    upgrade
+fi
+<%   end -%>
+<%   if script?(:before_remove) -%>
+%preun
+if [ "${1}" -eq 0 ]
+then
+<%=    script(:before_remove) %>
+fi
+<%   end -%>
+<%   if script?(:after_remove) -%>
+%postun
+if [ "${1}" -eq 0 ]
+then
+<%=    script(:after_remove) %>
+fi
+<%   end -%>
+<% else
+     other_scriptmap = {
+       :before_install => "pre",
+       :after_install => "post",
+       :before_remove => "preun",
+       :after_remove => "postun"
+     }
+     scriptmap.merge!(other_scriptmap)
+   end
+-%>
+<% scriptmap.each do |name, rpmname| -%>
+<%   if script?(name) -%>
+%<%=   rpmname %>
+<%=    script(name) %>
+<%   end -%>
+<% end -%>
+
+<%# This section adds any triggers, as ordered in the command line -%>
+<%
+  triggermap = {
+    :before_install => "prein",
+    :after_install => "in",
+    :before_uninstall => "un",
+    :after_target_uninstall => "postun"
+  } 
+  triggermap.each do |name, rpmtype|
+    (attributes["rpm_trigger_#{name}".to_sym] or []).each do |trigger_name, trigger_script, trigger_scriptprog| -%>
+%trigger<%= rpmtype -%> <%= trigger_scriptprog -%> -- <%= trigger_name %>
+<%= trigger_script %>
+<%   end -%>
+<% end -%>
+
+%files
+%defattr(<%= attributes[:rpm_defattrfile] %>,<%= attributes[:rpm_user] || "root" %>,<%= attributes[:rpm_group] || "root" %>,<%= attributes[:rpm_defattrdir] %>)
+<%# Output config files and then regular files. -%>
+<% config_files.each do |path| -%>
+%config(noreplace) <%= rpm_file_entry(path) %>
+<% end -%>
+<%# list directories %>
+<% directories.each do |path| -%>
+%dir <%= rpm_file_entry(path) %>
+<% end -%>
+<%# list only files, not directories? -%>
+# Reject config files already listed or parent directories, then prefix files
+# with "/", then make sure paths with spaces are quoted. I hate rpm so much.
+<% files.each do |path| -%>
+<%   path = "/#{path}" -%>
+<%   next if config_files.include?(path)-%>
+<%   next if directories.include?(path)-%>
+<%= rpm_file_entry(path) %>
+<% end -%>
+
+%changelog
+<%= attributes[:rpm_changelog] %>

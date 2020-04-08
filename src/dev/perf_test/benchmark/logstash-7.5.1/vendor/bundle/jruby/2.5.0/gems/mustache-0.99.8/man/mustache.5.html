@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>mustache(5) - Logic-less templates.</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#TAG-TYPES">TAG TYPES</a>
+    <a href="#COPYRIGHT">COPYRIGHT</a>
+    <a href="#SEE-ALSO">SEE ALSO</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>mustache(5)</li>
+    <li class='tc'>Mustache Manual</li>
+    <li class='tr'>mustache(5)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>mustache</code> - <span class="man-whatis">Logic-less templates.</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p>A typical Mustache template:</p>
+
+<pre><code>Hello {{name}}
+You have just won {{value}} dollars!
+{{#in_ca}}
+Well, {{taxed_value}} dollars, after taxes.
+{{/in_ca}}
+</code></pre>
+
+<p>Given the following hash:</p>
+
+<pre><code>{
+  "name": "Chris",
+  "value": 10000,
+  "taxed_value": 10000 - (10000 * 0.4),
+  "in_ca": true
+}
+</code></pre>
+
+<p>Will produce the following:</p>
+
+<pre><code>Hello Chris
+You have just won 10000 dollars!
+Well, 6000.0 dollars, after taxes.
+</code></pre>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p>Mustache can be used for HTML, config files, source code -
+anything. It works by expanding tags in a template using values
+provided in a hash or object.</p>
+
+<p>We call it "logic-less" because there are no if statements, else
+clauses, or for loops. Instead there are only tags. Some tags are
+replaced with a value, some nothing, and others a series of
+values. This document explains the different types of Mustache tags.</p>
+
+<h2 id="TAG-TYPES">TAG TYPES</h2>
+
+<p>Tags are indicated by the double mustaches. <code>{{person}}</code> is a tag, as
+is <code>{{#person}}</code>. In both examples, we'd refer to <code>person</code> as the key
+or tag key. Let's talk about the different types of tags.</p>
+
+<h3 id="Variables">Variables</h3>
+
+<p>The most basic tag type is the variable. A <code>{{name}}</code> tag in a basic
+template will try to find the <code>name</code> key in the current context. If
+there is no <code>name</code> key, the parent contexts will be checked recursively.
+If the top context is reached and the <code>name</code> key is still not found,
+nothing will be rendered.</p>
+
+<p>All variables are HTML escaped by default. If you want to return
+unescaped HTML, use the triple mustache: <code>{{{name}}}</code>.</p>
+
+<p>You can also use <code>&amp;</code> to unescape a variable: <code>{{&amp; name}}</code>. This may be
+useful when changing delimiters (see "Set Delimiter" below).</p>
+
+<p>By default a variable "miss" returns an empty string. This can usually
+be configured in your Mustache library. The Ruby version of Mustache
+supports raising an exception in this situation, for instance.</p>
+
+<p>Template:</p>
+
+<pre><code>* {{name}}
+* {{age}}
+* {{company}}
+* {{{company}}}
+</code></pre>
+
+<p>Hash:</p>
+
+<pre><code>{
+  "name": "Chris",
+  "company": "&lt;b&gt;GitHub&lt;/b&gt;"
+}
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>* Chris
+*
+* &amp;lt;b&amp;gt;GitHub&amp;lt;/b&amp;gt;
+* &lt;b&gt;GitHub&lt;/b&gt;
+</code></pre>
+
+<h3 id="Sections">Sections</h3>
+
+<p>Sections render blocks of text zero or more times, depending on the
+value of the key in the current context.</p>
+
+<p>A section begins with a pound and ends with a slash. That is,
+<code>{{#person}}</code> begins a "person" section while <code>{{/person}}</code> ends it.</p>
+
+<p>The behavior of the section is determined by the value of the key.</p>
+
+<p><strong>False Values or Empty Lists</strong></p>
+
+<p>If the <code>person</code> key exists and has a value of false or an empty
+list, the HTML between the pound and slash will not be displayed.</p>
+
+<p>Template:</p>
+
+<pre><code>Shown.
+{{#person}}
+  Never shown!
+{{/person}}
+</code></pre>
+
+<p>Hash:</p>
+
+<pre><code>{
+  "person": false
+}
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Shown.
+</code></pre>
+
+<p><strong>Non-Empty Lists</strong></p>
+
+<p>If the <code>person</code> key exists and has a non-false value, the HTML between
+the pound and slash will be rendered and displayed one or more times.</p>
+
+<p>When the value is a non-empty list, the text in the block will be
+displayed once for each item in the list. The context of the block
+will be set to the current item for each iteration. In this way we can
+loop over collections.</p>
+
+<p>Template:</p>
+
+<pre><code>{{#repo}}
+  &lt;b&gt;{{name}}&lt;/b&gt;
+{{/repo}}
+</code></pre>
+
+<p>Hash:</p>
+
+<pre><code>{
+  "repo": [
+    { "name": "resque" },
+    { "name": "hub" },
+    { "name": "rip" }
+  ]
+}
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>&lt;b&gt;resque&lt;/b&gt;
+&lt;b&gt;hub&lt;/b&gt;
+&lt;b&gt;rip&lt;/b&gt;
+</code></pre>
+
+<p><strong>Lambdas</strong></p>
+
+<p>When the value is a callable object, such as a function or lambda, the
+object will be invoked and passed the block of text. The text passed
+is the literal block, unrendered. <code>{{tags}}</code> will not have been expanded
+- the lambda should do that on its own. In this way you can implement
+filters or caching.</p>
+
+<p>Template:</p>
+
+<pre><code>{{#wrapped}}
+  {{name}} is awesome.
+{{/wrapped}}
+</code></pre>
+
+<p>Hash:</p>
+
+<pre><code>{
+  "name": "Willy",
+  "wrapped": function() {
+    return function(text, render) {
+      return "&lt;b&gt;" + render(text) + "&lt;/b&gt;"
+    }
+  }
+}
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>&lt;b&gt;Willy is awesome.&lt;/b&gt;
+</code></pre>
+
+<p><strong>Non-False Values</strong></p>
+
+<p>When the value is non-false but not a list, it will be used as the
+context for a single rendering of the block.</p>
+
+<p>Template:</p>
+
+<pre><code>{{#person?}}
+  Hi {{name}}!
+{{/person?}}
+</code></pre>
+
+<p>Hash:</p>
+
+<pre><code>{
+  "person?": { "name": "Jon" }
+}
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>Hi Jon!
+</code></pre>
+
+<h3 id="Inverted-Sections">Inverted Sections</h3>
+
+<p>An inverted section begins with a caret (hat) and ends with a
+slash. That is <code>{{^person}}</code> begins a "person" inverted section while
+<code>{{/person}}</code> ends it.</p>
+
+<p>While sections can be used to render text zero or more times based on the
+value of the key, inverted sections may render text once based
+on the inverse value of the key. That is, they will be rendered
+if the key doesn't exist, is false, or is an empty list.</p>
+
+<p>Template:</p>
+
+<pre><code>{{#repo}}
+  &lt;b&gt;{{name}}&lt;/b&gt;
+{{/repo}}
+{{^repo}}
+  No repos :(
+{{/repo}}
+</code></pre>
+
+<p>Hash:</p>
+
+<pre><code>{
+  "repo": []
+}
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code>No repos :(
+</code></pre>
+
+<h3 id="Comments">Comments</h3>
+
+<p>Comments begin with a bang and are ignored. The following template:</p>
+
+<pre><code>&lt;h1&gt;Today{{! ignore me }}.&lt;/h1&gt;
+</code></pre>
+
+<p>Will render as follows:</p>
+
+<pre><code>&lt;h1&gt;Today.&lt;/h1&gt;
+</code></pre>
+
+<p>Comments may contain newlines.</p>
+
+<h3 id="Partials">Partials</h3>
+
+<p>Partials begin with a greater than sign, like <code>{{&gt; box}}</code>.</p>
+
+<p>Partials are rendered at runtime (as opposed to compile time), so
+recursive partials are possible. Just avoid infinite loops.</p>
+
+<p>They also inherit the calling context. Whereas in ERB you may have
+this:</p>
+
+<pre><code>&lt;%= partial :next_more, :start =&gt; start, :size =&gt; size %&gt;
+</code></pre>
+
+<p>Mustache requires only this:</p>
+
+<pre><code>{{&gt; next_more}}
+</code></pre>
+
+<p>Why? Because the <code>next_more.mustache</code> file will inherit the <code>size</code> and
+<code>start</code> methods from the calling context.</p>
+
+<p>In this way you may want to think of partials as includes, or template
+expansion, even though it's not literally true.</p>
+
+<p>For example, this template and partial:</p>
+
+<pre><code>base.mustache:
+&lt;h2&gt;Names&lt;/h2&gt;
+{{#names}}
+  {{&gt; user}}
+{{/names}}
+
+user.mustache:
+&lt;strong&gt;{{name}}&lt;/strong&gt;
+</code></pre>
+
+<p>Can be thought of as a single, expanded template:</p>
+
+<pre><code>&lt;h2&gt;Names&lt;/h2&gt;
+{{#names}}
+  &lt;strong&gt;{{name}}&lt;/strong&gt;
+{{/names}}
+</code></pre>
+
+<h3 id="Set-Delimiter">Set Delimiter</h3>
+
+<p>Set Delimiter tags start with an equal sign and change the tag
+delimiters from <code>{{</code> and <code>}}</code> to custom strings.</p>
+
+<p>Consider the following contrived example:</p>
+
+<pre><code>* {{default_tags}}
+{{=&lt;% %>=}}
+* &lt;% erb_style_tags %>
+&lt;%={{ }}=%>
+* {{ default_tags_again }}
+</code></pre>
+
+<p>Here we have a list with three items. The first item uses the default
+tag style, the second uses erb style as defined by the Set Delimiter
+tag, and the third returns to the default style after yet another Set
+Delimiter declaration.</p>
+
+<p>According to <a href="http://google-ctemplate.googlecode.com/svn/trunk/doc/howto.html">ctemplates</a>, this "is useful for languages like TeX, where
+double-braces may occur in the text and are awkward to use for
+markup."</p>
+
+<p>Custom delimiters may not contain whitespace or the equals sign.</p>
+
+<h2 id="COPYRIGHT">COPYRIGHT</h2>
+
+<p>Mustache is Copyright (C) 2009 Chris Wanstrath</p>
+
+<p>Original CTemplate by Google</p>
+
+<h2 id="SEE-ALSO">SEE ALSO</h2>
+
+<p><a class="man-ref" href="mustache.1.ron.html">mustache<span class="s">(1)</span></a>,
+<a href="http://mustache.github.io/" data-bare-link="true">http://mustache.github.io/</a></p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'>DEFUNKT</li>
+    <li class='tc'>October 2014</li>
+    <li class='tr'>mustache(5)</li>
+  </ol>
+
+  </div>
+</body>
+</html>

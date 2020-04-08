@@ -1,0 +1,28 @@
+---
+# alpha and beta qualifiers are now added via VERSION_QUALIFIER environment var
+logstash: 7.5.1
+logstash-core: 7.5.1
+logstash-core-plugin-api: 2.1.16
+
+# jruby must reference a *released* version of jruby which can be downloaded from the official download url
+# *and* for which jars artifacts are published for compile-time
+jruby:
+  version: 9.2.8.0
+  sha1: 5b0b73b3d696afaeac92e6f8879dedcc63ac39d8
+
+# jruby-runtime-override, if specified, will override the jruby version installed in vendor/jruby for logstash runtime only,
+# not for the compile-time jars
+#
+#jruby-runtime-override:
+#  url: http://ci.jruby.org/snapshots/previous/jruby-bin-9.2.0.0-SNAPSHOT.tar.gz
+#  version: 9.2.0.0-SNAPSHOT
+#  sha1: IGNORE
+
+# Note: this file is copied to the root of logstash-core because its gemspec needs it when
+#       bundler evaluates the gemspec via bin/logstash
+# Ensure Jackson version here is kept in sync with version used by jrjackson gem
+jrjackson: 0.4.10
+jackson: 2.9.9
+jackson-databind: 2.9.9.3
+
+# This is a copy the project level versions.yml into this gem's root and it is created when the gemspec is evaluated.

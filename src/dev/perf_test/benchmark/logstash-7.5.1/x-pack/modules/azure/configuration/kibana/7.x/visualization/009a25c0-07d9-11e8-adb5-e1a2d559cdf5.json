@@ -1,0 +1,10 @@
+{
+  "title": "Errors [Azure Monitor]",
+  "visState": "{\"title\":\"Errors [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(255,222,85,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"1\",\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"Errors\",\"split_filters\":[{\"filter\":\"data.category:Errors\",\"label\":\"Errors\",\"color\":\"rgba(255,57,36,1)\",\"id\":\"ead38060-07d8-11e8-ac3e-4b165adb3935\"}]},{\"id\":\"2c144750-0881-11e8-b3d6-f7127beb4493\",\"color\":\"rgba(223,73,152,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"2c144751-0881-11e8-b3d6-f7127beb4493\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":\"0.5\",\"stacked\":\"none\",\"split_filters\":[{\"color\":\"rgba(244,78,59,1)\",\"id\":\"41fc5760-0881-11e8-b3d6-f7127beb4493\"}],\"terms_field\":\"azure.resource_name.keyword\",\"terms_size\":\"3\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"filter\":\"azure.group:sql_diagnostics AND category:Errors\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

@@ -1,0 +1,110 @@
+= New Features
+
+* Database#rollback_on_exit has been added, which allows you to
+  rollback transactions instead of committing them when exiting
+  the transaction block.  Previously, the only way to rollback
+  a transaction from inside a transaction block was to raise
+  an exception.  This allows you to tell Sequel to roll the
+  transaction back on exit, and then use return or throw to exit
+  the transaction block.
+
+  Database#rollback_on_exit supports savepoints, including
+  multiple savepoint levels, as well as canceling rollbacks:
+
+    DB.transaction do # BEGIN
+      DB.rollback_on_exit
+    end # ROLLBACK
+  
+    DB.transaction do # BEGIN
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.rollback_on_exit(savepoint: true)
+      end # ROLLBACK TO SAVEPOINT
+    end # COMMIT
+  
+    DB.transaction do # BEGIN
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.transaction(savepoint: true) do # SAVEPOINT
+          DB.rollback_on_exit(savepoint: true)
+        end # ROLLBACK TO SAVEPOINT
+      end # RELEASE SAVEPOINT
+    end # COMMIT
+  
+    DB.transaction do # BEGIN
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.rollback_on_exit(savepoint: true)
+      end # ROLLBACK TO SAVEPOINT
+    end # COMMIT
+  
+    DB.transaction do # BEGIN
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.transaction(savepoint: true) do # SAVEPOINT
+          DB.rollback_on_exit(savepoint: 2)
+        end # ROLLBACK TO SAVEPOINT
+      end # ROLLBACK TO SAVEPOINT
+    end # COMMIT
+  
+    DB.transaction do # BEGIN
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.transaction(savepoint: true) do # SAVEPOINT
+          DB.rollback_on_exit(savepoint: 3)
+        end # ROLLBACK TO SAVEPOINT
+      end # ROLLBACK TO SAVEPOINT
+    end # ROLLBACK
+
+    DB.transaction do # BEGIN
+      DB.rollback_on_exit
+      DB.rollback_on_exit(cancel: true)
+    end # COMMIT
+  
+* Sequel now supports window functions on SQLite 3.26.0+. SQLite
+  technically supports window functions on 3.25.0+, but enabling
+  window function support in Sequel opens up a code path that
+  generates queries that cause older versions of SQLite to produce a
+  segmentation fault.  This bug in SQLite has been fixed in 3.26.0.
+
+= Other Improvements
+
+* Sequel::Model no longer overrides existing methods when defining
+  getters and setters.  Historically, it only checked for existing
+  method definitions for methods that could be directly expressed
+  (e.g. not requiring send).  Sequel 5 broke the check for setter
+  methods that could be directly expressed.  This fixes cases where
+  model inheritance is used and the setter methods are overridden
+  in a parent class.
+
+* Alter table emulation now works correctly on SQLite 3.26.0+.
+
+* The one_to_one association setter does not modify reciprocal
+  associations in cases where doing so is not necessary.  This can
+  fix some cases where the nested_attributes plugin is used.
+
+* The class_table_inheritance plugin can now take advantage of the
+  schema_caching extension to prevent database queries to determine
+  column information when the class is created.
+
+* The nested_attributes plugin no longer validates one_to_one
+  associations twice when saving.
+
+* The class_table_inheritance plugin :qualify_tables option now
+  correctly qualifies subclasses of subclasses.
+
+* SQL expressions that are subscripted are now wrapped in parentheses.
+  This fixes at least subscripting a function expression on
+  PostgreSQL:
+
+    DB[:t].select{array_agg(column).sql_subscript(1)}
+    # SELECT (array_agg(column))[1] FROM t
+
+* Sequel::Migrator now uses more descriptive error messages if a
+  missing or empty migration directory is given.
+
+* bin/sequel -C when converting from SQLite to another database
+  type will now use 64-bit integer columns in the other database when
+  the SQLite column type is integer, as SQLite supports storing
+  64-bit values in integer columns, and most other databases only
+  support 32-bit values in integer columns.
+
+= Backwards Compatibility
+
+* The mysql adapter no longer attempts to load the mysqlplus driver,
+  it now only attempts to load the mysql driver.

@@ -1,0 +1,10 @@
+{
+  "title": "Top Queries [Azure Monitor]",
+  "visState": "{\"title\":\"Top Queries [Azure Monitor]\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"sql_diagnostics_query_store_runtime_stats_properties.duration\",\"customLabel\":\"Max Duration (ms)\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"sql_diagnostics_query_store_runtime_stats_properties.duration\",\"customLabel\":\"Average Duration (ms)\"}},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Executions\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"sql_diagnostics_query_store_runtime_stats_properties.query_hash.keyword\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Query Hash\"}}]}",
+  "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"73e18ac0-104c-11e8-8c94-a3d8d0cfd62b\",\"filter\":[],\"query\":{\"query\":\"data.category:QueryStoreRuntimeStatistics\",\"language\":\"lucene\"}}"
+  }
+}

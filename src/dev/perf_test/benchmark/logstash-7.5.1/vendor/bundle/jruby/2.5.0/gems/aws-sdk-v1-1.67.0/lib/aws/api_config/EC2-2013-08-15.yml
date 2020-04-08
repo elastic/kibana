@@ -1,0 +1,4708 @@
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2013-08-15'
+:operations:
+- :name: ActivateLicense
+  :method: :activate_license
+  :inputs:
+    DryRun:
+    - :boolean
+    LicenseId:
+    - :string
+    - :required
+    Capacity:
+    - :integer
+    - :required
+  :outputs: {}
+- :name: AllocateAddress
+  :method: :allocate_address
+  :inputs:
+    DryRun:
+    - :boolean
+    Domain:
+    - :string
+  :outputs: {}
+- :name: AssignPrivateIpAddresses
+  :method: :assign_private_ip_addresses
+  :inputs:
+    NetworkInterfaceId:
+    - :string
+    - :required
+    PrivateIpAddress:
+    - :list:
+      - :string
+    - :rename: privateIpAddresses
+    SecondaryPrivateIpAddressCount:
+    - :integer
+    AllowReassignment:
+    - :boolean
+  :outputs: {}
+- :name: AssociateAddress
+  :method: :associate_address
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :string
+    PublicIp:
+    - :string
+    AllocationId:
+    - :string
+    NetworkInterfaceId:
+    - :string
+    PrivateIpAddress:
+    - :string
+    AllowReassociation:
+    - :boolean
+  :outputs: {}
+- :name: AssociateDhcpOptions
+  :method: :associate_dhcp_options
+  :inputs:
+    DryRun:
+    - :boolean
+    DhcpOptionsId:
+    - :string
+    - :required
+    VpcId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: AssociateRouteTable
+  :method: :associate_route_table
+  :inputs:
+    DryRun:
+    - :boolean
+    SubnetId:
+    - :string
+    - :required
+    RouteTableId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: AttachInternetGateway
+  :method: :attach_internet_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    InternetGatewayId:
+    - :string
+    - :required
+    VpcId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: AttachNetworkInterface
+  :method: :attach_network_interface
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkInterfaceId:
+    - :string
+    - :required
+    InstanceId:
+    - :string
+    - :required
+    DeviceIndex:
+    - :integer
+    - :required
+  :outputs: {}
+- :name: AttachVolume
+  :method: :attach_volume
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :string
+    - :required
+    InstanceId:
+    - :string
+    - :required
+    Device:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      attachTime:
+        :type: :time
+      deleteOnTermination:
+        :type: :boolean
+- :name: AttachVpnGateway
+  :method: :attach_vpn_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    VpnGatewayId:
+    - :string
+    - :required
+    VpcId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: AuthorizeSecurityGroupEgress
+  :method: :authorize_security_group_egress
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupId:
+    - :string
+    - :required
+    SourceSecurityGroupName:
+    - :string
+    SourceSecurityGroupOwnerId:
+    - :string
+    IpProtocol:
+    - :string
+    FromPort:
+    - :integer
+    ToPort:
+    - :integer
+    CidrIp:
+    - :string
+    IpPermissions:
+    - :list:
+      - :structure:
+          IpProtocol:
+          - :string
+          - :rename: IpProtocol
+          FromPort:
+          - :integer
+          - :rename: FromPort
+          ToPort:
+          - :integer
+          - :rename: ToPort
+          Groups:
+          - :list:
+            - :structure:
+                UserId:
+                - :string
+                - :rename: UserId
+                GroupName:
+                - :string
+                - :rename: GroupName
+                GroupId:
+                - :string
+                - :rename: GroupId
+          - :rename: UserIdGroupPairs
+          IpRanges:
+          - :list:
+            - :structure:
+                CidrIp:
+                - :string
+                - :rename: CidrIp
+          - :rename: IpRanges
+  :outputs: {}
+- :name: AuthorizeSecurityGroupIngress
+  :method: :authorize_security_group_ingress
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupName:
+    - :string
+    GroupId:
+    - :string
+    SourceSecurityGroupName:
+    - :string
+    SourceSecurityGroupOwnerId:
+    - :string
+    IpProtocol:
+    - :string
+    FromPort:
+    - :integer
+    ToPort:
+    - :integer
+    CidrIp:
+    - :string
+    IpPermissions:
+    - :list:
+      - :structure:
+          IpProtocol:
+          - :string
+          - :rename: IpProtocol
+          FromPort:
+          - :integer
+          - :rename: FromPort
+          ToPort:
+          - :integer
+          - :rename: ToPort
+          Groups:
+          - :list:
+            - :structure:
+                UserId:
+                - :string
+                - :rename: UserId
+                GroupName:
+                - :string
+                - :rename: GroupName
+                GroupId:
+                - :string
+                - :rename: GroupId
+          - :rename: UserIdGroupPairs
+          IpRanges:
+          - :list:
+            - :structure:
+                CidrIp:
+                - :string
+                - :rename: CidrIp
+          - :rename: IpRanges
+  :outputs: {}
+- :name: BundleInstance
+  :method: :bundle_instance
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :string
+    - :required
+    Storage:
+    - :structure:
+        S3:
+        - :structure:
+            Bucket:
+            - :string
+            - :rename: Bucket
+            Prefix:
+            - :string
+            - :rename: Prefix
+            AWSAccessKeyId:
+            - :string
+            UploadPolicy:
+            - :string
+            - :rename: UploadPolicy
+            UploadPolicySignature:
+            - :string
+            - :rename: UploadPolicySignature
+    - :required
+  :outputs:
+    :children:
+      bundleInstanceTask:
+        :children:
+          startTime:
+            :type: :time
+          updateTime:
+            :type: :time
+- :name: CancelBundleTask
+  :method: :cancel_bundle_task
+  :inputs:
+    DryRun:
+    - :boolean
+    BundleId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      bundleInstanceTask:
+        :children:
+          startTime:
+            :type: :time
+          updateTime:
+            :type: :time
+- :name: CancelConversionTask
+  :method: :cancel_conversion_task
+  :inputs:
+    DryRun:
+    - :boolean
+    ConversionTaskId:
+    - :string
+    - :required
+    ReasonMessage:
+    - :string
+  :outputs: {}
+- :name: CancelExportTask
+  :method: :cancel_export_task
+  :inputs:
+    ExportTaskId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: CancelReservedInstancesListing
+  :method: :cancel_reserved_instances_listing
+  :inputs:
+    ReservedInstancesListingId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      reservedInstancesListingsSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :reserved_instances_listings_set
+            :list: true
+            :children:
+              createDate:
+                :type: :time
+              updateDate:
+                :type: :time
+              instanceCounts:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :instance_counts
+                    :list: true
+                    :children:
+                      instanceCount:
+                        :type: :integer
+              priceSchedules:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :price_schedules
+                    :list: true
+                    :children:
+                      term:
+                        :type: :integer
+                      price:
+                        :type: :float
+                      active:
+                        :type: :boolean
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: CancelSpotInstanceRequests
+  :method: :cancel_spot_instance_requests
+  :inputs:
+    DryRun:
+    - :boolean
+    SpotInstanceRequestId:
+    - :list:
+      - :string
+    - :required
+    - :rename: spotInstanceRequestIds
+  :outputs:
+    :children:
+      spotInstanceRequestSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :spot_instance_request_set
+            :list: true
+- :name: ConfirmProductInstance
+  :method: :confirm_product_instance
+  :inputs:
+    DryRun:
+    - :boolean
+    ProductCode:
+    - :string
+    - :required
+    InstanceId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: CopyImage
+  :method: :copy_image
+  :inputs:
+    DryRun:
+    - :boolean
+    SourceRegion:
+    - :string
+    - :required
+    SourceImageId:
+    - :string
+    - :required
+    Name:
+    - :string
+    - :required
+    Description:
+    - :string
+    ClientToken:
+    - :string
+  :outputs: {}
+- :name: CopySnapshot
+  :method: :copy_snapshot
+  :inputs:
+    DryRun:
+    - :boolean
+    SourceRegion:
+    - :string
+    - :required
+    SourceSnapshotId:
+    - :string
+    - :required
+    Description:
+    - :string
+  :outputs: {}
+- :name: CreateCustomerGateway
+  :method: :create_customer_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    Type:
+    - :string
+    - :required
+    IpAddress:
+    - :string
+    - :required
+    - :rename: PublicIp
+    BgpAsn:
+    - :integer
+    - :required
+  :outputs:
+    :children:
+      customerGateway:
+        :children:
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+- :name: CreateDhcpOptions
+  :method: :create_dhcp_options
+  :inputs:
+    DryRun:
+    - :boolean
+    DhcpConfiguration:
+    - :list:
+      - :structure:
+          Key:
+          - :string
+          - :rename: Key
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :required
+    - :rename: DhcpConfigurations
+  :outputs:
+    :children:
+      dhcpOptions:
+        :children:
+          dhcpConfigurationSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :dhcp_configuration_set
+                :list: true
+                :children:
+                  valueSet:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :value_set
+                        :list: true
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+- :name: CreateImage
+  :method: :create_image
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :string
+    - :required
+    Name:
+    - :string
+    - :required
+    Description:
+    - :string
+    NoReboot:
+    - :boolean
+    BlockDeviceMapping:
+    - :list:
+      - :structure:
+          VirtualName:
+          - :string
+          - :rename: VirtualName
+          DeviceName:
+          - :string
+          - :rename: DeviceName
+          Ebs:
+          - :structure:
+              SnapshotId:
+              - :string
+              VolumeSize:
+              - :integer
+              DeleteOnTermination:
+              - :boolean
+              VolumeType:
+              - :string
+              Iops:
+              - :integer
+          NoDevice:
+          - :string
+    - :rename: blockDeviceMappings
+  :outputs: {}
+- :name: CreateInstanceExportTask
+  :method: :create_instance_export_task
+  :inputs:
+    Description:
+    - :string
+    InstanceId:
+    - :string
+    - :required
+    TargetEnvironment:
+    - :string
+    ExportToS3:
+    - :structure:
+        DiskImageFormat:
+        - :string
+        ContainerFormat:
+        - :string
+        S3Bucket:
+        - :string
+        S3Prefix:
+        - :string
+    - :rename: exportToS3Task
+  :outputs: {}
+- :name: CreateInternetGateway
+  :method: :create_internet_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+  :outputs:
+    :children:
+      internetGateway:
+        :children:
+          attachmentSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :attachment_set
+                :list: true
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+- :name: CreateKeyPair
+  :method: :create_key_pair
+  :inputs:
+    DryRun:
+    - :boolean
+    KeyName:
+    - :string
+    - :required
+  :outputs: {}
+- :name: CreateNetworkAcl
+  :method: :create_network_acl
+  :inputs:
+    DryRun:
+    - :boolean
+    VpcId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      networkAcl:
+        :children:
+          default:
+            :type: :boolean
+          entrySet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :entry_set
+                :list: true
+                :children:
+                  ruleNumber:
+                    :type: :integer
+                  egress:
+                    :type: :boolean
+                  icmpTypeCode:
+                    :children:
+                      type:
+                        :type: :integer
+                      code:
+                        :type: :integer
+                  portRange:
+                    :children:
+                      from:
+                        :type: :integer
+                      to:
+                        :type: :integer
+          associationSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :association_set
+                :list: true
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+- :name: CreateNetworkAclEntry
+  :method: :create_network_acl_entry
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkAclId:
+    - :string
+    - :required
+    RuleNumber:
+    - :integer
+    - :required
+    Protocol:
+    - :string
+    - :required
+    RuleAction:
+    - :string
+    - :required
+    Egress:
+    - :boolean
+    - :required
+    CidrBlock:
+    - :string
+    - :required
+    Icmp:
+    - :structure:
+        Type:
+        - :integer
+        Code:
+        - :integer
+    - :rename: icmpTypeCode
+    PortRange:
+    - :structure:
+        From:
+        - :integer
+        To:
+        - :integer
+  :outputs: {}
+- :name: CreateNetworkInterface
+  :method: :create_network_interface
+  :inputs:
+    SubnetId:
+    - :string
+    - :required
+    Description:
+    - :string
+    PrivateIpAddress:
+    - :string
+    SecurityGroupId:
+    - :list:
+      - :string
+    - :rename: groups
+    PrivateIpAddresses:
+    - :list:
+      - :structure:
+          PrivateIpAddress:
+          - :string
+          - :required
+          Primary:
+          - :boolean
+    SecondaryPrivateIpAddressCount:
+    - :integer
+    DryRun:
+    - :boolean
+  :outputs:
+    :children:
+      networkInterface:
+        :children:
+          requesterManaged:
+            :type: :boolean
+          sourceDestCheck:
+            :type: :boolean
+          groupSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :group_set
+                :list: true
+          attachment:
+            :children:
+              deviceIndex:
+                :type: :integer
+              attachTime:
+                :type: :time
+              deleteOnTermination:
+                :type: :boolean
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+          privateIpAddressesSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :private_ip_addresses_set
+                :list: true
+                :children:
+                  primary:
+                    :type: :boolean
+- :name: CreatePlacementGroup
+  :method: :create_placement_group
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupName:
+    - :string
+    - :required
+    Strategy:
+    - :string
+    - :required
+  :outputs: {}
+- :name: CreateReservedInstancesListing
+  :method: :create_reserved_instances_listing
+  :inputs:
+    ReservedInstancesId:
+    - :string
+    - :required
+    InstanceCount:
+    - :integer
+    - :required
+    PriceSchedules:
+    - :list:
+      - :structure:
+          Term:
+          - :long
+          Price:
+          - :double
+          CurrencyCode:
+          - :string
+    - :required
+    ClientToken:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      reservedInstancesListingsSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :reserved_instances_listings_set
+            :list: true
+            :children:
+              createDate:
+                :type: :time
+              updateDate:
+                :type: :time
+              instanceCounts:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :instance_counts
+                    :list: true
+                    :children:
+                      instanceCount:
+                        :type: :integer
+              priceSchedules:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :price_schedules
+                    :list: true
+                    :children:
+                      term:
+                        :type: :integer
+                      price:
+                        :type: :float
+                      active:
+                        :type: :boolean
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: CreateRoute
+  :method: :create_route
+  :inputs:
+    DryRun:
+    - :boolean
+    RouteTableId:
+    - :string
+    - :required
+    DestinationCidrBlock:
+    - :string
+    - :required
+    GatewayId:
+    - :string
+    InstanceId:
+    - :string
+    NetworkInterfaceId:
+    - :string
+  :outputs: {}
+- :name: CreateRouteTable
+  :method: :create_route_table
+  :inputs:
+    DryRun:
+    - :boolean
+    VpcId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      routeTable:
+        :children:
+          routeSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :route_set
+                :list: true
+          associationSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :association_set
+                :list: true
+                :children:
+                  main:
+                    :type: :boolean
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+          propagatingVgwSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :propagating_vgw_set
+                :list: true
+- :name: CreateSecurityGroup
+  :method: :create_security_group
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupName:
+    - :string
+    - :required
+    GroupDescription:
+    - :string
+    - :required
+    - :rename: Description
+    VpcId:
+    - :string
+  :outputs: {}
+- :name: CreateSnapshot
+  :method: :create_snapshot
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :string
+    - :required
+    Description:
+    - :string
+  :outputs:
+    :children:
+      startTime:
+        :type: :time
+      volumeSize:
+        :type: :integer
+      tagSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :tag_set
+            :list: true
+- :name: CreateSpotDatafeedSubscription
+  :method: :create_spot_datafeed_subscription
+  :inputs:
+    DryRun:
+    - :boolean
+    Bucket:
+    - :string
+    - :required
+    Prefix:
+    - :string
+  :outputs: {}
+- :name: CreateSubnet
+  :method: :create_subnet
+  :inputs:
+    DryRun:
+    - :boolean
+    VpcId:
+    - :string
+    - :required
+    CidrBlock:
+    - :string
+    - :required
+    AvailabilityZone:
+    - :string
+  :outputs:
+    :children:
+      subnet:
+        :children:
+          availableIpAddressCount:
+            :type: :integer
+          defaultForAz:
+            :type: :boolean
+          mapPublicIpOnLaunch:
+            :type: :boolean
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+- :name: CreateTags
+  :method: :create_tags
+  :inputs:
+    DryRun:
+    - :boolean
+    ResourceId:
+    - :list:
+      - :string
+    - :required
+    - :rename: resources
+    Tag:
+    - :list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+    - :required
+    - :rename: tags
+  :outputs: {}
+- :name: CreateVolume
+  :method: :create_volume
+  :inputs:
+    DryRun:
+    - :boolean
+    Size:
+    - :integer
+    SnapshotId:
+    - :string
+    AvailabilityZone:
+    - :string
+    - :required
+    VolumeType:
+    - :string
+    Iops:
+    - :integer
+  :outputs:
+    :children:
+      size:
+        :type: :integer
+      createTime:
+        :type: :time
+      attachmentSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :attachment_set
+            :list: true
+            :children:
+              attachTime:
+                :type: :time
+              deleteOnTermination:
+                :type: :boolean
+      tagSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :tag_set
+            :list: true
+      iops:
+        :type: :integer
+- :name: CreateVpc
+  :method: :create_vpc
+  :inputs:
+    DryRun:
+    - :boolean
+    CidrBlock:
+    - :string
+    - :required
+    InstanceTenancy:
+    - :string
+  :outputs:
+    :children:
+      vpc:
+        :children:
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+          isDefault:
+            :type: :boolean
+- :name: CreateVpnConnection
+  :method: :create_vpn_connection
+  :inputs:
+    DryRun:
+    - :boolean
+    Type:
+    - :string
+    - :required
+    CustomerGatewayId:
+    - :string
+    - :required
+    VpnGatewayId:
+    - :string
+    - :required
+    Options:
+    - :structure:
+        StaticRoutesOnly:
+        - :boolean
+  :outputs:
+    :children:
+      vpnConnection:
+        :children:
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+          vgwTelemetry:
+            :ignore: true
+            :children:
+              item:
+                :rename: :vgw_telemetry
+                :list: true
+                :children:
+                  lastStatusChange:
+                    :type: :time
+                  acceptedRouteCount:
+                    :type: :integer
+          options:
+            :children:
+              staticRoutesOnly:
+                :type: :boolean
+          routes:
+            :ignore: true
+            :children:
+              item:
+                :rename: :routes
+                :list: true
+- :name: CreateVpnConnectionRoute
+  :method: :create_vpn_connection_route
+  :inputs:
+    VpnConnectionId:
+    - :string
+    - :required
+    DestinationCidrBlock:
+    - :string
+    - :required
+  :outputs: {}
+- :name: CreateVpnGateway
+  :method: :create_vpn_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    Type:
+    - :string
+    - :required
+    AvailabilityZone:
+    - :string
+  :outputs:
+    :children:
+      vpnGateway:
+        :children:
+          attachments:
+            :ignore: true
+            :children:
+              item:
+                :rename: :attachments
+                :list: true
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+          type:
+            :rename: :vpn_type
+- :name: DeactivateLicense
+  :method: :deactivate_license
+  :inputs:
+    DryRun:
+    - :boolean
+    LicenseId:
+    - :string
+    - :required
+    Capacity:
+    - :integer
+    - :required
+  :outputs: {}
+- :name: DeleteCustomerGateway
+  :method: :delete_customer_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    CustomerGatewayId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteDhcpOptions
+  :method: :delete_dhcp_options
+  :inputs:
+    DryRun:
+    - :boolean
+    DhcpOptionsId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteInternetGateway
+  :method: :delete_internet_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    InternetGatewayId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteKeyPair
+  :method: :delete_key_pair
+  :inputs:
+    DryRun:
+    - :boolean
+    KeyName:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteNetworkAcl
+  :method: :delete_network_acl
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkAclId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteNetworkAclEntry
+  :method: :delete_network_acl_entry
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkAclId:
+    - :string
+    - :required
+    RuleNumber:
+    - :integer
+    - :required
+    Egress:
+    - :boolean
+    - :required
+  :outputs: {}
+- :name: DeleteNetworkInterface
+  :method: :delete_network_interface
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkInterfaceId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeletePlacementGroup
+  :method: :delete_placement_group
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupName:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteRoute
+  :method: :delete_route
+  :inputs:
+    DryRun:
+    - :boolean
+    RouteTableId:
+    - :string
+    - :required
+    DestinationCidrBlock:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteRouteTable
+  :method: :delete_route_table
+  :inputs:
+    DryRun:
+    - :boolean
+    RouteTableId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteSecurityGroup
+  :method: :delete_security_group
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupName:
+    - :string
+    GroupId:
+    - :string
+  :outputs: {}
+- :name: DeleteSnapshot
+  :method: :delete_snapshot
+  :inputs:
+    DryRun:
+    - :boolean
+    SnapshotId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteSpotDatafeedSubscription
+  :method: :delete_spot_datafeed_subscription
+  :inputs:
+    DryRun:
+    - :boolean
+  :outputs: {}
+- :name: DeleteSubnet
+  :method: :delete_subnet
+  :inputs:
+    DryRun:
+    - :boolean
+    SubnetId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteTags
+  :method: :delete_tags
+  :inputs:
+    DryRun:
+    - :boolean
+    ResourceId:
+    - :list:
+      - :string
+    - :required
+    - :rename: resources
+    Tag:
+    - :list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+    - :rename: tags
+  :outputs: {}
+- :name: DeleteVolume
+  :method: :delete_volume
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteVpc
+  :method: :delete_vpc
+  :inputs:
+    DryRun:
+    - :boolean
+    VpcId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteVpnConnection
+  :method: :delete_vpn_connection
+  :inputs:
+    DryRun:
+    - :boolean
+    VpnConnectionId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteVpnConnectionRoute
+  :method: :delete_vpn_connection_route
+  :inputs:
+    VpnConnectionId:
+    - :string
+    - :required
+    DestinationCidrBlock:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteVpnGateway
+  :method: :delete_vpn_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    VpnGatewayId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeregisterImage
+  :method: :deregister_image
+  :inputs:
+    DryRun:
+    - :boolean
+    ImageId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DescribeAccountAttributes
+  :method: :describe_account_attributes
+  :inputs:
+    DryRun:
+    - :boolean
+    AttributeName:
+    - :list:
+      - :string
+    - :rename: attributeNames
+  :outputs:
+    :children:
+      accountAttributeSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :account_attribute_set
+            :list: true
+            :children:
+              attributeValueSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :attribute_value_set
+                    :list: true
+- :name: DescribeAddresses
+  :method: :describe_addresses
+  :inputs:
+    DryRun:
+    - :boolean
+    PublicIp:
+    - :list:
+      - :string
+    - :rename: PublicIps
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+    AllocationId:
+    - :list:
+      - :string
+    - :rename: allocationIds
+  :outputs:
+    :children:
+      addressesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :addresses_set
+            :list: true
+            :index:
+              :key: :public_ip
+              :name: :address_index
+- :name: DescribeAvailabilityZones
+  :method: :describe_availability_zones
+  :inputs:
+    DryRun:
+    - :boolean
+    ZoneName:
+    - :list:
+      - :string
+    - :rename: ZoneNames
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      availabilityZoneInfo:
+        :ignore: true
+        :children:
+          item:
+            :rename: :availability_zone_info
+            :list: true
+            :children:
+              messageSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :message_set
+                    :list: true
+- :name: DescribeBundleTasks
+  :method: :describe_bundle_tasks
+  :inputs:
+    DryRun:
+    - :boolean
+    BundleId:
+    - :list:
+      - :string
+    - :rename: BundleIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      bundleInstanceTasksSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :bundle_instance_tasks_set
+            :list: true
+            :children:
+              startTime:
+                :type: :time
+              updateTime:
+                :type: :time
+- :name: DescribeConversionTasks
+  :method: :describe_conversion_tasks
+  :inputs:
+    DryRun:
+    - :boolean
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+    ConversionTaskId:
+    - :list:
+      - :string
+    - :rename: conversionTaskIds
+  :outputs:
+    :children:
+      conversionTasks:
+        :ignore: true
+        :children:
+          item:
+            :rename: :conversion_tasks
+            :list: true
+            :children:
+              importInstance:
+                :children:
+                  volumes:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :volumes
+                        :list: true
+                        :children:
+                          bytesConverted:
+                            :type: :integer
+                          image:
+                            :children:
+                              size:
+                                :type: :integer
+                          volume:
+                            :children:
+                              size:
+                                :type: :integer
+              importVolume:
+                :children:
+                  bytesConverted:
+                    :type: :integer
+                  image:
+                    :children:
+                      size:
+                        :type: :integer
+                  volume:
+                    :children:
+                      size:
+                        :type: :integer
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: DescribeCustomerGateways
+  :method: :describe_customer_gateways
+  :inputs:
+    DryRun:
+    - :boolean
+    CustomerGatewayId:
+    - :list:
+      - :string
+    - :rename: CustomerGatewayIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: Filters
+  :outputs:
+    :children:
+      customerGatewaySet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :customer_gateway_set
+            :list: true
+            :children:
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              type:
+                :rename: :vpn_type
+- :name: DescribeDhcpOptions
+  :method: :describe_dhcp_options
+  :inputs:
+    DryRun:
+    - :boolean
+    DhcpOptionsId:
+    - :list:
+      - :string
+    - :rename: DhcpOptionsIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      dhcpOptionsSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :dhcp_options_set
+            :list: true
+            :children:
+              dhcpConfigurationSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :dhcp_configuration_set
+                    :list: true
+                    :children:
+                      valueSet:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :value_set
+                            :list: true
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: DescribeExportTasks
+  :method: :describe_export_tasks
+  :inputs:
+    ExportTaskId:
+    - :list:
+      - :string
+    - :rename: exportTaskIds
+  :outputs:
+    :children:
+      exportTaskSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :export_task_set
+            :list: true
+- :name: DescribeImageAttribute
+  :method: :describe_image_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    ImageId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      launchPermission:
+        :ignore: true
+        :children:
+          item:
+            :rename: :launch_permission
+            :list: true
+      productCodes:
+        :ignore: true
+        :children:
+          item:
+            :rename: :product_codes
+            :list: true
+      blockDeviceMapping:
+        :ignore: true
+        :children:
+          item:
+            :rename: :block_device_mapping
+            :list: true
+            :children:
+              ebs:
+                :children:
+                  volumeSize:
+                    :type: :integer
+                  deleteOnTermination:
+                    :type: :boolean
+                  iops:
+                    :type: :integer
+- :name: DescribeImages
+  :method: :describe_images
+  :inputs:
+    DryRun:
+    - :boolean
+    ImageId:
+    - :list:
+      - :string
+    - :rename: ImageIds
+    Owner:
+    - :list:
+      - :string
+    - :rename: Owners
+    ExecutableBy:
+    - :list:
+      - :string
+    - :rename: ExecutableUsers
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      imagesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :images_set
+            :list: true
+            :children:
+              isPublic:
+                :type: :boolean
+              productCodes:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :product_codes
+                    :list: true
+              blockDeviceMapping:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :block_device_mapping
+                    :list: true
+                    :children:
+                      ebs:
+                        :children:
+                          volumeSize:
+                            :type: :integer
+                          deleteOnTermination:
+                            :type: :boolean
+                          iops:
+                            :type: :integer
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+            :index:
+              :key: :image_id
+              :name: :image_index
+- :name: DescribeInstanceAttribute
+  :method: :describe_instance_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      disableApiTermination:
+        :children:
+          value:
+            :type: :boolean
+      blockDeviceMapping:
+        :ignore: true
+        :children:
+          item:
+            :rename: :block_device_mapping
+            :list: true
+            :children:
+              ebs:
+                :children:
+                  attachTime:
+                    :type: :time
+                  deleteOnTermination:
+                    :type: :boolean
+      productCodes:
+        :ignore: true
+        :children:
+          item:
+            :rename: :product_codes
+            :list: true
+      ebsOptimized:
+        :children:
+          value:
+            :type: :boolean
+- :name: DescribeInstanceStatus
+  :method: :describe_instance_status
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :list:
+      - :string
+    - :rename: InstanceIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+    NextToken:
+    - :string
+    MaxResults:
+    - :integer
+    IncludeAllInstances:
+    - :boolean
+  :outputs:
+    :children:
+      instanceStatusSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :instance_status_set
+            :list: true
+            :children:
+              eventsSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :events_set
+                    :list: true
+                    :children:
+                      notBefore:
+                        :type: :time
+                      notAfter:
+                        :type: :time
+              instanceState:
+                :children:
+                  code:
+                    :type: :integer
+              systemStatus:
+                :children:
+                  details:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :details
+                        :list: true
+                        :children:
+                          impairedSince:
+                            :type: :time
+              instanceStatus:
+                :children:
+                  details:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :details
+                        :list: true
+                        :children:
+                          impairedSince:
+                            :type: :time
+- :name: DescribeInstances
+  :method: :describe_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :list:
+      - :string
+    - :rename: InstanceIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      reservationSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :reservation_set
+            :list: true
+            :children:
+              groupSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :group_set
+                    :list: true
+              instancesSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :instances_set
+                    :list: true
+                    :children:
+                      instanceState:
+                        :children:
+                          code:
+                            :type: :integer
+                      amiLaunchIndex:
+                        :type: :integer
+                      productCodes:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :product_codes
+                            :list: true
+                      launchTime:
+                        :type: :time
+                      blockDeviceMapping:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :block_device_mapping
+                            :list: true
+                            :children:
+                              ebs:
+                                :children:
+                                  attachTime:
+                                    :type: :time
+                                  deleteOnTermination:
+                                    :type: :boolean
+                      tagSet:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :tag_set
+                            :list: true
+                      groupSet:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :group_set
+                            :list: true
+                      sourceDestCheck:
+                        :type: :boolean
+                      networkInterfaceSet:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :network_interface_set
+                            :list: true
+                            :children:
+                              sourceDestCheck:
+                                :type: :boolean
+                              groupSet:
+                                :ignore: true
+                                :children:
+                                  item:
+                                    :rename: :group_set
+                                    :list: true
+                              attachment:
+                                :children:
+                                  deviceIndex:
+                                    :type: :integer
+                                  attachTime:
+                                    :type: :time
+                                  deleteOnTermination:
+                                    :type: :boolean
+                              privateIpAddressesSet:
+                                :ignore: true
+                                :children:
+                                  item:
+                                    :rename: :private_ip_addresses_set
+                                    :list: true
+                                    :children:
+                                      primary:
+                                        :type: :boolean
+                      ebsOptimized:
+                        :type: :boolean
+                    :index:
+                      :key: :instance_id
+                      :name: :instance_index
+            :index:
+              :key_path:
+              - :instances_set
+              - :instance_id
+              :name: :reservation_index
+- :name: DescribeInternetGateways
+  :method: :describe_internet_gateways
+  :inputs:
+    DryRun:
+    - :boolean
+    InternetGatewayId:
+    - :list:
+      - :string
+    - :rename: internetGatewayIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      internetGatewaySet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :internet_gateway_set
+            :list: true
+            :children:
+              attachmentSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :attachment_set
+                    :list: true
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: DescribeKeyPairs
+  :method: :describe_key_pairs
+  :inputs:
+    DryRun:
+    - :boolean
+    KeyName:
+    - :list:
+      - :string
+    - :rename: KeyNames
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      keySet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :key_set
+            :list: true
+            :index:
+              :key: :key_name
+              :name: :key_index
+- :name: DescribeLicenses
+  :method: :describe_licenses
+  :inputs:
+    DryRun:
+    - :boolean
+    LicenseId:
+    - :list:
+      - :string
+    - :rename: licenseIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      licenseSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :license_set
+            :list: true
+            :children:
+              capacitySet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :capacity_set
+                    :list: true
+                    :children:
+                      capacity:
+                        :type: :integer
+                      instanceCapacity:
+                        :type: :integer
+                      earliestAllowedDeactivationTime:
+                        :type: :time
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: DescribeNetworkAcls
+  :method: :describe_network_acls
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkAclId:
+    - :list:
+      - :string
+    - :rename: networkAclIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      networkAclSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :network_acl_set
+            :list: true
+            :children:
+              default:
+                :type: :boolean
+              entrySet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :entry_set
+                    :list: true
+                    :children:
+                      ruleNumber:
+                        :type: :integer
+                      egress:
+                        :type: :boolean
+                      icmpTypeCode:
+                        :children:
+                          type:
+                            :type: :integer
+                          code:
+                            :type: :integer
+                      portRange:
+                        :children:
+                          from:
+                            :type: :integer
+                          to:
+                            :type: :integer
+              associationSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :association_set
+                    :list: true
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: DescribeNetworkInterfaceAttribute
+  :method: :describe_network_interface_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkInterfaceId:
+    - :string
+    - :required
+    Description:
+    - :string
+    SourceDestCheck:
+    - :string
+    GroupSet:
+    - :string
+    - :rename: groups
+    Attachment:
+    - :string
+  :outputs:
+    :children:
+      sourceDestCheck:
+        :children:
+          value:
+            :type: :boolean
+      groupSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :group_set
+            :list: true
+      attachment:
+        :children:
+          deviceIndex:
+            :type: :integer
+          attachTime:
+            :type: :time
+          deleteOnTermination:
+            :type: :boolean
+- :name: DescribeNetworkInterfaces
+  :method: :describe_network_interfaces
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkInterfaceId:
+    - :list:
+      - :string
+    - :rename: networkInterfaceIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      networkInterfaceSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :network_interface_set
+            :list: true
+            :children:
+              requesterManaged:
+                :type: :boolean
+              sourceDestCheck:
+                :type: :boolean
+              groupSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :groups
+                    :list: true
+              attachment:
+                :children:
+                  deviceIndex:
+                    :type: :integer
+                  attachTime:
+                    :type: :time
+                  deleteOnTermination:
+                    :type: :boolean
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              privateIpAddressesSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :private_ip_addresses_set
+                    :list: true
+                    :children:
+                      primary:
+                        :type: :boolean
+        :rename: :set
+- :name: DescribePlacementGroups
+  :method: :describe_placement_groups
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupName:
+    - :list:
+      - :string
+    - :rename: groupNames
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      placementGroupSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :placement_group_set
+            :list: true
+- :name: DescribeRegions
+  :method: :describe_regions
+  :inputs:
+    DryRun:
+    - :boolean
+    RegionName:
+    - :list:
+      - :string
+    - :rename: RegionNames
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      regionInfo:
+        :ignore: true
+        :children:
+          item:
+            :rename: :region_info
+            :list: true
+- :name: DescribeReservedInstances
+  :method: :describe_reserved_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    ReservedInstancesId:
+    - :list:
+      - :string
+    - :rename: ReservedInstancesIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+    OfferingType:
+    - :string
+  :outputs:
+    :children:
+      reservedInstancesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :reserved_instances_set
+            :list: true
+            :children:
+              start:
+                :type: :time
+              end:
+                :type: :time
+              duration:
+                :type: :integer
+              usagePrice:
+                :type: :float
+              fixedPrice:
+                :type: :float
+              instanceCount:
+                :type: :integer
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              recurringCharges:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :recurring_charges
+                    :list: true
+                    :children:
+                      amount:
+                        :type: :float
+- :name: DescribeReservedInstancesListings
+  :method: :describe_reserved_instances_listings
+  :inputs:
+    ReservedInstancesId:
+    - :string
+    ReservedInstancesListingId:
+    - :string
+    Filters:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+  :outputs:
+    :children:
+      reservedInstancesListingsSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :reserved_instances_listings_set
+            :list: true
+            :children:
+              createDate:
+                :type: :time
+              updateDate:
+                :type: :time
+              instanceCounts:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :instance_counts
+                    :list: true
+                    :children:
+                      instanceCount:
+                        :type: :integer
+              priceSchedules:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :price_schedules
+                    :list: true
+                    :children:
+                      term:
+                        :type: :integer
+                      price:
+                        :type: :float
+                      active:
+                        :type: :boolean
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: DescribeReservedInstancesModifications
+  :method: :describe_reserved_instances_modifications
+  :inputs:
+    ReservedInstancesModificationId:
+    - :list:
+      - :string
+    - :rename: ReservedInstancesModificationIds
+    NextToken:
+    - :string
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      reservedInstancesModificationsSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :reserved_instances_modifications_set
+            :list: true
+            :children:
+              reservedInstancesSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :reserved_instances_set
+                    :list: true
+              modificationResultSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :modification_result_set
+                    :list: true
+                    :children:
+                      targetConfiguration:
+                        :children:
+                          instanceCount:
+                            :type: :integer
+              createDate:
+                :type: :time
+              updateDate:
+                :type: :time
+              effectiveDate:
+                :type: :time
+- :name: DescribeReservedInstancesOfferings
+  :method: :describe_reserved_instances_offerings
+  :inputs:
+    DryRun:
+    - :boolean
+    ReservedInstancesOfferingId:
+    - :list:
+      - :string
+    - :rename: ReservedInstancesOfferingIds
+    InstanceType:
+    - :string
+    AvailabilityZone:
+    - :string
+    ProductDescription:
+    - :string
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+    InstanceTenancy:
+    - :string
+    OfferingType:
+    - :string
+    NextToken:
+    - :string
+    MaxResults:
+    - :integer
+    IncludeMarketplace:
+    - :boolean
+    MinDuration:
+    - :long
+    MaxDuration:
+    - :long
+    MaxInstanceCount:
+    - :integer
+  :outputs:
+    :children:
+      reservedInstancesOfferingsSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :reserved_instances_offerings_set
+            :list: true
+            :children:
+              duration:
+                :type: :integer
+              usagePrice:
+                :type: :float
+              fixedPrice:
+                :type: :float
+              recurringCharges:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :recurring_charges
+                    :list: true
+                    :children:
+                      amount:
+                        :type: :float
+              marketplace:
+                :type: :boolean
+              pricingDetailsSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :pricing_details_set
+                    :list: true
+                    :children:
+                      price:
+                        :type: :float
+                      count:
+                        :type: :integer
+- :name: DescribeRouteTables
+  :method: :describe_route_tables
+  :inputs:
+    DryRun:
+    - :boolean
+    RouteTableId:
+    - :list:
+      - :string
+    - :rename: routeTableIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      routeTableSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :route_table_set
+            :list: true
+            :children:
+              routeSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :route_set
+                    :list: true
+              associationSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :association_set
+                    :list: true
+                    :children:
+                      main:
+                        :type: :boolean
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              propagatingVgwSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :propagating_vgw_set
+                    :list: true
+- :name: DescribeSecurityGroups
+  :method: :describe_security_groups
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupName:
+    - :list:
+      - :string
+    - :rename: GroupNames
+    GroupId:
+    - :list:
+      - :string
+    - :rename: GroupIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      securityGroupInfo:
+        :ignore: true
+        :children:
+          item:
+            :rename: :security_group_info
+            :list: true
+            :children:
+              ipPermissions:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :ip_permissions
+                    :list: true
+                    :children:
+                      fromPort:
+                        :type: :integer
+                      toPort:
+                        :type: :integer
+                      groups:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :groups
+                            :list: true
+                      ipRanges:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :ip_ranges
+                            :list: true
+              ipPermissionsEgress:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :ip_permissions_egress
+                    :list: true
+                    :children:
+                      fromPort:
+                        :type: :integer
+                      toPort:
+                        :type: :integer
+                      groups:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :groups
+                            :list: true
+                      ipRanges:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :ip_ranges
+                            :list: true
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+            :index:
+              :key: :group_id
+              :name: :security_group_index
+- :name: DescribeSnapshotAttribute
+  :method: :describe_snapshot_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    SnapshotId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      createVolumePermission:
+        :ignore: true
+        :children:
+          item:
+            :rename: :create_volume_permission
+            :list: true
+      productCodes:
+        :ignore: true
+        :children:
+          item:
+            :rename: :product_codes
+            :list: true
+- :name: DescribeSnapshots
+  :method: :describe_snapshots
+  :inputs:
+    DryRun:
+    - :boolean
+    SnapshotId:
+    - :list:
+      - :string
+    - :rename: SnapshotIds
+    Owner:
+    - :list:
+      - :string
+    - :rename: OwnerIds
+    RestorableBy:
+    - :list:
+      - :string
+    - :rename: RestorableByUserIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      snapshotSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :snapshot_set
+            :list: true
+            :children:
+              startTime:
+                :type: :time
+              volumeSize:
+                :type: :integer
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+            :index:
+              :key: :snapshot_id
+              :name: :snapshot_index
+- :name: DescribeSpotDatafeedSubscription
+  :method: :describe_spot_datafeed_subscription
+  :inputs:
+    DryRun:
+    - :boolean
+  :outputs: {}
+- :name: DescribeSpotInstanceRequests
+  :method: :describe_spot_instance_requests
+  :inputs:
+    DryRun:
+    - :boolean
+    SpotInstanceRequestId:
+    - :list:
+      - :string
+    - :rename: spotInstanceRequestIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      spotInstanceRequestSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :spot_instance_request_set
+            :list: true
+            :children:
+              status:
+                :children:
+                  updateTime:
+                    :type: :time
+              validFrom:
+                :type: :time
+              validUntil:
+                :type: :time
+              launchSpecification:
+                :children:
+                  groupSet:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :group_set
+                        :list: true
+                  blockDeviceMapping:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :block_device_mapping
+                        :list: true
+                        :children:
+                          ebs:
+                            :children:
+                              volumeSize:
+                                :type: :integer
+                              deleteOnTermination:
+                                :type: :boolean
+                              iops:
+                                :type: :integer
+                  monitoringEnabled:
+                    :type: :boolean
+                  networkInterfaceSet:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :network_interface_set
+                        :list: true
+                        :children:
+                          deviceIndex:
+                            :type: :integer
+                          SecurityGroupId:
+                            :ignore: true
+                            :children:
+                              SecurityGroupId:
+                                :rename: :security_group_id
+                                :list: true
+                          deleteOnTermination:
+                            :type: :boolean
+                          privateIpAddressesSet:
+                            :ignore: true
+                            :children:
+                              item:
+                                :rename: :private_ip_addresses_set
+                                :list: true
+                                :children:
+                                  primary:
+                                    :type: :boolean
+                          secondaryPrivateIpAddressCount:
+                            :type: :integer
+                          associatePublicIpAddress:
+                            :type: :boolean
+                  ebsOptimized:
+                    :type: :boolean
+              createTime:
+                :type: :time
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: DescribeSpotPriceHistory
+  :method: :describe_spot_price_history
+  :inputs:
+    DryRun:
+    - :boolean
+    StartTime:
+    - :timestamp
+    EndTime:
+    - :timestamp
+    InstanceType:
+    - :list:
+      - :string
+    - :rename: instanceTypes
+    ProductDescription:
+    - :list:
+      - :string
+    - :rename: productDescriptions
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+    AvailabilityZone:
+    - :string
+    MaxResults:
+    - :integer
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      spotPriceHistorySet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :spot_price_history_set
+            :list: true
+            :children:
+              timestamp:
+                :type: :time
+- :name: DescribeSubnets
+  :method: :describe_subnets
+  :inputs:
+    DryRun:
+    - :boolean
+    SubnetId:
+    - :list:
+      - :string
+    - :rename: SubnetIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: Filters
+  :outputs:
+    :children:
+      subnetSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :subnet_set
+            :list: true
+            :children:
+              availableIpAddressCount:
+                :type: :integer
+              defaultForAz:
+                :type: :boolean
+              mapPublicIpOnLaunch:
+                :type: :boolean
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: DescribeTags
+  :method: :describe_tags
+  :inputs:
+    DryRun:
+    - :boolean
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      tagSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :tag_set
+            :list: true
+            :index:
+              :keys:
+              - :resource_type
+              - :resource_id
+              - :key
+              :name: :tag_index
+- :name: DescribeVolumeAttribute
+  :method: :describe_volume_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+  :outputs:
+    :children:
+      autoEnableIO:
+        :children:
+          value:
+            :type: :boolean
+      productCodes:
+        :ignore: true
+        :children:
+          item:
+            :rename: :product_codes
+            :list: true
+- :name: DescribeVolumeStatus
+  :method: :describe_volume_status
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :list:
+      - :string
+    - :rename: VolumeIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+    NextToken:
+    - :string
+    MaxResults:
+    - :integer
+  :outputs:
+    :children:
+      volumeStatusSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :volume_status_set
+            :list: true
+            :children:
+              volumeStatus:
+                :children:
+                  details:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :details
+                        :list: true
+              eventsSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :events_set
+                    :list: true
+                    :children:
+                      notBefore:
+                        :type: :time
+                      notAfter:
+                        :type: :time
+              actionsSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :actions_set
+                    :list: true
+- :name: DescribeVolumes
+  :method: :describe_volumes
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :list:
+      - :string
+    - :rename: VolumeIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: filters
+  :outputs:
+    :children:
+      volumeSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :volume_set
+            :list: true
+            :children:
+              size:
+                :type: :integer
+              createTime:
+                :type: :time
+              attachmentSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :attachment_set
+                    :list: true
+                    :children:
+                      attachTime:
+                        :type: :time
+                      deleteOnTermination:
+                        :type: :boolean
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              iops:
+                :type: :integer
+            :index:
+              :key: :volume_id
+              :name: :volume_index
+- :name: DescribeVpcAttribute
+  :method: :describe_vpc_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    VpcId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+  :outputs:
+    :children:
+      enableDnsSupport:
+        :children:
+          value:
+            :type: :boolean
+      enableDnsHostnames:
+        :children:
+          value:
+            :type: :boolean
+- :name: DescribeVpcs
+  :method: :describe_vpcs
+  :inputs:
+    DryRun:
+    - :boolean
+    VpcId:
+    - :list:
+      - :string
+    - :rename: VpcIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: Filters
+  :outputs:
+    :children:
+      vpcSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :vpc_set
+            :list: true
+            :children:
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              isDefault:
+                :type: :boolean
+- :name: DescribeVpnConnections
+  :method: :describe_vpn_connections
+  :inputs:
+    DryRun:
+    - :boolean
+    VpnConnectionId:
+    - :list:
+      - :string
+    - :rename: VpnConnectionIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: Filters
+  :outputs:
+    :children:
+      vpnConnectionSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :vpn_connection_set
+            :list: true
+            :children:
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              vgwTelemetry:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :vgw_telemetry
+                    :list: true
+                    :children:
+                      lastStatusChange:
+                        :type: :time
+                      acceptedRouteCount:
+                        :type: :integer
+              options:
+                :children:
+                  staticRoutesOnly:
+                    :type: :boolean
+              routes:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :routes
+                    :list: true
+              type:
+                :rename: :vpn_type
+- :name: DescribeVpnGateways
+  :method: :describe_vpn_gateways
+  :inputs:
+    DryRun:
+    - :boolean
+    VpnGatewayId:
+    - :list:
+      - :string
+    - :rename: VpnGatewayIds
+    Filter:
+    - :list:
+      - :structure:
+          Name:
+          - :string
+          Value:
+          - :list:
+            - :string
+          - :rename: Values
+    - :rename: Filters
+  :outputs:
+    :children:
+      vpnGatewaySet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :vpn_gateway_set
+            :list: true
+            :children:
+              attachments:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :attachments
+                    :list: true
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              type:
+                :rename: :vpn_type
+- :name: DetachInternetGateway
+  :method: :detach_internet_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    InternetGatewayId:
+    - :string
+    - :required
+    VpcId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DetachNetworkInterface
+  :method: :detach_network_interface
+  :inputs:
+    DryRun:
+    - :boolean
+    AttachmentId:
+    - :string
+    - :required
+    Force:
+    - :boolean
+  :outputs: {}
+- :name: DetachVolume
+  :method: :detach_volume
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :string
+    - :required
+    InstanceId:
+    - :string
+    Device:
+    - :string
+    Force:
+    - :boolean
+  :outputs:
+    :children:
+      attachTime:
+        :type: :time
+      deleteOnTermination:
+        :type: :boolean
+- :name: DetachVpnGateway
+  :method: :detach_vpn_gateway
+  :inputs:
+    DryRun:
+    - :boolean
+    VpnGatewayId:
+    - :string
+    - :required
+    VpcId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DisableVgwRoutePropagation
+  :method: :disable_vgw_route_propagation
+  :inputs:
+    RouteTableId:
+    - :string
+    - :required
+    GatewayId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DisassociateAddress
+  :method: :disassociate_address
+  :inputs:
+    DryRun:
+    - :boolean
+    PublicIp:
+    - :string
+    AssociationId:
+    - :string
+  :outputs: {}
+- :name: DisassociateRouteTable
+  :method: :disassociate_route_table
+  :inputs:
+    DryRun:
+    - :boolean
+    AssociationId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: EnableVgwRoutePropagation
+  :method: :enable_vgw_route_propagation
+  :inputs:
+    RouteTableId:
+    - :string
+    - :required
+    GatewayId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: EnableVolumeIO
+  :method: :enable_volume_io
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: GetConsoleOutput
+  :method: :get_console_output
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      timestamp:
+        :type: :time
+- :name: GetPasswordData
+  :method: :get_password_data
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      timestamp:
+        :type: :time
+- :name: ImportInstance
+  :method: :import_instance
+  :inputs:
+    DryRun:
+    - :boolean
+    Description:
+    - :string
+    LaunchSpecification:
+    - :structure:
+        Architecture:
+        - :string
+        GroupName:
+        - :list:
+          - :string
+        - :rename: groupNames
+        AdditionalInfo:
+        - :string
+        UserData:
+        - :string
+        InstanceType:
+        - :string
+        Placement:
+        - :structure:
+            AvailabilityZone:
+            - :string
+            - :rename: AvailabilityZone
+            GroupName:
+            - :string
+            Tenancy:
+            - :string
+        Monitoring:
+        - :boolean
+        SubnetId:
+        - :string
+        InstanceInitiatedShutdownBehavior:
+        - :string
+        PrivateIpAddress:
+        - :string
+    DiskImage:
+    - :list:
+      - :structure:
+          Image:
+          - :structure:
+              Format:
+              - :string
+              - :required
+              Bytes:
+              - :long
+              - :required
+              ImportManifestUrl:
+              - :string
+              - :required
+          Description:
+          - :string
+          Volume:
+          - :structure:
+              Size:
+              - :long
+              - :required
+    - :rename: diskImages
+    Platform:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      conversionTask:
+        :children:
+          importInstance:
+            :children:
+              volumes:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :volumes
+                    :list: true
+                    :children:
+                      bytesConverted:
+                        :type: :integer
+                      image:
+                        :children:
+                          size:
+                            :type: :integer
+                      volume:
+                        :children:
+                          size:
+                            :type: :integer
+          importVolume:
+            :children:
+              bytesConverted:
+                :type: :integer
+              image:
+                :children:
+                  size:
+                    :type: :integer
+              volume:
+                :children:
+                  size:
+                    :type: :integer
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+- :name: ImportKeyPair
+  :method: :import_key_pair
+  :inputs:
+    DryRun:
+    - :boolean
+    KeyName:
+    - :string
+    - :required
+    PublicKeyMaterial:
+    - :string
+    - :required
+  :outputs: {}
+- :name: ImportVolume
+  :method: :import_volume
+  :inputs:
+    DryRun:
+    - :boolean
+    AvailabilityZone:
+    - :string
+    Image:
+    - :structure:
+        Format:
+        - :string
+        - :required
+        Bytes:
+        - :long
+        - :required
+        ImportManifestUrl:
+        - :string
+        - :required
+    Description:
+    - :string
+    Volume:
+    - :structure:
+        Size:
+        - :long
+        - :required
+  :outputs:
+    :children:
+      conversionTask:
+        :children:
+          importInstance:
+            :children:
+              volumes:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :volumes
+                    :list: true
+                    :children:
+                      bytesConverted:
+                        :type: :integer
+                      image:
+                        :children:
+                          size:
+                            :type: :integer
+                      volume:
+                        :children:
+                          size:
+                            :type: :integer
+          importVolume:
+            :children:
+              bytesConverted:
+                :type: :integer
+              image:
+                :children:
+                  size:
+                    :type: :integer
+              volume:
+                :children:
+                  size:
+                    :type: :integer
+          tagSet:
+            :ignore: true
+            :children:
+              item:
+                :rename: :tag_set
+                :list: true
+- :name: ModifyImageAttribute
+  :method: :modify_image_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    ImageId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    OperationType:
+    - :string
+    UserId:
+    - :list:
+      - :string
+    - :rename: UserIds
+    UserGroup:
+    - :list:
+      - :string
+    - :rename: UserGroups
+    ProductCode:
+    - :list:
+      - :string
+    - :rename: ProductCodes
+    Value:
+    - :string
+    LaunchPermission:
+    - :structure:
+        Add:
+        - :list:
+          - :structure:
+              UserId:
+              - :string
+              - :rename: UserId
+              Group:
+              - :string
+              - :rename: Group
+        Remove:
+        - :list:
+          - :structure:
+              UserId:
+              - :string
+              - :rename: UserId
+              Group:
+              - :string
+              - :rename: Group
+    Description:
+    - :structure:
+        Value:
+        - :string
+  :outputs: {}
+- :name: ModifyInstanceAttribute
+  :method: :modify_instance_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    Value:
+    - :string
+    BlockDeviceMapping:
+    - :list:
+      - :structure:
+          DeviceName:
+          - :string
+          Ebs:
+          - :structure:
+              VolumeId:
+              - :string
+              DeleteOnTermination:
+              - :boolean
+          VirtualName:
+          - :string
+          NoDevice:
+          - :string
+    - :rename: blockDeviceMappings
+    SourceDestCheck:
+    - :structure:
+        Value:
+        - :boolean
+    DisableApiTermination:
+    - :structure:
+        Value:
+        - :boolean
+    InstanceType:
+    - :structure:
+        Value:
+        - :string
+    Kernel:
+    - :structure:
+        Value:
+        - :string
+    Ramdisk:
+    - :structure:
+        Value:
+        - :string
+    UserData:
+    - :structure:
+        Value:
+        - :string
+    InstanceInitiatedShutdownBehavior:
+    - :structure:
+        Value:
+        - :string
+    GroupId:
+    - :list:
+      - :string
+    - :rename: groups
+    EbsOptimized:
+    - :structure:
+        Value:
+        - :boolean
+  :outputs: {}
+- :name: ModifyNetworkInterfaceAttribute
+  :method: :modify_network_interface_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkInterfaceId:
+    - :string
+    - :required
+    Description:
+    - :structure:
+        Value:
+        - :string
+    SourceDestCheck:
+    - :structure:
+        Value:
+        - :boolean
+    SecurityGroupId:
+    - :list:
+      - :string
+    - :rename: groups
+    Attachment:
+    - :structure:
+        AttachmentId:
+        - :string
+        DeleteOnTermination:
+        - :boolean
+  :outputs: {}
+- :name: ModifyReservedInstances
+  :method: :modify_reserved_instances
+  :inputs:
+    ClientToken:
+    - :string
+    ReservedInstancesId:
+    - :list:
+      - :string
+    - :required
+    - :rename: ReservedInstancesIds
+    ReservedInstancesConfigurationSetItemType:
+    - :list:
+      - :structure:
+          AvailabilityZone:
+          - :string
+          Platform:
+          - :string
+          InstanceCount:
+          - :integer
+    - :required
+    - :rename: targetConfigurations
+  :outputs: {}
+- :name: ModifySnapshotAttribute
+  :method: :modify_snapshot_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    SnapshotId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    OperationType:
+    - :string
+    UserId:
+    - :list:
+      - :string
+    - :rename: UserIds
+    UserGroup:
+    - :list:
+      - :string
+    - :rename: GroupNames
+    CreateVolumePermission:
+    - :structure:
+        Add:
+        - :list:
+          - :structure:
+              UserId:
+              - :string
+              - :rename: UserId
+              Group:
+              - :string
+              - :rename: Group
+        Remove:
+        - :list:
+          - :structure:
+              UserId:
+              - :string
+              - :rename: UserId
+              Group:
+              - :string
+              - :rename: Group
+  :outputs: {}
+- :name: ModifyVolumeAttribute
+  :method: :modify_volume_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    VolumeId:
+    - :string
+    - :required
+    AutoEnableIO:
+    - :boolean
+  :outputs: {}
+- :name: ModifyVpcAttribute
+  :method: :modify_vpc_attribute
+  :inputs:
+    VpcId:
+    - :string
+    - :required
+    - :rename: VpcId
+    EnableDnsSupport:
+    - :structure:
+        Value:
+        - :boolean
+    EnableDnsHostnames:
+    - :structure:
+        Value:
+        - :boolean
+  :outputs: {}
+- :name: MonitorInstances
+  :method: :monitor_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :list:
+      - :string
+    - :required
+    - :rename: InstanceIds
+  :outputs:
+    :children:
+      instancesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :instances_set
+            :list: true
+- :name: PurchaseReservedInstancesOffering
+  :method: :purchase_reserved_instances_offering
+  :inputs:
+    DryRun:
+    - :boolean
+    ReservedInstancesOfferingId:
+    - :string
+    - :required
+    InstanceCount:
+    - :integer
+    - :required
+    LimitPrice:
+    - :structure:
+        Amount:
+        - :double
+        CurrencyCode:
+        - :string
+  :outputs: {}
+- :name: RebootInstances
+  :method: :reboot_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :list:
+      - :string
+    - :required
+    - :rename: InstanceIds
+  :outputs: {}
+- :name: RegisterImage
+  :method: :register_image
+  :inputs:
+    DryRun:
+    - :boolean
+    ImageLocation:
+    - :string
+    Name:
+    - :string
+    Description:
+    - :string
+    Architecture:
+    - :string
+    KernelId:
+    - :string
+    RamdiskId:
+    - :string
+    RootDeviceName:
+    - :string
+    BlockDeviceMapping:
+    - :list:
+      - :structure:
+          VirtualName:
+          - :string
+          - :rename: VirtualName
+          DeviceName:
+          - :string
+          - :rename: DeviceName
+          Ebs:
+          - :structure:
+              SnapshotId:
+              - :string
+              VolumeSize:
+              - :integer
+              DeleteOnTermination:
+              - :boolean
+              VolumeType:
+              - :string
+              Iops:
+              - :integer
+          NoDevice:
+          - :string
+    - :rename: blockDeviceMappings
+  :outputs: {}
+- :name: ReleaseAddress
+  :method: :release_address
+  :inputs:
+    DryRun:
+    - :boolean
+    PublicIp:
+    - :string
+    AllocationId:
+    - :string
+  :outputs: {}
+- :name: ReplaceNetworkAclAssociation
+  :method: :replace_network_acl_association
+  :inputs:
+    DryRun:
+    - :boolean
+    AssociationId:
+    - :string
+    - :required
+    NetworkAclId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: ReplaceNetworkAclEntry
+  :method: :replace_network_acl_entry
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkAclId:
+    - :string
+    - :required
+    RuleNumber:
+    - :integer
+    - :required
+    Protocol:
+    - :string
+    - :required
+    RuleAction:
+    - :string
+    - :required
+    Egress:
+    - :boolean
+    - :required
+    CidrBlock:
+    - :string
+    - :required
+    Icmp:
+    - :structure:
+        Type:
+        - :integer
+        Code:
+        - :integer
+    - :rename: icmpTypeCode
+    PortRange:
+    - :structure:
+        From:
+        - :integer
+        To:
+        - :integer
+  :outputs: {}
+- :name: ReplaceRoute
+  :method: :replace_route
+  :inputs:
+    DryRun:
+    - :boolean
+    RouteTableId:
+    - :string
+    - :required
+    DestinationCidrBlock:
+    - :string
+    - :required
+    GatewayId:
+    - :string
+    InstanceId:
+    - :string
+    NetworkInterfaceId:
+    - :string
+  :outputs: {}
+- :name: ReplaceRouteTableAssociation
+  :method: :replace_route_table_association
+  :inputs:
+    DryRun:
+    - :boolean
+    AssociationId:
+    - :string
+    - :required
+    RouteTableId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: ReportInstanceStatus
+  :method: :report_instance_status
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :list:
+      - :string
+    - :rename: instances
+    Status:
+    - :string
+    StartTime:
+    - :timestamp
+    EndTime:
+    - :timestamp
+    ReasonCode:
+    - :list:
+      - :string
+    - :rename: reasonCodes
+    Description:
+    - :string
+  :outputs: {}
+- :name: RequestSpotInstances
+  :method: :request_spot_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    SpotPrice:
+    - :string
+    - :required
+    InstanceCount:
+    - :integer
+    Type:
+    - :string
+    ValidFrom:
+    - :timestamp
+    ValidUntil:
+    - :timestamp
+    LaunchGroup:
+    - :string
+    AvailabilityZoneGroup:
+    - :string
+    LaunchSpecification:
+    - :structure:
+        ImageId:
+        - :string
+        KeyName:
+        - :string
+        UserData:
+        - :string
+        AddressingType:
+        - :string
+        InstanceType:
+        - :string
+        Placement:
+        - :structure:
+            AvailabilityZone:
+            - :string
+            GroupName:
+            - :string
+        KernelId:
+        - :string
+        RamdiskId:
+        - :string
+        BlockDeviceMapping:
+        - :list:
+          - :structure:
+              VirtualName:
+              - :string
+              - :rename: VirtualName
+              DeviceName:
+              - :string
+              - :rename: DeviceName
+              Ebs:
+              - :structure:
+                  SnapshotId:
+                  - :string
+                  VolumeSize:
+                  - :integer
+                  DeleteOnTermination:
+                  - :boolean
+                  VolumeType:
+                  - :string
+                  Iops:
+                  - :integer
+              NoDevice:
+              - :string
+        - :rename: blockDeviceMappings
+        Monitoring:
+        - :structure:
+            Enabled:
+            - :boolean
+            - :required
+        SubnetId:
+        - :string
+        NetworkInterface:
+        - :list:
+          - :structure:
+              NetworkInterfaceId:
+              - :string
+              DeviceIndex:
+              - :integer
+              SubnetId:
+              - :string
+              Description:
+              - :string
+              PrivateIpAddress:
+              - :string
+              SecurityGroupId:
+              - :list:
+                - :string
+              - :rename: groups
+              DeleteOnTermination:
+              - :boolean
+              PrivateIpAddresses:
+              - :list:
+                - :structure:
+                    PrivateIpAddress:
+                    - :string
+                    - :required
+                    Primary:
+                    - :boolean
+              - :rename: privateIpAddresses
+              SecondaryPrivateIpAddressCount:
+              - :integer
+              AssociatePublicIpAddress:
+              - :boolean
+        - :rename: networkInterfaces
+        IamInstanceProfile:
+        - :structure:
+            Arn:
+            - :string
+            Name:
+            - :string
+        EbsOptimized:
+        - :boolean
+        SecurityGroup:
+        - :list:
+          - :string
+        - :rename: SecurityGroups
+        SecurityGroupId:
+        - :list:
+          - :string
+        - :rename: SecurityGroupIds
+  :outputs:
+    :children:
+      spotInstanceRequestSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :spot_instance_request_set
+            :list: true
+            :children:
+              status:
+                :children:
+                  updateTime:
+                    :type: :time
+              validFrom:
+                :type: :time
+              validUntil:
+                :type: :time
+              launchSpecification:
+                :children:
+                  groupSet:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :group_set
+                        :list: true
+                  blockDeviceMapping:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :block_device_mapping
+                        :list: true
+                        :children:
+                          ebs:
+                            :children:
+                              volumeSize:
+                                :type: :integer
+                              deleteOnTermination:
+                                :type: :boolean
+                              iops:
+                                :type: :integer
+                  monitoringEnabled:
+                    :type: :boolean
+                  networkInterfaceSet:
+                    :ignore: true
+                    :children:
+                      item:
+                        :rename: :network_interface_set
+                        :list: true
+                        :children:
+                          deviceIndex:
+                            :type: :integer
+                          SecurityGroupId:
+                            :ignore: true
+                            :children:
+                              SecurityGroupId:
+                                :rename: :security_group_id
+                                :list: true
+                          deleteOnTermination:
+                            :type: :boolean
+                          privateIpAddressesSet:
+                            :ignore: true
+                            :children:
+                              item:
+                                :rename: :private_ip_addresses_set
+                                :list: true
+                                :children:
+                                  primary:
+                                    :type: :boolean
+                          secondaryPrivateIpAddressCount:
+                            :type: :integer
+                          associatePublicIpAddress:
+                            :type: :boolean
+                  ebsOptimized:
+                    :type: :boolean
+              createTime:
+                :type: :time
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+- :name: ResetImageAttribute
+  :method: :reset_image_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    ImageId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    - :required
+  :outputs: {}
+- :name: ResetInstanceAttribute
+  :method: :reset_instance_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    - :required
+  :outputs: {}
+- :name: ResetNetworkInterfaceAttribute
+  :method: :reset_network_interface_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    NetworkInterfaceId:
+    - :string
+    - :required
+    SourceDestCheck:
+    - :string
+  :outputs: {}
+- :name: ResetSnapshotAttribute
+  :method: :reset_snapshot_attribute
+  :inputs:
+    DryRun:
+    - :boolean
+    SnapshotId:
+    - :string
+    - :required
+    Attribute:
+    - :string
+    - :required
+  :outputs: {}
+- :name: RevokeSecurityGroupEgress
+  :method: :revoke_security_group_egress
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupId:
+    - :string
+    - :required
+    SourceSecurityGroupName:
+    - :string
+    SourceSecurityGroupOwnerId:
+    - :string
+    IpProtocol:
+    - :string
+    FromPort:
+    - :integer
+    ToPort:
+    - :integer
+    CidrIp:
+    - :string
+    IpPermissions:
+    - :list:
+      - :structure:
+          IpProtocol:
+          - :string
+          - :rename: IpProtocol
+          FromPort:
+          - :integer
+          - :rename: FromPort
+          ToPort:
+          - :integer
+          - :rename: ToPort
+          Groups:
+          - :list:
+            - :structure:
+                UserId:
+                - :string
+                - :rename: UserId
+                GroupName:
+                - :string
+                - :rename: GroupName
+                GroupId:
+                - :string
+                - :rename: GroupId
+          - :rename: UserIdGroupPairs
+          IpRanges:
+          - :list:
+            - :structure:
+                CidrIp:
+                - :string
+                - :rename: CidrIp
+          - :rename: IpRanges
+  :outputs: {}
+- :name: RevokeSecurityGroupIngress
+  :method: :revoke_security_group_ingress
+  :inputs:
+    DryRun:
+    - :boolean
+    GroupName:
+    - :string
+    GroupId:
+    - :string
+    SourceSecurityGroupName:
+    - :string
+    SourceSecurityGroupOwnerId:
+    - :string
+    IpProtocol:
+    - :string
+    FromPort:
+    - :integer
+    ToPort:
+    - :integer
+    CidrIp:
+    - :string
+    IpPermissions:
+    - :list:
+      - :structure:
+          IpProtocol:
+          - :string
+          - :rename: IpProtocol
+          FromPort:
+          - :integer
+          - :rename: FromPort
+          ToPort:
+          - :integer
+          - :rename: ToPort
+          Groups:
+          - :list:
+            - :structure:
+                UserId:
+                - :string
+                - :rename: UserId
+                GroupName:
+                - :string
+                - :rename: GroupName
+                GroupId:
+                - :string
+                - :rename: GroupId
+          - :rename: UserIdGroupPairs
+          IpRanges:
+          - :list:
+            - :structure:
+                CidrIp:
+                - :string
+                - :rename: CidrIp
+          - :rename: IpRanges
+  :outputs: {}
+- :name: RunInstances
+  :method: :run_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    ImageId:
+    - :string
+    - :required
+    MinCount:
+    - :integer
+    - :required
+    MaxCount:
+    - :integer
+    - :required
+    KeyName:
+    - :string
+    SecurityGroup:
+    - :list:
+      - :string
+    - :rename: SecurityGroups
+    SecurityGroupId:
+    - :list:
+      - :string
+    - :rename: SecurityGroupIds
+    UserData:
+    - :string
+    InstanceType:
+    - :string
+    Placement:
+    - :structure:
+        AvailabilityZone:
+        - :string
+        - :rename: AvailabilityZone
+        GroupName:
+        - :string
+        Tenancy:
+        - :string
+    KernelId:
+    - :string
+    RamdiskId:
+    - :string
+    BlockDeviceMapping:
+    - :list:
+      - :structure:
+          VirtualName:
+          - :string
+          - :rename: VirtualName
+          DeviceName:
+          - :string
+          - :rename: DeviceName
+          Ebs:
+          - :structure:
+              SnapshotId:
+              - :string
+              VolumeSize:
+              - :integer
+              DeleteOnTermination:
+              - :boolean
+              VolumeType:
+              - :string
+              Iops:
+              - :integer
+          NoDevice:
+          - :string
+    - :rename: BlockDeviceMappings
+    Monitoring:
+    - :structure:
+        Enabled:
+        - :boolean
+        - :required
+    SubnetId:
+    - :string
+    DisableApiTermination:
+    - :boolean
+    InstanceInitiatedShutdownBehavior:
+    - :string
+    License:
+    - :structure:
+        Pool:
+        - :string
+    PrivateIpAddress:
+    - :string
+    ClientToken:
+    - :string
+    AdditionalInfo:
+    - :string
+    NetworkInterface:
+    - :list:
+      - :structure:
+          NetworkInterfaceId:
+          - :string
+          DeviceIndex:
+          - :integer
+          SubnetId:
+          - :string
+          Description:
+          - :string
+          PrivateIpAddress:
+          - :string
+          SecurityGroupId:
+          - :list:
+            - :string
+          - :rename: groups
+          DeleteOnTermination:
+          - :boolean
+          PrivateIpAddresses:
+          - :list:
+            - :structure:
+                PrivateIpAddress:
+                - :string
+                - :required
+                Primary:
+                - :boolean
+          - :rename: privateIpAddresses
+          SecondaryPrivateIpAddressCount:
+          - :integer
+          AssociatePublicIpAddress:
+          - :boolean
+    - :rename: networkInterfaces
+    IamInstanceProfile:
+    - :structure:
+        Arn:
+        - :string
+        Name:
+        - :string
+    EbsOptimized:
+    - :boolean
+  :outputs:
+    :children:
+      groupSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :group_set
+            :list: true
+      instancesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :instances_set
+            :list: true
+            :children:
+              instanceState:
+                :children:
+                  code:
+                    :type: :integer
+              amiLaunchIndex:
+                :type: :integer
+              productCodes:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :product_codes
+                    :list: true
+              launchTime:
+                :type: :time
+              blockDeviceMapping:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :block_device_mapping
+                    :list: true
+                    :children:
+                      ebs:
+                        :children:
+                          attachTime:
+                            :type: :time
+                          deleteOnTermination:
+                            :type: :boolean
+              tagSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :tag_set
+                    :list: true
+              groupSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :group_set
+                    :list: true
+              sourceDestCheck:
+                :type: :boolean
+              networkInterfaceSet:
+                :ignore: true
+                :children:
+                  item:
+                    :rename: :network_interface_set
+                    :list: true
+                    :children:
+                      sourceDestCheck:
+                        :type: :boolean
+                      groupSet:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :group_set
+                            :list: true
+                      attachment:
+                        :children:
+                          deviceIndex:
+                            :type: :integer
+                          attachTime:
+                            :type: :time
+                          deleteOnTermination:
+                            :type: :boolean
+                      privateIpAddressesSet:
+                        :ignore: true
+                        :children:
+                          item:
+                            :rename: :private_ip_addresses_set
+                            :list: true
+                            :children:
+                              primary:
+                                :type: :boolean
+              ebsOptimized:
+                :type: :boolean
+- :name: StartInstances
+  :method: :start_instances
+  :inputs:
+    InstanceId:
+    - :list:
+      - :string
+    - :required
+    - :rename: InstanceIds
+    AdditionalInfo:
+    - :string
+    DryRun:
+    - :boolean
+  :outputs:
+    :children:
+      instancesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :instances_set
+            :list: true
+            :children:
+              currentState:
+                :children:
+                  code:
+                    :type: :integer
+              previousState:
+                :children:
+                  code:
+                    :type: :integer
+- :name: StopInstances
+  :method: :stop_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :list:
+      - :string
+    - :required
+    - :rename: InstanceIds
+    Force:
+    - :boolean
+  :outputs:
+    :children:
+      instancesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :instances_set
+            :list: true
+            :children:
+              currentState:
+                :children:
+                  code:
+                    :type: :integer
+              previousState:
+                :children:
+                  code:
+                    :type: :integer
+- :name: TerminateInstances
+  :method: :terminate_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :list:
+      - :string
+    - :required
+    - :rename: InstanceIds
+  :outputs:
+    :children:
+      instancesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :instances_set
+            :list: true
+            :children:
+              currentState:
+                :children:
+                  code:
+                    :type: :integer
+              previousState:
+                :children:
+                  code:
+                    :type: :integer
+- :name: UnassignPrivateIpAddresses
+  :method: :unassign_private_ip_addresses
+  :inputs:
+    NetworkInterfaceId:
+    - :string
+    - :required
+    PrivateIpAddress:
+    - :list:
+      - :string
+    - :required
+    - :rename: privateIpAddresses
+  :outputs: {}
+- :name: UnmonitorInstances
+  :method: :unmonitor_instances
+  :inputs:
+    DryRun:
+    - :boolean
+    InstanceId:
+    - :list:
+      - :string
+    - :required
+    - :rename: InstanceIds
+  :outputs:
+    :children:
+      instancesSet:
+        :ignore: true
+        :children:
+          item:
+            :rename: :instances_set
+            :list: true

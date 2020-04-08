@@ -1,0 +1,60 @@
+version: '1.0.{build}'
+
+environment:
+  matrix:
+    - CHILDPROCESS_POSIX_SPAWN: true
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 193-x64
+    - CHILDPROCESS_POSIX_SPAWN: false
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 193-x64
+    - CHILDPROCESS_POSIX_SPAWN: true
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 200-x64
+    - CHILDPROCESS_POSIX_SPAWN: false
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 200-x64
+    - CHILDPROCESS_POSIX_SPAWN: true
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 21-x64
+    - CHILDPROCESS_POSIX_SPAWN: false
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 21-x64
+    - CHILDPROCESS_POSIX_SPAWN: true
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 22-x64
+    - CHILDPROCESS_POSIX_SPAWN: false
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 22-x64
+    - CHILDPROCESS_POSIX_SPAWN: true
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 23-x64
+    - CHILDPROCESS_POSIX_SPAWN: false
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 23-x64
+    - CHILDPROCESS_POSIX_SPAWN: true
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 24-x64
+    - CHILDPROCESS_POSIX_SPAWN: false
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 24-x64
+    - CHILDPROCESS_POSIX_SPAWN: true
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 25-x64
+    - CHILDPROCESS_POSIX_SPAWN: false
+      CHILDPROCESS_UNSET: should-be-unset
+      RUBY_VERSION: 25-x64
+
+install:
+  - set PATH=C:\Ruby%RUBY_VERSION%\bin;%PATH%
+  - bundle install
+
+build: off
+
+before_test:
+  - ruby -v
+  - gem -v
+  - bundle -v
+
+test_script:
+  - bundle exec rake

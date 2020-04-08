@@ -1,0 +1,502 @@
+:plugin: kv
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Kv filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This filter helps automatically parse messages (or specific event fields)
+which are of the `foo=bar` variety.
+
+For example, if you have a log message which contains `ip=1.2.3.4
+error=REFUSED`, you can parse those automatically by configuring:
+[source,ruby]
+    filter {
+      kv { }
+    }
+
+The above will result in a message of `ip=1.2.3.4 error=REFUSED` having
+the fields:
+
+* `ip: 1.2.3.4`
+* `error: REFUSED`
+
+This is great for postfix, iptables, and other types of logs that
+tend towards `key=value` syntax.
+
+You can configure any arbitrary strings to split your data on,
+in case your data is not structured using `=` signs and whitespace.
+For example, this filter can also be used to parse query parameters like
+`foo=bar&baz=fizz` by setting the `field_split` parameter to `&`.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Kv Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-allow_duplicate_values>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-default_keys>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-exclude_keys>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-field_split>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-field_split_pattern>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-include_brackets>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-include_keys>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-prefix>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-recursive>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-remove_char_key>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-remove_char_value>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-source>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-tag_on_failure>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-tag_on_timeout>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-timeout_millis>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-transform_key>> |<<string,string>>, one of `["lowercase", "uppercase", "capitalize"]`|No
+| <<plugins-{type}s-{plugin}-transform_value>> |<<string,string>>, one of `["lowercase", "uppercase", "capitalize"]`|No
+| <<plugins-{type}s-{plugin}-trim_key>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-trim_value>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-value_split>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-value_split_pattern>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-whitespace>> |<<string,string>>, one of `["strict", "lenient"]`|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-allow_duplicate_values"]
+===== `allow_duplicate_values` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+A bool option for removing duplicate key/value pairs. When set to false, only
+one unique key/value pair will be preserved.
+
+For example, consider a source like `from=me from=me`. `[from]` will map to
+an Array with two elements: `["me", "me"]`. To only keep unique key/value pairs,
+you could use this configuration:
+[source,ruby]
+    filter {
+      kv {
+        allow_duplicate_values => false
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-default_keys"]
+===== `default_keys` 
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+A hash specifying the default keys and their values which should be added to the event
+in case these keys do not exist in the source field being parsed.
+[source,ruby]
+    filter {
+      kv {
+        default_keys => [ "from", "logstash@example.com",
+                         "to", "default@dev.null" ]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-exclude_keys"]
+===== `exclude_keys` 
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+An array specifying the parsed keys which should not be added to the event.
+By default no keys will be excluded.
+
+For example, consider a source like `Hey, from=<abc>, to=def foo=bar`.
+To exclude `from` and `to`, but retain the `foo` key, you could use this configuration:
+[source,ruby]
+    filter {
+      kv {
+        exclude_keys => [ "from", "to" ]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-field_split"]
+===== `field_split` 
+
+  * Value type is <<string,string>>
+  * Default value is `" "`
+
+A string of characters to use as single-character field delimiters for parsing out key-value pairs.
+
+These characters form a regex character class and thus you must escape special regex
+characters like `[` or `]` using `\`.
+
+*Example with URL Query Strings*
+
+For example, to split out the args from a url query string such as
+`?pin=12345~0&d=123&e=foo@bar.com&oq=bobo&ss=12345`:
+[source,ruby]
+    filter {
+      kv {
+        field_split => "&?"
+      }
+    }
+
+The above splits on both `&` and `?` characters, giving you the following
+fields:
+
+* `pin: 12345~0`
+* `d: 123`
+* `e: foo@bar.com`
+* `oq: bobo`
+* `ss: 12345`
+
+[id="plugins-{type}s-{plugin}-field_split_pattern"]
+===== `field_split_pattern`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+A regex expression to use as field delimiter for parsing out key-value pairs.
+Useful to define multi-character field delimiters.
+Setting the `field_split_pattern` options will take precedence over the `field_split` option.
+
+Note that you should avoid using captured groups in your regex and you should be
+cautious with lookaheads or lookbehinds and positional anchors.
+
+For example, to split fields on a repetition of one or more colons
+`k1=v1:k2=v2::k3=v3:::k4=v4`:
+[source,ruby]
+    filter { kv { field_split_pattern => ":+" } }
+
+To split fields on a regex character that need escaping like the plus sign
+`k1=v1++k2=v2++k3=v3++k4=v4`:
+[source,ruby]
+    filter { kv { field_split_pattern => "\\+\\+" } }
+
+[id="plugins-{type}s-{plugin}-include_brackets"]
+===== `include_brackets` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+A boolean specifying whether to treat square brackets, angle brackets,
+and parentheses as value "wrappers" that should be removed from the value.
+[source,ruby]
+    filter {
+      kv {
+        include_brackets => true
+      }
+    }
+
+For example, the result of this line:
+`bracketsone=(hello world) bracketstwo=[hello world] bracketsthree=<hello world>`
+
+will be:
+
+* bracketsone: hello world
+* bracketstwo: hello world
+* bracketsthree: hello world
+
+instead of:
+
+* bracketsone: (hello
+* bracketstwo: [hello
+* bracketsthree: <hello
+
+
+[id="plugins-{type}s-{plugin}-include_keys"]
+===== `include_keys` 
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+An array specifying the parsed keys which should be added to the event.
+By default all keys will be added.
+
+For example, consider a source like `Hey, from=<abc>, to=def foo=bar`.
+To include `from` and `to`, but exclude the `foo` key, you could use this configuration:
+[source,ruby]
+    filter {
+      kv {
+        include_keys => [ "from", "to" ]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-prefix"]
+===== `prefix` 
+
+  * Value type is <<string,string>>
+  * Default value is `""`
+
+A string to prepend to all of the extracted keys.
+
+For example, to prepend arg_ to all keys:
+[source,ruby]
+    filter { kv { prefix => "arg_" } }
+
+[id="plugins-{type}s-{plugin}-recursive"]
+===== `recursive` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+A boolean specifying whether to drill down into values
+and recursively get more key-value pairs from it.
+The extra key-value pairs will be stored as subkeys of the root key.
+
+Default is not to recursive values.
+[source,ruby]
+    filter {
+      kv {
+        recursive => "true"
+      }
+    }
+
+
+[id="plugins-{type}s-{plugin}-remove_char_key"]
+===== `remove_char_key` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+A string of characters to remove from the key.
+
+These characters form a regex character class and thus you must escape special regex
+characters like `[` or `]` using `\`.
+
+Contrary to trim option, all characters are removed from the key, whatever their position.
+
+For example, to remove `<` `>` `[` `]` and `,` characters from keys:
+[source,ruby]
+    filter {
+      kv {
+        remove_char_key => "<>\[\],"
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-remove_char_value"]
+===== `remove_char_value` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+A string of characters to remove from the value.
+
+These characters form a regex character class and thus you must escape special regex
+characters like `[` or `]` using `\`.
+
+Contrary to trim option, all characters are removed from the value, whatever their position.
+
+For example, to remove `<`, `>`, `[`, `]` and `,` characters from values:
+[source,ruby]
+    filter {
+      kv {
+        remove_char_value => "<>\[\],"
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-source"]
+===== `source` 
+
+  * Value type is <<string,string>>
+  * Default value is `"message"`
+
+The field to perform `key=value` searching on
+
+For example, to process the `not_the_message` field:
+[source,ruby]
+    filter { kv { source => "not_the_message" } }
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The name of the container to put all of the key-value pairs into.
+
+If this setting is omitted, fields will be written to the root of the
+event, as individual fields.
+
+For example, to place all keys into the event field kv:
+[source,ruby]
+    filter { kv { target => "kv" } }
+
+[id="plugins-{type}s-{plugin}-tag_on_failure"]
+===== `tag_on_failure`
+
+  * Value type is <<string,string>>
+  * The default value for this setting is `_kv_filter_error`.
+
+When a kv operation causes a runtime exception to be thrown within the plugin,
+the operation is safely aborted without crashing the plugin, and the event is
+tagged with the provided value.
+
+[id="plugins-{type}s-{plugin}-tag_on_timeout"]
+===== `tag_on_timeout`
+
+  * Value type is <<string,string>>
+  * The default value for this setting is `_kv_filter_timeout`.
+
+When timeouts are enabled and a kv operation is aborted, the event is tagged
+with the provided value (see: <<plugins-{type}s-{plugin}-timeout_millis>>).
+
+[id="plugins-{type}s-{plugin}-timeout_millis"]
+===== `timeout_millis`
+
+  * Value type is <<number,number>>
+  * The default value for this setting is 30000 (30 seconds).
+  * Set to zero (`0`) to disable timeouts
+
+Timeouts provide a safeguard against inputs that are pathological against the
+regular expressions that are used to extract key/value pairs. When parsing an
+event exceeds this threshold the operation is aborted and the event is tagged
+in order to prevent the operation from blocking the pipeline
+(see: <<plugins-{type}s-{plugin}-tag_on_timeout>>).
+
+[id="plugins-{type}s-{plugin}-transform_key"]
+===== `transform_key` 
+
+  * Value can be any of: `lowercase`, `uppercase`, `capitalize`
+  * There is no default value for this setting.
+
+Transform keys to lower case, upper case or capitals.
+
+For example, to lowercase all keys:
+[source,ruby]
+    filter {
+      kv {
+        transform_key => "lowercase"
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-transform_value"]
+===== `transform_value` 
+
+  * Value can be any of: `lowercase`, `uppercase`, `capitalize`
+  * There is no default value for this setting.
+
+Transform values to lower case, upper case or capitals.
+
+For example, to capitalize all values:
+[source,ruby]
+    filter {
+      kv {
+        transform_value => "capitalize"
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-trim_key"]
+===== `trim_key` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+A string of characters to trim from the key. This is useful if your
+keys are wrapped in brackets or start with space.
+
+These characters form a regex character class and thus you must escape special regex
+characters like `[` or `]` using `\`.
+
+Only leading and trailing characters are trimed from the key.
+
+For example, to trim `<` `>` `[` `]` and `,` characters from keys:
+[source,ruby]
+    filter {
+      kv {
+        trim_key => "<>\[\],"
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-trim_value"]
+===== `trim_value` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Constants used for transform check
+A string of characters to trim from the value. This is useful if your
+values are wrapped in brackets or are terminated with commas (like postfix
+logs).
+
+These characters form a regex character class and thus you must escape special regex
+characters like `[` or `]` using `\`.
+
+Only leading and trailing characters are trimed from the value.
+
+For example, to trim `<`, `>`, `[`, `]` and `,` characters from values:
+[source,ruby]
+    filter {
+      kv {
+        trim_value => "<>\[\],"
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-value_split"]
+===== `value_split` 
+
+  * Value type is <<string,string>>
+  * Default value is `"="`
+
+A non-empty string of characters to use as single-character value delimiters for parsing out key-value pairs.
+
+These characters form a regex character class and thus you must escape special regex
+characters like `[` or `]` using `\`.
+
+For example, to identify key-values such as
+`key1:value1 key2:value2`:
+[source,ruby]
+    filter { kv { value_split => ":" } }
+
+
+[id="plugins-{type}s-{plugin}-value_split_pattern"]
+===== `value_split_pattern`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+A regex expression to use as value delimiter for parsing out key-value pairs.
+Useful to define multi-character value delimiters.
+Setting the `value_split_pattern` options will take precedence over the `value_split option`.
+
+Note that you should avoid using captured groups in your regex and you should be
+cautious with lookaheads or lookbehinds and positional anchors.
+
+See `field_split_pattern` for examples.
+
+[id="plugins-{type}s-{plugin}-whitespace"]
+===== `whitespace`
+
+  * Value can be any of: `lenient`, `strict`
+  * Default value is `lenient`
+
+An option specifying whether to be _lenient_ or _strict_ with the acceptance of unnecessary
+whitespace surrounding the configured value-split sequence.
+
+By default the plugin is run in `lenient` mode, which ignores spaces that occur before or
+after the value-splitter. While this allows the plugin to make reasonable guesses with most
+input, in some situations it may be too lenient.
+
+You may want to enable `whitespace => strict` mode if you have control of the input data and
+can guarantee that no extra spaces are added surrounding the pattern you have defined for
+splitting values. Doing so will ensure that a _field-splitter_ sequence immediately following
+a _value-splitter_ will be interpreted as an empty field.
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

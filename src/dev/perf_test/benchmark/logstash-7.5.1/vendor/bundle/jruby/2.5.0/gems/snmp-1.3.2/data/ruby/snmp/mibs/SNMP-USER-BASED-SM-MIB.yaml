@@ -1,0 +1,36 @@
+--- 
+usmNoAuthProtocol: 1.3.6.1.6.3.10.1.1.1
+usmHMACMD5AuthProtocol: 1.3.6.1.6.3.10.1.1.2
+usmHMACSHAAuthProtocol: 1.3.6.1.6.3.10.1.1.3
+usmNoPrivProtocol: 1.3.6.1.6.3.10.1.2.1
+usmDESPrivProtocol: 1.3.6.1.6.3.10.1.2.2
+snmpUsmMIB: 1.3.6.1.6.3.15
+usmMIBObjects: 1.3.6.1.6.3.15.1
+usmStats: 1.3.6.1.6.3.15.1.1
+usmStatsUnsupportedSecLevels: 1.3.6.1.6.3.15.1.1.1
+usmStatsNotInTimeWindows: 1.3.6.1.6.3.15.1.1.2
+usmStatsUnknownUserNames: 1.3.6.1.6.3.15.1.1.3
+usmStatsUnknownEngineIDs: 1.3.6.1.6.3.15.1.1.4
+usmStatsWrongDigests: 1.3.6.1.6.3.15.1.1.5
+usmStatsDecryptionErrors: 1.3.6.1.6.3.15.1.1.6
+usmUser: 1.3.6.1.6.3.15.1.2
+usmUserSpinLock: 1.3.6.1.6.3.15.1.2.1
+usmUserTable: 1.3.6.1.6.3.15.1.2.2
+usmUserEntry: 1.3.6.1.6.3.15.1.2.2.1
+usmUserEngineID: 1.3.6.1.6.3.15.1.2.2.1.1
+usmUserName: 1.3.6.1.6.3.15.1.2.2.1.2
+usmUserSecurityName: 1.3.6.1.6.3.15.1.2.2.1.3
+usmUserCloneFrom: 1.3.6.1.6.3.15.1.2.2.1.4
+usmUserAuthProtocol: 1.3.6.1.6.3.15.1.2.2.1.5
+usmUserAuthKeyChange: 1.3.6.1.6.3.15.1.2.2.1.6
+usmUserOwnAuthKeyChange: 1.3.6.1.6.3.15.1.2.2.1.7
+usmUserPrivProtocol: 1.3.6.1.6.3.15.1.2.2.1.8
+usmUserPrivKeyChange: 1.3.6.1.6.3.15.1.2.2.1.9
+usmUserOwnPrivKeyChange: 1.3.6.1.6.3.15.1.2.2.1.10
+usmUserPublic: 1.3.6.1.6.3.15.1.2.2.1.11
+usmUserStorageType: 1.3.6.1.6.3.15.1.2.2.1.12
+usmUserStatus: 1.3.6.1.6.3.15.1.2.2.1.13
+usmMIBConformance: 1.3.6.1.6.3.15.2
+usmMIBCompliances: 1.3.6.1.6.3.15.2.1
+usmMIBGroups: 1.3.6.1.6.3.15.2.2
+

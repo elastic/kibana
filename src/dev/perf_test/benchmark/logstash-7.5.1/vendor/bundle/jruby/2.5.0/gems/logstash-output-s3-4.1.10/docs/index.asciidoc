@@ -1,0 +1,398 @@
+:plugin: s3
+:type: output
+:default_codec: line
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== S3 output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This plugin batches and uploads logstash events into Amazon Simple Storage Service (Amazon S3).
+
+S3 outputs create temporary files into the OS' temporary directory. 
+You can specify where to save them using the `temporary_directory` option.
+
+IMPORTANT: For configurations containing multiple s3 outputs with the restore
+option enabled, each output should define its own 'temporary_directory'.
+
+===== Requirements
+
+* Amazon S3 Bucket and S3 Access Permissions (Typically access_key_id and secret_access_key)
+* S3 PutObject permission
+
+===== S3 output file
+ 
+[source,txt]
+-----
+`ls.s3.312bc026-2f5d-49bc-ae9f-5940cf4ad9a6.2013-04-18T10.00.tag_hello.part0.txt`
+-----
+
+|=======
+| ls.s3 | indicates logstash plugin s3 |
+| 312bc026-2f5d-49bc-ae9f-5940cf4ad9a6 | a new, random uuid per file. |
+| 2013-04-18T10.00 | represents the time whenever you specify time_file. |
+| tag_hello | indicates the event's tag. |
+| part0 | If you indicate size_file, it will generate more parts if your file.size > size_file. 
+When a file is full, it gets pushed to the bucket and then deleted from the temporary directory. 
+If a file is empty, it is simply deleted.  Empty files will not be pushed. |
+|=======
+
+===== Crash Recovery
+
+This plugin will recover and upload temporary log files after crash/abnormal termination when using `restore` set to true
+
+===== Usage
+This is an example of logstash config:
+[source,ruby]
+output {
+   s3{
+     access_key_id => "crazy_key"             (optional)
+     secret_access_key => "monkey_access_key" (optional)
+     region => "eu-west-1"                    (optional, default = "us-east-1")
+     bucket => "your_bucket"                  (required)
+     size_file => 2048                        (optional) - Bytes
+     time_file => 5                           (optional) - Minutes
+     codec => "plain"                         (optional)
+     canned_acl => "private"                  (optional. Options are "private", "public-read", "public-read-write", "authenticated-read", "aws-exec-read", "bucket-owner-read", "bucket-owner-full-control", "log-delivery-write". Defaults to "private" )
+   }
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== S3 Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-access_key_id>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-additional_settings>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-aws_credentials_file>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-bucket>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-canned_acl>> |<<string,string>>, one of `["private", "public-read", "public-read-write", "authenticated-read", "aws-exec-read", "bucket-owner-read", "bucket-owner-full-control", "log-delivery-write"]`|No
+| <<plugins-{type}s-{plugin}-encoding>> |<<string,string>>, one of `["none", "gzip"]`|No
+| <<plugins-{type}s-{plugin}-endpoint>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-prefix>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-proxy_uri>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-region>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-restore>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-role_arn>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-role_session_name>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-rotation_strategy>> |<<string,string>>, one of `["size_and_time", "size", "time"]`|No
+| <<plugins-{type}s-{plugin}-secret_access_key>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-server_side_encryption>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-server_side_encryption_algorithm>> |<<string,string>>, one of `["AES256", "aws:kms"]`|No
+| <<plugins-{type}s-{plugin}-session_token>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-signature_version>> |<<string,string>>, one of `["v2", "v4"]`|No
+| <<plugins-{type}s-{plugin}-size_file>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-ssekms_key_id>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-storage_class>> |<<string,string>>, one of `["STANDARD", "REDUCED_REDUNDANCY", "STANDARD_IA"]`|No
+| <<plugins-{type}s-{plugin}-temporary_directory>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-time_file>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-upload_multipart_threshold>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-upload_queue_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-upload_workers_count>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-validate_credentials_on_root_bucket>> |<<boolean,boolean>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-access_key_id"]
+===== `access_key_id` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+This plugin uses the AWS SDK and supports several ways to get credentials, which will be tried in this order:
+
+. Static configuration, using `access_key_id` and `secret_access_key` params in logstash plugin config
+. External credentials file specified by `aws_credentials_file`
+. Environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+. Environment variables `AMAZON_ACCESS_KEY_ID` and `AMAZON_SECRET_ACCESS_KEY`
+. IAM Instance Profile (available when running inside EC2)
+
+[id="plugins-{type}s-{plugin}-additional_settings"]
+===== `additional_settings`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+Key-value pairs of settings and corresponding values used to parametrize
+the connection to S3. See full list in https://docs.aws.amazon.com/sdkforruby/api/Aws/S3/Client.html[the AWS SDK documentation]. Example:
+
+[source,ruby]
+    output {
+      s3 {
+        access_key_id => "1234",
+        secret_access_key => "secret",
+        region => "eu-west-1",
+        bucket => "logstash-test",
+        additional_settings => {
+          "force_path_style" => true,
+          "follow_redirects" => false
+        }
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-aws_credentials_file"]
+===== `aws_credentials_file` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Path to YAML file containing a hash of AWS credentials.
+This file will only be loaded if `access_key_id` and
+`secret_access_key` aren't set. The contents of the
+file should look like this:
+
+[source,ruby]
+----------------------------------
+    :access_key_id: "12345"
+    :secret_access_key: "54321"
+----------------------------------
+
+
+[id="plugins-{type}s-{plugin}-bucket"]
+===== `bucket` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+S3 bucket
+
+[id="plugins-{type}s-{plugin}-canned_acl"]
+===== `canned_acl` 
+
+  * Value can be any of: `private`, `public-read`, `public-read-write`, `authenticated-read`, `aws-exec-read`, `bucket-owner-read`, `bucket-owner-full-control`, `log-delivery-write`
+  * Default value is `"private"`
+
+The S3 canned ACL to use when putting the file. Defaults to "private".
+
+[id="plugins-{type}s-{plugin}-encoding"]
+===== `encoding` 
+
+  * Value can be any of: `none`, `gzip`
+  * Default value is `"none"`
+
+Specify the content encoding. Supports ("gzip"). Defaults to "none"
+
+[id="plugins-{type}s-{plugin}-endpoint"]
+===== `endpoint`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The endpoint to connect to. By default it is constructed using the value of `region`.
+This is useful when connecting to S3 compatible services, but beware that these aren't
+guaranteed to work correctly with the AWS SDK.
+The endpoint should be an HTTP or HTTPS URL, e.g. https://example.com
+
+[id="plugins-{type}s-{plugin}-prefix"]
+===== `prefix` 
+
+  * Value type is <<string,string>>
+  * Default value is `""`
+
+Specify a prefix to the uploaded filename, this can simulate directories on S3.  Prefix does not require leading slash.
+This option supports logstash interpolation: https://www.elastic.co/guide/en/logstash/current/event-dependent-configuration.html#sprintf;
+for example, files can be prefixed with the event date using `prefix = "%{+YYYY}/%{+MM}/%{+dd}"`.
+Be warned this can create a lot of temporary local files.
+
+[id="plugins-{type}s-{plugin}-proxy_uri"]
+===== `proxy_uri` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+URI to proxy server if required
+
+[id="plugins-{type}s-{plugin}-region"]
+===== `region` 
+
+  * Value type is <<string,string>>
+  * Default value is `"us-east-1"`
+
+The AWS Region
+
+[id="plugins-{type}s-{plugin}-restore"]
+===== `restore` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Used to enable recovery after crash/abnormal termination.
+Temporary log files will be recovered and uploaded.
+
+[id="plugins-{type}s-{plugin}-role_arn"]
+===== `role_arn`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The AWS IAM Role to assume, if any.
+This is used to generate temporary credentials, typically for cross-account access.
+See the https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html[AssumeRole API documentation] for more information.
+
+[id="plugins-{type}s-{plugin}-role_session_name"]
+===== `role_session_name`
+
+  * Value type is <<string,string>>
+  * Default value is `"logstash"`
+
+Session name to use when assuming an IAM role.
+
+[id="plugins-{type}s-{plugin}-rotation_strategy"]
+===== `rotation_strategy` 
+
+  * Value can be any of: `size_and_time`, `size`, `time`
+  * Default value is `"size_and_time"`
+
+Define the strategy to use to decide when we need to rotate the file and push it to S3,
+The default strategy is to check for both size and time, the first one to match will rotate the file.
+
+[id="plugins-{type}s-{plugin}-secret_access_key"]
+===== `secret_access_key` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The AWS Secret Access Key
+
+[id="plugins-{type}s-{plugin}-server_side_encryption"]
+===== `server_side_encryption` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Specifies whether or not to use S3's server side encryption. Defaults to no encryption.
+
+[id="plugins-{type}s-{plugin}-server_side_encryption_algorithm"]
+===== `server_side_encryption_algorithm` 
+
+  * Value can be any of: `AES256`, `aws:kms`
+  * Default value is `"AES256"`
+
+Specifies what type of encryption to use when SSE is enabled.
+
+[id="plugins-{type}s-{plugin}-session_token"]
+===== `session_token` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The AWS Session token for temporary credential
+
+[id="plugins-{type}s-{plugin}-signature_version"]
+===== `signature_version` 
+
+  * Value can be any of: `v2`, `v4`
+  * There is no default value for this setting.
+
+The version of the S3 signature hash to use. Normally uses the internal client default, can be explicitly
+specified here
+
+[id="plugins-{type}s-{plugin}-size_file"]
+===== `size_file` 
+
+  * Value type is <<number,number>>
+  * Default value is `5242880`
+
+Set the size of file in bytes, this means that files on bucket when have dimension > file_size, they are stored in two or more file.
+If you have tags then it will generate a specific size file for every tags
+
+[id="plugins-{type}s-{plugin}-ssekms_key_id"]
+===== `ssekms_key_id` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The key to use when specified along with server_side_encryption => aws:kms.
+If server_side_encryption => aws:kms is set but this is not default KMS key is used.
+http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingKMSEncryption.html
+
+[id="plugins-{type}s-{plugin}-storage_class"]
+===== `storage_class` 
+
+  * Value can be any of: `STANDARD`, `REDUCED_REDUNDANCY`, `STANDARD_IA`
+  * Default value is `"STANDARD"`
+
+Specifies what S3 storage class to use when uploading the file.
+More information about the different storage classes can be found:
+http://docs.aws.amazon.com/AmazonS3/latest/dev/storage-class-intro.html
+Defaults to STANDARD.
+
+[id="plugins-{type}s-{plugin}-temporary_directory"]
+===== `temporary_directory` 
+
+  * Value type is <<string,string>>
+  * Default value is `"/tmp/logstash"`
+
+Set the directory where logstash will store the tmp files before sending it to S3
+default to the current OS temporary directory in linux /tmp/logstash
+
+[id="plugins-{type}s-{plugin}-time_file"]
+===== `time_file` 
+
+  * Value type is <<number,number>>
+  * Default value is `15`
+
+Set the time, in MINUTES, to close the current sub_time_section of bucket.
+If you define file_size you have a number of files in consideration of the section and the current tag.
+0 stay all time on listener, beware if you specific 0 and size_file 0, because you will not put the file on bucket,
+for now the only thing this plugin can do is to put the file when logstash restart.
+
+[id="plugins-{type}s-{plugin}-upload_multipart_threshold"]
+===== `upload_multipart_threshold`
+
+  * Value type is <<number,number>>
+  * Default value is `15728640`
+
+Files larger than this number are uploaded using the S3 multipart APIs
+
+[id="plugins-{type}s-{plugin}-upload_queue_size"]
+===== `upload_queue_size` 
+
+  * Value type is <<number,number>>
+  * Default value is `4`
+
+Number of items we can keep in the local queue before uploading them
+
+[id="plugins-{type}s-{plugin}-upload_workers_count"]
+===== `upload_workers_count` 
+
+  * Value type is <<number,number>>
+  * Default value is `4`
+
+Specify how many workers to use to upload the files to S3
+
+[id="plugins-{type}s-{plugin}-validate_credentials_on_root_bucket"]
+===== `validate_credentials_on_root_bucket` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+The common use case is to define permission on the root bucket and give Logstash full access to write its logs.
+In some circumstances you need finer grained permission on subfolder, this allow you to disable the check at startup.
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

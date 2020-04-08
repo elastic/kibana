@@ -1,0 +1,77 @@
+= New Features
+
+* Dataset#with_* methods have been added as equivalents for a
+  few Dataset#*= methods, but instead of modifying the receiver, they
+  return a modified copy, similar to the dataset query methods.
+  Specific methods added:
+
+  with_extend :: Extends clone with given modules
+  with_row_proc :: Modifies row_proc in clone
+  with_quote_identifiers :: Modifies quote_identifiers setting in
+                            clone
+  with_identifier_input_method :: Modifies identifier_input_method
+                                  setting in clone
+  with_identifier_output_method :: Modifies identifier_output_method
+                                   setting in clone
+
+  Similarly, on Microsoft SQL Server, a with_mssql_unicode_strings
+  method has been added, which returns a clone with the
+  mssql_unicode_strings setting modified.
+
+* On DB2, Sequel now supports an :offset_strategy Database option,
+  which can be set to :limit_offset for "LIMIT X OFFSET Y" or
+  :offset_fetch for "OFFSET Y FETCH FIRST X ROWS ONLY".  Depending
+  on what version of DB2 is used and how DB2 is configured, it's
+  possible one of these strategies will work.  For backwards
+  compatibility, the current default is still to emulate offsets
+  using the ROW_NUMBER window function.
+
+* In the json_serializer plugin, you can now use an
+  Sequel::SQL::AliasedExpression instance as an association name
+  value, which allows you to rename the association in the resulting
+  JSON:
+
+    album.to_json(:include=>{Sequel.as(:album, :s)=>{:only=>:name}})
+    # => '{"id":1,"name":"RF","artist_id":2,"s":{"name":"YJM"}}'
+
+= Other Improvements
+
+* The association dataset methods now correctly handle cases where
+  one of the keys is nil.  Previously, they would incorrectly use an
+  IS NULL predicate in such cases.  Now, they use a false predicate.
+
+* The hook_class_methods plugin handling of commit hooks has been
+  fixed.  The implementation of commit hooks (but not rollback
+  hooks) was broken in hook_class_methods starting in 4.39.0 due to
+  changes to avoid keeping references to all model instances until
+  the transaction was committed or rolled back.
+
+* Using the Fixnum schema method no longer raises a warning on ruby
+  2.4+, as it now uses the Integer class instead of the Fixnum
+  constant.
+
+* The ado adapter has been greatly improved.  It now avoids memory
+  leaks, has much better type handling, and passes almost all specs.
+  Note that the ado adapter's behavior can change depending on the
+  version of ruby in use, try to use ruby 2.2+ for best compatibility.
+
+* Dataset#graph no longer mutates the receiver.  Previously, it set
+  an empty hash as the :graph option in the receiver, which was
+  unintentional and not desired.
+
+* Pure java exceptions that don't support the message= method are now
+  handled properly when reraising the exception on connection errors
+  in the jdbc adapter.
+
+= Backwards Compatibility
+
+* Support for using the Bignum constant as a generic type has been
+  removed, as was preannounced in the 4.36.0 release notes.  Users
+  should switch to using the :Bignum constant if they haven't already.
+
+* Users of the ado adapter may need to update their code now that the
+  ado adapter correctly handles most types.
+
+* The spec_*_w rake tasks in the repository now require ruby 2.4+ and
+  use the warning library for filtering warnings, instead of trying to
+  filter warnings with egrep.

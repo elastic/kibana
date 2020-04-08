@@ -1,0 +1,404 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2012-11-05'
+:operations:
+- :name: AddPermission
+  :method: :add_permission
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    Label:
+    - :string
+    - :required
+    AWSAccountId:
+    - :list:
+      - :string
+    - :required
+    - :rename: AWSAccountIds
+    ActionName:
+    - :list:
+      - :string
+    - :required
+    - :rename: Actions
+  :outputs:
+    :children:
+      AddPermissionResult:
+        :ignore: true
+- :name: ChangeMessageVisibility
+  :method: :change_message_visibility
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    ReceiptHandle:
+    - :string
+    - :required
+    VisibilityTimeout:
+    - :integer
+    - :required
+  :outputs:
+    :children:
+      ChangeMessageVisibilityResult:
+        :ignore: true
+- :name: ChangeMessageVisibilityBatch
+  :method: :change_message_visibility_batch
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    ChangeMessageVisibilityBatchRequestEntry:
+    - :list:
+      - :structure:
+          Id:
+          - :string
+          - :required
+          ReceiptHandle:
+          - :string
+          - :required
+          VisibilityTimeout:
+          - :integer
+    - :required
+    - :rename: Entries
+  :outputs:
+    :children:
+      ChangeMessageVisibilityBatchResult:
+        :ignore: true
+        :children:
+          ChangeMessageVisibilityBatchResultEntry:
+            :list: true
+            :rename: :successful
+          BatchResultErrorEntry:
+            :list: true
+            :rename: :failed
+            :children:
+              SenderFault:
+                :type: :boolean
+- :name: CreateQueue
+  :method: :create_queue
+  :inputs:
+    QueueName:
+    - :string
+    - :required
+    Attribute:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+        :key_param: Name
+        :value_param: Value
+        :flattened: true
+    - :rename: attributes
+  :outputs:
+    :children:
+      CreateQueueResult:
+        :ignore: true
+- :name: DeleteMessage
+  :method: :delete_message
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    ReceiptHandle:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteMessageResult:
+        :ignore: true
+- :name: DeleteMessageBatch
+  :method: :delete_message_batch
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    DeleteMessageBatchRequestEntry:
+    - :list:
+      - :structure:
+          Id:
+          - :string
+          - :required
+          ReceiptHandle:
+          - :string
+          - :required
+    - :required
+    - :rename: Entries
+  :outputs:
+    :children:
+      DeleteMessageBatchResult:
+        :ignore: true
+        :children:
+          DeleteMessageBatchResultEntry:
+            :list: true
+            :rename: :successful
+          BatchResultErrorEntry:
+            :list: true
+            :rename: :failed
+            :children:
+              SenderFault:
+                :type: :boolean
+- :name: DeleteQueue
+  :method: :delete_queue
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteQueueResult:
+        :ignore: true
+- :name: GetQueueAttributes
+  :method: :get_queue_attributes
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    AttributeName:
+    - :list:
+      - :string
+    - :rename: attributeNames
+  :outputs:
+    :children:
+      GetQueueAttributesResult:
+        :ignore: true
+        :children:
+          Attribute:
+            :rename: :attributes
+            :map:
+            - Name
+            - Value
+- :name: GetQueueUrl
+  :method: :get_queue_url
+  :inputs:
+    QueueName:
+    - :string
+    - :required
+    QueueOwnerAWSAccountId:
+    - :string
+  :outputs:
+    :children:
+      GetQueueUrlResult:
+        :ignore: true
+- :name: ListDeadLetterSourceQueues
+  :method: :list_dead_letter_source_queues
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      ListDeadLetterSourceQueuesResult:
+        :ignore: true
+        :children:
+          QueueUrl:
+            :list: true
+            :rename: :queue_urls
+- :name: ListQueues
+  :method: :list_queues
+  :inputs:
+    QueueNamePrefix:
+    - :string
+  :outputs:
+    :children:
+      ListQueuesResult:
+        :ignore: true
+        :children:
+          QueueUrl:
+            :list: true
+            :rename: :queue_urls
+- :name: ReceiveMessage
+  :method: :receive_message
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    AttributeName:
+    - :list:
+      - :string
+    - :rename: AttributeNames
+    MessageAttributeName:
+    - :list:
+      - :string
+    - :rename: MessageAttributeNames
+    MaxNumberOfMessages:
+    - :integer
+    VisibilityTimeout:
+    - :integer
+    WaitTimeSeconds:
+    - :integer
+  :outputs:
+    :children:
+      ReceiveMessageResult:
+        :ignore: true
+        :children:
+          Message:
+            :list: true
+            :rename: :messages
+            :children:
+              Attribute:
+                :rename: :attributes
+                :map:
+                - Name
+                - Value
+              MessageAttribute:
+                :rename: :message_attributes
+                :map:
+                - Name
+                - Value
+                :children:
+                  Value:
+                    :children:
+                      BinaryValue:
+                        :type: :blob
+                      StringListValue:
+                        :list: true
+                        :rename: :string_list_values
+                      BinaryListValue:
+                        :list: true
+                        :rename: :binary_list_values
+                        :type: :blob
+- :name: RemovePermission
+  :method: :remove_permission
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    Label:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RemovePermissionResult:
+        :ignore: true
+- :name: SendMessage
+  :method: :send_message
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    MessageBody:
+    - :string
+    - :required
+    DelaySeconds:
+    - :integer
+    MessageAttribute:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            StringValue:
+            - :string
+            BinaryValue:
+            - :blob
+            StringListValue:
+            - :list:
+              - :string
+            - :rename: StringListValues
+            BinaryListValue:
+            - :list:
+              - :blob
+            - :rename: BinaryListValues
+            DataType:
+            - :string
+            - :required
+        :key_param: Name
+        :value_param: Value
+        :flattened: true
+    - :rename: MessageAttributes
+  :outputs:
+    :children:
+      SendMessageResult:
+        :ignore: true
+- :name: SendMessageBatch
+  :method: :send_message_batch
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    SendMessageBatchRequestEntry:
+    - :list:
+      - :structure:
+          Id:
+          - :string
+          - :required
+          MessageBody:
+          - :string
+          - :required
+          DelaySeconds:
+          - :integer
+          MessageAttribute:
+          - :map:
+              :key:
+              - :string
+              :value:
+              - :structure:
+                  StringValue:
+                  - :string
+                  BinaryValue:
+                  - :blob
+                  StringListValue:
+                  - :list:
+                    - :string
+                  - :rename: StringListValues
+                  BinaryListValue:
+                  - :list:
+                    - :blob
+                  - :rename: BinaryListValues
+                  DataType:
+                  - :string
+                  - :required
+              :key_param: Name
+              :value_param: Value
+              :flattened: true
+          - :rename: MessageAttributes
+    - :required
+    - :rename: Entries
+  :outputs:
+    :children:
+      SendMessageBatchResult:
+        :ignore: true
+        :children:
+          SendMessageBatchResultEntry:
+            :list: true
+            :rename: :successful
+          BatchResultErrorEntry:
+            :list: true
+            :rename: :failed
+            :children:
+              SenderFault:
+                :type: :boolean
+- :name: SetQueueAttributes
+  :method: :set_queue_attributes
+  :inputs:
+    QueueUrl:
+    - :string
+    - :required
+    Attribute:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+        :key_param: Name
+        :value_param: Value
+        :flattened: true
+    - :required
+    - :rename: attributes
+  :outputs:
+    :children:
+      SetQueueAttributesResult:
+        :ignore: true

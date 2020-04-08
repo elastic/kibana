@@ -1,0 +1,10 @@
+{
+  "title": "Events over Time by Query Type",
+  "visState": "{\"title\":\"Events over Time by Query Type\",\"type\":\"metrics\",\"params\":{\"id\":\"45479ab0-4545-11e7-a94a-5d0a73686c64\",\"type\":\"timeseries\",\"series\":[{\"id\":\"45479ab1-4545-11e7-a94a-5d0a73686c64\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"45479ab2-4545-11e7-a94a-5d0a73686c64\",\"type\":\"count\"}],\"seperate_axis\":1,\"axis_position\":\"left\",\"formatter\":\"number\",\"chart_type\":\"bar\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.3\",\"stacked\":\"none\",\"label\":\"Event Count\"},{\"id\":\"afc2ab00-4545-11e7-a94a-5d0a73686c64\",\"color\":\"rgba(22,165,165,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"afc2ab01-4545-11e7-a94a-5d0a73686c64\",\"type\":\"count\"}],\"seperate_axis\":1,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"Query Types\",\"terms_field\":\"deviceCustomString1\"}],\"time_field\":\"deviceReceiptTime\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"filter\":\"deviceEventCategory:\\\"dns\\\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

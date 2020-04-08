@@ -1,0 +1,404 @@
+= Deprecated Features
+
+* Symbol splitting is now deprecated by default.  Sequel has
+  split symbols since the very first version, but it has caused
+  many problems over the years and while terse, it isn't
+  intuitive to new Sequel users and causes significant
+  problems when using databases that use double/triple
+  underscores in identifiers.
+
+  If you are using symbols with embedded double/triple
+  underscores, such as:
+
+    :table__column
+    :column___alias
+    :table__column___alias
+
+  you either need to turn symbol splitting on by doing:
+
+    Sequel.split_symbols = true
+
+  or you need to convert the symbols to Sequel objects:
+
+    Sequel[:table][:column]
+    Sequel[:column].as(:alias)
+    Sequel[:table][:column].as(:alias)
+
+  Sequel ships with multiple extensions that make creation
+  of those Sequel objects less verbose, so consider using
+  the symbol_aref, symbol_aref_refinement, symbol_as, 
+  symbol_as_refinement, and/or s extensions.
+
+  To automatically convert symbols with double/triple
+  underscores to their Sequel object equivalents, you can
+  use the sequel-unsplit tool available at
+  https://github.com/jeremyevans/sequel-unsplit.
+
+  This deprecation also affects virtual row block methods that use
+  double underscores.  For example:
+
+    DB[:table].where{table__column > 3}
+
+  should be changed to:
+
+    DB[:table].where{table[:column] > 3}
+
+* Automatically treating plain strings passed to filtering/update
+  methods as literal strings has been deprecated, with support moved
+  to the auto_literal_strings extension.  The automatic conversion
+  of plain strings to literal SQL is the most common cause of
+  SQL injections in applications using Sequel, since many methods
+  pass their arguments down to the filtering methods, without
+  considering whether the argument might be a string derived from
+  user input.  By requiring explicit marking of literal SQL strings,
+  SQL injections are less likely and easier to audit for.
+  
+  This change means that unless you want to use the
+  auto_literal_strings extension, code such as:
+
+    DB[:table].where("a = 1")
+    DB[:table].where("a > ?", 1)
+
+  should to be converted to:
+
+    DB[:table].where(Sequel.lit("a = 1"))
+    DB[:table].where(Sequel.lit("a > ?", 1))
+
+  or even better, avoid literal SQL completely by converting it to
+  use equivalent Sequel expressions:
+
+    DB[:table].where(:a => 1)
+    DB[:table].where{a > 1}
+
+  This change also affects passing Dataset#update a string:
+
+    # Before
+    DB[:table].update("a = a + 1")
+
+    # Change to
+    DB[:table].update(Sequel.lit("a = a + 1"))
+    DB[:table].update(:a => Sequel[:a] + 1)
+
+  Note that this deprecation does not affect cases where literal
+  SQL is used for the entire query, such as when using any of the
+  following:
+
+    DB["SELECT * FROM foo"]
+    DB.fetch("SELECT * FROM foo WHERE a = ?", 1)
+    DB.dataset.with_sql("SELECT * FROM foo WHERE a = ?", 1)
+
+* Passing blocks to virtual row methods has been deprecated,
+  with support moved to the virtual_row_method_block
+  extension.  Historically, passing blocks to virtual row methods
+  changed how the methods were handled, but in recent years
+  alternative methods have been added to get the same results.
+  If you don't want to use the virtual_row_method_block extension,
+  conversion is fairly simple:
+
+    # WHERE a()
+    # Before
+    where{a{}}
+    # Change to
+    where{a.function}
+
+    # SELECT count(*)
+    # Before
+    select{count(:*){}}
+    # Change to
+    select{count.function.*}
+    
+    # SELECT count(DISTINCT c)
+    # Before
+    select{count(:distinct, :c){}}
+    # Change to
+    select{count(:c).distinct}
+    
+    # SELECT sum(c) OVER (PARTITION BY a)
+    # Before
+    select{count(:over, :args=>c, :partition=>:a){}}
+    # Change to
+    select{count(:c).over(:partition=>:a)}
+
+* Model.set_allowed_columns and Model#{set,update}_{all,only}
+  have been deprecated, with support moved to the
+  whitelist_security plugin.  These were the historical mass
+  assignment methods supported by Sequel, but set_fields and
+  update_fields have been recommended instead for many years.
+
+* Model.finder and .prepared_finder have been deprecated by default,
+  with support moved to the finder plugin.  Model.finder was
+  originally added to make it easy to create optimized finder
+  methods, but few Sequel users actually use it, so it makes more
+  sense to move it to a plugin.
+
+* Model.def_dataset_method and Model.subset have been deprecated
+  by default, with support moved to the def_dataset_method plugin.
+  It's been recommended for many years to use Model.dataset_module
+  to define dataset methods, instead of calling def_dataset_method
+  and subset on the model class.
+
+* Using ` in virtual rows to create literal SQL is now deprecated,
+  switch to using Sequel.lit instead:
+
+    # Before
+    DB[:table].where{`a = 1`}
+    # Change to
+    DB[:table].where(Sequel.lit('a = 1'))
+
+* Corner cases in argument handling in the filtering methods are now
+  deprecated, including:
+
+  * Ignoring a filtering method called without an argument or block.
+    In Sequel 5, this will raise an exception.
+
+  * Ignoring empty string arguments or other objects that respond to
+    empty? and return true.  In Sequel 5, only an empty array or hash
+    will be ignored.
+
+  * Ignoring an explicit nil argument when a block is passed.  In
+    Sequel 5, this will use a NULL filter.
+
+  * Ignoring an explicit nil argument when there is no existing
+    filter on the dataset. In Sequel 5, this will use a NULL
+    filter.
+
+* Using a joined dataset as a Sequel::Model dataset is now
+  deprecated.  Such datasets should now be wrapped in a subquery.
+  In Sequel 5, such datasets will automatically be wrapped in
+  a subquery aliased to the first table.
+
+    # Before
+    Model.dataset = DB[:a].join(:b, :id=>:b_id)
+    # Change to
+    Model.dataset = DB[:a].join(:b, :id=>:b_id).from_self(:alias=>:a)
+
+* Model.first_where has been deprecated, Model.first should be used
+  instead.
+
+* Database#log_yield is now deprecated.  This does not affect any of
+  the adapters that ship with Sequel, but external adapters that
+  have not yet been updated to support #log_connection_yield will need
+  to be updated.
+
+* The set_overrides extension is now deprecated.  Anyone using it
+  should consider supporting it as an external extension.
+
+* Many internal Database and Dataset regexp and string constants
+  that were previously used internally have been deprecated.
+  Additionally, some historical aliases for existing constants
+  have also been deprecated, such as Sequel::Schema::Generator.
+  Ruby 2.3+ is required to receive deprecation warnings related to
+  these constants.
+
+* Passing model classes as the first argument to Dataset#join_table
+  and Dataset#graph is now deprecated.  Pass the model's table name
+  or the model's datasets instead.
+
+* Passing model instances to Dataset#insert and #insert_sql is now
+  deprecated. Call values on the model instance to get the values
+  hash, and pass that as the argument instead.
+
+* Calling Dataset#set_graph_aliases before Dataset#graph is now
+  deprecated.  Dataset#set_graph_aliases should now be called
+  after Dataset#graph, not before.
+
+* The sequel/no_core_ext file is deprecated.  Sequel hasn't loaded
+  the core extensions by default since Sequel 3.  You can use the
+  following if you want to support both Sequel 3 and Sequel 5:
+
+    begin
+      require 'sequel/no_core_ext'
+    rescue LoadError
+      require 'sequel'
+    end
+
+* Database#pragma_get and #pragma_set on SQLite are now deprecated,
+  along with any method that calls them, such as auto_vacuum,
+  temp_store, foreign_keys, case_sensitive_like, synchronous, and
+  their setter methods.  To set these pragrams for all SQLite
+  database connections, the appropriate options should be passed
+  when creating the Database instance.
+
+* Automatically looking up the dataset class for a Database
+  instance by looking for a DatasetClass constant in the Database's
+  class is now deprecated.  All adapters that ship with Sequel have
+  been converted, but external adapters should now define the
+  Database#dataset_class_default private method appropriately
+  to return the correct dataset class.
+
+* Calling Model.db= on a model with a dataset is now deprecated.
+  If a model already has a dataset, you must now use set_dataset
+  or dataset= to change the dataset, not db=.
+
+* Sequel::SQL::Expression#sql_literal and #lit are now deprecated.
+  These aren't used internally and aren't expected to be used
+  externally.
+
+* {Integer,Timestamp}Migrator::DEFAULT_SCHEMA_{COLUMN,TABLE}
+  are now deprecated.  They have been replaced by
+  default_schema_column and default_schema_table instance methods.
+
+* Passing a Schema::CreateTableGenerator instance as the
+  second argument to Database#create_table is now
+  deprecated.  Database#create_table still supports passing the
+  generator via the :generator option.
+  
+* Passing a second argument to Database#alter_table is now
+  deprecated.
+
+* Sequel::BasicObject.remove_methods! is now deprecated. It has
+  always been a no-op on ruby 1.9+.
+
+* Referencing the PG_NAMED_TYPES constant in your code is now
+  deprecated.  Previously, adding entries to the PG_NAMED_TYPES
+  was deprecated, but no deprecation message would be issued by
+  referencing the constant.
+
+* The conversion of - to _ in adapter schemes is now deprecated.
+  This does not affect any internal adapters, but it may affect
+  external ones.
+
+* The Database#jdbc_* methods in the jdbc/db2 adapter (e.g.
+  jdbc_tables) are now deprecated.  Call the regular versions
+  instead (e.g. tables).
+
+* Dataset#_filter and #_filter_or_exclude private methods have
+  been deprecated.  If you have an extension that was calling these
+  methods, switch to the new #add_filter private method.
+
+= New Features
+
+* The class_table_inheritance plugin now supports an :alias option.
+  If provided, this wraps subclass datasets in subqueries, avoiding
+  problems with ambiguous columns and cases where the wrong table
+  name is used.  Due to the deprecation of joined datasets for
+  models, use of the class_table_inheritance plugin without this
+  :alias option will result in deprecation warnings.  In Sequel 5,
+  class_table_inheritance will default to using an :alias option
+  with the same as the name of the parent table.
+
+* The Dataset#sqltime_precision private method has been added.
+  Adapters can use override this if the precision for time values
+  is different from the precision for timestamp values. Sequel
+  uses this support on Microsoft SQL Server, so that time values
+  now support microsecond precision, instead of millisecond
+  precision.
+
+= Other Improvements
+
+* Sequel::Model classes that use a SQL::Identifier or
+  SQL::QualifiedIdentifier FROM table value will now use optimized
+  lookups and deletes, just as is done for those that use a
+  Symbol or String.
+
+* Dataset#simple_select_all? now handles aliased subqueries
+  correctly, returning false instead of true.
+
+* If Sequel.application_timezone is set to :utc,
+  Sequel::SQLTime.create will create instances using utc time
+  instead of local time.
+
+* If there is an exception while rolling back a transaction when
+  using the :rollback=>:always option, the exception is now
+  raised instead of being ignored.
+
+* If a migration file does not contain a migration or contains
+  multiple migrations, the exception raised will now include
+  the file name in the exception message.
+
+* In the jdbc/sqlserver adapter, time values with fractional
+  seconds and datetimeoffset values are now handled better when
+  using some versions of the underlying JDBC driver.
+
+* An additional disconnect error is recognized when using the
+  mysql and mysql2 adapters.
+
+* Dataset#full_text_search on Microsoft SQL Server now works
+  correctly if the no_auto_literal_strings extension is used.
+
+* Calling Database#disconnect when using the single connection
+  pool without an active connection works correctly again. It was
+  broken starting in 4.43.0 during changes to implement
+  Database#freeze.
+
+* Model class methods are no longer added for private methods
+  defined in a dataset_module block.  Previously, a public model
+  class method was defined, but it would raise an error when
+  called.
+
+* Fixnum is no longer referenced in the sqlanywhere shared
+  adapter, fixing deprecation warnings on ruby 2.4.
+
+* Sequel no longer uses constants for building SQL queries,
+  relying on frozen string literal support for better
+  performance on ruby 2.3+.  However, this decreases SQL
+  query building performance on ruby <2.3.  For the fastest
+  SQL query building, update to a recent version of ruby.
+
+* Sequel no longer ignores an empty object argument to a
+  filtering method if a block is provided.  Previously,
+  this could raise an exception or produce invalid SQL.
+
+* Many small modifications were made to reduce array
+  allocations, providing minor speedups.
+
+* Internal use of Array#at has been replaced with Array#[],
+  providing minor speedups on recent ruby versions.
+
+* The jdbc/db2 adapter no longer adds jdbc_* methods to
+  JDBC::Database.
+
+* Sequel no longer issues deprecation warnings on ruby 1.8.7.
+  Sequel 5 will drop support for ruby 1.8.7, and it doesn't make
+  sense to issue a deprecation warning if you couldn't upgrade
+  anyway.
+
+= Backwards Compatibility
+
+* When specifying the :fields option to a nested_attributes
+  setter, set_fields is now used internally instead of set_only.
+  set_fields has been recommended over set_fields since it's
+  introduction in Sequel 3.12, but nested_attributes was added
+  in Sequel 3.4, before set_fields was available.  The result
+  of this change is that if additional fields are provided that
+  do not match the fields in the :fields option, they will be
+  ignored instead of an exception being raised.
+
+* When specifying a function name using a Sequel::SQL::Identifier
+  instance, the function name is no longer quoted unless
+  Sequel::SQL::Function#quoted is used to create a quoted
+  function.  The reason for this is to make converting virtual
+  row method block code easier.
+
+    # Before
+    Sequel.function(Sequel[:a]) # "a"()
+
+    # Now
+    Sequel.function(Sequel[:a]) # a()
+    Sequel.function(Sequel[:a]).quoted # "a"()
+
+* When passing an SQL::PlaceholderLiteralString instance to a
+  dataset filtering method, the placeholder string is now always
+  wrapped in parentheses:
+
+    ds.where(Sequel.lit('? OR ?', :a, :b)).where(:c)
+    # Before: WHERE a OR b AND c
+    # Now: WHERE (a OR b) AND c
+
+  This is more of a bugfix than a backwards compatibility issue,
+  but is listed in the backwards compatibility section as there
+  may be applications that could break due to this change.
+
+* Model.subset now calls Model.dataset_module.subset, instead of
+  the other way around.  If your code depends on this, you will
+  need to make modifications.
+
+* The private Database#column_definition_order method no longer
+  uses const_get(:COLUMN_DEFINITION_ORDER).  External adapters
+  that defined COLUMN_DEFINITION_ORDER but did not override
+  this method must now override this method.
+
+* The private Database#native_function_name method no longer
+  uses const_get(:EMULATED_FUNCTION_MAP). External adapters
+  that defined EMULATED_FUNCTION_MAP but did not override
+  this method must now override this method.

@@ -1,0 +1,141 @@
+= New Features
+
+* An eager_graph_eager plugin has been added, which allows you to
+  chain eager loads using separate queries to an existing dataset that
+  uses eager_graph.  Given the following model associations:
+
+    Band.one_to_many :albums
+    Album.one_to_many :tracks
+
+  Let's say you wanted to return bands ordered by album name, and
+  eagerly load those albums, you can do that using:
+
+    Band.eager_graph(:albums).order{albums[:name]}
+
+  Let's say you also wanted to eagerly load the tracks for each album.
+  You could just add them to the eager_graph call:
+
+    Band.eager_graph(albums: :tracks).order{albums[:name]}
+
+  However, the bloats the result set, and you aren't ordering by the
+  track information, so a join is not required.  The eager_graph_eager
+  plugin allows you to specify that the tracks be eagerly loaded in a
+  separate query after the eager_graph load of albums:
+
+    Band.eager_graph(:albums).
+      eager_graph_eager([:albums], :tracks).
+      order{albums[:name]}
+
+  eager_graph_eager's first argument is a dependency chain, specified
+  as an array of symbols.  This specifies the point at which to
+  perform the eager load. The remaining arguments are arguments that
+  could be passed to Dataset#eager to specify what dependent
+  associations should be loaded at that point.
+
+* A caller_logging Database extension has been added, which logs
+  caller information before queries, filtering out the internal
+  Sequel callers.  Example:
+
+    DB.extension :caller_logging
+    DB[:table].first
+    # Logger:
+    # (0.000041s) (source: /path/to/app/foo/t.rb:12 in `get_first`)
+    # SELECT * FROM table LIMIT 1
+
+  You can further filter the caller lines by setting
+  Database#caller_logging_ignore to a regexp of additional caller
+  lines to ignore.  This is useful if you have specific methods or
+  internal extensions/plugins that you would also like to ignore as
+  they obscure the code actually making the request.
+ 
+    DB.caller_logging_ignore = %r{/path/to/app/lib/plugins}
+ 
+  You can also format the caller before it is placed in the logger,
+  using caller_logging_formatter:
+ 
+    DB.caller_logging_formatter = lambda do |caller|
+      "(#{caller.sub(/\A\/path\/to\/app\//, '')})"
+    end
+    DB[:table].first
+    # Logger:
+    # (0.000041s) (foo/t.rb:12 in `get_first`) SELECT * FROM table LIMIT 1
+ 
+* Database#call_procedure has been added to the postgres adapter, and
+  is usable on PostgreSQL 11+ for calling procedures created with
+  CREATE PROCEDURE.
+
+    DB.call_procedure(:foo, 1, "bar")
+    # CALL foo(1, 'bar')
+
+  This method will return a hash of results if the procedure returns
+  a result, or nil if it does not return a result.
+
+= Other Improvements
+
+* It is now possible to use Dataset#eager_graph in an eager load
+  callback for associations that use join tables.  This allows you
+  to eager load some associations using separate queries and other
+  associations using joins.  For example:
+
+    Band.eager(:albums=>proc{|ds| ds.eager_graph(:tracks)})
+
+  Will load the bands in one query, and load the albums and tracks
+  in a separate query using a join.  Previously, this construction
+  worked only for associations that did not use join tables.  It now
+  works for associations that use join tables, as long as existing
+  selected columns are not removed inside the callback.
+
+* The tactical_eager_loading plugin now handles automatic eager
+  loading for associated objects that were created during the
+  load of dataset that uses eager_graph.  When using the plugin,
+  the following code will now only execute 2 queries, instead of
+  issuing a separate query for each album to get the tracks for
+  the album.
+
+    artists = Artist.eager_graph(:albums).all
+    artists.each do |artist|
+      artist.albums.each do |album|
+        album.tracks
+      end
+    end
+
+* Calling Dataset#graph with a dataset with existing selections where
+  the column aliases cannot be determined automatically now works
+  correctly by using a subselect.  Previously, attempting to do this
+  would raise an exception.  This allows the following code to work:
+
+    DB[:table].select_all(:table).select_append(expr).graph(...)
+
+* Datasets now cache the EagerGraphLoader object that is generated to
+  convert arrays of hashes into an object graph, so that subsequent
+  eager loads on the same dataset do not need to recompute the same
+  information.  Most EagerGraphLoader internal state is now frozen to
+  prevent unintentional modification.
+
+* Sequel.extension now loads files from gems.  Previously, it used
+  Kernel.require, which does not load files from gems.
+
+* Adapters that emulate prepared statements using literalization now
+  use a placeholder literalizer and should execute significantly
+  faster.  More prepared statement internal metadata is now frozen
+  to prevent unintentional modification.
+
+* Dataset#intersect, #except, and #nowait are now supported on MariaDB
+  10.3+.
+
+* The constraint_validations extension now respects the
+  constraint_validations_table setting when adding metadata for the
+  constraint validations.
+
+* In the oracle adapter, the clob prepared statement argument type is
+  now mapped to the OCI8::CLOB class, allowing the use of Oracle
+  procedures with clob output parameters.
+
+* The Model.load_cache method in the static_cache plugin is now public.
+
+= Backwards Compatibility
+
+* The private Dataset#prepared_arg? method has been removed.  It is no
+  longer necessary after the refactoring to the prepared statement
+  code.  External adapters that currently call the method should be
+  updated to no longer call the method.

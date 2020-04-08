@@ -1,0 +1,85 @@
+= New Features
+
+* Database#run and #<< now accept SQL::PlaceholderLiteralString
+  objects, allowing you to more easily run arbitrary DDL queries with
+  placeholders:
+
+    DB.run Sequel.lit("CREATE TABLE ? (? integer)", :table, :column)
+
+* You can now provide options for check constraints by calling the
+  constraint/add_constraint methods with a hash as the first argument.
+  On PostgreSQL, you can now use the :not_valid option for check
+  constraints, so they are enforced for inserts and updates, but
+  not for existing rows.
+
+    DB.create_table(:table) do
+      ...
+      constraint({:name=>:constraint_name, :not_valid=>true}) do
+        column_name > 10
+      end
+    end
+    
+* Dataset#stream has been added to the mysql2 adapter, and will have
+  the dataset stream results if used with mysql2 0.3.12+.  This
+  allows you to process large datasets without keeping the entire
+  dataset in memory.
+
+    DB[:large_table].stream.each{|r| ...}
+
+* Database#error_info has been added to the postgres adapter.  It
+  is supported on PostgreSQL 9.3+ if pg-0.16.0+ is used as the
+  underlying driver, and it gives you a hash of metadata related
+  to the exception:
+
+    DB[:table_name].insert(1) rescue DB.error_info($!)
+    # => {:schema=>"public", :table=>"table_name", :column=>nil,
+          :constraint=>"constraint_name", :type=>nil}
+ 
+* The :deferrable option is now supported when adding exclusion
+  constraints on PostgreSQL, to allow setting up deferred exclusion
+  constraints.
+
+* The :inherits option is now supported in Database#create_table on
+  PostgreSQL, for table inheritance:
+
+    DB.create_table(:t1, :inherits=>:t0){}
+    # CREATE TABLE t1 () INHERITS (t0)
+
+* Dataset#replace and #multi_replace are now supported on SQLite,
+  just as they have been previously on MySQL.
+
+* In the jdbc adapter, Java::JavaUtil::HashMap objects are now
+  converted to ruby Hash objects.  This is to make it easier to
+  handle the PostgreSQL hstore type when using the jdbc/postgres
+  adapter.
+
+* The odbc adapter now supports a :drvconnect option that accepts
+  an ODBC connection string that is passed to ruby-odbc verbatim.
+
+= Other Improvements
+
+* The prepared_statements plugin no longer breaks the
+  instance_filters and update_primary_key plugins.
+
+* Dropping indexes for tables in a specific schema is now supported
+  on PostgreSQL.  Sequel now explicitly specifies the same schema
+  as the table when dropping such indexes.
+
+* Calling Model#add_association methods with a primary key value
+  now raises a Sequel::NoMatchingRow if there is no object in the
+  associated table with that primary key.  Previously, this
+  situation was not handled and resulted in a NoMethodError being
+  raised later.
+
+* When an invalid virtual row block function call is detected, an
+  error is now properly raised.  Previously, the error was not
+  raised until the SQL was produced for the query.
+
+= Backwards Compatibility
+
+* The :driver option to the odbc adapter is deprecated and will be
+  removed in a future version.  It is thought to be broken, and
+  users wanting to use DSN-less connections should use the new
+  :drvconnect option.
+
+* The Postgres::ArrayOp#text_op private method has been removed.

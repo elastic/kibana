@@ -1,0 +1,254 @@
+= Model Hooks
+
+This guide is based on http://guides.rubyonrails.org/activerecord_validations_callbacks.html
+
+== Overview
+
+Model hooks are used to specify actions that occur at a given point in a model instance's lifecycle, such as before or after the model object is saved, created, updated, destroyed, or validated.  There are also around hooks for all types, which wrap the before hooks, the behavior, and the after hooks.
+
+== Basic Usage
+
+<tt>Sequel::Model</tt> uses instance methods for hooks.  To define a hook on a model, you just add an instance method to the model class:
+
+  class Album < Sequel::Model
+    def before_create
+      self.created_at ||= Time.now
+      super
+    end
+  end
+
+The one important thing to note here is the call to +super+ inside the hook.  Whenever you override one of Sequel::Model's methods, you should be calling +super+ to get the default behavior.  Many of the plugins that ship with Sequel work by overriding the hook methods and calling +super+.  If you use these plugins and override the hook methods but do not call +super+, it's likely the plugins will not work correctly.
+
+== Available Hooks
+
+Sequel calls hooks in the following order when saving/creating a new object (one that does not already exist in the database):
+
+* +around_validation+
+  * +before_validation+
+  * +validate+ method called
+  * +after_validation+
+* +around_save+
+  * +before_save+
+  * +around_create+
+    * +before_create+
+    * INSERT QUERY
+    * +after_create+
+  * +after_save+
+
+Sequel calls hooks in the following order when saving an existing object:
+
+* +around_validation+
+  * +before_validation+
+  * +validate+ method called
+  * +after_validation+
+* +around_save+
+  * +before_save+
+  * +around_update+
+    * +before_update+
+    * UPDATE QUERY
+    * +after_update+
+  * +after_save+
+
+Note that all of the hook calls are the same, except that +around_create+, +before_create+ and +after_create+ are used for a new object, and +around_update+, +before_update+ and +after_update+ are used for an existing object.  Note that +around_save+, +before_save+, and +after_save+ are called in both cases.
+
+Note that the validation hooks are still called if <tt>validate: false</tt> option is passed to save.  If you call <tt>Model#valid?</tt> manually, then only the validation hooks are called:
+
+* +around_validation+
+  * +before_validation+
+  * +validate+ method called
+  * +after_validation+
+
+Sequel calls hooks in the following order when destroying an existing object:
+
+* +around_destroy+
+  * +before_destroy+
+  * DELETE QUERY
+  * +after_destroy+
+
+Note that these hooks are only called when using <tt>Model#destroy</tt>, they are not called if you use <tt>Model#delete</tt>.
+
+== Transaction-related Hooks
+
+Sequel::Model no longer offers transaction hooks for model instances.  However, you can use the database transaction hooks inside model +before_save+ and +after_save+ hooks:
+
+  class Album < Sequel::Model
+    def before_save
+      db.after_rollback{rollback_action}
+      super
+    end
+
+    def after_save
+      super
+      db.after_commit{commit_action}
+    end
+  end
+
+== Running Hooks
+
+Sequel does not provide a simple way to turn off the running of save/create/update hooks.  If you attempt to save a model object, the save hooks are always called.  All model instance methods that modify the database call save in some manner, so you can be sure that if you define the hooks, they will be called when you save the object.
+
+However, you should note that there are plenty of ways to modify the database without saving a model object.  One example is by using plain datasets, or one of the model's dataset methods:
+
+  Album.where(name: 'RF').update(copies_sold: Sequel.+(:copies_sold, 1))
+  # UPDATE albums SET copies_sold = copies_sold + 1 WHERE name = 'RF'
+
+In this case, the +update+ method is called on the dataset returned by <tt>Album.where</tt>.  Even if there is only a single object with the name RF, this will not call any hooks.  If you want model hooks to be called, you need to make sure to operate on a model object:
+
+  album = Album.first(name: 'RF')
+  album.update(copies_sold: album.copies_sold + 1)
+  # UPDATE albums SET copies_sold = 2 WHERE id = 1
+
+For the destroy hooks, you need to make sure you call +destroy+ on the object:
+
+  album.destroy # runs destroy hooks
+
+== Skipping Hooks
+
+Sequel makes it easy to skip destroy hooks by calling +delete+ instead of +destroy+:
+
+  album.delete # does not run destroy hooks
+
+However, skipping hooks is a bad idea in general and should be avoided.  As mentioned above, Sequel doesn't allow you to turn off the running of save hooks. If you know what you are doing and really want to skip them, you need to drop down to the dataset level to do so.  This can be done for a specific model object by using the +this+ method for a dataset that represents a single object:
+
+  album.this # dataset
+
+The +this+ dataset works just like any other dataset, so you can call +update+ on it to modify it:
+
+  album.this.update(copies_sold: album.copies_sold + 1)
+
+If you want to insert a row into the model's table without running the creation hooks, you can use <tt>Model.insert</tt> instead of <tt>Model.create</tt>:
+
+  Album.insert(name: 'RF') # does not run hooks
+
+== Canceling Actions in Hooks
+
+Sometimes want to cancel an action in a before hook, so the action is not performed.  For example, you may want to not allow destroying or saving a record in certain cases.  In those cases, you can call +cancel_action+ inside the <tt>before_*</tt> hook, which will stop processing the hook and will either raise a <tt>Sequel::HookFailed</tt> exception (the default), or return +nil+ if +raise_on_save_failure+ is +false+).  You can use this to implement validation-like behavior, that will run even if validations are skipped:
+
+  class Album < Sequel::Model
+    def before_save
+      cancel_action if name == ''
+      super
+    end
+  end
+
+For around hooks, neglecting to call +super+ halts hook processing in the same way as calling +cancel_action+ in a before hook.  It's probably a bad idea to use +cancel_action+ hook processing in after hooks, or after yielding in around hooks, since by then the main processing has already taken place.
+
+By default, Sequel runs hooks other than validation hooks inside a transaction, so if you cancel the action by calling +cancel_action+ in any hook, Sequel will rollback the transaction.  However, note that the implicit use of transactions when saving and destroying model objects is conditional (it depends on the model instance's +use_transactions+ setting and the <tt>:transaction</tt> option passed to save).
+
+== Conditional Hooks
+
+Sometimes you only take to take a certain action in a hook if the object meets a certain condition.  For example, let's say you only want to make sure a timestamp is set when updating if the object is at a certain status level:
+
+  class Album < Sequel::Model
+    def before_update
+      self.timestamp ||= Time.now if status_id > 3
+      super
+    end
+  end
+
+Note how this hook action is made conditional just be using the standard ruby +if+ conditional.  Sequel makes it easy to handle conditional hook actions by using standard ruby conditionals inside the instance methods.
+
+== Using Hooks in Multiple Classes
+
+If you want all your model classes to use the same hook, you can just define that hook in Sequel::Model:
+
+  class Sequel::Model
+    def before_create
+      self.created_at ||= Time.now
+      super
+    end
+  end
+
+Just remember to call +super+ whenever you override the method in a subclass.  Note that +super+ is also used when overriding the hook in <tt>Sequel::Model</tt> itself.  This is important as if you add any plugins to Sequel::Model itself, if you override a hook in <tt>Sequel::Model</tt> and do not call +super+, the plugin may not work correctly.
+
+If you don't want all classes to use the same hook, but want to reuse hooks in multiple classes, you should use a plugin or a simple module:
+
+=== Plugin
+
+  module SetCreatedAt
+    module InstanceMethods
+      def before_create
+        self.created_at ||= Time.now
+        super
+      end
+    end
+  end
+  Album.plugin(SetCreatedAt)
+  Artist.plugin(SetCreatedAt)
+
+=== Simple Module
+
+  module SetCreatedAt
+    def before_create
+      self.created_at ||= Time.now
+      super
+    end
+  end
+  Album.send(:include, SetCreatedAt)
+  Artist.send(:include, SetCreatedAt)
+
+== +super+ Ordering
+
+While it's not enforced anywhere, it's a good idea to make +super+ the last expression when you override a before hook, and the first expression when you override an after hook:
+
+  class Album < Sequel::Model
+    def before_save
+      self.updated_at ||= Time.now
+      super
+    end
+
+    def after_save
+      super
+      AuditLog.create(:log=>"Album #{name} created")
+    end
+  end
+
+This allows the following general principles to be true:
+
+* before hooks are run in reverse order of inclusion
+* after hooks are run in order of inclusion
+
+So if you define the same before hook in both a model and a plugin that the model uses, the hooks will be called in this order:
+
+* model before hook
+* plugin before hook
+* plugin after hook
+* model after hook
+
+Again, Sequel does not enforce that, and you are free to call +super+ in an order other than the recommended one (just make sure that you call it).
+
+== Around Hooks
+
+Around hooks should only be used if you cannot accomplish the same results with before and after hooks.  For example, if you want to catch database errors caused by the +INSERT+ or +UPDATE+ query when saving a model object and raise them as validation errors, you cannot use a before or after hook.  You have use an +around_save+ hook:
+
+  class Album < Sequel::Model
+    def around_save
+      super
+    rescue Sequel::DatabaseError => e
+      # parse database error, set error on self, and reraise a Sequel::ValidationFailed
+    end
+  end
+ 
+Likewise, let's say that upon retrieval, you associate an object with a file descriptor, and you want to ensure that the file descriptor is closed after the object is saved to the database.  Let's assume you are always saving the object and you are not using validations.  You could not use an +after_save+ hook safely, since if the database raises an error, the +after_save+ method will not be called.  In this case, an +around_save+ hook is also the correct choice:
+
+  class Album < Sequel::Model
+    def around_save
+      super
+    ensure
+      @file_descriptor.close
+    end
+  end
+
+== Hook related plugins
+
+=== +instance_hooks+
+
+Sequel also ships with an +instance_hooks+ plugin that allows you to define before and after hooks on a per instance basis.  It's very useful as it allows you to delay action on an instance until before or after saving.  This can be important if you want to modify a group of related objects together (which is how the +nested_attributes+ plugin uses +instance_hooks+).
+
+=== +hook_class_methods+
+
+While it's recommended to write your hooks as instance methods, Sequel ships with a +hook_class_methods+ plugin that allows you to define hooks via class methods. It exists mostly for legacy compatibility, but is still supported.  However, it does not implement around hooks.
+
+=== +after_initialize+
+
+The after_initialize plugin adds an after_initialize hook, that is called for all model instances on creation (both new instances and instances retrieved from the database).  It exists mostly for legacy compatibility, but it is still supported.

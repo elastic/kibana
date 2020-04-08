@@ -1,0 +1,448 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2010-03-31'
+:operations:
+- :name: AddPermission
+  :method: :add_permission
+  :inputs:
+    TopicArn:
+    - :string
+    - :required
+    Label:
+    - :string
+    - :required
+    AWSAccountId:
+    - :membered_list:
+      - :string
+    - :required
+    ActionName:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      AddPermissionResult:
+        :ignore: true
+- :name: ConfirmSubscription
+  :method: :confirm_subscription
+  :inputs:
+    TopicArn:
+    - :string
+    - :required
+    Token:
+    - :string
+    - :required
+    AuthenticateOnUnsubscribe:
+    - :string
+  :outputs:
+    :children:
+      ConfirmSubscriptionResult:
+        :ignore: true
+- :name: CreatePlatformApplication
+  :method: :create_platform_application
+  :inputs:
+    Name:
+    - :string
+    - :required
+    Platform:
+    - :string
+    - :required
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    - :required
+  :outputs:
+    :children:
+      CreatePlatformApplicationResult:
+        :ignore: true
+- :name: CreatePlatformEndpoint
+  :method: :create_platform_endpoint
+  :inputs:
+    PlatformApplicationArn:
+    - :string
+    - :required
+    Token:
+    - :string
+    - :required
+    CustomUserData:
+    - :string
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+  :outputs:
+    :children:
+      CreatePlatformEndpointResult:
+        :ignore: true
+- :name: CreateTopic
+  :method: :create_topic
+  :inputs:
+    Name:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateTopicResult:
+        :ignore: true
+- :name: DeleteEndpoint
+  :method: :delete_endpoint
+  :inputs:
+    EndpointArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteEndpointResult:
+        :ignore: true
+- :name: DeletePlatformApplication
+  :method: :delete_platform_application
+  :inputs:
+    PlatformApplicationArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeletePlatformApplicationResult:
+        :ignore: true
+- :name: DeleteTopic
+  :method: :delete_topic
+  :inputs:
+    TopicArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteTopicResult:
+        :ignore: true
+- :name: GetEndpointAttributes
+  :method: :get_endpoint_attributes
+  :inputs:
+    EndpointArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetEndpointAttributesResult:
+        :ignore: true
+        :children:
+          Attributes:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :attributes
+                :map:
+                - key
+                - value
+- :name: GetPlatformApplicationAttributes
+  :method: :get_platform_application_attributes
+  :inputs:
+    PlatformApplicationArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetPlatformApplicationAttributesResult:
+        :ignore: true
+        :children:
+          Attributes:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :attributes
+                :map:
+                - key
+                - value
+- :name: GetSubscriptionAttributes
+  :method: :get_subscription_attributes
+  :inputs:
+    SubscriptionArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetSubscriptionAttributesResult:
+        :ignore: true
+        :children:
+          Attributes:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :attributes
+                :map:
+                - key
+                - value
+- :name: GetTopicAttributes
+  :method: :get_topic_attributes
+  :inputs:
+    TopicArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetTopicAttributesResult:
+        :ignore: true
+        :children:
+          Attributes:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :attributes
+                :map:
+                - key
+                - value
+- :name: ListEndpointsByPlatformApplication
+  :method: :list_endpoints_by_platform_application
+  :inputs:
+    PlatformApplicationArn:
+    - :string
+    - :required
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      ListEndpointsByPlatformApplicationResult:
+        :ignore: true
+        :children:
+          Endpoints:
+            :ignore: true
+            :children:
+              member:
+                :rename: :endpoints
+                :list: true
+                :children:
+                  Attributes:
+                    :ignore: true
+                    :children:
+                      entry:
+                        :rename: :attributes
+                        :map:
+                        - key
+                        - value
+- :name: ListPlatformApplications
+  :method: :list_platform_applications
+  :inputs:
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      ListPlatformApplicationsResult:
+        :ignore: true
+        :children:
+          PlatformApplications:
+            :ignore: true
+            :children:
+              member:
+                :rename: :platform_applications
+                :list: true
+                :children:
+                  Attributes:
+                    :ignore: true
+                    :children:
+                      entry:
+                        :rename: :attributes
+                        :map:
+                        - key
+                        - value
+- :name: ListSubscriptions
+  :method: :list_subscriptions
+  :inputs:
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      ListSubscriptionsResult:
+        :ignore: true
+        :children:
+          Subscriptions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :subscriptions
+                :list: true
+- :name: ListSubscriptionsByTopic
+  :method: :list_subscriptions_by_topic
+  :inputs:
+    TopicArn:
+    - :string
+    - :required
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      ListSubscriptionsByTopicResult:
+        :ignore: true
+        :children:
+          Subscriptions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :subscriptions
+                :list: true
+- :name: ListTopics
+  :method: :list_topics
+  :inputs:
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      ListTopicsResult:
+        :ignore: true
+        :children:
+          Topics:
+            :ignore: true
+            :children:
+              member:
+                :rename: :topics
+                :list: true
+- :name: Publish
+  :method: :publish
+  :inputs:
+    TopicArn:
+    - :string
+    TargetArn:
+    - :string
+    Message:
+    - :string
+    - :required
+    Subject:
+    - :string
+    MessageStructure:
+    - :string
+    MessageAttributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            DataType:
+            - :string
+            - :required
+            StringValue:
+            - :string
+            BinaryValue:
+            - :blob
+        :key_param: Name
+        :value_param: Value
+  :outputs:
+    :children:
+      PublishResult:
+        :ignore: true
+- :name: RemovePermission
+  :method: :remove_permission
+  :inputs:
+    TopicArn:
+    - :string
+    - :required
+    Label:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RemovePermissionResult:
+        :ignore: true
+- :name: SetEndpointAttributes
+  :method: :set_endpoint_attributes
+  :inputs:
+    EndpointArn:
+    - :string
+    - :required
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    - :required
+  :outputs:
+    :children:
+      SetEndpointAttributesResult:
+        :ignore: true
+- :name: SetPlatformApplicationAttributes
+  :method: :set_platform_application_attributes
+  :inputs:
+    PlatformApplicationArn:
+    - :string
+    - :required
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    - :required
+  :outputs:
+    :children:
+      SetPlatformApplicationAttributesResult:
+        :ignore: true
+- :name: SetSubscriptionAttributes
+  :method: :set_subscription_attributes
+  :inputs:
+    SubscriptionArn:
+    - :string
+    - :required
+    AttributeName:
+    - :string
+    - :required
+    AttributeValue:
+    - :string
+  :outputs:
+    :children:
+      SetSubscriptionAttributesResult:
+        :ignore: true
+- :name: SetTopicAttributes
+  :method: :set_topic_attributes
+  :inputs:
+    TopicArn:
+    - :string
+    - :required
+    AttributeName:
+    - :string
+    - :required
+    AttributeValue:
+    - :string
+  :outputs:
+    :children:
+      SetTopicAttributesResult:
+        :ignore: true
+- :name: Subscribe
+  :method: :subscribe
+  :inputs:
+    TopicArn:
+    - :string
+    - :required
+    Protocol:
+    - :string
+    - :required
+    Endpoint:
+    - :string
+  :outputs:
+    :children:
+      SubscribeResult:
+        :ignore: true
+- :name: Unsubscribe
+  :method: :unsubscribe
+  :inputs:
+    SubscriptionArn:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UnsubscribeResult:
+        :ignore: true

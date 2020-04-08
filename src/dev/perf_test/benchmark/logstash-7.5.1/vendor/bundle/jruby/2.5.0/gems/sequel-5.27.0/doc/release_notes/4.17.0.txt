@@ -1,0 +1,38 @@
+= New Features
+
+* A :preconnect Database option has been added, for automatically
+  creating the maximum number of connections to the database on
+  instantiation.  This is useful when there is high latency for
+  initial connection setup, where Sequel's usual approach of
+  connecting as needed can cause pauses at runtime.
+
+* Database#sharded? has been added for checking whether the Database
+  object uses multiple servers. 
+
+* Dataset#server? has been added, for returning a cloned dataset
+  associated with the given server/shard if the dataset does not
+  already have a server set.  This returns the receiver if the
+  server has already been set or the Database is not sharded.
+
+= Other Improvements
+
+* Sequel now uses the correct shard when deleting model instances.
+  Previously, the correct shard was only used in the unoptimized
+  case, not in the optimized case.
+
+* Sequel now uses the correct shard when using Dataset#insert_select
+  on PostgreSQL.  This was first broken in the 4.13.0 release.
+
+* Sequel now correctly handles Sequel::SQL::Blob instances used in
+  bound variables in the postgres adapter.  Previously this resulted
+  in duplicate apostrophes being used.
+
+* When using the jdbc/sqlite3 adapter with jdbc-sqlite3 3.8.7, Sequel
+  now handles date objects and empty blobs correctly, working around
+  bugs in the driver.
+
+= Backwards Compatibility
+
+* In the update_or_create plugin, Model.update_or_create now always
+  returns the object.  Previously it would not return the object if
+  the object already existed but no updates were necessary.

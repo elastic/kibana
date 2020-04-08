@@ -1,0 +1,130 @@
+= Forwards Compatibility
+
+* Ruby 2.4 will unify the Fixnum and Bignum classes into the Integer
+  class, making both Fixnum and Bignum references to Integer. This
+  will have the affect of changing the behavior of Sequel migrations
+  that use a reference to the Bignum class.  
+
+  For example, code like this will change behavior in ruby 2.4:
+
+    DB.create_table(:table) do
+      add_column :column, Bignum
+    end
+    # or:
+    DB.get(Sequel.cast('1', Bignum))
+
+  as this references the Bignum class. On ruby <2.4, this will create
+  a 64-bit integer column, on ruby 2.4+, it will create a 32-bit
+  integer column.
+
+  Code like this will be fine and does not need changing:
+
+    DB.create_table(:table) do
+      Bignum :column
+    end
+
+  as this calls the Bignum method.
+
+  Sequel now supports the :Bignum symbol as a generic type, so you
+  can now switch references to the Bignum class to the :Bignum
+  symbol whenever you want a generic 64-bit integer type:
+
+    DB.create_table(:table) do
+      add_column :column, :Bignum
+    end
+    # or:
+    DB.get(Sequel.cast('1', :Bignum))
+
+  Note that you should only do this if you are using Sequel 4.35.0+,
+  as previous versions of Sequel will treat the :Bignum symbol as
+  a database-specific type named Bignum.
+
+= New Features
+
+* A Sequel::Database#log_connection_info accessor has been added.  If
+  set to true, this includes connection information in Sequel's query
+  log.  In threaded connection pools (the default), this makes it
+  simple to see which connection is executing which queries.
+
+    DB.log_connection_info = true
+    DB.get(1)
+    # Logged: (0.000004s) (conn: 9713390226040) SELECT 1 AS v LIMIT 
+
+* Sequel::Model#lock! now supports an optional lock style, instead
+  of always using FOR UPDATE (which is still the default):
+
+    Example.first.lock!('FOR NO KEY UPDATE')
+    #=> SELECT * FROM examples WHERE id = 1 FOR NO KEY UPDATE LIMIT 1
+
+* Sequel::Dataset#skip_locked has been added, which skips locked rows
+  when returning query results. This is useful whenever you are
+  implementing a queue or similar data structure.  Currently, this is
+  supported on PostgreSQL 9.5+, Oracle, and Microsoft SQL Server.
+
+* An sql_comments extension has been added for setting SQL comments
+  on queries:
+
+    ds = DB[:table].comment("Some Comment").all
+    # SELECT * FROM table -- Some Comment
+    #
+
+  All consecutive whitespace in the comment is replaced by a
+  single space, and the comment ends in a newline so that it works
+  correctly in subqueries.
+
+  This extension is mostly useful if you are doing analysis of your
+  database server query log and want to include higher level
+  information about the query in the comment.
+
+* A server_logging extension has been added, which includes
+  server/shard information in the query log, if connection info
+  is being logged.
+
+    DB.extension :server_logging
+    DB.log_connection_info = true
+    DB.get(1)
+    # Logged: (0.000004s) (conn: 9712828677240, server: read_only)
+    #         SELECT 1 AS v LIMIT 1 
+    DB[:a].insert(:b=>1)
+    # Logged: (0.000003s) (conn: 9712534040260, server: default)
+    #         INSERT INTO a (b) VALUES (1)
+
+* On PostgreSQL, Database#full_text_search now supports a
+  :headline option for adding an extract of the matched text to
+  the SELECT list.
+
+* Sequel::Postgres::PGRange#cover? has been added to the pg_range
+  extension, which works with empty, unbounded, and exclusive
+  beginning ranges.  Previously, using #cover? with these ranges
+  would raise an exception.  Note that cover? is now always
+  defined, where previously it was only defined on ruby 1.9+.
+
+= Other Improvements
+
+* The jdbc adapters now work correctly on JRuby 9.1.  Previously,
+  some parts were broken on JRuby 9.1 due to frozen string literal
+  issues.
+
+* Sequel::Dataset#to_hash and #to_hash_groups now work correctly for
+  model datasets doing eager loading.
+
+* Using Sequel::Database#transaction with the :rollback=>:always
+  option now automatically uses a savepoint if supported when run
+  inside another transaction.  If savepoints are not supported,
+  using :rollback=>:always inside a transaction will now raise an
+  exception.
+
+* The delay_add_association plugin now handles hashes and primary keys
+  passed to the add_* association methods.
+
+* The json_serializer :include option now works correctly when using
+  *_to_many associations with the association_proxies plugin.
+
+* The schema_dumper extension now recognizes bool as a boolean type,
+  for consistency with the Database schema parser.
+
+= Backwards Compatibility
+
+* Custom adapters should switch from using log_yield to
+  log_connection_yield so that they work correctly when using
+  log_connection_info.

@@ -1,0 +1,11 @@
+{
+  "title": "Top 10 Application Protocols [ArcSight]",
+  "visState": "{\"title\":\"Top 10 Application Protocols [ArcSight]\",\"type\":\"tagcloud\",\"params\":{\"scale\":\"square root\",\"orientation\":\"single\",\"minFontSize\":26,\"maxFontSize\":72,\"hideLabel\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"applicationProtocol\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "savedSearchId": "6315e7a0-34be-11e7-95dc-4f6090d732f6",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

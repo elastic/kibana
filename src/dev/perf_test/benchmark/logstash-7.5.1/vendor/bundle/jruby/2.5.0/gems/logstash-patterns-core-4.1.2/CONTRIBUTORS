@@ -1,0 +1,59 @@
+The following is a list of people who have contributed ideas, code, bug
+reports, or in general have helped logstash along its way.
+
+Contributors:
+* Aaron Blew (blewa)
+* Alexander Fortin (shaftoe)
+* Avishai Ish-Shalom (avishai-ish-shalom)
+* Brad Fritz (bfritz)
+* Brian DeFreitas (briandef)
+* Chris Mague (maguec)
+* Christian Häussler (cniweb)
+* Colin Surprenant (colinsurprenant)
+* Corry Haines (tabletcorry)
+* Dimitri Tischenko (timidri)
+* Dr. Alexander Papaspyrou (lxndrp)
+* Erez Zarum (erezzarum)
+* Eugen Dinca (decbis)
+* Félix Barbeira (fbarbeira)
+* Greg Brockman (gdb)
+* Greg Mefford (GregMefford)
+* Greg Swallow (gswallow)
+* Guillaume ESPANEL (quatre)
+* Hugo Lopes Tavares (hltbra)
+* Ilya Nazarov (nilya)
+* Jared Everett (jarsever)
+* Jelle Smet (smetj)
+* Jeremiah Shirk (jeremiahshirk)
+* Jordan Sissel (jordansissel)
+* Jose Armesto (fiunchinho)
+* Joseph Price (PriceChild)
+* Kevin Nuckolls (knuckolls)
+* Kurt Hurtado (kurtado)
+* Lorenzo González (logongas)
+* Marcus Pamelia (pamelia)
+* Matt Dainty (bodgit)
+* Matthew Baxa (mbaxa)
+* MikeSchuette
+* Nick Padilla (NickPadilla)
+* Olaf van Zandwijk (olafz)
+* Oluf Lorenzen (Finkregh)
+* Paul Myjavec (pmyjavec)
+* Pete Fritchman (fetep)
+* Peter Fern (pdf)
+* Philippe Weber (wiibaa)
+* Pier-Hugues Pellerin (ph)
+* Prune (prune998)
+* Richard Pijnenburg (electrical)
+* Robin Bowes (robinbowes)
+* Simon Mulser (simonmulser)
+* Tom Robinson (tjrobinson)
+* Tray (torrancew)
+* Vincent Bernat (vincentbernat)
+* olagache
+* xiaclo
+
+Note: If you've sent us patches, bug reports, or otherwise contributed to
+Logstash, and you aren't on the list above and want to be, please let us know
+and we'll make sure you're here. Contributions from folks like you are what make
+open source awesome.

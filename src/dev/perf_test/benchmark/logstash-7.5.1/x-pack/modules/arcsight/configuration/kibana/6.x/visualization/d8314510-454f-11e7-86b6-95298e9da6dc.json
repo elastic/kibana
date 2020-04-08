@@ -1,0 +1,11 @@
+{
+  "title": "Top 20 Behaviors by Outcome [ArcSight]",
+  "visState": "{\"title\":\"Top 20 Behaviors by Outcome [ArcSight]\",\"type\":\"pie\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"categoryBehavior\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Event Behavior\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"categoryOutcome\",\"size\":3,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Event Outcome\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "savedSearchId": "7a2fc9c0-454d-11e7-86b6-95298e9da6dc",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "order": 0,
+  "index_patterns": "arcsight-*",
+  "mappings": {
+    "_meta": {
+      "version": "7.0.0"
+    },
+    "dynamic": true,
+    "dynamic_templates": [
+      {
+        "string_fields": {
+          "mapping": {
+            "type": "keyword"
+          },
+          "match_mapping_type": "string",
+          "match": "*"
+        }
+      }
+    ],
+    "properties": {
+      "destinationPort": {
+        "type": "integer"
+      },
+      "flexDate1": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "sourcePort": {
+        "type": "integer"
+      },
+      "baseEventCount": {
+        "type": "integer"
+      },
+      "destinationAddress": {
+        "type": "ip"
+      },
+      "destinationProcessId": {
+        "type": "integer"
+      },
+      "oldFileSize": {
+        "type": "integer"
+      },
+      "destination": {
+        "dynamic": false,
+        "type": "object",
+        "properties": {
+          "city_name": {
+            "type": "keyword"
+          },
+          "country_name": {
+            "type": "keyword"
+          },
+          "country_code2": {
+              "type": "keyword"
+            },
+          "location": {
+            "type": "geo_point"
+          },
+          "region_name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "source": {
+        "dynamic": false,
+        "type": "object",
+        "properties": {
+          "city_name": {
+            "type": "keyword"
+          },
+          "country_name": {
+            "type": "keyword"
+          },
+          "country_code2": {
+              "type": "keyword"
+            },
+          "location": {
+            "type": "geo_point"
+          },
+          "region_name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "deviceReceiptTime": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "destinationTranslatedPort": {
+        "type": "integer"
+      },
+      "deviceTranslatedAddress": {
+        "type": "ip"
+      },
+      "deviceAddress": {
+        "type": "ip"
+      },
+      "agentReceiptTime": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "startTime": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "sourceProcessId": {
+        "type": "integer"
+      },
+      "bytesIn": {
+        "type": "integer"
+      },
+      "bytesOut": {
+        "type": "integer"
+      },
+      "severity": {
+        "type": "keyword"
+      },
+      "deviceProcessId": {
+        "type": "integer"
+      },
+      "agentAddress": {
+        "type": "ip"
+      },
+      "sourceAddress": {
+        "type": "ip"
+      },
+      "sourceTranslatedPort": {
+        "type": "integer"
+      },
+      "deviceCustomDate2": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "deviceCustomDate1": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "flexNumber1": {
+        "type": "long"
+      },
+      "deviceCustomFloatingPoint1": {
+        "type": "float"
+      },
+      "oldFileModificationTime": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "deviceCustomFloatingPoint2": {
+        "type": "float"
+      },
+      "oldFileCreateTime": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "deviceCustomFloatingPoint3": {
+        "type": "float"
+      },
+      "sourceTranslatedAddress": {
+        "type": "ip"
+      },
+      "deviceCustomFloatingPoint4": {
+        "type": "float"
+      },
+      "flexNumber2": {
+        "type": "long"
+      },
+      "fileCreateTime": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "fileModificationTime": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "fileSize": {
+        "type": "integer"
+      },
+      "destinationTranslatedAddress": {
+        "type": "ip"
+      },
+      "endTime": {
+        "format": "epoch_millis||epoch_second||date_time||MMM dd YYYY HH:mm:ss z||MMM dd yyyy HH:mm:ss",
+        "type": "date"
+      },
+      "deviceCustomNumber1": {
+        "type": "long"
+      },
+      "deviceDirection": {
+        "type": "integer"
+      },
+      "device": {
+        "dynamic": false,
+        "type": "object",
+        "properties": {
+          "city_name": {
+            "type": "keyword"
+          },
+          "country_name": {
+            "type": "keyword"
+          },
+          "country_code2": {
+              "type": "keyword"
+            },
+          "location": {
+            "type": "geo_point"
+          },
+          "region_name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "deviceCustomNumber3": {
+        "type": "long"
+      },
+      "deviceCustomNumber2": {
+        "type": "long"
+      }
+    }
+  }
+}

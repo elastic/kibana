@@ -1,0 +1,59 @@
+There are two sample Java Web Start jnlp files in this directory for 
+starting JRuby and displaying an IRB Console.
+
+  jirb.jnlp
+
+jirb.jnlp uses an unsigned version of the jruby-complete.jar and 
+is run with the standard minimal security permissions that Java 
+Web Start assigns to an untrusted Web Start application. For example 
+while running this version you won't be able to read or write to 
+local directories.
+
+  signed-jirb.jnlp 
+
+signed-jirb.jnlp uses a signed version of the jruby-complete.jar 
+and includes this declaration in the jnlp:
+
+  <security>
+    <all-permissions/>
+  </security>
+
+Running signed-jirb.jnlp will start a JRuby IRB console with Java security
+permissions to interact with the local environment.
+
+In Java 1.5 the codebase attribute on the jnlp element does not support
+using a relative path spec to refer to the JRUBY_HOME/lib directory so
+the default ant task copies jruby-complete.jar to the jars/ directory 
+and also places a signed copy in signed-jars/.
+
+Before running the ant task make sure you have a copy of jruby-complete.jar
+here:
+
+  $JRUBY_HOME/lib/jruby-complete.jar
+
+If you have the JRuby source the jruby-complete.jar can built with this 
+ant task:
+
+  ant jar-complete
+
+Run the default ant task to prepare jruby-complete.jar for both the
+unsigned and signed sample jnlps.
+
+Running the unsigned jnlp sample:
+
+  javaws jirb.jnlp
+
+Running the signed jnlp sample:
+
+  javaws signed-jirb.jnlp
+
+The ant task will create a default jnlp-sample-keystore to use when
+signing the jar.
+
+You can create a keystore and certificate manually like this:
+
+  keytool -genkey -keystore jnlp-sample-keystore -alias jnlp-sample-keystore
+  keytool -selfcert -alias jnlp-sample-keystore -keystore jnlp-sample-keystore
+
+If you change the properties here or in the ant task generate-keystore
+also edit the values in the file default.properties to match the new values.

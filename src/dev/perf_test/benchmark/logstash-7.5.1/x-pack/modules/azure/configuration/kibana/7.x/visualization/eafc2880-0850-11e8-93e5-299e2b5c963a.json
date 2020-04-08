@@ -1,0 +1,10 @@
+{
+  "title": "Storage Used [Azure Monitor]",
+  "visState": "{\"title\":\"Storage Used [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(104,188,0,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"avg\",\"field\":\"data.average\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"ac54e1d0-0850-11e8-8a9e-77e15a1ba1ec\",\"type\":\"moving_average\",\"field\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":\"0.4\",\"stacked\":\"none\",\"split_filters\":[{\"filter\":\"data.metricName:storage_percent\",\"label\":\"Database Storage %\",\"color\":\"#68BC00\",\"id\":\"b0e7fe80-0850-11e8-8a9e-77e15a1ba1ec\"}],\"label\":\"Storage\",\"value_template\":\"{{value}}%\",\"axis_max\":\"100\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":0,\"show_grid\":1,\"axis_max\":\"100\",\"filter\":\"data.metricName:storage_percent\",\"axis_min\":\"0\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

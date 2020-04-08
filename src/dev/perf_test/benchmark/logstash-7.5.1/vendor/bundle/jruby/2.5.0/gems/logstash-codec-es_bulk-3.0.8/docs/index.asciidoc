@@ -1,0 +1,39 @@
+:plugin: es_bulk
+:type: codec
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Es_bulk codec plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This codec will decode the {ref}/docs-bulk.html[Elasticsearch bulk format]
+into individual events, plus metadata into the `@metadata` field.
+
+Encoding is not supported at this time as the Elasticsearch
+output submits Logstash events in bulk format.
+
+[id="plugins-{type}s-{plugin}-codec-settings"] 
+==== Codec settings in the `logstash-input-http` plugin 
+
+The {logstash-ref}/plugins-inputs-http.html[input-http] plugin has two
+configuration options for codecs: `codec` and `additional_codecs`. 
+
+Values in `additional_codecs` are prioritized over those specified in the
+`codec` option. That is, the default `codec` is applied only if no codec
+for the request's content-type is found in the `additional_codecs` setting.
+
+

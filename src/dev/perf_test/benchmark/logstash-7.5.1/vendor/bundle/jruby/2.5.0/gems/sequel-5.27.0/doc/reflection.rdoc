@@ -1,0 +1,120 @@
+= Reflection
+
+Sequel supports reflection information in multiple ways.
+
+== Adapter in Use
+
+You can get the adapter in use using Database#adapter_scheme:
+
+  DB.adapter_scheme # :postgres, :jdbc, :odbc
+
+== Database Connected To
+
+In some cases, the adapter scheme will be the same as the database to which you are connecting.  However, many adapters support multiple databases.  You can use the Database#database_type method to get the type of database to which you are connecting:
+
+  DB.database_type # :postgres, :h2, :mssql
+
+== Tables in the Database
+
+Database#tables gives an array of table name symbols:
+
+  DB.tables # [:table1, :table2, :table3, ...]
+
+== Views in the Database
+
+Database#views and gives an array of view name symbols:
+
+  DB.views # [:view1, :view2, :view3, ...]
+
+== Indexes on a table
+
+Database#indexes takes a table name gives a hash of index information.  Keys are index names, values are subhashes with the keys :columns and :unique :
+
+  DB.indexes(:table1) # {:index1=>{:columns=>[:column1], :unique=>false}, :index2=>{:columns=>[:column2, :column3], :unique=>true}}
+
+Index information generally does not include partial indexes, functional indexes, or indexes on the primary key of the table.
+
+== Foreign Key Information for a Table
+
+Database#foreign_key_list takes a table name and gives an array of hashes of foreign key information:
+
+  DB.foreign_key_list(:table1) # [{:columns=>[:column1], :table=>:referenced_table, :key=>[:referenced_column1]}]
+
+At least the following entries will be present in the hash:
+
+:columns :: An array of columns in the given table
+:table :: The table referenced by the columns
+:key :: An array of columns referenced (in the table specified by :table), but can be nil on certain adapters
+        if the primary key is referenced.
+
+The hash may also contain entries for:
+
+:deferrable :: Whether the constraint is deferrable
+:name :: The name of the constraint
+:on_delete :: The action to take ON DELETE
+:on_update :: The action to take ON UPDATE
+
+== Column Information for a Table
+
+Database#schema takes a table symbol and returns column information in an array with each element being an array with two elements.  The first elements of the subarray is a column symbol, and the second element is a hash of information about that column.  The hash should include the following keys:
+
+:allow_null :: Whether NULL/nil is an allowed value for this column. Used by the Sequel::Model typecasting code.
+:db_type :: The type of column the database provided, as a string.  Used by the schema_dumper plugin for a more specific type translation.
+:default :: The default value of the column, as either a string or nil.  Uses a database specific format. Used by the schema_dumper plugin for converting to a ruby value.
+:primary_key :: Whether this column is one of the primary key columns for the table.  Used by the Sequel::Model code to determine primary key columns.
+:ruby_default :: The default value of the column as a ruby object, or nil if there is no default or the default could not be successfully parsed into a ruby object.
+:type :: The type of column, as a symbol (e.g. :string).  Used by the Sequel::Model typecasting code.
+
+Example:
+
+  DB.schema(:table) # [[:column1, {:allow_null=>true, :db_type=>'varchar(255)', :default=>'blah', :primary_key=>false, :type=>:string}], ...]
+
+== Column Information for a Model
+
+Model#db_schema returns pretty much the same information, except it returns it as a hash with column keys instead of an array of two element arrays.
+
+  Model.db_schema # {:column1=>{:allow_null=>true, :db_type=>'varchar(255)', :default=>'blah', :primary_key=>false, :type=>:string}, ...}
+
+== Columns used by a dataset/model
+
+Dataset#columns returns the columns of the current dataset as an array of symbols:
+
+  DB[:table].columns # [:column1, :column2, :column3, ...]
+
+Dataset#columns! does the same thing, except it ignores any cached value.  In general, the cached value should never be incorrect, unless the database schema is changed after the dataset is created.
+
+  DB[:table].columns! # [:column1, :column2, :column3, ...]
+
+Model.columns does the same thing as Dataset#columns, using the model's dataset:
+
+  Model.columns # [:column1, :column2, :column3, ...]
+
+== Associations Defined
+
+Sequel::Model offers complete introspection capability for all associations.
+
+You can get an array of association symbols with Model.associations:
+
+  Model.associations # [:association1, :association2, ...]
+
+You can get the association reflection for a single association via the Model.association_reflection.  Association reflections are subclasses of hash:
+
+  Model.association_reflection(:association1) # #<Sequel::Model::Associations::ManyToOneAssociationReflection Model.many_to_one :association1>
+
+You can get an array of all association reflections via Model.all_association_reflections:
+
+  Model.all_association_reflections # [#<Sequel::Model::Associations::ManyToOneAssociationReflection Model.many_to_one :association1>, ...]
+
+Finally, you can get a hash of association reflections via Model.association_reflections:
+
+  Model.association_reflections # {:association1=>#<Sequel::Model::Associations::ManyToOneAssociationReflection Model.many_to_one :association1>, ...}
+
+== Validations Defined
+
+When using the validation_class_methods plugin, you can use the validation_reflections class method to get a hash with validation reflection information.  This returns a hash keyed on the column name symbol:
+
+  Model.validation_reflections[:column] # => [[:presence, {}], [:length, {:maximum=>255, :message=>'is just too long'}]]
+
+Similarly, when using the constraint_validations plugin, you can use the constraint_validation_reflections class method:
+
+  Model.constraint_validation_reflections[:column] # => [[:presence, {}], [:max_length, {:argument=>255, :message=>'is just too long'}]]

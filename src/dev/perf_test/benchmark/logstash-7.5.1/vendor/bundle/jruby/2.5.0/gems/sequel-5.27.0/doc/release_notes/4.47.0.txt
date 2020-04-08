@@ -1,0 +1,56 @@
+= Deprecated Features
+
+* Setting an invalid dataset for a model is now deprecated.
+  Historically, Sequel has swallowed exceptions for this to keep
+  backwards compatibility, but it generally just results in code
+  breaking later.  To allow invalid datasets to be used:
+
+    Sequel::Model.require_valid_table = false
+
+* The association_autoreloading and many_to_one_pk_lookup plugins
+  are now deprecated.  They were moved from plugins to standard
+  model behavior in Sequel 4.0, and have been no-ops since.
+
+* The pg_typecast_on_load plugin is now deprecated.  It is only useful
+  on the already deprecated do and swift adapters.
+
+= New Features
+
+* Database#with_server in the server_block extension now accepts an
+  optional second argument for the read only server to use.  This
+  allows for overriding the default server while providing a separate
+  default for read only queries:
+
+    DB.with_server(:server1, :server1ro) do
+      DB[:a].all       # Uses server1ro
+      DB[:b].insert(1) # Uses server1
+    end
+
+* Model.default_association_type_options has been added, allowing the
+  ability to set default options per association type.  This can be
+  used to make some association types read_only by default:
+
+    opts = Sequel::Model.default_association_type_options
+    opts[:one_to_many] = opts[:many_to_many] = {:read_only=>true}
+  
+* Database#views on PostgreSQL now accepts a :materialized option to
+  return materialized views instead of regular views.
+
+= Other Improvements
+
+* Setting Sequel::Model.require_valid_table = true no longer raises
+  an exception when using a valid dataset that selects from a subquery
+  or table returning function or uses a join.
+
+* The defaults_setter plugin now inherits any custom default
+  values when subclassing.
+
+* The schema_dumper extension now handles Oracle 11g XE behavior of
+  appending not null to the database type.
+
+= Backwards Compatibility
+
+* External callers of Database#check_non_connection_error (private
+  method) should update their code to call it with a true or false
+  argument specifying whether to raise an error for exceptions that
+  are not connection errors.

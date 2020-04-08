@@ -1,0 +1,334 @@
+#!/bin/bash
+
+# bail out if any part of this fails
+set -e
+
+# This is the self-extracting installer script for an FPM shell installer package.
+# It contains the logic to unpack a tar archive appended to the end of this script
+# and, optionally, to run post install logic.
+# Run the package file with -h to see a usage message or look at the print_usage method.
+#
+# The post install scripts are called with INSTALL_ROOT, INSTALL_DIR and VERBOSE exported
+# into the environment for their use.
+#
+# INSTALL_ROOT = the path passed in with -i or a relative directory of the name of the package
+#                file with no extension
+# INSTALL_DIR  = the same as INSTALL_ROOT unless -c (capistrano release directory) argumetn
+#                is used. Then it is $INSTALL_ROOT/releases/<datestamp>
+# CURRENT_DIR  = if -c argument is used, this is set to the $INSTALL_ROOT/current which is
+#                symlinked to INSTALL_DIR
+# VERBOSE      = is set if the package was called with -v for verbose output
+function main() {
+    set_install_dir
+
+    if ! slug_already_current ; then
+
+      create_pid
+      wait_for_others
+      kill_others
+      set_owner
+      unpack_payload
+
+      if [ "$UNPACK_ONLY" == "1" ] ; then
+          echo "Unpacking complete, not moving symlinks or restarting because unpack only was specified."
+      else
+          create_symlinks
+
+          set +e # don't exit on errors to allow us to clean up
+          if ! run_post_install ; then
+              revert_symlinks
+              log "Installation failed."
+              exit 1
+          else
+              clean_out_old_releases
+              log "Installation complete."
+          fi
+      fi
+
+    else
+        echo "This slug is already installed in 'current'. Specify -f to force reinstall. Exiting."
+    fi
+}
+
+# check if this slug is already running and exit unless `force` specified
+# Note: this only works with RELEASE_ID is used
+function slug_already_current(){
+    local this_slug=$(basename $0 .slug)
+    local current=$(basename "$(readlink ${INSTALL_ROOT}/current)")
+    log "'current' symlink points to slug: ${current}"
+
+    if [ "$this_slug" == "$current" ] ; then
+        if [ "$FORCE" == "1" ] ; then
+        log "Force was specified. Proceeding with install after renaming live directory to allow running service to shutdown correctly."
+            local real_dir=$(readlink ${INSTALL_ROOT}/current)
+            if [ -f ${real_dir}.old ] ; then
+                # remove that .old directory, if needed
+                rm -rf ${real_dir}.old
+            fi
+            mv ${real_dir} ${real_dir}.old
+            mkdir -p ${real_dir}
+        else
+            return 0;
+        fi
+    fi
+    return 1;
+}
+
+# deletes the PID file for this installation
+function delete_pid(){
+    rm -f ${INSTALL_ROOT}/$$.pid 2> /dev/null
+}
+
+# creates a PID file for this installation
+function create_pid(){
+    trap "delete_pid" EXIT
+    echo $$> ${INSTALL_ROOT}/$$.pid
+}
+
+
+# checks for other PID files and sleeps for a grace period if found
+function wait_for_others(){
+    local count=`ls ${INSTALL_ROOT}/*.pid | wc -l`
+
+    if [ $count -gt 1 ] ; then
+        sleep 10
+    fi
+}
+
+# kills other running installations
+function kill_others(){
+    for PID_FILE in $(ls ${INSTALL_ROOT}/*.pid) ; do
+        local p=`cat ${PID_FILE}`
+        if ! [ $p == $$ ] ; then
+            kill -9 $p
+            rm -f $PID_FILE 2> /dev/null
+        fi
+    done
+}
+
+# echos metadata file. A function so that we can have it change after we set INSTALL_ROOT
+function fpm_metadata_file(){
+    echo "${INSTALL_ROOT}/.install-metadata"
+}
+
+# if this package was installed at this location already we will find a metadata file with the details
+# about the installation that we left here. Load from that if available but allow command line args to trump
+function load_environment(){
+    local METADATA=$(fpm_metadata_file)
+    if [ -r "${METADATA}" ] ; then
+        log "Found existing metadata file '${METADATA}'. Loading previous install details. Env vars in current environment will take precedence over saved values."
+        local TMP="/tmp/$(basename $0).$$.tmp"
+        # save existing environment, load saved environment from previous run from install-metadata and then
+        # overlay current environment so that anything set currencly will take precedence
+        # but missing values will be loaded from previous runs.
+        save_environment "$TMP"
+        source "${METADATA}"
+        source $TMP
+        rm "$TMP"
+    fi
+}
+
+# write out metadata for future installs
+function save_environment(){
+    local METADATA=$1
+    echo -n "" > ${METADATA} # empty file
+
+    # just piping env to a file doesn't quote the variables. This does
+    # filter out multiline junk, _, and functions. _ is a readonly variable.
+    env | grep -v "^_=" | grep -v "^[^=(]*()=" | egrep "^[^ ]+=" | while read ENVVAR ; do
+        local NAME=${ENVVAR%%=*}
+        # sed is to preserve variable values with dollars (for escaped variables or $() style command replacement),
+        # and command replacement backticks
+        # Escaped parens captures backward reference \1 which gets replaced with backslash and \1 to esape them in the saved
+        # variable value
+        local VALUE=$(eval echo '$'$NAME | sed 's/\([$`]\)/\\\1/g')
+        echo "export $NAME=\"$VALUE\"" >> ${METADATA}
+    done
+
+    if [ -n "${OWNER}" ] ; then
+        chown ${OWNER} ${METADATA}
+    fi
+}
+
+function set_install_dir(){
+    # if INSTALL_ROOT isn't set by parsed args, use basename of package file with no extension
+    DEFAULT_DIR=$(echo $(basename $0) | sed -e 's/\.[^\.]*$//')
+    INSTALL_DIR=${INSTALL_ROOT:-$DEFAULT_DIR}
+
+    DATESTAMP=$(date +%Y%m%d%H%M%S)
+    if [ -z "$USE_FLAT_RELEASE_DIRECTORY" ] ; then
+        <%= "RELEASE_ID=#{release_id}" if respond_to?(:release_id) %>
+        INSTALL_DIR="${RELEASES_DIR}/${RELEASE_ID:-$DATESTAMP}"
+    fi
+
+    mkdir -p "$INSTALL_DIR" || die "Unable to create install directory $INSTALL_DIR"
+
+    export INSTALL_DIR
+
+    log "Installing package to '$INSTALL_DIR'"
+}
+
+function set_owner(){
+    export OWNER=${OWNER:-$USER}
+    log "Installing as user $OWNER"
+}
+
+function unpack_payload(){
+    if [ "$FORCE" == "1" ] || [ ! "$(ls -A $INSTALL_DIR)" ] ; then
+        log "Unpacking payload . . ."
+        local archive_line=$(grep -a -n -m1 '__ARCHIVE__$' $0 | sed 's/:.*//')
+        tail -n +$((archive_line + 1)) $0 | tar -C $INSTALL_DIR -xf - > /dev/null || die "Failed to unpack payload from the end of '$0' into '$INSTALL_DIR'"
+    else
+        # Files are already here, just move symlinks
+        log "Directory already exists and has contents ($INSTALL_DIR). Not unpacking payload."
+    fi
+}
+
+function run_post_install(){
+    local AFTER_INSTALL=$INSTALL_DIR/.fpm/after_install
+    if [ -r $AFTER_INSTALL ] ; then
+        chmod +x $AFTER_INSTALL
+        log "Running post install script"
+        output=$($AFTER_INSTALL 2>&1)
+        errorlevel=$?
+        log $output
+        return $errorlevel
+    fi
+    return 0
+}
+
+function create_symlinks(){
+    [ -n "$USE_FLAT_RELEASE_DIRECTORY" ] && return
+
+    export CURRENT_DIR="$INSTALL_ROOT/current"
+    if [ -e "$CURRENT_DIR" ] ; then
+        OLD_CURRENT_TARGET=$(readlink $CURRENT_DIR)
+        rm "$CURRENT_DIR"
+    fi
+    ln -s "$INSTALL_DIR" "$CURRENT_DIR"
+
+    log "Symlinked '$INSTALL_DIR' to '$CURRENT_DIR'"
+}
+
+# in case post install fails we may have to back out switching the symlink to current
+# We can't switch the symlink after because post install may assume that it is in the
+# exact state of being installed (services looking to current for their latest code)
+function revert_symlinks(){
+    if [ -n "$OLD_CURRENT_TARGET" ] ; then
+        log "Putting current symlink back to '$OLD_CURRENT_TARGET'"
+        if [ -e "$CURRENT_DIR" ] ; then
+            rm "$CURRENT_DIR"
+        fi
+        ln -s "$OLD_CURRENT_TARGET" "$CURRENT_DIR"
+    fi
+}
+
+function clean_out_old_releases(){
+    [ -n "$USE_FLAT_RELEASE_DIRECTORY" ] && return
+
+    if [ -n "$OLD_CURRENT_TARGET" ] ; then
+        # exclude old 'current' from deletions
+        while [ $(ls -tr "${RELEASES_DIR}" | grep -v ^$(basename "${OLD_CURRENT_TARGET}")$ | wc -l) -gt 2 ] ; do
+            OLDEST_RELEASE=$(ls -tr "${RELEASES_DIR}" | grep -v ^$(basename "${OLD_CURRENT_TARGET}")$ | head -1)
+            log "Deleting old release '${OLDEST_RELEASE}'"
+            rm -rf "${RELEASES_DIR}/${OLDEST_RELEASE}"
+        done
+    else
+        while [ $(ls -tr "${RELEASES_DIR}" | wc -l) -gt 2 ] ; do
+            OLDEST_RELEASE=$(ls -tr "${RELEASES_DIR}" | head -1)
+            log "Deleting old release '${OLDEST_RELEASE}'"
+            rm -rf "${RELEASES_DIR}/${OLDEST_RELEASE}"
+        done
+    fi
+}
+
+function print_usage(){
+    echo "Usage: `basename $0` [options]"
+    echo "Install this package"
+    echo "  -i <DIRECTORY> : install_root - an optional directory to install to."
+    echo "      Default is package file name without file extension"
+    echo "  -o <USER>     : owner - the name of the user that will own the files installed"
+    echo "                   by the package. Defaults to current user"
+    echo "  -r: disable capistrano style release directories - Default behavior is to create a releases directory inside"
+    echo "      install_root and unpack contents into a date stamped (or build time id named) directory under the release"
+    echo "      directory. Then create a 'current' symlink under install_root to the unpacked"
+    echo "      directory once installation is complete replacing the symlink if it already "
+    echo "      exists. If this flag is set just install into install_root directly"
+    echo "  -u: Unpack the package, but do not install and symlink the payload"
+    echo "  -f: force - Always overwrite existing installations"
+    echo "  -y: yes - Don't prompt to clobber existing installations"
+    echo "  -v: verbose - More output on installation"
+    echo "  -h: help -  Display this message"
+}
+
+function die () {
+    local message=$*
+    echo "Error: $message : $!"
+    exit 1
+}
+
+function log(){
+    local message=$*
+    if [ -n "$VERBOSE" ] ; then
+        echo "$*"
+    fi
+}
+
+function parse_args() {
+    args=`getopt i:o:rfuyvh $*`
+
+    if [ $? != 0 ] ; then
+        print_usage
+        exit 2
+    fi
+    set -- $args
+    for i
+    do
+        case "$i"
+            in
+            -r)
+                USE_FLAT_RELEASE_DIRECTORY=1
+                shift;;
+            -i)
+                shift;
+                export INSTALL_ROOT="$1"
+                export RELEASES_DIR="${INSTALL_ROOT}/releases"
+                shift;;
+            -o)
+                shift;
+                export OWNER="$1"
+                shift;;
+            -v)
+                export VERBOSE=1
+                shift;;
+            -u)
+                UNPACK_ONLY=1
+                shift;;
+            -f)
+                FORCE=1
+                shift;;
+            -y)
+                CONFIRM="y"
+                shift;;
+            -h)
+                print_usage
+                exit 0
+                shift;;
+            --)
+                shift; break;;
+        esac
+    done
+}
+
+# parse args first to get install root
+parse_args $*
+# load environment from previous installations so we get defaults from that
+load_environment
+# reparse args so they can override any settings from previous installations if provided on the command line
+parse_args $*
+
+main
+save_environment $(fpm_metadata_file)
+exit 0
+
+__ARCHIVE__

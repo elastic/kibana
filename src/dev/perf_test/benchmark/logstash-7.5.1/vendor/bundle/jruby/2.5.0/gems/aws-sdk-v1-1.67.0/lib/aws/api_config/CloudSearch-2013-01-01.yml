@@ -1,0 +1,1184 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2013-01-01'
+:operations:
+- :name: BuildSuggesters
+  :method: :build_suggesters
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    - :required
+  :outputs:
+    :children:
+      BuildSuggestersResult:
+        :ignore: true
+        :children:
+          FieldNames:
+            :ignore: true
+            :children:
+              member:
+                :rename: :field_names
+                :list: true
+- :name: CreateDomain
+  :method: :create_domain
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateDomainResult:
+        :ignore: true
+        :children:
+          DomainStatus:
+            :children:
+              Created:
+                :type: :boolean
+              Deleted:
+                :type: :boolean
+              RequiresIndexDocuments:
+                :type: :boolean
+              Processing:
+                :type: :boolean
+              SearchPartitionCount:
+                :type: :integer
+              SearchInstanceCount:
+                :type: :integer
+              Limits:
+                :children:
+                  MaximumReplicationCount:
+                    :type: :integer
+                  MaximumPartitionCount:
+                    :type: :integer
+- :name: DefineAnalysisScheme
+  :method: :define_analysis_scheme
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    AnalysisScheme:
+    - :structure:
+        AnalysisSchemeName:
+        - :string
+        - :required
+        AnalysisSchemeLanguage:
+        - :string
+        - :required
+        AnalysisOptions:
+        - :structure:
+            Synonyms:
+            - :string
+            Stopwords:
+            - :string
+            StemmingDictionary:
+            - :string
+            JapaneseTokenizationDictionary:
+            - :string
+            AlgorithmicStemming:
+            - :string
+    - :required
+  :outputs:
+    :children:
+      DefineAnalysisSchemeResult:
+        :ignore: true
+        :children:
+          AnalysisScheme:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DefineExpression
+  :method: :define_expression
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    Expression:
+    - :structure:
+        ExpressionName:
+        - :string
+        - :required
+        ExpressionValue:
+        - :string
+        - :required
+    - :required
+  :outputs:
+    :children:
+      DefineExpressionResult:
+        :ignore: true
+        :children:
+          Expression:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DefineIndexField
+  :method: :define_index_field
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    IndexField:
+    - :structure:
+        IndexFieldName:
+        - :string
+        - :required
+        IndexFieldType:
+        - :string
+        - :required
+        IntOptions:
+        - :structure:
+            DefaultValue:
+            - :long
+            SourceField:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+            SortEnabled:
+            - :boolean
+        DoubleOptions:
+        - :structure:
+            DefaultValue:
+            - :double
+            SourceField:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+            SortEnabled:
+            - :boolean
+        LiteralOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            SourceField:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+            SortEnabled:
+            - :boolean
+        TextOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            SourceField:
+            - :string
+            ReturnEnabled:
+            - :boolean
+            SortEnabled:
+            - :boolean
+            HighlightEnabled:
+            - :boolean
+            AnalysisScheme:
+            - :string
+        DateOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            SourceField:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+            SortEnabled:
+            - :boolean
+        LatLonOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            SourceField:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+            SortEnabled:
+            - :boolean
+        IntArrayOptions:
+        - :structure:
+            DefaultValue:
+            - :long
+            SourceFields:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+        DoubleArrayOptions:
+        - :structure:
+            DefaultValue:
+            - :double
+            SourceFields:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+        LiteralArrayOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            SourceFields:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+        TextArrayOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            SourceFields:
+            - :string
+            ReturnEnabled:
+            - :boolean
+            HighlightEnabled:
+            - :boolean
+            AnalysisScheme:
+            - :string
+        DateArrayOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            SourceFields:
+            - :string
+            FacetEnabled:
+            - :boolean
+            SearchEnabled:
+            - :boolean
+            ReturnEnabled:
+            - :boolean
+    - :required
+  :outputs:
+    :children:
+      DefineIndexFieldResult:
+        :ignore: true
+        :children:
+          IndexField:
+            :children:
+              Options:
+                :children:
+                  IntOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :integer
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  DoubleOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :float
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  LiteralOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  TextOptions:
+                    :children:
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                      HighlightEnabled:
+                        :type: :boolean
+                  DateOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  LatLonOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  IntArrayOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :integer
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                  DoubleArrayOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :float
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                  LiteralArrayOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                  TextArrayOptions:
+                    :children:
+                      ReturnEnabled:
+                        :type: :boolean
+                      HighlightEnabled:
+                        :type: :boolean
+                  DateArrayOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DefineSuggester
+  :method: :define_suggester
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    Suggester:
+    - :structure:
+        SuggesterName:
+        - :string
+        - :required
+        DocumentSuggesterOptions:
+        - :structure:
+            SourceField:
+            - :string
+            - :required
+            FuzzyMatching:
+            - :string
+            SortExpression:
+            - :string
+        - :required
+    - :required
+  :outputs:
+    :children:
+      DefineSuggesterResult:
+        :ignore: true
+        :children:
+          Suggester:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DeleteAnalysisScheme
+  :method: :delete_analysis_scheme
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    AnalysisSchemeName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteAnalysisSchemeResult:
+        :ignore: true
+        :children:
+          AnalysisScheme:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DeleteDomain
+  :method: :delete_domain
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteDomainResult:
+        :ignore: true
+        :children:
+          DomainStatus:
+            :children:
+              Created:
+                :type: :boolean
+              Deleted:
+                :type: :boolean
+              RequiresIndexDocuments:
+                :type: :boolean
+              Processing:
+                :type: :boolean
+              SearchPartitionCount:
+                :type: :integer
+              SearchInstanceCount:
+                :type: :integer
+              Limits:
+                :children:
+                  MaximumReplicationCount:
+                    :type: :integer
+                  MaximumPartitionCount:
+                    :type: :integer
+- :name: DeleteExpression
+  :method: :delete_expression
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    ExpressionName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteExpressionResult:
+        :ignore: true
+        :children:
+          Expression:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DeleteIndexField
+  :method: :delete_index_field
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    IndexFieldName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteIndexFieldResult:
+        :ignore: true
+        :children:
+          IndexField:
+            :children:
+              Options:
+                :children:
+                  IntOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :integer
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  DoubleOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :float
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  LiteralOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  TextOptions:
+                    :children:
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                      HighlightEnabled:
+                        :type: :boolean
+                  DateOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  LatLonOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                      SortEnabled:
+                        :type: :boolean
+                  IntArrayOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :integer
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                  DoubleArrayOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :float
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                  LiteralArrayOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+                  TextArrayOptions:
+                    :children:
+                      ReturnEnabled:
+                        :type: :boolean
+                      HighlightEnabled:
+                        :type: :boolean
+                  DateArrayOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      SearchEnabled:
+                        :type: :boolean
+                      ReturnEnabled:
+                        :type: :boolean
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DeleteSuggester
+  :method: :delete_suggester
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    SuggesterName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteSuggesterResult:
+        :ignore: true
+        :children:
+          Suggester:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DescribeAnalysisSchemes
+  :method: :describe_analysis_schemes
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    AnalysisSchemeNames:
+    - :membered_list:
+      - :string
+    Deployed:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeAnalysisSchemesResult:
+        :ignore: true
+        :children:
+          AnalysisSchemes:
+            :ignore: true
+            :children:
+              member:
+                :rename: :analysis_schemes
+                :list: true
+                :children:
+                  Status:
+                    :children:
+                      CreationDate:
+                        :type: :time
+                      UpdateDate:
+                        :type: :time
+                      UpdateVersion:
+                        :type: :integer
+                      PendingDeletion:
+                        :type: :boolean
+- :name: DescribeAvailabilityOptions
+  :method: :describe_availability_options
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    Deployed:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeAvailabilityOptionsResult:
+        :ignore: true
+        :children:
+          AvailabilityOptions:
+            :children:
+              Options:
+                :type: :boolean
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DescribeDomains
+  :method: :describe_domains
+  :inputs:
+    DomainNames:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeDomainsResult:
+        :ignore: true
+        :children:
+          DomainStatusList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :domain_status_list
+                :list: true
+                :children:
+                  Created:
+                    :type: :boolean
+                  Deleted:
+                    :type: :boolean
+                  RequiresIndexDocuments:
+                    :type: :boolean
+                  Processing:
+                    :type: :boolean
+                  SearchPartitionCount:
+                    :type: :integer
+                  SearchInstanceCount:
+                    :type: :integer
+                  Limits:
+                    :children:
+                      MaximumReplicationCount:
+                        :type: :integer
+                      MaximumPartitionCount:
+                        :type: :integer
+- :name: DescribeExpressions
+  :method: :describe_expressions
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    ExpressionNames:
+    - :membered_list:
+      - :string
+    Deployed:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeExpressionsResult:
+        :ignore: true
+        :children:
+          Expressions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :expressions
+                :list: true
+                :children:
+                  Status:
+                    :children:
+                      CreationDate:
+                        :type: :time
+                      UpdateDate:
+                        :type: :time
+                      UpdateVersion:
+                        :type: :integer
+                      PendingDeletion:
+                        :type: :boolean
+- :name: DescribeIndexFields
+  :method: :describe_index_fields
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    FieldNames:
+    - :membered_list:
+      - :string
+    Deployed:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeIndexFieldsResult:
+        :ignore: true
+        :children:
+          IndexFields:
+            :ignore: true
+            :children:
+              member:
+                :rename: :index_fields
+                :list: true
+                :children:
+                  Options:
+                    :children:
+                      IntOptions:
+                        :children:
+                          DefaultValue:
+                            :type: :integer
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                          SortEnabled:
+                            :type: :boolean
+                      DoubleOptions:
+                        :children:
+                          DefaultValue:
+                            :type: :float
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                          SortEnabled:
+                            :type: :boolean
+                      LiteralOptions:
+                        :children:
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                          SortEnabled:
+                            :type: :boolean
+                      TextOptions:
+                        :children:
+                          ReturnEnabled:
+                            :type: :boolean
+                          SortEnabled:
+                            :type: :boolean
+                          HighlightEnabled:
+                            :type: :boolean
+                      DateOptions:
+                        :children:
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                          SortEnabled:
+                            :type: :boolean
+                      LatLonOptions:
+                        :children:
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                          SortEnabled:
+                            :type: :boolean
+                      IntArrayOptions:
+                        :children:
+                          DefaultValue:
+                            :type: :integer
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                      DoubleArrayOptions:
+                        :children:
+                          DefaultValue:
+                            :type: :float
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                      LiteralArrayOptions:
+                        :children:
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                      TextArrayOptions:
+                        :children:
+                          ReturnEnabled:
+                            :type: :boolean
+                          HighlightEnabled:
+                            :type: :boolean
+                      DateArrayOptions:
+                        :children:
+                          FacetEnabled:
+                            :type: :boolean
+                          SearchEnabled:
+                            :type: :boolean
+                          ReturnEnabled:
+                            :type: :boolean
+                  Status:
+                    :children:
+                      CreationDate:
+                        :type: :time
+                      UpdateDate:
+                        :type: :time
+                      UpdateVersion:
+                        :type: :integer
+                      PendingDeletion:
+                        :type: :boolean
+- :name: DescribeScalingParameters
+  :method: :describe_scaling_parameters
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeScalingParametersResult:
+        :ignore: true
+        :children:
+          ScalingParameters:
+            :children:
+              Options:
+                :children:
+                  DesiredReplicationCount:
+                    :type: :integer
+                  DesiredPartitionCount:
+                    :type: :integer
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DescribeServiceAccessPolicies
+  :method: :describe_service_access_policies
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    Deployed:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeServiceAccessPoliciesResult:
+        :ignore: true
+        :children:
+          AccessPolicies:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: DescribeSuggesters
+  :method: :describe_suggesters
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    SuggesterNames:
+    - :membered_list:
+      - :string
+    Deployed:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeSuggestersResult:
+        :ignore: true
+        :children:
+          Suggesters:
+            :ignore: true
+            :children:
+              member:
+                :rename: :suggesters
+                :list: true
+                :children:
+                  Status:
+                    :children:
+                      CreationDate:
+                        :type: :time
+                      UpdateDate:
+                        :type: :time
+                      UpdateVersion:
+                        :type: :integer
+                      PendingDeletion:
+                        :type: :boolean
+- :name: IndexDocuments
+  :method: :index_documents
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    - :required
+  :outputs:
+    :children:
+      IndexDocumentsResult:
+        :ignore: true
+        :children:
+          FieldNames:
+            :ignore: true
+            :children:
+              member:
+                :rename: :field_names
+                :list: true
+- :name: ListDomainNames
+  :method: :list_domain_names
+  :inputs: {}
+  :outputs:
+    :children:
+      ListDomainNamesResult:
+        :ignore: true
+        :children:
+          DomainNames:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :domain_names
+                :map:
+                - key
+                - value
+- :name: UpdateAvailabilityOptions
+  :method: :update_availability_options
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    MultiAZ:
+    - :boolean
+    - :required
+  :outputs:
+    :children:
+      UpdateAvailabilityOptionsResult:
+        :ignore: true
+        :children:
+          AvailabilityOptions:
+            :children:
+              Options:
+                :type: :boolean
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: UpdateScalingParameters
+  :method: :update_scaling_parameters
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    ScalingParameters:
+    - :structure:
+        DesiredInstanceType:
+        - :string
+        DesiredReplicationCount:
+        - :integer
+        DesiredPartitionCount:
+        - :integer
+    - :required
+  :outputs:
+    :children:
+      UpdateScalingParametersResult:
+        :ignore: true
+        :children:
+          ScalingParameters:
+            :children:
+              Options:
+                :children:
+                  DesiredReplicationCount:
+                    :type: :integer
+                  DesiredPartitionCount:
+                    :type: :integer
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean
+- :name: UpdateServiceAccessPolicies
+  :method: :update_service_access_policies
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    AccessPolicies:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateServiceAccessPoliciesResult:
+        :ignore: true
+        :children:
+          AccessPolicies:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+                  PendingDeletion:
+                    :type: :boolean

@@ -1,0 +1,10 @@
+{
+  "title": "Query Duration (ms) [Azure Monitor]",
+  "visState": "{\"title\":\"Query Duration (ms) [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"a5439470-07fd-11e8-92fe-81a50acfdb07\",\"color\":\"rgba(255,222,85,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"a5439471-07fd-11e8-92fe-81a50acfdb07\",\"type\":\"avg\",\"field\":\"sql_diagnostics_QueryStoreRuntimeStatistics_properties.duration\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"bf5c2ed0-07fd-11e8-92fe-81a50acfdb07\",\"type\":\"moving_average\",\"field\":\"a5439471-07fd-11e8-92fe-81a50acfdb07\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0.0a\",\"chart_type\":\"line\",\"line_width\":\"1\",\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"label\":\"Query Duration\"},{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(0,191,179,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"avg\",\"field\":\"sql_diagnostics_QueryStoreRuntimeStatistics_properties.duration\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"4e9246e0-07e3-11e8-a756-61fb48b75e56\",\"type\":\"moving_average\",\"field\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0.0a\",\"chart_type\":\"bar\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.4\",\"stacked\":\"none\",\"terms_field\":\"azure.resource_name.keyword\",\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"terms_size\":\"3\",\"value_template\":\"{{value}}\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"filter\":\"azure.group:sql_diagnostics\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

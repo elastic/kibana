@@ -1,0 +1,77 @@
+:plugin: drop
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Drop filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Drop filter.
+
+Drops everything that gets to this filter.
+
+This is best used in combination with conditionals, for example:
+[source,ruby]
+    filter {
+      if [loglevel] == "debug" {
+        drop { }
+      }
+    }
+
+The above will only pass events to the drop filter if the loglevel field is
+`debug`. This will cause all events matching to be dropped.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Drop Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-percentage>> |<<number,number>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-percentage"]
+===== `percentage` 
+
+  * Value type is <<number,number>>
+  * Default value is `100`
+
+Drop all the events within a pre-configured percentage.
+
+This is useful if you just need a percentage but not the whole.
+
+Example, to only drop around 40% of the events that have the field loglevel with value "debug".
+
+    filter {
+      if [loglevel] == "debug" {
+        drop {
+          percentage => 40
+        }
+      }
+    }
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

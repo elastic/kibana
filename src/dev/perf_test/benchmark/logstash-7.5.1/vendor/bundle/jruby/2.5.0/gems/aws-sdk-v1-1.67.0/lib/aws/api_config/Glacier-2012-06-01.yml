@@ -1,0 +1,649 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2012-06-01'
+:operations:
+- :name: AbortMultipartUpload
+  :method: :abort_multipart_upload
+  :http:
+    :verb: DELETE
+    :uri: /:account_id/vaults/:vault_name/multipart-uploads/:upload_id
+    :response_code: 204
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :upload_id:
+      :type: :string
+      :required: true
+  :outputs: {}
+- :name: CompleteMultipartUpload
+  :method: :complete_multipart_upload
+  :http:
+    :verb: POST
+    :uri: /:account_id/vaults/:vault_name/multipart-uploads/:upload_id
+    :request_headers:
+      :archive_size: x-amz-archive-size
+      :checksum: x-amz-sha256-tree-hash
+      :content_sha256: x-amz-content-sha256
+    :response_code: 201
+    :response_headers:
+      :location: Location
+      :checksum: x-amz-sha256-tree-hash
+      :archive_id: x-amz-archive-id
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :upload_id:
+      :type: :string
+      :required: true
+    :archive_size:
+      :type: :integer
+    :checksum:
+      :type: :string
+      :required: true
+    :content_sha256:
+      :type: :string
+  :outputs: {}
+- :name: CreateVault
+  :method: :create_vault
+  :http:
+    :verb: PUT
+    :uri: /:account_id/vaults/:vault_name
+    :response_code: 201
+    :response_headers:
+      :location: Location
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+  :outputs: {}
+- :name: DeleteArchive
+  :method: :delete_archive
+  :http:
+    :verb: DELETE
+    :uri: /:account_id/vaults/:vault_name/archives/:archive_id
+    :response_code: 204
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :archive_id:
+      :type: :string
+      :required: true
+  :outputs: {}
+- :name: DeleteVault
+  :method: :delete_vault
+  :http:
+    :verb: DELETE
+    :uri: /:account_id/vaults/:vault_name
+    :response_code: 204
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+  :outputs: {}
+- :name: DeleteVaultNotifications
+  :method: :delete_vault_notifications
+  :http:
+    :verb: DELETE
+    :uri: /:account_id/vaults/:vault_name/notification-configuration
+    :response_code: 204
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+  :outputs: {}
+- :name: DescribeJob
+  :method: :describe_job
+  :http:
+    :verb: GET
+    :uri: /:account_id/vaults/:vault_name/jobs/:job_id
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :job_id:
+      :type: :string
+      :required: true
+  :outputs:
+    JobId:
+      :sym: :job_id
+      :type: :string
+    JobDescription:
+      :sym: :job_description
+      :type: :string
+    Action:
+      :sym: :action
+      :type: :string
+    ArchiveId:
+      :sym: :archive_id
+      :type: :string
+    VaultARN:
+      :sym: :vault_arn
+      :type: :string
+    CreationDate:
+      :sym: :creation_date
+      :type: :string
+    Completed:
+      :sym: :completed
+      :type: :boolean
+    StatusCode:
+      :sym: :status_code
+      :type: :string
+    StatusMessage:
+      :sym: :status_message
+      :type: :string
+    ArchiveSizeInBytes:
+      :sym: :archive_size_in_bytes
+      :type: :integer
+    InventorySizeInBytes:
+      :sym: :inventory_size_in_bytes
+      :type: :integer
+    SNSTopic:
+      :sym: :sns_topic
+      :type: :string
+    CompletionDate:
+      :sym: :completion_date
+      :type: :string
+    SHA256TreeHash:
+      :sym: :sha256_tree_hash
+      :type: :string
+    ArchiveSHA256TreeHash:
+      :sym: :archive_sha256_tree_hash
+      :type: :string
+    RetrievalByteRange:
+      :sym: :retrieval_byte_range
+      :type: :string
+- :name: DescribeVault
+  :method: :describe_vault
+  :http:
+    :verb: GET
+    :uri: /:account_id/vaults/:vault_name
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+  :outputs:
+    VaultARN:
+      :sym: :vault_arn
+      :type: :string
+    VaultName:
+      :sym: :vault_name
+      :type: :string
+    CreationDate:
+      :sym: :creation_date
+      :type: :string
+    LastInventoryDate:
+      :sym: :last_inventory_date
+      :type: :string
+    NumberOfArchives:
+      :sym: :number_of_archives
+      :type: :integer
+    SizeInBytes:
+      :sym: :size_in_bytes
+      :type: :integer
+- :name: GetJobOutput
+  :method: :get_job_output
+  :http:
+    :verb: GET
+    :uri: /:account_id/vaults/:vault_name/jobs/:job_id/output
+    :request_headers:
+      :range: Range
+    :response_payload: :body
+    :response_headers:
+      :checksum: x-amz-sha256-tree-hash
+      :content_range: Content-Range
+      :accept_ranges: Accept-Ranges
+      :content_type: Content-Type
+      :archive_description: x-amz-archive-description
+    :response_status: status
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :job_id:
+      :type: :string
+      :required: true
+    :range:
+      :type: :string
+  :outputs: {}
+- :name: GetVaultNotifications
+  :method: :get_vault_notifications
+  :http:
+    :verb: GET
+    :uri: /:account_id/vaults/:vault_name/notification-configuration
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+  :outputs:
+    SNSTopic:
+      :sym: :sns_topic
+      :type: :string
+    Events:
+      :sym: :events
+      :type: :string
+- :name: InitiateJob
+  :method: :initiate_job
+  :http:
+    :verb: POST
+    :uri: /:account_id/vaults/:vault_name/jobs
+    :request_payload: :job_parameters
+    :response_code: 202
+    :response_headers:
+      :location: Location
+      :job_id: x-amz-job-id
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :job_parameters:
+      :name: jobParameters
+      :type: :hash
+      :required: true
+      :members:
+        :format:
+          :name: Format
+          :type: :string
+        :type:
+          :name: Type
+          :type: :string
+        :archive_id:
+          :name: ArchiveId
+          :type: :string
+        :description:
+          :name: Description
+          :type: :string
+        :sns_topic:
+          :name: SNSTopic
+          :type: :string
+        :retrieval_byte_range:
+          :name: RetrievalByteRange
+          :type: :string
+        :inventory_retrieval_parameters:
+          :name: InventoryRetrievalParameters
+          :type: :hash
+          :members:
+            :start_date:
+              :name: StartDate
+              :type: :string
+            :end_date:
+              :name: EndDate
+              :type: :string
+            :limit:
+              :name: Limit
+              :type: :string
+            :marker:
+              :name: Marker
+              :type: :string
+  :outputs: {}
+- :name: InitiateMultipartUpload
+  :method: :initiate_multipart_upload
+  :http:
+    :verb: POST
+    :uri: /:account_id/vaults/:vault_name/multipart-uploads
+    :request_headers:
+      :archive_description: x-amz-archive-description
+      :part_size: x-amz-part-size
+    :response_code: 201
+    :response_headers:
+      :location: Location
+      :upload_id: x-amz-multipart-upload-id
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :archive_description:
+      :type: :string
+    :part_size:
+      :type: :integer
+  :outputs: {}
+- :name: ListJobs
+  :method: :list_jobs
+  :http:
+    :verb: GET
+    :uri: /:account_id/vaults/:vault_name/jobs?marker=:marker;limit=:limit;completed=:completed;statuscode=:statuscode
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :limit:
+      :type: :integer
+    :marker:
+      :type: :string
+    :statuscode:
+      :type: :string
+    :completed:
+      :type: :string
+  :outputs:
+    JobList:
+      :sym: :job_list
+      :type: :hash
+      :members:
+        JobId:
+          :sym: :job_id
+          :type: :string
+        JobDescription:
+          :sym: :job_description
+          :type: :string
+        Action:
+          :sym: :action
+          :type: :string
+        ArchiveId:
+          :sym: :archive_id
+          :type: :string
+        VaultARN:
+          :sym: :vault_arn
+          :type: :string
+        CreationDate:
+          :sym: :creation_date
+          :type: :string
+        Completed:
+          :sym: :completed
+          :type: :boolean
+        StatusCode:
+          :sym: :status_code
+          :type: :string
+        StatusMessage:
+          :sym: :status_message
+          :type: :string
+        ArchiveSizeInBytes:
+          :sym: :archive_size_in_bytes
+          :type: :integer
+        InventorySizeInBytes:
+          :sym: :inventory_size_in_bytes
+          :type: :integer
+        SNSTopic:
+          :sym: :sns_topic
+          :type: :string
+        CompletionDate:
+          :sym: :completion_date
+          :type: :string
+        SHA256TreeHash:
+          :sym: :sha256_tree_hash
+          :type: :string
+        ArchiveSHA256TreeHash:
+          :sym: :archive_sha256_tree_hash
+          :type: :string
+        RetrievalByteRange:
+          :sym: :retrieval_byte_range
+          :type: :string
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: ListMultipartUploads
+  :method: :list_multipart_uploads
+  :http:
+    :verb: GET
+    :uri: /:account_id/vaults/:vault_name/multipart-uploads?marker=:upload_id_marker;limit=:limit
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :upload_id_marker:
+      :type: :string
+    :limit:
+      :type: :integer
+  :outputs:
+    UploadsList:
+      :sym: :uploads_list
+      :type: :hash
+      :members:
+        MultipartUploadId:
+          :sym: :multipart_upload_id
+          :type: :string
+        VaultARN:
+          :sym: :vault_arn
+          :type: :string
+        ArchiveDescription:
+          :sym: :archive_description
+          :type: :string
+        PartSizeInBytes:
+          :sym: :part_size_in_bytes
+          :type: :integer
+        CreationDate:
+          :sym: :creation_date
+          :type: :string
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: ListParts
+  :method: :list_parts
+  :http:
+    :verb: GET
+    :uri: /:account_id/vaults/:vault_name/multipart-uploads/:upload_id?marker=:marker;limit=:limit
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :upload_id:
+      :type: :string
+      :required: true
+    :marker:
+      :type: :string
+    :limit:
+      :type: :integer
+  :outputs:
+    MultipartUploadId:
+      :sym: :multipart_upload_id
+      :type: :string
+    VaultARN:
+      :sym: :vault_arn
+      :type: :string
+    ArchiveDescription:
+      :sym: :archive_description
+      :type: :string
+    PartSizeInBytes:
+      :sym: :part_size_in_bytes
+      :type: :integer
+    CreationDate:
+      :sym: :creation_date
+      :type: :string
+    Parts:
+      :sym: :parts
+      :type: :hash
+      :members:
+        RangeInBytes:
+          :sym: :range_in_bytes
+          :type: :string
+        SHA256TreeHash:
+          :sym: :sha256_tree_hash
+          :type: :string
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: ListVaults
+  :method: :list_vaults
+  :http:
+    :verb: GET
+    :uri: /:account_id/vaults?marker=:marker;limit=:limit
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :marker:
+      :type: :string
+    :limit:
+      :type: :integer
+  :outputs:
+    VaultList:
+      :sym: :vault_list
+      :type: :hash
+      :members:
+        VaultARN:
+          :sym: :vault_arn
+          :type: :string
+        VaultName:
+          :sym: :vault_name
+          :type: :string
+        CreationDate:
+          :sym: :creation_date
+          :type: :string
+        LastInventoryDate:
+          :sym: :last_inventory_date
+          :type: :string
+        NumberOfArchives:
+          :sym: :number_of_archives
+          :type: :integer
+        SizeInBytes:
+          :sym: :size_in_bytes
+          :type: :integer
+    Marker:
+      :sym: :marker
+      :type: :string
+- :name: SetVaultNotifications
+  :method: :set_vault_notifications
+  :http:
+    :verb: PUT
+    :uri: /:account_id/vaults/:vault_name/notification-configuration
+    :request_payload: :vault_notification_config
+    :response_code: 204
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :vault_notification_config:
+      :name: vaultNotificationConfig
+      :type: :hash
+      :required: true
+      :members:
+        :sns_topic:
+          :name: SNSTopic
+          :type: :string
+        :events:
+          :name: Events
+          :type: :array
+          :members:
+            :name: member
+            :type: :string
+  :outputs: {}
+- :name: UploadArchive
+  :method: :upload_archive
+  :http:
+    :verb: POST
+    :uri: /:account_id/vaults/:vault_name/archives
+    :request_headers:
+      :archive_description: x-amz-archive-description
+      :checksum: x-amz-sha256-tree-hash
+      :content_sha256: x-amz-content-sha256
+    :request_payload: :body
+    :response_code: 201
+    :response_headers:
+      :location: Location
+      :checksum: x-amz-sha256-tree-hash
+      :archive_id: x-amz-archive-id
+  :inputs:
+    :vault_name:
+      :type: :string
+      :required: true
+    :account_id:
+      :type: :string
+      :required: true
+    :archive_description:
+      :type: :string
+    :checksum:
+      :type: :string
+      :required: true
+    :body:
+      :name: body
+      :type: :blob
+      :required: true
+    :content_sha256:
+      :type: :string
+  :outputs: {}
+- :name: UploadMultipartPart
+  :method: :upload_multipart_part
+  :http:
+    :verb: PUT
+    :uri: /:account_id/vaults/:vault_name/multipart-uploads/:upload_id
+    :request_headers:
+      :checksum: x-amz-sha256-tree-hash
+      :range: Content-Range
+      :content_sha256: x-amz-content-sha256
+    :request_payload: :body
+    :response_code: 204
+    :response_headers:
+      :checksum: x-amz-sha256-tree-hash
+  :inputs:
+    :account_id:
+      :type: :string
+      :required: true
+    :vault_name:
+      :type: :string
+      :required: true
+    :upload_id:
+      :type: :string
+      :required: true
+    :checksum:
+      :type: :string
+      :required: true
+    :range:
+      :type: :string
+    :body:
+      :name: body
+      :type: :blob
+      :required: true
+    :content_sha256:
+      :type: :string
+  :outputs: {}

@@ -1,0 +1,105 @@
+:plugin: lumberjack
+:type: output
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Lumberjack output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This output sends events using the lumberjack protocol.
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Lumberjack Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-flush_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-hosts>> |<<array,array>>|Yes
+| <<plugins-{type}s-{plugin}-idle_flush_time>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|Yes
+| <<plugins-{type}s-{plugin}-ssl_certificate>> |a valid filesystem path|Yes
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-flush_size"]
+===== `flush_size` 
+
+  * Value type is <<number,number>>
+  * Default value is `1024`
+
+To make efficient calls to the lumberjack output we are buffering events locally.
+if the number of events exceed the number the declared `flush_size` we will
+send them to the logstash server.
+
+[id="plugins-{type}s-{plugin}-hosts"]
+===== `hosts` 
+
+  * This is a required setting.
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+list of addresses lumberjack can send to
+
+[id="plugins-{type}s-{plugin}-idle_flush_time"]
+===== `idle_flush_time` 
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+The amount of time since last flush before a flush is forced.
+
+This setting helps ensure slow event rates don't get stuck in Logstash.
+For example, if your `flush_size` is 100, and you have received 10 events,
+and it has been more than `idle_flush_time` seconds since the last flush,
+Logstash will flush those 10 events automatically.
+
+This helps keep both fast and slow log streams moving along in
+near-real-time.
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * This is a required setting.
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+the port to connect to
+
+[id="plugins-{type}s-{plugin}-ssl_certificate"]
+===== `ssl_certificate` 
+
+  * This is a required setting.
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+ssl certificate to use
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

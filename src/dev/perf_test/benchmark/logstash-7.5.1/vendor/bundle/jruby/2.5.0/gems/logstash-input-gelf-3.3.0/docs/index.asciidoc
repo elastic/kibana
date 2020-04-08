@@ -1,0 +1,136 @@
+:plugin: gelf
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Gelf input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This input will read GELF messages as events over the network,
+making it a good choice if you already use Graylog2 today.
+
+The main use case for this input is to leverage existing GELF
+logging libraries such as the GELF log4j appender.
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Gelf Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-use_udp>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-use_tcp>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-port_tcp>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-port_udp>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-remap>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-strip_leading_underscore>> |<<boolean,boolean>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * Value type is <<string,string>>
+  * Default value is `"0.0.0.0"`
+
+The IP address or hostname to listen on.
+
+[id="plugins-{type}s-{plugin}-use_udp"]
+===== `use_udp`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Whether to listen for gelf messages sent over udp
+
+[id="plugins-{type}s-{plugin}-use_tcp"]
+===== `use_tcp`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Whether to listen for gelf messages sent over tcp
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * Value type is <<number,number>>
+  * Default value is `12201`
+
+The port to listen on. Remember that ports less than 1024 (privileged
+ports) may require root to use.
+port_tcp and port_udp can be used to set a specific port for each protocol.
+[id="plugins-{type}s-{plugin}-port_tcp"]
+===== `port_tcp`
+
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+Tcp port to listen on. Use port instead of this setting unless you need a different port for udp than tcp
+
+[id="plugins-{type}s-{plugin}-port_udp"]
+===== `port_udp`
+
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+Udp port to listen on. Use port instead of this setting unless you need a different port for udp than tcp
+
+[id="plugins-{type}s-{plugin}-remap"]
+===== `remap` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Whether or not to remap the GELF message fields to Logstash event fields or
+leave them intact.
+
+Remapping converts the following GELF fields to Logstash equivalents:
+
+* `full\_message` becomes `event.get("message")`.
+* if there is no `full\_message`, `short\_message` becomes `event.get("message")`.
+
+[id="plugins-{type}s-{plugin}-strip_leading_underscore"]
+===== `strip_leading_underscore` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Whether or not to remove the leading `\_` in GELF fields or leave them
+in place. (Logstash < 1.2 did not remove them by default.). Note that
+GELF version 1.1 format now requires all non-standard fields to be added
+as an "additional" field, beginning with an underscore.
+
+e.g. `\_foo` becomes `foo`
+
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

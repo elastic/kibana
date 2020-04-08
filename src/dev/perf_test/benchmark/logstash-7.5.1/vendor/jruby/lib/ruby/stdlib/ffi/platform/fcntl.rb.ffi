@@ -1,0 +1,32 @@
+module Fcntl
+  @@@
+  constants do |c|
+    c.include 'fcntl.h'
+
+    c.const 'F_DUPFD'
+    c.const 'F_GETFD'
+    c.const 'F_GETLK'
+    c.const 'F_SETFD'
+    c.const 'F_GETFL'
+    c.const 'F_SETFL'
+    c.const 'F_SETLK'
+    c.const 'F_SETLKW'
+    c.const 'FD_CLOEXEC'
+    c.const 'F_RDLCK'
+    c.const 'F_UNLCK'
+    c.const 'F_WRLCK'
+    c.const 'O_CREAT'
+    c.const 'O_EXCL'
+    c.const 'O_NOCTTY'
+    c.const 'O_TRUNC'
+    c.const 'O_APPEND'
+    c.const 'O_NONBLOCK'
+    c.const 'O_NDELAY'
+    c.const 'O_RDONLY'
+    c.const 'O_RDWR'
+    c.const 'O_WRONLY'
+    c.const 'O_ACCMODE'
+  end
+  @@@
+end
+

@@ -1,0 +1,10 @@
+{
+  "title": "Events by Outcomes [ArcSight]",
+  "visState": "{\"title\":\"Events by Outcomes [ArcSight]\",\"type\":\"metrics\",\"params\":{\"id\":\"e10aefa0-4550-11e7-86b6-95298e9da6dc\",\"type\":\"timeseries\",\"series\":[{\"id\":\"1b5b1130-4551-11e7-86b6-95298e9da6dc\",\"color\":\"rgba(244,78,59,1)\",\"split_mode\":\"filters\",\"metrics\":[{\"id\":\"1b5b1131-4551-11e7-86b6-95298e9da6dc\",\"type\":\"count\"}],\"seperate_axis\":1,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"3\",\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"terms_field\":\"categoryOutcome\",\"terms_size\":\"3\",\"label\":\"Event Outcomes\",\"hide_in_legend\":0,\"split_filters\":[{\"filter\":\"categoryOutcome:\\\"/Failure\\\"\",\"label\":\"Failure\",\"color\":\"rgba(244,78,59,1)\",\"id\":\"a4c1a0b0-4551-11e7-86b6-95298e9da6dc\"},{\"filter\":\"categoryOutcome:\\\"/Success\\\"\",\"label\":\"Success\",\"color\":\"rgba(104,188,0,1)\",\"id\":\"b51f14b0-4551-11e7-86b6-95298e9da6dc\"},{\"filter\":\"categoryOutcome:\\\"/Attempt\\\"\",\"label\":\"Attempt\",\"color\":\"rgba(251,158,0,1)\",\"id\":\"c4b19790-4551-11e7-86b6-95298e9da6dc\"}]},{\"id\":\"e10aefa1-4550-11e7-86b6-95298e9da6dc\",\"color\":\"rgba(104,182,204,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"e10aefa2-4550-11e7-86b6-95298e9da6dc\",\"type\":\"count\"}],\"seperate_axis\":1,\"axis_position\":\"left\",\"formatter\":\"number\",\"chart_type\":\"bar\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Event Count\"}],\"time_field\":\"deviceReceiptTime\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"filter\":\"categoryDeviceGroup:\\\"/Operating System\\\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

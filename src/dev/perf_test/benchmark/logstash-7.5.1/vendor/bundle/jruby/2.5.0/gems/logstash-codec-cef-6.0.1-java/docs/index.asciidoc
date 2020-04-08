@@ -1,0 +1,147 @@
+:plugin: cef
+:type: codec
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Cef codec plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Implementation of a Logstash codec for the ArcSight Common Event Format (CEF)
+Based on Revision 20 of Implementing ArcSight CEF, dated from June 05, 2013
+https://community.saas.hpe.com/dcvta86296/attachments/dcvta86296/connector-documentation/1116/1/CommonEventFormatv23.pdf
+
+If this codec receives a payload from an input that is not a valid CEF message, then it will
+produce an event with the payload as the 'message' field and a '_cefparsefailure' tag.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Cef Codec Configuration Options
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-delimiter>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-fields>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-name>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-product>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-reverse_mapping>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-severity>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-signature>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-vendor>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-version>> |<<string,string>>|No
+|=======================================================================
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-delimiter"]
+===== `delimiter` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+If your input puts a delimiter between each CEF event, you'll want to set
+this to be that delimiter.
+
+For example, with the TCP input, you probably want to put this:
+
+    input {
+      tcp {
+        codec => cef { delimiter => "\r\n" }
+        # ...
+      }
+    }
+
+This setting allows the following character sequences to have special meaning:
+
+* `\\r` (backslash "r") - means carriage return (ASCII 0x0D)
+* `\\n` (backslash "n") - means newline (ASCII 0x0A)
+
+[id="plugins-{type}s-{plugin}-fields"]
+===== `fields` 
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+Fields to be included in CEV extension part as key/value pairs
+
+[id="plugins-{type}s-{plugin}-name"]
+===== `name` 
+
+  * Value type is <<string,string>>
+  * Default value is `"Logstash"`
+
+Name field in CEF header. The new value can include `%{foo}` strings
+to help you build a new value from other parts of the event.
+
+[id="plugins-{type}s-{plugin}-product"]
+===== `product` 
+
+  * Value type is <<string,string>>
+  * Default value is `"Logstash"`
+
+Device product field in CEF header. The new value can include `%{foo}` strings
+to help you build a new value from other parts of the event.
+
+
+[id="plugins-{type}s-{plugin}-reverse_mapping"]
+===== `reverse_mapping`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Set to true to adhere to the specifications and encode using the CEF key name (short name) for the CEF field names.
+
+[id="plugins-{type}s-{plugin}-severity"]
+===== `severity` 
+
+  * Value type is <<string,string>>
+  * Default value is `"6"`
+
+Severity field in CEF header. The new value can include `%{foo}` strings
+to help you build a new value from other parts of the event.
+
+Defined as field of type string to allow sprintf. The value will be validated
+to be an integer in the range from 0 to 10 (including).
+All invalid values will be mapped to the default of 6.
+
+[id="plugins-{type}s-{plugin}-signature"]
+===== `signature` 
+
+  * Value type is <<string,string>>
+  * Default value is `"Logstash"`
+
+Signature ID field in CEF header. The new value can include `%{foo}` strings
+to help you build a new value from other parts of the event.
+
+[id="plugins-{type}s-{plugin}-vendor"]
+===== `vendor` 
+
+  * Value type is <<string,string>>
+  * Default value is `"Elasticsearch"`
+
+Device vendor field in CEF header. The new value can include `%{foo}` strings
+to help you build a new value from other parts of the event.
+
+[id="plugins-{type}s-{plugin}-version"]
+===== `version` 
+
+  * Value type is <<string,string>>
+  * Default value is `"1.0"`
+
+Device version field in CEF header. The new value can include `%{foo}` strings
+to help you build a new value from other parts of the event.
+
+

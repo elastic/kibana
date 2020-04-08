@@ -1,0 +1,10 @@
+{
+  "title": "Event Count [ArcSight]",
+  "visState": "{\"title\":\"Event Count [ArcSight]\",\"type\":\"metrics\",\"params\":{\"id\":\"19363b80-76cc-11e7-9fc0-830beaf5fb4b\",\"type\":\"metric\",\"series\":[{\"id\":\"19363b81-76cc-11e7-9fc0-830beaf5fb4b\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"19363b82-76cc-11e7-9fc0-830beaf5fb4b\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0.0a\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Event Count\",\"value_template\":\"\",\"override_index_pattern\":1,\"series_index_pattern\":\"arcsight-*\",\"series_time_field\":\"@timestamp\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"background_color_rules\":[{\"id\":\"30faacb0-76cc-11e7-9fc0-830beaf5fb4b\"}]},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

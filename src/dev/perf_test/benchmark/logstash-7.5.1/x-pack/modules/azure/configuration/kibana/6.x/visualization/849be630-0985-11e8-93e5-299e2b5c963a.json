@@ -1,0 +1,10 @@
+{
+  "title": "Select Server [Azure Monitor]",
+  "visState": "{\"title\":\"Select Server [Azure Monitor]\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1517598395667\",\"indexPattern\":\"73e18ac0-104c-11e8-8c94-a3d8d0cfd62b\",\"fieldName\":\"azure.server.keyword\",\"label\":\"Server\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}}],\"updateFiltersOnChange\":true,\"useTimeFilter\":false},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

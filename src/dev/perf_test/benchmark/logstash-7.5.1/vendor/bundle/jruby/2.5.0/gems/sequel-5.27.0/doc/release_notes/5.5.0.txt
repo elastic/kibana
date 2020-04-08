@@ -1,0 +1,61 @@
+= New Features
+
+* The defaults_setter plugin now supports a :cache option, which
+  will cache default values in the model object's values hash:
+
+    Model.plugin :defaults_setter
+    o = Model.new
+    o.column # => 1 # default value
+    o.values # => {}
+
+    Model.plugin :defaults_setter, cache: true
+    o = Model.new
+    o.column # => 1 # default value
+    o.values # => {:column => 1}
+
+* The pg_array extension now sets a :callable_default schema entry
+  for recognized empty array defaults.
+
+* The pg_hstore extension now sets a :callable_default schema entry
+  for recognized empty hstore defaults.
+
+* The pg_json extension now sets a :callable_default schema entry for
+  recognized empty json/jsonb array/hash defaults. 
+
+* The pg_inet extension now sets a :ruby_default schema entry for
+  recognized inet/cidr defaults.
+
+* The pg_range extension now sets a :ruby_default schema entry for
+  recognized range defaults.
+
+* The defaults_setter plugin will now give preference to a
+  :callable_default schema entry over a :ruby_default schema entry.
+  Combined with the other changes listed above, this makes default
+  values recognized by the pg_array, pg_hstore, and pg_json extensions
+  work well if the defaults_setter :cache option is also used.
+
+= Other Improvements
+
+* The modification_detection plugin no longer breaks column change
+  detection for new objects.
+
+* Database#copy_table in the postgres adapter now handles errors that
+  occur when processing rows.  Previously, an exception could be
+  raised on the next query in that case.
+
+* The results of the changed_columns method are now cached in many
+  places internally where they are called in a loop.  This results
+  in better performance, especially if the modification_detection or
+  serialization_modification_detection plugins are used.
+
+= Backwards Compatibility
+
+* The pg_interval extension now sets a :ruby_default schema entry for
+  recognized interval defaults to the same value Sequel would return
+  if the default value was returned.  Previously, Sequel would use a
+  string in the :ruby_schema schema value.
+
+* String values in hashes returned by Database#schema are now frozen
+  to prevent possible thread-safety issues and issues with
+  unintentional modification of a shared string.  The hashes
+  themselves are not frozen and can still be modified.

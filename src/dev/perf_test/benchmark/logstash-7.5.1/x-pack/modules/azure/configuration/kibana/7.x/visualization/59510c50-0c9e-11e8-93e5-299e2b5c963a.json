@@ -1,0 +1,10 @@
+{
+  "title": "Database Info 1 [Azure Monitor]",
+  "visState": "{\n  \"title\": \"Database Info 1 [Azure Monitor]\",\n  \"type\": \"metric\",\n  \"params\": {\n    \"addTooltip\": true,\n    \"addLegend\": false,\n    \"type\": \"metric\",\n    \"metric\": {\n      \"percentageMode\": false,\n      \"useRanges\": false,\n      \"colorSchema\": \"Green to Red\",\n      \"metricColorMode\": \"None\",\n      \"colorsRange\": [\n        {\n          \"from\": 0,\n          \"to\": 10000\n        }\n      ],\n      \"labels\": {\n        \"show\": true\n      },\n      \"invertColors\": false,\n      \"style\": {\n        \"bgFill\": \"#000\",\n        \"bgColor\": false,\n        \"labelColor\": false,\n        \"subText\": \"\",\n        \"fontSize\": 12\n      }\n    }\n  },\n  \"aggs\": [\n    {\n      \"id\": \"1\",\n      \"enabled\": true,\n      \"type\": \"top_hits\",\n      \"schema\": \"metric\",\n      \"params\": {\n        \"field\": \"azure.resource_name.keyword\",\n        \"aggregate\": \"concat\",\n        \"size\": 1,\n        \"sortField\": \"@timestamp\",\n        \"sortOrder\": \"desc\",\n        \"customLabel\": \"Database\"\n      }\n    }\n  ]\n}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\n  \"index\": \"azure-*\",\n  \"filter\": [],\n  \"query\": {\n    \"query\": \"azure.group:sql_diagnostics\",\n    \"language\": \"lucene\"\n  }\n}"
+  }
+}

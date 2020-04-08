@@ -1,0 +1,72 @@
+= New Features
+
+* A csv_serializer plugin has been added, for serializing model
+  objects and datasets to CSV, or parsing CSV into a model
+  object or array of model objects.  Behavior and API is similar to
+  the existing xml_serializer and json_serializer plugins.
+
+* Sequel::MassAssignmentRestriction is now raised for mass assignment
+  errors in strict mode (the default).  Previously the generic
+  Sequel::Error was used.
+
+= Other Improvements
+
+* On Ruby 1.9+, Sequel now uses condition variables instead of busy
+  waiting for connections in the threaded conection pools.  This
+  can significantly decrease overhead when waiting for connections,
+  which can improve performance on machines that are compute
+  bottlenecked.  This also makes the connection pool checkouts more
+  fair, reducing the chance that a request for a connection will
+  fail with a PoolTimeout when under heavy resource contention.
+ 
+* Sequel now attempts to avoid hash allocations and rehashing in
+  performance sensitive code.  This can speed up Dataset#clone,
+  Model#clone, and #Model#dup by about 60%, and speed up method
+  chains such as:
+
+    ds.select(:a).where(:a=>1).order(1)
+
+  by almost 20%.
+
+* Symbol#to_proc is used instead of explicit blocks across the
+  the library, which should improve performance slightly on Ruby 1.9+.
+
+* When Model#cancel_action is used in association before hooks,
+  Sequel will now return false if raise_on_save_failure = false,
+  instead of raising an exception.  This mirrors the behavior
+  when Model#cancel_action is used inside model save hooks when
+  raise_on_save_failure = false.
+
+* Dataset#to_hash and #to_hash_groups now work correctly on model
+  datasets when given a single array argument.
+
+* The auto_validations plugin now works correctly on columns that
+  have a default value, but where the default value is not parseable
+  into a ruby object by the adapter.
+
+* The tree plugin now correctly sets the reciprocal association
+  in the children association it creates.
+
+* In the pg_array extension, if the :default value when creating a
+  column is set to a ruby array, Sequel will now convert it to a
+  PostgreSQL array.
+
+* Sequel no longer adds a :max_length entry to the schema for
+  varchar(max) columns on Microsoft SQL Server.
+
+* Adapters now are specified to set the :default schema entry for
+  columns to nil if the adapter can determine the :default is nil.
+  Adapters that ship with Sequel already did this, but previously
+  it was unspecified behavior.
+
+* Sequel no longer silently ignores the :jdbc_properties Database
+  option in the jdbc adapter.  Previously, it only used the
+  :jdbc_properties option if it was not able to connect without it.
+
+* Bit types are now converted to boolean values in the ODBC adapter.
+
+= Backwards Compatibility
+
+* The db2, dbi, fdbsql, firebird, jdbc/fdbsql, informix, and openbase
+  adapters are now deprecated and will be removed in a future version
+  of Sequel.

@@ -1,0 +1,36 @@
+--- 
+bldgHVACMIB: 1.3.6.1.3.122
+bldgHVACObjects: 1.3.6.1.3.122.1
+bldgHVACTable: 1.3.6.1.3.122.1.1
+bldgHVACEntry: 1.3.6.1.3.122.1.1.1
+bldgHVACFloor: 1.3.6.1.3.122.1.1.1.1
+bldgHVACOffice: 1.3.6.1.3.122.1.1.1.2
+bldgHVACCfgTemplate: 1.3.6.1.3.122.1.1.1.3
+bldgHVACFanSpeed: 1.3.6.1.3.122.1.1.1.4
+bldgHVACCurrentTemp: 1.3.6.1.3.122.1.1.1.5
+bldgHVACCoolOrHeatMins: 1.3.6.1.3.122.1.1.1.6
+bldgHVACDiscontinuityTime: 1.3.6.1.3.122.1.1.1.7
+bldgHVACOwner: 1.3.6.1.3.122.1.1.1.8
+bldgHVACStorageType: 1.3.6.1.3.122.1.1.1.9
+bldgHVACStatus: 1.3.6.1.3.122.1.1.1.10
+bldgHVACCfgTemplateInfoTable: 1.3.6.1.3.122.1.2
+bldgHVACCfgTemplateInfoEntry: 1.3.6.1.3.122.1.2.1
+bldgHVACCfgTemplateInfoIndex: 1.3.6.1.3.122.1.2.1.1
+bldgHVACCfgTemplateInfoID: 1.3.6.1.3.122.1.2.1.2
+bldgHVACCfgTemplateInfoDescr: 1.3.6.1.3.122.1.2.1.3
+bldgHVACCfgTemplateInfoOwner: 1.3.6.1.3.122.1.2.1.4
+bldgHVACCfgTemplateInfoStatus: 1.3.6.1.3.122.1.2.1.5
+bldgHVACCfgTemplateInfoStorType: 1.3.6.1.3.122.1.2.1.6
+bldgHVACCfgTemplateTable: 1.3.6.1.3.122.1.3
+bldgHVACCfgTemplateEntry: 1.3.6.1.3.122.1.3.1
+bldgHVACCfgTemplateIndex: 1.3.6.1.3.122.1.3.1.1
+bldgHVACCfgTemplateDesiredTemp: 1.3.6.1.3.122.1.3.1.2
+bldgHVACCfgTemplateCoolOrHeat: 1.3.6.1.3.122.1.3.1.3
+bldgHVACCfgTemplateInfo: 1.3.6.1.3.122.1.3.1.4
+bldgHVACCfgTemplateOwner: 1.3.6.1.3.122.1.3.1.5
+bldgHVACCfgTemplateStorage: 1.3.6.1.3.122.1.3.1.6
+bldgHVACCfgTemplateStatus: 1.3.6.1.3.122.1.3.1.7
+bldgConformance: 1.3.6.1.3.122.2
+bldgCompliances: 1.3.6.1.3.122.2.1
+bldgGroups: 1.3.6.1.3.122.2.2
+

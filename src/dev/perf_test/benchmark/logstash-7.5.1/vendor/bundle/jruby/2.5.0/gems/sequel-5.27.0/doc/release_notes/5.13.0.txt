@@ -1,0 +1,27 @@
+= New Features
+
+* A constant_sql_override Database extension has been added, allowing
+  for overriding the SQL used by constants such as
+  Sequel::CURRENT_TIMESTAMP.  This can be used to force
+  CURRENT_TIMESTAMP to be literalized at a particular time zone:
+
+    DB.extension :constant_sql_override
+    DB.set_constant_sql(Sequel::CURRENT_TIMESTAMP,
+      "CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")
+
+* Prepared statements now support the :single_value type, which
+  returns the first column value in the dataset.
+
+    prep_stmt = DB[:table].select(:column).prepare(:single_value, :ps)
+    prep_stmt.call
+    # PREPARE ps AS SELECT column FROM table LIMIT 1;
+    # EXECUTE ps;
+    # => 42
+
+= Other Improvements
+
+* Dataset#from_self will no longer use a cached dataset if any options
+  are given, as that can result in incorrect behavior.
+
+* Model.all in the static_cache plugin now accepts a block, mirroring
+  the API when the static_cache plugin is not used.

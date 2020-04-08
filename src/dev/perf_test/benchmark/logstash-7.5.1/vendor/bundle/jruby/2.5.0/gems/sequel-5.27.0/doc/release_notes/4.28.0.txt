@@ -1,0 +1,57 @@
+= New Features
+
+* A subset_conditions plugin has been added, which adds a method
+  for each subset that returns the filter conditions for the
+  subset.  This makes it easier to reuse the subset conditions:
+
+    class Foo < Sequel::Model
+      plugin :subset_conditions
+      subset :active, :active=>true
+    end
+
+    Foo.exclude(Foo.active_conditions)
+    Foo.where(:a=>1).or(Foo.active_conditions)
+
+* A boolean_subsets plugin has been added, which adds a subset for each
+  boolean column:
+
+    # Assume boolean column :active
+    Foo.plugin :boolean_subsets
+
+    Foo.active
+    # SELECT * FROM foos WHERE (active IS TRUE)
+
+  You can provide a block to the plugin to change the arguments passed
+  to subset:
+    
+    Foo.plugin :boolean_subsets do |column|
+      [:"where_#{column}", column]
+    end
+
+    Foo.where_active
+    # SELECT * FROM foos WHERE active
+
+  As with similar plugins, you can add the boolean_subsets plugin to
+  Sequel::Model itself, and all subclasses created afterward will have
+  the boolean subset methods automatically created.
+
+= Other Improvements
+
+* If Model#refresh can't find the related row, Sequel now raises a
+  Sequel::NoExistingObject exception instead of a generic
+  Sequel::Error exception.
+
+* In the csv_serializer plugin, when calling #to_csv on a model class
+  or dataset, instead of using #[] to access data, #send is used to
+  call methods.  This is more similar to other plugins as well as
+  Model#to_csv.
+
+* The list plugin now works better with the auto_validations plugin,
+  or any other time there is a validation on the position column.
+
+= Backwards Compatibility
+
+* The change to the csv_serializer plugin can change results if you
+  are overriding any of the column accessor methods.  It can also
+  break existing code if one of the columns being used isn't defined
+  as a method or the method requires more than one argument.

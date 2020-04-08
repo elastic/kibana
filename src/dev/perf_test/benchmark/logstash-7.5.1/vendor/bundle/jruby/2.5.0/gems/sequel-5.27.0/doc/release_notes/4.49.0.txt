@@ -1,0 +1,222 @@
+= Forward Compatibility
+
+Sequel 4.49.0 will be the last minor release of Sequel 4. While the
+vast majority of backwards incompatible changes in Sequel 5 have
+deprecation warnings in 4.49.0, there are a few changes that do
+not.  Here is a brief list of changes coming in Sequel 5 that
+do not have deprecation warnings (note that this list may not be
+exhaustive):
+
+* The {before,after,around}_validation hooks will always be called
+  when saving, even if the validate: false option is used.  This
+  will allow you to use the before_validation hook to make changes
+  to the model instance that are required before validation and
+  before saving even if not validating.  Currently, you would have
+  to use both a before_save and before_validation hook, which would
+  both be run on normal instance saving.
+
+* Getting values for newly created model instances after insertion
+  now happens before after_create is called, instead of after.
+  This behavior is currently available via the before_after_save
+  plugin, and and will become the default behavior.
+
+* Sequel will now immediately attempt to the connect to the database
+  when a Database instance is created, in order to fail fast.  This
+  behavior is currently available via the test: true option, and
+  will become the default behavior.  You can force not testing the
+  connection by using the test: false option.
+
+* The validates_unique method in the validation_helpers plugin will
+  now only check for uniqueness by default if the record is new or
+  one of the related columns has been modified by default.  You can
+  use only_if_modified: false to force the uniqueness check.
+
+* Database schema methods and schema generator methods will return
+  nil instead of some internal value.
+
+* Many cases where Sequel uses send internally will be switched to
+  public_send so they only call public methods, unless it is
+  specifically expected that they will call private methods.
+
+* Model association hooks will be nil instead of empty arrays by
+  default.  They will only be arrays if that hook has been set for
+  the association.
+
+* Internal uses of instance_eval with a block will be changed to
+  instance_exec.  This will allow them to be used with lambdas that
+  take no arguments.  Unfortunately, it will break the case where a
+  lambda is currently used that takes one argument.
+
+* Most internal constants will be frozen, unless there is a
+  requirement that they be modified at runtime.
+
+* The @was_new instance variable set during model instance creation
+  will be removed.
+
+= Deprecated Features
+
+* Model association before callbacks returning false canceling the
+  action is now deprecated.  The callbacks should now call
+  Model#cancel_action to cancel the action.
+
+* Loading plugins by requiring them via sequel_#{plugin} is now
+  deprecated.  Affected plugins should move the plugin file so it can
+  be required via sequel/plugins/#{plugin}.
+
+* In the mock adapter, Dataset#autoid=, #_fetch=, and #numrows= are
+  now deprecated.  They modified the dataset itself, which would not
+  work for frozen datasets.  Dataset#with_autoid, #with_fetch,
+  and #with_numrows should be used instead, which return a modified
+  copy.
+
+* In the null_dataset extension, Dataset#nullify! is now deprecated.
+  It modified the dataset itself, which would not work for frozen
+  datasets.  Dataset#nullify should be used instead, which returns a
+  modified copy.
+
+* Modifying the validation_helpers plugin DEFAULT_OPTIONS hash is now
+  deprecated.  Any change to the default options should be done by
+  overriding the Model#default_validation_helpers_options private
+  method.
+
+* Modifying ConnectionPool::CONNECTION_POOL_MAP to support an
+  external connection pool is now deprecated.  To use an external
+  connection pool, pass the pool class via the :pool_class
+  Database option.  Additionally, using a :pool_class option that
+  is not a class or a symbol for one of the default connection
+  pools is also deprecated.
+
+* ConnectionPool#created_count is now deprecated.  This method was
+  misnamed, as it was in alias to size, but the name implies it
+  returns how many connections have been created, as opposed to how
+  many connections are still in the pool.
+
+* Sequel::SQL::Function#f is now deprecated, switch to using #name
+  instead.
+
+* Sequel::SQL::AliasedExpression#aliaz is now deprecated, switch
+  to using #alias instead.
+
+* The :eager_loading_predicate_key association option and
+  eager_loading_predicate_key association method are now deprecated.
+  The predicate_key option and method should be used instead.
+
+* The cti_columns class method in the class_table_inheritance plugin
+  is now deprecated.
+
+* The serialized_columns class method in the serialization plugin
+  is now deprecated.
+
+* Having ds.join_table(:table, :cross, :a=>:b) be treated as an
+  inner join on MySQL is now deprecated.
+
+* Sequel::IBMDB::Connection#prepared_statements= in the ibmdb
+  adapter is now deprecated.
+
+* Additional internal constants are now deprecated.
+
+= New Features
+
+* Database#extend_datasets and Database#with_extend if given a block
+  now use a Dataset::DatasetModule instance instead of a plain Module
+  instance.  Dataset::DatasetModule is a subset of
+  Model::DatasetModule, and allows for the easy creation of dataset
+  methods that can perform caching for frozen datasets.
+
+  Defining dataset methods is done by calling methods with the same
+  name as dataset methods inside the extend_datasets or with_extend
+  block:
+
+    DB.extend_datasets do
+      order :by_id, :id
+      select :with_id_and_name, :id, :name
+      where :active, :active
+    end
+
+  This is equivalent to:
+
+    DB.extend_datasets do
+      def by_id
+        order(:id)
+      end
+
+      def with_id_and_name
+        select(:id, :name)
+      end
+
+      def active
+        where(:active)
+      end
+    end
+
+  Except that for frozen datasets (the default in Sequel 5),
+  code like:
+
+    100.times do
+      DB[:table].active.with_id_and_name.by_id
+    end
+
+  will only allocate 4 datasets instead of 400, and can be
+  3-4 times faster.
+
+* Dataset#where_{all,each,single_value} are now core dataset methods
+  instead of just model dataset methods.  These methods allow you to
+  replace:
+
+    dataset.where(cond).all
+    dataset.where(cond).each{}
+    dataset.where(cond).single_value
+
+  with:
+
+    dataset.where_all(cond)
+    dataset.where_each(cond){}
+    dataset.where_single_value(cond)
+
+  The advantage of #where_{all,each,single_value} is that frozen
+  datasets can take potentially advantage of caching and perform
+  70%-300% faster.
+
+* Oracle 12 native limit/offset support is now supported, which
+  in particular makes offset queries much faster as they don't
+  have to be emulated using the row_number window function.
+
+* Dataset#paged_each in the mysql2 adapter now supports a
+  :stream=>false option to disable streaming and fallback to
+  the default implementation.
+  
+* The postgres adapter now supports the :sslrootcert option
+  directly, you no longer need to specify it using the
+  :driver_options hash.
+
+* The single_table_inheritance plugin now supports an
+  sti_class_from_sti_key method for getting the appropriate
+  subclass for the given key.
+
+= Other Improvements
+
+* Using the dataset_associations plugin with a many_through_many
+  association that joins to the same table multiple times is now
+  handled correctly by automatically aliasing the table
+  appropriately.
+
+* On Ruby 2.1+, Sequel::Error#cause will use wrapped_exception
+  if one is set.  This doesn't result in different behavior in
+  most cases, but it can in cases where nested exception handling
+  is done and Sequel tries to raise the most relevant exception.
+
+* Using the composition plugin with the :mapping option now works
+  correctly when using the column_conflicts plugin.
+
+* The validation_helpers plugin's validates_max_length method
+  now correctly gets the default :nil_message option from
+  the default_validation_helpers_options method instead of
+  looking at the plugin defaults.
+
+* The duplicate_columns_handler extension no longer makes the
+  Dataset#columns= method public.
+
+* On H2 1.4+, alter_table add_primary_key now works correctly.
+
+* The jdbc/sqlserver adapter's datetimeoffset type handling now
+  works with more JDBC driver versions.

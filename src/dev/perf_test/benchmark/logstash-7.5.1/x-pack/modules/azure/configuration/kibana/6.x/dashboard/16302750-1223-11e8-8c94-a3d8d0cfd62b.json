@@ -1,0 +1,12 @@
+{
+  "title": "[Azure Monitor] Alerts",
+  "hits": 0,
+  "description": "",
+  "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":1,\"w\":6,\"h\":1,\"i\":\"1\"},\"id\":\"890f3af0-093a-11e8-93e5-299e2b5c963a\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.2.1\"},{\"panelIndex\":\"15\",\"gridData\":{\"x\":0,\"y\":4,\"w\":6,\"h\":1,\"i\":\"15\"},\"id\":\"15b9f8d0-1216-11e8-8c94-a3d8d0cfd62b\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.2.1\"},{\"panelIndex\":\"16\",\"gridData\":{\"x\":0,\"y\":5,\"w\":12,\"h\":30,\"i\":\"16\"},\"id\":\"f802b0b0-1211-11e8-8c94-a3d8d0cfd62b\",\"title\":\"Alerts Viewer\",\"type\":\"search\",\"version\":\"6.2.1\"},{\"panelIndex\":\"17\",\"gridData\":{\"x\":0,\"y\":2,\"w\":6,\"h\":2,\"i\":\"17\"},\"id\":\"94e47b60-1385-11e8-8c94-a3d8d0cfd62b\",\"title\":\"Alert Activity\",\"type\":\"visualization\",\"version\":\"6.2.1\"},{\"panelIndex\":\"18\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":1,\"i\":\"18\"},\"id\":\"8e2e0480-13bc-11e8-8c94-a3d8d0cfd62b\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.2.1\"},{\"panelIndex\":\"19\",\"gridData\":{\"x\":6,\"y\":0,\"w\":6,\"h\":5,\"i\":\"19\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"0 - 12\":\"#F9D9F9\",\"12 - 23\":\"#E5A8E2\",\"23 - 34\":\"#D683CE\",\"34 - 45\":\"#BA43A9\"},\"defaultColors\":{\"0 - 12\":\"rgb(247,252,245)\",\"12 - 23\":\"rgb(199,233,192)\",\"23 - 34\":\"rgb(116,196,118)\",\"34 - 45\":\"rgb(35,139,69)\"},\"legendOpen\":false}},\"id\":\"2d11a9b0-1ac2-11e8-8c94-a3d8d0cfd62b\",\"title\":\"Alerts Heatmap\",\"type\":\"visualization\",\"version\":\"6.2.1\"}]",
+  "optionsJSON": "{\"darkTheme\":true,\"hidePanelTitles\":false,\"useMargins\":false}",
+  "version": 1,
+  "timeRestore": false,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "title": "Top 10 Sources by Size [ArcSight]",
+  "visState": "{\"title\":\"Top 10 Sources by Size [ArcSight]\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"sourceHostName\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Sources\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"sum\",\"schema\":\"metric\",\"params\":{\"field\":\"bytesIn\",\"customLabel\":\"Bytes\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"destinationHostName\",\"customLabel\":\"Destinations\"}},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Count\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{\"P-11\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-13\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-2\":{\"mapCenter\":[-0.17578097424708533,0],\"mapZoom\":0},\"P-3\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"P-4\":{\"mapCenter\":[-0.17578097424708533,0],\"mapZoom\":0},\"P-5\":{\"vis\":{\"defaultColors\":{\"0 - 18,000\":\"rgb(247,251,255)\",\"108,000 - 126,000\":\"rgb(74,152,201)\",\"126,000 - 144,000\":\"rgb(46,126,188)\",\"144,000 - 162,000\":\"rgb(23,100,171)\",\"162,000 - 180,000\":\"rgb(8,74,145)\",\"18,000 - 36,000\":\"rgb(227,238,249)\",\"36,000 - 54,000\":\"rgb(208,225,242)\",\"54,000 - 72,000\":\"rgb(182,212,233)\",\"72,000 - 90,000\":\"rgb(148,196,223)\",\"90,000 - 108,000\":\"rgb(107,174,214)\"},\"legendOpen\":false}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+  "description": "",
+  "savedSearchId": "bb1f4bc0-73fd-11e7-b4d0-0fc7dfb45744",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

@@ -1,0 +1,84 @@
+:plugin: truncate
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Truncate filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Allows you to truncate fields longer than a given length.
+
+This truncates on bytes values, not character count.  In practice, this
+should mean that the truncated length is somewhere between `length_bytes` and
+`length_bytes - 6` (UTF-8 supports up to 6-byte characters).
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Truncate Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-fields>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-length_bytes>> |<<number,number>>|Yes
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-fields"]
+===== `fields` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+A list of fieldrefs to truncate if they are too long.
+
+If not specified, the default behavior will be to attempt truncation on all
+strings in the event. This default behavior could be computationally
+expensive, so if you know exactly which fields you wish to truncate, it is
+advised that you be specific and configure the fields you want truncated.
+
+Special behaviors for non-string fields:
+
+* Numbers: No action
+* Array: this plugin will attempt truncation on all elements of that array.
+* Hash: truncate will try all values of the hash (recursively, if this hash
+contains other hashes).
+
+[id="plugins-{type}s-{plugin}-length_bytes"]
+===== `length_bytes` 
+
+  * This is a required setting.
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+Fields over this length will be truncated to this length.
+
+Truncation happens from the end of the text (the start will be kept).
+
+As an example, if you set `length_bytes => 10` and a field contains "hello
+world, how are you?", then this field will be truncated and have this value:
+"hello worl"
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

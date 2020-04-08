@@ -1,0 +1,201 @@
+:plugin: ruby
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Ruby filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Execute ruby code. This filter accepts inline ruby code or a ruby file.
+The two options are mutually exclusive and have slightly different ways of working,
+which are described below.
+
+===== Inline ruby code
+
+To inline ruby in your filter, place all code in the `code` option. This code will be executed for every event the filter receives. You can also place ruby code in the `init` option - it will be executed only once during the plugin's register phase.
+
+For example, to cancel 90% of events, you can do this:
+[source,ruby]
+    filter {
+      ruby {
+        # Cancel 90% of events
+        code => "event.cancel if rand <= 0.90"
+      }
+    }
+
+If you need to create additional events, you must use a specific syntax `new_event_block.call(event)` like in this example duplicating the input event
+[source,ruby]
+filter {
+  ruby {
+    code => "new_event_block.call(event.clone)"
+  }
+}
+
+===== Using a Ruby script file
+
+As the inline code can become complex and hard to structure inside of a text string in `code`, it's then preferrable to place the Ruby code in a .rb file, using the `path` option.
+
+[source,ruby]
+    filter {
+      ruby {
+        # Cancel 90% of events
+        path => "/etc/logstash/drop_percentage.rb"
+        script_params => { "percentage" => 0.9 }
+      }
+    }
+
+The ruby script file should define the following methods:
+
+ * `register(params)`: An optional register method that receives the key/value hash passed in the `script_params` configuration option
+ * `filter(event)`: A mandatory Ruby method that accepts a Logstash event and must return an array of events
+
+Below is an example implementation of the `drop_percentage.rb` ruby script that drops a configurable percentage of events:
+
+[source,ruby]
+----
+# the value of `params` is the value of the hash passed to `script_params`
+# in the logstash configuration
+def register(params)
+	@drop_percentage = params["percentage"]
+end
+
+# the filter method receives an event and must return a list of events.
+# Dropping an event means not including it in the return array,
+# while creating new ones only requires you to add a new instance of
+# LogStash::Event to the returned array
+def filter(event)
+	if rand >= @drop_percentage
+		return [event]
+	else
+		return [] # return empty array to cancel event
+	end
+end
+----
+
+===== Testing the ruby script
+
+To validate the behaviour of the `filter` method you implemented,
+the Ruby filter plugin provides an inline test framework where you
+can assert expectations.
+The tests you define will run when the pipeline is created and will
+prevent it from starting if a test fails.
+
+You can also verify if the tests pass using the logstash `-t` flag.
+
+For example above, you can write at the bottom of the `drop_percentage.rb`
+ruby script the following test:
+
+[source,ruby]
+----
+def register(params)
+  # ..
+end
+
+def filter(event)
+  # ..
+end
+
+test "drop percentage 100%" do
+  parameters do
+    { "percentage" => 1 }
+  end
+
+  in_event { { "message" => "hello" } }
+
+  expect("drops the event") do |events|
+    events.size == 0
+  end
+end
+----
+
+We can now test that the ruby script we're using is implemented correctly:
+
+[source,shell]
+----
+% bin/logstash -e "filter { ruby { path => '/etc/logstash/drop_percentage.rb' script_params => { 'drop_percentage' => 0.5 } } }" -t
+[2017-10-13T13:44:29,723][INFO ][logstash.filters.ruby.script] Test run complete {:script_path=>"/etc/logstash/drop_percentage.rb", :results=>{:passed=>1, :failed=>0, :errored=>0}}
+Configuration OK
+[2017-10-13T13:44:29,887][INFO ][logstash.runner          ] Using config.test_and_exit mode. Config Validation Result: OK. Exiting Logstash
+----
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Ruby Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-code>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-init>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-path>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-script_params>> |<<hash,hash>>,{}|No
+| <<plugins-{type}s-{plugin}-tag_on_exception>> |<<string,string>>,_rubyexception|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-code"]
+===== `code`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+  * This setting cannot be used together with `path`.
+
+The code to execute for every event.
+You will have an `event` variable available that is the event itself. See the <<event-api,Event API>> for more information.
+
+[id="plugins-{type}s-{plugin}-init"]
+===== `init`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Any code to execute at logstash startup-time
+
+[id="plugins-{type}s-{plugin}-path"]
+===== `path`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+  * This setting cannot be used together with `code`.
+
+The path of the ruby script file that implements the `filter` method.
+
+[id="plugins-{type}s-{plugin}-script_params"]
+===== `script_params`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+A key/value hash with parameters that are passed to the register method
+of your ruby script file defined in `path`.
+
+[id="plugins-{type}s-{plugin}-tag_on_exception"]
+===== `tag_on_exception`
+
+  * Value type is <<string,string>>
+  * Default value is `_rubyexception`
+
+Tag to add to events in case the ruby code (either inline or file based)
+causes an exception.
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

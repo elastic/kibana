@@ -1,0 +1,563 @@
+= The Sequel Object Model
+
+Sequel's dataset layer is mostly structured as an DSL, so it often obscures
+what actual objects are being used.  For example, you don't usually create
+Sequel objects by calling #new on the object's class (other than Sequel::Model
+instances).  However, just as almost everything in ruby is an object, all 
+the methods you call in Sequel deal with objects behind the scenes.
+
+In addition to the standard ruby types, there are four main types of
+Sequel-specific objects that you deal when programming with Sequel:
+
+* Sequel::Database
+* Sequel::Dataset
+* Sequel::Model
+* Sequel::SQL::Expression (and subclasses)
+
+== Sequel::Database
+
+Sequel::Database is the main Sequel object that you deal with.  It's usually
+created by the Sequel.connect method:
+
+  DB = Sequel.connect('postgres://host/database')
+
+A Sequel::Database object represents the database you are connecting to.
+Sequel::Database handles things like Sequel::Dataset creation,
+
+  dataset = DB[:table]
+
+schema modification,
+
+  DB.create_table(:table) do
+    primary_key :id
+    String :name
+  end
+
+and transactions:
+
+  DB.transaction do
+    DB[:table].insert(:column=>value)
+  end
+
+Sequel::Database#literal can be used to take any object that Sequel handles
+and literalize the object to an SQL string fragment:
+
+  DB.literal(DB[:table]) # (SELECT * FROM "table")
+
+== Sequel::Dataset
+
+Sequel::Dataset objects represent SQL queries.  They are created from
+a Sequel::Database object:
+
+  dataset = DB[:table]         # SELECT * FROM "table"
+  dataset = DB.from(table)     # SELECT * FROM "table"
+  dataset = DB.select(:column) # SELECT "column"
+
+Most Sequel::Dataset methods that do not execute queries return modified
+copies of the receiver, and the general way to build queries in Sequel is
+via a method chain:
+
+  dataset = DB[:test].
+              select(:column1, :column2).
+              where(column3: 4).
+              order(:column5)
+
+Such a method chain is a more direct way of doing:
+
+  dataset = DB[:test]
+  dataset = dataset.select(:column1, :column2)
+  dataset = dataset.where(column3: 4)
+  dataset = dataset.order(:column5)
+
+When you are ready to execute your query, you call one of the Sequel::Dataset
+action methods.  For returning rows, you can do:
+
+  dataset.first
+  dataset.all
+  dataset.each{|row| row}
+
+For inserting, updating, or deleting rows, you can do:
+
+  dataset.insert(column: value)
+  dataset.update(column: value)
+  dataset.delete
+
+All datasets are related to their database object, which you can access via
+the Sequel::Dataset#db method:
+
+  dataset.db # => DB
+
+== Sequel::Model
+
+Sequel::Model classes are wrappers around a particular Sequel::Dataset object that
+add custom behavior, both custom behavior for the entire set of rows in the dataset
+(the model's class methods), custom behavior for a subset of rows in the dataset
+(the model's dataset methods), and custom behavior for single rows in the dataset
+(the model's instance methods).
+
+Unlike most other Sequel objects, Sequel::Model classes and instances are
+generally created by the user using standard ruby syntax:
+
+  class Album < Sequel::Model
+  end
+  album = Album.new
+
+Model classes that use a non-default Database instance or table name generally
+use the Sequel::Model method to create the superclass:
+
+  class Album < Sequel::Model(DB[:music_albums])
+  end
+  album = Album.new
+
+All model classes are related to their Sequel::Dataset object, which you
+can access via the Sequel::Model.dataset method:
+
+  Album.dataset # SELECT * FROM "albums"
+
+Additionally, all model classes are related to their dataset's Sequel::Database
+object, which you can access via the Sequel::Model.db method:
+
+  Album.db # => DB
+
+== Standard Ruby Types
+
+Where possible, Sequel uses ruby's standard types to represent SQL concepts.
+In the examples here, the text to the right side of the # sign is the output
+if you pass the left side to Sequel::Database#literal.
+
+=== Symbol
+
+Ruby symbols represent SQL identifiers (tables, columns, schemas):
+
+  :schema # "schema"
+  :table  # "table"
+  :column # "column"
+
+=== Integer, Float, BigDecimal, String, Date, Time, DateTime
+
+Ruby's Integer, Float, BigDecimal, String, Date, Time, and DateTime classes
+represent similar types in SQL:
+
+  1                     # 1
+  1.0                   # 1.0
+  BigDecimal.new('1.0') # 1.0
+  "string"              # 'string'
+  Date.new(2012, 5, 6)  # '2012-05-06'
+  Time.now              # '2012-05-06 10:20:30'
+  DateTime.now          # '2012-05-06 10:20:30'
+
+=== Hash
+
+Sequel generally uses hash objects to represent equality:
+
+  {column: 1} # ("column" = 1)
+
+However, if you use an array as the hash value, it represents inclusion in the value list:
+
+  {column: [1, 2, 3]} # ("column" IN (1, 2, 3))
+
+You can also use a Sequel::Dataset instance as the hash value, which will be used to
+represent inclusion in the subselect:
+
+  {column: DB[:table].select(:column)} # ("column" IN (SELECT "column" FROM "table"))
+
+If you pass true, false, or nil as the hash value, it represents identity:
+
+  {column: nil} # ("column" IS NULL)
+
+If you pass a Range object, it will be used as the bounds for a greater than and less than
+operation:
+
+  {column: 1..2}  # (("column" >= 1) AND ("column" <= 2))
+  {column: 1...3} # (("column" >= 1) AND ("column" < 3))
+
+If you pass a Regexp object as the value, it will be used as a regular expression
+operation if the database supports it:
+
+  {column: /a.*b/} # ("column" ~ 'a.*b')
+
+=== Array
+
+Sequel generally treats arrays as an SQL value list:
+
+  [1, 2, 3] # (1, 2, 3)
+
+However, if all members of the array are arrays with two members, then the array is treated like
+a hash:
+
+   [[:column, 1]] # ("column" = 1)
+
+The advantage of using an array over a hash for such a case is that a hash cannot include
+multiple objects with the same key, while the array can.
+
+== Sequel::SQL::Expression (and subclasses)
+
+If Sequel needs to represent an SQL concept that does not map directly to an existing
+ruby class, it will generally use a Sequel::SQL::Expression subclass to represent that
+concept.
+
+Some of the examples below show examples that require the {core_extensions extension}[rdoc-ref:doc/core_extensions.rdoc].
+
+=== Sequel::LiteralString
+
+Sequel::LiteralString is not actually a Sequel::SQL::Expression subclass.  It is
+a subclass of String, but it is treated specially by Sequel, in that it is treated
+as literal SQL code, instead of as an SQL string that needs to be escaped:
+
+  Sequel::LiteralString.new("co'de") # co'de
+
+The following shortcuts exist for creating Sequel::LiteralString objects:
+
+  Sequel.lit("co'de")
+  "co'de".lit # core_extensions extension
+
+=== Sequel::SQL::Blob
+
+Sequel::SQL::Blob is also a String subclass, but it is treated as an SQL blob
+instead of an SQL string, as SQL blobs often have different literalization rules
+than SQL strings do:
+
+  Sequel::SQL::Blob.new("blob")
+
+The following shortcuts exist for creating Sequel::SQL::Blob objects:
+
+  Sequel.blob("blob")
+  "blob".to_sequel_blob  # core_extensions extension
+
+=== Sequel::SQLTime
+
+Sequel::SQLTime is a Time subclass.  However, it is treated specially by Sequel
+in that only the time component is literalized, not the date part.  This type
+is used to represent SQL time types, which do not contain date information.
+
+  Sequel::SQLTime.create(10, 20, 30) # "10:20:30"
+
+=== Sequel::SQL::ValueList
+
+Sequel::SQL::ValueList objects always represent SQL value lists.  Most ruby arrays
+represent value lists in SQL, except that arrays of two-element arrays are treated
+similar to hashes.  Such arrays can be wrapped in this class to ensure they are
+treated as value lists.  This is important when doing a composite key IN lookup,
+which some databases support.  Sequel::SQL::ValueList is an ::Array subclass with
+no additional behavior, so it can be instantiated like a normal array:
+
+  Sequel::SQL::ValueList.new([[1, 2], [3, 4]]) # ((1, 2), (3, 4))
+
+In general, you don't need to create Sequel::SQL::ValueList instances manually,
+they will be created automatically where they are required in most cases.
+
+The following shortcuts exist for creating Sequel::SQL::ValueList objects:
+
+  Sequel.value_list([[1, 2], [3, 4]])
+  [[1, 2], [3, 4]].sql_value_list # core_extensions extension
+
+=== Sequel::SQL::Identifier
+
+Sequel::SQL::Identifier objects represent single identifiers.  The main reason for
+their existence is they support many additional Sequel specific methods that are
+not supported on plain symbols:
+
+  Sequel::SQL::Identifier.new(:colum) # "col"
+
+The following shortcuts exist for creating Sequel::SQL::Identifier objects:
+
+  Sequel[:column]
+  Sequel.identifier(:column)
+  :column.identifier # core_extensions extension
+
+=== Sequel::SQL::QualifiedIdentifier
+
+Sequel::SQL::QualifiedIdentifier objects represent qualified identifiers:
+
+  Sequel::SQL::QualifiedIdentifier.new(:table, :column) # "table"."column"
+
+The following shortcuts exist for creating Sequel::SQL::QualifiedIdentifier objects:
+
+  Sequel[:table][:column]
+  Sequel.qualify(:table, :column)
+  :column.qualify(:table) # core_extensions extension
+
+=== Sequel::SQL::AliasedExpression
+
+Sequel::SQL::AliasedExpression objects represent aliased expressions in SQL.  The alias
+is treated as an identifier, but the expression can be an arbitrary Sequel expression:
+
+  Sequel::SQL::AliasedExpression.new(:column, :alias)
+  # "column" AS "alias"
+
+Derived column lists are also supported:
+
+  Sequel::SQL::AliasedExpression.new(:table, :alias, [:column_alias1, :column_alias2])
+  # "table" AS "alias"("column_alias1", "column_alias2")
+
+The following shortcuts exist for creating Sequel::SQL::AliasedExpression objects:
+
+  Sequel[:column].as(:alias)
+  Sequel.as(:column, :alias)
+  Sequel.as(:column, :alias, [:column_alias1, :column_alias2])
+  :column.as(:alias) # core_extensions or symbol_as extension
+  
+=== Sequel::SQL::ComplexExpression
+
+Sequel::SQL::ComplexExpression objects mostly represent SQL operations with arguments.
+There are separate subclasses for representing boolean operations such as AND and OR
+(Sequel::SQL::BooleanExpression), mathematical operations such as + and -
+(Sequel::SQL::NumericExpression), and string operations such as || and LIKE
+(Sequel::SQL::StringExpression).
+
+  Sequel::SQL::BooleanExpression.new(:OR, :col1, :col2) # ("col1" OR "col2")
+  Sequel::SQL::NumericExpression.new(:+, :column, 2) # ("column" + 2)
+  Sequel::SQL::StringExpression.new(:"||", :column, "b") # ("column" || 'b')
+
+There are many shortcuts for creating Sequel::SQL::ComplexExpression objects:
+
+  Sequel.or(:col1, :col2)
+  :col1 | :col2 # core_extensions extension
+
+  Sequel.+(:column, 2)
+  :column + 2 # core_extensions extension
+
+  Sequel.join([:column, 'b'])
+  :column + 'b' # core_extensions extension
+
+=== Sequel::SQL::CaseExpression
+
+Sequel::SQL::CaseExpression objects represent SQL CASE expressions, which represent
+branches in the database, similar to ruby case expressions.  Like ruby's case
+expressions, these case expressions can have a implicit value you are comparing
+against:
+
+  Sequel::SQL::CaseExpression.new({2=>1}, 0, :a) # CASE "a" WHEN 2 THEN 1 ELSE 0 END
+
+Or they can treat each condition separately:
+ 
+  Sequel::SQL::CaseExpression.new({{a: 2}=>1}, 0) # CASE WHEN ("a" = 2) THEN 1 ELSE 0 END
+
+In addition to providing a hash, you can also provide an array of two-element arrays:
+
+  Sequel::SQL::CaseExpression.new([[2, 1]], 0, :a) # CASE "a" WHEN 2 THEN 1 ELSE 0 END
+
+The following shortcuts exist for creating Sequel::SQL::CaseExpression objects:
+
+  Sequel.case({2=>1}, 0, :a)
+  Sequel.case({{a: 2}=>1}, 0)
+
+  {2=>1}.case(0, :a) # core_extensions extension
+  {{a: 2}=>1}.case(0) # core_extensions extension
+
+=== Sequel::SQL::Cast
+
+Sequel::SQL::Cast objects represent CAST expressions in SQL, which does explicit
+typecasting in the database.  With Sequel, you provide the expression to typecast
+as well as the type to cast to.  The type can either be a generic type, given as
+a ruby class:
+
+  Sequel::SQL::Cast.new(:a, String) # (CAST "a" AS text)
+
+or a specific type, given as a symbol or string:
+
+  Sequel::SQL::Cast.new(:a, :int4) # (CAST "a" AS int4)
+
+The following shortcuts exist for creating Sequel::SQL::Cast objects:
+
+  Sequel.cast(:a, String)
+  Sequel.cast(:a, :int4)
+
+  :a.cast(String) # core_extensions extension
+  :a.cast(:int4) # core_extensions extension
+
+=== Sequel::SQL::ColumnAll
+
+Sequel::SQL::ColumnAll objects represent the selection of all columns from a table:
+
+  Sequel::SQL::ColumnAll.new(:table) # "table".*
+
+The following shortcut exists for creating Sequel::SQL::ColumnAll objects:
+
+  Sequel[:table].*
+  Sequel[:schema][:table].*
+  :table.* # core_extensions extension
+
+=== Sequel::SQL::Constant
+
+Sequel::SQL::Constant objects represent constants or pseudo-constants in SQL,
+such as TRUE, NULL, and CURRENT_TIMESTAMP.  These are not designed to be created
+or used by the end user, but some existing values are predefined under the
+Sequel namespace:
+
+  Sequel::CURRENT_TIMESTAMP # CURRENT_TIMESTAMP
+
+These objects are usually used as values in queries:
+
+  DB[:table].insert(time: Sequel::CURRENT_TIMESTAMP)
+
+=== Sequel::SQL::DelayedEvaluation
+
+Sequel::SQL::DelayedEvaluation objects represent an evaluation that is delayed
+until query literalization.
+
+  Sequel::SQL::DelayedEvaluation.new(proc{some_model.updated_at})
+
+The following shortcut exists for creating Sequel::SQL::DelayedEvaluation
+objects:
+
+  Sequel.delay{some_model.updated_at}
+
+Note how Sequel.delay requires a block, while Sequel::SQL::DelayedEvaluation.new
+accepts a generic callable object.
+
+Let's say you wanted a dataset for the number of objects greater than some
+attribute of another object:
+
+  ds = DB[:table].where{updated_at > some_model.updated_at}
+
+The problem with the above query is that it evaluates "some_model.updated_at"
+statically, so if you change some_model.updated_at later, it won't affect this
+dataset.  You can use Sequel.delay to fix this:
+
+  ds = DB[:table].where{updated_at > Sequel.delay{some_model.updated_at}}
+
+This will evaluate "some_model.updated_at" every time you literalize the
+dataset (usually every time it is executed).
+
+=== Sequel::SQL::Function
+
+Sequel::SQL::Function objects represents database function calls, which take a function
+name and any arguments:
+
+  Sequel::SQL::Function.new(:func, :a, 2) # func("a", 2)
+
+The following shortcuts exist for creating Sequel::SQL::Function objects:
+
+  Sequel.function(:func, :a, 2)
+  :func.sql_function(:a, 2) # core_extensions extension
+
+=== Sequel::SQL::JoinClause
+
+Sequel::SQL::JoinClause objects represent SQL JOIN clauses.  They are usually
+not created manually, as the Dataset join methods create them automatically.
+
+=== Sequel::SQL::PlaceholderLiteralString
+
+Sequel::SQL::PlaceholderLiteralString objects represent a literal SQL string
+with placeholders for variables.  There are three types of these objects.
+The first type uses question marks with multiple placeholder value objects:
+
+  Sequel::SQL::PlaceholderLiteralString.new('? = ?', [:a, 1]) # "a" = 1
+
+The second uses named placeholders with colons and a hash of placeholder
+value objects:
+
+  Sequel::SQL::PlaceholderLiteralString.new(':b = :v', [{b: :a, v: 1}]) # "a" = 1
+
+The third uses an array instead of a string, with multiple placeholder
+objects, each one going in between the members of the array:
+
+  Sequel::SQL::PlaceholderLiteralString.new(['', ' = '], [:a, 1]) # "a" = 1
+
+For any of these three forms, you can also include a third argument for whether
+to include parentheses around the string:
+
+  Sequel::SQL::PlaceholderLiteralString.new('? = ?', [:a, 1], true) # ("a" = 1)
+
+The following shortcuts exist for creating Sequel::SQL::PlaceholderLiteralString
+objects:
+
+  Sequel.lit('? = ?', :a, 1)
+  Sequel.lit(':b = :v', b: :a, v: 1)
+  Sequel.lit(['', ' = '], :a, 1)
+
+  '? = ?'.lit(:a, 1) # core_extensions extension
+  ':b = :v'.lit(:b=>:a, :v=>1) # core_extensions extension
+
+=== Sequel::SQL::OrderedExpression
+
+Sequel::SQL::OrderedExpression objects represent ascending or descending sorts,
+used by the Dataset order methods.  They take an expression, and whether to sort
+it ascending or descending:
+
+  Sequel::SQL::OrderedExpression.new(:a) # "a" DESC
+  Sequel::SQL::OrderedExpression.new(:a, false) # "a" ASC
+
+Additionally, they take an options hash, which can be used to specify how nulls
+can be sorted:
+
+  Sequel::SQL::OrderedExpression.new(:a, true, :nulls=>:first) # "a" DESC NULLS FIRST
+  Sequel::SQL::OrderedExpression.new(:a, false, :nulls=>:last) # "a" ASC NULLS LAST
+
+The following shortcuts exist for creating Sequel::SQL::OrderedExpression objects:
+
+  Sequel.asc(:a)
+  Sequel.desc(:a)
+  Sequel.asc(:a, :nulls=>:first)
+  Sequel.desc(:a, :nulls=>:last)
+
+  :a.asc # core_extensions extension
+  :a.desc # core_extensions extension
+  :a.asc(:nulls=>:first) # core_extensions extension
+  :a.desc(:nulls=>:last) # core_extensions extension
+
+=== Sequel::SQL::Subscript
+
+Sequel::SQL::Subscript objects represent SQL database array access.  They take an
+expression and an array of indexes (or a range for an SQL array slice):
+
+  Sequel::SQL::Subscript.new(:a, [1]) # "a"[1]
+  Sequel::SQL::Subscript.new(:a, [1, 2]) # "a"[1, 2]
+  Sequel::SQL::Subscript.new(:a, [1..2]) # "a"[1:2]
+
+The following shortcuts exist for creating Sequel::SQL::Subscript objects:
+
+  Sequel.subscript(:a, 1)
+  Sequel.subscript(:a, 1, 2)
+  Sequel.subscript(:a, 1..2)
+
+  :a.sql_subscript(1) # core_extensions extension
+  :a.sql_subscript(1, 2) # core_extensions extension
+  :a.sql_subscript(1..2) # core_extensions extension
+  
+=== Sequel::SQL::VirtualRow
+
+Sequel::SQL::VirtualRow is a BasicObject subclass that is the backbone behind the
+block expression support:
+
+  DB[:table].where{a < 1}
+
+In the above code, the block is instance-evaled inside a VirtualRow instance.
+
+These objects are usually not instantiated manually.  See the
+{Virtual Row Guide}[rdoc-ref:doc/virtual_rows.rdoc] for details.
+
+=== Sequel::SQL::Window
+
+Sequel::SQL::Window objects represent the windows used by Sequel::SQL::Function.
+They use a hash-based API, supporting the :frame, :order, :partition, and :window
+options:
+
+  Sequel::SQL::Window.new(order: :a) # (ORDER BY "a")
+  Sequel::SQL::Window.new(partition: :a) # (PARTITION BY "a")
+
+  Sequel::SQL::Window.new(partition: :a, frame: :all)
+  # (PARTITION BY "a" ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+
+=== Sequel::SQL::Wrapper
+
+Sequel::SQL::Wrapper objects wrap arbitrary objects so that they can be used
+in Sequel expressions:
+
+  o = Object.new
+  def o.sql_literal_append(ds, sql) sql << "foo" end
+  Sequel::SQL::Wrapper.new(o) # foo
+
+The advantage of wrapping the object is that you can the call Sequel methods
+on the wrapper that would not be defined on the object itself:
+
+  Sequel::SQL::Wrapper.new(o) + 1 # (foo + 1)
+
+You can use the Sequel.[] method to wrap any object:
+
+  Sequel[o]
+
+However, note that that does not necessarily return a Sequel::SQL::Wrapper
+object, it may return a different class of object, such as a
+Sequel::SQL::ComplexExpression subclass object.

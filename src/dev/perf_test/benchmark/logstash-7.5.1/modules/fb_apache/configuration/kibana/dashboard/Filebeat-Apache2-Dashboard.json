@@ -1,0 +1,13 @@
+{
+  "hits": 0, 
+  "timeRestore": false, 
+  "description": "", 
+  "title": "Filebeat Apache2 Dashboard", 
+  "uiStateJSON": "{\"P-1\":{\"mapCenter\":[40.713955826286046,-0.17578125]}}", 
+  "panelsJSON": "[{\"col\":1,\"id\":\"Apache2-access-unique-IPs-map\",\"panelIndex\":1,\"row\":1,\"size_x\":12,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"Apache2-response-codes-of-top-URLs\",\"panelIndex\":2,\"row\":6,\"size_x\":8,\"size_y\":3,\"type\":\"visualization\"},{\"col\":9,\"id\":\"Apache2-browsers\",\"panelIndex\":3,\"row\":6,\"size_x\":4,\"size_y\":3,\"type\":\"visualization\"},{\"col\":11,\"id\":\"Apache2-operating-systems\",\"panelIndex\":4,\"row\":4,\"size_x\":2,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"Apache2-error-logs-over-time\",\"panelIndex\":5,\"row\":9,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"Apache2-response-codes-over-time\",\"panelIndex\":6,\"row\":4,\"size_x\":10,\"size_y\":2,\"type\":\"visualization\"},{\"id\":\"Apache2-errors-log\",\"type\":\"search\",\"panelIndex\":7,\"size_x\":12,\"size_y\":3,\"col\":1,\"row\":11,\"columns\":[\"apache2.error.client\",\"apache2.error.level\",\"apache2.error.module\",\"apache2.error.message\"],\"sort\":[\"@timestamp\",\"desc\"]}]", 
+  "optionsJSON": "{\"darkTheme\":false}", 
+  "version": 1, 
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}]}"
+  }
+}

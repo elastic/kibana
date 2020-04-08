@@ -1,0 +1,10 @@
+{
+  "title": "Query Duration (ms) Single [Azure Monitor]",
+  "visState": "{\"title\":\"Query Duration (ms) Single [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"bar\",\"color\":\"rgba(0,191,179,1)\",\"fill\":\"0.1\",\"formatter\":\"0a\",\"hide_in_legend\":1,\"id\":\"a5439470-07fd-11e8-92fe-81a50acfdb07\",\"label\":\"Query Duration\",\"line_width\":\"1\",\"metrics\":[{\"field\":\"sql_diagnostics_QueryStoreRuntimeStatistics_properties.duration\",\"id\":\"a5439471-07fd-11e8-92fe-81a50acfdb07\",\"type\":\"avg\"},{\"field\":\"a5439471-07fd-11e8-92fe-81a50acfdb07\",\"id\":\"bf5c2ed0-07fd-11e8-92fe-81a50acfdb07\",\"minimize\":0,\"model\":\"simple\",\"settings\":\"\",\"type\":\"moving_average\",\"window\":\"\"}],\"point_size\":1,\"seperate_axis\":0,\"split_mode\":\"everything\",\"stacked\":\"none\",\"value_template\":\"{{value}} ms\"}],\"show_grid\":1,\"show_legend\":0,\"time_field\":\"@timestamp\",\"type\":\"timeseries\",\"filter\":\"azure.group:sql_diagnostics\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

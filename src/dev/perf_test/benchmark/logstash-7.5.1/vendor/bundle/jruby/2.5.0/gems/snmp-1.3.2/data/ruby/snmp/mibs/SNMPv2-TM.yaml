@@ -1,0 +1,10 @@
+--- 
+snmpUDPDomain: 1.3.6.1.6.1.1
+snmpCLNSDomain: 1.3.6.1.6.1.2
+snmpCONSDomain: 1.3.6.1.6.1.3
+snmpDDPDomain: 1.3.6.1.6.1.4
+snmpIPXDomain: 1.3.6.1.6.1.5
+rfc1157Proxy: 1.3.6.1.6.2.1
+rfc1157Domain: 1.3.6.1.6.2.1.1
+snmpv2tm: 1.3.6.1.6.3.19
+

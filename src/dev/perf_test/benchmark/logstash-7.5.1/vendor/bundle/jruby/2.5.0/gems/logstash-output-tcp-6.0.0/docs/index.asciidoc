@@ -1,0 +1,147 @@
+:plugin: tcp
+:type: output
+:default_codec: json
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Tcp output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Write events over a TCP socket.
+
+Each event json is separated by a newline.
+
+Can either accept connections from clients or connect to a server,
+depending on `mode`.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Tcp Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-mode>> |<<string,string>>, one of `["server", "client"]`|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|Yes
+| <<plugins-{type}s-{plugin}-reconnect_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-ssl_cacert>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-ssl_cert>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-ssl_enable>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-ssl_key>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-ssl_key_passphrase>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-ssl_verify>> |<<boolean,boolean>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+When mode is `server`, the address to listen on.
+When mode is `client`, the address to connect to.
+
+[id="plugins-{type}s-{plugin}-mode"]
+===== `mode` 
+
+  * Value can be any of: `server`, `client`
+  * Default value is `"client"`
+
+Mode to operate in. `server` listens for client connections,
+`client` connects to a server.
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * This is a required setting.
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+When mode is `server`, the port to listen on.
+When mode is `client`, the port to connect to.
+
+[id="plugins-{type}s-{plugin}-reconnect_interval"]
+===== `reconnect_interval` 
+
+  * Value type is <<number,number>>
+  * Default value is `10`
+
+When connect failed,retry interval in sec.
+
+[id="plugins-{type}s-{plugin}-ssl_cacert"]
+===== `ssl_cacert` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+The SSL CA certificate, chainfile or CA path. The system CA path is automatically included.
+
+[id="plugins-{type}s-{plugin}-ssl_cert"]
+===== `ssl_cert` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+SSL certificate path
+
+[id="plugins-{type}s-{plugin}-ssl_enable"]
+===== `ssl_enable` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Enable SSL (must be set for other `ssl_` options to take effect).
+
+[id="plugins-{type}s-{plugin}-ssl_key"]
+===== `ssl_key` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+SSL key path
+
+[id="plugins-{type}s-{plugin}-ssl_key_passphrase"]
+===== `ssl_key_passphrase` 
+
+  * Value type is <<password,password>>
+  * Default value is `nil`
+
+SSL key passphrase
+
+[id="plugins-{type}s-{plugin}-ssl_verify"]
+===== `ssl_verify` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Verify the identity of the other end of the SSL connection against the CA.
+For input, sets the field `sslsubject` to that of the client certificate.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

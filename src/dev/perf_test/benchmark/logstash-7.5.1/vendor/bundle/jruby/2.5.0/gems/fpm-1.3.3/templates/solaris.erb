@@ -1,0 +1,15 @@
+CLASSES=none
+TZ=PST
+PATH=/sbin:/usr/sbin:/usr/bin:/usr/sadm/install/bin
+BASEDIR=/
+PKG=<%= name %>
+NAME=<%= name %>
+ARCH=<%= architecture %>
+VERSION=<%= version %><%= iteration && "-" + iteration.to_s %>
+CATEGORY=application
+<%# pkginfo(4) says DESC is max 256 characters -%>
+DESC=<%= description.split("\n").first[0..255] or "no description given" %>
+VENDOR=<%= maintainer %>
+<%# Take maintainer of "Foo <bar@baz.com>" and use "bar@baz.com" -%>
+EMAIL=<%= (maintainer[/<.+>/] or maintainer).gsub(/[<>]/, "") %>
+

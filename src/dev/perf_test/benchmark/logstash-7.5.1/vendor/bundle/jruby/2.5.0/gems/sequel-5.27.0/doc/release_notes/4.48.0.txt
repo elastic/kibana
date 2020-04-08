@@ -1,0 +1,293 @@
+= Deprecated Features
+
+* The identifier_columns plugin is now deprecated.  There is no reason
+  to use it when Sequel.split_symbols = false, which will be the
+  default in Sequel 5.
+
+* The filter_having, hash_aliases, and sequel_3_dataset_methods
+  extensions are now deprecated.  They only existed for backwards
+  compatibility with Sequel 3.
+
+* The query_literals extension is now deprecated.  It changes behavior
+  in a way that makes SQL injections more likely.
+
+* The meta_def extension is now deprecated.  It is no longer necessary,
+  since on ruby 1.9+ you can use define_singleton_method.
+
+* The empty_array_ignore_nulls extension has been deprecated.  It
+  has been a no-op since Sequel 4.25.0.
+
+* The cti_base_model, cti_key, and cti_model_map class methods in
+  the class_table_inheritance plugin are now deprecated. Use
+  cti_models.first instead of cti_base_model, sti_key
+  instead of cti_key, and sti_model_map instead of cti_model_map.
+
+* The :strict option in the nested_attributes plugin is now deprecated.
+  Switch to using the :unmatched_pk option.
+
+* Database#reset_conversion_procs on PostgreSQL is now deprecated.
+  There will be no need to call it in Sequel 5.
+
+* Using global conversion procs added by the pg_* extensions, without
+  loading the pg_* extension into the Database instance, are now
+  deprecated.  Additionally, using PGArray.register or PGRange.register
+  to register global types is now also deprecated.  Use
+  Database#register_array_type or Database#register_range_type instead
+  to register the types on a per-Database basis.
+
+* Treating :natural_inner join type as NATURAL LEFT JOIN on MySQL is
+  now deprecated.  MySQL doesn't support NATURAL INNER JOIN, but if
+  you were going to convert it, NATURAL JOIN would make more sense.
+
+* Unexpected values passed to Dataset#insert_conflict on SQLite are
+  now deprecated.  Only values that result in one of the following
+  strings will be allowed in Sequel 5: ROLLBACK, ABORT, FAIL, IGNORE,
+  and REPLACE.
+
+* The Dataset#and, #exclude_where, #interval, and #range methods
+  are now deprecated.  Undeprecated copies are now available in the
+  new sequel_4_dataset_methods extension.
+
+* Model.<< is now deprecated.  Intuitivately, you would except this
+  to call Model.create and return the Model class, but it calls <<
+  on the model's dataset and returns the dataset.
+
+* The Sequel::Postgres::PG_TYPES constant is now deprecated.  All
+  conversion procs should now be added on a per-Database basis using
+  add_conversion_proc or add_named_conversion_proc.  The following
+  private Database methods related to conversion procs are now
+  deprecated, though some are still called internally and therefore
+  do not have deprecation warnings:
+
+  * add_named_conversion_procs
+  * conversion_procs_updated
+  * convert_named_procs_to_procs
+  * copy_conversion_procs
+  * get_conversion_procs
+
+  Related to this, loading the sequel/adapters/utils/pg_types.rb file
+  is now deprecated.
+
+* The following adapter or database specific global accessors for setting
+  defaults are now deprecated:
+
+  * Sequel::DB2.use_clob_as_blob
+  * Sequel::IBMDB.convert_smallint_to_bool
+  * Sequel::MySQL.convert_invalid_date_time
+  * Sequel::MySQL.convert_tinyint_to_bool
+  * Sequel::MySQL.default_charset
+  * Sequel::MySQL.default_collate
+  * Sequel::MySQL.default_engine
+  * Sequel::Postgres.use_iso_date_format
+  * Sequel::Postgres.client_min_messages
+  * Sequel::Postgres.force_standard_strings 
+  * Sequel::SqlAnywhere.convert_smallint_to_bool
+
+  Use the Database instance accessors or Database options instead to
+  change behavior.
+
+* The following adapter or database specific dataset mutation methods are
+  now deprecated:
+
+  * convert_smallint_to_bool= (ibmdb adapter, SQLAnywhere)
+  * convert_types= (jdbc adapter)
+  * mssql_unicode_strings= (Microsoft SQL Server)
+
+  Use the with_* methods which return a modified copy of the dataset
+  instead of these mutation methods.
+
+* The Dataset#non_sql_options private method is now deprecated.
+  External adapters that overrode this method should switch to
+  overriding Dataset#non_sql_option?.
+
+* The Database#timestamp_convertor private method in the jdbc adapter
+  is now deprecated.  Users should switch to method(:timestamp_convert).
+
+* Modification of the Sequel::JDBC::TypeConvertor class is now
+  deprecated.  External jdbc subadapters that were using this to add
+  custom conversion procs should be modified.
+
+* Having the pg_row extension respect conversion procs for subtypes
+  added after the registeration of the composite type is now deprecated.
+  Now, all subtypes should have the appropriate conversion proc added
+  before the composite type is registered.
+
+* Array#sql_array in the core_extensions extension is now deprecated.
+  Switch to using Array#sql_value_list.
+
+* The SEQUEL_POSTGRES_USES_PG constant added by the postgres adapter
+  is now deprecated. Sequel::Postgres::USES_PG should be used instead.
+
+* Many more internal Sequel constants have been deprecated.
+
+= New Features
+
+* The Model#to_json and Dataset#to_json methods in the json_serializer
+  plugin now support a block.  This block is called with the
+  hash/array that would have be serialized to JSON, and the block
+  should return the object to serialize.  This makes it easy to
+  customize the JSON output by adding new entries, or wrapping the
+  object in other object.
+
+  The Dataset#to_json method supports an :instance_block option, which
+  should be a proc that will be passed to Model#to_json.
+
+  In order to implement this, Sequel.object_to_json now passes any
+  block given to the to_json call on the object.  If you are
+  overriding Sequel.object_to_json, you are responsible for making
+  sure the block is passed appropriately.
+
+* The association_pks plugin now supports a
+  :association_pks_use_associated_table association option for
+  many_to_many associations.  If this option is used, instead of just
+  looking at the join table, the association_pks getter will get the
+  primary keys from the associated table.  This can be useful if the
+  association's right_primary_key does not match the associated
+  model's primary key, and you are interested in the primary keys of
+  the associated objects.  If this option is used, no association_pks
+  setter method is created.
+
+* Dataset#as_hash has been added as a replacement to #to_hash.
+  If you want, you can now undef_method :to_hash and use
+  as_hash and things will work.  Doing so can work around
+  problems when using keyword argument splats in ruby 2.0+.
+  For example:
+
+    def foo(*a, **b)
+    end
+
+    foo(City.order(:id))
+  
+  results in foo being called with a being [] and b being
+  City.order(:id).to_hash, which is unexpected and undesired
+  behavior.  If you want to use keyword argument splats or other
+  places where ruby will call to_hash implicitly if it is defined,
+  using undef_method :to_hash is recommended.
+
+* A Database#add_conversion_proc method has been added on
+  PostgreSQL.  This method takes a type OID and either a block
+  or a callable argument to use as the conversion proc for the
+  type OID.
+
+* The following adapter or database specific Database accessors
+  have been added for changing settings on a per-Database basis:
+
+  * convert_smallint_to_bool (ibmdb adapter)
+  * default_charset (MySQL)
+  * default_collate (MySQL)
+  * default_engine (MySQL)
+  * use_clob_as_blob (DB2)
+
+* A Dataset#with_convert_types method has been added to the jdbc
+  adapter, for returning a modified dataset with the convert_types
+  setting changed.
+
+= Other Improvements
+
+* Using the postgres adapter with pg 0.21.0 no longer results in
+  deprecation warnings.
+
+* When using the class_table_inheritance plugin and using a direct
+  subclass of the parent class that does not use a separate table,
+  as well as using the :alias option, the insert SQL used is now
+  correct.  Previously, it attempted to insert into a subquery,
+  which is not valid SQL.
+
+  Additionally, the dataset for such a model no longer uses a
+  subquery, since there is no reason to do so as there is no join.
+
+* Model.skip_auto_validations(:not_null) in the auto_validations
+  plugin now skips not null checks for columns with default
+  values, in addition to skipping not null checks for columns
+  without default values.
+
+* The static_cache plugin now supports the options hash argument
+  to to_hash and to_hash_groups.  Currently, it only supports
+  the :hash option, since the :all option doesn't make sense.
+
+* When touching associations in the touch plugin, clear the
+  cached association, because otherwise the cached values will
+  be stale.
+
+* The validation_class_methods plugin no longer requires the
+  blank extension.
+
+* The validation_helpers plugin methods that support the
+  :allow_blank option now work correctly if the blank extension
+  is not loaded.
+
+* Loading the column_conflicts plugin into a model a second time
+  no longer removes existing column conflict settings.
+
+* On SQLite 3.8.8+, indexes automatically created from unique
+  constraints are now included in Database#indexes output.
+
+* On SQLite 3.8.8+, partial indexes are now excluded from
+  Database#indexes output.
+
+* Database#indexes on PostgreSQL 9.5+ now uses a simpler query
+  with the array_position function.
+
+* Database#foreign_key_list on PostgreSQL now uses a single
+  query instead of two queries, and also uses the array_position
+  function on PostgreSQL 9.5+ to simplify the queries.
+
+* On PostgreSQL and Derby, when calling Database#create_table
+  with the :ignore_index_errors option inside a transaction,
+  a savepoint is used around each index creation so that an
+  index error does not cause the entire transaction to fail.
+  A savepoint is also used on Microsoft SQL Server, but it
+  appears that Microsoft SQL Server rolls back the entire
+  transaction if CREATE INDEX returns an error, instead of
+  just rolling back to the savepoint.
+
+* Encoding is now preserved when parsing PostgreSQL arrays in the
+  pg_array extension.
+
+* Database#copy_table in the postgres adapter now does not
+  hide the underlying exception if an exception is raised
+  during processing.
+
+* Database#copy_into in the jdbc/postgresql adapter now does not
+  hide the underlying exception if an exception is raised
+  during processing.
+
+* Database#copy_into in the jdbc/postgresql adapter now
+  respects the :server option for using a specific shard.
+
+* Calling #reset_conversion_procs on Database instance that
+  uses the pg_hstore extension now results in the hstore
+  type still being parsed.  Previously, the hstore conversion
+  proc would be dropped.
+
+* The postgres adapter no longer monkey-patches postgres-pr if it
+  uses that as the driver.
+
+* Multiple thread-safety issues in the mock adapter have been
+  fixed.
+
+* Thread safety issues when simultaneously loading multiple
+  adapters that access PostgreSQL have been fixed.
+
+* Hash allocations have been reduced in the csv_serializer,
+  json_serializer, and xml_serializer plugins.
+
+* The deprecated Sequel::Model::ANONYMOUS_MODEL_CLASSES
+  constant is now correctly populated with classes created
+  by Sequel::Model().  This was broken in starting in
+  Sequel 4.45.0.
+
+= Backwards Compatibility
+
+* The pg_array_associations plugin now loads the pg_array
+  extension into the Database instance if it is not already
+  loaded.  This can break cases where the pg_array_associations
+  plugin is used on a non-PostgreSQL database.
+
+* Support for using the old postgres driver has been removed
+  from the postgres adapter.  The postgres adapter now only
+  supports pg and postgres-pr.
+
+* When the postgres-pr driver is being used by the postgres
+  adapter, connecting to a database is only allowed if
+  standard strings are being forced (the default).

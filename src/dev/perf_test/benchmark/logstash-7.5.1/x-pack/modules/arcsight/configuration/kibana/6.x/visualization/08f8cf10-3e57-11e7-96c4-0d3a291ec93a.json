@@ -1,0 +1,10 @@
+{
+  "title": "Firewall - Navigation",
+  "visState": "{\"title\":\"Firewall - Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### **Navigation Pane** ###\\n\\n[Firewall Devices Overview](#/dashboard/37af0b40-398d-11e7-ae19-21fb91585845)\\n\\n[Firewall Suspicious Activities](#/dashboard/82051450-3e56-11e7-96c4-0d3a291ec93a)\\n\\n[Endopint Overview](#dashboard/d2fa5030-3e5d-11e7-b212-897f1496dc0e)\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

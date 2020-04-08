@@ -1,0 +1,1083 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2011-01-01'
+:operations:
+- :name: AttachInstances
+  :method: :attach_instances
+  :inputs:
+    InstanceIds:
+    - :membered_list:
+      - :string
+    AutoScalingGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AttachInstancesResult:
+        :ignore: true
+- :name: CompleteLifecycleAction
+  :method: :complete_lifecycle_action
+  :inputs:
+    LifecycleHookName:
+    - :string
+    - :required
+    AutoScalingGroupName:
+    - :string
+    - :required
+    LifecycleActionToken:
+    - :string
+    - :required
+    LifecycleActionResult:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CompleteLifecycleActionResult:
+        :ignore: true
+- :name: CreateAutoScalingGroup
+  :method: :create_auto_scaling_group
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    LaunchConfigurationName:
+    - :string
+    InstanceId:
+    - :string
+    MinSize:
+    - :integer
+    - :required
+    MaxSize:
+    - :integer
+    - :required
+    DesiredCapacity:
+    - :integer
+    DefaultCooldown:
+    - :integer
+    AvailabilityZones:
+    - :membered_list:
+      - :string
+    LoadBalancerNames:
+    - :membered_list:
+      - :string
+    HealthCheckType:
+    - :string
+    HealthCheckGracePeriod:
+    - :integer
+    PlacementGroup:
+    - :string
+    VPCZoneIdentifier:
+    - :string
+    TerminationPolicies:
+    - :membered_list:
+      - :string
+    Tags:
+    - :membered_list:
+      - :structure:
+          ResourceId:
+          - :string
+          ResourceType:
+          - :string
+          Key:
+          - :string
+          - :required
+          Value:
+          - :string
+          PropagateAtLaunch:
+          - :boolean
+  :outputs:
+    :children:
+      CreateAutoScalingGroupResult:
+        :ignore: true
+- :name: CreateLaunchConfiguration
+  :method: :create_launch_configuration
+  :inputs:
+    LaunchConfigurationName:
+    - :string
+    - :required
+    ImageId:
+    - :string
+    KeyName:
+    - :string
+    SecurityGroups:
+    - :membered_list:
+      - :string
+    UserData:
+    - :string
+    InstanceId:
+    - :string
+    InstanceType:
+    - :string
+    KernelId:
+    - :string
+    RamdiskId:
+    - :string
+    BlockDeviceMappings:
+    - :membered_list:
+      - :structure:
+          VirtualName:
+          - :string
+          DeviceName:
+          - :string
+          - :required
+          Ebs:
+          - :structure:
+              SnapshotId:
+              - :string
+              VolumeSize:
+              - :integer
+              VolumeType:
+              - :string
+              DeleteOnTermination:
+              - :boolean
+              Iops:
+              - :integer
+          NoDevice:
+          - :boolean
+    ClassicLinkVPCId:
+    - :string
+    ClassicLinkVPCSecurityGroups:
+    - :membered_list:
+        - :string
+    InstanceMonitoring:
+    - :structure:
+        Enabled:
+        - :boolean
+    SpotPrice:
+    - :string
+    IamInstanceProfile:
+    - :string
+    EbsOptimized:
+    - :boolean
+    AssociatePublicIpAddress:
+    - :boolean
+    PlacementTenancy:
+    - :string
+  :outputs:
+    :children:
+      CreateLaunchConfigurationResult:
+        :ignore: true
+- :name: CreateOrUpdateTags
+  :method: :create_or_update_tags
+  :inputs:
+    Tags:
+    - :membered_list:
+      - :structure:
+          ResourceId:
+          - :string
+          ResourceType:
+          - :string
+          Key:
+          - :string
+          - :required
+          Value:
+          - :string
+          PropagateAtLaunch:
+          - :boolean
+    - :required
+  :outputs:
+    :children:
+      CreateOrUpdateTagsResult:
+        :ignore: true
+- :name: DeleteAutoScalingGroup
+  :method: :delete_auto_scaling_group
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    ForceDelete:
+    - :boolean
+  :outputs:
+    :children:
+      DeleteAutoScalingGroupResult:
+        :ignore: true
+- :name: DeleteLaunchConfiguration
+  :method: :delete_launch_configuration
+  :inputs:
+    LaunchConfigurationName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteLaunchConfigurationResult:
+        :ignore: true
+- :name: DeleteLifecycleHook
+  :method: :delete_lifecycle_hook
+  :inputs:
+    LifecycleHookName:
+    - :string
+    - :required
+    AutoScalingGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteLifecycleHookResult:
+        :ignore: true
+- :name: DeleteNotificationConfiguration
+  :method: :delete_notification_configuration
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    TopicARN:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteNotificationConfigurationResult:
+        :ignore: true
+- :name: DeletePolicy
+  :method: :delete_policy
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    PolicyName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeletePolicyResult:
+        :ignore: true
+- :name: DeleteScheduledAction
+  :method: :delete_scheduled_action
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    ScheduledActionName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteScheduledActionResult:
+        :ignore: true
+- :name: DeleteTags
+  :method: :delete_tags
+  :inputs:
+    Tags:
+    - :membered_list:
+      - :structure:
+          ResourceId:
+          - :string
+          ResourceType:
+          - :string
+          Key:
+          - :string
+          - :required
+          Value:
+          - :string
+          PropagateAtLaunch:
+          - :boolean
+    - :required
+  :outputs:
+    :children:
+      DeleteTagsResult:
+        :ignore: true
+- :name: DescribeAccountLimits
+  :method: :describe_account_limits
+  :inputs: {}
+  :outputs:
+    :children:
+      DescribeAccountLimitsResult:
+        :ignore: true
+        :children:
+          MaxNumberOfAutoScalingGroups:
+            :type: :integer
+          MaxNumberOfLaunchConfigurations:
+            :type: :integer
+- :name: DescribeAdjustmentTypes
+  :method: :describe_adjustment_types
+  :inputs: {}
+  :outputs:
+    :children:
+      DescribeAdjustmentTypesResult:
+        :ignore: true
+        :children:
+          AdjustmentTypes:
+            :ignore: true
+            :children:
+              member:
+                :rename: :adjustment_types
+                :list: true
+- :name: DescribeAutoScalingGroups
+  :method: :describe_auto_scaling_groups
+  :inputs:
+    AutoScalingGroupNames:
+    - :membered_list:
+      - :string
+    NextToken:
+    - :string
+    MaxRecords:
+    - :integer
+  :outputs:
+    :children:
+      DescribeAutoScalingGroupsResult:
+        :ignore: true
+        :children:
+          AutoScalingGroups:
+            :ignore: true
+            :children:
+              member:
+                :rename: :auto_scaling_groups
+                :list: true
+                :children:
+                  MinSize:
+                    :type: :integer
+                  MaxSize:
+                    :type: :integer
+                  DesiredCapacity:
+                    :type: :integer
+                  DefaultCooldown:
+                    :type: :integer
+                  AvailabilityZones:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :availability_zones
+                        :list: true
+                  LoadBalancerNames:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :load_balancer_names
+                        :list: true
+                  HealthCheckGracePeriod:
+                    :type: :integer
+                  Instances:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :instances
+                        :list: true
+                  CreatedTime:
+                    :type: :time
+                  SuspendedProcesses:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :suspended_processes
+                        :list: true
+                  EnabledMetrics:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :enabled_metrics
+                        :list: true
+                  Tags:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :tags
+                        :list: true
+                        :children:
+                          PropagateAtLaunch:
+                            :type: :boolean
+                  TerminationPolicies:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :termination_policies
+                        :list: true
+- :name: DescribeAutoScalingInstances
+  :method: :describe_auto_scaling_instances
+  :inputs:
+    InstanceIds:
+    - :membered_list:
+      - :string
+    MaxRecords:
+    - :integer
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      DescribeAutoScalingInstancesResult:
+        :ignore: true
+        :children:
+          AutoScalingInstances:
+            :ignore: true
+            :children:
+              member:
+                :rename: :auto_scaling_instances
+                :list: true
+- :name: DescribeAutoScalingNotificationTypes
+  :method: :describe_auto_scaling_notification_types
+  :inputs: {}
+  :outputs:
+    :children:
+      DescribeAutoScalingNotificationTypesResult:
+        :ignore: true
+        :children:
+          AutoScalingNotificationTypes:
+            :ignore: true
+            :children:
+              member:
+                :rename: :auto_scaling_notification_types
+                :list: true
+- :name: DescribeLaunchConfigurations
+  :method: :describe_launch_configurations
+  :inputs:
+    LaunchConfigurationNames:
+    - :membered_list:
+      - :string
+    NextToken:
+    - :string
+    MaxRecords:
+    - :integer
+  :outputs:
+    :children:
+      DescribeLaunchConfigurationsResult:
+        :ignore: true
+        :children:
+          LaunchConfigurations:
+            :ignore: true
+            :children:
+              member:
+                :rename: :launch_configurations
+                :list: true
+                :children:
+                  SecurityGroups:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :security_groups
+                        :list: true
+                  BlockDeviceMappings:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :block_device_mappings
+                        :list: true
+                        :children:
+                          Ebs:
+                            :children:
+                              VolumeSize:
+                                :type: :integer
+                              DeleteOnTermination:
+                                :type: :boolean
+                              Iops:
+                                :type: :integer
+                          NoDevice:
+                            :type: :boolean
+                  ClassicLinkVPCId:
+                    :type: :string
+                  ClassicLinkVPCSecurityGroups:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :classic_link_vpc_security_groups
+                        :list: true
+                  InstanceMonitoring:
+                    :children:
+                      Enabled:
+                        :type: :boolean
+                  CreatedTime:
+                    :type: :time
+                  EbsOptimized:
+                    :type: :boolean
+                  AssociatePublicIpAddress:
+                    :type: :boolean
+- :name: DescribeLifecycleHookTypes
+  :method: :describe_lifecycle_hook_types
+  :inputs: {}
+  :outputs:
+    :children:
+      DescribeLifecycleHookTypesResult:
+        :ignore: true
+        :children:
+          LifecycleHookTypes:
+            :ignore: true
+            :children:
+              member:
+                :rename: :lifecycle_hook_types
+                :list: true
+- :name: DescribeLifecycleHooks
+  :method: :describe_lifecycle_hooks
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    LifecycleHookNames:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeLifecycleHooksResult:
+        :ignore: true
+        :children:
+          LifecycleHooks:
+            :ignore: true
+            :children:
+              member:
+                :rename: :lifecycle_hooks
+                :list: true
+                :children:
+                  HeartbeatTimeout:
+                    :type: :integer
+                  GlobalTimeout:
+                    :type: :integer
+- :name: DescribeMetricCollectionTypes
+  :method: :describe_metric_collection_types
+  :inputs: {}
+  :outputs:
+    :children:
+      DescribeMetricCollectionTypesResult:
+        :ignore: true
+        :children:
+          Metrics:
+            :ignore: true
+            :children:
+              member:
+                :rename: :metrics
+                :list: true
+          Granularities:
+            :ignore: true
+            :children:
+              member:
+                :rename: :granularities
+                :list: true
+- :name: DescribeNotificationConfigurations
+  :method: :describe_notification_configurations
+  :inputs:
+    AutoScalingGroupNames:
+    - :membered_list:
+      - :string
+    NextToken:
+    - :string
+    MaxRecords:
+    - :integer
+  :outputs:
+    :children:
+      DescribeNotificationConfigurationsResult:
+        :ignore: true
+        :children:
+          NotificationConfigurations:
+            :ignore: true
+            :children:
+              member:
+                :rename: :notification_configurations
+                :list: true
+- :name: DescribePolicies
+  :method: :describe_policies
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    PolicyNames:
+    - :membered_list:
+      - :string
+    NextToken:
+    - :string
+    MaxRecords:
+    - :integer
+  :outputs:
+    :children:
+      DescribePoliciesResult:
+        :ignore: true
+        :children:
+          ScalingPolicies:
+            :ignore: true
+            :children:
+              member:
+                :rename: :scaling_policies
+                :list: true
+                :children:
+                  ScalingAdjustment:
+                    :type: :integer
+                  Cooldown:
+                    :type: :integer
+                  Alarms:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :alarms
+                        :list: true
+                  MinAdjustmentStep:
+                    :type: :integer
+- :name: DescribeScalingActivities
+  :method: :describe_scaling_activities
+  :inputs:
+    ActivityIds:
+    - :membered_list:
+      - :string
+    AutoScalingGroupName:
+    - :string
+    MaxRecords:
+    - :integer
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      DescribeScalingActivitiesResult:
+        :ignore: true
+        :children:
+          Activities:
+            :ignore: true
+            :children:
+              member:
+                :rename: :activities
+                :list: true
+                :children:
+                  StartTime:
+                    :type: :time
+                  EndTime:
+                    :type: :time
+                  Progress:
+                    :type: :integer
+- :name: DescribeScalingProcessTypes
+  :method: :describe_scaling_process_types
+  :inputs: {}
+  :outputs:
+    :children:
+      DescribeScalingProcessTypesResult:
+        :ignore: true
+        :children:
+          Processes:
+            :ignore: true
+            :children:
+              member:
+                :rename: :processes
+                :list: true
+- :name: DescribeScheduledActions
+  :method: :describe_scheduled_actions
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    ScheduledActionNames:
+    - :membered_list:
+      - :string
+    StartTime:
+    - :timestamp
+    EndTime:
+    - :timestamp
+    NextToken:
+    - :string
+    MaxRecords:
+    - :integer
+  :outputs:
+    :children:
+      DescribeScheduledActionsResult:
+        :ignore: true
+        :children:
+          ScheduledUpdateGroupActions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :scheduled_update_group_actions
+                :list: true
+                :children:
+                  Time:
+                    :type: :time
+                  StartTime:
+                    :type: :time
+                  EndTime:
+                    :type: :time
+                  MinSize:
+                    :type: :integer
+                  MaxSize:
+                    :type: :integer
+                  DesiredCapacity:
+                    :type: :integer
+- :name: DescribeTags
+  :method: :describe_tags
+  :inputs:
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          Values:
+          - :membered_list:
+            - :string
+    NextToken:
+    - :string
+    MaxRecords:
+    - :integer
+  :outputs:
+    :children:
+      DescribeTagsResult:
+        :ignore: true
+        :children:
+          Tags:
+            :ignore: true
+            :children:
+              member:
+                :rename: :tags
+                :list: true
+                :children:
+                  PropagateAtLaunch:
+                    :type: :boolean
+- :name: DescribeTerminationPolicyTypes
+  :method: :describe_termination_policy_types
+  :inputs: {}
+  :outputs:
+    :children:
+      DescribeTerminationPolicyTypesResult:
+        :ignore: true
+        :children:
+          TerminationPolicyTypes:
+            :ignore: true
+            :children:
+              member:
+                :rename: :termination_policy_types
+                :list: true
+- :name: DetachInstances
+  :method: :detach_instances
+  :inputs:
+    InstanceIds:
+    - :membered_list:
+      - :string
+    AutoScalingGroupName:
+    - :string
+    - :required
+    ShouldDecrementDesiredCapacity:
+    - :boolean
+    - :required
+  :outputs:
+    :children:
+      DetachInstancesResult:
+        :ignore: true
+        :children:
+          Activities:
+            :ignore: true
+            :children:
+              member:
+                :rename: :activities
+                :list: true
+                :children:
+                  StartTime:
+                    :type: :time
+                  EndTime:
+                    :type: :time
+                  Progress:
+                    :type: :integer
+- :name: DisableMetricsCollection
+  :method: :disable_metrics_collection
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    Metrics:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DisableMetricsCollectionResult:
+        :ignore: true
+- :name: EnableMetricsCollection
+  :method: :enable_metrics_collection
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    Metrics:
+    - :membered_list:
+      - :string
+    Granularity:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      EnableMetricsCollectionResult:
+        :ignore: true
+- :name: EnterStandby
+  :method: :enter_standby
+  :inputs:
+    InstanceIds:
+    - :membered_list:
+      - :string
+    AutoScalingGroupName:
+    - :string
+    - :required
+    ShouldDecrementDesiredCapacity:
+    - :boolean
+    - :required
+  :outputs:
+    :children:
+      EnterStandbyResult:
+        :ignore: true
+        :children:
+          Activities:
+            :ignore: true
+            :children:
+              member:
+                :rename: :activities
+                :list: true
+                :children:
+                  StartTime:
+                    :type: :time
+                  EndTime:
+                    :type: :time
+                  Progress:
+                    :type: :integer
+- :name: ExecutePolicy
+  :method: :execute_policy
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    PolicyName:
+    - :string
+    - :required
+    HonorCooldown:
+    - :boolean
+  :outputs:
+    :children:
+      ExecutePolicyResult:
+        :ignore: true
+- :name: ExitStandby
+  :method: :exit_standby
+  :inputs:
+    InstanceIds:
+    - :membered_list:
+      - :string
+    AutoScalingGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      ExitStandbyResult:
+        :ignore: true
+        :children:
+          Activities:
+            :ignore: true
+            :children:
+              member:
+                :rename: :activities
+                :list: true
+                :children:
+                  StartTime:
+                    :type: :time
+                  EndTime:
+                    :type: :time
+                  Progress:
+                    :type: :integer
+- :name: PutLifecycleHook
+  :method: :put_lifecycle_hook
+  :inputs:
+    LifecycleHookName:
+    - :string
+    - :required
+    AutoScalingGroupName:
+    - :string
+    - :required
+    LifecycleTransition:
+    - :string
+    RoleARN:
+    - :string
+    NotificationTargetARN:
+    - :string
+    NotificationMetadata:
+    - :string
+    HeartbeatTimeout:
+    - :integer
+    DefaultResult:
+    - :string
+  :outputs:
+    :children:
+      PutLifecycleHookResult:
+        :ignore: true
+- :name: PutNotificationConfiguration
+  :method: :put_notification_configuration
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    TopicARN:
+    - :string
+    - :required
+    NotificationTypes:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      PutNotificationConfigurationResult:
+        :ignore: true
+- :name: PutScalingPolicy
+  :method: :put_scaling_policy
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    PolicyName:
+    - :string
+    - :required
+    ScalingAdjustment:
+    - :integer
+    - :required
+    AdjustmentType:
+    - :string
+    - :required
+    Cooldown:
+    - :integer
+    MinAdjustmentStep:
+    - :integer
+  :outputs:
+    :children:
+      PutScalingPolicyResult:
+        :ignore: true
+- :name: PutScheduledUpdateGroupAction
+  :method: :put_scheduled_update_group_action
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    ScheduledActionName:
+    - :string
+    - :required
+    Time:
+    - :timestamp
+    StartTime:
+    - :timestamp
+    EndTime:
+    - :timestamp
+    Recurrence:
+    - :string
+    MinSize:
+    - :integer
+    MaxSize:
+    - :integer
+    DesiredCapacity:
+    - :integer
+  :outputs:
+    :children:
+      PutScheduledUpdateGroupActionResult:
+        :ignore: true
+- :name: RecordLifecycleActionHeartbeat
+  :method: :record_lifecycle_action_heartbeat
+  :inputs:
+    LifecycleHookName:
+    - :string
+    - :required
+    AutoScalingGroupName:
+    - :string
+    - :required
+    LifecycleActionToken:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RecordLifecycleActionHeartbeatResult:
+        :ignore: true
+- :name: ResumeProcesses
+  :method: :resume_processes
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    ScalingProcesses:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      ResumeProcessesResult:
+        :ignore: true
+- :name: SetDesiredCapacity
+  :method: :set_desired_capacity
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    DesiredCapacity:
+    - :integer
+    - :required
+    HonorCooldown:
+    - :boolean
+  :outputs:
+    :children:
+      SetDesiredCapacityResult:
+        :ignore: true
+- :name: SetInstanceHealth
+  :method: :set_instance_health
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+    HealthStatus:
+    - :string
+    - :required
+    ShouldRespectGracePeriod:
+    - :boolean
+  :outputs:
+    :children:
+      SetInstanceHealthResult:
+        :ignore: true
+- :name: SuspendProcesses
+  :method: :suspend_processes
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    ScalingProcesses:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      SuspendProcessesResult:
+        :ignore: true
+- :name: TerminateInstanceInAutoScalingGroup
+  :method: :terminate_instance_in_auto_scaling_group
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+    ShouldDecrementDesiredCapacity:
+    - :boolean
+    - :required
+  :outputs:
+    :children:
+      TerminateInstanceInAutoScalingGroupResult:
+        :ignore: true
+        :children:
+          Activity:
+            :children:
+              StartTime:
+                :type: :time
+              EndTime:
+                :type: :time
+              Progress:
+                :type: :integer
+- :name: UpdateAutoScalingGroup
+  :method: :update_auto_scaling_group
+  :inputs:
+    AutoScalingGroupName:
+    - :string
+    - :required
+    LaunchConfigurationName:
+    - :string
+    MinSize:
+    - :integer
+    MaxSize:
+    - :integer
+    DesiredCapacity:
+    - :integer
+    DefaultCooldown:
+    - :integer
+    AvailabilityZones:
+    - :membered_list:
+      - :string
+    HealthCheckType:
+    - :string
+    HealthCheckGracePeriod:
+    - :integer
+    PlacementGroup:
+    - :string
+    VPCZoneIdentifier:
+    - :string
+    TerminationPolicies:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      UpdateAutoScalingGroupResult:
+        :ignore: true

@@ -1,0 +1,4179 @@
+# Copyright 2011-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2012-09-25'
+:operations:
+- :name: CancelJob
+  :method: :cancel_job
+  :http:
+    :verb: DELETE
+    :uri: /2012-09-25/jobs/:id
+    :response_code: 202
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs: {}
+- :name: CreateJob
+  :method: :create_job
+  :http:
+    :verb: POST
+    :uri: /2012-09-25/jobs
+    :response_code: 201
+  :inputs:
+    :pipeline_id:
+      :name: PipelineId
+      :type: :string
+      :required: true
+    :input:
+      :name: Input
+      :type: :hash
+      :required: true
+      :members:
+        :key:
+          :name: Key
+          :type: :string
+        :frame_rate:
+          :name: FrameRate
+          :type: :string
+        :resolution:
+          :name: Resolution
+          :type: :string
+        :aspect_ratio:
+          :name: AspectRatio
+          :type: :string
+        :interlaced:
+          :name: Interlaced
+          :type: :string
+        :container:
+          :name: Container
+          :type: :string
+        :encryption:
+          :name: Encryption
+          :type: :hash
+          :members:
+            :mode:
+              :name: Mode
+              :type: :string
+            :key:
+              :name: Key
+              :type: :string
+            :key_md_5:
+              :name: KeyMd5
+              :type: :string
+            :initialization_vector:
+              :name: InitializationVector
+              :type: :string
+    :output:
+      :name: Output
+      :type: :hash
+      :members:
+        :key:
+          :name: Key
+          :type: :string
+        :thumbnail_pattern:
+          :name: ThumbnailPattern
+          :type: :string
+        :thumbnail_encryption:
+          :name: ThumbnailEncryption
+          :type: :hash
+          :members:
+            :mode:
+              :name: Mode
+              :type: :string
+            :key:
+              :name: Key
+              :type: :string
+            :key_md_5:
+              :name: KeyMd5
+              :type: :string
+            :initialization_vector:
+              :name: InitializationVector
+              :type: :string
+        :rotate:
+          :name: Rotate
+          :type: :string
+        :preset_id:
+          :name: PresetId
+          :type: :string
+        :segment_duration:
+          :name: SegmentDuration
+          :type: :string
+        :watermarks:
+          :name: Watermarks
+          :type: :array
+          :members:
+            :name: member
+            :type: :hash
+            :members:
+              :preset_watermark_id:
+                :name: PresetWatermarkId
+                :type: :string
+              :input_key:
+                :name: InputKey
+                :type: :string
+              :encryption:
+                :name: Encryption
+                :type: :hash
+                :members:
+                  :mode:
+                    :name: Mode
+                    :type: :string
+                  :key:
+                    :name: Key
+                    :type: :string
+                  :key_md_5:
+                    :name: KeyMd5
+                    :type: :string
+                  :initialization_vector:
+                    :name: InitializationVector
+                    :type: :string
+        :album_art:
+          :name: AlbumArt
+          :type: :hash
+          :members:
+            :merge_policy:
+              :name: MergePolicy
+              :type: :string
+            :artwork:
+              :name: Artwork
+              :type: :array
+              :members:
+                :name: member
+                :type: :hash
+                :members:
+                  :input_key:
+                    :name: InputKey
+                    :type: :string
+                  :max_width:
+                    :name: MaxWidth
+                    :type: :string
+                  :max_height:
+                    :name: MaxHeight
+                    :type: :string
+                  :sizing_policy:
+                    :name: SizingPolicy
+                    :type: :string
+                  :padding_policy:
+                    :name: PaddingPolicy
+                    :type: :string
+                  :album_art_format:
+                    :name: AlbumArtFormat
+                    :type: :string
+                  :encryption:
+                    :name: Encryption
+                    :type: :hash
+                    :members:
+                      :mode:
+                        :name: Mode
+                        :type: :string
+                      :key:
+                        :name: Key
+                        :type: :string
+                      :key_md_5:
+                        :name: KeyMd5
+                        :type: :string
+                      :initialization_vector:
+                        :name: InitializationVector
+                        :type: :string
+        :composition:
+          :name: Composition
+          :type: :array
+          :members:
+            :name: member
+            :type: :hash
+            :members:
+              :time_span:
+                :name: TimeSpan
+                :type: :hash
+                :members:
+                  :start_time:
+                    :name: StartTime
+                    :type: :string
+                  :duration:
+                    :name: Duration
+                    :type: :string
+        :captions:
+          :name: Captions
+          :type: :hash
+          :members:
+            :merge_policy:
+              :name: MergePolicy
+              :type: :string
+            :caption_sources:
+              :name: CaptionSources
+              :type: :array
+              :members:
+                :name: member
+                :type: :hash
+                :members:
+                  :key:
+                    :name: Key
+                    :type: :string
+                  :language:
+                    :name: Language
+                    :type: :string
+                  :time_offset:
+                    :name: TimeOffset
+                    :type: :string
+                  :label:
+                    :name: Label
+                    :type: :string
+                  :encryption:
+                    :name: Encryption
+                    :type: :hash
+                    :members:
+                      :mode:
+                        :name: Mode
+                        :type: :string
+                      :key:
+                        :name: Key
+                        :type: :string
+                      :key_md_5:
+                        :name: KeyMd5
+                        :type: :string
+                      :initialization_vector:
+                        :name: InitializationVector
+                        :type: :string
+            :caption_formats:
+              :name: CaptionFormats
+              :type: :array
+              :members:
+                :name: member
+                :type: :hash
+                :members:
+                  :format:
+                    :name: Format
+                    :type: :string
+                  :pattern:
+                    :name: Pattern
+                    :type: :string
+                  :encryption:
+                    :name: Encryption
+                    :type: :hash
+                    :members:
+                      :mode:
+                        :name: Mode
+                        :type: :string
+                      :key:
+                        :name: Key
+                        :type: :string
+                      :key_md_5:
+                        :name: KeyMd5
+                        :type: :string
+                      :initialization_vector:
+                        :name: InitializationVector
+                        :type: :string
+        :encryption:
+          :name: Encryption
+          :type: :hash
+          :members:
+            :mode:
+              :name: Mode
+              :type: :string
+            :key:
+              :name: Key
+              :type: :string
+            :key_md_5:
+              :name: KeyMd5
+              :type: :string
+            :initialization_vector:
+              :name: InitializationVector
+              :type: :string
+    :outputs:
+      :name: Outputs
+      :type: :array
+      :members:
+        :name: member
+        :type: :hash
+        :members:
+          :key:
+            :name: Key
+            :type: :string
+          :thumbnail_pattern:
+            :name: ThumbnailPattern
+            :type: :string
+          :thumbnail_encryption:
+            :name: ThumbnailEncryption
+            :type: :hash
+            :members:
+              :mode:
+                :name: Mode
+                :type: :string
+              :key:
+                :name: Key
+                :type: :string
+              :key_md_5:
+                :name: KeyMd5
+                :type: :string
+              :initialization_vector:
+                :name: InitializationVector
+                :type: :string
+          :rotate:
+            :name: Rotate
+            :type: :string
+          :preset_id:
+            :name: PresetId
+            :type: :string
+          :segment_duration:
+            :name: SegmentDuration
+            :type: :string
+          :watermarks:
+            :name: Watermarks
+            :type: :array
+            :members:
+              :name: member
+              :type: :hash
+              :members:
+                :preset_watermark_id:
+                  :name: PresetWatermarkId
+                  :type: :string
+                :input_key:
+                  :name: InputKey
+                  :type: :string
+                :encryption:
+                  :name: Encryption
+                  :type: :hash
+                  :members:
+                    :mode:
+                      :name: Mode
+                      :type: :string
+                    :key:
+                      :name: Key
+                      :type: :string
+                    :key_md_5:
+                      :name: KeyMd5
+                      :type: :string
+                    :initialization_vector:
+                      :name: InitializationVector
+                      :type: :string
+          :album_art:
+            :name: AlbumArt
+            :type: :hash
+            :members:
+              :merge_policy:
+                :name: MergePolicy
+                :type: :string
+              :artwork:
+                :name: Artwork
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :hash
+                  :members:
+                    :input_key:
+                      :name: InputKey
+                      :type: :string
+                    :max_width:
+                      :name: MaxWidth
+                      :type: :string
+                    :max_height:
+                      :name: MaxHeight
+                      :type: :string
+                    :sizing_policy:
+                      :name: SizingPolicy
+                      :type: :string
+                    :padding_policy:
+                      :name: PaddingPolicy
+                      :type: :string
+                    :album_art_format:
+                      :name: AlbumArtFormat
+                      :type: :string
+                    :encryption:
+                      :name: Encryption
+                      :type: :hash
+                      :members:
+                        :mode:
+                          :name: Mode
+                          :type: :string
+                        :key:
+                          :name: Key
+                          :type: :string
+                        :key_md_5:
+                          :name: KeyMd5
+                          :type: :string
+                        :initialization_vector:
+                          :name: InitializationVector
+                          :type: :string
+          :composition:
+            :name: Composition
+            :type: :array
+            :members:
+              :name: member
+              :type: :hash
+              :members:
+                :time_span:
+                  :name: TimeSpan
+                  :type: :hash
+                  :members:
+                    :start_time:
+                      :name: StartTime
+                      :type: :string
+                    :duration:
+                      :name: Duration
+                      :type: :string
+          :captions:
+            :name: Captions
+            :type: :hash
+            :members:
+              :merge_policy:
+                :name: MergePolicy
+                :type: :string
+              :caption_sources:
+                :name: CaptionSources
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :hash
+                  :members:
+                    :key:
+                      :name: Key
+                      :type: :string
+                    :language:
+                      :name: Language
+                      :type: :string
+                    :time_offset:
+                      :name: TimeOffset
+                      :type: :string
+                    :label:
+                      :name: Label
+                      :type: :string
+                    :encryption:
+                      :name: Encryption
+                      :type: :hash
+                      :members:
+                        :mode:
+                          :name: Mode
+                          :type: :string
+                        :key:
+                          :name: Key
+                          :type: :string
+                        :key_md_5:
+                          :name: KeyMd5
+                          :type: :string
+                        :initialization_vector:
+                          :name: InitializationVector
+                          :type: :string
+              :caption_formats:
+                :name: CaptionFormats
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :hash
+                  :members:
+                    :format:
+                      :name: Format
+                      :type: :string
+                    :pattern:
+                      :name: Pattern
+                      :type: :string
+                    :encryption:
+                      :name: Encryption
+                      :type: :hash
+                      :members:
+                        :mode:
+                          :name: Mode
+                          :type: :string
+                        :key:
+                          :name: Key
+                          :type: :string
+                        :key_md_5:
+                          :name: KeyMd5
+                          :type: :string
+                        :initialization_vector:
+                          :name: InitializationVector
+                          :type: :string
+          :encryption:
+            :name: Encryption
+            :type: :hash
+            :members:
+              :mode:
+                :name: Mode
+                :type: :string
+              :key:
+                :name: Key
+                :type: :string
+              :key_md_5:
+                :name: KeyMd5
+                :type: :string
+              :initialization_vector:
+                :name: InitializationVector
+                :type: :string
+    :output_key_prefix:
+      :name: OutputKeyPrefix
+      :type: :string
+    :playlists:
+      :name: Playlists
+      :type: :array
+      :members:
+        :name: member
+        :type: :hash
+        :members:
+          :name:
+            :name: Name
+            :type: :string
+          :format:
+            :name: Format
+            :type: :string
+          :output_keys:
+            :name: OutputKeys
+            :type: :array
+            :members:
+              :name: member
+              :type: :string
+    :user_metadata:
+      :name: UserMetadata
+      :type: :map
+      :keys:
+        :name: key
+        :type: :string
+      :members:
+        :name: value
+        :type: :string
+  :outputs:
+    Job:
+      :sym: :job
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        PipelineId:
+          :sym: :pipeline_id
+          :type: :string
+        Input:
+          :sym: :input
+          :type: :hash
+          :members:
+            Key:
+              :sym: :key
+              :type: :string
+            FrameRate:
+              :sym: :frame_rate
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            Interlaced:
+              :sym: :interlaced
+              :type: :string
+            Container:
+              :sym: :container
+              :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        Output:
+          :sym: :output
+          :type: :hash
+          :members:
+            Id:
+              :sym: :id
+              :type: :string
+            Key:
+              :sym: :key
+              :type: :string
+            ThumbnailPattern:
+              :sym: :thumbnail_pattern
+              :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+            Rotate:
+              :sym: :rotate
+              :type: :string
+            PresetId:
+              :sym: :preset_id
+              :type: :string
+            SegmentDuration:
+              :sym: :segment_duration
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+            Duration:
+              :sym: :duration
+              :type: :integer
+            Width:
+              :sym: :width
+              :type: :integer
+            Height:
+              :sym: :height
+              :type: :integer
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                PresetWatermarkId:
+                  :sym: :preset_watermark_id
+                  :type: :string
+                InputKey:
+                  :sym: :input_key
+                  :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
+            AlbumArt:
+              :sym: :album_art
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                Artwork:
+                  :sym: :artwork
+                  :type: :hash
+                  :members:
+                    InputKey:
+                      :sym: :input_key
+                      :type: :string
+                    MaxWidth:
+                      :sym: :max_width
+                      :type: :string
+                    MaxHeight:
+                      :sym: :max_height
+                      :type: :string
+                    SizingPolicy:
+                      :sym: :sizing_policy
+                      :type: :string
+                    PaddingPolicy:
+                      :sym: :padding_policy
+                      :type: :string
+                    AlbumArtFormat:
+                      :sym: :album_art_format
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Composition:
+              :sym: :composition
+              :type: :hash
+              :members:
+                TimeSpan:
+                  :sym: :time_span
+                  :type: :hash
+                  :members:
+                    StartTime:
+                      :sym: :start_time
+                      :type: :string
+                    Duration:
+                      :sym: :duration
+                      :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        Outputs:
+          :sym: :outputs
+          :type: :hash
+          :members:
+            Id:
+              :sym: :id
+              :type: :string
+            Key:
+              :sym: :key
+              :type: :string
+            ThumbnailPattern:
+              :sym: :thumbnail_pattern
+              :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+            Rotate:
+              :sym: :rotate
+              :type: :string
+            PresetId:
+              :sym: :preset_id
+              :type: :string
+            SegmentDuration:
+              :sym: :segment_duration
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+            Duration:
+              :sym: :duration
+              :type: :integer
+            Width:
+              :sym: :width
+              :type: :integer
+            Height:
+              :sym: :height
+              :type: :integer
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                PresetWatermarkId:
+                  :sym: :preset_watermark_id
+                  :type: :string
+                InputKey:
+                  :sym: :input_key
+                  :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
+            AlbumArt:
+              :sym: :album_art
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                Artwork:
+                  :sym: :artwork
+                  :type: :hash
+                  :members:
+                    InputKey:
+                      :sym: :input_key
+                      :type: :string
+                    MaxWidth:
+                      :sym: :max_width
+                      :type: :string
+                    MaxHeight:
+                      :sym: :max_height
+                      :type: :string
+                    SizingPolicy:
+                      :sym: :sizing_policy
+                      :type: :string
+                    PaddingPolicy:
+                      :sym: :padding_policy
+                      :type: :string
+                    AlbumArtFormat:
+                      :sym: :album_art_format
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Composition:
+              :sym: :composition
+              :type: :hash
+              :members:
+                TimeSpan:
+                  :sym: :time_span
+                  :type: :hash
+                  :members:
+                    StartTime:
+                      :sym: :start_time
+                      :type: :string
+                    Duration:
+                      :sym: :duration
+                      :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        OutputKeyPrefix:
+          :sym: :output_key_prefix
+          :type: :string
+        Playlists:
+          :sym: :playlists
+          :type: :hash
+          :members:
+            Name:
+              :sym: :name
+              :type: :string
+            Format:
+              :sym: :format
+              :type: :string
+            OutputKeys:
+              :sym: :output_keys
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        UserMetadata:
+          :sym: :user_metadata
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
+- :name: CreatePipeline
+  :method: :create_pipeline
+  :http:
+    :verb: POST
+    :uri: /2012-09-25/pipelines
+    :response_code: 201
+  :inputs:
+    :name:
+      :name: Name
+      :type: :string
+      :required: true
+    :input_bucket:
+      :name: InputBucket
+      :type: :string
+      :required: true
+    :output_bucket:
+      :name: OutputBucket
+      :type: :string
+    :role:
+      :name: Role
+      :type: :string
+      :required: true
+    :aws_kms_key_arn:
+      :name: AwsKmsKeyArn
+      :type: :string
+    :notifications:
+      :name: Notifications
+      :type: :hash
+      :members:
+        :progressing:
+          :name: Progressing
+          :type: :string
+        :completed:
+          :name: Completed
+          :type: :string
+        :warning:
+          :name: Warning
+          :type: :string
+        :error:
+          :name: Error
+          :type: :string
+    :content_config:
+      :name: ContentConfig
+      :type: :hash
+      :members:
+        :bucket:
+          :name: Bucket
+          :type: :string
+        :storage_class:
+          :name: StorageClass
+          :type: :string
+        :permissions:
+          :name: Permissions
+          :type: :array
+          :members:
+            :name: member
+            :type: :hash
+            :members:
+              :grantee_type:
+                :name: GranteeType
+                :type: :string
+              :grantee:
+                :name: Grantee
+                :type: :string
+              :access:
+                :name: Access
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :string
+    :thumbnail_config:
+      :name: ThumbnailConfig
+      :type: :hash
+      :members:
+        :bucket:
+          :name: Bucket
+          :type: :string
+        :storage_class:
+          :name: StorageClass
+          :type: :string
+        :permissions:
+          :name: Permissions
+          :type: :array
+          :members:
+            :name: member
+            :type: :hash
+            :members:
+              :grantee_type:
+                :name: GranteeType
+                :type: :string
+              :grantee:
+                :name: Grantee
+                :type: :string
+              :access:
+                :name: Access
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :string
+  :outputs:
+    Pipeline:
+      :sym: :pipeline
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        InputBucket:
+          :sym: :input_bucket
+          :type: :string
+        OutputBucket:
+          :sym: :output_bucket
+          :type: :string
+        Role:
+          :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
+          :type: :string
+        Notifications:
+          :sym: :notifications
+          :type: :hash
+          :members:
+            Progressing:
+              :sym: :progressing
+              :type: :string
+            Completed:
+              :sym: :completed
+              :type: :string
+            Warning:
+              :sym: :warning
+              :type: :string
+            Error:
+              :sym: :error
+              :type: :string
+        ContentConfig:
+          :sym: :content_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+        ThumbnailConfig:
+          :sym: :thumbnail_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+- :name: CreatePreset
+  :method: :create_preset
+  :http:
+    :verb: POST
+    :uri: /2012-09-25/presets
+    :response_code: 201
+  :inputs:
+    :name:
+      :name: Name
+      :type: :string
+      :required: true
+    :description:
+      :name: Description
+      :type: :string
+    :container:
+      :name: Container
+      :type: :string
+      :required: true
+    :video:
+      :name: Video
+      :type: :hash
+      :members:
+        :codec:
+          :name: Codec
+          :type: :string
+        :codec_options:
+          :name: CodecOptions
+          :type: :map
+          :keys:
+            :name: key
+            :type: :string
+          :members:
+            :name: value
+            :type: :string
+        :keyframes_max_dist:
+          :name: KeyframesMaxDist
+          :type: :string
+        :fixed_gop:
+          :name: FixedGOP
+          :type: :string
+        :bit_rate:
+          :name: BitRate
+          :type: :string
+        :frame_rate:
+          :name: FrameRate
+          :type: :string
+        :max_frame_rate:
+          :name: MaxFrameRate
+          :type: :string
+        :resolution:
+          :name: Resolution
+          :type: :string
+        :aspect_ratio:
+          :name: AspectRatio
+          :type: :string
+        :max_width:
+          :name: MaxWidth
+          :type: :string
+        :max_height:
+          :name: MaxHeight
+          :type: :string
+        :display_aspect_ratio:
+          :name: DisplayAspectRatio
+          :type: :string
+        :sizing_policy:
+          :name: SizingPolicy
+          :type: :string
+        :padding_policy:
+          :name: PaddingPolicy
+          :type: :string
+        :watermarks:
+          :name: Watermarks
+          :type: :array
+          :members:
+            :name: member
+            :type: :hash
+            :members:
+              :id:
+                :name: Id
+                :type: :string
+              :max_width:
+                :name: MaxWidth
+                :type: :string
+              :max_height:
+                :name: MaxHeight
+                :type: :string
+              :sizing_policy:
+                :name: SizingPolicy
+                :type: :string
+              :horizontal_align:
+                :name: HorizontalAlign
+                :type: :string
+              :horizontal_offset:
+                :name: HorizontalOffset
+                :type: :string
+              :vertical_align:
+                :name: VerticalAlign
+                :type: :string
+              :vertical_offset:
+                :name: VerticalOffset
+                :type: :string
+              :opacity:
+                :name: Opacity
+                :type: :string
+              :target:
+                :name: Target
+                :type: :string
+    :audio:
+      :name: Audio
+      :type: :hash
+      :members:
+        :codec:
+          :name: Codec
+          :type: :string
+        :sample_rate:
+          :name: SampleRate
+          :type: :string
+        :bit_rate:
+          :name: BitRate
+          :type: :string
+        :channels:
+          :name: Channels
+          :type: :string
+        :codec_options:
+          :name: CodecOptions
+          :type: :hash
+          :members:
+            :profile:
+              :name: Profile
+              :type: :string
+    :thumbnails:
+      :name: Thumbnails
+      :type: :hash
+      :members:
+        :format:
+          :name: Format
+          :type: :string
+        :interval:
+          :name: Interval
+          :type: :string
+        :resolution:
+          :name: Resolution
+          :type: :string
+        :aspect_ratio:
+          :name: AspectRatio
+          :type: :string
+        :max_width:
+          :name: MaxWidth
+          :type: :string
+        :max_height:
+          :name: MaxHeight
+          :type: :string
+        :sizing_policy:
+          :name: SizingPolicy
+          :type: :string
+        :padding_policy:
+          :name: PaddingPolicy
+          :type: :string
+  :outputs:
+    Preset:
+      :sym: :preset
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Description:
+          :sym: :description
+          :type: :string
+        Container:
+          :sym: :container
+          :type: :string
+        Audio:
+          :sym: :audio
+          :type: :hash
+          :members:
+            Codec:
+              :sym: :codec
+              :type: :string
+            SampleRate:
+              :sym: :sample_rate
+              :type: :string
+            BitRate:
+              :sym: :bit_rate
+              :type: :string
+            Channels:
+              :sym: :channels
+              :type: :string
+            CodecOptions:
+              :sym: :codec_options
+              :type: :hash
+              :members:
+                Profile:
+                  :sym: :profile
+                  :type: :string
+        Video:
+          :sym: :video
+          :type: :hash
+          :members:
+            Codec:
+              :sym: :codec
+              :type: :string
+            CodecOptions:
+              :sym: :codec_options
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            KeyframesMaxDist:
+              :sym: :keyframes_max_dist
+              :type: :string
+            FixedGOP:
+              :sym: :fixed_gop
+              :type: :string
+            BitRate:
+              :sym: :bit_rate
+              :type: :string
+            FrameRate:
+              :sym: :frame_rate
+              :type: :string
+            MaxFrameRate:
+              :sym: :max_frame_rate
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            MaxWidth:
+              :sym: :max_width
+              :type: :string
+            MaxHeight:
+              :sym: :max_height
+              :type: :string
+            DisplayAspectRatio:
+              :sym: :display_aspect_ratio
+              :type: :string
+            SizingPolicy:
+              :sym: :sizing_policy
+              :type: :string
+            PaddingPolicy:
+              :sym: :padding_policy
+              :type: :string
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                Id:
+                  :sym: :id
+                  :type: :string
+                MaxWidth:
+                  :sym: :max_width
+                  :type: :string
+                MaxHeight:
+                  :sym: :max_height
+                  :type: :string
+                SizingPolicy:
+                  :sym: :sizing_policy
+                  :type: :string
+                HorizontalAlign:
+                  :sym: :horizontal_align
+                  :type: :string
+                HorizontalOffset:
+                  :sym: :horizontal_offset
+                  :type: :string
+                VerticalAlign:
+                  :sym: :vertical_align
+                  :type: :string
+                VerticalOffset:
+                  :sym: :vertical_offset
+                  :type: :string
+                Opacity:
+                  :sym: :opacity
+                  :type: :string
+                Target:
+                  :sym: :target
+                  :type: :string
+        Thumbnails:
+          :sym: :thumbnails
+          :type: :hash
+          :members:
+            Format:
+              :sym: :format
+              :type: :string
+            Interval:
+              :sym: :interval
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            MaxWidth:
+              :sym: :max_width
+              :type: :string
+            MaxHeight:
+              :sym: :max_height
+              :type: :string
+            SizingPolicy:
+              :sym: :sizing_policy
+              :type: :string
+            PaddingPolicy:
+              :sym: :padding_policy
+              :type: :string
+        Type:
+          :sym: :type
+          :type: :string
+    Warning:
+      :sym: :warning
+      :type: :string
+- :name: DeletePipeline
+  :method: :delete_pipeline
+  :http:
+    :verb: DELETE
+    :uri: /2012-09-25/pipelines/:id
+    :response_code: 202
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs: {}
+- :name: DeletePreset
+  :method: :delete_preset
+  :http:
+    :verb: DELETE
+    :uri: /2012-09-25/presets/:id
+    :response_code: 202
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs: {}
+- :name: ListJobsByPipeline
+  :method: :list_jobs_by_pipeline
+  :http:
+    :verb: GET
+    :uri: /2012-09-25/jobsByPipeline/:pipeline_id?Ascending=:ascending;PageToken=:page_token
+  :inputs:
+    :pipeline_id:
+      :type: :string
+      :required: true
+    :ascending:
+      :type: :string
+    :page_token:
+      :type: :string
+  :outputs:
+    Jobs:
+      :sym: :jobs
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        PipelineId:
+          :sym: :pipeline_id
+          :type: :string
+        Input:
+          :sym: :input
+          :type: :hash
+          :members:
+            Key:
+              :sym: :key
+              :type: :string
+            FrameRate:
+              :sym: :frame_rate
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            Interlaced:
+              :sym: :interlaced
+              :type: :string
+            Container:
+              :sym: :container
+              :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        Output:
+          :sym: :output
+          :type: :hash
+          :members:
+            Id:
+              :sym: :id
+              :type: :string
+            Key:
+              :sym: :key
+              :type: :string
+            ThumbnailPattern:
+              :sym: :thumbnail_pattern
+              :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+            Rotate:
+              :sym: :rotate
+              :type: :string
+            PresetId:
+              :sym: :preset_id
+              :type: :string
+            SegmentDuration:
+              :sym: :segment_duration
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+            Duration:
+              :sym: :duration
+              :type: :integer
+            Width:
+              :sym: :width
+              :type: :integer
+            Height:
+              :sym: :height
+              :type: :integer
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                PresetWatermarkId:
+                  :sym: :preset_watermark_id
+                  :type: :string
+                InputKey:
+                  :sym: :input_key
+                  :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
+            AlbumArt:
+              :sym: :album_art
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                Artwork:
+                  :sym: :artwork
+                  :type: :hash
+                  :members:
+                    InputKey:
+                      :sym: :input_key
+                      :type: :string
+                    MaxWidth:
+                      :sym: :max_width
+                      :type: :string
+                    MaxHeight:
+                      :sym: :max_height
+                      :type: :string
+                    SizingPolicy:
+                      :sym: :sizing_policy
+                      :type: :string
+                    PaddingPolicy:
+                      :sym: :padding_policy
+                      :type: :string
+                    AlbumArtFormat:
+                      :sym: :album_art_format
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Composition:
+              :sym: :composition
+              :type: :hash
+              :members:
+                TimeSpan:
+                  :sym: :time_span
+                  :type: :hash
+                  :members:
+                    StartTime:
+                      :sym: :start_time
+                      :type: :string
+                    Duration:
+                      :sym: :duration
+                      :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        Outputs:
+          :sym: :outputs
+          :type: :hash
+          :members:
+            Id:
+              :sym: :id
+              :type: :string
+            Key:
+              :sym: :key
+              :type: :string
+            ThumbnailPattern:
+              :sym: :thumbnail_pattern
+              :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+            Rotate:
+              :sym: :rotate
+              :type: :string
+            PresetId:
+              :sym: :preset_id
+              :type: :string
+            SegmentDuration:
+              :sym: :segment_duration
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+            Duration:
+              :sym: :duration
+              :type: :integer
+            Width:
+              :sym: :width
+              :type: :integer
+            Height:
+              :sym: :height
+              :type: :integer
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                PresetWatermarkId:
+                  :sym: :preset_watermark_id
+                  :type: :string
+                InputKey:
+                  :sym: :input_key
+                  :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
+            AlbumArt:
+              :sym: :album_art
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                Artwork:
+                  :sym: :artwork
+                  :type: :hash
+                  :members:
+                    InputKey:
+                      :sym: :input_key
+                      :type: :string
+                    MaxWidth:
+                      :sym: :max_width
+                      :type: :string
+                    MaxHeight:
+                      :sym: :max_height
+                      :type: :string
+                    SizingPolicy:
+                      :sym: :sizing_policy
+                      :type: :string
+                    PaddingPolicy:
+                      :sym: :padding_policy
+                      :type: :string
+                    AlbumArtFormat:
+                      :sym: :album_art_format
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Composition:
+              :sym: :composition
+              :type: :hash
+              :members:
+                TimeSpan:
+                  :sym: :time_span
+                  :type: :hash
+                  :members:
+                    StartTime:
+                      :sym: :start_time
+                      :type: :string
+                    Duration:
+                      :sym: :duration
+                      :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        OutputKeyPrefix:
+          :sym: :output_key_prefix
+          :type: :string
+        Playlists:
+          :sym: :playlists
+          :type: :hash
+          :members:
+            Name:
+              :sym: :name
+              :type: :string
+            Format:
+              :sym: :format
+              :type: :string
+            OutputKeys:
+              :sym: :output_keys
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        UserMetadata:
+          :sym: :user_metadata
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
+    NextPageToken:
+      :sym: :next_page_token
+      :type: :string
+- :name: ListJobsByStatus
+  :method: :list_jobs_by_status
+  :http:
+    :verb: GET
+    :uri: /2012-09-25/jobsByStatus/:status?Ascending=:ascending;PageToken=:page_token
+  :inputs:
+    :status:
+      :type: :string
+      :required: true
+    :ascending:
+      :type: :string
+    :page_token:
+      :type: :string
+  :outputs:
+    Jobs:
+      :sym: :jobs
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        PipelineId:
+          :sym: :pipeline_id
+          :type: :string
+        Input:
+          :sym: :input
+          :type: :hash
+          :members:
+            Key:
+              :sym: :key
+              :type: :string
+            FrameRate:
+              :sym: :frame_rate
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            Interlaced:
+              :sym: :interlaced
+              :type: :string
+            Container:
+              :sym: :container
+              :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        Output:
+          :sym: :output
+          :type: :hash
+          :members:
+            Id:
+              :sym: :id
+              :type: :string
+            Key:
+              :sym: :key
+              :type: :string
+            ThumbnailPattern:
+              :sym: :thumbnail_pattern
+              :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+            Rotate:
+              :sym: :rotate
+              :type: :string
+            PresetId:
+              :sym: :preset_id
+              :type: :string
+            SegmentDuration:
+              :sym: :segment_duration
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+            Duration:
+              :sym: :duration
+              :type: :integer
+            Width:
+              :sym: :width
+              :type: :integer
+            Height:
+              :sym: :height
+              :type: :integer
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                PresetWatermarkId:
+                  :sym: :preset_watermark_id
+                  :type: :string
+                InputKey:
+                  :sym: :input_key
+                  :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
+            AlbumArt:
+              :sym: :album_art
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                Artwork:
+                  :sym: :artwork
+                  :type: :hash
+                  :members:
+                    InputKey:
+                      :sym: :input_key
+                      :type: :string
+                    MaxWidth:
+                      :sym: :max_width
+                      :type: :string
+                    MaxHeight:
+                      :sym: :max_height
+                      :type: :string
+                    SizingPolicy:
+                      :sym: :sizing_policy
+                      :type: :string
+                    PaddingPolicy:
+                      :sym: :padding_policy
+                      :type: :string
+                    AlbumArtFormat:
+                      :sym: :album_art_format
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Composition:
+              :sym: :composition
+              :type: :hash
+              :members:
+                TimeSpan:
+                  :sym: :time_span
+                  :type: :hash
+                  :members:
+                    StartTime:
+                      :sym: :start_time
+                      :type: :string
+                    Duration:
+                      :sym: :duration
+                      :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        Outputs:
+          :sym: :outputs
+          :type: :hash
+          :members:
+            Id:
+              :sym: :id
+              :type: :string
+            Key:
+              :sym: :key
+              :type: :string
+            ThumbnailPattern:
+              :sym: :thumbnail_pattern
+              :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+            Rotate:
+              :sym: :rotate
+              :type: :string
+            PresetId:
+              :sym: :preset_id
+              :type: :string
+            SegmentDuration:
+              :sym: :segment_duration
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+            Duration:
+              :sym: :duration
+              :type: :integer
+            Width:
+              :sym: :width
+              :type: :integer
+            Height:
+              :sym: :height
+              :type: :integer
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                PresetWatermarkId:
+                  :sym: :preset_watermark_id
+                  :type: :string
+                InputKey:
+                  :sym: :input_key
+                  :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
+            AlbumArt:
+              :sym: :album_art
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                Artwork:
+                  :sym: :artwork
+                  :type: :hash
+                  :members:
+                    InputKey:
+                      :sym: :input_key
+                      :type: :string
+                    MaxWidth:
+                      :sym: :max_width
+                      :type: :string
+                    MaxHeight:
+                      :sym: :max_height
+                      :type: :string
+                    SizingPolicy:
+                      :sym: :sizing_policy
+                      :type: :string
+                    PaddingPolicy:
+                      :sym: :padding_policy
+                      :type: :string
+                    AlbumArtFormat:
+                      :sym: :album_art_format
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Composition:
+              :sym: :composition
+              :type: :hash
+              :members:
+                TimeSpan:
+                  :sym: :time_span
+                  :type: :hash
+                  :members:
+                    StartTime:
+                      :sym: :start_time
+                      :type: :string
+                    Duration:
+                      :sym: :duration
+                      :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        OutputKeyPrefix:
+          :sym: :output_key_prefix
+          :type: :string
+        Playlists:
+          :sym: :playlists
+          :type: :hash
+          :members:
+            Name:
+              :sym: :name
+              :type: :string
+            Format:
+              :sym: :format
+              :type: :string
+            OutputKeys:
+              :sym: :output_keys
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        UserMetadata:
+          :sym: :user_metadata
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
+    NextPageToken:
+      :sym: :next_page_token
+      :type: :string
+- :name: ListPipelines
+  :method: :list_pipelines
+  :http:
+    :verb: GET
+    :uri: /2012-09-25/pipelines?Ascending=:ascending;PageToken=:page_token
+  :inputs:
+    :ascending:
+      :type: :string
+    :page_token:
+      :type: :string
+  :outputs:
+    Pipelines:
+      :sym: :pipelines
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        InputBucket:
+          :sym: :input_bucket
+          :type: :string
+        OutputBucket:
+          :sym: :output_bucket
+          :type: :string
+        Role:
+          :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
+          :type: :string
+        Notifications:
+          :sym: :notifications
+          :type: :hash
+          :members:
+            Progressing:
+              :sym: :progressing
+              :type: :string
+            Completed:
+              :sym: :completed
+              :type: :string
+            Warning:
+              :sym: :warning
+              :type: :string
+            Error:
+              :sym: :error
+              :type: :string
+        ContentConfig:
+          :sym: :content_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+        ThumbnailConfig:
+          :sym: :thumbnail_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+    NextPageToken:
+      :sym: :next_page_token
+      :type: :string
+- :name: ListPresets
+  :method: :list_presets
+  :http:
+    :verb: GET
+    :uri: /2012-09-25/presets?Ascending=:ascending;PageToken=:page_token
+  :inputs:
+    :ascending:
+      :type: :string
+    :page_token:
+      :type: :string
+  :outputs:
+    Presets:
+      :sym: :presets
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Description:
+          :sym: :description
+          :type: :string
+        Container:
+          :sym: :container
+          :type: :string
+        Audio:
+          :sym: :audio
+          :type: :hash
+          :members:
+            Codec:
+              :sym: :codec
+              :type: :string
+            SampleRate:
+              :sym: :sample_rate
+              :type: :string
+            BitRate:
+              :sym: :bit_rate
+              :type: :string
+            Channels:
+              :sym: :channels
+              :type: :string
+            CodecOptions:
+              :sym: :codec_options
+              :type: :hash
+              :members:
+                Profile:
+                  :sym: :profile
+                  :type: :string
+        Video:
+          :sym: :video
+          :type: :hash
+          :members:
+            Codec:
+              :sym: :codec
+              :type: :string
+            CodecOptions:
+              :sym: :codec_options
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            KeyframesMaxDist:
+              :sym: :keyframes_max_dist
+              :type: :string
+            FixedGOP:
+              :sym: :fixed_gop
+              :type: :string
+            BitRate:
+              :sym: :bit_rate
+              :type: :string
+            FrameRate:
+              :sym: :frame_rate
+              :type: :string
+            MaxFrameRate:
+              :sym: :max_frame_rate
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            MaxWidth:
+              :sym: :max_width
+              :type: :string
+            MaxHeight:
+              :sym: :max_height
+              :type: :string
+            DisplayAspectRatio:
+              :sym: :display_aspect_ratio
+              :type: :string
+            SizingPolicy:
+              :sym: :sizing_policy
+              :type: :string
+            PaddingPolicy:
+              :sym: :padding_policy
+              :type: :string
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                Id:
+                  :sym: :id
+                  :type: :string
+                MaxWidth:
+                  :sym: :max_width
+                  :type: :string
+                MaxHeight:
+                  :sym: :max_height
+                  :type: :string
+                SizingPolicy:
+                  :sym: :sizing_policy
+                  :type: :string
+                HorizontalAlign:
+                  :sym: :horizontal_align
+                  :type: :string
+                HorizontalOffset:
+                  :sym: :horizontal_offset
+                  :type: :string
+                VerticalAlign:
+                  :sym: :vertical_align
+                  :type: :string
+                VerticalOffset:
+                  :sym: :vertical_offset
+                  :type: :string
+                Opacity:
+                  :sym: :opacity
+                  :type: :string
+                Target:
+                  :sym: :target
+                  :type: :string
+        Thumbnails:
+          :sym: :thumbnails
+          :type: :hash
+          :members:
+            Format:
+              :sym: :format
+              :type: :string
+            Interval:
+              :sym: :interval
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            MaxWidth:
+              :sym: :max_width
+              :type: :string
+            MaxHeight:
+              :sym: :max_height
+              :type: :string
+            SizingPolicy:
+              :sym: :sizing_policy
+              :type: :string
+            PaddingPolicy:
+              :sym: :padding_policy
+              :type: :string
+        Type:
+          :sym: :type
+          :type: :string
+    NextPageToken:
+      :sym: :next_page_token
+      :type: :string
+- :name: ReadJob
+  :method: :read_job
+  :http:
+    :verb: GET
+    :uri: /2012-09-25/jobs/:id
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    Job:
+      :sym: :job
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        PipelineId:
+          :sym: :pipeline_id
+          :type: :string
+        Input:
+          :sym: :input
+          :type: :hash
+          :members:
+            Key:
+              :sym: :key
+              :type: :string
+            FrameRate:
+              :sym: :frame_rate
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            Interlaced:
+              :sym: :interlaced
+              :type: :string
+            Container:
+              :sym: :container
+              :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        Output:
+          :sym: :output
+          :type: :hash
+          :members:
+            Id:
+              :sym: :id
+              :type: :string
+            Key:
+              :sym: :key
+              :type: :string
+            ThumbnailPattern:
+              :sym: :thumbnail_pattern
+              :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+            Rotate:
+              :sym: :rotate
+              :type: :string
+            PresetId:
+              :sym: :preset_id
+              :type: :string
+            SegmentDuration:
+              :sym: :segment_duration
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+            Duration:
+              :sym: :duration
+              :type: :integer
+            Width:
+              :sym: :width
+              :type: :integer
+            Height:
+              :sym: :height
+              :type: :integer
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                PresetWatermarkId:
+                  :sym: :preset_watermark_id
+                  :type: :string
+                InputKey:
+                  :sym: :input_key
+                  :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
+            AlbumArt:
+              :sym: :album_art
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                Artwork:
+                  :sym: :artwork
+                  :type: :hash
+                  :members:
+                    InputKey:
+                      :sym: :input_key
+                      :type: :string
+                    MaxWidth:
+                      :sym: :max_width
+                      :type: :string
+                    MaxHeight:
+                      :sym: :max_height
+                      :type: :string
+                    SizingPolicy:
+                      :sym: :sizing_policy
+                      :type: :string
+                    PaddingPolicy:
+                      :sym: :padding_policy
+                      :type: :string
+                    AlbumArtFormat:
+                      :sym: :album_art_format
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Composition:
+              :sym: :composition
+              :type: :hash
+              :members:
+                TimeSpan:
+                  :sym: :time_span
+                  :type: :hash
+                  :members:
+                    StartTime:
+                      :sym: :start_time
+                      :type: :string
+                    Duration:
+                      :sym: :duration
+                      :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        Outputs:
+          :sym: :outputs
+          :type: :hash
+          :members:
+            Id:
+              :sym: :id
+              :type: :string
+            Key:
+              :sym: :key
+              :type: :string
+            ThumbnailPattern:
+              :sym: :thumbnail_pattern
+              :type: :string
+            ThumbnailEncryption:
+              :sym: :thumbnail_encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+            Rotate:
+              :sym: :rotate
+              :type: :string
+            PresetId:
+              :sym: :preset_id
+              :type: :string
+            SegmentDuration:
+              :sym: :segment_duration
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+            Duration:
+              :sym: :duration
+              :type: :integer
+            Width:
+              :sym: :width
+              :type: :integer
+            Height:
+              :sym: :height
+              :type: :integer
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                PresetWatermarkId:
+                  :sym: :preset_watermark_id
+                  :type: :string
+                InputKey:
+                  :sym: :input_key
+                  :type: :string
+                Encryption:
+                  :sym: :encryption
+                  :type: :hash
+                  :members:
+                    Mode:
+                      :sym: :mode
+                      :type: :string
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    KeyMd5:
+                      :sym: :key_md_5
+                      :type: :string
+                    InitializationVector:
+                      :sym: :initialization_vector
+                      :type: :string
+            AlbumArt:
+              :sym: :album_art
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                Artwork:
+                  :sym: :artwork
+                  :type: :hash
+                  :members:
+                    InputKey:
+                      :sym: :input_key
+                      :type: :string
+                    MaxWidth:
+                      :sym: :max_width
+                      :type: :string
+                    MaxHeight:
+                      :sym: :max_height
+                      :type: :string
+                    SizingPolicy:
+                      :sym: :sizing_policy
+                      :type: :string
+                    PaddingPolicy:
+                      :sym: :padding_policy
+                      :type: :string
+                    AlbumArtFormat:
+                      :sym: :album_art_format
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Composition:
+              :sym: :composition
+              :type: :hash
+              :members:
+                TimeSpan:
+                  :sym: :time_span
+                  :type: :hash
+                  :members:
+                    StartTime:
+                      :sym: :start_time
+                      :type: :string
+                    Duration:
+                      :sym: :duration
+                      :type: :string
+            Captions:
+              :sym: :captions
+              :type: :hash
+              :members:
+                MergePolicy:
+                  :sym: :merge_policy
+                  :type: :string
+                CaptionSources:
+                  :sym: :caption_sources
+                  :type: :hash
+                  :members:
+                    Key:
+                      :sym: :key
+                      :type: :string
+                    Language:
+                      :sym: :language
+                      :type: :string
+                    TimeOffset:
+                      :sym: :time_offset
+                      :type: :string
+                    Label:
+                      :sym: :label
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+                CaptionFormats:
+                  :sym: :caption_formats
+                  :type: :hash
+                  :members:
+                    Format:
+                      :sym: :format
+                      :type: :string
+                    Pattern:
+                      :sym: :pattern
+                      :type: :string
+                    Encryption:
+                      :sym: :encryption
+                      :type: :hash
+                      :members:
+                        Mode:
+                          :sym: :mode
+                          :type: :string
+                        Key:
+                          :sym: :key
+                          :type: :string
+                        KeyMd5:
+                          :sym: :key_md_5
+                          :type: :string
+                        InitializationVector:
+                          :sym: :initialization_vector
+                          :type: :string
+            Encryption:
+              :sym: :encryption
+              :type: :hash
+              :members:
+                Mode:
+                  :sym: :mode
+                  :type: :string
+                Key:
+                  :sym: :key
+                  :type: :string
+                KeyMd5:
+                  :sym: :key_md_5
+                  :type: :string
+                InitializationVector:
+                  :sym: :initialization_vector
+                  :type: :string
+        OutputKeyPrefix:
+          :sym: :output_key_prefix
+          :type: :string
+        Playlists:
+          :sym: :playlists
+          :type: :hash
+          :members:
+            Name:
+              :sym: :name
+              :type: :string
+            Format:
+              :sym: :format
+              :type: :string
+            OutputKeys:
+              :sym: :output_keys
+              :type: :string
+            Status:
+              :sym: :status
+              :type: :string
+            StatusDetail:
+              :sym: :status_detail
+              :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        UserMetadata:
+          :sym: :user_metadata
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
+- :name: ReadPipeline
+  :method: :read_pipeline
+  :http:
+    :verb: GET
+    :uri: /2012-09-25/pipelines/:id
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    Pipeline:
+      :sym: :pipeline
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        InputBucket:
+          :sym: :input_bucket
+          :type: :string
+        OutputBucket:
+          :sym: :output_bucket
+          :type: :string
+        Role:
+          :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
+          :type: :string
+        Notifications:
+          :sym: :notifications
+          :type: :hash
+          :members:
+            Progressing:
+              :sym: :progressing
+              :type: :string
+            Completed:
+              :sym: :completed
+              :type: :string
+            Warning:
+              :sym: :warning
+              :type: :string
+            Error:
+              :sym: :error
+              :type: :string
+        ContentConfig:
+          :sym: :content_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+        ThumbnailConfig:
+          :sym: :thumbnail_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+- :name: ReadPreset
+  :method: :read_preset
+  :http:
+    :verb: GET
+    :uri: /2012-09-25/presets/:id
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    Preset:
+      :sym: :preset
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Description:
+          :sym: :description
+          :type: :string
+        Container:
+          :sym: :container
+          :type: :string
+        Audio:
+          :sym: :audio
+          :type: :hash
+          :members:
+            Codec:
+              :sym: :codec
+              :type: :string
+            SampleRate:
+              :sym: :sample_rate
+              :type: :string
+            BitRate:
+              :sym: :bit_rate
+              :type: :string
+            Channels:
+              :sym: :channels
+              :type: :string
+            CodecOptions:
+              :sym: :codec_options
+              :type: :hash
+              :members:
+                Profile:
+                  :sym: :profile
+                  :type: :string
+        Video:
+          :sym: :video
+          :type: :hash
+          :members:
+            Codec:
+              :sym: :codec
+              :type: :string
+            CodecOptions:
+              :sym: :codec_options
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            KeyframesMaxDist:
+              :sym: :keyframes_max_dist
+              :type: :string
+            FixedGOP:
+              :sym: :fixed_gop
+              :type: :string
+            BitRate:
+              :sym: :bit_rate
+              :type: :string
+            FrameRate:
+              :sym: :frame_rate
+              :type: :string
+            MaxFrameRate:
+              :sym: :max_frame_rate
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            MaxWidth:
+              :sym: :max_width
+              :type: :string
+            MaxHeight:
+              :sym: :max_height
+              :type: :string
+            DisplayAspectRatio:
+              :sym: :display_aspect_ratio
+              :type: :string
+            SizingPolicy:
+              :sym: :sizing_policy
+              :type: :string
+            PaddingPolicy:
+              :sym: :padding_policy
+              :type: :string
+            Watermarks:
+              :sym: :watermarks
+              :type: :hash
+              :members:
+                Id:
+                  :sym: :id
+                  :type: :string
+                MaxWidth:
+                  :sym: :max_width
+                  :type: :string
+                MaxHeight:
+                  :sym: :max_height
+                  :type: :string
+                SizingPolicy:
+                  :sym: :sizing_policy
+                  :type: :string
+                HorizontalAlign:
+                  :sym: :horizontal_align
+                  :type: :string
+                HorizontalOffset:
+                  :sym: :horizontal_offset
+                  :type: :string
+                VerticalAlign:
+                  :sym: :vertical_align
+                  :type: :string
+                VerticalOffset:
+                  :sym: :vertical_offset
+                  :type: :string
+                Opacity:
+                  :sym: :opacity
+                  :type: :string
+                Target:
+                  :sym: :target
+                  :type: :string
+        Thumbnails:
+          :sym: :thumbnails
+          :type: :hash
+          :members:
+            Format:
+              :sym: :format
+              :type: :string
+            Interval:
+              :sym: :interval
+              :type: :string
+            Resolution:
+              :sym: :resolution
+              :type: :string
+            AspectRatio:
+              :sym: :aspect_ratio
+              :type: :string
+            MaxWidth:
+              :sym: :max_width
+              :type: :string
+            MaxHeight:
+              :sym: :max_height
+              :type: :string
+            SizingPolicy:
+              :sym: :sizing_policy
+              :type: :string
+            PaddingPolicy:
+              :sym: :padding_policy
+              :type: :string
+        Type:
+          :sym: :type
+          :type: :string
+- :name: TestRole
+  :method: :test_role
+  :http:
+    :verb: POST
+    :uri: /2012-09-25/roleTests
+    :response_code: 200
+  :inputs:
+    :role:
+      :name: Role
+      :type: :string
+      :required: true
+    :input_bucket:
+      :name: InputBucket
+      :type: :string
+      :required: true
+    :output_bucket:
+      :name: OutputBucket
+      :type: :string
+      :required: true
+    :topics:
+      :name: Topics
+      :type: :array
+      :required: true
+      :members:
+        :name: member
+        :type: :string
+  :outputs:
+    Success:
+      :sym: :success
+      :type: :string
+    Messages:
+      :sym: :messages
+      :type: :string
+- :name: UpdatePipeline
+  :method: :update_pipeline
+  :http:
+    :verb: PUT
+    :uri: /2012-09-25/pipelines/:id
+    :response_code: 200
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+    :name:
+      :name: Name
+      :type: :string
+    :input_bucket:
+      :name: InputBucket
+      :type: :string
+    :role:
+      :name: Role
+      :type: :string
+    :aws_kms_key_arn:
+      :name: AwsKmsKeyArn
+      :type: :string
+    :notifications:
+      :name: Notifications
+      :type: :hash
+      :members:
+        :progressing:
+          :name: Progressing
+          :type: :string
+        :completed:
+          :name: Completed
+          :type: :string
+        :warning:
+          :name: Warning
+          :type: :string
+        :error:
+          :name: Error
+          :type: :string
+    :content_config:
+      :name: ContentConfig
+      :type: :hash
+      :members:
+        :bucket:
+          :name: Bucket
+          :type: :string
+        :storage_class:
+          :name: StorageClass
+          :type: :string
+        :permissions:
+          :name: Permissions
+          :type: :array
+          :members:
+            :name: member
+            :type: :hash
+            :members:
+              :grantee_type:
+                :name: GranteeType
+                :type: :string
+              :grantee:
+                :name: Grantee
+                :type: :string
+              :access:
+                :name: Access
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :string
+    :thumbnail_config:
+      :name: ThumbnailConfig
+      :type: :hash
+      :members:
+        :bucket:
+          :name: Bucket
+          :type: :string
+        :storage_class:
+          :name: StorageClass
+          :type: :string
+        :permissions:
+          :name: Permissions
+          :type: :array
+          :members:
+            :name: member
+            :type: :hash
+            :members:
+              :grantee_type:
+                :name: GranteeType
+                :type: :string
+              :grantee:
+                :name: Grantee
+                :type: :string
+              :access:
+                :name: Access
+                :type: :array
+                :members:
+                  :name: member
+                  :type: :string
+  :outputs:
+    Pipeline:
+      :sym: :pipeline
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        InputBucket:
+          :sym: :input_bucket
+          :type: :string
+        OutputBucket:
+          :sym: :output_bucket
+          :type: :string
+        Role:
+          :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
+          :type: :string
+        Notifications:
+          :sym: :notifications
+          :type: :hash
+          :members:
+            Progressing:
+              :sym: :progressing
+              :type: :string
+            Completed:
+              :sym: :completed
+              :type: :string
+            Warning:
+              :sym: :warning
+              :type: :string
+            Error:
+              :sym: :error
+              :type: :string
+        ContentConfig:
+          :sym: :content_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+        ThumbnailConfig:
+          :sym: :thumbnail_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+- :name: UpdatePipelineNotifications
+  :method: :update_pipeline_notifications
+  :http:
+    :verb: POST
+    :uri: /2012-09-25/pipelines/:id/notifications
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+    :notifications:
+      :name: Notifications
+      :type: :hash
+      :required: true
+      :members:
+        :progressing:
+          :name: Progressing
+          :type: :string
+        :completed:
+          :name: Completed
+          :type: :string
+        :warning:
+          :name: Warning
+          :type: :string
+        :error:
+          :name: Error
+          :type: :string
+  :outputs:
+    Pipeline:
+      :sym: :pipeline
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        InputBucket:
+          :sym: :input_bucket
+          :type: :string
+        OutputBucket:
+          :sym: :output_bucket
+          :type: :string
+        Role:
+          :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
+          :type: :string
+        Notifications:
+          :sym: :notifications
+          :type: :hash
+          :members:
+            Progressing:
+              :sym: :progressing
+              :type: :string
+            Completed:
+              :sym: :completed
+              :type: :string
+            Warning:
+              :sym: :warning
+              :type: :string
+            Error:
+              :sym: :error
+              :type: :string
+        ContentConfig:
+          :sym: :content_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+        ThumbnailConfig:
+          :sym: :thumbnail_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+- :name: UpdatePipelineStatus
+  :method: :update_pipeline_status
+  :http:
+    :verb: POST
+    :uri: /2012-09-25/pipelines/:id/status
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+    :status:
+      :name: Status
+      :type: :string
+      :required: true
+  :outputs:
+    Pipeline:
+      :sym: :pipeline
+      :type: :hash
+      :members:
+        Id:
+          :sym: :id
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        InputBucket:
+          :sym: :input_bucket
+          :type: :string
+        OutputBucket:
+          :sym: :output_bucket
+          :type: :string
+        Role:
+          :sym: :role
+          :type: :string
+        AwsKmsKeyArn:
+          :sym: :aws_kms_key_arn
+          :type: :string
+        Notifications:
+          :sym: :notifications
+          :type: :hash
+          :members:
+            Progressing:
+              :sym: :progressing
+              :type: :string
+            Completed:
+              :sym: :completed
+              :type: :string
+            Warning:
+              :sym: :warning
+              :type: :string
+            Error:
+              :sym: :error
+              :type: :string
+        ContentConfig:
+          :sym: :content_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string
+        ThumbnailConfig:
+          :sym: :thumbnail_config
+          :type: :hash
+          :members:
+            Bucket:
+              :sym: :bucket
+              :type: :string
+            StorageClass:
+              :sym: :storage_class
+              :type: :string
+            Permissions:
+              :sym: :permissions
+              :type: :hash
+              :members:
+                GranteeType:
+                  :sym: :grantee_type
+                  :type: :string
+                Grantee:
+                  :sym: :grantee
+                  :type: :string
+                Access:
+                  :sym: :access
+                  :type: :string

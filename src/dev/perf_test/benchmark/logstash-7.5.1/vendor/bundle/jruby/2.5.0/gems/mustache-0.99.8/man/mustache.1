@@ -1,0 +1,165 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "MUSTACHE" "1" "October 2014" "DEFUNKT" "Mustache Manual"
+.
+.SH "NAME"
+\fBmustache\fR \- Mustache processor
+.
+.SH "SYNOPSIS"
+.
+.nf
+
+mustache <YAML> <FILE>
+mustache \-\-compile <FILE>
+mustache \-\-tokens <FILE>
+.
+.fi
+.
+.SH "DESCRIPTION"
+Mustache is a logic\-less templating system for HTML, config files, anything\.
+.
+.P
+The \fBmustache\fR command processes a Mustache template preceded by YAML frontmatter from standard input and prints one or more documents to standard output\.
+.
+.P
+YAML frontmatter begins with \fB\-\-\-\fR on a single line, followed by YAML, ending with another \fB\-\-\-\fR on a single line, e\.g\.
+.
+.IP "" 4
+.
+.nf
+
+\-\-\-
+names: [ {name: chris}, {name: mark}, {name: scott} ]
+\-\-\-
+.
+.fi
+.
+.IP "" 0
+.
+.P
+If you are unfamiliar with YAML, it is a superset of JSON\. Valid JSON should work fine\.
+.
+.P
+After the frontmatter should come any valid Mustache template\. See mustache(5) for an overview of Mustache templates\.
+.
+.P
+For example:
+.
+.IP "" 4
+.
+.nf
+
+{{#names}}
+  Hi {{name}}!
+{{/names}}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Now let\'s combine them\.
+.
+.IP "" 4
+.
+.nf
+
+$ cat data\.yml
+\-\-\-
+names: [ {name: chris}, {name: mark}, {name: scott} ]
+\-\-\-
+
+$ cat template\.mustache
+{{#names}}
+  Hi {{name}}!
+{{/names}}
+
+$ cat data\.yml template\.mustache | mustache
+Hi chris!
+Hi mark!
+Hi scott!
+.
+.fi
+.
+.IP "" 0
+.
+.P
+If you provide multiple YAML documents (as delimited by \fB\-\-\-\fR), your template will be rendered multiple times\. Like a mail merge\.
+.
+.P
+For example:
+.
+.IP "" 4
+.
+.nf
+
+$ cat data\.yml
+\-\-\-
+name: chris
+\-\-\-
+name: mark
+\-\-\-
+name: scott
+\-\-\-
+
+$ cat template\.mustache
+Hi {{name}}!
+
+$ cat data\.yml template\.mustache | mustache
+Hi chris!
+Hi mark!
+Hi scott!
+.
+.fi
+.
+.IP "" 0
+.
+.SH "OPTIONS"
+By default \fBmustache\fR will try to render a Mustache template using the YAML frontmatter you provide\. It can do a few other things, however\.
+.
+.TP
+\fB\-c\fR, \fB\-\-compile\fR
+Print the compiled Ruby version of a given template\. This is the code that is actually used when rendering a template into a string\. Useful for debugging but only if you are familiar with Mustache\'s internals\.
+.
+.TP
+\fB\-t\fR, \fB\-\-tokens\fR
+Print the tokenized form of a given Mustache template\. This can be used to understand how Mustache parses a template\. The tokens are handed to a generator which compiles them into a Ruby string\. Syntax errors and confused tags, therefore, can probably be identified by examining the tokens produced\.
+.
+.SH "INSTALLATION"
+If you have RubyGems installed:
+.
+.IP "" 4
+.
+.nf
+
+gem install mustache
+.
+.fi
+.
+.IP "" 0
+.
+.SH "EXAMPLES"
+.
+.nf
+
+$ mustache data\.yml template\.mustache
+$ cat data\.yml | mustache \- template\.mustache
+$ mustache \-c template\.mustache
+$ cat <<data | ruby mustache \- template\.mustache
+\-\-\-
+name: Bob
+age: 30
+\-\-\-
+data
+.
+.fi
+.
+.SH "COPYRIGHT"
+Mustache is Copyright (C) 2009 Chris Wanstrath
+.
+.P
+Original CTemplate by Google
+.
+.SH "SEE ALSO"
+mustache(5), gem(1), \fIhttp://mustache\.github\.io/\fR

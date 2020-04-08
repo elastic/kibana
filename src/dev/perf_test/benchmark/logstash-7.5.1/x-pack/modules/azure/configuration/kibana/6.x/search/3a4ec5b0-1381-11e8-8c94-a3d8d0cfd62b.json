@@ -1,0 +1,17 @@
+{
+  "title": "Service Health Search [Azure Monitor][Activity Log]",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "resultDescription",
+    "resultType"
+  ],
+  "sort": [
+    "@timestamp",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"azure-*\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"azure.group:activity_log AND azure.category:ServiceHealth\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"exists\":{\"field\":\"resultType\"},\"meta\":{\"alias\":null,\"disabled\":false,\"index\":\"73e18ac0-104c-11e8-8c94-a3d8d0cfd62b\",\"key\":\"resultType\",\"negate\":false,\"type\":\"exists\",\"value\":\"exists\"}}]}"
+  }
+}

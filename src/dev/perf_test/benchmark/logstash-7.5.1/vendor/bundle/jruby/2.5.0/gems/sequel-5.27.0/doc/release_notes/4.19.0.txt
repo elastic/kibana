@@ -1,0 +1,45 @@
+= New Features
+
+* Model#get_column_value and #set_column_value have been added for
+  getting/setting column values.  Historically, to get column
+  values, you would just send the column name, and to set column
+  values you would send the column name suffixed by =.  However,
+  this doesn't work when such methods are already defined by
+  ruby or Sequel itself (e.g. class, model, object_id).
+
+  Both #get_column_value and #set_column_value are just aliases to
+  #send, but you can safely override the methods to handle column
+  names that conflict with existing method names.  Both the core
+  model code and all of the plugins that ship with Sequel have
+  been updated to use these new methods.  External plugins are
+  strongly encouraged to switch to these new methods.
+
+* A column_conflicts plugin has been added to automatically handle
+  columns that conflict with existing method names.  So if you
+  have a column named "model" in your table, you can just load the
+  column_conflicts plugin and Sequel will handle things correctly.
+
+* A accessed_columns plugin has been added, which records which
+  columns have been accessed for a model instance.  This is useful
+  in development when you are planning on restricted the columns
+  selected by the dataset that retrieved the instance.  SELECTing
+  only the columns you need can result in significant performance
+  increases, and the accessed_columns plugin makes that easier.
+
+* Model#cancel_action has been added for canceling actions in
+  before hooks, instead of having the before hook methods return
+  false (which is still supported).  In addition to being easier to
+  use, this also makes it possible to use custom exception messages
+  for hook failures, if you are using the default behavior of raising
+  exceptions on save failures.
+
+= Other Improvements
+
+* Dataset#union, #intersect, and #except now automatically handle
+  datasets with raw SQL, by wrapping such datasets in subqueries.
+
+* The integer migrator now stores the correct migration number
+  when migrating with allow_missing_migration_files set.
+
+* A :timeout=>nil Database option on MySQL no longer sets a
+  wait_timeout.

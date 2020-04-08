@@ -1,0 +1,88 @@
+= New Features
+
+* A Sequel::Model.require_valid_table accessor has been added. This
+  setting is false for backwards compatibility, but if set to true,
+  will raise an error you try to create a model class where an
+  invalid table name is used or the schema or columns cannot be
+  determined.  This makes it easier to catch bugs, as things will
+  fail fast, but it means that you must change code like:
+
+    class Foo < Sequel::Model
+      set_dataset :my_foos
+    end
+
+  to:
+
+    class Foo < Sequel::Model(:my_foos)
+    end
+
+  as otherwise Foo will attempt to use the foos table by default
+  when creating the class, which will raise an error as it is not
+  the correct table name.
+
+* Sequel::Database#transaction now supports a :savepoint=>:only
+  option, which will create a savepoint if already inside a
+  transaction, but will yield without creating a transaction if
+  not inside a transaction.  The use case for this is when you
+  are running code that may raise an exception, and you don't
+  want to invalidate the current transaction state.
+
+= Other Improvements
+
+* The graph_each extension now splits results into subhashes when
+  using Sequel::Dataset#first, as it did before Sequel 4.27.0.
+
+* On PostgreSQL, Dataset#insert_conflict now accepts an array of
+  columns as the value for the :target option.
+
+* You can now pass a Sequel::SQL::Identifier or a
+  Sequel::SQL::QualifiedIdentifer as the table argument when creating
+  a foreign key.  Previously, only symbols were supported, and using
+  other values required specifying the :table option.  So this will
+  now work to reference a table that includes a double underscore:
+
+    foreign_key :foo_id, Sequel.identifier(:fo__oo)
+
+* Creating model classes inside a transaction on PostgreSQL where
+  the implicit table name isn't correct no longer causes the
+  transaction to fail.
+
+  Similar issues were also fixed in the boolean_readers,
+  boolean_subsets, and class_table_inheritance plugins.
+
+* On PostgreSQL, You can now use the :qualify=>true option in the
+  schema dumper, to dump using schema-qualified table names.
+
+* On Microsoft SQL Server, the set_column_allow_null and
+  set_column_not_null alter table methods now work on varchar(max),
+  text, and similar columns.
+
+* On Oracle, Sequel::Database#sequence_for_table now returns nil if
+  given a table that doesn't exist or that the user does not have
+  access to.
+
+* Passing arbitrary objects to a model association method now
+  indicates that the association should be reloaded, which was
+  used to work but was broken in Sequel 4.32.0.
+
+* It is now possible to raise Sequel::ValidationFailed and
+  Sequel::HookFailed without an argument.
+
+= Backwards Compatibility
+
+* Sequel::Model no longer swallows many errors when subclassing or
+  setting datasets.  While this should hopefully not affect backwards
+  compatibility, it may break things where the methods were raising
+  exceptions.  If this does break backwards compatibility, it is
+  most likely because it is no longer hiding another bug that should
+  be fixed.  Specific changes include:
+
+  * Model.inherited no longer rescues exceptions raised by set_dataset
+  * When subclassing a model that has a dataset, the columns and
+    schema are just copied from the superclass
+  * Only Sequel::Error is rescued in calls to columns and schema,
+    before it would rescue StandardError.
+
+* The Sequel.firebird and Sequel.informix adapter methods have been
+  removed, they are no longer needed as the firebird and informix
+  adapters were removed a few versions back.

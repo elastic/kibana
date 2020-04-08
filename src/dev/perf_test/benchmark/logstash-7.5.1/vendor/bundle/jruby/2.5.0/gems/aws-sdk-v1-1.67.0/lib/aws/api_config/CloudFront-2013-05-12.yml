@@ -1,0 +1,2448 @@
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2013-05-12'
+:operations:
+- :name: CreateCloudFrontOriginAccessIdentity
+  :method: :create_cloud_front_origin_access_identity
+  :http:
+    :verb: POST
+    :uri: /2013-05-12/origin-access-identity/cloudfront
+    :request_payload: :cloud_front_origin_access_identity_config
+    :response_code: 201
+    :response_headers:
+      :location: Location
+      :etag: ETag
+  :inputs:
+    :cloud_front_origin_access_identity_config:
+      :name: CloudFrontOriginAccessIdentityConfig
+      :type: :hash
+      :required: true
+      :members:
+        :caller_reference:
+          :name: CallerReference
+          :type: :string
+          :required: true
+        :comment:
+          :name: Comment
+          :type: :string
+          :required: true
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      S3CanonicalUserId:
+        :type: :string
+      CloudFrontOriginAccessIdentityConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          Comment:
+            :type: :string
+- :name: CreateDistribution
+  :method: :create_distribution
+  :http:
+    :verb: POST
+    :uri: /2013-05-12/distribution
+    :request_payload: :distribution_config
+    :response_code: 201
+    :response_headers:
+      :location: Location
+      :etag: ETag
+  :inputs:
+    :distribution_config:
+      :name: DistributionConfig
+      :type: :hash
+      :required: true
+      :members:
+        :caller_reference:
+          :name: CallerReference
+          :type: :string
+          :required: true
+        :aliases:
+          :name: Aliases
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: CNAME
+                :type: :string
+        :default_root_object:
+          :name: DefaultRootObject
+          :type: :string
+          :required: true
+        :origins:
+          :name: Origins
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: Origin
+                :type: :hash
+                :members:
+                  :id:
+                    :name: Id
+                    :type: :string
+                    :required: true
+                  :domain_name:
+                    :name: DomainName
+                    :type: :string
+                    :required: true
+                  :s3_origin_config:
+                    :name: S3OriginConfig
+                    :type: :hash
+                    :members:
+                      :origin_access_identity:
+                        :name: OriginAccessIdentity
+                        :type: :string
+                        :required: true
+                  :custom_origin_config:
+                    :name: CustomOriginConfig
+                    :type: :hash
+                    :members:
+                      :http_port:
+                        :name: HTTPPort
+                        :type: :integer
+                        :required: true
+                      :https_port:
+                        :name: HTTPSPort
+                        :type: :integer
+                        :required: true
+                      :origin_protocol_policy:
+                        :name: OriginProtocolPolicy
+                        :type: :string
+                        :required: true
+        :default_cache_behavior:
+          :name: DefaultCacheBehavior
+          :type: :hash
+          :required: true
+          :members:
+            :target_origin_id:
+              :name: TargetOriginId
+              :type: :string
+              :required: true
+            :forwarded_values:
+              :name: ForwardedValues
+              :type: :hash
+              :required: true
+              :members:
+                :query_string:
+                  :name: QueryString
+                  :type: :boolean
+                  :required: true
+                :cookies:
+                  :name: Cookies
+                  :type: :hash
+                  :required: true
+                  :members:
+                    :forward:
+                      :name: Forward
+                      :type: :string
+                      :required: true
+                    :whitelisted_names:
+                      :name: WhitelistedNames
+                      :type: :hash
+                      :members:
+                        :quantity:
+                          :name: Quantity
+                          :type: :integer
+                          :required: true
+                        :items:
+                          :name: Items
+                          :type: :array
+                          :members:
+                            :name: Name
+                            :type: :string
+            :trusted_signers:
+              :name: TrustedSigners
+              :type: :hash
+              :required: true
+              :members:
+                :enabled:
+                  :name: Enabled
+                  :type: :boolean
+                  :required: true
+                :quantity:
+                  :name: Quantity
+                  :type: :integer
+                  :required: true
+                :items:
+                  :name: Items
+                  :type: :array
+                  :members:
+                    :name: AwsAccountNumber
+                    :type: :string
+            :viewer_protocol_policy:
+              :name: ViewerProtocolPolicy
+              :type: :string
+              :required: true
+            :min_ttl:
+              :name: MinTTL
+              :type: :integer
+              :required: true
+        :cache_behaviors:
+          :name: CacheBehaviors
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: CacheBehavior
+                :type: :hash
+                :members:
+                  :path_pattern:
+                    :name: PathPattern
+                    :type: :string
+                    :required: true
+                  :target_origin_id:
+                    :name: TargetOriginId
+                    :type: :string
+                    :required: true
+                  :forwarded_values:
+                    :name: ForwardedValues
+                    :type: :hash
+                    :required: true
+                    :members:
+                      :query_string:
+                        :name: QueryString
+                        :type: :boolean
+                        :required: true
+                      :cookies:
+                        :name: Cookies
+                        :type: :hash
+                        :required: true
+                        :members:
+                          :forward:
+                            :name: Forward
+                            :type: :string
+                            :required: true
+                          :whitelisted_names:
+                            :name: WhitelistedNames
+                            :type: :hash
+                            :members:
+                              :quantity:
+                                :name: Quantity
+                                :type: :integer
+                                :required: true
+                              :items:
+                                :name: Items
+                                :type: :array
+                                :members:
+                                  :name: Name
+                                  :type: :string
+                  :trusted_signers:
+                    :name: TrustedSigners
+                    :type: :hash
+                    :required: true
+                    :members:
+                      :enabled:
+                        :name: Enabled
+                        :type: :boolean
+                        :required: true
+                      :quantity:
+                        :name: Quantity
+                        :type: :integer
+                        :required: true
+                      :items:
+                        :name: Items
+                        :type: :array
+                        :members:
+                          :name: AwsAccountNumber
+                          :type: :string
+                  :viewer_protocol_policy:
+                    :name: ViewerProtocolPolicy
+                    :type: :string
+                    :required: true
+                  :min_ttl:
+                    :name: MinTTL
+                    :type: :integer
+                    :required: true
+        :comment:
+          :name: Comment
+          :type: :string
+          :required: true
+        :logging:
+          :name: Logging
+          :type: :hash
+          :required: true
+          :members:
+            :enabled:
+              :name: Enabled
+              :type: :boolean
+              :required: true
+            :include_cookies:
+              :name: IncludeCookies
+              :type: :boolean
+              :required: true
+            :bucket:
+              :name: Bucket
+              :type: :string
+              :required: true
+            :prefix:
+              :name: Prefix
+              :type: :string
+              :required: true
+        :price_class:
+          :name: PriceClass
+          :type: :string
+          :required: true
+        :enabled:
+          :name: Enabled
+          :type: :boolean
+          :required: true
+        :viewer_certificate:
+          :name: ViewerCertificate
+          :type: :hash
+          :members:
+            :iam_certificate_id:
+              :name: IAMCertificateId
+              :type: :string
+            :cloud_front_default_certificate:
+              :name: CloudFrontDefaultCertificate
+              :type: :boolean
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      Status:
+        :type: :string
+      LastModifiedTime:
+        :type: :time
+      InProgressInvalidationBatches:
+        :type: :integer
+      DomainName:
+        :type: :string
+      ActiveTrustedSigners:
+        :children:
+          Enabled:
+            :type: :boolean
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              Signer:
+                :rename: :items
+                :list: true
+                :children:
+                  AwsAccountNumber:
+                    :type: :string
+                  KeyPairIds:
+                    :children:
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          KeyPairId:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+      DistributionConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          Aliases:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CNAME:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          DefaultRootObject:
+            :type: :string
+          Origins:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  Origin:
+                    :rename: :items
+                    :list: true
+                    :children:
+                      Id:
+                        :type: :string
+                      DomainName:
+                        :type: :string
+                      S3OriginConfig:
+                        :children:
+                          OriginAccessIdentity:
+                            :type: :string
+                      CustomOriginConfig:
+                        :children:
+                          HTTPPort:
+                            :type: :integer
+                          HTTPSPort:
+                            :type: :integer
+                          OriginProtocolPolicy:
+                            :type: :string
+          DefaultCacheBehavior:
+            :children:
+              TargetOriginId:
+                :type: :string
+              ForwardedValues:
+                :children:
+                  QueryString:
+                    :type: :boolean
+                  Cookies:
+                    :children:
+                      Forward:
+                        :type: :string
+                      WhitelistedNames:
+                        :children:
+                          Quantity:
+                            :type: :integer
+                          Items:
+                            :ignore: true
+                            :children:
+                              Name:
+                                :rename: :items
+                                :list: true
+                                :type: :string
+              TrustedSigners:
+                :children:
+                  Enabled:
+                    :type: :boolean
+                  Quantity:
+                    :type: :integer
+                  Items:
+                    :ignore: true
+                    :children:
+                      AwsAccountNumber:
+                        :rename: :items
+                        :list: true
+                        :type: :string
+              ViewerProtocolPolicy:
+                :type: :string
+              MinTTL:
+                :type: :integer
+          CacheBehaviors:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CacheBehavior:
+                    :rename: :items
+                    :list: true
+                    :children:
+                      PathPattern:
+                        :type: :string
+                      TargetOriginId:
+                        :type: :string
+                      ForwardedValues:
+                        :children:
+                          QueryString:
+                            :type: :boolean
+                          Cookies:
+                            :children:
+                              Forward:
+                                :type: :string
+                              WhitelistedNames:
+                                :children:
+                                  Quantity:
+                                    :type: :integer
+                                  Items:
+                                    :ignore: true
+                                    :children:
+                                      Name:
+                                        :rename: :items
+                                        :list: true
+                                        :type: :string
+                      TrustedSigners:
+                        :children:
+                          Enabled:
+                            :type: :boolean
+                          Quantity:
+                            :type: :integer
+                          Items:
+                            :ignore: true
+                            :children:
+                              AwsAccountNumber:
+                                :rename: :items
+                                :list: true
+                                :type: :string
+                      ViewerProtocolPolicy:
+                        :type: :string
+                      MinTTL:
+                        :type: :integer
+          Comment:
+            :type: :string
+          Logging:
+            :children:
+              Enabled:
+                :type: :boolean
+              IncludeCookies:
+                :type: :boolean
+              Bucket:
+                :type: :string
+              Prefix:
+                :type: :string
+          PriceClass:
+            :type: :string
+          Enabled:
+            :type: :boolean
+          ViewerCertificate:
+            :children:
+              IAMCertificateId:
+                :type: :string
+              CloudFrontDefaultCertificate:
+                :type: :boolean
+- :name: CreateInvalidation
+  :method: :create_invalidation
+  :http:
+    :verb: POST
+    :uri: /2013-05-12/distribution/:distribution_id/invalidation
+    :request_payload: :invalidation_batch
+    :response_code: 201
+    :response_headers:
+      :location: Location
+  :inputs:
+    :distribution_id:
+      :type: :string
+      :required: true
+    :invalidation_batch:
+      :name: InvalidationBatch
+      :type: :hash
+      :required: true
+      :members:
+        :paths:
+          :name: Paths
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: Path
+                :type: :string
+        :caller_reference:
+          :name: CallerReference
+          :type: :string
+          :required: true
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      Status:
+        :type: :string
+      CreateTime:
+        :type: :time
+      InvalidationBatch:
+        :children:
+          Paths:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  Path:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          CallerReference:
+            :type: :string
+- :name: CreateStreamingDistribution
+  :method: :create_streaming_distribution
+  :http:
+    :verb: POST
+    :uri: /2013-05-12/streaming-distribution
+    :request_payload: :streaming_distribution_config
+    :response_code: 201
+    :response_headers:
+      :location: Location
+      :etag: ETag
+  :inputs:
+    :streaming_distribution_config:
+      :name: StreamingDistributionConfig
+      :type: :hash
+      :required: true
+      :members:
+        :caller_reference:
+          :name: CallerReference
+          :type: :string
+          :required: true
+        :s3_origin:
+          :name: S3Origin
+          :type: :hash
+          :required: true
+          :members:
+            :domain_name:
+              :name: DomainName
+              :type: :string
+              :required: true
+            :origin_access_identity:
+              :name: OriginAccessIdentity
+              :type: :string
+              :required: true
+        :aliases:
+          :name: Aliases
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: CNAME
+                :type: :string
+        :comment:
+          :name: Comment
+          :type: :string
+          :required: true
+        :logging:
+          :name: Logging
+          :type: :hash
+          :required: true
+          :members:
+            :enabled:
+              :name: Enabled
+              :type: :boolean
+              :required: true
+            :bucket:
+              :name: Bucket
+              :type: :string
+              :required: true
+            :prefix:
+              :name: Prefix
+              :type: :string
+              :required: true
+        :trusted_signers:
+          :name: TrustedSigners
+          :type: :hash
+          :required: true
+          :members:
+            :enabled:
+              :name: Enabled
+              :type: :boolean
+              :required: true
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: AwsAccountNumber
+                :type: :string
+        :price_class:
+          :name: PriceClass
+          :type: :string
+          :required: true
+        :enabled:
+          :name: Enabled
+          :type: :boolean
+          :required: true
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      Status:
+        :type: :string
+      LastModifiedTime:
+        :type: :time
+      DomainName:
+        :type: :string
+      ActiveTrustedSigners:
+        :children:
+          Enabled:
+            :type: :boolean
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              Signer:
+                :rename: :items
+                :list: true
+                :children:
+                  AwsAccountNumber:
+                    :type: :string
+                  KeyPairIds:
+                    :children:
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          KeyPairId:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+      StreamingDistributionConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          S3Origin:
+            :children:
+              DomainName:
+                :type: :string
+              OriginAccessIdentity:
+                :type: :string
+          Aliases:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CNAME:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          Comment:
+            :type: :string
+          Logging:
+            :children:
+              Enabled:
+                :type: :boolean
+              Bucket:
+                :type: :string
+              Prefix:
+                :type: :string
+          TrustedSigners:
+            :children:
+              Enabled:
+                :type: :boolean
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  AwsAccountNumber:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          PriceClass:
+            :type: :string
+          Enabled:
+            :type: :boolean
+- :name: DeleteCloudFrontOriginAccessIdentity
+  :method: :delete_cloud_front_origin_access_identity
+  :http:
+    :verb: DELETE
+    :uri: /2013-05-12/origin-access-identity/cloudfront/:id
+    :request_headers:
+      :if_match: If-Match
+    :response_code: 204
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+    :if_match:
+      :type: :string
+  :outputs: {}
+- :name: DeleteDistribution
+  :method: :delete_distribution
+  :http:
+    :verb: DELETE
+    :uri: /2013-05-12/distribution/:id
+    :request_headers:
+      :if_match: If-Match
+    :response_code: 204
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+    :if_match:
+      :type: :string
+  :outputs: {}
+- :name: DeleteStreamingDistribution
+  :method: :delete_streaming_distribution
+  :http:
+    :verb: DELETE
+    :uri: /2013-05-12/streaming-distribution/:id
+    :request_headers:
+      :if_match: If-Match
+    :response_code: 204
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+    :if_match:
+      :type: :string
+  :outputs: {}
+- :name: GetCloudFrontOriginAccessIdentity
+  :method: :get_cloud_front_origin_access_identity
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/origin-access-identity/cloudfront/:id
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      S3CanonicalUserId:
+        :type: :string
+      CloudFrontOriginAccessIdentityConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          Comment:
+            :type: :string
+- :name: GetCloudFrontOriginAccessIdentityConfig
+  :method: :get_cloud_front_origin_access_identity_config
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/origin-access-identity/cloudfront/:id/config
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    :children:
+      CallerReference:
+        :type: :string
+      Comment:
+        :type: :string
+- :name: GetDistribution
+  :method: :get_distribution
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/distribution/:id
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      Status:
+        :type: :string
+      LastModifiedTime:
+        :type: :time
+      InProgressInvalidationBatches:
+        :type: :integer
+      DomainName:
+        :type: :string
+      ActiveTrustedSigners:
+        :children:
+          Enabled:
+            :type: :boolean
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              Signer:
+                :rename: :items
+                :list: true
+                :children:
+                  AwsAccountNumber:
+                    :type: :string
+                  KeyPairIds:
+                    :children:
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          KeyPairId:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+      DistributionConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          Aliases:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CNAME:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          DefaultRootObject:
+            :type: :string
+          Origins:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  Origin:
+                    :rename: :items
+                    :list: true
+                    :children:
+                      Id:
+                        :type: :string
+                      DomainName:
+                        :type: :string
+                      S3OriginConfig:
+                        :children:
+                          OriginAccessIdentity:
+                            :type: :string
+                      CustomOriginConfig:
+                        :children:
+                          HTTPPort:
+                            :type: :integer
+                          HTTPSPort:
+                            :type: :integer
+                          OriginProtocolPolicy:
+                            :type: :string
+          DefaultCacheBehavior:
+            :children:
+              TargetOriginId:
+                :type: :string
+              ForwardedValues:
+                :children:
+                  QueryString:
+                    :type: :boolean
+                  Cookies:
+                    :children:
+                      Forward:
+                        :type: :string
+                      WhitelistedNames:
+                        :children:
+                          Quantity:
+                            :type: :integer
+                          Items:
+                            :ignore: true
+                            :children:
+                              Name:
+                                :rename: :items
+                                :list: true
+                                :type: :string
+              TrustedSigners:
+                :children:
+                  Enabled:
+                    :type: :boolean
+                  Quantity:
+                    :type: :integer
+                  Items:
+                    :ignore: true
+                    :children:
+                      AwsAccountNumber:
+                        :rename: :items
+                        :list: true
+                        :type: :string
+              ViewerProtocolPolicy:
+                :type: :string
+              MinTTL:
+                :type: :integer
+          CacheBehaviors:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CacheBehavior:
+                    :rename: :items
+                    :list: true
+                    :children:
+                      PathPattern:
+                        :type: :string
+                      TargetOriginId:
+                        :type: :string
+                      ForwardedValues:
+                        :children:
+                          QueryString:
+                            :type: :boolean
+                          Cookies:
+                            :children:
+                              Forward:
+                                :type: :string
+                              WhitelistedNames:
+                                :children:
+                                  Quantity:
+                                    :type: :integer
+                                  Items:
+                                    :ignore: true
+                                    :children:
+                                      Name:
+                                        :rename: :items
+                                        :list: true
+                                        :type: :string
+                      TrustedSigners:
+                        :children:
+                          Enabled:
+                            :type: :boolean
+                          Quantity:
+                            :type: :integer
+                          Items:
+                            :ignore: true
+                            :children:
+                              AwsAccountNumber:
+                                :rename: :items
+                                :list: true
+                                :type: :string
+                      ViewerProtocolPolicy:
+                        :type: :string
+                      MinTTL:
+                        :type: :integer
+          Comment:
+            :type: :string
+          Logging:
+            :children:
+              Enabled:
+                :type: :boolean
+              IncludeCookies:
+                :type: :boolean
+              Bucket:
+                :type: :string
+              Prefix:
+                :type: :string
+          PriceClass:
+            :type: :string
+          Enabled:
+            :type: :boolean
+          ViewerCertificate:
+            :children:
+              IAMCertificateId:
+                :type: :string
+              CloudFrontDefaultCertificate:
+                :type: :boolean
+- :name: GetDistributionConfig
+  :method: :get_distribution_config
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/distribution/:id/config
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    :children:
+      CallerReference:
+        :type: :string
+      Aliases:
+        :children:
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              CNAME:
+                :rename: :items
+                :list: true
+                :type: :string
+      DefaultRootObject:
+        :type: :string
+      Origins:
+        :children:
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              Origin:
+                :rename: :items
+                :list: true
+                :children:
+                  Id:
+                    :type: :string
+                  DomainName:
+                    :type: :string
+                  S3OriginConfig:
+                    :children:
+                      OriginAccessIdentity:
+                        :type: :string
+                  CustomOriginConfig:
+                    :children:
+                      HTTPPort:
+                        :type: :integer
+                      HTTPSPort:
+                        :type: :integer
+                      OriginProtocolPolicy:
+                        :type: :string
+      DefaultCacheBehavior:
+        :children:
+          TargetOriginId:
+            :type: :string
+          ForwardedValues:
+            :children:
+              QueryString:
+                :type: :boolean
+              Cookies:
+                :children:
+                  Forward:
+                    :type: :string
+                  WhitelistedNames:
+                    :children:
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          Name:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+          TrustedSigners:
+            :children:
+              Enabled:
+                :type: :boolean
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  AwsAccountNumber:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          ViewerProtocolPolicy:
+            :type: :string
+          MinTTL:
+            :type: :integer
+      CacheBehaviors:
+        :children:
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              CacheBehavior:
+                :rename: :items
+                :list: true
+                :children:
+                  PathPattern:
+                    :type: :string
+                  TargetOriginId:
+                    :type: :string
+                  ForwardedValues:
+                    :children:
+                      QueryString:
+                        :type: :boolean
+                      Cookies:
+                        :children:
+                          Forward:
+                            :type: :string
+                          WhitelistedNames:
+                            :children:
+                              Quantity:
+                                :type: :integer
+                              Items:
+                                :ignore: true
+                                :children:
+                                  Name:
+                                    :rename: :items
+                                    :list: true
+                                    :type: :string
+                  TrustedSigners:
+                    :children:
+                      Enabled:
+                        :type: :boolean
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          AwsAccountNumber:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+                  ViewerProtocolPolicy:
+                    :type: :string
+                  MinTTL:
+                    :type: :integer
+      Comment:
+        :type: :string
+      Logging:
+        :children:
+          Enabled:
+            :type: :boolean
+          IncludeCookies:
+            :type: :boolean
+          Bucket:
+            :type: :string
+          Prefix:
+            :type: :string
+      PriceClass:
+        :type: :string
+      Enabled:
+        :type: :boolean
+      ViewerCertificate:
+        :children:
+          IAMCertificateId:
+            :type: :string
+          CloudFrontDefaultCertificate:
+            :type: :boolean
+- :name: GetInvalidation
+  :method: :get_invalidation
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/distribution/:distribution_id/invalidation/:id
+  :inputs:
+    :distribution_id:
+      :type: :string
+      :required: true
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      Status:
+        :type: :string
+      CreateTime:
+        :type: :time
+      InvalidationBatch:
+        :children:
+          Paths:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  Path:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          CallerReference:
+            :type: :string
+- :name: GetStreamingDistribution
+  :method: :get_streaming_distribution
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/streaming-distribution/:id
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      Status:
+        :type: :string
+      LastModifiedTime:
+        :type: :time
+      DomainName:
+        :type: :string
+      ActiveTrustedSigners:
+        :children:
+          Enabled:
+            :type: :boolean
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              Signer:
+                :rename: :items
+                :list: true
+                :children:
+                  AwsAccountNumber:
+                    :type: :string
+                  KeyPairIds:
+                    :children:
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          KeyPairId:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+      StreamingDistributionConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          S3Origin:
+            :children:
+              DomainName:
+                :type: :string
+              OriginAccessIdentity:
+                :type: :string
+          Aliases:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CNAME:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          Comment:
+            :type: :string
+          Logging:
+            :children:
+              Enabled:
+                :type: :boolean
+              Bucket:
+                :type: :string
+              Prefix:
+                :type: :string
+          TrustedSigners:
+            :children:
+              Enabled:
+                :type: :boolean
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  AwsAccountNumber:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          PriceClass:
+            :type: :string
+          Enabled:
+            :type: :boolean
+- :name: GetStreamingDistributionConfig
+  :method: :get_streaming_distribution_config
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/streaming-distribution/:id/config
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :id:
+      :type: :string
+      :required: true
+  :outputs:
+    :children:
+      CallerReference:
+        :type: :string
+      S3Origin:
+        :children:
+          DomainName:
+            :type: :string
+          OriginAccessIdentity:
+            :type: :string
+      Aliases:
+        :children:
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              CNAME:
+                :rename: :items
+                :list: true
+                :type: :string
+      Comment:
+        :type: :string
+      Logging:
+        :children:
+          Enabled:
+            :type: :boolean
+          Bucket:
+            :type: :string
+          Prefix:
+            :type: :string
+      TrustedSigners:
+        :children:
+          Enabled:
+            :type: :boolean
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              AwsAccountNumber:
+                :rename: :items
+                :list: true
+                :type: :string
+      PriceClass:
+        :type: :string
+      Enabled:
+        :type: :boolean
+- :name: ListCloudFrontOriginAccessIdentities
+  :method: :list_cloud_front_origin_access_identities
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/origin-access-identity/cloudfront?Marker=:marker&MaxItems=:max_items
+  :inputs:
+    :marker:
+      :type: :string
+    :max_items:
+      :type: :integer
+  :outputs:
+    :children:
+      Marker:
+        :type: :string
+      NextMarker:
+        :type: :string
+      MaxItems:
+        :type: :integer
+      IsTruncated:
+        :type: :boolean
+      Quantity:
+        :type: :integer
+      Items:
+        :ignore: true
+        :children:
+          CloudFrontOriginAccessIdentitySummary:
+            :rename: :items
+            :list: true
+            :children:
+              Id:
+                :type: :string
+              S3CanonicalUserId:
+                :type: :string
+              Comment:
+                :type: :string
+- :name: ListDistributions
+  :method: :list_distributions
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/distribution?Marker=:marker&MaxItems=:max_items
+  :inputs:
+    :marker:
+      :type: :string
+    :max_items:
+      :type: :integer
+  :outputs:
+    :children:
+      Marker:
+        :type: :string
+      NextMarker:
+        :type: :string
+      MaxItems:
+        :type: :integer
+      IsTruncated:
+        :type: :boolean
+      Quantity:
+        :type: :integer
+      Items:
+        :ignore: true
+        :children:
+          DistributionSummary:
+            :rename: :items
+            :list: true
+            :children:
+              Id:
+                :type: :string
+              Status:
+                :type: :string
+              LastModifiedTime:
+                :type: :time
+              DomainName:
+                :type: :string
+              Aliases:
+                :children:
+                  Quantity:
+                    :type: :integer
+                  Items:
+                    :ignore: true
+                    :children:
+                      CNAME:
+                        :rename: :items
+                        :list: true
+                        :type: :string
+              Origins:
+                :children:
+                  Quantity:
+                    :type: :integer
+                  Items:
+                    :ignore: true
+                    :children:
+                      Origin:
+                        :rename: :items
+                        :list: true
+                        :children:
+                          Id:
+                            :type: :string
+                          DomainName:
+                            :type: :string
+                          S3OriginConfig:
+                            :children:
+                              OriginAccessIdentity:
+                                :type: :string
+                          CustomOriginConfig:
+                            :children:
+                              HTTPPort:
+                                :type: :integer
+                              HTTPSPort:
+                                :type: :integer
+                              OriginProtocolPolicy:
+                                :type: :string
+              DefaultCacheBehavior:
+                :children:
+                  TargetOriginId:
+                    :type: :string
+                  ForwardedValues:
+                    :children:
+                      QueryString:
+                        :type: :boolean
+                      Cookies:
+                        :children:
+                          Forward:
+                            :type: :string
+                          WhitelistedNames:
+                            :children:
+                              Quantity:
+                                :type: :integer
+                              Items:
+                                :ignore: true
+                                :children:
+                                  Name:
+                                    :rename: :items
+                                    :list: true
+                                    :type: :string
+                  TrustedSigners:
+                    :children:
+                      Enabled:
+                        :type: :boolean
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          AwsAccountNumber:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+                  ViewerProtocolPolicy:
+                    :type: :string
+                  MinTTL:
+                    :type: :integer
+              CacheBehaviors:
+                :children:
+                  Quantity:
+                    :type: :integer
+                  Items:
+                    :ignore: true
+                    :children:
+                      CacheBehavior:
+                        :rename: :items
+                        :list: true
+                        :children:
+                          PathPattern:
+                            :type: :string
+                          TargetOriginId:
+                            :type: :string
+                          ForwardedValues:
+                            :children:
+                              QueryString:
+                                :type: :boolean
+                              Cookies:
+                                :children:
+                                  Forward:
+                                    :type: :string
+                                  WhitelistedNames:
+                                    :children:
+                                      Quantity:
+                                        :type: :integer
+                                      Items:
+                                        :ignore: true
+                                        :children:
+                                          Name:
+                                            :rename: :items
+                                            :list: true
+                                            :type: :string
+                          TrustedSigners:
+                            :children:
+                              Enabled:
+                                :type: :boolean
+                              Quantity:
+                                :type: :integer
+                              Items:
+                                :ignore: true
+                                :children:
+                                  AwsAccountNumber:
+                                    :rename: :items
+                                    :list: true
+                                    :type: :string
+                          ViewerProtocolPolicy:
+                            :type: :string
+                          MinTTL:
+                            :type: :integer
+              Comment:
+                :type: :string
+              PriceClass:
+                :type: :string
+              Enabled:
+                :type: :boolean
+              ViewerCertificate:
+                :children:
+                  IAMCertificateId:
+                    :type: :string
+                  CloudFrontDefaultCertificate:
+                    :type: :boolean
+- :name: ListInvalidations
+  :method: :list_invalidations
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/distribution/:distribution_id/invalidation?Marker=:marker&MaxItems=:max_items
+  :inputs:
+    :distribution_id:
+      :type: :string
+      :required: true
+    :marker:
+      :type: :string
+    :max_items:
+      :type: :integer
+  :outputs:
+    :children:
+      Marker:
+        :type: :string
+      NextMarker:
+        :type: :string
+      MaxItems:
+        :type: :integer
+      IsTruncated:
+        :type: :boolean
+      Quantity:
+        :type: :integer
+      Items:
+        :ignore: true
+        :children:
+          InvalidationSummary:
+            :rename: :items
+            :list: true
+            :children:
+              Id:
+                :type: :string
+              CreateTime:
+                :type: :time
+              Status:
+                :type: :string
+- :name: ListStreamingDistributions
+  :method: :list_streaming_distributions
+  :http:
+    :verb: GET
+    :uri: /2013-05-12/streaming-distribution?Marker=:marker&MaxItems=:max_items
+  :inputs:
+    :marker:
+      :type: :string
+    :max_items:
+      :type: :integer
+  :outputs:
+    :children:
+      Marker:
+        :type: :string
+      NextMarker:
+        :type: :string
+      MaxItems:
+        :type: :integer
+      IsTruncated:
+        :type: :boolean
+      Quantity:
+        :type: :integer
+      Items:
+        :ignore: true
+        :children:
+          StreamingDistributionSummary:
+            :rename: :items
+            :list: true
+            :children:
+              Id:
+                :type: :string
+              Status:
+                :type: :string
+              LastModifiedTime:
+                :type: :time
+              DomainName:
+                :type: :string
+              S3Origin:
+                :children:
+                  DomainName:
+                    :type: :string
+                  OriginAccessIdentity:
+                    :type: :string
+              Aliases:
+                :children:
+                  Quantity:
+                    :type: :integer
+                  Items:
+                    :ignore: true
+                    :children:
+                      CNAME:
+                        :rename: :items
+                        :list: true
+                        :type: :string
+              TrustedSigners:
+                :children:
+                  Enabled:
+                    :type: :boolean
+                  Quantity:
+                    :type: :integer
+                  Items:
+                    :ignore: true
+                    :children:
+                      AwsAccountNumber:
+                        :rename: :items
+                        :list: true
+                        :type: :string
+              Comment:
+                :type: :string
+              PriceClass:
+                :type: :string
+              Enabled:
+                :type: :boolean
+- :name: UpdateCloudFrontOriginAccessIdentity
+  :method: :update_cloud_front_origin_access_identity
+  :http:
+    :verb: PUT
+    :uri: /2013-05-12/origin-access-identity/cloudfront/:id/config
+    :request_payload: :cloud_front_origin_access_identity_config
+    :request_headers:
+      :if_match: If-Match
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :cloud_front_origin_access_identity_config:
+      :name: CloudFrontOriginAccessIdentityConfig
+      :type: :hash
+      :required: true
+      :members:
+        :caller_reference:
+          :name: CallerReference
+          :type: :string
+          :required: true
+        :comment:
+          :name: Comment
+          :type: :string
+          :required: true
+    :id:
+      :type: :string
+      :required: true
+    :if_match:
+      :type: :string
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      S3CanonicalUserId:
+        :type: :string
+      CloudFrontOriginAccessIdentityConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          Comment:
+            :type: :string
+- :name: UpdateDistribution
+  :method: :update_distribution
+  :http:
+    :verb: PUT
+    :uri: /2013-05-12/distribution/:id/config
+    :request_payload: :distribution_config
+    :request_headers:
+      :if_match: If-Match
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :distribution_config:
+      :name: DistributionConfig
+      :type: :hash
+      :required: true
+      :members:
+        :caller_reference:
+          :name: CallerReference
+          :type: :string
+          :required: true
+        :aliases:
+          :name: Aliases
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: CNAME
+                :type: :string
+        :default_root_object:
+          :name: DefaultRootObject
+          :type: :string
+          :required: true
+        :origins:
+          :name: Origins
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: Origin
+                :type: :hash
+                :members:
+                  :id:
+                    :name: Id
+                    :type: :string
+                    :required: true
+                  :domain_name:
+                    :name: DomainName
+                    :type: :string
+                    :required: true
+                  :s3_origin_config:
+                    :name: S3OriginConfig
+                    :type: :hash
+                    :members:
+                      :origin_access_identity:
+                        :name: OriginAccessIdentity
+                        :type: :string
+                        :required: true
+                  :custom_origin_config:
+                    :name: CustomOriginConfig
+                    :type: :hash
+                    :members:
+                      :http_port:
+                        :name: HTTPPort
+                        :type: :integer
+                        :required: true
+                      :https_port:
+                        :name: HTTPSPort
+                        :type: :integer
+                        :required: true
+                      :origin_protocol_policy:
+                        :name: OriginProtocolPolicy
+                        :type: :string
+                        :required: true
+        :default_cache_behavior:
+          :name: DefaultCacheBehavior
+          :type: :hash
+          :required: true
+          :members:
+            :target_origin_id:
+              :name: TargetOriginId
+              :type: :string
+              :required: true
+            :forwarded_values:
+              :name: ForwardedValues
+              :type: :hash
+              :required: true
+              :members:
+                :query_string:
+                  :name: QueryString
+                  :type: :boolean
+                  :required: true
+                :cookies:
+                  :name: Cookies
+                  :type: :hash
+                  :required: true
+                  :members:
+                    :forward:
+                      :name: Forward
+                      :type: :string
+                      :required: true
+                    :whitelisted_names:
+                      :name: WhitelistedNames
+                      :type: :hash
+                      :members:
+                        :quantity:
+                          :name: Quantity
+                          :type: :integer
+                          :required: true
+                        :items:
+                          :name: Items
+                          :type: :array
+                          :members:
+                            :name: Name
+                            :type: :string
+            :trusted_signers:
+              :name: TrustedSigners
+              :type: :hash
+              :required: true
+              :members:
+                :enabled:
+                  :name: Enabled
+                  :type: :boolean
+                  :required: true
+                :quantity:
+                  :name: Quantity
+                  :type: :integer
+                  :required: true
+                :items:
+                  :name: Items
+                  :type: :array
+                  :members:
+                    :name: AwsAccountNumber
+                    :type: :string
+            :viewer_protocol_policy:
+              :name: ViewerProtocolPolicy
+              :type: :string
+              :required: true
+            :min_ttl:
+              :name: MinTTL
+              :type: :integer
+              :required: true
+        :cache_behaviors:
+          :name: CacheBehaviors
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: CacheBehavior
+                :type: :hash
+                :members:
+                  :path_pattern:
+                    :name: PathPattern
+                    :type: :string
+                    :required: true
+                  :target_origin_id:
+                    :name: TargetOriginId
+                    :type: :string
+                    :required: true
+                  :forwarded_values:
+                    :name: ForwardedValues
+                    :type: :hash
+                    :required: true
+                    :members:
+                      :query_string:
+                        :name: QueryString
+                        :type: :boolean
+                        :required: true
+                      :cookies:
+                        :name: Cookies
+                        :type: :hash
+                        :required: true
+                        :members:
+                          :forward:
+                            :name: Forward
+                            :type: :string
+                            :required: true
+                          :whitelisted_names:
+                            :name: WhitelistedNames
+                            :type: :hash
+                            :members:
+                              :quantity:
+                                :name: Quantity
+                                :type: :integer
+                                :required: true
+                              :items:
+                                :name: Items
+                                :type: :array
+                                :members:
+                                  :name: Name
+                                  :type: :string
+                  :trusted_signers:
+                    :name: TrustedSigners
+                    :type: :hash
+                    :required: true
+                    :members:
+                      :enabled:
+                        :name: Enabled
+                        :type: :boolean
+                        :required: true
+                      :quantity:
+                        :name: Quantity
+                        :type: :integer
+                        :required: true
+                      :items:
+                        :name: Items
+                        :type: :array
+                        :members:
+                          :name: AwsAccountNumber
+                          :type: :string
+                  :viewer_protocol_policy:
+                    :name: ViewerProtocolPolicy
+                    :type: :string
+                    :required: true
+                  :min_ttl:
+                    :name: MinTTL
+                    :type: :integer
+                    :required: true
+        :comment:
+          :name: Comment
+          :type: :string
+          :required: true
+        :logging:
+          :name: Logging
+          :type: :hash
+          :required: true
+          :members:
+            :enabled:
+              :name: Enabled
+              :type: :boolean
+              :required: true
+            :include_cookies:
+              :name: IncludeCookies
+              :type: :boolean
+              :required: true
+            :bucket:
+              :name: Bucket
+              :type: :string
+              :required: true
+            :prefix:
+              :name: Prefix
+              :type: :string
+              :required: true
+        :price_class:
+          :name: PriceClass
+          :type: :string
+          :required: true
+        :enabled:
+          :name: Enabled
+          :type: :boolean
+          :required: true
+        :viewer_certificate:
+          :name: ViewerCertificate
+          :type: :hash
+          :members:
+            :iam_certificate_id:
+              :name: IAMCertificateId
+              :type: :string
+            :cloud_front_default_certificate:
+              :name: CloudFrontDefaultCertificate
+              :type: :boolean
+    :id:
+      :type: :string
+      :required: true
+    :if_match:
+      :type: :string
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      Status:
+        :type: :string
+      LastModifiedTime:
+        :type: :time
+      InProgressInvalidationBatches:
+        :type: :integer
+      DomainName:
+        :type: :string
+      ActiveTrustedSigners:
+        :children:
+          Enabled:
+            :type: :boolean
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              Signer:
+                :rename: :items
+                :list: true
+                :children:
+                  AwsAccountNumber:
+                    :type: :string
+                  KeyPairIds:
+                    :children:
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          KeyPairId:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+      DistributionConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          Aliases:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CNAME:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          DefaultRootObject:
+            :type: :string
+          Origins:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  Origin:
+                    :rename: :items
+                    :list: true
+                    :children:
+                      Id:
+                        :type: :string
+                      DomainName:
+                        :type: :string
+                      S3OriginConfig:
+                        :children:
+                          OriginAccessIdentity:
+                            :type: :string
+                      CustomOriginConfig:
+                        :children:
+                          HTTPPort:
+                            :type: :integer
+                          HTTPSPort:
+                            :type: :integer
+                          OriginProtocolPolicy:
+                            :type: :string
+          DefaultCacheBehavior:
+            :children:
+              TargetOriginId:
+                :type: :string
+              ForwardedValues:
+                :children:
+                  QueryString:
+                    :type: :boolean
+                  Cookies:
+                    :children:
+                      Forward:
+                        :type: :string
+                      WhitelistedNames:
+                        :children:
+                          Quantity:
+                            :type: :integer
+                          Items:
+                            :ignore: true
+                            :children:
+                              Name:
+                                :rename: :items
+                                :list: true
+                                :type: :string
+              TrustedSigners:
+                :children:
+                  Enabled:
+                    :type: :boolean
+                  Quantity:
+                    :type: :integer
+                  Items:
+                    :ignore: true
+                    :children:
+                      AwsAccountNumber:
+                        :rename: :items
+                        :list: true
+                        :type: :string
+              ViewerProtocolPolicy:
+                :type: :string
+              MinTTL:
+                :type: :integer
+          CacheBehaviors:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CacheBehavior:
+                    :rename: :items
+                    :list: true
+                    :children:
+                      PathPattern:
+                        :type: :string
+                      TargetOriginId:
+                        :type: :string
+                      ForwardedValues:
+                        :children:
+                          QueryString:
+                            :type: :boolean
+                          Cookies:
+                            :children:
+                              Forward:
+                                :type: :string
+                              WhitelistedNames:
+                                :children:
+                                  Quantity:
+                                    :type: :integer
+                                  Items:
+                                    :ignore: true
+                                    :children:
+                                      Name:
+                                        :rename: :items
+                                        :list: true
+                                        :type: :string
+                      TrustedSigners:
+                        :children:
+                          Enabled:
+                            :type: :boolean
+                          Quantity:
+                            :type: :integer
+                          Items:
+                            :ignore: true
+                            :children:
+                              AwsAccountNumber:
+                                :rename: :items
+                                :list: true
+                                :type: :string
+                      ViewerProtocolPolicy:
+                        :type: :string
+                      MinTTL:
+                        :type: :integer
+          Comment:
+            :type: :string
+          Logging:
+            :children:
+              Enabled:
+                :type: :boolean
+              IncludeCookies:
+                :type: :boolean
+              Bucket:
+                :type: :string
+              Prefix:
+                :type: :string
+          PriceClass:
+            :type: :string
+          Enabled:
+            :type: :boolean
+          ViewerCertificate:
+            :children:
+              IAMCertificateId:
+                :type: :string
+              CloudFrontDefaultCertificate:
+                :type: :boolean
+- :name: UpdateStreamingDistribution
+  :method: :update_streaming_distribution
+  :http:
+    :verb: PUT
+    :uri: /2013-05-12/streaming-distribution/:id/config
+    :request_payload: :streaming_distribution_config
+    :request_headers:
+      :if_match: If-Match
+    :response_headers:
+      :etag: ETag
+  :inputs:
+    :streaming_distribution_config:
+      :name: StreamingDistributionConfig
+      :type: :hash
+      :required: true
+      :members:
+        :caller_reference:
+          :name: CallerReference
+          :type: :string
+          :required: true
+        :s3_origin:
+          :name: S3Origin
+          :type: :hash
+          :required: true
+          :members:
+            :domain_name:
+              :name: DomainName
+              :type: :string
+              :required: true
+            :origin_access_identity:
+              :name: OriginAccessIdentity
+              :type: :string
+              :required: true
+        :aliases:
+          :name: Aliases
+          :type: :hash
+          :required: true
+          :members:
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: CNAME
+                :type: :string
+        :comment:
+          :name: Comment
+          :type: :string
+          :required: true
+        :logging:
+          :name: Logging
+          :type: :hash
+          :required: true
+          :members:
+            :enabled:
+              :name: Enabled
+              :type: :boolean
+              :required: true
+            :bucket:
+              :name: Bucket
+              :type: :string
+              :required: true
+            :prefix:
+              :name: Prefix
+              :type: :string
+              :required: true
+        :trusted_signers:
+          :name: TrustedSigners
+          :type: :hash
+          :required: true
+          :members:
+            :enabled:
+              :name: Enabled
+              :type: :boolean
+              :required: true
+            :quantity:
+              :name: Quantity
+              :type: :integer
+              :required: true
+            :items:
+              :name: Items
+              :type: :array
+              :members:
+                :name: AwsAccountNumber
+                :type: :string
+        :price_class:
+          :name: PriceClass
+          :type: :string
+          :required: true
+        :enabled:
+          :name: Enabled
+          :type: :boolean
+          :required: true
+    :id:
+      :type: :string
+      :required: true
+    :if_match:
+      :type: :string
+  :outputs:
+    :children:
+      Id:
+        :type: :string
+      Status:
+        :type: :string
+      LastModifiedTime:
+        :type: :time
+      DomainName:
+        :type: :string
+      ActiveTrustedSigners:
+        :children:
+          Enabled:
+            :type: :boolean
+          Quantity:
+            :type: :integer
+          Items:
+            :ignore: true
+            :children:
+              Signer:
+                :rename: :items
+                :list: true
+                :children:
+                  AwsAccountNumber:
+                    :type: :string
+                  KeyPairIds:
+                    :children:
+                      Quantity:
+                        :type: :integer
+                      Items:
+                        :ignore: true
+                        :children:
+                          KeyPairId:
+                            :rename: :items
+                            :list: true
+                            :type: :string
+      StreamingDistributionConfig:
+        :children:
+          CallerReference:
+            :type: :string
+          S3Origin:
+            :children:
+              DomainName:
+                :type: :string
+              OriginAccessIdentity:
+                :type: :string
+          Aliases:
+            :children:
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  CNAME:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          Comment:
+            :type: :string
+          Logging:
+            :children:
+              Enabled:
+                :type: :boolean
+              Bucket:
+                :type: :string
+              Prefix:
+                :type: :string
+          TrustedSigners:
+            :children:
+              Enabled:
+                :type: :boolean
+              Quantity:
+                :type: :integer
+              Items:
+                :ignore: true
+                :children:
+                  AwsAccountNumber:
+                    :rename: :items
+                    :list: true
+                    :type: :string
+          PriceClass:
+            :type: :string
+          Enabled:
+            :type: :boolean
+:namespace: http://cloudfront.amazonaws.com/doc/2013-05-12/

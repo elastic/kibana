@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'power_assert'
+
+begin
+  require 'pry'
+  Pry
+rescue LoadError
+  require 'irb'
+  IRB
+end.start

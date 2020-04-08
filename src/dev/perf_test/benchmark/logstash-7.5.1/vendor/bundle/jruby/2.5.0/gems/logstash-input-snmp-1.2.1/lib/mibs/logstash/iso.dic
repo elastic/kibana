@@ -1,0 +1,18 @@
+# This is a logstash dummy MIB to inject the root "iso" IOD.
+
+MIB = {
+    "moduleName" : "logstash",
+
+    "logstash" : {
+        "nodetype" : "module",
+        "language" : "SMIv2",
+    },
+
+    "nodes" : {
+        "iso" : {
+            "nodetype" : "node",
+            "moduleName" : "logstash",
+            "oid" : "1",
+        }, # node
+    }, # nodes
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Navigation SQL DB [Azure Monitor]",
+  "visState": "{\"title\":\"Navigation SQL DB [Azure Monitor]\",\"type\":\"markdown\",\"params\":{\"fontSize\":10,\"markdown\":\"### Azure Monitoring\\n\\n[Overview](#/dashboard/f110f010-11fc-11e8-8c94-a3d8d0cfd62b) | [Users](#/dashboard/06fa0b60-121a-11e8-8c94-a3d8d0cfd62b) | [Alerts](#/dashboard/16302750-1223-11e8-8c94-a3d8d0cfd62b) | [**SQL DB**](#/dashboard/91ba2090-07cb-11e8-adb5-e1a2d559cdf5) | [SQL DB Queries](#/dashboard/9adef750-08b0-11e8-93e5-299e2b5c963a)\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

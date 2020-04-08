@@ -1,0 +1,20 @@
+{
+  "ResourceGroup": "OPT489",
+  "time": "2018-01-16T15:14:41.1342222Z",
+  "LogicalServerName": "OPT489",
+  "SubscriptionId": "846FY0F5-9C8H-452C-95C3-555555666C2A",
+  "category": "Errors",
+  "operationName": "ErrorEvent",
+  "properties": {
+    "query_hash": "0",
+    "state": 1,
+    "ElasticPoolName": "RecommendedStandardPool1",
+    "query_plan_hash": "0",
+    "DatabaseName": "DB874999",
+    "user_defined": false,
+    "error_number": 3902,
+    "message": "The COMMIT TRANSACTION request has no corresponding BEGIN TRANSACTION.",
+    "severity": 16
+  },
+  "resourceId": "/SUBSCRIPTIONS/846FY0F5-9C8H-452C-95C3-555555666C2A/RESOURCEGROUPS/OPT489/PROVIDERS/MICROSOFT.SQL/SERVERS/OPT489/DATABASES/DB874999"
+}

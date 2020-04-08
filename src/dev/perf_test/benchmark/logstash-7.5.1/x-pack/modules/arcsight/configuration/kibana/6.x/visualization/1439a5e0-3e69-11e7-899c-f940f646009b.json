@@ -1,0 +1,10 @@
+{
+  "title": "Endpoint - Navigation",
+  "visState": "{\"title\":\"Endpoint - Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### **Navigation Pane** ###\\n\\n[Endopint Overview](#dashboard/d2fa5030-3e5d-11e7-b212-897f1496dc0e)\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

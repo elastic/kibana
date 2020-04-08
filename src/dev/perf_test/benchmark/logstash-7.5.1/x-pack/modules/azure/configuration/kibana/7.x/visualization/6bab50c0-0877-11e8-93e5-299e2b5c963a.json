@@ -1,0 +1,10 @@
+{
+  "title": "DTU Utilization [Azure Monitor]",
+  "visState": "{\"title\":\"DTU Utilization [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(255,222,85,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"avg\",\"field\":\"average\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"b75f7650-0876-11e8-8a9e-77e15a1ba1ec\",\"type\":\"moving_average\",\"field\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"1\",\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"split_filters\":[{\"filter\":\"data.metricName:dtu_consumption_percent\",\"label\":\"DTU %\",\"color\":\"#68BC00\",\"id\":\"bdf1be60-0876-11e8-8a9e-77e15a1ba1ec\"}],\"label\":\"DTU\",\"value_template\":\"{{value}}%\"},{\"id\":\"e92aa790-0876-11e8-8a9e-77e15a1ba1ec\",\"color\":\"rgba(1,155,143,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"e92aa791-0876-11e8-8a9e-77e15a1ba1ec\",\"type\":\"avg\",\"field\":\"average\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"1544c900-0877-11e8-8a9e-77e15a1ba1ec\",\"type\":\"moving_average\",\"field\":\"e92aa791-0876-11e8-8a9e-77e15a1ba1ec\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":\"0.4\",\"stacked\":\"none\",\"terms_field\":\"azure.resource_name.keyword\",\"terms_size\":\"3\",\"terms_direction\":\"desc\",\"value_template\":\"{{value}}%\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"show_grid\":1,\"filter\":\"azure.group:sql_diagnostics AND metricName:dtu_consumption_percent\",\"axis_max\":\"100\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

@@ -1,0 +1,13 @@
+modules:
+  - name: azure
+    var.input.azure_event_hubs.threads: 8
+    var.input.azure_event_hubs.decorate_events: true
+    var.input.azure_event_hubs.consumer_group: "logstash"
+    var.input.azure_event_hubs.storage_connection: "DefaultEndpointsProtocol=https;AccountName=example...."
+    var.input.azure_event_hubs.event_hub_connections:
+      - ["name",                      "event_hub_connection",      "storage_connection",                                      "initial_position", "decorate_events"]
+      - ["insights-operational-logs", "Endpoint=sb://example1...", "DefaultEndpointsProtocol=https;AccountName=example1....", "HEAD",             "true"]
+      - ["insights-metrics-pt1m",     "Endpoint=sb://example2...", "DefaultEndpointsProtocol=https;AccountName=example2....", "TAIL",             "true"]
+      - ["insights-logs-errors",      "Endpoint=sb://example3...", "DefaultEndpointsProtocol=https;AccountName=example3....", "LOOK_BACK",        "false"]
+      - ["insights-operational-logs", "Endpoint=sb://example4...", "DefaultEndpointsProtocol=https;AccountName=example4....", "HEAD",             "true"]
+      

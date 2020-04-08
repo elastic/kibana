@@ -1,0 +1,31 @@
+--- 
+t11FcVirtualFabricMIB: 1.3.6.1.2.1.147
+t11vfObjects: 1.3.6.1.2.1.147.1
+t11vfCoreSwitchTable: 1.3.6.1.2.1.147.1.1
+t11vfCoreSwitchEntry: 1.3.6.1.2.1.147.1.1.1
+t11vfCoreSwitchSwitchName: 1.3.6.1.2.1.147.1.1.1.1
+t11vfCoreSwitchMaxSupported: 1.3.6.1.2.1.147.1.1.1.2
+t11vfCoreSwitchStorageType: 1.3.6.1.2.1.147.1.1.1.3
+t11vfVirtualSwitchTable: 1.3.6.1.2.1.147.1.2
+t11vfVirtualSwitchEntry: 1.3.6.1.2.1.147.1.2.1
+t11vfVirtualSwitchVfId: 1.3.6.1.2.1.147.1.2.1.1
+t11vfVirtualSwitchCoreSwitchName: 1.3.6.1.2.1.147.1.2.1.2
+t11vfVirtualSwitchRowStatus: 1.3.6.1.2.1.147.1.2.1.3
+t11vfVirtualSwitchStorageType: 1.3.6.1.2.1.147.1.2.1.4
+t11vfPortTable: 1.3.6.1.2.1.147.1.3
+t11vfPortEntry: 1.3.6.1.2.1.147.1.3.1
+t11vfPortVfId: 1.3.6.1.2.1.147.1.3.1.1
+t11vfPortTaggingAdminStatus: 1.3.6.1.2.1.147.1.3.1.2
+t11vfPortTaggingOperStatus: 1.3.6.1.2.1.147.1.3.1.3
+t11vfPortStorageType: 1.3.6.1.2.1.147.1.3.1.4
+t11vfLocallyEnabledTable: 1.3.6.1.2.1.147.1.4
+t11vfLocallyEnabledEntry: 1.3.6.1.2.1.147.1.4.1
+t11vfLocallyEnabledPortIfIndex: 1.3.6.1.2.1.147.1.4.1.1
+t11vfLocallyEnabledVfId: 1.3.6.1.2.1.147.1.4.1.2
+t11vfLocallyEnabledOperStatus: 1.3.6.1.2.1.147.1.4.1.3
+t11vfLocallyEnabledRowStatus: 1.3.6.1.2.1.147.1.4.1.4
+t11vfLocallyEnabledStorageType: 1.3.6.1.2.1.147.1.4.1.5
+t11vfConformance: 1.3.6.1.2.1.147.2
+t11vfMIBCompliances: 1.3.6.1.2.1.147.2.1
+t11vfMIBGroups: 1.3.6.1.2.1.147.2.2
+

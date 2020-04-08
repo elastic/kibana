@@ -1,0 +1,92 @@
+= New Features
+
+* Sequel now supports Sybase SQLAnywhere, via the sqlanywhere and
+  jdbc/sqlanywhere adapters.
+
+* The filter by associations support now handles cases where the
+  association has :conditions or a block (as long as the block
+  does not rely on instance-specific behavior).  This allows
+  you to handle the following:
+
+    Album.many_to_many :popular_tags, :class=>:Tag do |ds|
+      ds.where{tags__popularity > 9000}
+    end
+    Album.where(:popular_tags=>[Tag[1], Tag[2]])
+
+  This will return all albums whose popular_tags would include
+  at least one of those two tags.  Previously, the block would
+  be ignored, returning albums containing one those tags even if
+  the tags weren't popular.
+
+* A table_select plugin has been added that changes the default
+  selection for models from * to table.*.  This is useful for
+  people who want ActiveRecord-like behavior instead of SQL-like
+  behavior, where joining tables doesn't automatically include
+  columns in the other table.
+
+  This can fix issues where joining another table that has columns
+  with the same name as columns in the model table without
+  specifying an explicit selection results in model objects being
+  returned where the values in the model object are the values
+  from the joined table instead of the model table.
+
+* Dataset#offset has been added, for specifying offset separately
+  from limit.  Previous this was possible via:
+
+    ds.limit(nil, offset)
+
+  but this is a friendlier API.
+
+* The jdbc adapter now has support for foreign key parsing.  This
+  is used if there is no specific support for the underlying
+  database.
+
+* Foreign key parsing is now supported on Oracle.
+
+= Other Improvements
+
+* Association add_*/remove_*/remove_all_* methods for
+  pg_array_to_many associations now work on unsaved model objects.
+
+* In the constraint_validations extension, deletes from the
+  metadata table are now processed before inserts, so that dropping
+  an existing constraint and readding a constraint with the same
+  name now works correctly.
+
+* Cloning an association now copies the :eager_block option
+  correctly from the source association if it was passed as
+  the block to the source association method.
+
+* Cloning a cloned association now copies the block for the
+  association.
+
+* The descendants method in the tree plugin no longer modifies an
+  array it is iterating over.
+
+* The jdbc/postgresql adapter now supports PostgreSQL-specific types,
+  with pretty much the same support as the postgres adapter.  When
+  using the pg_* extensions, the dataset will now handle the
+  PostgreSQL types correctly and return instances of the correct
+  Ruby classes (e.g. hstore is returned as Sequel::Postgres::HStore).
+
+  You should no longer need to use the typecast_on_load or
+  pg_typecast_on_load plugins when using model objects that use these
+  types when using the jdbc/postgresql adapter.
+
+* Offset emulation on Oracle now handles cases where selected
+  columns can't be ordered.
+
+* Offset emulation on DB2 no longer automatically orders on all
+  columns if the dataset itself is unordered.
+
+* Types containing spaces are now returning correctly when
+  parsing the schema in the oracle adapter.
+
+* Database#tables no longer returns tables in the recycle bin on
+  Oracle.
+
+* add_foreign_key now works correctly on HSQLDB, by splitting the
+  column addition and constraint addition into two separate
+  statements.
+
+* add_primary_key now works correctly on H2.

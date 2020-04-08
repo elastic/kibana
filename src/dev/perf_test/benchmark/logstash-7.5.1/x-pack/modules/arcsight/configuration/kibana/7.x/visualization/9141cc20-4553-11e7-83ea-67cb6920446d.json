@@ -1,0 +1,11 @@
+{
+  "title": "Top 5 Vendors by Product [ArcSight]",
+  "visState": "{\"title\":\"Top 5 Vendors by Product [ArcSight]\",\"type\":\"pie\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"deviceVendor\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"OS Vendor\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"deviceProduct\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"OS Product\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "savedSearchId": "7a2fc9c0-454d-11e7-86b6-95298e9da6dc",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

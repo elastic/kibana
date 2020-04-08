@@ -1,0 +1,28 @@
+= New Features
+
+* A Database#rename_enum_value method has been added to the pg_enum
+  extension. It is supported on PostgreSQL 10+:
+
+    DB.rename_enum_value(:enum_type, 'old_name', 'new_name')
+
+= Other Improvements
+
+* The performance of row fetching and type conversion in the
+  sqlanywhere adapter has been improved.
+
+* The performance of row fetching in the sqlite adapter has been
+  improved.
+
+* Calling Database#drop_table now drops any constraint validations
+  metadata for the table if using the constraint_validations
+  extension.  However, modifying the table using Database#alter_table
+  does not affect the constraint validations metadata.
+
+* The sqlite adapter when used with ruby-sqlite3 1.4.0+ now uses
+  SQLite extended result codes for a more accurate determination of
+  specific database errors types.
+
+* Performance for typecasting to decimal and floats has been improved
+  slightly.
+
+* Performance when merging hashes has been improved slightly.

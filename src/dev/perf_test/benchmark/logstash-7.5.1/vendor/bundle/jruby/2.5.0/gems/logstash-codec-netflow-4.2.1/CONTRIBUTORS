@@ -1,0 +1,61 @@
+The following is a list of people who have contributed ideas, code, bug
+reports, or in general have helped logstash along its way.
+
+Contributors:
+* Aaron Mildenstein (untergeek)
+* Adam Kaminski (thimslugga)
+* Ana (janniten)
+* Andrew Cholakian (andrewvc)
+* Ayden Beeson (abeeson)
+* Bjørn Ruberg (bruberg)
+* Colin Surprenant (colinsurprenant)
+* Daniel Nägele (analogbyte)
+* Dan Hermann (danhermann)
+* Diyaldine Maoulida
+* Evgeniy Sudyr (ejectck)
+* G.J. Moed (gjmoed)
+* Gmoz Shih
+* Jason Liu (JasonLZJ)
+* James Park-Watt (jimmypw)
+* Jason Keller (jasonkeller)
+* Jeremy Foran (jeremyforan)
+* Jordan Sissel (jordansissel)
+* Jorrit Folmer (jorritfolmer)
+* Keenan Tims (ktims)
+* Magnus Kessler (kesslerm)
+* Marian Craciunescu (marian-craciunescu)
+* Matt Dainty (bodgit)
+* Max Caines (maxcaines)
+* Paul Warren (pwarren)
+* Pedro de Oliveira
+* Philipp Kahr
+* Philippe Veys
+* Pier-Hugues Pellerin (ph)
+* Pulkit Agrawal (propulkit)
+* Raju Nair (rajutech76)
+* Richard Pijnenburg (electrical)
+* Rob Cowart (robcowart)
+* Ry Biesemeyer (yaauie)
+* Salvador Ferrer (salva-ferrer)
+* Vishal Solanki
+* Will Rigby (wrigby)
+* Yehonatan Devorkin (Devorkin)
+* Rojuinex
+* Sjaak01
+* debadair
+* HenryTheSir
+* hkshirish
+* hhindlem
+* niempy
+* jstopinsek
+* sliddjur
+* szhong12
+* zwirk
+
+Maintainer:
+* Jorrit Folmer (jorritfolmer)
+
+Note: If you've sent us patches, bug reports, or otherwise contributed to
+Logstash, and you aren't on the list above and want to be, please let us know
+and we'll make sure you're here. Contributions from folks like you are what make
+open source awesome.

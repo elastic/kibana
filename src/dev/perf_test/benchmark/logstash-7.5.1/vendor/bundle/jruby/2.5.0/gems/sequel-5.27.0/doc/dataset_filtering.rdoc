@@ -1,0 +1,222 @@
+= Dataset Filtering
+
+Sequel is very flexible when it comes to filtering records. You can specify your conditions as a hash of values to compare against, or as ruby code that Sequel translates into SQL expressions, or as an SQL code fragment (with optional parameters), .
+
+== Filtering using a hash
+
+If you just need to compare records against values, you can supply a hash:
+
+  items.where(category: 'ruby').sql
+  # "SELECT * FROM items WHERE (category = 'ruby')"
+
+Sequel can check for null values:
+
+  items.where(category: nil).sql
+  # "SELECT * FROM items WHERE (category IS NULL)"
+
+Or compare two columns:
+
+  items.where{{x: some_table[:y]}}.sql
+  # "SELECT * FROM items WHERE (x = some_table.y)"
+
+And also compare against multiple values:
+
+  items.where(category: ['ruby', 'perl']).sql
+  # "SELECT * FROM items WHERE (category IN ('ruby', 'perl'))"
+
+Ranges (both inclusive and exclusive) can also be used:
+
+  items.where(price: 100..200).sql
+  # "SELECT * FROM items WHERE (price >= 100 AND price <= 200)"
+
+  items.where(price: 100...200).sql
+  # "SELECT * FROM items WHERE (price >= 100 AND price < 200)"
+
+== Filtering using an array
+
+If you need to select multiple items from a dataset, you can supply an array:
+
+	items.where(id: [1, 38, 47, 99]).sql
+	# "SELECT * FROM items WHERE (id IN (1, 38, 47, 99))"
+
+== Filtering using expressions
+
+You can pass a block to where (referred to as a virtual row block), which is evaluated in a special context:
+
+  items.where{price * 2 < 50}.sql
+  # "SELECT * FROM items WHERE ((price * 2) < 50)
+
+This works for the standard inequality and arithmetic operators:
+
+  items.where{price + 100 < 200}.sql
+  # "SELECT * FROM items WHERE ((price + 100) < 200)
+
+  items.where{price - 100 > 200}.sql
+  # "SELECT * FROM items WHERE ((price - 100) > 200)
+
+  items.where{price * 100 <= 200}.sql
+  # "SELECT * FROM items WHERE ((price * 100) <= 200)
+
+  items.where{price / 100 >= 200}.sql
+  # "SELECT * FROM items WHERE ((price / 100) >= 200)
+
+  items.where{price ** 2 >= 200}.sql
+  # "SELECT * FROM items WHERE (power(price, 2) >= 200)
+
+You use the overloaded bitwise and (&) and or (|) operators to combine expressions:
+
+  items.where{(price + 100 < 200) & (price * 100 <= 200)}.sql
+  # "SELECT * FROM items WHERE (((price + 100) < 200) AND ((price * 100) <= 200))
+
+  items.where{(price - 100 > 200) | (price / 100 >= 200)}.sql
+  # "SELECT * FROM items WHERE (((price - 100) > 200) OR ((price / 100) >= 200))
+
+To filter by equality, you use the standard hash, which can be combined with other expressions using Sequel.& and Sequel.|:
+
+  items.where{Sequel.&({category: 'ruby'}, (price + 100 < 200))}.sql
+  # "SELECT * FROM items WHERE ((category = 'ruby') AND ((price + 100) < 200))"
+
+You can also use the =~ operator:
+
+  items.where{(category =~ 'ruby') & (price + 100 < 200)}.sql
+  # "SELECT * FROM items WHERE ((category = 'ruby') AND ((price + 100) < 200))"
+
+This works with other hash values, such as arrays and ranges:
+
+  items.where{Sequel.|({category: ['ruby', 'other']}, (price - 100 > 200))}.sql
+  # "SELECT * FROM items WHERE ((category IN ('ruby', 'other')) OR ((price - 100) > 200))"
+
+  items.where{(price =~ (100..200)) & :active}.sql
+  # "SELECT * FROM items WHERE ((price >= 100 AND price <= 200) AND active)"
+
+== Filtering using a custom filter string
+
+If you wish to include an SQL fragment as part of a filter, you need to wrap it with +Sequel.lit+ to mark that it is literal SQL code, and pass it to the #where method:
+
+  items.where(Sequel.lit('x < 10')).sql
+  # "SELECT * FROM items WHERE x < 10"
+
+In order to prevent SQL injection, you can replace literal values with question marks and supply the values as additional arguments to +Sequel.lit+:
+
+  items.where(Sequel.lit('category = ?', 'ruby')).sql
+  # "SELECT * FROM items WHERE category = 'ruby'"
+
+You can also use placeholders with :placeholder and a hash of placeholder values:
+
+  items.where(Sequel.lit('category = :category', category: "ruby")).sql
+  # "SELECT * FROM items WHERE category = 'ruby'"
+
+In order to combine AND and OR together, you have a few options:
+
+  items.where(category: nil).or(category: "ruby")
+  # SELECT * FROM items WHERE (category IS NULL) OR (category = 'ruby')
+
+This won't work if you add other conditions:
+
+  items.where(name: "Programming in Ruby").where(category: nil).or(category: 'ruby')
+  # SELECT * FROM items WHERE ((name = 'Programming in Ruby') AND (category IS NULL)) OR (category = 'ruby')
+
+The OR applies globally and not locally. To fix this, use & and |:
+
+  items.where(Sequel[name: "Programming in Ruby"] & (Sequel[category: nil] | Sequel[category: "ruby"]))
+  # SELECT * FROM items WHERE ((name = 'Programming in Ruby') AND ((category IS NULL) OR (category = 'ruby')))
+
+=== Specifying SQL functions
+
+Sequel also allows you to specify functions by using the Sequel.function method:
+
+  items.literal(Sequel.function(:avg, :price)) # "avg(price)"
+
+If you are specifying a filter/selection/order, you can use a virtual row block:
+
+  items.select{avg(price)}
+
+=== Negating conditions
+
+You can use the exclude method to exclude whole conditions:
+
+  items.exclude(category: 'ruby').sql
+  # "SELECT * FROM items WHERE (category != 'ruby')"
+
+  items.exclude(:active).sql
+  # "SELECT * FROM items WHERE NOT active"
+
+  items.exclude{price / 100 >= 200}.sql
+  # "SELECT * FROM items WHERE ((price / 100) < 200)
+
+To exclude only parts of conditions, you can use when in combination with Sequel.~ or the ~ method on Sequel expressions:
+
+  items.where{Sequel.&(Sequel.~(category: 'ruby'), (price + 100 < 200))}.sql
+  # "SELECT * FROM items WHERE ((category != 'ruby') AND ((price + 100) < 200))"
+
+  items.where{~(category =~ 'ruby') & (price + 100 < 200)}.sql
+  # "SELECT * FROM items WHERE ((category != 'ruby') AND ((price + 100) < 200))"
+
+You can also use the !~ method:
+
+  items.where{(category !~ 'ruby') & (price + 100 < 200)}.sql
+  # "SELECT * FROM items WHERE ((category != 'ruby') AND ((price + 100) < 200))"
+
+=== Comparing against column references
+
+You can also compare against other columns:
+
+  items.where{credit > debit}.sql
+  # "SELECT * FROM items WHERE (credit > debit)
+
+Or against SQL functions:
+
+  items.where{price - 100 < max(price)}.sql
+  # "SELECT * FROM items WHERE ((price - 100) < max(price))"
+
+== String search functions
+
+You can search SQL strings in a case sensitive manner using the Sequel.like method:
+
+  items.where(Sequel.like(:name, 'Acme%')).sql
+  # "SELECT * FROM items WHERE (name LIKE 'Acme%' ESCAPE '\')"
+
+You can search SQL strings in a case insensitive manner using the Sequel.ilike method:
+
+  items.where(Sequel.ilike(:name, 'Acme%')).sql
+  # "SELECT * FROM items WHERE (name ILIKE 'Acme%' ESCAPE '\')"
+
+You can specify a Regexp as a hash value (or like argument), but this will probably only work
+on PostgreSQL and MySQL:
+
+  items.where(name: /Acme.*/).sql
+  # "SELECT * FROM items WHERE (name ~ 'Acme.*')"
+
+Like can also take more than one argument:
+
+  items.where(Sequel.like(:name, 'Acme%', /Beta.*/)).sql
+  # "SELECT * FROM items WHERE ((name LIKE 'Acme%' ESCAPE '\') OR (name ~ 'Beta.*'))"
+
+== String concatenation
+
+You can concatenate SQL strings using Sequel.join:
+
+  items.where(Sequel.join([:name, :comment]).like('Jo%nice%')).sql
+  # "SELECT * FROM items WHERE ((name || comment) LIKE 'Jo%nice%' ESCAPE '\')"
+
+Sequel.join also takes a join argument:
+
+  items.where(Sequel.join([:name, :comment], ':').like('John:%nice%')).sql
+  # "SELECT * FROM items WHERE ((name || ':' || comment) LIKE 'John:%nice%' ESCAPE '\')"
+
+== Filtering using sub-queries
+
+Datasets can be used as subqueries. Subqueries can be very useful for filtering records, and many times provide a simpler alternative to table joins. Subqueries can be used in all forms of filters:
+
+  refs = consumer_refs.where(:logged_in).select(:consumer_id)
+  consumers.where(id: refs).sql
+  # "SELECT * FROM consumers WHERE (id IN (SELECT consumer_id FROM consumer_refs WHERE logged_in))"
+
+Note that if you are checking for the inclusion of a single column in a subselect, the subselect should only select a single column.
+
+== Using OR instead of AND
+
+By default, if you chain calls to +where+, the conditions get ANDed together.  If you want to use an OR for a condition, you can use the +or+ method:
+
+  items.where(name: 'Food').or(vendor: 1).sql
+  # "SELECT * FROM items WHERE ((name = 'Food') OR (vendor = 1))"

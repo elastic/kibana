@@ -1,0 +1,10 @@
+{
+  "title": "User Activity Overview [Azure Monitor][Activity Log]",
+  "visState": "{\"title\":\"User Activity Overview [Azure Monitor][Activity Log]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(1,155,143,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"bar\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.4\",\"stacked\":\"none\",\"label\":\"Actions\",\"split_filters\":[{\"filter\":\"_exists_:identity.claims.name\",\"label\":\"\",\"color\":\"rgba(244,78,59,1)\",\"id\":\"a5302500-1399-11e8-a699-f390e75f4dd5\"}],\"filter\":\"\",\"hide_in_legend\":0}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":0,\"show_grid\":1,\"filter\":\"azure.group:activity_log AND azure.category:Administrative AND _exists_:identity.claims.name\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

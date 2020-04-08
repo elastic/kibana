@@ -1,0 +1,18 @@
+--- 
+dot1dStpVersion: 1.3.6.1.2.1.17.2.16
+dot1dStpTxHoldCount: 1.3.6.1.2.1.17.2.17
+dot1dStpExtPortTable: 1.3.6.1.2.1.17.2.19
+dot1dStpExtPortEntry: 1.3.6.1.2.1.17.2.19.1
+dot1dStpPortProtocolMigration: 1.3.6.1.2.1.17.2.19.1.1
+dot1dStpPortAdminEdgePort: 1.3.6.1.2.1.17.2.19.1.2
+dot1dStpPortOperEdgePort: 1.3.6.1.2.1.17.2.19.1.3
+dot1dStpPortAdminPointToPoint: 1.3.6.1.2.1.17.2.19.1.4
+dot1dStpPortOperPointToPoint: 1.3.6.1.2.1.17.2.19.1.5
+dot1dStpPortAdminPathCost: 1.3.6.1.2.1.17.2.19.1.6
+rstpMIB: 1.3.6.1.2.1.134
+rstpNotifications: 1.3.6.1.2.1.134.0
+rstpObjects: 1.3.6.1.2.1.134.1
+rstpConformance: 1.3.6.1.2.1.134.2
+rstpGroups: 1.3.6.1.2.1.134.2.1
+rstpCompliances: 1.3.6.1.2.1.134.2.2
+

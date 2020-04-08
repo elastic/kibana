@@ -1,0 +1,165 @@
+:plugin: sns
+:type: output
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Sns output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+SNS output.
+
+Send events to Amazon's Simple Notification Service, a hosted pub/sub
+framework.  It supports various subscription types, including email, HTTP/S, SMS, and SQS.
+
+For further documentation about the service see:
+
+  http://docs.amazonwebservices.com/sns/latest/api/
+
+This plugin looks for the following fields on events it receives:
+
+ * `sns` - If no ARN is found in the configuration file, this will be used as
+ the ARN to publish.
+ * `sns_subject` - The subject line that should be used.
+ Optional. The "%{host}" will be used if `sns_subject` is not present. The subject
+ will be truncated to 100 characters. If `sns_subject` is set to a non-string value a JSON version of that value will be saved.
+ * `sns_message` - Optional string of message to be sent. If this is set to a non-string value it will be encoded with the specified `codec`. If this is not set the entire event will be encoded with the codec.
+ with the @message truncated so that the length of the JSON fits in
+ `32768` bytes.
+
+==== Upgrading to 2.0.0
+
+This plugin used to have a `format` option for controlling the encoding of messages prior to being sent to SNS.
+This plugin now uses the logstash standard {logstash-ref}/configuration-file-structure.html#codec[codec] option for encoding instead.
+If you want the same 'plain' format as the v0/1 codec (`format => "plain"`) use `codec => "s3_plain"`.
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Sns Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-access_key_id>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-arn>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-aws_credentials_file>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-proxy_uri>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-publish_boot_message_arn>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-region>> |<<string,string>>, one of `["us-east-1", "us-east-2", "us-west-1", "us-west-2", "eu-central-1", "eu-west-1", "eu-west-2", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ap-northeast-2", "sa-east-1", "us-gov-west-1", "cn-north-1", "ap-south-1", "ca-central-1"]`|No
+| <<plugins-{type}s-{plugin}-secret_access_key>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-session_token>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-access_key_id"]
+===== `access_key_id` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+This plugin uses the AWS SDK and supports several ways to get credentials, which will be tried in this order:
+
+1. Static configuration, using `access_key_id` and `secret_access_key` params in logstash plugin config
+2. External credentials file specified by `aws_credentials_file`
+3. Environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+4. Environment variables `AMAZON_ACCESS_KEY_ID` and `AMAZON_SECRET_ACCESS_KEY`
+5. IAM Instance Profile (available when running inside EC2)
+
+[id="plugins-{type}s-{plugin}-arn"]
+===== `arn` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Optional ARN to send messages to. If you do not set this you must
+include the `sns` field in your events to set the ARN on a per-message basis!
+
+[id="plugins-{type}s-{plugin}-aws_credentials_file"]
+===== `aws_credentials_file` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Path to YAML file containing a hash of AWS credentials.
+This file will only be loaded if `access_key_id` and
+`secret_access_key` aren't set. The contents of the
+file should look like this:
+
+[source,ruby]
+----------------------------------
+    :access_key_id: "12345"
+    :secret_access_key: "54321"
+----------------------------------
+
+
+[id="plugins-{type}s-{plugin}-proxy_uri"]
+===== `proxy_uri` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+URI to proxy server if required
+
+[id="plugins-{type}s-{plugin}-publish_boot_message_arn"]
+===== `publish_boot_message_arn` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+When an ARN for an SNS topic is specified here, the message
+"Logstash successfully booted" will be sent to it when this plugin
+is registered.
+
+Example: arn:aws:sns:us-east-1:770975001275:logstash-testing
+
+
+[id="plugins-{type}s-{plugin}-region"]
+===== `region` 
+
+  * Value can be any of: `us-east-1`, `us-east-2`, `us-west-1`, `us-west-2`, `eu-central-1`, `eu-west-1`, `eu-west-2`, `ap-southeast-1`, `ap-southeast-2`, `ap-northeast-1`, `ap-northeast-2`, `sa-east-1`, `us-gov-west-1`, `cn-north-1`, `ap-south-1`, `ca-central-1`
+  * Default value is `"us-east-1"`
+
+The AWS Region
+
+[id="plugins-{type}s-{plugin}-secret_access_key"]
+===== `secret_access_key` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The AWS Secret Access Key
+
+[id="plugins-{type}s-{plugin}-session_token"]
+===== `session_token` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The AWS Session token for temporary credential
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

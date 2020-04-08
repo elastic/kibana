@@ -1,0 +1,41 @@
+PATH
+  remote: .
+  specs:
+    http_parser.rb (0.6.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    benchmark_suite (0.8.0)
+    bouncy-castle-java (1.5.0147)
+    diff-lcs (1.1.2)
+    ffi (1.0.11)
+    ffi (1.0.11-java)
+    jruby-openssl (0.9.4)
+      bouncy-castle-java (>= 1.5.0147)
+    json (1.8.0)
+    json (1.8.0-java)
+    rake (0.9.2)
+    rake-compiler (0.7.9)
+      rake
+    rspec (2.4.0)
+      rspec-core (~> 2.4.0)
+      rspec-expectations (~> 2.4.0)
+      rspec-mocks (~> 2.4.0)
+    rspec-core (2.4.0)
+    rspec-expectations (2.4.0)
+      diff-lcs (~> 1.1.2)
+    rspec-mocks (2.4.0)
+
+PLATFORMS
+  java
+  ruby
+
+DEPENDENCIES
+  benchmark_suite
+  ffi
+  http_parser.rb!
+  jruby-openssl
+  json (>= 1.4.6)
+  rake-compiler (>= 0.7.9)
+  rspec (>= 2.0.1)

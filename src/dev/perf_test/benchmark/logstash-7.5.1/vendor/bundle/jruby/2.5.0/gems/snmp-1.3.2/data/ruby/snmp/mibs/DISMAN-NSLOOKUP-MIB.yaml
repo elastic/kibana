@@ -1,0 +1,24 @@
+--- 
+lookupMIB: 1.3.6.1.2.1.82
+lookupObjects: 1.3.6.1.2.1.82.1
+lookupMaxConcurrentRequests: 1.3.6.1.2.1.82.1.1
+lookupPurgeTime: 1.3.6.1.2.1.82.1.2
+lookupCtlTable: 1.3.6.1.2.1.82.1.3
+lookupCtlEntry: 1.3.6.1.2.1.82.1.3.1
+lookupCtlOwnerIndex: 1.3.6.1.2.1.82.1.3.1.1
+lookupCtlOperationName: 1.3.6.1.2.1.82.1.3.1.2
+lookupCtlTargetAddressType: 1.3.6.1.2.1.82.1.3.1.3
+lookupCtlTargetAddress: 1.3.6.1.2.1.82.1.3.1.4
+lookupCtlOperStatus: 1.3.6.1.2.1.82.1.3.1.5
+lookupCtlTime: 1.3.6.1.2.1.82.1.3.1.6
+lookupCtlRc: 1.3.6.1.2.1.82.1.3.1.7
+lookupCtlRowStatus: 1.3.6.1.2.1.82.1.3.1.8
+lookupResultsTable: 1.3.6.1.2.1.82.1.4
+lookupResultsEntry: 1.3.6.1.2.1.82.1.4.1
+lookupResultsIndex: 1.3.6.1.2.1.82.1.4.1.1
+lookupResultsAddressType: 1.3.6.1.2.1.82.1.4.1.2
+lookupResultsAddress: 1.3.6.1.2.1.82.1.4.1.3
+lookupConformance: 1.3.6.1.2.1.82.2
+lookupCompliances: 1.3.6.1.2.1.82.2.1
+lookupGroups: 1.3.6.1.2.1.82.2.2
+

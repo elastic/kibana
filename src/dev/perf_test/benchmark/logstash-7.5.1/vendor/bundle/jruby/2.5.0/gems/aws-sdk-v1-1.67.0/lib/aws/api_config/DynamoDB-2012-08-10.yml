@@ -1,0 +1,2105 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:target_prefix: DynamoDB_20120810.
+:api_version: '2012-08-10'
+:operations:
+- :name: BatchGetItem
+  :method: :batch_get_item
+  :inputs:
+    RequestItems:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            Keys:
+            - :list:
+              - :map:
+                  :key:
+                  - :string
+                  :value:
+                  - :structure:
+                      S:
+                      - :string
+                      N:
+                      - :string
+                      B:
+                      - :blob
+                      SS:
+                      - :list:
+                        - :string
+                      NS:
+                      - :list:
+                        - :string
+                      BS:
+                      - :list:
+                        - :blob
+            - :required
+            AttributesToGet:
+            - :list:
+              - :string
+            ConsistentRead:
+            - :boolean
+    - :required
+    ReturnConsumedCapacity:
+    - :string
+  :outputs:
+    Responses:
+      :sym: :responses
+      :type: :map
+      :members:
+        :sym: :member
+        :type: :map
+        :members:
+          :sym: :map_value
+          :type: :hash
+          :members:
+            S:
+              :sym: :s
+              :type: :string
+            N:
+              :sym: :n
+              :type: :string
+            B:
+              :sym: :b
+              :type: :blob
+            SS:
+              :sym: :ss
+              :type: :string
+            NS:
+              :sym: :ns
+              :type: :string
+            BS:
+              :sym: :bs
+              :type: :blob
+    UnprocessedKeys:
+      :sym: :unprocessed_keys
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          Keys:
+            :sym: :member
+            :type: :map
+            :members:
+              :sym: :map_value
+              :type: :hash
+              :members:
+                S:
+                  :sym: :s
+                  :type: :string
+                N:
+                  :sym: :n
+                  :type: :string
+                B:
+                  :sym: :b
+                  :type: :blob
+                SS:
+                  :sym: :ss
+                  :type: :string
+                NS:
+                  :sym: :ns
+                  :type: :string
+                BS:
+                  :sym: :bs
+                  :type: :blob
+          AttributesToGet:
+            :sym: :attributes_to_get
+            :type: :string
+          ConsistentRead:
+            :sym: :consistent_read
+            :type: :boolean
+    ConsumedCapacity:
+      :sym: :consumed_capacity
+      :type: :hash
+      :members:
+        TableName:
+          :sym: :table_name
+          :type: :string
+        CapacityUnits:
+          :sym: :capacity_units
+          :type: :float
+        Table:
+          :sym: :table
+          :type: :hash
+          :members:
+            CapacityUnits:
+              :sym: :capacity_units
+              :type: :float
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+- :name: BatchWriteItem
+  :method: :batch_write_item
+  :inputs:
+    RequestItems:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :list:
+          - :structure:
+              PutRequest:
+              - :structure:
+                  Item:
+                  - :map:
+                      :key:
+                      - :string
+                      :value:
+                      - :structure:
+                          S:
+                          - :string
+                          N:
+                          - :string
+                          B:
+                          - :blob
+                          SS:
+                          - :list:
+                            - :string
+                          NS:
+                          - :list:
+                            - :string
+                          BS:
+                          - :list:
+                            - :blob
+                  - :required
+              DeleteRequest:
+              - :structure:
+                  Key:
+                  - :map:
+                      :key:
+                      - :string
+                      :value:
+                      - :structure:
+                          S:
+                          - :string
+                          N:
+                          - :string
+                          B:
+                          - :blob
+                          SS:
+                          - :list:
+                            - :string
+                          NS:
+                          - :list:
+                            - :string
+                          BS:
+                          - :list:
+                            - :blob
+                  - :required
+    - :required
+    ReturnConsumedCapacity:
+    - :string
+    ReturnItemCollectionMetrics:
+    - :string
+  :outputs:
+    UnprocessedItems:
+      :sym: :unprocessed_items
+      :type: :map
+      :members:
+        :sym: :value
+        :type: :hash
+        :members:
+          PutRequest:
+            :sym: :put_request
+            :type: :hash
+            :members:
+              Item:
+                :sym: :item
+                :type: :map
+                :members:
+                  :sym: :map_value
+                  :type: :hash
+                  :members:
+                    S:
+                      :sym: :s
+                      :type: :string
+                    N:
+                      :sym: :n
+                      :type: :string
+                    B:
+                      :sym: :b
+                      :type: :blob
+                    SS:
+                      :sym: :ss
+                      :type: :string
+                    NS:
+                      :sym: :ns
+                      :type: :string
+                    BS:
+                      :sym: :bs
+                      :type: :blob
+          DeleteRequest:
+            :sym: :delete_request
+            :type: :hash
+            :members:
+              Key:
+                :sym: :key
+                :type: :map
+                :members:
+                  :sym: :map_value
+                  :type: :hash
+                  :members:
+                    S:
+                      :sym: :s
+                      :type: :string
+                    N:
+                      :sym: :n
+                      :type: :string
+                    B:
+                      :sym: :b
+                      :type: :blob
+                    SS:
+                      :sym: :ss
+                      :type: :string
+                    NS:
+                      :sym: :ns
+                      :type: :string
+                    BS:
+                      :sym: :bs
+                      :type: :blob
+    ItemCollectionMetrics:
+      :sym: :item_collection_metrics
+      :type: :map
+      :members:
+        :sym: :value
+        :type: :hash
+        :members:
+          ItemCollectionKey:
+            :sym: :item_collection_key
+            :type: :map
+            :members:
+              :sym: :map_value
+              :type: :hash
+              :members:
+                S:
+                  :sym: :s
+                  :type: :string
+                N:
+                  :sym: :n
+                  :type: :string
+                B:
+                  :sym: :b
+                  :type: :blob
+                SS:
+                  :sym: :ss
+                  :type: :string
+                NS:
+                  :sym: :ns
+                  :type: :string
+                BS:
+                  :sym: :bs
+                  :type: :blob
+          SizeEstimateRangeGB:
+            :sym: :size_estimate_range_gb
+            :type: :float
+    ConsumedCapacity:
+      :sym: :consumed_capacity
+      :type: :hash
+      :members:
+        TableName:
+          :sym: :table_name
+          :type: :string
+        CapacityUnits:
+          :sym: :capacity_units
+          :type: :float
+        Table:
+          :sym: :table
+          :type: :hash
+          :members:
+            CapacityUnits:
+              :sym: :capacity_units
+              :type: :float
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+- :name: CreateTable
+  :method: :create_table
+  :inputs:
+    AttributeDefinitions:
+    - :list:
+      - :structure:
+          AttributeName:
+          - :string
+          - :required
+          AttributeType:
+          - :string
+          - :required
+    - :required
+    TableName:
+    - :string
+    - :required
+    KeySchema:
+    - :list:
+      - :structure:
+          AttributeName:
+          - :string
+          - :required
+          KeyType:
+          - :string
+          - :required
+    - :required
+    LocalSecondaryIndexes:
+    - :list:
+      - :structure:
+          IndexName:
+          - :string
+          - :required
+          KeySchema:
+          - :list:
+            - :structure:
+                AttributeName:
+                - :string
+                - :required
+                KeyType:
+                - :string
+                - :required
+          - :required
+          Projection:
+          - :structure:
+              ProjectionType:
+              - :string
+              NonKeyAttributes:
+              - :list:
+                - :string
+          - :required
+    GlobalSecondaryIndexes:
+    - :list:
+      - :structure:
+          IndexName:
+          - :string
+          - :required
+          KeySchema:
+          - :list:
+            - :structure:
+                AttributeName:
+                - :string
+                - :required
+                KeyType:
+                - :string
+                - :required
+          - :required
+          Projection:
+          - :structure:
+              ProjectionType:
+              - :string
+              NonKeyAttributes:
+              - :list:
+                - :string
+          - :required
+          ProvisionedThroughput:
+          - :structure:
+              ReadCapacityUnits:
+              - :long
+              - :required
+              WriteCapacityUnits:
+              - :long
+              - :required
+          - :required
+    ProvisionedThroughput:
+    - :structure:
+        ReadCapacityUnits:
+        - :long
+        - :required
+        WriteCapacityUnits:
+        - :long
+        - :required
+    - :required
+  :outputs:
+    TableDescription:
+      :sym: :table_description
+      :type: :hash
+      :members:
+        AttributeDefinitions:
+          :sym: :attribute_definitions
+          :type: :hash
+          :members:
+            AttributeName:
+              :sym: :attribute_name
+              :type: :string
+            AttributeType:
+              :sym: :attribute_type
+              :type: :string
+        TableName:
+          :sym: :table_name
+          :type: :string
+        KeySchema:
+          :sym: :key_schema
+          :type: :hash
+          :members:
+            AttributeName:
+              :sym: :attribute_name
+              :type: :string
+            KeyType:
+              :sym: :key_type
+              :type: :string
+        TableStatus:
+          :sym: :table_status
+          :type: :string
+        CreationDateTime:
+          :sym: :creation_date_time
+          :type: :time
+        ProvisionedThroughput:
+          :sym: :provisioned_throughput
+          :type: :hash
+          :members:
+            LastIncreaseDateTime:
+              :sym: :last_increase_date_time
+              :type: :time
+            LastDecreaseDateTime:
+              :sym: :last_decrease_date_time
+              :type: :time
+            NumberOfDecreasesToday:
+              :sym: :number_of_decreases_today
+              :type: :integer
+            ReadCapacityUnits:
+              :sym: :read_capacity_units
+              :type: :integer
+            WriteCapacityUnits:
+              :sym: :write_capacity_units
+              :type: :integer
+        TableSizeBytes:
+          :sym: :table_size_bytes
+          :type: :integer
+        ItemCount:
+          :sym: :item_count
+          :type: :integer
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :hash
+          :members:
+            IndexName:
+              :sym: :index_name
+              :type: :string
+            KeySchema:
+              :sym: :key_schema
+              :type: :hash
+              :members:
+                AttributeName:
+                  :sym: :attribute_name
+                  :type: :string
+                KeyType:
+                  :sym: :key_type
+                  :type: :string
+            Projection:
+              :sym: :projection
+              :type: :hash
+              :members:
+                ProjectionType:
+                  :sym: :projection_type
+                  :type: :string
+                NonKeyAttributes:
+                  :sym: :non_key_attributes
+                  :type: :string
+            IndexSizeBytes:
+              :sym: :index_size_bytes
+              :type: :integer
+            ItemCount:
+              :sym: :item_count
+              :type: :integer
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :hash
+          :members:
+            IndexName:
+              :sym: :index_name
+              :type: :string
+            KeySchema:
+              :sym: :key_schema
+              :type: :hash
+              :members:
+                AttributeName:
+                  :sym: :attribute_name
+                  :type: :string
+                KeyType:
+                  :sym: :key_type
+                  :type: :string
+            Projection:
+              :sym: :projection
+              :type: :hash
+              :members:
+                ProjectionType:
+                  :sym: :projection_type
+                  :type: :string
+                NonKeyAttributes:
+                  :sym: :non_key_attributes
+                  :type: :string
+            IndexStatus:
+              :sym: :index_status
+              :type: :string
+            ProvisionedThroughput:
+              :sym: :provisioned_throughput
+              :type: :hash
+              :members:
+                LastIncreaseDateTime:
+                  :sym: :last_increase_date_time
+                  :type: :time
+                LastDecreaseDateTime:
+                  :sym: :last_decrease_date_time
+                  :type: :time
+                NumberOfDecreasesToday:
+                  :sym: :number_of_decreases_today
+                  :type: :integer
+                ReadCapacityUnits:
+                  :sym: :read_capacity_units
+                  :type: :integer
+                WriteCapacityUnits:
+                  :sym: :write_capacity_units
+                  :type: :integer
+            IndexSizeBytes:
+              :sym: :index_size_bytes
+              :type: :integer
+            ItemCount:
+              :sym: :item_count
+              :type: :integer
+- :name: DeleteItem
+  :method: :delete_item
+  :inputs:
+    TableName:
+    - :string
+    - :required
+    Key:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            S:
+            - :string
+            N:
+            - :string
+            B:
+            - :blob
+            SS:
+            - :list:
+              - :string
+            NS:
+            - :list:
+              - :string
+            BS:
+            - :list:
+              - :blob
+    - :required
+    Expected:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            Value:
+            - :structure:
+                S:
+                - :string
+                N:
+                - :string
+                B:
+                - :blob
+                SS:
+                - :list:
+                  - :string
+                NS:
+                - :list:
+                  - :string
+                BS:
+                - :list:
+                  - :blob
+            Exists:
+            - :boolean
+            ComparisonOperator:
+            - :string
+            AttributeValueList:
+            - :list:
+              - :structure:
+                  S:
+                  - :string
+                  N:
+                  - :string
+                  B:
+                  - :blob
+                  SS:
+                  - :list:
+                    - :string
+                  NS:
+                  - :list:
+                    - :string
+                  BS:
+                  - :list:
+                    - :blob
+    ConditionalOperator:
+    - :string
+    ReturnValues:
+    - :string
+    ReturnConsumedCapacity:
+    - :string
+    ReturnItemCollectionMetrics:
+    - :string
+  :outputs:
+    Attributes:
+      :sym: :attributes
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          S:
+            :sym: :s
+            :type: :string
+          N:
+            :sym: :n
+            :type: :string
+          B:
+            :sym: :b
+            :type: :blob
+          SS:
+            :sym: :ss
+            :type: :string
+          NS:
+            :sym: :ns
+            :type: :string
+          BS:
+            :sym: :bs
+            :type: :blob
+    ConsumedCapacity:
+      :sym: :consumed_capacity
+      :type: :hash
+      :members:
+        TableName:
+          :sym: :table_name
+          :type: :string
+        CapacityUnits:
+          :sym: :capacity_units
+          :type: :float
+        Table:
+          :sym: :table
+          :type: :hash
+          :members:
+            CapacityUnits:
+              :sym: :capacity_units
+              :type: :float
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+    ItemCollectionMetrics:
+      :sym: :item_collection_metrics
+      :type: :hash
+      :members:
+        ItemCollectionKey:
+          :sym: :item_collection_key
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              S:
+                :sym: :s
+                :type: :string
+              N:
+                :sym: :n
+                :type: :string
+              B:
+                :sym: :b
+                :type: :blob
+              SS:
+                :sym: :ss
+                :type: :string
+              NS:
+                :sym: :ns
+                :type: :string
+              BS:
+                :sym: :bs
+                :type: :blob
+        SizeEstimateRangeGB:
+          :sym: :size_estimate_range_gb
+          :type: :float
+- :name: DeleteTable
+  :method: :delete_table
+  :inputs:
+    TableName:
+    - :string
+    - :required
+  :outputs:
+    TableDescription:
+      :sym: :table_description
+      :type: :hash
+      :members:
+        AttributeDefinitions:
+          :sym: :attribute_definitions
+          :type: :hash
+          :members:
+            AttributeName:
+              :sym: :attribute_name
+              :type: :string
+            AttributeType:
+              :sym: :attribute_type
+              :type: :string
+        TableName:
+          :sym: :table_name
+          :type: :string
+        KeySchema:
+          :sym: :key_schema
+          :type: :hash
+          :members:
+            AttributeName:
+              :sym: :attribute_name
+              :type: :string
+            KeyType:
+              :sym: :key_type
+              :type: :string
+        TableStatus:
+          :sym: :table_status
+          :type: :string
+        CreationDateTime:
+          :sym: :creation_date_time
+          :type: :time
+        ProvisionedThroughput:
+          :sym: :provisioned_throughput
+          :type: :hash
+          :members:
+            LastIncreaseDateTime:
+              :sym: :last_increase_date_time
+              :type: :time
+            LastDecreaseDateTime:
+              :sym: :last_decrease_date_time
+              :type: :time
+            NumberOfDecreasesToday:
+              :sym: :number_of_decreases_today
+              :type: :integer
+            ReadCapacityUnits:
+              :sym: :read_capacity_units
+              :type: :integer
+            WriteCapacityUnits:
+              :sym: :write_capacity_units
+              :type: :integer
+        TableSizeBytes:
+          :sym: :table_size_bytes
+          :type: :integer
+        ItemCount:
+          :sym: :item_count
+          :type: :integer
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :hash
+          :members:
+            IndexName:
+              :sym: :index_name
+              :type: :string
+            KeySchema:
+              :sym: :key_schema
+              :type: :hash
+              :members:
+                AttributeName:
+                  :sym: :attribute_name
+                  :type: :string
+                KeyType:
+                  :sym: :key_type
+                  :type: :string
+            Projection:
+              :sym: :projection
+              :type: :hash
+              :members:
+                ProjectionType:
+                  :sym: :projection_type
+                  :type: :string
+                NonKeyAttributes:
+                  :sym: :non_key_attributes
+                  :type: :string
+            IndexSizeBytes:
+              :sym: :index_size_bytes
+              :type: :integer
+            ItemCount:
+              :sym: :item_count
+              :type: :integer
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :hash
+          :members:
+            IndexName:
+              :sym: :index_name
+              :type: :string
+            KeySchema:
+              :sym: :key_schema
+              :type: :hash
+              :members:
+                AttributeName:
+                  :sym: :attribute_name
+                  :type: :string
+                KeyType:
+                  :sym: :key_type
+                  :type: :string
+            Projection:
+              :sym: :projection
+              :type: :hash
+              :members:
+                ProjectionType:
+                  :sym: :projection_type
+                  :type: :string
+                NonKeyAttributes:
+                  :sym: :non_key_attributes
+                  :type: :string
+            IndexStatus:
+              :sym: :index_status
+              :type: :string
+            ProvisionedThroughput:
+              :sym: :provisioned_throughput
+              :type: :hash
+              :members:
+                LastIncreaseDateTime:
+                  :sym: :last_increase_date_time
+                  :type: :time
+                LastDecreaseDateTime:
+                  :sym: :last_decrease_date_time
+                  :type: :time
+                NumberOfDecreasesToday:
+                  :sym: :number_of_decreases_today
+                  :type: :integer
+                ReadCapacityUnits:
+                  :sym: :read_capacity_units
+                  :type: :integer
+                WriteCapacityUnits:
+                  :sym: :write_capacity_units
+                  :type: :integer
+            IndexSizeBytes:
+              :sym: :index_size_bytes
+              :type: :integer
+            ItemCount:
+              :sym: :item_count
+              :type: :integer
+- :name: DescribeTable
+  :method: :describe_table
+  :inputs:
+    TableName:
+    - :string
+    - :required
+  :outputs:
+    Table:
+      :sym: :table
+      :type: :hash
+      :members:
+        AttributeDefinitions:
+          :sym: :attribute_definitions
+          :type: :hash
+          :members:
+            AttributeName:
+              :sym: :attribute_name
+              :type: :string
+            AttributeType:
+              :sym: :attribute_type
+              :type: :string
+        TableName:
+          :sym: :table_name
+          :type: :string
+        KeySchema:
+          :sym: :key_schema
+          :type: :hash
+          :members:
+            AttributeName:
+              :sym: :attribute_name
+              :type: :string
+            KeyType:
+              :sym: :key_type
+              :type: :string
+        TableStatus:
+          :sym: :table_status
+          :type: :string
+        CreationDateTime:
+          :sym: :creation_date_time
+          :type: :time
+        ProvisionedThroughput:
+          :sym: :provisioned_throughput
+          :type: :hash
+          :members:
+            LastIncreaseDateTime:
+              :sym: :last_increase_date_time
+              :type: :time
+            LastDecreaseDateTime:
+              :sym: :last_decrease_date_time
+              :type: :time
+            NumberOfDecreasesToday:
+              :sym: :number_of_decreases_today
+              :type: :integer
+            ReadCapacityUnits:
+              :sym: :read_capacity_units
+              :type: :integer
+            WriteCapacityUnits:
+              :sym: :write_capacity_units
+              :type: :integer
+        TableSizeBytes:
+          :sym: :table_size_bytes
+          :type: :integer
+        ItemCount:
+          :sym: :item_count
+          :type: :integer
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :hash
+          :members:
+            IndexName:
+              :sym: :index_name
+              :type: :string
+            KeySchema:
+              :sym: :key_schema
+              :type: :hash
+              :members:
+                AttributeName:
+                  :sym: :attribute_name
+                  :type: :string
+                KeyType:
+                  :sym: :key_type
+                  :type: :string
+            Projection:
+              :sym: :projection
+              :type: :hash
+              :members:
+                ProjectionType:
+                  :sym: :projection_type
+                  :type: :string
+                NonKeyAttributes:
+                  :sym: :non_key_attributes
+                  :type: :string
+            IndexSizeBytes:
+              :sym: :index_size_bytes
+              :type: :integer
+            ItemCount:
+              :sym: :item_count
+              :type: :integer
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :hash
+          :members:
+            IndexName:
+              :sym: :index_name
+              :type: :string
+            KeySchema:
+              :sym: :key_schema
+              :type: :hash
+              :members:
+                AttributeName:
+                  :sym: :attribute_name
+                  :type: :string
+                KeyType:
+                  :sym: :key_type
+                  :type: :string
+            Projection:
+              :sym: :projection
+              :type: :hash
+              :members:
+                ProjectionType:
+                  :sym: :projection_type
+                  :type: :string
+                NonKeyAttributes:
+                  :sym: :non_key_attributes
+                  :type: :string
+            IndexStatus:
+              :sym: :index_status
+              :type: :string
+            ProvisionedThroughput:
+              :sym: :provisioned_throughput
+              :type: :hash
+              :members:
+                LastIncreaseDateTime:
+                  :sym: :last_increase_date_time
+                  :type: :time
+                LastDecreaseDateTime:
+                  :sym: :last_decrease_date_time
+                  :type: :time
+                NumberOfDecreasesToday:
+                  :sym: :number_of_decreases_today
+                  :type: :integer
+                ReadCapacityUnits:
+                  :sym: :read_capacity_units
+                  :type: :integer
+                WriteCapacityUnits:
+                  :sym: :write_capacity_units
+                  :type: :integer
+            IndexSizeBytes:
+              :sym: :index_size_bytes
+              :type: :integer
+            ItemCount:
+              :sym: :item_count
+              :type: :integer
+- :name: GetItem
+  :method: :get_item
+  :inputs:
+    TableName:
+    - :string
+    - :required
+    Key:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            S:
+            - :string
+            N:
+            - :string
+            B:
+            - :blob
+            SS:
+            - :list:
+              - :string
+            NS:
+            - :list:
+              - :string
+            BS:
+            - :list:
+              - :blob
+    - :required
+    AttributesToGet:
+    - :list:
+      - :string
+    ConsistentRead:
+    - :boolean
+    ReturnConsumedCapacity:
+    - :string
+  :outputs:
+    Item:
+      :sym: :item
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          S:
+            :sym: :s
+            :type: :string
+          N:
+            :sym: :n
+            :type: :string
+          B:
+            :sym: :b
+            :type: :blob
+          SS:
+            :sym: :ss
+            :type: :string
+          NS:
+            :sym: :ns
+            :type: :string
+          BS:
+            :sym: :bs
+            :type: :blob
+    ConsumedCapacity:
+      :sym: :consumed_capacity
+      :type: :hash
+      :members:
+        TableName:
+          :sym: :table_name
+          :type: :string
+        CapacityUnits:
+          :sym: :capacity_units
+          :type: :float
+        Table:
+          :sym: :table
+          :type: :hash
+          :members:
+            CapacityUnits:
+              :sym: :capacity_units
+              :type: :float
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+- :name: ListTables
+  :method: :list_tables
+  :inputs:
+    ExclusiveStartTableName:
+    - :string
+    Limit:
+    - :integer
+  :outputs:
+    TableNames:
+      :sym: :table_names
+      :type: :string
+    LastEvaluatedTableName:
+      :sym: :last_evaluated_table_name
+      :type: :string
+- :name: PutItem
+  :method: :put_item
+  :inputs:
+    TableName:
+    - :string
+    - :required
+    Item:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            S:
+            - :string
+            N:
+            - :string
+            B:
+            - :blob
+            SS:
+            - :list:
+              - :string
+            NS:
+            - :list:
+              - :string
+            BS:
+            - :list:
+              - :blob
+    - :required
+    Expected:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            Value:
+            - :structure:
+                S:
+                - :string
+                N:
+                - :string
+                B:
+                - :blob
+                SS:
+                - :list:
+                  - :string
+                NS:
+                - :list:
+                  - :string
+                BS:
+                - :list:
+                  - :blob
+            Exists:
+            - :boolean
+            ComparisonOperator:
+            - :string
+            AttributeValueList:
+            - :list:
+              - :structure:
+                  S:
+                  - :string
+                  N:
+                  - :string
+                  B:
+                  - :blob
+                  SS:
+                  - :list:
+                    - :string
+                  NS:
+                  - :list:
+                    - :string
+                  BS:
+                  - :list:
+                    - :blob
+    ReturnValues:
+    - :string
+    ReturnConsumedCapacity:
+    - :string
+    ReturnItemCollectionMetrics:
+    - :string
+    ConditionalOperator:
+    - :string
+  :outputs:
+    Attributes:
+      :sym: :attributes
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          S:
+            :sym: :s
+            :type: :string
+          N:
+            :sym: :n
+            :type: :string
+          B:
+            :sym: :b
+            :type: :blob
+          SS:
+            :sym: :ss
+            :type: :string
+          NS:
+            :sym: :ns
+            :type: :string
+          BS:
+            :sym: :bs
+            :type: :blob
+    ConsumedCapacity:
+      :sym: :consumed_capacity
+      :type: :hash
+      :members:
+        TableName:
+          :sym: :table_name
+          :type: :string
+        CapacityUnits:
+          :sym: :capacity_units
+          :type: :float
+        Table:
+          :sym: :table
+          :type: :hash
+          :members:
+            CapacityUnits:
+              :sym: :capacity_units
+              :type: :float
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+    ItemCollectionMetrics:
+      :sym: :item_collection_metrics
+      :type: :hash
+      :members:
+        ItemCollectionKey:
+          :sym: :item_collection_key
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              S:
+                :sym: :s
+                :type: :string
+              N:
+                :sym: :n
+                :type: :string
+              B:
+                :sym: :b
+                :type: :blob
+              SS:
+                :sym: :ss
+                :type: :string
+              NS:
+                :sym: :ns
+                :type: :string
+              BS:
+                :sym: :bs
+                :type: :blob
+        SizeEstimateRangeGB:
+          :sym: :size_estimate_range_gb
+          :type: :float
+- :name: Query
+  :method: :query
+  :inputs:
+    TableName:
+    - :string
+    - :required
+    IndexName:
+    - :string
+    Select:
+    - :string
+    AttributesToGet:
+    - :list:
+      - :string
+    Limit:
+    - :integer
+    ConsistentRead:
+    - :boolean
+    KeyConditions:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            AttributeValueList:
+            - :list:
+              - :structure:
+                  S:
+                  - :string
+                  N:
+                  - :string
+                  B:
+                  - :blob
+                  SS:
+                  - :list:
+                    - :string
+                  NS:
+                  - :list:
+                    - :string
+                  BS:
+                  - :list:
+                    - :blob
+            ComparisonOperator:
+            - :string
+            - :required
+    QueryFilter:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            AttributeValueList:
+            - :list:
+              - :structure:
+                  S:
+                  - :string
+                  N:
+                  - :string
+                  B:
+                  - :blob
+                  SS:
+                  - :list:
+                    - :string
+                  NS:
+                  - :list:
+                    - :string
+                  BS:
+                  - :list:
+                    - :blob
+            ComparisonOperator:
+            - :string
+            - :required
+    ConditionalOperator:
+    - :string
+    ScanIndexForward:
+    - :boolean
+    ExclusiveStartKey:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            S:
+            - :string
+            N:
+            - :string
+            B:
+            - :blob
+            SS:
+            - :list:
+              - :string
+            NS:
+            - :list:
+              - :string
+            BS:
+            - :list:
+              - :blob
+    ReturnConsumedCapacity:
+    - :string
+  :outputs:
+    Items:
+      :sym: :member
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          S:
+            :sym: :s
+            :type: :string
+          N:
+            :sym: :n
+            :type: :string
+          B:
+            :sym: :b
+            :type: :blob
+          SS:
+            :sym: :ss
+            :type: :string
+          NS:
+            :sym: :ns
+            :type: :string
+          BS:
+            :sym: :bs
+            :type: :blob
+    Count:
+      :sym: :count
+      :type: :integer
+    ScannedCount:
+      :sym: :scanned_count
+      :type: :integer
+    LastEvaluatedKey:
+      :sym: :last_evaluated_key
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          S:
+            :sym: :s
+            :type: :string
+          N:
+            :sym: :n
+            :type: :string
+          B:
+            :sym: :b
+            :type: :blob
+          SS:
+            :sym: :ss
+            :type: :string
+          NS:
+            :sym: :ns
+            :type: :string
+          BS:
+            :sym: :bs
+            :type: :blob
+    ConsumedCapacity:
+      :sym: :consumed_capacity
+      :type: :hash
+      :members:
+        TableName:
+          :sym: :table_name
+          :type: :string
+        CapacityUnits:
+          :sym: :capacity_units
+          :type: :float
+        Table:
+          :sym: :table
+          :type: :hash
+          :members:
+            CapacityUnits:
+              :sym: :capacity_units
+              :type: :float
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+- :name: Scan
+  :method: :scan
+  :inputs:
+    TableName:
+    - :string
+    - :required
+    AttributesToGet:
+    - :list:
+      - :string
+    Limit:
+    - :integer
+    Select:
+    - :string
+    ScanFilter:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            AttributeValueList:
+            - :list:
+              - :structure:
+                  S:
+                  - :string
+                  N:
+                  - :string
+                  B:
+                  - :blob
+                  SS:
+                  - :list:
+                    - :string
+                  NS:
+                  - :list:
+                    - :string
+                  BS:
+                  - :list:
+                    - :blob
+            ComparisonOperator:
+            - :string
+            - :required
+    ConditionalOperator:
+    - :string
+    ExclusiveStartKey:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            S:
+            - :string
+            N:
+            - :string
+            B:
+            - :blob
+            SS:
+            - :list:
+              - :string
+            NS:
+            - :list:
+              - :string
+            BS:
+            - :list:
+              - :blob
+    ReturnConsumedCapacity:
+    - :string
+    TotalSegments:
+    - :integer
+    Segment:
+    - :integer
+  :outputs:
+    Items:
+      :sym: :member
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          S:
+            :sym: :s
+            :type: :string
+          N:
+            :sym: :n
+            :type: :string
+          B:
+            :sym: :b
+            :type: :blob
+          SS:
+            :sym: :ss
+            :type: :string
+          NS:
+            :sym: :ns
+            :type: :string
+          BS:
+            :sym: :bs
+            :type: :blob
+    Count:
+      :sym: :count
+      :type: :integer
+    ScannedCount:
+      :sym: :scanned_count
+      :type: :integer
+    LastEvaluatedKey:
+      :sym: :last_evaluated_key
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          S:
+            :sym: :s
+            :type: :string
+          N:
+            :sym: :n
+            :type: :string
+          B:
+            :sym: :b
+            :type: :blob
+          SS:
+            :sym: :ss
+            :type: :string
+          NS:
+            :sym: :ns
+            :type: :string
+          BS:
+            :sym: :bs
+            :type: :blob
+    ConsumedCapacity:
+      :sym: :consumed_capacity
+      :type: :hash
+      :members:
+        TableName:
+          :sym: :table_name
+          :type: :string
+        CapacityUnits:
+          :sym: :capacity_units
+          :type: :float
+        Table:
+          :sym: :table
+          :type: :hash
+          :members:
+            CapacityUnits:
+              :sym: :capacity_units
+              :type: :float
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+- :name: UpdateItem
+  :method: :update_item
+  :inputs:
+    TableName:
+    - :string
+    - :required
+    Key:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            S:
+            - :string
+            N:
+            - :string
+            B:
+            - :blob
+            SS:
+            - :list:
+              - :string
+            NS:
+            - :list:
+              - :string
+            BS:
+            - :list:
+              - :blob
+    - :required
+    AttributeUpdates:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            Value:
+            - :structure:
+                S:
+                - :string
+                N:
+                - :string
+                B:
+                - :blob
+                SS:
+                - :list:
+                  - :string
+                NS:
+                - :list:
+                  - :string
+                BS:
+                - :list:
+                  - :blob
+            Action:
+            - :string
+    Expected:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :structure:
+            Value:
+            - :structure:
+                S:
+                - :string
+                N:
+                - :string
+                B:
+                - :blob
+                SS:
+                - :list:
+                  - :string
+                NS:
+                - :list:
+                  - :string
+                BS:
+                - :list:
+                  - :blob
+            Exists:
+            - :boolean
+            ComparisonOperator:
+            - :string
+            AttributeValueList:
+            - :list:
+              - :structure:
+                  S:
+                  - :string
+                  N:
+                  - :string
+                  B:
+                  - :blob
+                  SS:
+                  - :list:
+                    - :string
+                  NS:
+                  - :list:
+                    - :string
+                  BS:
+                  - :list:
+                    - :blob
+    ConditionalOperator:
+    - :string
+    ReturnValues:
+    - :string
+    ReturnConsumedCapacity:
+    - :string
+    ReturnItemCollectionMetrics:
+    - :string
+  :outputs:
+    Attributes:
+      :sym: :attributes
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :hash
+        :members:
+          S:
+            :sym: :s
+            :type: :string
+          N:
+            :sym: :n
+            :type: :string
+          B:
+            :sym: :b
+            :type: :blob
+          SS:
+            :sym: :ss
+            :type: :string
+          NS:
+            :sym: :ns
+            :type: :string
+          BS:
+            :sym: :bs
+            :type: :blob
+    ConsumedCapacity:
+      :sym: :consumed_capacity
+      :type: :hash
+      :members:
+        TableName:
+          :sym: :table_name
+          :type: :string
+        CapacityUnits:
+          :sym: :capacity_units
+          :type: :float
+        Table:
+          :sym: :table
+          :type: :hash
+          :members:
+            CapacityUnits:
+              :sym: :capacity_units
+              :type: :float
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              CapacityUnits:
+                :sym: :capacity_units
+                :type: :float
+    ItemCollectionMetrics:
+      :sym: :item_collection_metrics
+      :type: :hash
+      :members:
+        ItemCollectionKey:
+          :sym: :item_collection_key
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              S:
+                :sym: :s
+                :type: :string
+              N:
+                :sym: :n
+                :type: :string
+              B:
+                :sym: :b
+                :type: :blob
+              SS:
+                :sym: :ss
+                :type: :string
+              NS:
+                :sym: :ns
+                :type: :string
+              BS:
+                :sym: :bs
+                :type: :blob
+        SizeEstimateRangeGB:
+          :sym: :size_estimate_range_gb
+          :type: :float
+- :name: UpdateTable
+  :method: :update_table
+  :inputs:
+    TableName:
+    - :string
+    - :required
+    ProvisionedThroughput:
+    - :structure:
+        ReadCapacityUnits:
+        - :long
+        - :required
+        WriteCapacityUnits:
+        - :long
+        - :required
+    GlobalSecondaryIndexUpdates:
+    - :list:
+      - :structure:
+          Update:
+          - :structure:
+              IndexName:
+              - :string
+              - :required
+              ProvisionedThroughput:
+              - :structure:
+                  ReadCapacityUnits:
+                  - :long
+                  - :required
+                  WriteCapacityUnits:
+                  - :long
+                  - :required
+              - :required
+  :outputs:
+    TableDescription:
+      :sym: :table_description
+      :type: :hash
+      :members:
+        AttributeDefinitions:
+          :sym: :attribute_definitions
+          :type: :hash
+          :members:
+            AttributeName:
+              :sym: :attribute_name
+              :type: :string
+            AttributeType:
+              :sym: :attribute_type
+              :type: :string
+        TableName:
+          :sym: :table_name
+          :type: :string
+        KeySchema:
+          :sym: :key_schema
+          :type: :hash
+          :members:
+            AttributeName:
+              :sym: :attribute_name
+              :type: :string
+            KeyType:
+              :sym: :key_type
+              :type: :string
+        TableStatus:
+          :sym: :table_status
+          :type: :string
+        CreationDateTime:
+          :sym: :creation_date_time
+          :type: :time
+        ProvisionedThroughput:
+          :sym: :provisioned_throughput
+          :type: :hash
+          :members:
+            LastIncreaseDateTime:
+              :sym: :last_increase_date_time
+              :type: :time
+            LastDecreaseDateTime:
+              :sym: :last_decrease_date_time
+              :type: :time
+            NumberOfDecreasesToday:
+              :sym: :number_of_decreases_today
+              :type: :integer
+            ReadCapacityUnits:
+              :sym: :read_capacity_units
+              :type: :integer
+            WriteCapacityUnits:
+              :sym: :write_capacity_units
+              :type: :integer
+        TableSizeBytes:
+          :sym: :table_size_bytes
+          :type: :integer
+        ItemCount:
+          :sym: :item_count
+          :type: :integer
+        LocalSecondaryIndexes:
+          :sym: :local_secondary_indexes
+          :type: :hash
+          :members:
+            IndexName:
+              :sym: :index_name
+              :type: :string
+            KeySchema:
+              :sym: :key_schema
+              :type: :hash
+              :members:
+                AttributeName:
+                  :sym: :attribute_name
+                  :type: :string
+                KeyType:
+                  :sym: :key_type
+                  :type: :string
+            Projection:
+              :sym: :projection
+              :type: :hash
+              :members:
+                ProjectionType:
+                  :sym: :projection_type
+                  :type: :string
+                NonKeyAttributes:
+                  :sym: :non_key_attributes
+                  :type: :string
+            IndexSizeBytes:
+              :sym: :index_size_bytes
+              :type: :integer
+            ItemCount:
+              :sym: :item_count
+              :type: :integer
+        GlobalSecondaryIndexes:
+          :sym: :global_secondary_indexes
+          :type: :hash
+          :members:
+            IndexName:
+              :sym: :index_name
+              :type: :string
+            KeySchema:
+              :sym: :key_schema
+              :type: :hash
+              :members:
+                AttributeName:
+                  :sym: :attribute_name
+                  :type: :string
+                KeyType:
+                  :sym: :key_type
+                  :type: :string
+            Projection:
+              :sym: :projection
+              :type: :hash
+              :members:
+                ProjectionType:
+                  :sym: :projection_type
+                  :type: :string
+                NonKeyAttributes:
+                  :sym: :non_key_attributes
+                  :type: :string
+            IndexStatus:
+              :sym: :index_status
+              :type: :string
+            ProvisionedThroughput:
+              :sym: :provisioned_throughput
+              :type: :hash
+              :members:
+                LastIncreaseDateTime:
+                  :sym: :last_increase_date_time
+                  :type: :time
+                LastDecreaseDateTime:
+                  :sym: :last_decrease_date_time
+                  :type: :time
+                NumberOfDecreasesToday:
+                  :sym: :number_of_decreases_today
+                  :type: :integer
+                ReadCapacityUnits:
+                  :sym: :read_capacity_units
+                  :type: :integer
+                WriteCapacityUnits:
+                  :sym: :write_capacity_units
+                  :type: :integer
+            IndexSizeBytes:
+              :sym: :index_size_bytes
+              :type: :integer
+            ItemCount:
+              :sym: :item_count
+              :type: :integer

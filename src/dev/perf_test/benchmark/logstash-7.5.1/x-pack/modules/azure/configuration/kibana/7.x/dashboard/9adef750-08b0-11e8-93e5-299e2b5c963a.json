@@ -1,0 +1,12 @@
+{
+  "title": "[Azure Monitor] SQL DB Queries",
+  "hits": 0,
+  "description": "",
+  "panelsJSON": "[{\"gridData\":{\"h\":2,\"i\":\"11\",\"w\":5,\"x\":7,\"y\":2},\"id\":\"6d71abf0-0842-11e8-adb5-e1a2d559cdf5\",\"panelIndex\":\"11\",\"title\":\"Query Wait Time\",\"type\":\"visualization\",\"version\":\"6.1.3\"},{\"gridData\":{\"h\":2,\"i\":\"12\",\"w\":5,\"x\":2,\"y\":2},\"id\":\"518cb600-0842-11e8-adb5-e1a2d559cdf5\",\"panelIndex\":\"12\",\"title\":\"Query Duration\",\"type\":\"visualization\",\"version\":\"6.1.3\"},{\"gridData\":{\"h\":2,\"i\":\"23\",\"w\":3,\"x\":6,\"y\":0},\"id\":\"d02c64c0-08a0-11e8-93e5-299e2b5c963a\",\"panelIndex\":\"23\",\"title\":\"DTU Utilization\",\"type\":\"visualization\",\"version\":\"6.1.3\"},{\"gridData\":{\"h\":1,\"i\":\"25\",\"w\":6,\"x\":0,\"y\":0},\"id\":\"20a043b0-13c1-11e8-8c94-a3d8d0cfd62b\",\"panelIndex\":\"25\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.2.1\"},{\"gridData\":{\"h\":2,\"i\":\"27\",\"w\":2,\"x\":0,\"y\":2},\"id\":\"3fb82260-1527-11e8-8c94-a3d8d0cfd62b\",\"panelIndex\":\"27\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.2.1\"},{\"gridData\":{\"h\":2,\"i\":\"28\",\"w\":3,\"x\":9,\"y\":0},\"id\":\"5dbd8b20-08a1-11e8-93e5-299e2b5c963a\",\"panelIndex\":\"28\",\"title\":\"Errors\",\"type\":\"visualization\",\"version\":\"6.2.1\"},{\"gridData\":{\"h\":9,\"i\":\"29\",\"w\":12,\"x\":0,\"y\":4},\"id\":\"35de9400-1526-11e8-8c94-a3d8d0cfd62b\",\"panelIndex\":\"29\",\"title\":\"Top Queries\",\"type\":\"visualization\",\"version\":\"6.2.1\"},{\"gridData\":{\"h\":1,\"i\":\"30\",\"w\":6,\"x\":0,\"y\":1},\"id\":\"db0ec510-152d-11e8-8c94-a3d8d0cfd62b\",\"panelIndex\":\"30\",\"title\":\"\",\"type\":\"visualization\",\"version\":\"6.2.1\"}]",
+  "optionsJSON": "{\"darkTheme\":true,\"useMargins\":false}",
+  "version": 1,
+  "timeRestore": false,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+  }
+}

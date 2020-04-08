@@ -1,0 +1,382 @@
+:plugin: http_poller
+:type: input
+:default_codec: json
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Http_poller input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This Logstash input plugin allows you to call an HTTP API, decode the output of it into event(s), and
+send them on their merry way. The idea behind this plugins came from a need to read springboot
+metrics endpoint, instead of configuring jmx to monitor my java application memory/gc/ etc.
+
+==== Example
+Reads from a list of urls and decodes the body of the response with a codec.
+The config should look like this:
+
+[source,ruby]
+----------------------------------
+input {
+  http_poller {
+    urls => {
+      test1 => "http://localhost:9200"
+      test2 => {
+        # Supports all options supported by ruby's Manticore HTTP client
+        method => get
+        user => "AzureDiamond"
+        password => "hunter2"
+        url => "http://localhost:9200/_cluster/health"
+        headers => {
+          Accept => "application/json"
+        }
+     }
+    }
+    request_timeout => 60
+    # Supports "cron", "every", "at" and "in" schedules by rufus scheduler
+    schedule => { cron => "* * * * * UTC"}
+    codec => "json"
+    # A hash of request metadata info (timing, response headers, etc.) will be sent here
+    metadata_target => "http_poller_metadata"
+  }
+}
+
+output {
+  stdout {
+    codec => rubydebug
+  }
+}
+----------------------------------
+
+Using the HTTP poller with custom a custom CA or self signed cert.
+
+If you have a self signed cert you will need to convert your server's certificate to a valid# `.jks` or `.p12` file. An easy way to do it is to run the following one-liner, substituting your server's URL for the placeholder `MYURL` and `MYPORT`.
+
+[source,ruby]
+----------------------------------
+openssl s_client -showcerts -connect MYURL:MYPORT </dev/null 2>/dev/null|openssl x509 -outform PEM > downloaded_cert.pem; keytool -import -alias test -file downloaded_cert.pem -keystore downloaded_truststore.jks
+----------------------------------
+
+The above snippet will create two files `downloaded_cert.pem` and `downloaded_truststore.jks`. You will be prompted to set a password for the `jks` file during this process. To configure logstash use a config like the one that follows.
+
+
+[source,ruby]
+----------------------------------
+ http_poller {
+   urls => {
+     myurl => "https://myhostname:1234"
+   }
+   truststore => "/path/to/downloaded_truststore.jks"
+   truststore_password => "mypassword"
+   schedule => { cron => "* * * * * UTC"}
+ }
+----------------------------------
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Http_poller Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-user>> |<<string,string>>|no
+| <<plugins-{type}s-{plugin}-password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-automatic_retries>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-cacert>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-client_cert>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-client_key>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-connect_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-cookies>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-follow_redirects>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-keepalive>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-keystore>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-keystore_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-keystore_type>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-metadata_target>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-pool_max>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-pool_max_per_route>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-proxy>> |<<,>>|No
+| <<plugins-{type}s-{plugin}-request_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-retry_non_idempotent>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-schedule>> |<<hash,hash>>|Yes
+| <<plugins-{type}s-{plugin}-socket_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-truststore>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-truststore_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-truststore_type>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-urls>> |<<hash,hash>>|Yes
+| <<plugins-{type}s-{plugin}-validate_after_inactivity>> |<<number,number>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-user"]
+===== `user` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Username to use with HTTP authentication for ALL requests. Note that you can also set this per-URL.
+If you set this you must also set the `password` option.
+
+[id="plugins-{type}s-{plugin}-password"]
+===== `password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+Password to be used in conjunction with the username for HTTP authentication.
+
+[id="plugins-{type}s-{plugin}-automatic_retries"]
+===== `automatic_retries` 
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+How many times should the client retry a failing URL. We highly recommend NOT setting this value
+to zero if keepalive is enabled. Some servers incorrectly end keepalives early requiring a retry!
+Note: if `retry_non_idempotent` is set only GET, HEAD, PUT, DELETE, OPTIONS, and TRACE requests will be retried.
+
+[id="plugins-{type}s-{plugin}-cacert"]
+===== `cacert` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you need to use a custom X.509 CA (.pem certs) specify the path to that here
+
+[id="plugins-{type}s-{plugin}-client_cert"]
+===== `client_cert` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you'd like to use a client certificate (note, most people don't want this) set the path to the x509 cert here
+
+[id="plugins-{type}s-{plugin}-client_key"]
+===== `client_key` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you're using a client certificate specify the path to the encryption key here
+
+[id="plugins-{type}s-{plugin}-connect_timeout"]
+===== `connect_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `10`
+
+Timeout (in seconds) to wait for a connection to be established. Default is `10s`
+
+[id="plugins-{type}s-{plugin}-cookies"]
+===== `cookies` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Enable cookie support. With this enabled the client will persist cookies
+across requests as a normal web browser would. Enabled by default
+
+[id="plugins-{type}s-{plugin}-follow_redirects"]
+===== `follow_redirects` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Should redirects be followed? Defaults to `true`
+
+[id="plugins-{type}s-{plugin}-keepalive"]
+===== `keepalive` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Turn this on to enable HTTP keepalive support. We highly recommend setting `automatic_retries` to at least
+one with this to fix interactions with broken keepalive implementations.
+
+[id="plugins-{type}s-{plugin}-keystore"]
+===== `keystore` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you need to use a custom keystore (`.jks`) specify that here. This does not work with .pem keys!
+
+[id="plugins-{type}s-{plugin}-keystore_password"]
+===== `keystore_password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+Specify the keystore password here.
+Note, most .jks files created with keytool require a password!
+
+[id="plugins-{type}s-{plugin}-keystore_type"]
+===== `keystore_type` 
+
+  * Value type is <<string,string>>
+  * Default value is `"JKS"`
+
+Specify the keystore type here. One of `JKS` or `PKCS12`. Default is `JKS`
+
+[id="plugins-{type}s-{plugin}-metadata_target"]
+===== `metadata_target` 
+
+  * Value type is <<string,string>>
+  * Default value is `"@metadata"`
+
+If you'd like to work with the request/response metadata.
+Set this value to the name of the field you'd like to store a nested
+hash of metadata.
+
+[id="plugins-{type}s-{plugin}-pool_max"]
+===== `pool_max` 
+
+  * Value type is <<number,number>>
+  * Default value is `50`
+
+Max number of concurrent connections. Defaults to `50`
+
+[id="plugins-{type}s-{plugin}-pool_max_per_route"]
+===== `pool_max_per_route` 
+
+  * Value type is <<number,number>>
+  * Default value is `25`
+
+Max number of concurrent connections to a single host. Defaults to `25`
+
+[id="plugins-{type}s-{plugin}-proxy"]
+===== `proxy` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+If you'd like to use an HTTP proxy . This supports multiple configuration syntaxes:
+
+1. Proxy host in form: `http://proxy.org:1234`
+2. Proxy host in form: `{host => "proxy.org", port => 80, scheme => 'http', user => 'username@host', password => 'password'}`
+3. Proxy host in form: `{url =>  'http://proxy.org:1234', user => 'username@host', password => 'password'}`
+
+[id="plugins-{type}s-{plugin}-request_timeout"]
+===== `request_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `60`
+
+Timeout (in seconds) for the entire request.
+
+[id="plugins-{type}s-{plugin}-retry_non_idempotent"]
+===== `retry_non_idempotent` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+If `automatic_retries` is enabled this will cause non-idempotent HTTP verbs (such as POST) to be retried.
+
+[id="plugins-{type}s-{plugin}-schedule"]
+===== `schedule` 
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Schedule of when to periodically poll from the urls
+Format: A hash with
+  + key: "cron" | "every" | "in" | "at"
+  + value: string
+Examples:
+  a) { "every" => "1h" }
+  b) { "cron" => "* * * * * UTC" }
+See: rufus/scheduler for details about different schedule options and value string format
+
+[id="plugins-{type}s-{plugin}-socket_timeout"]
+===== `socket_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `10`
+
+Timeout (in seconds) to wait for data on the socket. Default is `10s`
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Define the target field for placing the received data. If this setting is omitted, the data will be stored at the root (top level) of the event.
+
+[id="plugins-{type}s-{plugin}-truststore"]
+===== `truststore` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you need to use a custom truststore (`.jks`) specify that here. This does not work with .pem certs!
+
+[id="plugins-{type}s-{plugin}-truststore_password"]
+===== `truststore_password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+Specify the truststore password here.
+Note, most .jks files created with keytool require a password!
+
+[id="plugins-{type}s-{plugin}-truststore_type"]
+===== `truststore_type` 
+
+  * Value type is <<string,string>>
+  * Default value is `"JKS"`
+
+Specify the truststore type here. One of `JKS` or `PKCS12`. Default is `JKS`
+
+[id="plugins-{type}s-{plugin}-urls"]
+===== `urls` 
+
+  * This is a required setting.
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+A Hash of urls in this format : `"name" => "url"`.
+The name and the url will be passed in the outputed event
+
+[id="plugins-{type}s-{plugin}-validate_after_inactivity"]
+===== `validate_after_inactivity` 
+
+  * Value type is <<number,number>>
+  * Default value is `200`
+
+How long to wait before checking for a stale connection to determine if a keepalive request is needed.
+Consider setting this value lower than the default, possibly to 0, if you get connection errors regularly.
+
+This client is based on Apache Commons' HTTP implementation. Here's how the
+https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/conn/PoolingHttpClientConnectionManager.html#setValidateAfterInactivity(int)[Apache
+Commons documentation] describes this option: "Defines period of inactivity in
+milliseconds after which persistent connections must be re-validated prior to
+being leased to the consumer. Non-positive value passed to this method disables
+connection validation. This check helps detect connections that have become
+stale (half-closed) while kept inactive in the pool."
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

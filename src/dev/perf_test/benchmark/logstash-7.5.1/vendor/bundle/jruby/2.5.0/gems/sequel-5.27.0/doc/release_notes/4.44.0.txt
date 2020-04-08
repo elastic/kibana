@@ -1,0 +1,125 @@
+= New Features
+
+* Model.freeze is now supported and recommended in production and
+  during testing.  It freezes all class-level metadata, preventing
+  possible thread-safety issues at runtime.
+
+* Model.finalize_associations has been added, speeding up some
+  association reflection methods by about 10x.  This method
+  should be called after all associated models have been loaded.
+  This can speed up the retrieval of associated objects for small
+  datasets by 5-10%.
+
+  One advantage of using this is it will raise an exception if it
+  recognizes that any of your associations are not defined
+  correctly, such as referencing an associated class that doesn't
+  exist.
+
+* Model.freeze_descendents has been added to the subclasses plugin.
+  This method finalizes associations for all descendent classes,
+  then freezes the descendent class.  It's designed to make it
+  easy to freeze all model classes in use:
+
+    Sequel::Model.plugin :subclasses
+    Dir['./models/*.rb'].each{|f| require f}
+    Sequel::Model.freeze_descendents
+
+* An implicit_subquery dataset extension has been added, which
+  implicitly uses a subquery if you have a dataset with raw SQL and
+  you call a method that would modify the SQL used:
+
+    DB['SELECT * FROM foo'].where(:bar=>1)
+    # SELECT * FROM foo
+
+    DB.extension :implicit_subquery
+    DB['SELECT * FROM foo'].where(:bar=>1)
+    # SELECT * FROM (SELECT * FROM foo) AS t1 WHERE (bar = 1)
+
+* Model datasets now have where_all, where_each, and
+  where_single_value methods for returning data:
+
+    class Album < Sequel::Model; end
+    Album.where_all(:id=>[1,2,3])
+    # => [Album[1], Album[3], Album[2]]
+
+    Album.where_each(:id=>[1,2,3]) do |album|
+      # ...
+    end
+
+    Album.select(:name).where_single_value(:id=>1)
+    # "Album's Name"
+
+  These methods are designed for use by other dataset methods you
+  define, and are optimized for frozen datasets if the methods will
+  be called multiple times on the same dataset.  where_all and
+  where_each can increase performance by up to 40% for small datasets
+  compared to where.all and where.each.  where_single_value can be up
+  to twice as fast as where.single_value.
+
+* Model.dataset_module now supports an eager method for eager loading:
+
+    class Album < Sequel::Model
+      many_to_one :artist
+
+      dataset_module do
+        eager :with_artist, :artist
+      end
+    end
+
+    Album.with_artist.all # eagerly loads artist association
+
+= Other Improvements
+
+* The jdbc adapter now supports Database#freeze.  Possible
+  thread-safety issues when initializing multiple jdbc Database
+  instances in separate threads at the same time have been fixed.
+
+* The postgres adapter now raises an exception if it recognizes that
+  the loaded version of sequel_pg is incompatible.
+
+* Sequel classes that are subclasses of core classes now define
+  custom #inspect methods so instances can easily be differentiated from
+  core class instances.  For example:
+
+    Sequel::SQL::Blob.new('a')
+    # => #<Sequel::SQL::Blob:0xa6f3a3c3710 bytes=1 content="a">
+    Sequel::SQLTime.now
+    # => #<Sequel::SQLTime 10:03:06>
+    Sequel::LiteralString.new("foo")
+    # => #<Sequel::LiteralString "foo">
+    class Album < Sequel::Model; end
+    Album.many_to_one :artist
+    # => #<Sequel::Model::Associations::ManyToOneAssociationReflection Album.many_to_one :artist>
+    Sequel::SQL::ValueList.new([[1,2]])
+    # => #<Sequel::SQL::ValueList [[1, 2]]>
+
+* Dataset#from_self now copies the columns from the current dataset
+  if they are present, since wrapping a dataset in a subquery should
+  not change the columns returned.
+
+* On PostgreSQL, array type conversion now correctly handles false
+  values.
+
+* Another disconnect error is now recognized by the jdbc/as400
+  adapter.
+
+* Modifications to Sequel::Model::Associations::ASSOCIATION_TYPES
+  are now thread safe, fixing issues if separate threads attempt
+  to load separate model plugins that modify this hash.
+
+* The force_encoding plugin no longer modifies the encoding of
+  Sequel::SQL::Blob instances.
+
+* Many plugins were updated so they no longer add constants to the
+  namespace of the model that loads them.
+
+= Backwards Compatibility
+
+* Maintainers of external model plugins should update their
+  code to support Model.freeze.
+
+= Upcoming Deprecation
+
+* Starting in Sequel 4.45.0, Sequel will be adding deprecation
+  warnings for features that will be removed or where behavior will
+  change in Sequel 5.

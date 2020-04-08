@@ -1,0 +1,32 @@
+= New Features
+
+* An association_multi_add_remove plugin has been added.  This plugin
+  adds a shortcut for adding or removing multiple associated objects
+  in a single method call:
+
+    Artist.plugin :association_multi_add_remove
+    Artist.many_to_one :albums
+    Artist[1].add_albums([Album[2], Album[3]])
+    Artist[1].remove_albums([Album[4], Album[5]])
+
+  It also offers a setter method, which will add and remove associated
+  objects as necessary:
+
+    Artist[1].albums = [Album[3], Album[4]]
+
+= Other Improvements
+
+* The sharding plugin now integrates with the server_block extension.
+  This makes it so if you retrieve a model instance inside a
+  with_server block, saving the model instance will save it back to
+  the shard from which it was retrieved.
+
+* Setting a default for a column on Microsoft SQL Server now works
+  correctly if the column already has a default.
+
+* Sequel::SQL::NumericMethods#coerce no longer raises NoMethodError
+  if the super method is not defined.  This fixes some cases when
+  comparing Date/DateTime instances to Sequel objects.
+
+* The csv_serializer plugin now avoids keyword argument separation
+  issues on Ruby 2.7+.

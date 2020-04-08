@@ -1,0 +1,26 @@
+[Unit]
+{{#description}}
+Description={{{ description }}}
+{{/description}}
+
+[Service]
+Type=simple
+User={{{ user }}}
+Group={{{ group }}}
+# Load env vars from /etc/default/ and /etc/sysconfig/ if they exist.
+# Prefixing the path with '-' makes it try to load, but if the file doesn't
+# exist, it continues onward.
+EnvironmentFile=-{{{default_file}}}
+EnvironmentFile=-{{{sysconfig_file}}}
+ExecStart={{{program}}} {{{shell_args}}}
+{{#prestart}}
+ExecStartPre={{{unit_path}}}/{{{name}}}-prestart.sh
+{{/prestart}}
+Restart=always
+WorkingDirectory={{{chdir}}}
+{{#nice}}Nice={{{nice}}}
+{{/nice}}{{#limit_open_files}}LimitNOFILE={{{limit_open_files}}}
+{{/limit_open_files}}
+
+[Install]
+WantedBy=multi-user.target

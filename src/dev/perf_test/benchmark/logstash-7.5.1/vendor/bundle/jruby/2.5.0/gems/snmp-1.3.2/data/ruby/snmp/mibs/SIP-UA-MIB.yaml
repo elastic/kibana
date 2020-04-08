@@ -1,0 +1,14 @@
+--- 
+sipUAMIB: 1.3.6.1.2.1.150
+sipUAMIBObjects: 1.3.6.1.2.1.150.1
+sipUACfgServer: 1.3.6.1.2.1.150.1.1
+sipUACfgServerTable: 1.3.6.1.2.1.150.1.1.1
+sipUACfgServerEntry: 1.3.6.1.2.1.150.1.1.1.1
+sipUACfgServerIndex: 1.3.6.1.2.1.150.1.1.1.1.1
+sipUACfgServerAddressType: 1.3.6.1.2.1.150.1.1.1.1.2
+sipUACfgServerAddress: 1.3.6.1.2.1.150.1.1.1.1.3
+sipUACfgServerRole: 1.3.6.1.2.1.150.1.1.1.1.4
+sipUAMIBConformance: 1.3.6.1.2.1.150.2
+sipUAMIBCompliances: 1.3.6.1.2.1.150.2.1
+sipUAMIBGroups: 1.3.6.1.2.1.150.2.2
+

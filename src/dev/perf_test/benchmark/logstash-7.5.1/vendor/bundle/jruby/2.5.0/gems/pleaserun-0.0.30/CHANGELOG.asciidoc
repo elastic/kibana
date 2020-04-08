@@ -1,0 +1,69 @@
+= Pleaserun Changes and Releases
+
+== 0.0.29 (April 17, 2017)
+  * `pleaserun --version` will now write the version of pleaserun and exit. (#125)
+
+== 0.0.28 (February 6, 2017)
+  * sysv and upstart will now `set -a` before loading /etc/default and
+    /etc/sysconfig files. This is to bring them in line with what users are
+    asking me as well as with what systemd does with these files. (#121)
+
+== 0.0.27 (November 4, 2016)
+  * Fix a bug where upstart jobs would fail to run if the job's user was not root.
+  * upstart: Add nice and limit_open_files support for Upstart 0.6.5
+  * systemd: Add support for Nice and LimitNOFILE. Fixes #120
+  * upstart: Added support for environment variables in Upstart 0.6.5
+  * Environment variables for services can now be specified with
+    --environment-file and --environment-variable flags.
+
+== 0.0.24 (May 20, 2016)
+  * Fix bug where rubygem packages dont' seem to ship symlinks, so the
+    'default' target version for some platforms was not found. Now, instead of 
+    symlinking 'default' to whatever should be the default, we just have the 
+    default as a directory specifically. Hopefully this helps.
+
+== 0.0.23 (May 19, 2016)
+  * Catch JRuby IOError when execution of a missing file fails.
+ 
+== 0.0.22 (May 18, 2016)
+  * systemd platform now defaults to targeting /etc/systemd/system for writing
+    unit files. This was chosen based on research across across 7 different
+    Linux distributions.
+  * fix a bug where attempting to detect systemd would crash becuase
+    `systemctl` was not available.
+
+== 0.0.21 (May 16, 2016)
+  * Platform detection mechanism now looks for evidence that a given platform
+    is available (files, executables, etc).  The previous mechanism used facter
+    or ohai to figure out the operating system version and had a mapping of OS to
+    platform.
+
+== 0.0.20 (May 13, 2016)
+  * The --install-prefix flag now sets the write path for both --install and --no-install (default) modes
+
+== 0.0.19 (May 6, 2016)
+  * Fix bug in OS detection
+  
+== 0.0.18 (May 6, 2016)
+  * Support newer Facter api (Aaron Mildtenstein)
+
+== 0.0.17 (May 4, 2016)
+  * Added detection for Fedora 22 and 23, OS X 10.11, and Ubuntu 14.10, 15.04, 15.50, and 16.04. (#98, Aaron Mildenstein)
+
+== 0.0.13  (April 30, 2015)
+  * Now supports MRI 1.9.3 (Vincent Janelle)
+  * cli: New flag --install-prefix. This lets you tell pleaserun what directory to write things.
+  * cli: New flag --[no-]install-actions. If enabled, will run any required installation actions in order to signal the local system to load your newly created service.
+  * upstart: now only generates the .conf file, not the init script,
+    since it's not needed.
+  * sysv: Add ulimit support
+  * detection: Amazon Linux is now detected and, because it is based on RHEL6, defaults to Upstart 0.6.5 (Bob Miller, #68)
+  * misc: The ohai gem is now optional. Ohai is incompatible with JRuby, so I don't want to require it by default. The ohai gem will still be used, if present, during platform detection.
+  * cli: New flag --sysv-log-path. This lets you set the path for the sysv platform to log its output.
+
+== 0.0.4 (March 5, 2014)
+  * cli: Autodetect OSX and use launchd 
+
+== Prior versions?
+
+prior versions and changes not tracked. Sorry!

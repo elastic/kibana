@@ -1,0 +1,11 @@
+<pkg-info 
+<% if !attributes[:osxpkg_postinstall_action].nil? -%>postinstall-action="<%= attributes[:osxpkg_postinstall_action] %>"<% end -%>
+>
+<% if !attributes[:osxpkg_dont_obsolete].nil? -%>
+    <dont-obsolete>
+    <% attributes[:osxpkg_dont_obsolete].each do |filepath| -%>
+        <file path="<%= filepath %>"/>
+    <% end -%>
+    </dont-obsolete>
+<% end -%>
+</pkg-info>

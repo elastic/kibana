@@ -1,0 +1,121 @@
+# This YAML file contains the configuration options for several different
+# JMS Providers
+#
+# The Examples that ship with jruby-jms will use the entry 'default' unless
+# overriden at the command line. For example:
+#    jruby producer.rb activemq
+#
+---
+# Which JMS Provider to use by default
+
+#default: hornetq222
+#default: hornetq2_4_0
+#default: activemq543
+#default: activemq551
+default: activemq5_11_1
+#default: webspheremq6
+#default: webspheremq7
+
+activemq543:
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: tcp://localhost:61616
+  :require_jars:
+    - ~/jms/apache-activemq-5.4.3/activemq-all-5.4.3.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+activemq551:
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: tcp://localhost:61616
+  :require_jars:
+    - ~/jms/apache-activemq-5.5.1/activemq-all-5.5.1.jar
+    - ~/jms/apache-activemq-5.5.1/lib/optional/slf4j-log4j12-1.5.11.jar
+    - ~/jms/apache-activemq-5.5.1/lib/optional/log4j-1.2.14.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+activemq590:
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: tcp://localhost:61616
+  :require_jars:
+    - /usr/local/Cellar/activemq/5.9.0/libexec/activemq-all-5.9.0.jar
+    - /usr/local/Cellar/activemq/5.9.0/libexec/lib/optional/log4j-1.2.17.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+activemq5_11_1:
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: tcp://localhost:61616
+  :require_jars:
+    - /usr/local/Cellar/activemq/5.11.1/libexec/activemq-all-5.11.1.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+hornetq2_4_0:
+  # Connect to a local HornetQ Broker using JNDI
+  :jndi_name: /ConnectionFactory
+  :jndi_context:
+    java.naming.factory.initial: org.jnp.interfaces.NamingContextFactory
+    java.naming.provider.url: jnp://localhost:1099
+    java.naming.factory.url.pkgs: org.jboss.naming:org.jnp.interfaces
+    java.naming.security.principal: guest
+    java.naming.security.credentials: guest
+  :require_jars:
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/hornetq-commons.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/hornetq-core-client.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/hornetq-jms-client.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/jboss-jms-api.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/jnp-client.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/netty.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+hornetq222:
+  # Connect to a local HornetQ Broker using JNDI
+  :jndi_name: /ConnectionFactory
+  :jndi_context:
+    java.naming.factory.initial: org.jnp.interfaces.NamingContextFactory
+    java.naming.provider.url: jnp://localhost:1099
+    java.naming.factory.url.pkgs: org.jboss.naming:org.jnp.interfaces
+    java.naming.security.principal: guest
+    java.naming.security.credentials: guest
+  :require_jars:
+    - ~/jms/hornetq-2.2.2.Final/lib/hornetq-core-client.jar
+    - ~/jms/hornetq-2.2.2.Final/lib/netty.jar
+    - ~/jms/hornetq-2.2.2.Final/lib/hornetq-jms-client.jar
+    - ~/jms/hornetq-2.2.2.Final/lib/jboss-jms-api.jar
+    - ~/jms/hornetq-2.2.2.Final/lib/jnp-client.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+webspheremq7:
+  :factory: com.ibm.mq.jms.MQConnectionFactory
+  :queue_manager: MYQM
+  :host_name: 127.0.0.1
+  :channel: SRVCONCHA
+  :port: 61414
+  # Transport Type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  :transport_type: 1
+  :username: mqm
+  :require_jars:
+    - ~/jms/libs-ibmqm7/com.ibm.mqjms.jar
+    - ~/jms/libs-ibmqm7/jms.jar
+    - ~/jms/libs-ibmqm7/com.ibm.mq.jmqi.jar
+    - ~/jms/libs-ibmqm7/dhbcore.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+webspheremq6:
+  :factory: com.ibm.mq.jms.MQConnectionFactory
+  :queue_manager: MYQM
+  :host_name: 127.0.0.1
+  :channel: SRVCONCHA
+  :port: 61414
+  # Transport Type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  :transport_type: 1
+  :username: mqm
+  :require_jars:
+    - ~/jms/libs-ibmqm6/com.ibm.mqjms.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic

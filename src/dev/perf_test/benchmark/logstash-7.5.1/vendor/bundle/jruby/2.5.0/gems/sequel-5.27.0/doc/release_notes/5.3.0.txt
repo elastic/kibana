@@ -1,0 +1,121 @@
+= New Features
+
+* An :extensions Database option is now supported, which will load the
+  named extensions into the Database before any connections are
+  initiated:
+
+    DB = Sequel.connect('mock:///', :extensions=>[:error_sql, :synchronize_sql])
+    DB = Sequel.connect('mock:///?extensions=error_sql,synchronize_sql')
+
+* A :connect_sqls Database option is now supported, which will issue
+  the given queries on all new connections:
+
+    DB = Sequel.connect('postgres:///', :connect_sqls=>[
+        'SET random_page_cost = 1.0',
+        "SET default_tablespace = 'foo'"
+      ])
+
+* DatasetModule#reverse has been added for simpler use of descending
+  orders:
+
+    class Foo < Sequel::Model
+      dataset_module do
+        reverse :newest_first, :created_at
+      end
+    end
+    Foo.newest_first.first(10)
+
+* A synchronize_sql extension has been added.  This extension checks
+  out a connection around SQL string creation, and is useful in the
+  cases where escaping values in the query requires a connection and
+  a large number of values need to be escaped.
+
+* The following features are now supported on MariaDB 10.2+:
+
+  * Common table expressions.
+
+  * Window functions.
+
+  * Dropping CHECK constraints. Older versions of MariaDB/MySQL
+    ignored CHECK constraints that were added, and Sequel did not
+    attempt to filter them out, so Sequel did not require changes to
+    add CHECK constraints.  MariaDB 10.2 CHECK constraints work
+    correctly with Sequel's constraint_validations extension/plugin.
+
+  * Raising CHECK constraint violations as
+    Sequel::CheckConstraintViolation instances.
+
+  * Recognizing curdate() as Sequel::CURRENT_DATE when used as the
+    default value for a date column.
+
+* Date::Infinity values are now supported in the
+  pg_extended_date_support extension:
+
+    DB.convert_infinite_timestamps = :date  
+
+  This returns infinite dates/timestamps as Date::Infinity instances,
+  and literalizes Date::Infinity instances correctly.
+
+= Improvements
+
+* Database#reset_primary_key_sequence now works correctly on
+  PostgreSQL 10.
+
+* If a commit or rollback raises an exception when using the postgres
+  adapter, Sequel will check the connection's current transaction
+  status and only send another rollback if the connection is currently
+  inside a transaction.  This fixes a warning that is issued in most
+  cases if a commit or rollback fails.
+
+* The jdbc/postgresql adapter now forces JDBC PreparedStatement
+  instances created by Dataset#call to never be prepared server side,
+  working around an caching issue in the jdbc-postgres drier in
+  versions greater than 9.4.1200.
+
+* Database#indexes will no longer return indexes which are in the
+  process of being dropped on PostgreSQL 9.3+.  Additionally,
+  Database#indexes will now return indexes that have indcheckxmin
+  set.  The previous removal of indexes with indcheckxmin set is
+  more likely to cause false negatives than correctly remove
+  indexes not yet valid.
+
+* Common table expressions are no longer hoisted from subqueries on
+  SQLite.  They are still hoisted from queries used in
+  UNION/INSERT/EXCEPT, since SQLite does not support common table
+  expressions at that level.
+
+* On Microsoft SQL Server, using an INSERT query with a subquery that
+  uses a common table expression now hoists the common table
+  expression from subquery level to main query level, allowing such
+  queries to work.
+
+* An additional disconnect error is now recognized in the oracle
+  adapter.
+
+* bin/sequel now adds a Database logger before the initial
+  connection is made, allowing you to see any connection setup
+  statements issued to the database.
+
+= Backwards Compatibility
+
+* Calling a filtering method with no argument and a virtual row
+  block that returns nil on a dataset with no existing filter is
+  deprecated in this version and will emit a warning.  The behavior
+  in this version remains the same, where the dataset is not
+  modified. The behavior will change in Sequel 5.4.0 so that a
+  WHERE NULL filter will be added in that case, instead of the
+  filter being ignored, so that the behavior is similar to calling
+  the filtering method with a nil argument.
+
+    # Sequel 5.3.0
+    DB[:a].where{nil}
+    # SELECT * FROM a
+
+    # Sequel 5.4.0
+    DB[:a].where{nil}
+    # SELECT * FROM a WHERE NULL
+
+* Support for PostgreSQL <8.1 has been dropped from Database#indexes.
+  Sequel's PostgreSQL support requires >=8.2 for Dataset#insert to
+  work, so it doesn't make sense to support earlier versions in other
+  cases.

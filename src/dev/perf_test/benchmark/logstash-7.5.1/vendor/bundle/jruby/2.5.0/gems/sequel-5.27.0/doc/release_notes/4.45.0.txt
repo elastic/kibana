@@ -1,0 +1,370 @@
+= Deprecated Features
+
+* Dataset mutation is now deprecated.  Users should switch to using
+  the non-mutating methods.
+
+    # Instead of:
+    dataset.where!(:foo)
+    # Switch to:
+    dataset = dataset.where(:foo)
+
+* Support for the Cubrid, Firebird, Informix, and Progress databases
+  has been deprecated.  Any users of this support should consider
+  creating an external adapter with the current code and maintaining
+  such support themselves.
+
+* The do (DataObjects), swift, and jdbc/as400 adapters have been
+  deprecated.  Any users of these adapters should consider creating an
+  external adapter with the current code and maintaining the adapter
+  themselves.
+
+* Model transaction hooks (after_commit, after_rollback,
+  after_destroy_commit, after_destroy_rollback) are now deprecated.
+  Users should switch to calling the after_commit and after_rollback
+  database transaction hooks directly.
+
+    # Instead of:
+    def after_commit
+      super
+      do_something
+    end
+    # Switch to:
+    def after_save
+      super
+      db.after_commit{do_something}
+    end
+
+* Passing a block to Database#from is now deprecated.  For backwards
+  compatibility, this block affected the WHERE clause instead of the
+  FROM clause.  In Sequel 5, Database#from blocks will be treated like
+  Dataset#from blocks, and will affect the FROM clause.  This behavior
+  has been available for years by using the from_block extension.
+
+    # Instead of:
+    DB.from(:foo){a > b}
+    # Switch to:
+    DB.from(:foo).where{a > b}
+
+* Passing non-hash arguments and multiple arguments to the
+  model association methods is now deprecated.  Switch to using a
+  hash as an argument.
+
+    # Instead of:
+    model.association(true)
+    model.association(proc{|ds| ds.where(:foo)})
+    # Switch to:
+    model.association(:reload=>true)
+    model.association(:callback=>proc{|ds| ds.where(:foo)})
+    model.association{|ds| ds.where(:foo)}
+
+* Passing procs as filter arguments is now deprecated.  These should
+  now be passed as blocks instead of arguments.
+
+    # Instead of:
+    dataset.where(proc{foo > bar})
+    # Switch to:
+    dataset.where{foo > bar}
+
+* Passing multiple arguments or an array as filter arguments when the
+  array/arguments does not represent a conditions specifier (array of
+  two element arrays, treated like a hash) is now deprecated.  Switch
+  to calling the filter method separately with each argument or using
+  Sequel.& to combine the arguments:
+
+    # Instead of:
+    dataset.where(:foo, :bar)
+    dataset.where([:foo, :bar])
+    # Switch to:
+    dataset.where(:foo).where(:bar)
+    dataset.where(Sequel.&(:foo, :bar))
+
+* Returning false from model before hooks to cancel an action is
+  now deprecated.  Switch to calling cancel_action instead.
+
+    # Instead of:
+    def before_save
+      return false if something
+      super
+    end
+    # Switch to:
+    def before_save
+      cancel_action('something bad') if something
+      super
+    end
+
+* Database#each_server has been deprecated.  Switch to using
+  Database#servers and Database#with_server from server_block
+  extension:
+
+    # Instead of:
+    DB.each_server{|db| db.run("foo")}
+    # Switch to:
+    DB.extension :server_block
+    DB.servers.each{|s| DB.with_server(s){DB.run("foo")}}
+
+* Calling Database#add_servers and Database#remove_servers on a
+  database that does not use the :servers option is now deprecated.
+  Currently, the calls to add_servers and remove_servers are
+  ignored for such databases, which can hide errors.
+
+* Sequel::Postgres::PG_NAMED_TYPES is now deprecated.  Switch to
+  calling Database#add_named_conversion_proc instead.
+
+    # Instead of:
+    require 'sequel/adapters/utils/pg_types'
+    Sequel::Postgres::PG_NAMED_TYPES[:foo] = lambda{|v| v}
+    DB = Sequel.connect('postgres://...')
+    # Switch to:
+    DB = Sequel.connect('postgres://...')
+    DB.add_named_conversion_proc(:foo){|v| v}
+
+* Modifying the identifier mangling settings for a Database or
+  Dataset is now deprecated unless the identifier_mangling extension
+  is explicitly loaded into the Database instance.
+
+* The Sequel::Database.single_threaded accessor is now deprecated.
+  Switch to using Sequel.single_threaded= and Sequel.single_threaded?.
+
+* Sequel::Database.identifier_input_method,
+  Sequel::Database.identifier_output_method,
+  and Sequel::Database.quote_identifier accessors are now deprecated.
+  Switch to modifying the setting for each Database instance.
+
+* Sequel.identifier_input_method=, Sequel.identifier_output_method=,
+  and Sequel.quote_identifer= setter methods are now deprecated.
+  Switch to modifying the setting for each Database instance.
+
+* Calling Dataset#delete/update/truncate on datasets with limits
+  or offsets is now deprecated, unless the database will respect
+  the limit or offset.  Currently, only MySQL and Microsoft SQL
+  Server have limited support for such deletes and updates.  You
+  should either call unlimited or skip_limit_check before calling
+  delete/update/truncate.
+
+* Deprecate having duplicate column names in subclass tables when
+  using the class_table_inheritance plugin.  The documentation has
+  warned against this for a long time, but the code did not enforce
+  it.
+
+* When using the association_pks plugin setter methods without the
+  :delay_pks association option set, a warning is now issued. In
+  Sequel 5, the default will be to assume that the :delay_pks
+  option is :always, and not to make modifications until the object
+  is saved.  If you would like to keep the current behavior, set
+  the :delay_pks=>false association option.
+
+  The current :delay_pks=>true behavior will be removed in Sequel 5,
+  with it being treated like :delay_pks=>:always.  If you are relying
+  on the current behavior of :delay_pks=>true (delay for new objects,
+  immediate for existing objects), you will need to update your code.
+
+* Database#dup/clone are now deprecated.  They have never been
+  handled correctly, since the default implementation from Kernel
+  has been used.
+
+* Model.dup/clone are now deprecated.  They have never been
+  handled correctly, as the default implemenation from Kernel/Module
+  has been used.
+
+* Database#use on MySQL is now deprecated.  Switch to creating a new
+  Database instance instead of modifying the database for an existing
+  instance.
+
+* Database#database_name on MySQL is now deprecated. Switch to asking
+  the database server which database you are connected to:
+
+    # Instead of:
+    DB.database_name
+    # Switch to:
+    DB.get{DATABASE{}}
+
+* In the lazy_attributes, nested_attributes, composition, and
+  serialization plugins, the *_module accessors are now deprecated.
+  These were implementation details that should not have been
+  exposed.
+
+* The schema plugin is now deprecated.  Switch to defining the schema
+  before creating the model class using the Database schema methods.
+
+* The scissors plugin is deprecated.  It existed for compatibility
+  with Sequel 3, but it is dangerous as it makes it easier to modify
+  all rows when the intent was to modify a single row.
+
+* The prepared_statements_associations and prepared_statements_with_pk
+  plugins are now deprecated.  These plugins generally make things
+  slower.
+
+* Dataset#unbind, Sequel::Unbinder, and Sequel::UnbindDuplicate are
+  now deprecated.  This mostly existed to support the
+  prepared_statements_associations and prepared_statements_with_pk
+  plugins.
+
+* Sequel::Error::* exception class aliases are now deprecated. Switch
+  to using the exception classes in the Sequel namespace.
+
+* Sequel::BeforeHookFailed is now deprecated.  Switch to using
+  Sequel::HookFailed.
+
+* Calling Sequel::Qualifier.new with 2 arguments is now deprecated.
+  Users should switch to calling it with a single argument (the
+  table used for qualifying unqualified identifiers).
+
+* Treating unrecognized prepared statement types as :select is now
+  deprecated.  Switch to using :select as the prepared statement
+  type.
+
+* The @was_new instance variable available in model after_save hooks
+  is now deprecated.  There is no deprecation warning associated
+  with this change.
+
+    # Instead of:
+    def after_save
+      super
+      if @was_new
+        do_something
+      else
+        do_something_else
+      end
+    end
+    # Switch to:
+    def after_create
+      super
+      do_something
+    end
+    def after_update
+      super
+      do_something_else
+    end
+
+* The @columns_updated instance variable available in model
+  after_save and after_update hooks is deprecated.  Switch to
+  using the new columns_updated plugin and calling the
+  columns_updated method.
+
+* The Sequel.cache_anonymous_models accessor has been deprecated.
+  Switch to using Sequel::Model.cache_anonymous_models.
+
+* Sequel::Model::ANONYMOUS_MODEL_CLASSES and
+  Sequel::Model::ANONYMOUS_MODEL_CLASSES_MUTEX have been
+  deprecated.
+
+* Sequel::Database::ResetIdentifierMangling has been deprecated.
+
+= New Features
+
+* A validation_contexts plugin has been added, which adds support
+  for a :validation_context option to Model#save and Model#valid?.
+  The value for this option will be available via the
+  validation_context method inside the validation hooks and
+  validate method.
+
+    class Album < Sequel::Model
+      plugin :validation_contexts
+
+      def validate
+        super
+        if validation_context == :approve
+          errors.add(:status_id, 'not 42') unless status_id == 42
+        end
+      end
+    end
+
+    album = Album.first
+    album.status_id = 41
+    album.valid?(:validation_context=>:approve) # => false
+    album.status_id = 42
+    album.valid?(:validation_context=>:approve) # => true
+
+* A columns_updated plugin has been added, allowing you to get
+  access to the hash used for updating a model instance via the
+  columns_updated method:
+
+    class Album < Sequel::Model
+      plugin :columns_updated
+
+      def after_update
+        super
+        if columns_updated.has_key?(:foo)
+          do_something(columns_updated[:foo])
+        end
+      end
+    end
+
+* Dataset#delete on Microsoft SQL Server now respects limits.  Note
+  that Microsoft SQL Server does not respect orders for deletes, only
+  limits, which makes this support not very useful.  Currently a
+  deprecation warning will be issued when using a delete with an
+  order and a limit, and in Sequel 5 an exception will be raised.
+
+* An odbc/oracle subadapter has been added.
+
+* A Model.dataset_module_class accessor has been added, allowing
+  plugins to add support for custom behavior in dataset_module blocks.
+
+* Support for deprecating constants on Ruby 2.3+ has been added.
+  Note that you will only get warnings for deprecated constant
+  use if you are running on Ruby 2.3+.  If you are running on a
+  previous version of Ruby, you should scan your code manually for
+  deprecated constant use.
+
+= Other Improvements
+
+* Using Model#cancel_action inside validation hooks now works
+  correctly when Model#valid? is called.
+
+* Model#[] now handles columns with false values correctly when using
+  the split_values plugin.
+
+* When calling Dataset#union/intersect/except on a dataset with
+  an offset but no limit, the dataset is wrapped in a subquery, just
+  like a dataset with a limit.
+
+* The dumping of 64-bit autoincrementing primary key columns by the
+  schema_dumper extension is now handled correctly when using the
+  :same_db option.
+
+* The schema_dumper extension now supports the :schema option when
+  dumping schema.
+
+* On Microsoft SQL Server and SQLAnywhere, ORDER BY clauses now come
+  after UNION/INTERSECT/EXCEPT instead of before, fixing issues when
+  the :from_self=>false option is used with union/intersect/except
+  and an order is applied afterward.
+
+* On Microsoft SQL Server, if calling Dataset#union/intersect/except
+  on a dataset with an order and without a limit or offset, the order
+  is removed.  When using UNION/INTERSECT/EXCEPT, Microsoft SQL
+  Server does not guarantee any ordering unless you specify an order
+  for the compound dataset.  As a general rule, you should always
+  apply orders after compounds instead of before.
+
+* On Microsoft SQL Server <2012, when using a dataset with an offset
+  without a limit in a UNION/INTERSECT/EXCEPT query, Sequel now uses
+  TOP (100) PERCENT to work around the limitation that using orders
+  in subqueries is not supported unless there is a limit (offsets
+  are emulated by a ROW_NUMBER window function with an order in this
+  case).
+
+* Database#indexes on MySQL now handles qualified identifiers.
+
+* Sequel now literalizes Sequel::SQLTime instances with 3 fractional
+  digits in the jdbc/postgresql adapter, fixing issues on JRuby
+  9.1.8.0+ (the first JRuby version to support greater than
+  millisecond precision).
+
+= Backwards Compatibility
+
+* When using the association_proxies plugin and passing a block when
+  loading the plugin, the :proxy_argument option in hash passed to
+  the block is now an empty hash instead of nil if no argument was
+  given to the association method.
+
+* The private Model#_valid? method now takes a single options hash
+  argument, instead of 2 arguments.
+
+* The pg_hstore extension no longer modifies PG_NAMED_TYPES.  This
+  should not affect behavior if the pg_hstore extension is loaded
+  into the Database instance.
+
+* Support for pg <0.8.0 has been dropped.  pg 0.8.0 was released in
+  January 2008.
