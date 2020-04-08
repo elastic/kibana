@@ -225,7 +225,6 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         ) : null,
     },
   ];
-
   return (
     <CreateDatasourcePageLayout {...layoutProps}>
       {formState === 'CONFIRM' && agentConfig && (
@@ -237,7 +236,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         />
       )}
       <EuiSteps steps={steps} />
-      <EuiBottomBar>
+      <EuiBottomBar className="ingestManager__bottomBar" paddingSize="m">
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="ghost" href={cancelUrl}>
