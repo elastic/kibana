@@ -162,5 +162,5 @@ export interface AlertAttributes {
 }
 
 export interface RuleAlertAttributes extends AlertAttributes {
-  params: RuleAlertParams;
+  params: Omit<RuleAlertParams, 'ruleId'> & { ruleId: string };
 }

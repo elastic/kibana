@@ -24,7 +24,7 @@ import { palettes } from '@elastic/eui/lib/services';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 
 import { AggGroupNames } from '../../../../plugins/data/public';
-import { Schemas } from '../../vis_default_editor/public';
+import { Schemas } from '../../../../plugins/vis_default_editor/public';
 import {
   Positions,
   ChartTypes,
