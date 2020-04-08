@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertsClient, AlertServices } from '../../../../../../../plugins/alerting/server';
+import {
+  AlertsClient,
+  AlertServices,
+  PartialAlert,
+} from '../../../../../../../plugins/alerting/server';
 import { getRuleActionsSavedObject } from '../rule_actions/get_rule_actions_saved_object';
 import { readRules } from './read_rules';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
@@ -19,7 +23,7 @@ export const updateRuleActions = async ({
   alertsClient,
   savedObjectsClient,
   ruleAlertId,
-}: UpdateRuleActions) => {
+}: UpdateRuleActions): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, id: ruleAlertId });
   if (rule == null) {
     return null;
