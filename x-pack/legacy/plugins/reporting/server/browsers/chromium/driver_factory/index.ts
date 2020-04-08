@@ -11,9 +11,9 @@ import os from 'os';
 import path from 'path';
 import {
   Browser,
+  Page,
   ConsoleMessage,
   LaunchOptions,
-  Page,
   Request as PuppeteerRequest,
 } from 'puppeteer';
 import * as Rx from 'rxjs';
@@ -38,6 +38,7 @@ export class HeadlessChromiumDriverFactory {
   private browserConfig: BrowserConfig;
   private userDataDir: string;
   private getChromiumArgs: (viewport: ViewportConfig) => string[];
+  private page?: Page;
 
   constructor(binaryPath: binaryPath, logger: Logger, captureConfig: CaptureConfig) {
     this.binaryPath = binaryPath;
@@ -55,6 +56,17 @@ export class HeadlessChromiumDriverFactory {
   }
 
   type = BROWSER_TYPE;
+
+  async screenshotPage(): Promise<Buffer | null> {
+    if (this.page) {
+      return this.page.screenshot({
+        type: 'jpeg',
+        quality: 50,
+        fullPage: true,
+      });
+    }
+    return null;
+  }
 
   test(logger: Logger) {
     const chromiumArgs = args({
@@ -93,7 +105,7 @@ export class HeadlessChromiumDriverFactory {
       const chromiumArgs = this.getChromiumArgs(viewport);
 
       let browser: Browser;
-      let page: Page;
+
       try {
         browser = await puppeteerLaunch({
           pipe: !this.browserConfig.inspect,
@@ -106,11 +118,11 @@ export class HeadlessChromiumDriverFactory {
           },
         } as LaunchOptions);
 
-        page = await browser.newPage();
+        this.page = await browser.newPage();
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
-        page.setDefaultTimeout(this.captureConfig.timeouts.openUrl);
+        this.page.setDefaultTimeout(this.captureConfig.timeouts.openUrl);
 
         logger.debug(`Browser page driver created`);
       } catch (err) {
@@ -145,17 +157,17 @@ export class HeadlessChromiumDriverFactory {
       );
 
       // taps the browser log streams and combine them to Kibana logs
-      this.getBrowserLogger(page, logger).subscribe();
+      this.getBrowserLogger(this.page, logger).subscribe();
       this.getProcessLogger(browser, logger).subscribe();
 
       // HeadlessChromiumDriver: object to "drive" a browser page
-      const driver = new HeadlessChromiumDriver(page, {
+      const driver = new HeadlessChromiumDriver(this.page, {
         inspect: !!this.browserConfig.inspect,
         networkPolicy: this.captureConfig.networkPolicy,
       });
 
       // Rx.Observable<never>: stream to interrupt page capture
-      const exit$ = this.getPageExit(browser, page);
+      const exit$ = this.getPageExit(browser, this.page);
 
       observer.next({ driver, exit$ });
 

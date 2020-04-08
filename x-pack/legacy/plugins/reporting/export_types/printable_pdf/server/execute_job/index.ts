@@ -5,7 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, map, mergeMap, take } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
 import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
@@ -36,6 +36,8 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
     const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
 
     const jobLogger = logger.clone([jobId]);
+    const timeout = config.get('queue', 'timeout') - 5000;
+
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
@@ -67,7 +69,24 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
       })
     );
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
-    return process$.pipe(takeUntil(stop$)).toPromise();
+    const timeout$ = Rx.fromEventPattern(d => {
+      setTimeout(async () => {
+        jobLogger.warn('Job timing out, attempting to capture page screenshot');
+        const lastScreen = await browserDriverFactory.screenshotPage();
+        if (lastScreen) {
+          return d({
+            content_type: 'image/jpeg',
+            content: lastScreen.toString('base64'),
+            size: lastScreen.byteLength,
+            warnings: ['PDF Job timed out'],
+          });
+        }
+        d();
+      }, timeout);
+    });
+
+    return Rx.race(process$, timeout$)
+      .pipe(take(1))
+      .toPromise();
   };
 };

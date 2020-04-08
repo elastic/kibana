@@ -25,6 +25,7 @@ export const WHITELISTED_JOB_CONTENT_TYPES = [
   'application/pdf',
   CONTENT_TYPE_CSV,
   'image/png',
+  'image/jpeg',
 ];
 
 // See:
