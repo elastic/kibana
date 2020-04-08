@@ -29,7 +29,6 @@ import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
 import { subscribeWithScope } from '../../../../../../../../plugins/kibana_legacy/public';
-import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -239,14 +238,12 @@ uiModules
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexPatternListProvider = managementSetup.indexPattern.list;
-    $scope.indexPattern.tags = managementSetup.indexPattern.list.getIndexPatternTags(
+    $scope.indexPatternListProvider = npStart.plugins.indexPatternManagement.list;
+    $scope.indexPattern.tags = npStart.plugins.indexPatternManagement.list.getIndexPatternTags(
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
-    $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo.bind(
-      managementSetup.indexPattern.list
-    );
+    $scope.getFieldInfo = npStart.plugins.indexPatternManagement.list.getFieldInfo;
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
@@ -257,7 +254,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        managementSetup.indexPattern.list
+        npStart.plugins.indexPatternManagement.list
       );
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
@@ -375,7 +372,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        managementSetup.indexPattern.list
+        npStart.plugins.indexPatternManagement.list
       );
 
       if ($scope.fieldFilter === undefined) {
