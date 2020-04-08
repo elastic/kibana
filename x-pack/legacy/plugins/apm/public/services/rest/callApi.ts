@@ -11,7 +11,7 @@ import { HttpSetup, HttpFetchOptions } from 'kibana/public';
 
 export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;
-  forceCache?: boolean;
+  isCachable?: boolean;
   method?: string;
   body?: any;
 };
@@ -74,8 +74,8 @@ export async function callApi<T = void>(
 // only cache items that has a time range with `start` and `end` params,
 // and where `end` is not a timestamp in the future
 function isCachable(fetchOptions: FetchOptions) {
-  if (fetchOptions.forceCache) {
-    return true;
+  if (fetchOptions.isCachable !== undefined) {
+    return fetchOptions.isCachable;
   }
 
   if (

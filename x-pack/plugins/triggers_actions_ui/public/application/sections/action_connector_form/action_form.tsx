@@ -129,7 +129,7 @@ export const ActionForm = ({
   async function loadConnectors() {
     try {
       const actionsResponse = await loadAllActions({ http });
-      setConnectors(actionsResponse.data);
+      setConnectors(actionsResponse);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(

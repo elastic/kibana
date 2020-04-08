@@ -4,7 +4,6 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
   "name": "Bypass UAC via Event Viewer",
   "query": "process.parent.name:eventvwr.exe and event.action:\"Process Create (rule: ProcessCreate)\" and not process.executable:(\"C:\\Windows\\SysWOW64\\mmc.exe\" or \"C:\\Windows\\System32\\mmc.exe\")",
   "risk_score": 21,

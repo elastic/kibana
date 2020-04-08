@@ -151,8 +151,15 @@ export const ml = {
     });
   },
 
-  validateJob({ job }: { job: Job }) {
-    const body = JSON.stringify({ job });
+  validateJob(payload: {
+    job: Job;
+    duration: {
+      start?: number;
+      end?: number;
+    };
+    fields?: any[];
+  }) {
+    const body = JSON.stringify(payload);
     return http<any>({
       path: `${basePath()}/validate/job`,
       method: 'POST',
