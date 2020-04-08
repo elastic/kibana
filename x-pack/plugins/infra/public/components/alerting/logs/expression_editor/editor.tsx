@@ -29,6 +29,7 @@ import { useSource } from '../../../../containers/source';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator, TimeUnit } from '../../../../../server/lib/alerting/log_threshold/types';
 import { DocumentCount } from './document_count';
+import { Criteria } from './criteria';
 
 export interface LogsDocumentCountExpression {
   count?: {
@@ -68,13 +69,13 @@ export const ExpressionEditor: React.FC<Props> = props => {
         value: 75,
         comparator: Comparator.GT,
       },
-      criteria: [{ field: null, comparator: Comparator.EQ, value: null }],
+      criteria: [{ field: undefined, comparator: Comparator.EQ, value: undefined }],
       timeSize: 5,
       timeUnit: 'm',
     };
   }, []);
 
-  // Set the default expression
+  // Set the default expression (disables exhaustive-deps due to only wanting to run this once on mount)
   useEffect(() => {
     for (const [key, value] of Object.entries(defaultExpression)) {
       setAlertParams(key, value);
@@ -89,6 +90,10 @@ export const ExpressionEditor: React.FC<Props> = props => {
     [alertParams.count, setAlertParams]
   );
 
+  const updateCriteria = useCallback(() => {
+    // Update things here
+  }, []);
+
   return (
     <>
       <DocumentCount
@@ -96,6 +101,8 @@ export const ExpressionEditor: React.FC<Props> = props => {
         value={alertParams.count?.value}
         updateCount={updateCount}
       />
+
+      <Criteria criteria={alertParams.criteria} updateCriteria={updateCriteria} />
     </>
   );
 };
