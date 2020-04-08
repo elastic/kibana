@@ -424,7 +424,7 @@ describe('Ready for collection observable', () => {
     const makeCollectorSpy = sinon.spy();
     usageCollection.makeUsageCollector = makeCollectorSpy;
 
-    const plugins = getPluginsMock({ usageCollection });
+    const plugins = getPluginsMock({ usageCollection } as any);
     registerReportingUsageCollector(mockReporting, plugins);
 
     const [args] = makeCollectorSpy.firstCall.args;
