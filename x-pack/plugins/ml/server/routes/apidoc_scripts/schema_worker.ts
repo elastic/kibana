@@ -6,7 +6,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { extractDocumentation } from './schema_extractor';
+import { DocEntry, extractDocumentation } from './schema_extractor';
 
 interface ApiParameter {
   group: string;
@@ -27,8 +27,9 @@ interface Local {
   name: string;
   description: string;
   parameter: {
-    fields: {
-      Parameter: ApiParameter[];
+    fields?: {
+      Parameter?: ApiParameter[];
+      [key: string]: ApiParameter[] | undefined;
     };
   };
   success: { fields: ObjectConstructor[] };
@@ -59,25 +60,58 @@ export function postProcess(parsedFiles: any[]): void {
       const schemaFields = schemaDocs.get(schema);
       if (!schemaFields) return;
 
-      // Init parameters object
+      // Init parameters collection
       if (!block.local.parameter) {
         block.local.parameter = {
-          fields: { Parameter: [] },
+          fields: { Parameters: [] },
         };
       }
 
-      for (const field of schemaFields) {
-        block.local!.parameter!.fields!.Parameter.push({
-          group: 'Parameter',
-          type: field.type,
-          size: undefined,
-          allowedValues: undefined,
-          optional: !!field.optional,
-          field: field.name,
-          defaultValue: undefined,
-          description: field.documentation,
-        });
+      if (!block.local.parameter.fields!.Parameters) {
+        block.local.parameter.fields!.Parameters = [];
       }
+
+      extractDocEntries(schemaFields, block);
     });
   });
+}
+
+/**
+ * Extracts schema's doc entries to apidoc parameters
+ * @param docEntries
+ * @param block
+ * @param nestedPrefix
+ */
+function extractDocEntries(docEntries: DocEntry[], block: Block, nestedPrefix = ''): void {
+  for (const field of docEntries) {
+    let collection = (block.local!.parameter!.fields!.Parameters as unknown) as ApiParameter[];
+    let group = 'Parameters';
+
+    if (nestedPrefix.length > 0) {
+      // @ts-ignore
+      if (!block.local.parameter.fields[nestedPrefix]) {
+        // @ts-ignore
+        block.local.parameter.fields[nestedPrefix] = [];
+      }
+      // @ts-ignore
+      collection = block.local.parameter.fields[nestedPrefix];
+
+      group = nestedPrefix;
+    }
+
+    collection.push({
+      group,
+      type: field.type,
+      size: undefined,
+      allowedValues: undefined,
+      optional: !!field.optional,
+      field: field.name,
+      defaultValue: undefined,
+      description: field.documentation,
+    });
+
+    if (field.nested) {
+      extractDocEntries(field.nested, block, field.name);
+    }
+  }
 }

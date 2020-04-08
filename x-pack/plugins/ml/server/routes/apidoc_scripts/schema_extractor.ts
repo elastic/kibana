@@ -6,11 +6,12 @@
 
 import * as ts from 'typescript';
 
-interface DocEntry {
+export interface DocEntry {
   name: string;
   documentation?: string;
   type: string;
   optional?: boolean;
+  nested?: DocEntry[];
 }
 
 /** Generate documentation for all classes in a set of .ts files */
@@ -48,16 +49,31 @@ export function extractDocumentation(
     }
 
     if (node.getChildCount() > 0) {
-      // check all child nodes recursively. could be improved
-      // by only checking exported variable statement with child object literals
       ts.forEachChild(node, visit);
     }
 
     if (ts.isPropertyAssignment(node) && node.name) {
-      const schemaName = ts.isVariableDeclaration(node.parent.parent)
-        ? node.parent.parent.name.getText()
-        : null;
-      if (schemaName !== null) {
+      let parentCheck: ts.Node = node.parent;
+      let schemaName: string | undefined;
+
+      while (
+        schemaName === undefined &&
+        !ts.isSourceFile(parentCheck) &&
+        !ts.isPropertyAssignment(parentCheck) &&
+        parentCheck !== undefined
+      ) {
+        for (const schemaKey of result.keys()) {
+          if (parentCheck.getFullText().includes(schemaKey)) {
+            schemaName = schemaKey;
+            break;
+          }
+        }
+        if (schemaName === undefined) {
+          parentCheck = parentCheck.parent;
+        }
+      }
+
+      if (schemaName !== undefined) {
         const arr = result.get(schemaName);
         const symbol = checker.getSymbolAtLocation(node.name);
         if (symbol && arr) {
@@ -82,11 +98,56 @@ export function extractDocumentation(
       typePropertySymbol!.valueDeclaration
     );
 
+    const resName = resultType && resultType.symbol && resultType.symbol.name;
+
+    let type: DocEntry['type'] = checker.typeToString(resultType);
+    const nestedEntries = processNestedMembers(resultType);
+
+    if (nestedEntries && nestedEntries.length > 0) {
+      if (resName === 'Array') {
+        type = `Array<${symbol.getName()}>`;
+      } else {
+        type = symbol.getName();
+      }
+    }
+
     return {
       name: symbol.getName(),
       documentation: ts.displayPartsToString(symbol.getDocumentationComment(checker)),
-      type: checker.typeToString(resultType),
+      type,
+      ...(nestedEntries ? { nested: nestedEntries } : {}),
     };
+  }
+
+  /** Process members of objects or collections */
+  function processNestedMembers(type: ts.Type): DocEntry[] | null {
+    const typeArguments =
+      type.aliasTypeArguments || checker.getTypeArguments(type as ts.TypeReference);
+
+    let collection = null;
+
+    if (typeArguments && typeArguments.length) {
+      const members: ts.SymbolTable =
+        // @ts-ignore
+        typeArguments[0].members ||
+        // @ts-ignore
+        (typeArguments[0].aliasTypeArguments && typeArguments[0].aliasTypeArguments[0].members);
+
+      if (!members) return collection;
+
+      collection = [];
+
+      members.forEach(member => {
+        collection.push({
+          name: member.escapedName,
+          documentation: ts.displayPartsToString(member.getDocumentationComment(checker)),
+          // @ts-ignore
+          type: checker.typeToString(member.type),
+        });
+      });
+    }
+
+    return collection;
   }
 
   /**
