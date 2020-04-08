@@ -116,6 +116,7 @@ export const patchRulesRoute = (router: IRouter) => {
           version,
           anomalyThreshold,
           machineLearningJobId,
+          actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is empty, otherwise we are a notification and should not enable it
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleActions = await updateRulesNotifications({
