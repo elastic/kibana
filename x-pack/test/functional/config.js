@@ -88,9 +88,6 @@ export default async function({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
-        '--xpack.endpoint.enabled=true',
-        '--xpack.ingestManager.enabled=true',
-        '--xpack.ingestManager.fleet.enabled=true',
       ],
     },
     uiSettings: {

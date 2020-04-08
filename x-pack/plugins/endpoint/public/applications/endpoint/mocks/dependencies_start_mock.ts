@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestManagerStart } from '../../../../ingest_manager/public';
+import { IngestManagerStart } from '../../../../../ingest_manager/public';
 import {
   dataPluginMock,
   Start as DataPublicStartMock,

@@ -20,8 +20,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.endpoint.enabled=true',
         '--xpack.ingestManager.enabled=true',
         '--xpack.ingestManager.fleet.enabled=true',
-        // use a bogus port so the ingest manager setup will fail
-        '--xpack.ingestManager.epm.registryUrl=http://127.0.0.1:12345',
       ],
     },
   };
