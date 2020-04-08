@@ -7,6 +7,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
@@ -51,7 +52,28 @@ export function registerTransactionDurationAlertType({
     validate: {
       params: paramsSchema
     },
-
+    actionVariables: {
+      context: [
+        {
+          description: i18n.translate(
+            'xpack.apm.registerTransactionDurationAlertType.variables.serviceName',
+            {
+              defaultMessage: 'Service name'
+            }
+          ),
+          name: 'serviceName'
+        },
+        {
+          description: i18n.translate(
+            'xpack.apm.registerTransactionDurationAlertType.variables.transactionType',
+            {
+              defaultMessage: 'Transaction type'
+            }
+          ),
+          name: 'transactionType'
+        }
+      ]
+    },
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
 
@@ -131,7 +153,10 @@ export function registerTransactionDurationAlertType({
         const alertInstance = services.alertInstanceFactory(
           AlertType.TransactionDuration
         );
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId);
+        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+          transactionType: alertParams.transactionType,
+          serviceName: alertParams.serviceName
+        });
       }
 
       return {};
