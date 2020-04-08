@@ -60,7 +60,7 @@ import { NavAction, SavedDashboardPanel } from '../types';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { saveDashboard, FilterUtils } from './lib';
+import { saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
@@ -144,12 +144,7 @@ export class DashboardAppController {
 
     // sync initial app filters from state to filterManager
     // if there is an existing similar global filter, then leave it as global
-    filterManager.setAppFilters(
-      FilterUtils.removeGlobalFromAppFilters(
-        _.cloneDeep(dashboardStateManager.appState.filters),
-        filterManager.getGlobalFilters()
-      )
-    );
+    filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
     // setup syncing of app filters between appState and filterManager
     const stopSyncingAppFilters = connectToQueryState(
       queryService,
@@ -158,10 +153,7 @@ export class DashboardAppController {
         get: () => ({ filters: dashboardStateManager.appState.filters }),
         state$: dashboardStateManager.appState$.pipe(
           map(state => ({
-            filters: FilterUtils.removeGlobalFromAppFilters(
-              state.filters,
-              filterManager.getGlobalFilters()
-            ),
+            filters: state.filters,
           }))
         ),
       },

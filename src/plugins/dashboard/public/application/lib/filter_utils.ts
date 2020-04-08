@@ -76,16 +76,4 @@ export class FilterUtils {
       return f;
     });
   }
-
-  /**
-   * Returns new app filters array with removed filters which exist in globalFilters
-   * @param appFilters
-   * @param globalFilters
-   */
-  public static removeGlobalFromAppFilters(appFilters: Filter[], globalFilters: Filter[]) {
-    return appFilters.filter(
-      appFilter =>
-        !globalFilters.some(globalFilter => esFilters.compareFilters(globalFilter, appFilter))
-    );
-  }
 }
