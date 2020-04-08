@@ -12,8 +12,8 @@ import { Assign } from '@kbn/utility-types';
 import { Breadcrumb } from '@elastic/eui';
 import { Component } from 'react';
 import { CoreSetup } from 'src/core/public';
-import { CoreStart } from 'kibana/public';
-import { CoreStart as CoreStart_2 } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
+import { CoreStart as CoreStart_2 } from 'kibana/public';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -632,21 +632,21 @@ export type IAggType = AggType;
 // Warning: (ae-missing-release-tag) "IDataPluginServices" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IDataPluginServices extends Partial<CoreStart_2> {
+export interface IDataPluginServices extends Partial<CoreStart> {
     // (undocumented)
     appName: string;
     // (undocumented)
     data: DataPublicPluginStart;
     // (undocumented)
-    http: CoreStart_2['http'];
+    http: CoreStart['http'];
     // (undocumented)
-    notifications: CoreStart_2['notifications'];
+    notifications: CoreStart['notifications'];
     // (undocumented)
-    savedObjects: CoreStart_2['savedObjects'];
+    savedObjects: CoreStart['savedObjects'];
     // (undocumented)
     storage: IStorageWrapper;
     // (undocumented)
-    uiSettings: CoreStart_2['uiSettings'];
+    uiSettings: CoreStart['uiSettings'];
 }
 
 // Warning: (ae-missing-release-tag) "IEsSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1094,7 +1094,7 @@ export type ISearch<T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY> =
 // @public (undocumented)
 export interface ISearchContext {
     // (undocumented)
-    core: CoreStart;
+    core: CoreStart_2;
     // (undocumented)
     getSearchStrategy: <T extends TStrategyTypes>(name: T) => TSearchStrategyProvider<T>;
 }
@@ -1307,7 +1307,7 @@ export class Plugin implements Plugin_2<DataPublicPluginSetup, DataPublicPluginS
     // Warning: (ae-forgotten-export) The symbol "DataStartDependencies" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    start(core: CoreStart_2, { uiActions }: DataStartDependencies): DataPublicPluginStart;
+    start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart;
     // (undocumented)
     stop(): void;
     }
@@ -1533,7 +1533,7 @@ export const search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("./search/aggs/buckets/_bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
         } | {
             display: string;
             val: string;
