@@ -28,15 +28,11 @@
             "agent": {
               "properties": {
                 "id": {
-                  "fields": {
-                    "keyword": {
-                      "ignore_above": 256,
-                      "type": "keyword"
-                    }
-                  },
-                  "type": "text"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "object"
             }
           }
         },
