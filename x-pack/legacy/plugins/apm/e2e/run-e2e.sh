@@ -72,6 +72,8 @@ ${APM_IT_DIR}/scripts/compose.py start master \
     --elasticsearch-port $ELASTICSEARCH_PORT \
     --apm-server-port=$APM_SERVER_PORT \
     --elasticsearch-heap 4g \
+    --apm-server-opt queue.mem.events=8192 \
+    --apm-server-opt output.elasticsearch.bulk_max_size=4096 \
     &> ${TMP_DIR}/apm-it.log
 
 # Stop if apm-integration-testing failed to start correctly
@@ -105,7 +107,7 @@ curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/.a
 curl --silent --user admin:changeme -XDELETE "localhost:${ELASTICSEARCH_PORT}/apm*" > /dev/null
 
 # Ingest data into APM Server
-node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/events.json 2> ${TMP_DIR}/ingest-data.log
+node ingest-data/replay.js --server-url http://localhost:$APM_SERVER_PORT --events ${TMP_DIR}/events.json 2>> ${TMP_DIR}/ingest-data.log
 
 # Stop if not all events were ingested correctly
 if [ $? -ne 0 ]; then
