@@ -90,7 +90,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       }
       const embeddableObject = await factory.create({
         ...input,
-        title: i18n.MAP_TITLE,
+        customPanelTitle: i18n.MAP_TITLE,
       });
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {

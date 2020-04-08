@@ -69,19 +69,18 @@ beforeEach(async () => {
 test('Updates the embeddable title when given', async done => {
   const getUserData = () => Promise.resolve({ title: 'What is up?' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
-  expect(embeddable.getInput().title).toBeUndefined();
-  expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
+  expect(embeddable.getInput().customPanelTitle).toBeUndefined();
+  expect(embeddable.getOutput().panelTitle).toBe('Hello Robert Baratheon');
   await customizePanelAction.execute({ embeddable });
   await nextTick();
-  expect(embeddable.getTitle()).toBe('What is up?');
-  expect(embeddable.getInput().title).toBe('What is up?');
+  expect(embeddable.getInput().customPanelTitle).toBe('What is up?');
 
   // Recreating the container should preserve the custom title.
   const containerClone = createHelloWorldContainer(container.getInput());
   // Need to wait for the container to tell us the embeddable has been loaded.
   const subscription = containerClone.getOutput$().subscribe(() => {
     if (containerClone.getOutput().embeddableLoaded[embeddable.id]) {
-      expect(embeddable.getInput().title).toBe('What is up?');
+      expect(embeddable.getInput().customPanelTitle).toBe('What is up?');
       subscription.unsubscribe();
       done();
     }
@@ -91,26 +90,26 @@ test('Updates the embeddable title when given', async done => {
 test('Empty string results in an empty title', async () => {
   const getUserData = () => Promise.resolve({ title: '' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
-  expect(embeddable.getInput().title).toBeUndefined();
-  expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
+  expect(embeddable.getInput().customPanelTitle).toBe('');
+  expect(embeddable.getOutput().panelTitle).toBe('Hello Robert Baratheon');
 
   await customizePanelAction.execute({ embeddable });
   await nextTick();
-  expect(embeddable.getTitle()).toBe('');
+  expect(embeddable.getInput().customPanelTitle).toBe('');
 });
 
 test('Undefined title results in the original title', async () => {
   const getUserData = () => Promise.resolve({ title: 'hi' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
-  expect(embeddable.getInput().title).toBeUndefined();
-  expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
+  expect(embeddable.getInput().customPanelTitle).toBeUndefined();
+  expect(embeddable.getOutput().panelTitle).toBe('Hello Robert Baratheon');
   await customizePanelAction.execute({ embeddable });
   await nextTick();
-  expect(embeddable.getTitle()).toBe('hi');
+  expect(embeddable.getInput().customPanelTitle).toBe('hi');
 
   await new CustomizePanelTitleAction(() => Promise.resolve({ title: undefined })).execute({
     embeddable,
   });
   await nextTick();
-  expect(embeddable.getTitle()).toBe('Hello Robert Baratheon');
+  expect(embeddable.getInput().customPanelTitle).toBeUndefined();
 });

@@ -49,7 +49,7 @@ interface Props {
 export function ListContainerExample({ getEmbeddableFactory }: Props) {
   const listInput = {
     id: 'hello',
-    title: 'My todo list',
+    customPanelTitle: 'My todo list',
     viewMode: ViewMode.VIEW,
     panels: {
       '1': {
@@ -80,7 +80,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
 
   const searchableInput = {
     id: '1',
-    title: 'My searchable todo list',
+    customPanelTitle: 'My searchable todo list',
     viewMode: ViewMode.VIEW,
     panels: {
       '1': {

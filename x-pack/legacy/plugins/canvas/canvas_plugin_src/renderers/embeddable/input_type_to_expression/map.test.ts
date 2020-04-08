@@ -46,7 +46,7 @@ describe('toExpression', () => {
         lon: 2,
         zoom: 3,
       },
-      title: 'title',
+      customPanelTitle: 'title',
       timeRange: {
         from: 'now-1h',
         to: 'now',

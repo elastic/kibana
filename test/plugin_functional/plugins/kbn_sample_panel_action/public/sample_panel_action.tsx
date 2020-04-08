@@ -46,7 +46,9 @@ export function createSamplePanelAction(getStartServices: CoreSetup['getStartSer
           <React.Fragment>
             <EuiFlyoutHeader>
               <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-                <h1>{embeddable.getTitle()}</h1>
+                <h1>
+                  {embeddable.getInput().customPanelTitle || embeddable.getOutput().panelTitle}
+                </h1>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>

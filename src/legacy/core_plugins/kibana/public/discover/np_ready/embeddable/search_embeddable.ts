@@ -114,7 +114,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   ) {
     super(
       initialInput,
-      { defaultTitle: savedSearch.title, editUrl, indexPatterns, editable },
+      { panelTitle: savedSearch.title, editUrl, indexPatterns, editable },
       parent
     );
 
@@ -132,7 +132,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       .subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-      this.panelTitle = this.output.title || '';
+      this.panelTitle = this.output.panelTitle || '';
 
       if (this.searchScope) {
         this.pushContainerStateParamsToScope(this.searchScope);

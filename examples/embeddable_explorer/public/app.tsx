@@ -38,6 +38,7 @@ import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
+import { InputVsOutputExample } from './input_vs_output';
 
 interface PageDef {
   title: string;
@@ -101,6 +102,11 @@ const EmbeddableExplorerApp = ({
       component: (
         <HelloWorldEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
       ),
+    },
+    {
+      title: 'Input vs Output state',
+      id: 'inputOutputEmbeddableSection',
+      component: <InputVsOutputExample embeddableServices={embeddableApi} />,
     },
     {
       title: 'Todo embeddable',

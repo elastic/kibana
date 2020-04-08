@@ -22,7 +22,10 @@ import { EmbeddableRoot } from './embeddable_root';
 import { mount } from 'enzyme';
 
 test('ErrorEmbeddable renders an embeddable', async () => {
-  const embeddable = new ErrorEmbeddable('some error occurred', { id: '123', title: 'Error' });
+  const embeddable = new ErrorEmbeddable('some error occurred', {
+    id: '123',
+    customPanelTitle: 'Error',
+  });
   const component = mount(<EmbeddableRoot embeddable={embeddable} />);
   expect(
     component.getDOMNode().querySelectorAll('[data-test-subj="embeddableStackError"]').length
@@ -40,7 +43,7 @@ test('ErrorEmbeddable renders an embeddable', async () => {
 
 test('ErrorEmbeddable renders an embeddable with markdown message', async () => {
   const error = '[some link](http://localhost:5601/takeMeThere)';
-  const embeddable = new ErrorEmbeddable(error, { id: '123', title: 'Error' });
+  const embeddable = new ErrorEmbeddable(error, { id: '123', customPanelTitle: 'Error' });
   const component = mount(<EmbeddableRoot embeddable={embeddable} />);
   expect(
     component.getDOMNode().querySelectorAll('[data-test-subj="embeddableStackError"]').length

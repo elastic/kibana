@@ -44,7 +44,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async toggleContextMenu(parent) {
       log.debug('toggleContextMenu');
-      await (parent ? parent.moveMouseTo() : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      await (parent ? parent.moveMouseTo() : testSubjects.moveMouseTo('embeddablePanelTitle'));
       const toggleMenuItem = await this.findContextMenu(parent);
       await toggleMenuItem.click();
     }
@@ -84,6 +84,10 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async customizePanel(parent) {
       await this.openContextMenu(parent);
+      await this.clickCustomizePanelTitle();
+    }
+
+    async clickCustomizePanelTitle() {
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
     }
 
@@ -150,6 +154,10 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click('customizePanelHideTitle');
     }
 
+    async clickSaveCustomPanelTitle() {
+      await testSubjects.click('saveNewTitleButton');
+    }
+
     async toggleHidePanelTitle(originalTitle) {
       log.debug(`hidePanelTitle(${originalTitle})`);
       let panelOptions = null;
@@ -158,7 +166,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       }
       await this.customizePanel(panelOptions);
       await this.clickHidePanelTitleToggle();
-      await testSubjects.click('saveNewTitleButton');
+      await this.clickSaveCustomPanelTitle();
     }
 
     /**

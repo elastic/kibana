@@ -12,8 +12,8 @@ export function toExpression(input: SavedMapInput): string {
   expressionParts.push('savedMap');
   expressionParts.push(`id="${input.id}"`);
 
-  if (input.title) {
-    expressionParts.push(`title="${input.title}"`);
+  if (input.customPanelTitle) {
+    expressionParts.push(`title="${input.customPanelTitle}"`);
   }
 
   if (input.mapCenter) {

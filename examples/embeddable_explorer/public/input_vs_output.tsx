@@ -27,53 +27,18 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
   EuiText,
+  EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableStart, IEmbeddable } from '../../../src/plugins/embeddable/public';
-import {
-  HELLO_WORLD_EMBEDDABLE,
-  TODO_EMBEDDABLE,
-  MULTI_TASK_TODO_EMBEDDABLE,
-  SEARCHABLE_LIST_CONTAINER,
-} from '../../embeddable_examples/public';
+import { HELLO_WORLD_EMBEDDABLE } from '../../embeddable_examples/public';
 
 interface Props {
   embeddableServices: EmbeddableStart;
 }
 
-export function EmbeddablePanelExample({ embeddableServices }: Props) {
-  const searchableInput = {
-    id: '1',
-    customPanelTitle: 'My searchable todo list',
-    panels: {
-      '1': {
-        type: HELLO_WORLD_EMBEDDABLE,
-        explicitInput: {
-          id: '1',
-          title: 'Hello',
-        },
-      },
-      '2': {
-        type: TODO_EMBEDDABLE,
-        explicitInput: {
-          id: '2',
-          task: 'Goes out on Wednesdays!',
-          icon: 'broom',
-          title: 'Take out the trash',
-        },
-      },
-      '3': {
-        type: MULTI_TASK_TODO_EMBEDDABLE,
-        explicitInput: {
-          id: '3',
-          icon: 'searchProfilerApp',
-          title: 'Learn more',
-          tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
-        },
-      },
-    },
-  };
-
+export function InputVsOutputExample({ embeddableServices }: Props) {
   const [embeddable, setEmbeddable] = useState<IEmbeddable | undefined>(undefined);
 
   const ref = useRef(false);
@@ -81,8 +46,8 @@ export function EmbeddablePanelExample({ embeddableServices }: Props) {
   useEffect(() => {
     ref.current = true;
     if (!embeddable) {
-      const factory = embeddableServices.getEmbeddableFactory(SEARCHABLE_LIST_CONTAINER);
-      const promise = factory?.create(searchableInput);
+      const factory = embeddableServices.getEmbeddableFactory(HELLO_WORLD_EMBEDDABLE);
+      const promise = factory?.create({ id: 'hello', customPanelTitle: 'Hi there!' });
       if (promise) {
         promise.then(e => {
           if (ref.current) {
@@ -101,19 +66,44 @@ export function EmbeddablePanelExample({ embeddableServices }: Props) {
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>The embeddable panel component</h1>
+            <h1>Embeddable input vs output</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageContent>
         <EuiPageContentBody>
           <EuiText>
-            You can render your embeddable inside the EmbeddablePanel component. This adds some
-            extra rendering and offers a context menu with pluggable actions. Using EmbeddablePanel
-            to render your embeddable means you get access to the &quot;Add panel flyout&quot;. Now
-            you can see how to add embeddables to your container, and how
-            &quot;getExplicitInput&quot; is used to grab input not provided by the container.
+            One example of input and output state is an embeddable&apos;s title. The Customize Panel
+            action works on any embeddable in an <EuiCode>EmbeddablePanel</EuiCode> that takes
+            <EuiCode>title</EuiCode> as input or has title on output.
+            <EuiSpacer />
+            <EuiCallOut>
+              <b>Input</b> is state <i> given to</i> the embeddable. <b>Output</b> is state read{' '}
+              <i>from</i> the embeddable. <EuiCode>embeddable.updateInput</EuiCode> is a public
+              function while
+              <EuiCode>embeddable.updateOutput</EuiCode> is private.
+            </EuiCallOut>
+            <EuiSpacer />
+            If <EuiCode>input.title</EuiCode> exists, this is used in the display, as it&apos;s
+            considered an override. Every embeddable that wants the &quot;Reset panel title&quot;
+            action to work should store the initial <EuiCode>input.title</EuiCode> on output, or
+            some other default title (for example, the title stored with a saved object).
           </EuiText>
+          <EuiText>
+            To explore this example:
+            <ul>
+              <li>
+                Try editing the panel title using the <b>Customize panel title</b> action which is
+                available only in Edit mode.
+              </li>
+              <li>
+                Play around with resetting and hiding the panel title. Hide the panel title and view
+                the embeddable in view mode to see how the panel header space is gone.
+              </li>
+            </ul>
+          </EuiText>
+
+          <EuiSpacer />
           <EuiPanel data-test-subj="embeddedPanelExample" paddingSize="none" role="figure">
             {embeddable ? (
               <embeddableServices.EmbeddablePanel embeddable={embeddable} />

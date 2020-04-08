@@ -26,7 +26,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER, EmbeddableContext } from '../triggers';
-import { IEmbeddable } from '../embeddables/i_embeddable';
+import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
@@ -37,9 +37,12 @@ import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_a
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
+import { withEmbeddableSubscription } from '../embeddables/with_subscription';
 
 interface Props {
-  embeddable: IEmbeddable<any, any>;
+  input: EmbeddableInput;
+  output: EmbeddableOutput;
+  embeddable: IEmbeddable;
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
@@ -59,7 +62,7 @@ interface State {
   badges: Array<Action<EmbeddableContext>>;
 }
 
-export class EmbeddablePanel extends React.Component<Props, State> {
+export class EmbeddablePanelInner extends React.Component<Props, State> {
   private embeddableRoot: React.RefObject<HTMLDivElement>;
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
@@ -69,9 +72,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const { embeddable } = this.props;
-    const viewMode = embeddable.getInput().viewMode
-      ? embeddable.getInput().viewMode
-      : ViewMode.EDIT;
+    const viewMode = embeddable.getInput().viewMode ?? ViewMode.EDIT;
     const hidePanelTitles = embeddable.parent
       ? Boolean(embeddable.parent.getInput().hidePanelTitles)
       : false;
@@ -111,7 +112,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     this.subscription = embeddable.getInput$().subscribe(async () => {
       if (this.mounted) {
         this.setState({
-          viewMode: embeddable.getInput().viewMode ? embeddable.getInput().viewMode : ViewMode.EDIT,
+          viewMode: embeddable.getInput().viewMode ?? ViewMode.EDIT,
         });
 
         this.refreshBadges();
@@ -153,11 +154,16 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   public render() {
+    const { input, output, embeddable, hideHeader } = this.props;
     const viewOnlyMode = this.state.viewMode === ViewMode.VIEW;
     const classes = classNames('embPanel', {
       'embPanel--editing': !viewOnlyMode,
     });
-    const title = this.props.embeddable.getTitle();
+
+    // If input.title is undefined, use output.title (if it exists). Otherwise, the empty
+    // string will hide this title, or the panel will show whatever is in input.title.
+    const title = input.customPanelTitle === undefined ? output.panelTitle : input.customPanelTitle;
+
     const headerId = this.generateId();
     return (
       <EuiPanel
@@ -167,7 +173,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         role="figure"
         aria-labelledby={headerId}
       >
-        {!this.props.hideHeader && (
+        {!hideHeader && (
           <PanelHeader
             getActionContextMenuPanel={this.getActionContextMenuPanel}
             hidePanelTitles={this.state.hidePanelTitles}
@@ -175,7 +181,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             closeContextMenu={this.state.closeContextMenu}
             title={title}
             badges={this.state.badges}
-            embeddable={this.props.embeddable}
+            embeddable={embeddable}
             headerId={headerId}
           />
         )}
@@ -261,3 +267,19 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     });
   };
 }
+
+export const EmbeddablePanel = withEmbeddableSubscription<
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+  {
+    getActions: UiActionsService['getTriggerCompatibleActions'];
+    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+    getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+    overlays: CoreStart['overlays'];
+    notifications: CoreStart['notifications'];
+    inspector: InspectorStartContract;
+    SavedObjectFinder: React.ComponentType<any>;
+    hideHeader?: boolean;
+  }
+>(EmbeddablePanelInner);

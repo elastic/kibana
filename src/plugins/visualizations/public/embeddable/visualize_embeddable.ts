@@ -74,7 +74,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
   private query?: Query;
-  private title?: string;
+  private panelTitle?: string;
   private filters?: Filter[];
   private visCustomizations: VisualizeInput['vis'];
   private subscriptions: Subscription[] = [];
@@ -94,7 +94,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     super(
       initialInput,
       {
-        defaultTitle: vis.title,
+        panelTitle: vis.title,
         editUrl,
         indexPatterns,
         editable,
@@ -129,7 +129,12 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   public openInspector = () => {
     if (this.handler) {
-      return this.handler.openInspector(this.getTitle() || '');
+      const title =
+        this.input.customPanelTitle === undefined || this.input.customPanelTitle === ''
+          ? this.output.panelTitle
+          : this.input.customPanelTitle;
+
+      return this.handler.openInspector(title || '');
     }
   };
 
@@ -182,10 +187,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       dirty = true;
     }
 
-    if (this.output.title !== this.title) {
-      this.title = this.output.title;
+    if (this.output.panelTitle !== this.panelTitle) {
+      this.panelTitle = this.output.panelTitle;
       if (this.domNode) {
-        this.domNode.setAttribute('data-title', this.title || '');
+        this.domNode.setAttribute('data-title', this.panelTitle || '');
       }
     }
 
@@ -264,7 +269,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       })
     );
 
-    div.setAttribute('data-title', this.output.title || '');
+    div.setAttribute('data-title', this.output.panelTitle || '');
 
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);

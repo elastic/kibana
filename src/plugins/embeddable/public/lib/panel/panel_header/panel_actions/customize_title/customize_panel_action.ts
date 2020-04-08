@@ -55,6 +55,6 @@ export class CustomizePanelTitleAction implements Action<ActionContext> {
 
   public async execute({ embeddable }: ActionContext) {
     const customTitle = await this.getDataFromUser({ embeddable });
-    embeddable.updateInput(customTitle);
+    embeddable.updateInput({ customPanelTitle: customTitle.title });
   }
 }

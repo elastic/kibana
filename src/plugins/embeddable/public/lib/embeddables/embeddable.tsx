@@ -25,10 +25,6 @@ import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
 
-function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
-  return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
-}
-
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
@@ -58,10 +54,7 @@ export abstract class Embeddable<
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
-    this.output = {
-      title: getPanelTitle(input, output),
-      ...output,
-    };
+    this.output = output;
     this.input = {
       viewMode: ViewMode.EDIT,
       ...input,
@@ -106,10 +99,6 @@ export abstract class Embeddable<
 
   public getInput(): Readonly<TEmbeddableInput> {
     return this.input;
-  }
-
-  public getTitle() {
-    return this.output.title;
   }
 
   /**
@@ -184,9 +173,6 @@ export abstract class Embeddable<
       }
       this.input = newInput;
       this.input$.next(newInput);
-      this.updateOutput({
-        title: getPanelTitle(this.input, this.output),
-      } as Partial<TEmbeddableOutput>);
     }
   }
 

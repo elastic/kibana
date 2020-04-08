@@ -85,8 +85,7 @@ test('Is initialized with the embeddables title', async () => {
   const component = mount(<CustomizePanelModal embeddable={embeddable} updateTitle={() => {}} />);
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
-  expect(inputField.props().placeholder).toBe(embeddable.getOutput().title);
-  expect(inputField.props().placeholder).toBe(embeddable.getOutput().defaultTitle);
+  expect(inputField.props().placeholder).toBe(embeddable.getOutput().panelTitle);
   expect(inputField.props().value).toBe('');
 });
 
@@ -106,7 +105,7 @@ test('Calls updateTitle with a new title', async () => {
 });
 
 test('Input value shows custom title if one given', async () => {
-  embeddable.updateInput({ title: 'new title' });
+  embeddable.updateInput({ customPanelTitle: 'new title' });
 
   const updateTitle = jest.fn();
   const component = mount(
@@ -122,7 +121,7 @@ test('Input value shows custom title if one given', async () => {
 test('Reset updates the input with the default title when the embeddable has no title override', async () => {
   const updateTitle = jest.fn();
 
-  embeddable.updateInput({ title: 'my custom title' });
+  embeddable.updateInput({ customPanelTitle: 'my custom title' });
   const component = mount(
     <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} />
   );
@@ -132,7 +131,7 @@ test('Reset updates the input with the default title when the embeddable has no 
   inputField.simulate('change', event);
 
   findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
-  expect(inputField.props().placeholder).toBe(embeddable.getOutput().defaultTitle);
+  expect(inputField.props().placeholder).toBe(embeddable.getOutput().panelTitle);
 });
 
 test('Reset updates the input with the default title when the embeddable has a title override', async () => {
@@ -146,7 +145,7 @@ test('Reset updates the input with the default title when the embeddable has a t
   inputField.simulate('change', event);
 
   findTestSubject(component, 'resetCustomEmbeddablePanelTitle').simulate('click');
-  expect(inputField.props().placeholder).toBe(embeddable.getOutput().defaultTitle);
+  expect(inputField.props().placeholder).toBe(embeddable.getOutput().panelTitle);
 });
 
 test('Reset calls updateTitle with undefined', async () => {

@@ -373,7 +373,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async getPanelTitles() {
       log.debug('in getPanelTitles');
-      const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
+      const titleObjects = await testSubjects.findAll('embeddablePanelTitle');
       return await Promise.all(titleObjects.map(async title => await title.getVisibleText()));
     }
 

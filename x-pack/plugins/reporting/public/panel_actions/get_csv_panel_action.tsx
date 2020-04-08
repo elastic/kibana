@@ -101,7 +101,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
 
     const id = `search:${embeddable.getSavedSearch().id}`;
-    const filename = embeddable.getTitle();
+    const filename = embeddable.getInput().customPanelTitle || embeddable.getOutput().panelTitle;
     const timezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const fromTime = dateMath.parse(from);
     const toTime = dateMath.parse(to);

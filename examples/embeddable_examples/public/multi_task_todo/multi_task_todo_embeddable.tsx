@@ -56,7 +56,7 @@ function getHasMatch(tasks: string[], title?: string, search?: string) {
 
 function getOutput(input: MultiTaskTodoInput) {
   const hasMatch = getHasMatch(input.tasks, input.title, input.search);
-  return { hasMatch };
+  return { hasMatch, ...(input.title !== undefined && { panelTitle: input.title }) };
 }
 
 export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, MultiTaskTodoOutput> {
@@ -64,8 +64,8 @@ export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, Mult
   private subscription: Subscription;
   private node?: HTMLElement;
 
-  constructor(initialInput: MultiTaskTodoInput, parent?: IContainer) {
-    super(initialInput, getOutput(initialInput), parent);
+  constructor(input: MultiTaskTodoInput, parent?: IContainer) {
+    super(input, getOutput(input), parent);
 
     // If you have any output state that changes as a result of input state changes, you
     // should use an subcription.  Here, any time input tasks list, or the input filter

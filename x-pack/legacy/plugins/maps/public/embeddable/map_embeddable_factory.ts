@@ -142,7 +142,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     return new MapEmbeddable(
       {
         layerList,
-        title: input.title ?? '',
+        title: input.customPanelTitle ?? '',
         indexPatterns,
         editable: false,
       },

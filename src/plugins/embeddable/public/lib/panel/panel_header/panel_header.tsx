@@ -118,7 +118,7 @@ export function PanelHeader({
     >
       <h2
         id={headerId}
-        data-test-subj="dashboardPanelTitle"
+        data-test-subj="embeddablePanelTitle"
         className="embPanel__title embPanel__dragger"
       >
         {showTitle ? (

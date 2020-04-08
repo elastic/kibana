@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { UiActionsSetup } from '../../../src/plugins/ui_actions/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../src/plugins/embeddable/public';
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from './hello_world';
 import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoInput, TodoOutput } from './todo';
@@ -27,13 +32,22 @@ import {
   SearchableListContainerFactory,
 } from './searchable_list_container';
 import { LIST_CONTAINER, ListContainerFactory } from './list_container';
+import { ACTION_TOGGLE_VIEW_MODE, ToggleViewModeActionContext } from './actions';
+import { createToggleViewModeAction } from './actions';
 
 export interface EmbeddableExamplesSetupDependencies {
+  uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
 }
 
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
+}
+
+declare module '../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_TOGGLE_VIEW_MODE]: ToggleViewModeActionContext;
+  }
 }
 
 export class EmbeddableExamplesPlugin
@@ -43,6 +57,10 @@ export class EmbeddableExamplesPlugin
     core: CoreSetup<EmbeddableExamplesStartDependencies>,
     deps: EmbeddableExamplesSetupDependencies
   ) {
+    const toggleViewModeAction = createToggleViewModeAction();
+    deps.uiActions.registerAction(toggleViewModeAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, toggleViewModeAction);
+
     deps.embeddable.registerEmbeddableFactory(
       HELLO_WORLD_EMBEDDABLE,
       new HelloWorldEmbeddableFactory()

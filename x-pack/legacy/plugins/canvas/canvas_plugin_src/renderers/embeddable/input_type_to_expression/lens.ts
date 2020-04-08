@@ -13,8 +13,8 @@ export function toExpression(input: SavedLensInput): string {
 
   expressionParts.push(`id="${input.id}"`);
 
-  if (input.title) {
-    expressionParts.push(`title="${input.title}"`);
+  if (input.customPanelTitle) {
+    expressionParts.push(`title="${input.customPanelTitle}"`);
   }
 
   if (input.timeRange) {

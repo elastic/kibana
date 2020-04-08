@@ -32,14 +32,13 @@ export default function({ getService }: PluginFunctionalProviderContext) {
 
     it('list containers render', async () => {
       await retry.try(async () => {
-        const title = await testSubjects.getVisibleText('listContainerTitle');
-        expect(title).to.be('My todo list');
-
-        const titles = await testSubjects.getVisibleTextAll('todoEmbeddableTitle');
-        expect(titles).to.eql(['Take out the trash', 'Vaccum the floor', 'Take out the trash']);
-
-        const searchableTitle = await testSubjects.getVisibleText('searchableListContainerTitle');
-        expect(searchableTitle).to.be('My searchable todo list');
+        const titles = await testSubjects.getVisibleTextAll('embeddablePanelTitle');
+        expect(titles).to.eql([
+          'Take out the trash',
+          'Vaccum the floor',
+          'Take out the trash',
+          'Learn more',
+        ]);
 
         const text = await testSubjects.getVisibleTextAll('helloWorldEmbeddable');
         expect(text).to.eql(['HELLO WORLD!', 'HELLO WORLD!']);

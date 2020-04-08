@@ -43,7 +43,6 @@ export interface ContainerOutput extends EmbeddableOutput {
 }
 
 export interface ContainerInput<PanelExplicitInput = {}> extends EmbeddableInput {
-  hidePanelTitles?: boolean;
   panels: {
     [key: string]: PanelState<PanelExplicitInput & { [id: string]: unknown } & { id: string }>;
   };

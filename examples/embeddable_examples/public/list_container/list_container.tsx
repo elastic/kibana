@@ -32,7 +32,16 @@ export class ListContainer extends Container<{}, ContainerInput> {
   private node?: HTMLElement;
 
   constructor(input: ContainerInput, private embeddableServices: EmbeddableStart) {
-    super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
+    super(
+      input,
+      {
+        embeddableLoaded: {},
+        // Store as the default panel title, any custom title passed in in the initial input.
+        // This is what the value will be reset to with the "reset title" action.
+        panelTitle: input.customPanelTitle,
+      },
+      embeddableServices.getEmbeddableFactory
+    );
   }
 
   getInheritedInput() {

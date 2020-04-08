@@ -33,6 +33,7 @@ export interface TodoInput extends EmbeddableInput {
   task: string;
   icon?: string;
   search?: string;
+  title?: string;
 }
 
 export interface TodoOutput extends EmbeddableOutput {
@@ -41,6 +42,7 @@ export interface TodoOutput extends EmbeddableOutput {
 
 function getOutput(input: TodoInput): TodoOutput {
   return {
+    ...(input.title !== undefined && { panelTitle: input.title }),
     hasMatch: input.search
       ? Boolean(input.task.match(input.search) || (input.title && input.title.match(input.search)))
       : true,
@@ -54,8 +56,16 @@ export class TodoEmbeddable extends Embeddable<TodoInput, TodoOutput> {
   private subscription: Subscription;
   private node?: HTMLElement;
 
-  constructor(initialInput: TodoInput, parent?: IContainer) {
-    super(initialInput, getOutput(initialInput), parent);
+  constructor(input: TodoInput, parent?: IContainer) {
+    super(
+      input,
+      {
+        ...getOutput(input),
+        // Use input.title as the default title of the panel, if rendered inside one.
+        panelTitle: input.title ?? input.customPanelTitle,
+      },
+      parent
+    );
 
     // If you have any output state that changes as a result of input state changes, you
     // should use an subcription.  Here, we use output to indicate whether this task

@@ -30,7 +30,7 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   constructor(private readonly title: string, initialInput: VisualizeInput) {
-    super(initialInput, { title });
+    super(initialInput, { panelTitle: title });
   }
 
   public reload() {}

@@ -64,7 +64,7 @@ export class ContactCardEmbeddable extends Embeddable<
       {
         fullName: getFullName(initialInput),
         originalLastName: initialInput.lastName,
-        defaultTitle: `Hello ${getFullName(initialInput)}`,
+        panelTitle: `Hello ${getFullName(initialInput)}`,
       },
       parent
     );
@@ -73,7 +73,7 @@ export class ContactCardEmbeddable extends Embeddable<
       const fullName = getFullName(this.input);
       this.updateOutput({
         fullName,
-        defaultTitle: `Hello ${fullName}`,
+        panelTitle: `Hello ${fullName}`,
       });
     });
   }

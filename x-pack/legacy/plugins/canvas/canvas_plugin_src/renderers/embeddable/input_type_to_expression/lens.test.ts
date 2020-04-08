@@ -34,7 +34,7 @@ describe('toExpression', () => {
   it('includes optional input values', () => {
     const input: SavedLensInput = {
       ...baseEmbeddableInput,
-      title: 'title',
+      customPanelTitle: 'title',
       timeRange: {
         from: 'now-1h',
         to: 'now',

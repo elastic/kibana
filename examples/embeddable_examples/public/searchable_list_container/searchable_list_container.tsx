@@ -41,7 +41,16 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
   private node?: HTMLElement;
 
   constructor(input: SearchableContainerInput, private embeddableServices: EmbeddableStart) {
-    super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
+    super(
+      input,
+      {
+        embeddableLoaded: {},
+        // Store as the default panel title, any custom title passed in in the initial input.
+        // This is what the value will be reset to with the "reset title" action.
+        panelTitle: input.customPanelTitle,
+      },
+      embeddableServices.getEmbeddableFactory
+    );
   }
 
   // TODO: add a more advanced example here where inherited child input is derived from container

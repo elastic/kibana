@@ -25,13 +25,15 @@ export class HelloWorldEmbeddable extends Embeddable {
   // to instantiate this kind of embeddable.
   public readonly type = HELLO_WORLD_EMBEDDABLE;
 
-  constructor(initialInput: EmbeddableInput, parent?: IContainer) {
+  constructor(input: EmbeddableInput, parent?: IContainer) {
     super(
       // Input state is irrelevant to this embeddable, just pass it along.
-      initialInput,
-      // Initial output state - this embeddable does not do anything with output, so just
-      // pass along an empty object.
-      {},
+      input,
+      // Save this as the default title, this will be shown if input.customPanelTitle is changed to
+      // undefined at any point, and this Embeddable is rendered inside an EmbeddablePanel.
+      {
+        panelTitle: input.customPanelTitle,
+      },
       // Optional parent component, this embeddable can optionally be rendered inside a container.
       parent
     );

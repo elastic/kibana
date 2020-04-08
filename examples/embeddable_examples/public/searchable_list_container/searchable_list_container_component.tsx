@@ -166,12 +166,9 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
   }
 
   public render() {
-    const { embeddable } = this.props;
     return (
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
-          <h2 data-test-subj="searchableListContainerTitle">{embeddable.getTitle()}</h2>
-          <EuiSpacer size="l" />
           {this.renderControls()}
           <EuiSpacer size="l" />
           {this.renderList()}

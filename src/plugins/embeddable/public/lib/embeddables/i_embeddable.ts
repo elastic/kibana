@@ -25,10 +25,24 @@ import { TriggerContextMapping } from '../../../../ui_actions/public';
 
 export interface EmbeddableInput {
   viewMode?: ViewMode;
-  title?: string;
-  id: string;
-  lastReloadRequestTime?: number;
+  /**
+   * An optional panel title that will be displayed with this embeddable if rendered inside an EmbeddablePanel element.
+   * If this is undefined, EmbeddablePanel looks to `output.panelTitle`. If this is set to an empty string, then the
+   * panel title will be hidden.
+   */
+  customPanelTitle?: string;
+
+  /**
+   * If true, and if this embeddable is rendered inside an EmbeddablePanel element, the panel title will be
+   * hidden. This is useful in addition to `input.customPanelTitle` because using this to hide the title,
+   * instead of setting `input.customPanelTitle` to an empty string, will preserve
+   * any custom panel title that was set by the user, and it can just be quickly toggled on or off.
+   */
   hidePanelTitles?: boolean;
+
+  id: string;
+
+  lastReloadRequestTime?: number;
 
   /**
    * Reserved key for `ui_actions` events.
@@ -48,8 +62,12 @@ export interface EmbeddableInput {
 
 export interface EmbeddableOutput {
   editUrl?: string;
-  defaultTitle?: string;
-  title?: string;
+  /**
+   * An optional title that will be displayed with this embeddable. If `input.customPanelTitle` is set, that title
+   * will be shown instead.
+   */
+  panelTitle?: string;
+
   editable?: boolean;
   savedObjectId?: string;
 }
@@ -126,11 +144,6 @@ export interface IEmbeddable<
    * Returns an observable which will be notified when output state changes.
    */
   getOutput$(): Readonly<Observable<O>>;
-
-  /**
-   * Returns the title of this embeddable.
-   */
-  getTitle(): string | undefined;
 
   /**
    * Returns the top most parent embeddable, or itself if this embeddable

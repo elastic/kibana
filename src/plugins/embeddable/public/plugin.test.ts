@@ -100,7 +100,7 @@ test('custom embeddable factory provider test for intercepting embeddable creati
   const factory = start.getEmbeddableFactory('test');
 
   const embeddable = await factory?.create({ id: '123' });
-  embeddable!.updateInput({ title: 'boo' });
+  embeddable!.updateInput({ customPanelTitle: 'boo' });
   // initial subscription, plus the second update.
   expect(updateCount).toEqual(2);
 

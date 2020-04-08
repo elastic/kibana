@@ -94,7 +94,9 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     const explicitInput = await factory.getExplicitInput();
     const embeddable = await this.props.container.addNewEmbeddable(type, explicitInput);
     if (embeddable) {
-      this.showToast(embeddable.getInput().title || '');
+      this.showToast(
+        embeddable.getOutput().panelTitle || embeddable.getInput().customPanelTitle || ''
+      );
     }
   };
 

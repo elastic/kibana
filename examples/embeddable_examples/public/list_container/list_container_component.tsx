@@ -18,7 +18,7 @@
  */
 import React from 'react';
 
-import { EuiFlexGroup, EuiSpacer, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
 import {
   IContainer,
   withEmbeddableSubscription,
@@ -62,13 +62,7 @@ function renderList(
 }
 
 export function ListContainerComponentInner({ embeddable, input, embeddableServices }: Props) {
-  return (
-    <div>
-      <h2 data-test-subj="listContainerTitle">{embeddable.getTitle()}</h2>
-      <EuiSpacer size="l" />
-      {renderList(embeddable, input.panels, embeddableServices)}
-    </div>
-  );
+  return <div>{renderList(embeddable, input.panels, embeddableServices)}</div>;
 }
 
 // You don't have to use this helper wrapper, but it handles a lot of the React boilerplate for

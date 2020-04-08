@@ -56,8 +56,9 @@ export class InspectPanelAction implements Action<ActionContext> {
       throw new Error('Action not compatible with context');
     }
 
+    const title = embeddable.getInput().customPanelTitle || embeddable.getOutput().panelTitle;
     const session = this.inspector.open(adapters, {
-      title: embeddable.getTitle(),
+      title,
     });
     // Overwrite the embeddables.destroy() function to close the inspector
     // before calling the original destroy method

@@ -113,7 +113,9 @@ export class ReplacePanelFlyout extends React.Component<Props> {
       />
     );
 
-    const panelToReplace = 'Replace panel ' + this.props.panelToRemove.getTitle() + ' with:';
+    const { panelToRemove } = this.props;
+    const title = panelToRemove.getInput().customPanelTitle || panelToRemove.getOutput().panelTitle;
+    const panelToReplace = 'Replace panel ' + title + ' with:';
 
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardReplacePanel">
