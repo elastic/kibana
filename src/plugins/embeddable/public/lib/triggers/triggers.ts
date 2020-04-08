@@ -27,10 +27,7 @@ export interface EmbeddableContext {
 export interface EmbeddableVisTriggerContext {
   embeddable?: IEmbeddable;
   timeFieldName?: string;
-  data: {
-    e?: MouseEvent;
-    data: unknown;
-  };
+  data: unknown;
 }
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
