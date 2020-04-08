@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { MarkdownOptions } from './markdown_options';
 import { SettingsOptions } from './settings_options';
-import { DefaultEditorSize } from '../../../../plugins/vis_default_editor/public';
+import { DefaultEditorSize } from '../../vis_default_editor/public';
 
 export const markdownVisDefinition = {
   name: 'markdown',

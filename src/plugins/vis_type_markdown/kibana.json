@@ -1,0 +1,6 @@
+{
+    "id": "markdown_vis",
+    "version": "kibana",
+    "ui": true,
+    "requiredPlugins": ["expressions", "visualizations"]
+}

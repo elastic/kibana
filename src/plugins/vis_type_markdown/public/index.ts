@@ -17,17 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
-import { MarkdownPluginSetupDependencies } from './plugin';
-import { plugin } from '.';
+import { PluginInitializerContext } from '../../../core/public';
+import { MarkdownPlugin as Plugin } from './plugin';
 
-const plugins: Readonly<MarkdownPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}
