@@ -9,7 +9,7 @@ import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingSetupDeps, ReportingCore } from '../types';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
@@ -24,8 +24,9 @@ export function registerJobGenerationRoutes(
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const config = server.config();
-  const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
+  const config = reporting.getConfig();
+  const downloadBaseUrl =
+    config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
 
   /*
    * Generates enqueued job details to use in responses
@@ -48,7 +49,7 @@ export function registerJobGenerationRoutes(
 
     return h
       .response({
-        path: `${DOWNLOAD_BASE_URL}/${jobJson.id}`,
+        path: `${downloadBaseUrl}/${jobJson.id}`,
         job: jobJson,
       })
       .type('application/json');
@@ -67,12 +68,12 @@ export function registerJobGenerationRoutes(
     return err;
   }
 
-  registerGenerateFromJobParams(server, plugins, handler, handleError, logger);
-  registerLegacy(server, plugins, handler, handleError, logger); // 7.x only
+  registerGenerateFromJobParams(reporting, server, plugins, handler, handleError, logger);
+  registerLegacy(reporting, server, plugins, handler, handleError, logger); // 7.x only
 
   // Register beta panel-action download-related API's
-  if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(server, plugins, handler, handleError, logger);
+  if (config.get('csv', 'enablePanelActionDownload')) {
+    registerGenerateCsvFromSavedObject(reporting, server, plugins, handler, handleError, logger);
     registerGenerateCsvFromSavedObjectImmediate(reporting, server, plugins, logger);
   }
 }

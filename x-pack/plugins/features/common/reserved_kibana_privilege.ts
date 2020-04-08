@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Size } from './layout';
+import { FeatureKibanaPrivileges } from '.';
 
-export interface CaptureConfig {
-  zoom: number;
-  viewport: Size;
+export interface ReservedKibanaPrivilege {
+  id: string;
+  privilege: FeatureKibanaPrivileges;
 }

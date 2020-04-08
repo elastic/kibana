@@ -13,7 +13,6 @@ import {
   ESQueueCreateJobFn,
   Logger,
   RequestFacade,
-  ServerFacade,
 } from '../../../../types';
 import { JobParamsPDF } from '../../types';
 // @ts-ignore untyped module
@@ -29,14 +28,10 @@ interface CreateJobFnOpts {
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(
-  reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: unknown,
-  logger: Logger
-) {
-  const compatibilityShim = compatibilityShimFactory(server, logger);
-  const crypto = cryptoFactory(server);
+>> = function createJobFactoryFn(reporting: ReportingCore, logger: Logger) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
+  const compatibilityShim = compatibilityShimFactory(reporting, logger);
 
   return compatibilityShim(async function createJobFn(
     { objectType, title, relativeUrls, browserTimezone, layout }: CreateJobFnOpts,
