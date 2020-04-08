@@ -53,7 +53,7 @@ export const PipelineDetails: FunctionComponent<Props> = ({
 
   descriptionListItems.push({
     title: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-      defaultMessage: 'Processors',
+      defaultMessage: 'Processors JSON',
     }),
     // We use this title from the description list and display the processors in a code block underneath
     description: '',
