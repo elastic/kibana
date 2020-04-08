@@ -10,5 +10,5 @@ import { RouteDefinitionParams } from '..';
  * Defines routes required for the Account Management view.
  */
 export function defineAccountManagementRoutes({ httpResources }: RouteDefinitionParams) {
-  httpResources.registerCoreApp({ path: '/security/account', validate: false });
+  httpResources.registerCoreApp({ path: '/security/account' });
 }

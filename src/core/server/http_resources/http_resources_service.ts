@@ -36,6 +36,7 @@ import {
   HttpResources,
   HttpResourcesResponseOptions,
   HttpResourcesRenderOptions,
+  StaticHttpResourcesRenderOptions,
   HttpResourcesRequestHandler,
   HttpResourcesServiceToolkit,
 } from './types';
@@ -63,11 +64,8 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
   private createRegistrar(deps: SetupDeps, router: IRouter): HttpResources {
     return {
-      registerCoreApp: (
-        route: RouteConfig<unknown, unknown, unknown, 'get'>,
-        options: HttpResourcesRenderOptions = {}
-      ) => {
-        router.get(route, async (context, request, response) => {
+      registerCoreApp: (options: StaticHttpResourcesRenderOptions) => {
+        router.get({ path: options.path, validate: false }, async (context, request, response) => {
           const body = await deps.rendering.render(request, context.core.uiSettings.client, {
             includeUserSettings: true,
           });
@@ -78,20 +76,20 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           });
         });
       },
-      registerAnonymousCoreApp: (
-        route: RouteConfig<unknown, unknown, unknown, 'get'>,
-        options: HttpResourcesRenderOptions = {}
-      ) => {
-        router.get(route, async (context, request, response) => {
-          const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-            includeUserSettings: false,
-          });
+      registerAnonymousCoreApp: (options: StaticHttpResourcesRenderOptions) => {
+        router.get(
+          { path: options.path, validate: false, options: { authRequired: false } },
+          async (context, request, response) => {
+            const body = await deps.rendering.render(request, context.core.uiSettings.client, {
+              includeUserSettings: false,
+            });
 
-          return response.ok({
-            body,
-            headers: { ...options.headers, 'content-security-policy': deps.http.csp.header },
-          });
-        });
+            return response.ok({
+              body,
+              headers: { ...options.headers, 'content-security-policy': deps.http.csp.header },
+            });
+          }
+        );
       },
       register: <P, Q, B>(
         route: RouteConfig<P, Q, B, 'get'>,

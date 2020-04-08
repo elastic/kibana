@@ -45,20 +45,18 @@ describe('HttpResources service', () => {
     });
     describe('registerCoreApp', () => {
       it('registers core app with route config', async () => {
-        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
         const { createRegistrar } = await service.setup(setupDeps);
         const { registerCoreApp } = createRegistrar(router);
-        registerCoreApp(routeConfig);
+        registerCoreApp({ path: '/' });
 
         const [[routerConfig]] = router.get.mock.calls;
-        expect(routerConfig).toBe(routeConfig);
+        expect(routerConfig).toEqual({ path: '/', validate: false });
       });
 
       it('renders page with user settings and CSP header', async () => {
-        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
         const { createRegistrar } = await service.setup(setupDeps);
         const { registerCoreApp } = createRegistrar(router);
-        registerCoreApp(routeConfig);
+        registerCoreApp({ path: '/' });
 
         const [[, routeHandler]] = router.get.mock.calls;
 
@@ -83,10 +81,10 @@ describe('HttpResources service', () => {
       });
 
       it('can attach headers, except the CSP header', async () => {
-        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
         const { createRegistrar } = await service.setup(setupDeps);
         const { registerCoreApp } = createRegistrar(router);
-        registerCoreApp(routeConfig, {
+        registerCoreApp({
+          path: '/',
           headers: {
             'content-security-policy': "script-src 'unsafe-eval'",
             'x-kibana': '42',
@@ -110,20 +108,22 @@ describe('HttpResources service', () => {
     });
     describe('registerAnonymousCoreApp', () => {
       it('registers core app with route config', async () => {
-        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
         const { createRegistrar } = await service.setup(setupDeps);
         const { registerAnonymousCoreApp } = createRegistrar(router);
-        registerAnonymousCoreApp(routeConfig);
+        registerAnonymousCoreApp({ path: '/' });
 
         const [[routerConfig]] = router.get.mock.calls;
-        expect(routerConfig).toBe(routeConfig);
+        expect(routerConfig).toEqual({
+          path: '/',
+          validate: false,
+          options: { authRequired: false },
+        });
       });
 
       it('renders page with user settings and CSP header', async () => {
-        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
         const { createRegistrar } = await service.setup(setupDeps);
         const { registerAnonymousCoreApp } = createRegistrar(router);
-        registerAnonymousCoreApp(routeConfig);
+        registerAnonymousCoreApp({ path: '/' });
 
         const [[, routeHandler]] = router.get.mock.calls;
 
@@ -148,10 +148,10 @@ describe('HttpResources service', () => {
       });
 
       it('can attach headers, except the CSP header', async () => {
-        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
         const { createRegistrar } = await service.setup(setupDeps);
         const { registerAnonymousCoreApp } = createRegistrar(router);
-        registerAnonymousCoreApp(routeConfig, {
+        registerAnonymousCoreApp({
+          path: '/',
           headers: {
             'content-security-policy': "script-src 'unsafe-eval'",
             'x-kibana': '42',

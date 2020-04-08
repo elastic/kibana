@@ -27,6 +27,10 @@ import {
   RequestHandler,
 } from '../http';
 
+export interface StaticHttpResourcesRenderOptions extends HttpResourcesRenderOptions {
+  path: string;
+}
+
 export interface HttpResourcesRenderOptions {
   headers?: ResponseHeaders;
 }
@@ -53,14 +57,8 @@ export interface InternalHttpResourcesSetup {
 }
 
 export interface HttpResources {
-  registerCoreApp: (
-    route: RouteConfig<any, any, any, 'get'>,
-    options?: HttpResourcesRenderOptions
-  ) => void;
-  registerAnonymousCoreApp: (
-    route: RouteConfig<any, any, any, 'get'>,
-    options?: HttpResourcesRenderOptions
-  ) => void;
+  registerCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
+  registerAnonymousCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
   register: <P, Q, B>(
     route: RouteConfig<P, Q, B, 'get'>,
     handler: HttpResourcesRequestHandler<P, Q, B>

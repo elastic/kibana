@@ -180,6 +180,7 @@ export {
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
+  StaticHttpResourcesRenderOptions,
 } from './http_resources';
 
 export { IRenderOptions } from './rendering';

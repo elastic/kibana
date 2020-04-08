@@ -26,4 +26,5 @@ export {
   HttpResourcesRequestHandler,
   HttpResources,
   InternalHttpResourcesSetup,
+  StaticHttpResourcesRenderOptions,
 } from './types';

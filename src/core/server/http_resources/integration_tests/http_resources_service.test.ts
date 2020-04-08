@@ -41,7 +41,7 @@ describe('http resources service', () => {
 
         const router = http.createRouter('');
         const resources = httpResources.createRegistrar(router);
-        resources.registerAnonymousCoreApp({ path: '/render-anon-core', validate: false });
+        resources.registerAnonymousCoreApp({ path: '/render-anon-core' });
 
         await root.start();
         const response = await kbnTestServer.request.get(root, '/render-anon-core').expect(200);
