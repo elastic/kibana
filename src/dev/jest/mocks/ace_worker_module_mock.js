@@ -17,10 +17,4 @@
  * under the License.
  */
 
-// @ts-ignore
-import src from '!!raw-loader!./x_json.ace.worker.js';
-
-export const workerModule = {
-  id: 'ace/mode/json_worker',
-  src,
-};
+module.exports = '';
