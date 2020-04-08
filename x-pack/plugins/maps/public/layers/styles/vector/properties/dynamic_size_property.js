@@ -99,9 +99,13 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     }
   }
 
-  syncCircleStrokeWidthWithMb(mbLayerId, mbMap) {
-    const lineWidth = this.getMbSizeExpression();
-    mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
+  syncCircleStrokeWidthWithMb(mbLayerId, mbMap, hasNoRadius) {
+    if (hasNoRadius) {
+      mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', 0);
+    } else {
+      const lineWidth = this.getMbSizeExpression();
+      mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
+    }
   }
 
   syncCircleRadiusWithMb(mbLayerId, mbMap) {
