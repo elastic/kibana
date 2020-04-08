@@ -9,11 +9,3 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-// @ts-ignore
-export { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-// @ts-ignore
-export { AppStateProvider } from 'ui/state_management/app_state';
-// @ts-ignore
-export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';

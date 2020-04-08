@@ -52,6 +52,6 @@ export const monitoring = kibana => {
       });
     },
     config,
-    uiExports: getUiExports(),
+    //uiExports: getUiExports(),
   });
 };

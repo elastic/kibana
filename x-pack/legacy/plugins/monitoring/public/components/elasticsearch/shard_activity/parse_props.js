@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from '../../../np_imports/ui/chrome';
+import { Legacy } from '../../../np_imports/legacy';
 import { capitalize } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { formatDateTimeLocal } from '../../../../common/formatting';
@@ -39,7 +39,7 @@ export const parseProps = props => {
   } = props;
 
   const { files, size } = index;
-  const injector = chrome.dangerouslyGetActiveInjector();
+  const injector = Legacy.shims.getAngularInjector();
   const timezone = injector.get('config').get('dateFormat:tz');
 
   return {

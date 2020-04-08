@@ -9,10 +9,11 @@ import { EuiSpacer, EuiCodeBlock, EuiLink, EuiCallOut, EuiText } from '@elastic/
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UNDETECTED_BEAT_TYPE, DEFAULT_BEAT_FOR_URLS } from './common_beats_instructions';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from '../../../../np_imports/ui/shims';
+import { Legacy } from '../../../../np_imports/legacy';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 
 export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
   const beatType = product.beatType;
   const securitySetup = getSecurityStep(
     `${ELASTIC_WEBSITE_URL}guide/en/beats/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`

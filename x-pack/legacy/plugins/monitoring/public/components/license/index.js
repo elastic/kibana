@@ -19,9 +19,7 @@ import {
 } from '@elastic/eui';
 import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'plugins/monitoring/np_imports/ui/chrome';
-
-const licenseManagement = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management`;
+import { Legacy } from '../../np_imports/legacy';
 
 const LicenseUpdateInfoForPrimary = ({ isPrimaryCluster, uploadLicensePath }) => {
   if (!isPrimaryCluster) {
@@ -60,6 +58,7 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
 
 export function License(props) {
   const { status, type, isExpired, expiryDate } = props;
+  const licenseManagement = `${Legacy.shims.getBasePath()}/app/kibana#/management/elasticsearch/license_management`;
   return (
     <EuiPage>
       <EuiScreenReaderOnly>

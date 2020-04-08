@@ -8,9 +8,9 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
+import { uiModules } from '../../np_imports/angular/helpers/modules';
 import template from './index.html';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../../np_imports/legacy';
 import { shortenPipelineHash } from '../../../common/formatting';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 import { Subscription } from 'rxjs';
@@ -77,6 +77,7 @@ export class MonitoringMainController {
   }
 
   addTimerangeObservers = () => {
+    const timefilter = Legacy.shims.timefilter;
     this.subscriptions = new Subscription();
 
     const refreshIntervalUpdated = () => {
@@ -101,6 +102,7 @@ export class MonitoringMainController {
 
   // kick things off from the directive link function
   setup(options) {
+    const timefilter = Legacy.shims.timefilter;
     this._licenseService = options.licenseService;
     this._breadcrumbsService = options.breadcrumbsService;
     this._kbnUrlService = options.kbnUrlService;
@@ -208,7 +210,16 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
-      controller.addTimerangeObservers();
+      
+      scope.$applyAsync(() => {
+        controller.addTimerangeObservers();
+        const setupObj = getSetupObj();
+        controller.setup(setupObj);
+        Object.keys(setupObj.attributes).forEach(key => {
+          attributes.$observe(key, () => controller.setup(getSetupObj()));
+        });
+      });
+
       initSetupModeState(scope, $injector, () => {
         controller.setup(getSetupObj());
       });
@@ -243,11 +254,6 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
         };
       }
 
-      const setupObj = getSetupObj();
-      controller.setup(setupObj);
-      Object.keys(setupObj.attributes).forEach(key => {
-        attributes.$observe(key, () => controller.setup(getSetupObj()));
-      });
       scope.$on('$destroy', () => {
         controller.pipelineDropdownElement &&
           unmountComponentAtNode(controller.pipelineDropdownElement);

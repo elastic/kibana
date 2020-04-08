@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import chrome from '../../np_imports/ui/chrome';
+import { Legacy } from '../../np_imports/legacy';
 import { capitalize } from 'lodash';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
@@ -152,7 +152,7 @@ export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) 
     category: alert.metadata.link,
   }));
 
-  const injector = chrome.dangerouslyGetActiveInjector();
+  const injector = Legacy.shims.getAngularInjector();
   const timezone = injector.get('config').get('dateFormat:tz');
 
   return (

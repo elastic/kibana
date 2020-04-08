@@ -9,11 +9,11 @@
  */
 import React from 'react';
 import { get } from 'lodash';
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
+import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../../../np_imports/legacy';
 import {
   EuiPage,
   EuiPageBody,
@@ -33,7 +33,7 @@ function getPageData($injector) {
   const globalState = $injector.get('globalState');
   const $route = $injector.get('$route');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/kibana/${$route.current.params.uuid}`;
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
 
   return $http
     .post(url, {

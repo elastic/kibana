@@ -8,7 +8,7 @@ import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
+import { uiModules } from '../../../np_imports/angular/helpers/modules';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { MachineLearningJobStatusIcon } from 'plugins/monitoring/components/elasticsearch/ml_job_listing/status_icon';
 import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';

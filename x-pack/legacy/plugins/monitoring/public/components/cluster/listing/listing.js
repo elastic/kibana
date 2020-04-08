@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, Component } from 'react';
-import chrome from 'plugins/monitoring/np_imports/ui/chrome';
+import { Legacy } from '../../../np_imports/legacy';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { capitalize, partial } from 'lodash';
@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiIcon,
 } from '@elastic/eui';
-import { toastNotifications } from '../../../np_imports/ui/shims';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -242,7 +241,7 @@ const changeCluster = (scope, globalState, kbnUrl, clusterUuid, ccs) => {
 
 const licenseWarning = (scope, { title, text }) => {
   scope.$evalAsync(() => {
-    toastNotifications.addWarning({ title, text, 'data-test-subj': 'monitoringLicenseWarning' });
+    Legacy.shims.toastNotifications.addWarning({ title, text, 'data-test-subj': 'monitoringLicenseWarning' });
   });
 };
 
@@ -285,7 +284,7 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
 };
 
 const handleClickInvalidLicense = (scope, clusterName) => {
-  const licensingPath = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management/home`;
+  const licensingPath = `${Legacy.shims.getBasePath()}/app/kibana#/management/elasticsearch/license_management/home`;
 
   licenseWarning(scope, {
     title: toMountPoint(

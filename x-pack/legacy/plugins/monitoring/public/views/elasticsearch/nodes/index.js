@@ -7,8 +7,8 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
+import { Legacy } from '../../../np_imports/legacy';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -41,7 +41,7 @@ uiRoutes.when('/elasticsearch/nodes', {
         _api; // to fix eslint
         const $http = $injector.get('$http');
         const globalState = $injector.get('globalState');
-        const timeBounds = timefilter.getBounds();
+        const timeBounds = Legacy.shims.timefilter.getBounds();
 
         const getNodes = (clusterUuid = globalState.cluster_uuid) =>
           $http.post(`../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`, {

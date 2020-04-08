@@ -14,34 +14,28 @@ import {
   createTopNavHelper,
 } from '../../../../../../../src/plugins/kibana_legacy/public';
 
-import {
-  GlobalStateProvider,
-  StateManagementConfigProvider,
-  AppStateProvider,
-  npStart,
-} from '../legacy_imports';
+import { GlobalState } from '../../np_ready/url_state';
 
-// @ts-ignore
-import { PromiseServiceCreator } from './providers/promises';
 // @ts-ignore
 import { PrivateProvider } from './providers/private';
 // @ts-ignore
 import { KbnUrlProvider } from './providers/url';
 
-type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
-
 export const appModuleName = 'monitoring';
-const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
-export const localAppModule = (core: AppMountContext['core']) => {
+type IPrivate = <T>(provider: (...injectable: unknown[]) => T) => T;
+//const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.bootstrap', 'ui.ace'];
+
+const thirdPartyAngularDependencies = ['ngRoute', 'react', 'ui.bootstrap'];
+
+export const localAppModule = (core: AppMountContext['core'], query: any, navigation: any) => { // TODO: add types
   createLocalI18nModule();
   createLocalPrivateModule();
-  createLocalPromiseModule();
   createLocalStorage();
   createLocalConfigModule(core);
   createLocalKbnUrlModule();
-  createLocalStateModule();
-  createLocalTopNavModule(npStart.plugins.navigation);
+  createLocalStateModule(query);
+  createLocalTopNavModule(navigation);
   createHrefModule(core);
 
   const appModule = angular.module(appModuleName, [
@@ -60,18 +54,26 @@ export const localAppModule = (core: AppMountContext['core']) => {
   return appModule;
 };
 
-function createLocalStateModule() {
+function createLocalStateModule(query: any) {
   angular
     .module('monitoring/State', [
       'monitoring/Private',
       'monitoring/Config',
       'monitoring/KbnUrl',
-      'monitoring/Promise',
     ])
-    .factory('AppState', function(Private: IPrivate) {
-      return Private(AppStateProvider);
-    })
-    .service('globalState', function(Private: IPrivate) {
+    .service('globalState', function (Private: IPrivate, $rootScope: ng.IRootScopeService, $location: ng.ILocationService) {
+      function GlobalStateProvider(this: any) {
+        const state = new GlobalState(query, $rootScope, $location, this);
+        const initialState: any = state.getState();
+        for (const key in initialState) {
+          this[key] = initialState[key];
+        }
+        this.save = () => {
+          const newState = { ...this };
+          delete newState.save;
+          state.setState(newState);
+        }
+      }
       return Private(GlobalStateProvider);
     });
 }
@@ -85,7 +87,6 @@ function createLocalKbnUrlModule() {
 function createLocalConfigModule(core: AppMountContext['core']) {
   angular
     .module('monitoring/Config', ['monitoring/Private'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
     .provider('config', () => {
       return {
         $get: () => ({
@@ -95,16 +96,12 @@ function createLocalConfigModule(core: AppMountContext['core']) {
     });
 }
 
-function createLocalPromiseModule() {
-  angular.module('monitoring/Promise', []).service('Promise', PromiseServiceCreator);
-}
-
 function createLocalStorage() {
   angular
     .module('monitoring/Storage', [])
     .service('localStorage', ($window: IWindowService) => new Storage($window.localStorage))
     .service('sessionStorage', ($window: IWindowService) => new Storage($window.sessionStorage))
-    .service('sessionTimeout', () => {});
+    .service('sessionTimeout', () => { });
 }
 
 function createLocalPrivateModule() {

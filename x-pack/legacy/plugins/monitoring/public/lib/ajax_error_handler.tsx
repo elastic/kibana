@@ -8,7 +8,7 @@ import React from 'react';
 import { contains } from 'lodash';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toastNotifications } from '../np_imports/ui/shims';
+import { Legacy } from '../np_imports/legacy';
 // @ts-ignore
 import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public'; // eslint-disable-line import/order
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
@@ -43,7 +43,7 @@ export function ajaxErrorHandlersProvider($injector: any) {
       kbnUrl.redirect('access-denied');
     } else if (err.status === 404 && !contains(window.location.hash, 'no-data')) {
       // pass through if this is a 404 and we're already on the no-data page
-      toastNotifications.addDanger({
+      Legacy.shims.toastNotifications.addDanger({
         title: toMountPoint(
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.requestFailedNotificationTitle"
@@ -64,7 +64,7 @@ export function ajaxErrorHandlersProvider($injector: any) {
         ),
       });
     } else {
-      toastNotifications.addDanger({
+      Legacy.shims.toastNotifications.addDanger({
         title: toMountPoint(
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle"

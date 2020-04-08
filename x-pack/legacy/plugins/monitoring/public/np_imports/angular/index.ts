@@ -5,38 +5,40 @@
  */
 
 import angular, { IModule } from 'angular';
+import { uiRoutes } from './helpers/routes';
+import { Legacy } from '../legacy';
+import { uiModules } from './helpers/modules';
+import { configureAppAngularModule } from '../../../../../../../src/plugins/kibana_legacy/public';
+import { localAppModule, appModuleName } from './app_modules';
 
-import { AppMountContext, LegacyCoreStart } from 'kibana/public';
-
-// @ts-ignore TODO: change to absolute path
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
-// @ts-ignore TODO: change to absolute path
-import chrome from 'plugins/monitoring/np_imports/ui/chrome';
-// @ts-ignore TODO: change to absolute path
-import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
-// @ts-ignore TODO: change to absolute path
-import { registerTimefilterWithGlobalState } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { configureAppAngularModule } from './angular_config';
-
-import { localAppModule, appModuleName } from './modules';
-
+const SAFARI_FIX = 'kbnLocalApplicationWrapper';
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 
-  constructor({ core }: AppMountContext, { element }: { element: HTMLElement }) {
-    uiModules.addToModule();
-    const app: IModule = localAppModule(core);
-    app.config(($routeProvider: any) => {
-      $routeProvider.eagerInstantiationEnabled(false);
-      uiRoutes.addToProvider($routeProvider);
+  constructor({ core, element, data: { query }, navigation, isCloud, pluginInitializerContext }: any) { // TODO: add types
+    //uiModules.implement();
+    const app: IModule = localAppModule(core, query, navigation);
+    app.run(($injector: angular.auto.IInjectorService) => {
+      this.injector = $injector
+      Legacy.init(core, query.timefilter.timefilter, this.injector, isCloud);
     });
-    configureAppAngularModule(app, core as LegacyCoreStart);
-    registerTimefilterWithGlobalState(app);
+
+    app.config(($routeProvider: unknown) => uiRoutes.addToProvider($routeProvider));
+
+    console.log('...CORE:', core)
+
+    const np = { core, env: pluginInitializerContext.env }
+    configureAppAngularModule(app, np, true);
     const appElement = document.createElement('div');
     appElement.setAttribute('style', 'height: 100%');
-    appElement.innerHTML = '<div ng-view style="height: 100%" id="monitoring-angular-app"></div>';
-    this.injector = angular.bootstrap(appElement, [appModuleName]);
-    chrome.setInjector(this.injector);
+    appElement.setAttribute('class', SAFARI_FIX);
+    appElement.innerHTML = `<div ng-view style="height: 100%" id="monitoring-angular-app" class="${SAFARI_FIX}"></div>`;
+
+    if (!element.classList.contains(SAFARI_FIX)) {
+      element.classList.add(SAFARI_FIX)
+    }
+
+    angular.bootstrap(appElement, [appModuleName]);
     angular.element(element).append(appElement);
   }
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
+import { uiModules } from '../../../np_imports/angular/helpers/modules';
 import { BeatsOverview } from 'plugins/monitoring/components/beats/overview';
 
 const uiModule = uiModules.get('monitoring/directives', []);

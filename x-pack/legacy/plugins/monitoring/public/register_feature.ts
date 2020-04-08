@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+ /*
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { npSetup } from 'ui/new_platform';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
+
 
 const {
   plugins: { home },
@@ -28,3 +30,4 @@ if (chrome.getInjected('monitoringUiEnabled')) {
     category: FeatureCatalogueCategory.ADMIN,
   });
 }
+*/

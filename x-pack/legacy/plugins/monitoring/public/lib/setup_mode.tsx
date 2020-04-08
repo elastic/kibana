@@ -8,17 +8,9 @@ import React from 'react';
 import { render } from 'react-dom';
 import { get, contains } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
-import { PluginsSetup } from 'ui/new_platform/new_platform';
-import { toastNotifications } from '../np_imports/ui/shims';
-import chrome from '../np_imports/ui/chrome';
-import { CloudSetup } from '../../../../../plugins/cloud/public';
+import { Legacy } from '../np_imports/legacy';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
-
-interface PluginsSetupWithCloud extends PluginsSetup {
-  cloud: CloudSetup;
-}
 
 function isOnPage(hash: string) {
   return contains(window.location.hash, hash);
@@ -46,12 +38,12 @@ const checkAngularState = () => {
 interface ISetupModeState {
   enabled: boolean;
   data: any;
-  callbacks: Function[];
+  callback?: (() => void) | null;
 }
 const setupModeState: ISetupModeState = {
   enabled: false,
   data: null,
-  callbacks: [],
+  callback: null,
 };
 
 export const getSetupModeState = () => setupModeState;
@@ -94,17 +86,15 @@ export const fetchCollectionData = async (uuid?: string, fetchWithoutClusterUuid
 };
 
 const notifySetupModeDataChange = (oldData?: any) => {
-  setupModeState.callbacks.forEach((cb: Function) => cb(oldData));
+  setupModeState.callback && setupModeState.callback();
 };
 
 export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid = false) => {
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
-  const { cloud } = npSetup.plugins as PluginsSetupWithCloud;
-  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
   const hasPermissions = get(data, '_meta.hasPermissions', false);
-  if (isCloudEnabled || !hasPermissions) {
+  if (Legacy.shims.isCloud || !hasPermissions) {
     let text: string = '';
     if (!hasPermissions) {
       text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
@@ -117,7 +107,7 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
     }
 
     angularState.scope.$evalAsync(() => {
-      toastNotifications.addDanger({
+      Legacy.shims.toastNotifications.addDanger({
         title: i18n.translate('xpack.monitoring.setupMode.notAvailableTitle', {
           defaultMessage: 'Setup mode is not available',
         }),
@@ -182,9 +172,7 @@ export const setSetupModeMenuItem = () => {
   }
 
   const globalState = angularState.injector.get('globalState');
-  const { cloud } = npSetup.plugins as PluginsSetupWithCloud;
-  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
-  const enabled = !globalState.inSetupMode && !isCloudEnabled;
+  const enabled = !globalState.inSetupMode && !Legacy.shims.isCloud;
 
   render(
     <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />,
@@ -192,13 +180,13 @@ export const setSetupModeMenuItem = () => {
   );
 };
 
-export const addSetupModeCallback = (callback: Function) => setupModeState.callbacks.push(callback);
+export const addSetupModeCallback = (callback: () => void) => setupModeState.callback = callback;
 
-export const initSetupModeState = async ($scope: any, $injector: any, callback?: Function) => {
+export const initSetupModeState = async ($scope: any, $injector: any, callback?: () => void) => {
   angularState.scope = $scope;
   angularState.injector = $injector;
   if (callback) {
-    setupModeState.callbacks.push(callback);
+    setupModeState.callback = callback;
   }
 
   const globalState = $injector.get('globalState');
@@ -212,7 +200,7 @@ export const isInSetupMode = () => {
     return true;
   }
 
-  const $injector = angularState.injector || chrome.dangerouslyGetActiveInjector();
+  const $injector = angularState.injector || Legacy.shims.getAngularInjector();
   const globalState = $injector.get('globalState');
   return globalState.inSetupMode;
 };

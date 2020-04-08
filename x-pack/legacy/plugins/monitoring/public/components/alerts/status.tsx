@@ -17,8 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { kfetch } from '../../np_imports/ui/kfetch';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from '../../np_imports/ui/shims';
+import { Legacy } from '../../np_imports/legacy';
 import { Alert, BASE_ALERT_API_PATH } from '../../../../../../plugins/alerting/common';
 import { getSetupModeState, addSetupModeCallback, toggleSetupMode } from '../../lib/setup_mode';
 import { NUMBER_OF_MIGRATED_ALERTS, ALERT_TYPE_PREFIX } from '../../../common/constants';
@@ -39,7 +38,7 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
 
   React.useEffect(() => {
     async function fetchAlertsStatus() {
-      const alerts = await kfetch({ method: 'GET', pathname: `${BASE_ALERT_API_PATH}/_find` });
+      const alerts = await Legacy.shims.kfetch({ method: 'GET', pathname: `${BASE_ALERT_API_PATH}/_find` });
       const monitoringAlerts = alerts.data.filter((alert: Alert) =>
         alert.alertTypeId.startsWith(ALERT_TYPE_PREFIX)
       );
@@ -57,7 +56,7 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
   }, [setupModeEnabled, showMigrationFlyout]);
 
   async function fetchSecurityConfigured() {
-    const response = await kfetch({ pathname: '/internal/security/api_key/privileges' });
+    const response = await Legacy.shims.kfetch({ pathname: '/internal/security/api_key/privileges' });
     setIsSecurityConfigured(response.areApiKeysEnabled);
   }
 
@@ -72,7 +71,7 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
     if (isSecurityConfigured) {
       return null;
     }
-
+    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
     const link = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/security-settings.html#api-key-service-settings`;
     return (
       <Fragment>

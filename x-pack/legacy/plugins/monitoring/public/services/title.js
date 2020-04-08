@@ -6,20 +6,22 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
-import { docTitle } from '../np_imports/ui/shims';
+import { uiModules } from '../np_imports/angular/helpers/modules';
+import { Legacy } from '../np_imports/legacy';
 
 const uiModule = uiModules.get('monitoring/title', []);
-uiModule.service('title', () => {
+uiModule.service('title', ($rootScope) => {
   return function changeTitle(cluster, suffix) {
     let clusterName = _.get(cluster, 'cluster_name');
     clusterName = clusterName ? `- ${clusterName}` : '';
     suffix = suffix ? `- ${suffix}` : '';
-    docTitle.change(
-      i18n.translate('xpack.monitoring.stackMonitoringDocTitle', {
-        defaultMessage: 'Stack Monitoring {clusterName} {suffix}',
-        values: { clusterName, suffix },
-      })
-    );
+    $rootScope.$applyAsync(() => {
+      Legacy.shims.docTitle.change(
+        i18n.translate('xpack.monitoring.stackMonitoringDocTitle', {
+          defaultMessage: 'Stack Monitoring {clusterName} {suffix}',
+          values: { clusterName, suffix },
+        })
+      );
+    });
   };
 });

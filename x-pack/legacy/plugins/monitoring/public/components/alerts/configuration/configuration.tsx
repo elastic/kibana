@@ -7,7 +7,7 @@
 import React, { ReactNode } from 'react';
 import { EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { kfetch } from '../../../np_imports/ui/kfetch';
+import { Legacy } from '../../../np_imports/legacy';
 import { ActionResult } from '../../../../../../../plugins/actions/common';
 import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
 import { getMissingFieldErrors } from '../../../lib/form_validation';
@@ -59,7 +59,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
   }, [emailAddress]);
 
   async function fetchEmailActions() {
-    const kibanaActions = await kfetch({
+    const kibanaActions = await Legacy.shims.kfetch({
       method: 'GET',
       pathname: `/api/action/_find`,
     });
@@ -84,7 +84,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
     setShowFormErrors(false);
 
     try {
-      await kfetch({
+      await Legacy.shims.kfetch({
         method: 'POST',
         pathname: `/api/monitoring/v1/alerts`,
         body: JSON.stringify({ selectedEmailActionId, emailAddress }),

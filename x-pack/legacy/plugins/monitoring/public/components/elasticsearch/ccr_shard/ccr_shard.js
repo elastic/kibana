@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import chrome from '../../../np_imports/ui/chrome';
+import { Legacy } from '../../../np_imports/legacy';
 import {
   EuiPage,
   EuiPageBody,
@@ -93,7 +93,7 @@ export class CcrShard extends PureComponent {
 
   renderLatestStat() {
     const { stat, timestamp } = this.props;
-    const injector = chrome.dangerouslyGetActiveInjector();
+    const injector = Legacy.shims.getAngularInjector();
     const timezone = injector.get('config').get('dateFormat:tz');
 
     return (

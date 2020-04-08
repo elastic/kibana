@@ -5,9 +5,9 @@
  */
 import React, { Fragment } from 'react';
 import { isEmpty } from 'lodash';
-import chrome from '../../../np_imports/ui/chrome';
+import { Legacy } from '../../../np_imports/legacy';
 import { i18n } from '@kbn/i18n';
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
+import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
@@ -69,7 +69,7 @@ uiRoutes.when('/overview', {
             return;
           }
 
-          let emailAddress = chrome.getInjected('monitoringLegacyEmailAddress') || '';
+          let emailAddress = Legacy.shims.getInjected('monitoringLegacyEmailAddress') || '';
           if (KIBANA_ALERTING_ENABLED) {
             emailAddress = config.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) || emailAddress;
           }

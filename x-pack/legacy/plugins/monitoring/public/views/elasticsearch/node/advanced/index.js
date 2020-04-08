@@ -9,11 +9,11 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
+import { uiRoutes } from '../../../../np_imports/angular/helpers/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../../../../np_imports/legacy';
 import { AdvancedNode } from '../../../../components/elasticsearch/node/advanced';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { CODE_PATH_ELASTICSEARCH } from '../../../../../common/constants';
@@ -22,7 +22,7 @@ function getPageData($injector) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const $route = $injector.get('$route');
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/nodes/${$route.current.params.node}`;
 
   return $http

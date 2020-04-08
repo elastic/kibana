@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
+import { uiModules } from '../np_imports/angular/helpers/modules';
 
 const uiModule = uiModules.get('monitoring/features', []);
 uiModule.service('features', function($window) {

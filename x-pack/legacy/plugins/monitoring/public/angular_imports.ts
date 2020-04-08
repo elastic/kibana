@@ -13,13 +13,3 @@ import 'plugins/monitoring/services/title';
 import 'plugins/monitoring/services/breadcrumbs';
 import 'plugins/monitoring/directives/all';
 import 'plugins/monitoring/views/all';
-
-import { npSetup, npStart } from '../public/np_imports/legacy_imports';
-import { plugin } from './np_ready';
-
-const pluginInstance = plugin({} as any);
-pluginInstance.setup(npSetup.core, npSetup.plugins);
-pluginInstance.start(npStart.core, {
-  ...npStart.plugins,
-  __LEGACY: {},
-});

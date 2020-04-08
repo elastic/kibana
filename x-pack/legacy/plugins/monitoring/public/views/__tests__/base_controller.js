@@ -7,7 +7,7 @@
 import { spy, stub } from 'sinon';
 import expect from '@kbn/expect';
 import { MonitoringViewBaseController } from '../';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../../../np_imports/legacy';
 import { PromiseWithCancel, Status } from '../../../common/cancel_promise';
 
 /*

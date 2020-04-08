@@ -6,47 +6,47 @@
 
 import angular from 'angular';
 
-type PrivateProvider = (...args: any) => any;
+type PrivateProvider = (...args: unknown[]) => unknown;
 interface Provider {
   name: string;
   provider: PrivateProvider;
 }
 
 class Modules {
-  private _services: Provider[] = [];
-  private _filters: Provider[] = [];
-  private _directives: Provider[] = [];
+  private services: Provider[] = [];
+  private filters: Provider[] = [];
+  private directives: Provider[] = [];
 
   public get = (_name: string, _dep?: string[]) => {
     return this;
   };
 
   public service = (...args: any) => {
-    this._services.push(args);
+    this.services.push(args);
   };
 
   public filter = (...args: any) => {
-    this._filters.push(args);
+    this.filters.push(args);
   };
 
   public directive = (...args: any) => {
-    this._directives.push(args);
+    this.directives.push(args);
   };
 
-  public addToModule = () => {
+  public implement = () => {
     angular.module('monitoring/services', []);
     angular.module('monitoring/filters', []);
     angular.module('monitoring/directives', []);
 
-    this._services.forEach(args => {
-      angular.module('monitoring/services').service.apply(null, args as any);
+    this.services.forEach(args => {
+      angular.module('monitoring/services').service.apply(null, args as any );
     });
 
-    this._filters.forEach(args => {
+    this.filters.forEach(args => {
       angular.module('monitoring/filters').filter.apply(null, args as any);
     });
 
-    this._directives.forEach(args => {
+    this.directives.forEach(args => {
       angular.module('monitoring/directives').directive.apply(null, args as any);
     });
   };

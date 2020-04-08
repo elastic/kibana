@@ -5,17 +5,16 @@
  */
 import React, { PureComponent } from 'react';
 import { capitalize } from 'lodash';
-import chrome from '../../np_imports/ui/chrome';
+import { Legacy } from '../../np_imports/legacy';
 import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
 import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from './reason';
-import { capabilities } from '../../np_imports/ui/capabilities';
 
 const getFormattedDateTimeLocal = timestamp => {
-  const injector = chrome.dangerouslyGetActiveInjector();
+  const injector = Legacy.shims.getAngularInjector();
   const timezone = injector.get('config').get('dateFormat:tz');
   return formatDateTimeLocal(timestamp, timezone);
 };
@@ -110,7 +109,7 @@ const clusterColumns = [
 ];
 
 function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
-  const base = `${chrome.getBasePath()}/app/logs/link-to/${INFRA_SOURCE_ID}/logs`;
+  const base = `${Legacy.shims.getBasePath()}/app/logs/link-to/${INFRA_SOURCE_ID}/logs`;
 
   const params = [];
   if (clusterUuid) {
@@ -158,7 +157,7 @@ export class Logs extends PureComponent {
   }
 
   renderCallout() {
-    const uiCapabilities = capabilities.get();
+    const uiCapabilities = Legacy.shims.capabilities.get();
     const show = uiCapabilities.logs && uiCapabilities.logs.show;
     const {
       logs: { enabled },

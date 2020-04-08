@@ -8,10 +8,11 @@ import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from '../../np_imports/ui/shims';
+import { Legacy } from '../../np_imports/legacy';
 import { Monospace } from '../metricbeat_migration/instruction_steps/components/monospace/monospace';
 
 export const Reason = ({ reason }) => {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
   let title = i18n.translate('xpack.monitoring.logs.reason.defaultTitle', {
     defaultMessage: 'No log data found',
   });

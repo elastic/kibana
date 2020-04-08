@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
+//import { uiModules } from 'ui/modules';
 
-uiModules.get('kibana').constant('monitoringUiEnabled', true);
+//uiModules.get('kibana').constant('monitoringUiEnabled', true);

@@ -5,12 +5,12 @@
  */
 
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../../../np_imports/legacy';
 
 export function getPageData($injector) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/ccr`;
 
   return $http

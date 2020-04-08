@@ -8,12 +8,12 @@
  * Kibana Overview
  */
 import React from 'react';
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
+import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../../../np_imports/legacy';
 import {
   EuiPage,
   EuiPageBody,
@@ -31,7 +31,7 @@ function getPageData($injector) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/kibana`;
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
 
   return $http
     .post(url, {

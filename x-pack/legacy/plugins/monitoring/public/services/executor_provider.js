@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { subscribeWithScope } from 'plugins/monitoring/np_imports/ui/utils';
+import { Legacy } from '../np_imports/legacy';
+import { subscribeWithScope } from '../np_imports/angular/helpers/utils';
 import { Subscription } from 'rxjs';
-export function executorProvider(Promise, $timeout) {
+export function executorProvider($timeout, $q) {
   const queue = [];
   const subscriptions = new Subscription();
   let executionTimer;
@@ -61,8 +60,8 @@ export function executorProvider(Promise, $timeout) {
    * @returns {Promise} a promise of all the services
    */
   function run() {
-    const noop = () => Promise.resolve();
-    return Promise.all(
+    const noop = () => $q.resolve();
+    return $q.all(
       queue.map(service => {
         return service
           .execute()
@@ -78,7 +77,7 @@ export function executorProvider(Promise, $timeout) {
   }
 
   function killIfPaused() {
-    if (timefilter.getRefreshInterval().pause) {
+    if (Legacy.shims.timefilter.getRefreshInterval().pause) {
       killTimer();
     }
   }
@@ -88,6 +87,7 @@ export function executorProvider(Promise, $timeout) {
    * @returns {void}
    */
   function start() {
+    const timefilter = Legacy.shims.timefilter;
     if (
       (ignorePaused || timefilter.getRefreshInterval().pause === false) &&
       timefilter.getRefreshInterval().value > 0
@@ -102,17 +102,22 @@ export function executorProvider(Promise, $timeout) {
   return {
     register,
     start($scope) {
-      subscriptions.add(
-        subscribeWithScope($scope, timefilter.getFetch$(), {
-          next: reFetch,
-        })
-      );
-      subscriptions.add(
-        subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-          next: killIfPaused,
-        })
-      );
-      start();
+
+      $scope.$applyAsync(() => {
+        const timefilter = Legacy.shims.timefilter;
+        subscriptions.add(
+          subscribeWithScope($scope, timefilter.getFetch$(), {
+            next: reFetch,
+          })
+        );
+        subscriptions.add(
+          subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+            next: killIfPaused,
+          })
+        );
+        start();
+      });
+
     },
     run,
     destroy,

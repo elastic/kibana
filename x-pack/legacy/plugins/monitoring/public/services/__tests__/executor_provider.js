@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { executorProvider } from '../executor_provider';
 import Bluebird from 'bluebird';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../np_imports/legacy';
 
 describe('$executor service', () => {
   let scope;

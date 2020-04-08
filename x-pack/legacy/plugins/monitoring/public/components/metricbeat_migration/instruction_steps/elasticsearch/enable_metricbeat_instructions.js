@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCodeBlock, EuiLink, EuiText } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from '../../../../np_imports/ui/shims';
+import { Legacy } from '../../../../np_imports/legacy';
 import { getSecurityStep, getMigrationStatusStep } from '../common_instructions';
 
 export function getElasticsearchInstructionsForEnablingMetricbeat(
@@ -16,6 +16,7 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(
   _meta,
   { esMonitoringUrl }
 ) {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
   const securitySetup = getSecurityStep(
     `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`
   );

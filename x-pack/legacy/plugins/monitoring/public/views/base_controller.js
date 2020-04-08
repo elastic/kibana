@@ -9,8 +9,7 @@ import moment from 'moment';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { I18nContext } from '../np_imports/ui/shims';
+import { Legacy } from '../np_imports/legacy';
 import { PromiseWithCancel } from '../../common/cancel_promise';
 import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
 
@@ -113,17 +112,6 @@ export class MonitoringViewBaseController {
 
     const { enableTimeFilter = true, enableAutoRefresh = true } = options;
 
-    if (enableTimeFilter === false) {
-      timefilter.disableTimeRangeSelector();
-    } else {
-      timefilter.enableTimeRangeSelector();
-    }
-
-    if (enableAutoRefresh === false) {
-      timefilter.disableAutoRefreshSelector();
-    } else {
-      timefilter.enableAutoRefreshSelector();
-    }
 
     this.updateData = () => {
       if (this.updateDataPromise) {
@@ -146,7 +134,46 @@ export class MonitoringViewBaseController {
         });
       });
     };
-    fetchDataImmediately && this.updateData();
+
+    $scope.$applyAsync(() => {
+      const timefilter = Legacy.shims.timefilter;
+
+      if (enableTimeFilter === false) {
+        timefilter.disableTimeRangeSelector();
+      } else {
+        timefilter.enableTimeRangeSelector();
+      }
+
+      if (enableAutoRefresh === false) {
+        timefilter.disableAutoRefreshSelector();
+      } else {
+        timefilter.enableAutoRefreshSelector();
+      }
+
+      // needed for chart pages
+      this.onBrush = ({ xaxis }) => {
+        removePopstateHandler();
+        const { to, from } = xaxis;
+        const timezone = config.get('dateFormat:tz');
+        const offset = getOffsetInMS(timezone);
+        timefilter.setTime({
+          from: moment(from - offset),
+          to: moment(to - offset),
+          mode: 'absolute',
+        });
+        $executor.cancel();
+        $executor.run();
+        ++zoomInLevel;
+        clearTimeout(deferTimer);
+        /*
+          Needed to defer 'popstate' event, so it does not fire immediately after it's added.
+          10ms is to make sure the event is not added with the same code digest
+        */
+        deferTimer = setTimeout(() => addPopstateHandler(), 10);
+      };
+
+      fetchDataImmediately && this.updateData();
+    });
 
     $executor.register({
       execute: () => this.updateData(),
@@ -162,28 +189,6 @@ export class MonitoringViewBaseController {
       $executor.destroy();
     });
 
-    // needed for chart pages
-    this.onBrush = ({ xaxis }) => {
-      removePopstateHandler();
-      const { to, from } = xaxis;
-      const timezone = config.get('dateFormat:tz');
-      const offset = getOffsetInMS(timezone);
-      timefilter.setTime({
-        from: moment(from - offset),
-        to: moment(to - offset),
-        mode: 'absolute',
-      });
-      $executor.cancel();
-      $executor.run();
-      ++zoomInLevel;
-      clearTimeout(deferTimer);
-      /*
-        Needed to defer 'popstate' event, so it does not fire immediately after it's added.
-        10ms is to make sure the event is not added with the same code digest
-      */
-      deferTimer = setTimeout(() => addPopstateHandler(), 10);
-    };
-
     this.setTitle = title => titleService($scope.cluster, title);
   }
 
@@ -193,6 +198,7 @@ export class MonitoringViewBaseController {
       console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
       return;
     }
+    const I18nContext = Legacy.shims.I18nContext;
     const wrappedComponent = (
       <I18nContext>{!this._isDataInitialized ? <PageLoading /> : component}</I18nContext>
     );

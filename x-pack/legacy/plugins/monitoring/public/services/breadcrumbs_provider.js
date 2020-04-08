@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'plugins/monitoring/np_imports/ui/chrome';
+import { Legacy } from '../np_imports/legacy';
 import { i18n } from '@kbn/i18n';
 
 // Helper for making objects to use in a link element
@@ -195,7 +195,7 @@ export function breadcrumbsProvider() {
       breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
     }
 
-    chrome.breadcrumbs.set(
+    Legacy.shims.breadcrumbs.set(
       breadcrumbs.map(b => ({
         text: b.label,
         href: b.url,

@@ -5,8 +5,8 @@
  */
 
 import { noop } from 'lodash';
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
-import uiChrome from 'plugins/monitoring/np_imports/ui/chrome';
+import { uiRoutes } from '../../np_imports/angular/helpers/routes';
+import { Legacy } from '../../np_imports/legacy';
 import template from './index.html';
 
 const tryPrivilege = ($http, kbnUrl) => {
@@ -40,7 +40,7 @@ uiRoutes.when('/access-denied', {
 
     // The template's "Back to Kibana" button click handler
     this.goToKibana = () => {
-      $window.location.href = uiChrome.getBasePath() + kbnBaseUrl;
+      $window.location.href = Legacy.shims.getBasePath() + kbnBaseUrl;
     };
 
     // keep trying to load data in the background

@@ -8,11 +8,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render } from 'react-dom';
 import { find, get } from 'lodash';
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
+import { uiRoutes } from '../../np_imports/angular/helpers/routes';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../../np_imports/legacy';
 import { Alerts } from '../../components/alerts';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,7 +25,7 @@ function getPageData($injector) {
   const Private = $injector.get('Private');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/legacy_alerts`;
 
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
 
   return $http
     .post(url, {

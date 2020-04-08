@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment-timezone';
-import chrome from '../../../np_imports/ui/chrome';
+import { Legacy } from '../../../np_imports/legacy';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
@@ -58,7 +58,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
       severityIcon.iconType = 'check';
     }
 
-    const injector = chrome.dangerouslyGetActiveInjector();
+    const injector = Legacy.shims.getAngularInjector();
     const timezone = injector.get('config').get('dateFormat:tz');
 
     return (

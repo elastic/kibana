@@ -8,18 +8,17 @@ import { get, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import chrome from 'plugins/monitoring/np_imports/ui/chrome';
+import { Legacy } from '../../np_imports/legacy';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 
 const REACT_NODE_ID = 'licenseReact';
 
 export class LicenseViewController {
   constructor($injector, $scope) {
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
+    Legacy.shims.timefilter.disableTimeRangeSelector();
+    Legacy.shims.timefilter.disableAutoRefreshSelector();
 
     $scope.$on('$destroy', () => {
       unmountComponentAtNode(document.getElementById(REACT_NODE_ID));
@@ -46,14 +45,14 @@ export class LicenseViewController {
     this.isExpired = Date.now() > get(cluster, 'license.expiry_date_in_millis');
     this.isPrimaryCluster = cluster.isPrimary;
 
-    const basePath = chrome.getBasePath();
+    const basePath = Legacy.shims.getBasePath();
     this.uploadLicensePath = basePath + '/app/kibana#' + MANAGEMENT_BASE_PATH + 'upload_license';
 
     this.renderReact($scope);
   }
 
   renderReact($scope) {
-    const injector = chrome.dangerouslyGetActiveInjector();
+    const injector = Legacy.shims.getAngularInjector();
     const timezone = injector.get('config').get('dateFormat:tz');
     $scope.$evalAsync(() => {
       const { isPrimaryCluster, license, isExpired, uploadLicensePath } = this;

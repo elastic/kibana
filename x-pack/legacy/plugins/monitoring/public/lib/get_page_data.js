@@ -5,12 +5,12 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../np_imports/legacy';
 
 export function getPageData($injector, api) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
 
   return $http
     .post(api, {

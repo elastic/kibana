@@ -8,11 +8,11 @@
  * Logstash Overview
  */
 import React from 'react';
-import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
+import { uiRoutes } from '../../../np_imports/angular/helpers/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
-import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { Legacy } from '../../../np_imports/legacy';
 import { Overview } from '../../../components/logstash/overview';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
@@ -21,7 +21,7 @@ function getPageData($injector) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/logstash`;
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
 
   return $http
     .post(url, {

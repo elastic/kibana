@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+ /*
 import { uiModules } from 'ui/modules';
 import { npStart } from 'ui/new_platform';
 
@@ -14,3 +15,5 @@ uiModules.get('monitoring/hacks').run(monitoringUiEnabled => {
 
   npStart.core.chrome.navLinks.update('monitoring', { hidden: true });
 });
+
+*/

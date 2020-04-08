@@ -16,7 +16,7 @@ import { NoData } from 'plugins/monitoring/components';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
 import { MonitoringViewBaseController } from '../base_controller';
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
+import { Legacy } from '../../np_imports/legacy';
 
 export class NoDataController extends MonitoringViewBaseController {
   constructor($injector, $scope) {
@@ -98,15 +98,12 @@ export class NoDataController extends MonitoringViewBaseController {
 
   render(enabler) {
     const props = this;
-    const { cloud } = npSetup.plugins;
-    const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
-
     this.renderReact(
       <NoData
         {...props}
         enabler={enabler}
         changePath={this.changePath}
-        isCloudEnabled={isCloudEnabled}
+        isCloudEnabled={Legacy.shims.isCloud}
       />
     );
   }

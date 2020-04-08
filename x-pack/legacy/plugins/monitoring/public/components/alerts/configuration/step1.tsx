@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { omit, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { kfetch } from '../../../np_imports/ui/kfetch';
+import { Legacy } from '../../../np_imports/legacy';
 import { ActionResult, BASE_ACTION_API_PATH } from '../../../../../../../plugins/actions/common';
 import { ManageEmailAction, EmailActionData } from '../manage_email_action';
 import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
@@ -42,7 +42,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
 
   async function createEmailAction(data: EmailActionData) {
     if (props.editAction) {
-      await kfetch({
+      await Legacy.shims.kfetch({
         method: 'PUT',
         pathname: `${BASE_ACTION_API_PATH}/${props.editAction.id}`,
         body: JSON.stringify({
@@ -53,7 +53,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
       });
       props.setEditAction(null);
     } else {
-      await kfetch({
+      await Legacy.shims.kfetch({
         method: 'POST',
         pathname: BASE_ACTION_API_PATH,
         body: JSON.stringify({
@@ -73,7 +73,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
   async function deleteEmailAction(id: string) {
     setIsDeleting(true);
 
-    await kfetch({
+    await Legacy.shims.kfetch({
       method: 'DELETE',
       pathname: `${BASE_ACTION_API_PATH}/${id}`,
     });
@@ -99,7 +99,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
       to: [props.emailAddress],
     };
 
-    const result = await kfetch({
+    const result = await Legacy.shims.kfetch({
       method: 'POST',
       pathname: `${BASE_ACTION_API_PATH}/${props.selectedEmailActionId}/_execute`,
       body: JSON.stringify({ params }),
