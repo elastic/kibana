@@ -1,0 +1,16 @@
+@mixin padBannerWith($size) {
+  p[role='banner'] {
+    padding-left: $size;
+    padding-right: $size;
+  }
+}
+
+.alertingHealthCheck {
+  @include padBannerWith(2 * $euiSize);
+}
+
+.alertingFlyoutHealthCheck {
+  @include padBannerWith(2 * $euiSize);
+
+  margin-top: $euiSize;
+}

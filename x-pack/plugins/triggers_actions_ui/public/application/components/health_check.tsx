@@ -17,18 +17,19 @@ import { DocLinksStart, HttpSetup } from 'kibana/public';
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { AlertingFrameworkHealth } from '../../types';
 import { health } from '../lib/alert_api';
+import './health_check.scss';
 
 interface Props {
   docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
   http: HttpSetup;
-  alignToTop?: boolean;
+  inFlyout?: boolean;
 }
 
 export const HealthCheck: React.FunctionComponent<Props> = ({
   docLinks,
   http,
   children,
-  alignToTop = false,
+  inFlyout = false,
 }) => {
   const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
@@ -38,7 +39,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
     })();
   }, [http]);
 
-  const style = alignToTop ? { marginTop: '1em' } : {};
+  const className = inFlyout ? 'alertingFlyoutHealthCheck' : 'alertingFlyoutHealthCheck';
 
   return pipe(
     alertingHealth,
@@ -48,11 +49,11 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <Fragment>{children}</Fragment>
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
-          <TlsAndEncryptionError docLinks={docLinks} style={style} />
+          <TlsAndEncryptionError docLinks={docLinks} className={className} />
         ) : !healthCheck.hasPermanentEncryptionKey ? (
-          <EncryptionError docLinks={docLinks} style={style} />
+          <EncryptionError docLinks={docLinks} className={className} />
         ) : (
-          <TlsError docLinks={docLinks} style={style} />
+          <TlsError docLinks={docLinks} className={className} />
         );
       }
     )
@@ -60,17 +61,17 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
 };
 
 type PromptErrorProps = Pick<Props, 'docLinks'> & {
-  style?: React.CSSProperties;
+  className?: string;
 };
 
 const TlsAndEncryptionError = ({
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  style,
+  className,
 }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
-    style={style ?? {}}
+    className={className}
     titleSize="xs"
     title={
       <h2>
@@ -105,12 +106,12 @@ const TlsAndEncryptionError = ({
 
 const EncryptionError = ({
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  style,
+  className,
 }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
-    style={style ?? {}}
+    className={className}
     titleSize="xs"
     title={
       <h2>
@@ -145,12 +146,12 @@ const EncryptionError = ({
 
 const TlsError = ({
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  style,
+  className,
 }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
-    style={style ?? {}}
+    className={className}
     titleSize="xs"
     title={
       <h2>

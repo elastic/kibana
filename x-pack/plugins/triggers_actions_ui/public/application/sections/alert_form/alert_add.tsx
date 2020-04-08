@@ -153,7 +153,7 @@ export const AlertAdd = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <HealthCheck docLinks={docLinks} http={http} alignToTop={true}>
+        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
           <EuiFlyoutBody>
             <AlertForm
               alert={alert}
