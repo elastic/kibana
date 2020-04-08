@@ -827,7 +827,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columnOrder: ['cola', 'id1'],
                   columns: {
                     cola: initialState.layers.currentLayer.columns.cola,
-                    id1: expect.objectContaining({
+                    colb: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'memory',
                     }),
@@ -837,6 +837,16 @@ describe('IndexPattern Data Source suggestions', () => {
             }),
           })
         );
+      });
+
+      it('updates references when replacing one metric with another', () => {
+        const initialState = stateWithNonEmptyTables();
+        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
+          name: 'memory',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        });
       });
 
       it('adds a metric column on a number field if no other metrics set', () => {
