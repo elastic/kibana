@@ -14,7 +14,7 @@ import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../ty
 import { SymbolIds, NamedColors, PaintServerIds } from './defs';
 import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
-import * as eventModel from '../../../../common/models/event';
+// import * as eventModel from '../../../../common/models/event';
 import * as processModel from '../models/process_event';
 import * as selectors from '../store/selectors';
 
@@ -150,30 +150,6 @@ export const ProcessEventDot = styled(
       const isSelectedDescendant = nodeId === selectedDescendantId;
 
       const dispatch = useResolverDispatch();
-
-      const LabelText = styled.div`
-        color: ${NamedColors.empty};
-        width: 100%;
-        height: 100%;
-        font-size: 45%;
-        background-color: ${labelFill};
-        text-align: left;
-        vertical-align: middle;
-        font-weight: bold;
-        letter-spacing: -0.02px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-
-        & span {
-          display: inline-block;
-          max-width: 100%;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-        }
-      `;
 
       const handleFocus = useCallback(
         (focusEvent: React.FocusEvent<HTMLDivElement>) => {
