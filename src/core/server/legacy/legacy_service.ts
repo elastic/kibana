@@ -306,6 +306,9 @@ export class LegacyService implements CoreService {
         registerType: setupDeps.core.savedObjects.registerType,
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
+      status: {
+        core$: setupDeps.core.status.core$,
+      },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
