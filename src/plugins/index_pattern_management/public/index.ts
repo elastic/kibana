@@ -29,14 +29,11 @@
  * either types, or static code.
  */
 import { PluginInitializerContext } from 'src/core/public';
-import { ManagementPlugin } from './plugin';
-export { ManagementSetup, ManagementStart } from './plugin';
+import { IndexPatternManagementPlugin } from './plugin';
+export { IndexPatternManagementSetup, IndexPatternManagementStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ManagementPlugin(initializerContext);
+  return new IndexPatternManagementPlugin(initializerContext);
 }
 
-export {
-  IndexPatternCreationConfig,
-  IndexPatternListConfig,
-} from './services/index_pattern_management';
+export { IndexPatternCreationConfig, IndexPatternListConfig } from './service';

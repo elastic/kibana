@@ -27,7 +27,7 @@ export class IndexPatternListManager {
     this.configs = [];
   }
 
-  public add(Config: typeof IndexPatternListConfig) {
+  private addListConfig(Config: typeof IndexPatternListConfig) {
     const config = new Config();
     if (this.configs.findIndex(c => c.key === config.key) !== -1) {
       throw new Error(`${config.key} exists in IndexPatternListManager.`);
@@ -35,7 +35,7 @@ export class IndexPatternListManager {
     this.configs.push(config);
   }
 
-  public getIndexPatternTags(indexPattern: IIndexPattern, isDefault: boolean) {
+  private getIndexPatternTags(indexPattern: IIndexPattern, isDefault: boolean) {
     return this.configs.reduce((tags: IndexPatternTag[], config) => {
       return config.getIndexPatternTags
         ? tags.concat(config.getIndexPatternTags(indexPattern, isDefault))
@@ -43,15 +43,25 @@ export class IndexPatternListManager {
     }, []);
   }
 
-  public getFieldInfo(indexPattern: IIndexPattern, field: IFieldType): string[] {
+  private getFieldInfo(indexPattern: IIndexPattern, field: IFieldType): string[] {
     return this.configs.reduce((info: string[], config) => {
       return config.getFieldInfo ? info.concat(config.getFieldInfo(indexPattern, field)) : info;
     }, []);
   }
 
-  public areScriptedFieldsEnabled(indexPattern: IIndexPattern): boolean {
+  private areScriptedFieldsEnabled(indexPattern: IIndexPattern): boolean {
     return this.configs.every(config => {
       return config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true;
     });
   }
+
+  setup = () => ({
+    addListConfig: this.addListConfig.bind(this),
+  });
+
+  start = () => ({
+    getIndexPatternTags: this.getIndexPatternTags.bind(this),
+    getFieldInfo: this.getFieldInfo.bind(this),
+    areScriptedFieldsEnabled: this.areScriptedFieldsEnabled.bind(this),
+  });
 }
