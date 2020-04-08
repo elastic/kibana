@@ -6,7 +6,7 @@
 
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ChromeBreadcrumb, IToasts } from 'src/core/public';
+import { ChromeBreadcrumb } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 import { App } from './app';
@@ -17,7 +17,6 @@ export interface AppServices {
   metric: UiMetricService;
   documentation: DocumentationService;
   api: ApiService;
-  notifications: IToasts;
 }
 
 export const renderApp = (

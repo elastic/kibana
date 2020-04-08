@@ -18,7 +18,6 @@ export async function mountManagementSection(
   const [coreStart] = await coreSetup.getStartServices();
   const {
     docLinks,
-    notifications,
     i18n: { Context: I18nContext },
   } = coreStart;
 
@@ -34,7 +33,6 @@ export async function mountManagementSection(
 
   const services = {
     setBreadcrumbs,
-    notifications: notifications.toasts,
     metric: uiMetricService,
     documentation: documentationService,
     api: apiService,
