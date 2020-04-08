@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Embeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public/';
+import { Embeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public';
+import { EnhancedEmbeddable } from '../../../../../embeddable_enhanced/public';
+import {
+  UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
+  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+} from '../../../../../advanced_ui_actions/public';
 import {
   TriggerContextMapping,
   UiActionsStart,
 } from '../../../../../../../src/plugins/ui_actions/public';
+import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 
 export class MockEmbeddable extends Embeddable {
   public readonly type = 'mock';
@@ -26,3 +32,17 @@ export class MockEmbeddable extends Embeddable {
     return this.triggers;
   }
 }
+
+export const enhanceEmbeddable = <E extends MockEmbeddable>(
+  embeddable: E,
+  uiActions: UiActionsStart = uiActionsPluginMock.createStartContract()
+): EnhancedEmbeddable<E> => {
+  (embeddable as EnhancedEmbeddable<E>).enhancements = {
+    dynamicActions: new DynamicActionManager({
+      storage: new MemoryActionStorage(),
+      isCompatible: async () => true,
+      uiActions,
+    }),
+  };
+  return embeddable as EnhancedEmbeddable<E>;
+};

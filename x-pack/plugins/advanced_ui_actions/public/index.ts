@@ -32,4 +32,5 @@ export {
   DynamicActionManager as UiActionsEnhancedDynamicActionManager,
   DynamicActionManagerParams as UiActionsEnhancedDynamicActionManagerParams,
   DynamicActionManagerState as UiActionsEnhancedDynamicActionManagerState,
+  MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
 } from './dynamic_actions';
