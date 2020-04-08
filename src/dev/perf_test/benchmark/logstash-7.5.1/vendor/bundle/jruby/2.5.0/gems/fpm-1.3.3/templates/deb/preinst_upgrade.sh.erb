@@ -1,0 +1,32 @@
+before_upgrade() {
+<% if script?(:before_upgrade) -%>
+<%=  script(:before_upgrade) %>
+<% end -%>
+}
+
+before_install() {
+<% if script?(:before_install) -%>
+<%=  script(:before_install) %>
+<% end -%>
+}
+
+if [ "${1}" = "install" -a -z "${2}" ]
+then
+    before_install
+elif [ "${1}" = "upgrade" -a -n "${2}" ]
+then
+    upgradeFromVersion="${2}"
+    before_upgrade "${2}"
+elif [ "${1}" = "install" -a -n "${2}" ]
+then
+    upgradeFromVersion="${2}"
+    # Executed when a package is removed but its config files aren't,
+    # and a new version is installed.
+    # Looks a _lot_ like an upgrade case, I say we just execute the
+    # same "before upgrade" script as in the previous case
+    before_upgrade "${2}"
+elif echo "${1}" | grep -E -q '(fail|abort)'
+then
+    echo "Failed to install before the pre-installation script was run." >&2
+    exit 1
+fi

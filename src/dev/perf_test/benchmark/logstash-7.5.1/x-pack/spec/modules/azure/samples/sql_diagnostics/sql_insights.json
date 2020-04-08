@@ -1,0 +1,48 @@
+{
+  "ResourceGroup": "99SGV6",
+  "time": "2017-09-15T21:25:14.9950534Z",
+  "level": "Informational",
+  "LogicalServerName": "99SGV6",
+  "SubscriptionId": "83109cf8-e0d2-4fba-b262-e7722c72826c",
+  "category": "SQLInsights",
+  "operationName": "Insight",
+  "properties": {
+    "impact": [
+      {
+        "metric": "ExcessiveWaitingSeconds",
+        "value": 68,
+        "entity": {
+          "value": "0x8A3EF414DC5DABC8",
+          "type": "Query"
+        }
+      },
+      {
+        "metric": "ExcessiveWaitingSeconds",
+        "value": 17,
+        "entity": {
+          "value": "0x93DC8A02889C03D2",
+          "type": "Query"
+        }
+      },
+      {
+        "metric": "ExcessiveWaitingSeconds",
+        "value": 15.1,
+        "entity": {
+          "value": "0x70E9B2B8E70EC4FB",
+          "type": "Query"
+        }
+      }
+    ],
+    "issueId": 5213749,
+    "intervalEndTme": "2017-09-15T21:00:00.0000000Z",
+    "status": "Active",
+    "elasticPoolName": "RecommendedStandardPool1",
+    "intervalStartTime": "2017-09-15T20:45:00.0000000Z",
+    "rootCauseAnalysis": "The database is hitting its CPU limits. Average consumption has reached 86.8.",
+    "databaseName": "DB99876",
+    "detections": [],
+    "metric": "ExcessiveWaitingSeconds",
+    "value": 527.403
+  },
+  "resourceId": "/SUBSCRIPTIONS/83109cf8-e0d2-4fba-b262-e7722c72826c/RESOURCEGROUPS/99SGV6/PROVIDERS/MICROSOFT.SQL/SERVERS/99SGV6/DATABASES/DB99876"
+}

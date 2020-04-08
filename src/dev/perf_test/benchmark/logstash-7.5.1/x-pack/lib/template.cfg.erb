@@ -1,0 +1,45 @@
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+
+input {
+  metrics {
+    collection_interval => <%= collection_interval %>
+    collection_timeout_interval => <%= collection_timeout_interval %>
+    extended_performance_collection => <%= extended_performance_collection? %>
+    config_collection => <%= config_collection? %>
+  }
+}
+output {
+  elasticsearch {
+    hosts => <%= es_hosts %>
+    bulk_path => "/_monitoring/bulk?system_id=logstash&system_api_version=<%= system_api_version %>&interval=1s"
+    manage_template => false
+    document_type => "%{[@metadata][document_type]}"
+    index => ""
+    sniffing => <%= sniffing %>
+  <% if auth? %>
+    user => "<%= user %>"
+    password => "<%= password %>"
+  <% end %>
+  <% if ssl? %>
+    ssl => true
+    <% if ca_path %>
+        cacert => "<%= ca_path %>"
+    <% end %>
+    <% if truststore? %>
+        truststore => "<%= truststore_path %>"
+        truststore_password => "<%= truststore_password %>"
+    <% end %>
+    <% if keystore? %>
+        keystore => "<%= keystore_path %>"
+        keystore_password => "<%= keystore_password %>"
+    <% end %>
+    ssl_certificate_verification => <%= ssl_certificate_verification %>
+  <% else %>
+    # In the case where the user does not want SSL we don't set ssl => false
+    # the reason being that the user can still turn ssl on by using https in their URL
+    # This causes the ES output to throw an error due to conflicting messages
+  <% end %>
+  }
+}

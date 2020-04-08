@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+libdir = File.expand_path("../lib", File.dirname(__FILE__))
+$LOAD_PATH << libdir if File.exist?(File.join(libdir, "pleaserun", "cli.rb"))
+require "pleaserun/cli"
+exit(PleaseRun::CLI.run || 0)

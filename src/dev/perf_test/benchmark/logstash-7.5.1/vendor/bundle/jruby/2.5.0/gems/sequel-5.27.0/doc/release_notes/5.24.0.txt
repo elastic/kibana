@@ -1,0 +1,56 @@
+= New Features
+
+* A :cache_file plugin option has been added to the
+  pg_auto_constraint_validations plugin.  This option specifies
+  a file to use to cache the metadata the plugin uses, so the
+  plugin does not need to run 5 queries per model at startup to
+  load the metadata.  This can dramatically improve startup time
+  when using the plugin with a large number of models.
+
+  To create the metadata file, load the plugin into Sequel::Model
+  (or whatever class you are using as the base class for your
+  model classes) with the :cache_file option, and after loading
+  all of the subclasses of that class, run:
+
+    Sequel::Model.dump_pg_auto_constraint_validations_cache
+
+  As when using the schema_caching and index_caching extensions,
+  it is up to the user to ensure that the cached metadata matches
+  the current database schema.  Sequel does no checking of this,
+  as checking would take more time, and the point of this plugin
+  is to improve startup performance.
+
+* A static_cache_cache plugin has been added.  This plugin allows
+  for caching rows for models using the static_cache plugin. This
+  prevents the need to issue a query at model creation time to
+  get the rows.  This plugin should be loaded into Sequel::Model
+  (or whatever class you are using as the base class for your
+  model classes) before loading the models using the static_cache
+  plugin.  To create the metadata file, after all subclasses of
+  that class have been loaded, run:
+
+    Sequel::Model.dump_static_cache_cache
+
+* :unique_deferrable and :primary_key_deferrable column
+  options are now supported on PostgreSQL 9+ and Oracle. This
+  allows you to created deferrable unique and primary key
+  column constraints.  You could already create deferrable
+  table constraints using the :deferrable option to the primary_key
+  and unique methods.
+
+* A :generated_always_as column option is now supported on
+  PostgreSQL 12+, for creating generated columns.
+
+* A Database#skip_logging? private method has been added.  This
+  is designed for use in extensions, to force log timing even
+  when no loggers are configured.
+
+= Other Improvements
+
+* Sequel no longer sets the :host option to localhost by default
+  in the mysql2 adapter.  This prevents Sequel from overriding
+  a host specified in the defaults_file.
+
+* All database array types are converted to Ruby arrays in the
+  jdbc adapter.  Previously, this was only done in the
+  jdbc/postgresql subadapter.

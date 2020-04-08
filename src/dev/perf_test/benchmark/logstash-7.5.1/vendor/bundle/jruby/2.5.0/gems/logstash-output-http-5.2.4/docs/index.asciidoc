@@ -1,0 +1,387 @@
+:plugin: http
+:type: output
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Http output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This output lets you send events to a generic HTTP(S) endpoint.
+
+This output will execute up to 'pool_max' requests in parallel for performance.
+Consider this when tuning this plugin for performance.
+
+Additionally, note that when parallel execution is used strict ordering of events is not
+guaranteed!
+
+Beware, this gem does not yet support codecs. Please use the 'format' option for now.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Http Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-automatic_retries>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-cacert>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-client_cert>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-client_key>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-connect_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-content_type>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-cookies>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-follow_redirects>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-format>> |<<string,string>>, one of `["json", "json_batch", "form", "message"]`|No
+| <<plugins-{type}s-{plugin}-headers>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-http_compression>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-http_method>> |<<string,string>>, one of `["put", "post", "patch", "delete", "get", "head"]`|Yes
+| <<plugins-{type}s-{plugin}-ignorable_codes>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-keepalive>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-keystore>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-keystore_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-keystore_type>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-mapping>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-message>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-pool_max>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-pool_max_per_route>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-proxy>> |<<,>>|No
+| <<plugins-{type}s-{plugin}-request_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-retry_failed>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-retry_non_idempotent>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-retryable_codes>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-socket_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-truststore>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-truststore_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-truststore_type>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-url>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-validate_after_inactivity>> |<<number,number>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-automatic_retries"]
+===== `automatic_retries` 
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+How many times should the client retry a failing URL. We highly recommend NOT setting this value
+to zero if keepalive is enabled. Some servers incorrectly end keepalives early requiring a retry!
+Note: if `retry_non_idempotent` is set only GET, HEAD, PUT, DELETE, OPTIONS, and TRACE requests will be retried.
+
+[id="plugins-{type}s-{plugin}-cacert"]
+===== `cacert` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you need to use a custom X.509 CA (.pem certs) specify the path to that here
+
+[id="plugins-{type}s-{plugin}-client_cert"]
+===== `client_cert` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you'd like to use a client certificate (note, most people don't want this) set the path to the x509 cert here
+
+[id="plugins-{type}s-{plugin}-client_key"]
+===== `client_key` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you're using a client certificate specify the path to the encryption key here
+
+[id="plugins-{type}s-{plugin}-connect_timeout"]
+===== `connect_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `10`
+
+Timeout (in seconds) to wait for a connection to be established. Default is `10s`
+
+[id="plugins-{type}s-{plugin}-content_type"]
+===== `content_type` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Content type
+
+If not specified, this defaults to the following:
+
+* if format is "json", "application/json"
+* if format is "json_batch", "application/json". Each Logstash batch of events will be concatenated into a single array and sent in one request.
+* if format is "form", "application/x-www-form-urlencoded"
+
+[id="plugins-{type}s-{plugin}-cookies"]
+===== `cookies` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Enable cookie support. With this enabled the client will persist cookies
+across requests as a normal web browser would. Enabled by default
+
+[id="plugins-{type}s-{plugin}-follow_redirects"]
+===== `follow_redirects` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Should redirects be followed? Defaults to `true`
+
+[id="plugins-{type}s-{plugin}-format"]
+===== `format` 
+
+  * Value can be any of: `json`, `json_batch`, `form`, `message`
+  * Default value is `"json"`
+
+Set the format of the http body.
+
+If json_batch, each batch of events received by this output will be placed
+into a single JSON array and sent in one request. This is particularly useful
+for high throughput scenarios such as sending data between Logstash instaces.
+
+If form, then the body will be the mapping (or whole event) converted
+into a query parameter string, e.g. `foo=bar&baz=fizz...`
+
+If message, then the body will be the result of formatting the event according to message
+
+Otherwise, the event is sent as json.
+
+[id="plugins-{type}s-{plugin}-headers"]
+===== `headers` 
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+Custom headers to use
+format is `headers => ["X-My-Header", "%{host}"]`
+
+[id="plugins-{type}s-{plugin}-http_compression"]
+===== `http_compression`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Enable request compression support. With this enabled the plugin will compress
+http requests using gzip.
+
+[id="plugins-{type}s-{plugin}-http_method"]
+===== `http_method` 
+
+  * This is a required setting.
+  * Value can be any of: `put`, `post`, `patch`, `delete`, `get`, `head`
+  * There is no default value for this setting.
+
+The HTTP Verb. One of "put", "post", "patch", "delete", "get", "head"
+
+[id="plugins-{type}s-{plugin}-ignorable_codes"]
+===== `ignorable_codes` 
+
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+If you would like to consider some non-2xx codes to be successes 
+enumerate them here. Responses returning these codes will be considered successes
+
+[id="plugins-{type}s-{plugin}-keepalive"]
+===== `keepalive` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Turn this on to enable HTTP keepalive support. We highly recommend setting `automatic_retries` to at least
+one with this to fix interactions with broken keepalive implementations.
+
+[id="plugins-{type}s-{plugin}-keystore"]
+===== `keystore` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you need to use a custom keystore (`.jks`) specify that here. This does not work with .pem keys!
+
+[id="plugins-{type}s-{plugin}-keystore_password"]
+===== `keystore_password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+Specify the keystore password here.
+Note, most .jks files created with keytool require a password!
+
+[id="plugins-{type}s-{plugin}-keystore_type"]
+===== `keystore_type` 
+
+  * Value type is <<string,string>>
+  * Default value is `"JKS"`
+
+Specify the keystore type here. One of `JKS` or `PKCS12`. Default is `JKS`
+
+[id="plugins-{type}s-{plugin}-mapping"]
+===== `mapping` 
+
+  * Value type is <<hash,hash>>
+  * There is no default value for this setting.
+
+This lets you choose the structure and parts of the event that are sent.
+
+
+For example:
+[source,ruby]
+   mapping => {"foo" => "%{host}"
+              "bar" => "%{type}"}
+
+[id="plugins-{type}s-{plugin}-message"]
+===== `message` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+
+
+[id="plugins-{type}s-{plugin}-pool_max"]
+===== `pool_max` 
+
+  * Value type is <<number,number>>
+  * Default value is `50`
+
+Max number of concurrent connections. Defaults to `50`
+
+[id="plugins-{type}s-{plugin}-pool_max_per_route"]
+===== `pool_max_per_route` 
+
+  * Value type is <<number,number>>
+  * Default value is `25`
+
+Max number of concurrent connections to a single host. Defaults to `25`
+
+[id="plugins-{type}s-{plugin}-proxy"]
+===== `proxy` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+If you'd like to use an HTTP proxy . This supports multiple configuration syntaxes:
+
+1. Proxy host in form: `http://proxy.org:1234`
+2. Proxy host in form: `{host => "proxy.org", port => 80, scheme => 'http', user => 'username@host', password => 'password'}`
+3. Proxy host in form: `{url =>  'http://proxy.org:1234', user => 'username@host', password => 'password'}`
+
+[id="plugins-{type}s-{plugin}-request_timeout"]
+===== `request_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `60`
+
+This module makes it easy to add a very fully configured HTTP client to logstash
+based on [Manticore](https://github.com/cheald/manticore).
+For an example of its usage see https://github.com/logstash-plugins/logstash-input-http_poller
+Timeout (in seconds) for the entire request
+
+[id="plugins-{type}s-{plugin}-retry_failed"]
+===== `retry_failed` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Set this to false if you don't want this output to retry failed requests
+
+[id="plugins-{type}s-{plugin}-retry_non_idempotent"]
+===== `retry_non_idempotent` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+If `automatic_retries` is enabled this will cause non-idempotent HTTP verbs (such as POST) to be retried.
+
+[id="plugins-{type}s-{plugin}-retryable_codes"]
+===== `retryable_codes` 
+
+  * Value type is <<number,number>>
+  * Default value is `[429, 500, 502, 503, 504]`
+
+If encountered as response codes this plugin will retry these requests
+
+[id="plugins-{type}s-{plugin}-socket_timeout"]
+===== `socket_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `10`
+
+Timeout (in seconds) to wait for data on the socket. Default is `10s`
+
+[id="plugins-{type}s-{plugin}-truststore"]
+===== `truststore` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+If you need to use a custom truststore (`.jks`) specify that here. This does not work with .pem certs!
+
+[id="plugins-{type}s-{plugin}-truststore_password"]
+===== `truststore_password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+Specify the truststore password here.
+Note, most .jks files created with keytool require a password!
+
+[id="plugins-{type}s-{plugin}-truststore_type"]
+===== `truststore_type` 
+
+  * Value type is <<string,string>>
+  * Default value is `"JKS"`
+
+Specify the truststore type here. One of `JKS` or `PKCS12`. Default is `JKS`
+
+[id="plugins-{type}s-{plugin}-url"]
+===== `url` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+URL to use
+
+[id="plugins-{type}s-{plugin}-validate_after_inactivity"]
+===== `validate_after_inactivity` 
+
+  * Value type is <<number,number>>
+  * Default value is `200`
+
+How long to wait before checking if the connection is stale before executing a request on a connection using keepalive.
+You may want to set this lower, possibly to 0 if you get connection errors regularly
+Quoting the Apache commons docs (this client is based Apache Commmons):
+'Defines period of inactivity in milliseconds after which persistent connections must be re-validated prior to being leased to the consumer. Non-positive value passed to this method disables connection validation. This check helps detect connections that have become stale (half-closed) while kept inactive in the pool.'
+See https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/conn/PoolingHttpClientConnectionManager.html#setValidateAfterInactivity(int)[these docs for more info]
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

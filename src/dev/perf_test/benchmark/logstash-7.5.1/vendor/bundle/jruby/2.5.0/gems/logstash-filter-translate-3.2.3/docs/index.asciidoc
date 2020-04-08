@@ -1,0 +1,385 @@
+:plugin: translate
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Translate filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+A general search and replace tool that uses a configured hash
+and/or a file to determine replacement values. Currently supported are
+YAML, JSON, and CSV files. Each dictionary item is a key value pair.
+
+You can specify dictionary entries in one of two ways: 
+
+* The `dictionary` configuration item can contain a hash representing
+the mapping. 
+* An external file (readable by logstash) may be specified in the
+`dictionary_path` configuration item. 
+
+These two methods may not be used in conjunction; it will produce an error.
+
+Operationally, for each event, the value from the `field` setting is tested
+against the dictionary and if it matches exactly (or matches a regex when
+`regex` configuration item has been enabled), the matched value is put in
+the `destination` field, but on no match the `fallback` setting string is
+used instead.
+
+Example:
+[source,ruby]
+----
+    filter {
+      translate {
+        field => "[http_status]"
+        destination => "[http_status_description]"
+        dictionary => {
+          "100" => "Continue"
+          "101" => "Switching Protocols"
+          "200" => "OK"
+          "500" => "Server Error"
+        }
+        fallback => "I'm a teapot"
+      }
+    }
+----
+
+Occasionally, people find that they have a field with a variable sized array of
+values or objects that need some enrichment. The `iterate_on` setting helps in
+these cases.
+
+Alternatively, for simple string search and replacements for just a few values
+you might consider using the gsub function of the mutate filter.
+
+It is possible to provide multi-valued dictionary values. When using a YAML or
+JSON dictionary, you can have the value as a hash (map) or an array datatype.
+When using a CSV dictionary, multiple values in the translation must be
+extracted with another filter e.g. Dissect or KV. +
+Note that the `fallback` is a string so on no match the fallback setting needs
+to formatted so that a filter can extract the multiple values to the correct fields.
+
+File based dictionaries are loaded in a separate thread using a scheduler.
+If you set a `refresh_interval` of 300 seconds (5 minutes) or less then the
+modified time of the file is checked before reloading. Very large dictionaries
+are supported, internally tested at 100 000 key/values, and we minimise
+the impact on throughput by having the refresh in the scheduler thread.
+Any ongoing modification of the dictionary file should be done using a
+copy/edit/rename or create/rename mechanism to avoid the refresh code from
+processing half-baked dictionary content.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Translate Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-destination>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-dictionary>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-dictionary_path>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-exact>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-fallback>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-field>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-iterate_on>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-override>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-refresh_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-regex>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-refresh_behaviour>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-destination"]
+===== `destination`
+
+  * Value type is <<string,string>>
+  * Default value is `"translation"`
+
+The destination field you wish to populate with the translated code. The default
+is a field named `translation`. Set this to the same value as source if you want
+to do a substitution, in this case filter will allways succeed. This will clobber
+the old value of the source field!
+
+[id="plugins-{type}s-{plugin}-dictionary"]
+===== `dictionary`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+The dictionary to use for translation, when specified in the logstash filter
+configuration item (i.e. do not use the `@dictionary_path` file).
+
+Example:
+[source,ruby]
+----
+    filter {
+      translate {
+        dictionary => {
+          "100"         => "Continue"
+          "101"         => "Switching Protocols"
+          "merci"       => "thank you"
+          "old version" => "new version"
+        }
+      }
+    }
+----
+
+NOTE: It is an error to specify both `dictionary` and `dictionary_path`.
+
+[id="plugins-{type}s-{plugin}-dictionary_path"]
+===== `dictionary_path`
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+The full path of the external dictionary file. The format of the table should be
+a standard YAML, JSON, or CSV. 
+
+Specify any integer-based keys in quotes. The
+value taken from the event's `field` setting is converted to a string. The
+lookup dictionary keys must also be strings, and the quotes make the
+integer-based keys function as a string. For example, the YAML file should look
+something like this:
+
+[source,ruby]
+----
+    "100": Continue
+    "101": Switching Protocols
+    merci: gracias
+    old version: new version
+----
+
+NOTE: It is an error to specify both `dictionary` and `dictionary_path`.
+
+The currently supported formats are YAML, JSON, and CSV. Format selection is
+based on the file extension: `json` for JSON, `yaml` or `yml` for YAML, and
+`csv` for CSV. The CSV format expects exactly two columns, with the first serving
+as the original text (lookup key), and the second column as the translation.
+
+[id="plugins-{type}s-{plugin}-exact"]
+===== `exact`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+When `exact => true`, the translate filter will populate the destination field
+with the exact contents of the dictionary value. When `exact => false`, the
+filter will populate the destination field with the result of any existing
+destination field's data, with the translated value substituted in-place.
+
+For example, consider this simple translation.yml, configured to check the `data` field:
+[source,ruby]
+----
+    foo: bar
+----
+
+If logstash receives an event with the `data` field set to `foo`, and `exact => true`,
+the destination field will be populated with the string `bar`.
+If `exact => false`, and logstash receives the same event, the destination field
+will be also set to `bar`. However, if logstash receives an event with the `data` field
+set to `foofing`, the destination field will be set to `barfing`.
+
+Set both `exact => true` AND `regex => `true` if you would like to match using dictionary
+keys as regular expressions. A large dictionary could be expensive to match in this case.
+
+[id="plugins-{type}s-{plugin}-fallback"]
+===== `fallback`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+In case no translation occurs in the event (no matches), this will add a default
+translation string, which will always populate `field`, if the match failed.
+
+For example, if we have configured `fallback => "no match"`, using this dictionary:
+[source,ruby]
+----
+    foo: bar
+----
+
+Then, if logstash received an event with the field `foo` set to `bar`, the destination
+field would be set to `bar`. However, if logstash received an event with `foo` set to `nope`,
+then the destination field would still be populated, but with the value of `no match`.
+This configuration can be dynamic and include parts of the event using the `%{field}` syntax.
+
+[id="plugins-{type}s-{plugin}-field"]
+===== `field`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The name of the logstash event field containing the value to be compared for a
+match by the translate filter (e.g. `message`, `host`, `response_code`).
+
+If this field is an array, only the first value will be used.
+
+[id="plugins-{type}s-{plugin}-iterate_on"]
+===== `iterate_on`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+When the value that you need to perform enrichment on is a variable sized array
+then specify the field name in this setting. This setting introduces two modes,
+1) when the value is an array of strings and 2) when the value is an array of
+objects (as in JSON object). +
+In the first mode, you should have the same field name in both `field` and
+`iterate_on`, the result will be an array added to the field specified in the
+`destination` setting. This array will have the looked up value (or the
+`fallback` value or nil) in same ordinal position as each sought value. +
+In the second mode, specify the field that has the array of objects in
+`iterate_on` then specify the field in each object that provides the sought value
+with `field` and the field to write the looked up value (or the `fallback` value)
+to with `destination`.
+
+For a dictionary of:
+[source,csv]
+----
+  100,Yuki
+  101,Rupert
+  102,Ahmed
+  103,Kwame
+----
+
+Example of Mode 1
+[source,ruby]
+    filter {
+      translate {
+        iterate_on => "[collaborator_ids]"
+        field      => "[collaborator_ids]"
+        destination => "[collaborator_names]"
+        fallback => "Unknown"
+      }
+    }
+
+Before
+[source,json]
+  {
+    "collaborator_ids": [100,103,110,102]
+  }
+
+After
+[source,json]
+  {
+    "collaborator_ids": [100,103,110,102],
+    "collabrator_names": ["Yuki","Kwame","Unknown","Ahmed"]
+  }
+
+Example of Mode 2
+[source,ruby]
+    filter {
+      translate {
+        iterate_on => "[collaborators]"
+        field      => "[id]"
+        destination => "[name]"
+        fallback => "Unknown"
+      }
+    }
+
+Before
+[source,json]
+  {
+    "collaborators": [
+      {
+        "id": 100
+      },
+      {
+        "id": 103
+      },
+      {
+        "id": 110
+      },
+      {
+        "id": 101
+      }
+    ]
+  }
+
+After
+[source,json]
+  {
+    "collaborators": [
+      {
+        "id": 100,
+        "name": "Yuki"
+      },
+      {
+        "id": 103,
+        "name": "Kwame"
+      },
+      {
+        "id": 110,
+        "name": "Unknown"
+      },
+      {
+        "id": 101,
+        "name": "Rupert"
+      }
+    ]
+  }
+
+[id="plugins-{type}s-{plugin}-override"]
+===== `override`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+If the destination (or target) field already exists, this configuration item specifies
+whether the filter should skip translation (default) or overwrite the target field
+value with the new translation value.
+
+[id="plugins-{type}s-{plugin}-refresh_interval"]
+===== `refresh_interval`
+
+  * Value type is <<number,number>>
+  * Default value is `300`
+
+When using a dictionary file, this setting will indicate how frequently
+(in seconds) logstash will check the dictionary file for updates. +
+A value of zero or less will disable refresh.
+
+[id="plugins-{type}s-{plugin}-regex"]
+===== `regex`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+To treat dictionary keys as regular expressions, set `regex => true`.
+
+Be sure to escape dictionary key strings for use with regex.
+Resources on regex formatting are available online.
+
+[id="plugins-{type}s-{plugin}-refresh_behaviour"]
+===== `refresh_behaviour`
+
+  * Value type is <<string,string>>
+  * Default value is `merge`
+
+When using a dictionary file, this setting indicates how the update will be executed.
+Setting this to `merge` causes the new dictionary to be merged into the old one. This means
+same entry will be updated but entries that existed before but not in the new dictionary
+will remain after the merge; `replace` causes the whole dictionary to be replaced
+with a new one (deleting all entries of the old one on update).
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

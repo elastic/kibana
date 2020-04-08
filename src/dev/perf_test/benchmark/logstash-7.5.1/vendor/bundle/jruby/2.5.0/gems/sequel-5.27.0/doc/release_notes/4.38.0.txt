@@ -1,0 +1,67 @@
+= New Features
+
+* Sequel::SQL::NumericMethods#coerce has been added, which adds
+  support for ruby's coercion protocol when performing numeric
+  operations.  Previously, Sequel supported code like:
+
+    Sequel.expr{a - 1}
+
+  This is because a in this case returns a Sequel::SQL::Indentifier,
+  which defines #- to return a Sequel::SQL::NumericExpression.  By
+  supporting #coerce, the following code now also works:
+
+    Sequel.expr{1 - a}
+
+  This is because Integer#- calls #coerce on the argument if it is
+  defined (ruby's coercion protocol).  Previously, you had to handle
+  this differently, using something like:
+
+    Sequel.expr(1) - a
+    # or
+    Sequel.-(1, a)
+
+* Sequel now supports the ** operator for exponentiation on
+  expressions, similar to the +, -, *, and / operators.  Sequel uses
+  the database power function to implement this by default on the
+  databases that support it (most of them).  On Access, it uses the ^
+  operator, on Derby it is emulated using a combination of exp/ln
+  (with some loss of precision).  SQLite doesn't support a power
+  function at all, but Sequel emulates it using multiplication for
+  known integer exponents.
+
+* Sequel::SQLTime.date= has been added, which allows you to set the
+  date used for Sequel::SQLTime instances.  Sequel::SQLTime is a
+  subclass of Time that is literalized using only the time components,
+  and is the ruby class used to store values of database time columns
+  on most adapters.  Sequel::SQLTime defaults to using the current
+  date, but you can now set a specific date, for more consistency with
+  some drivers (Mysql2 uses 2000-01-01, tiny_tds uses 1900-01-01).
+
+* The postgres adapter now supports a :driver_options option when
+  using the pg driver, which is passed directly to pg.  This can be
+  used to specify a client SSL certificate or to specify the
+  certificate authority root certificate when using
+  :sslmode=>'verify-full'.
+
+= Other Improvements
+
+* Sequel no longer uses after_commit/rollback database hooks by
+  default if the after_commit/after_rollback model methods are not
+  overridden. This provides a performance speedup, but the main
+  benefit is that it no longer causes memory issues when saving a
+  large number of model instances in a single transaction, and it
+  also works with prepared transactions/2 phase commit.  You can
+  still set use_after_commit_rollback= manually to force the
+  after_commit/rollback setting.
+
+  Note that Sequel 5 will move after_commit/rollback model hooks to
+  a plugin, and the default and recommended approach will be to use
+  the database after_commit/rollback hooks in the after_save or
+  similar model hooks.
+
+= Backwards Compatibility
+
+* The Sequel::Model use_after_commit_rollback class and instance
+  methods now return nil by default instead of true.  nil now
+  indicates the default behavior of checking whether the appropriate
+  model hook has been defined, and only adding a database hook if so.

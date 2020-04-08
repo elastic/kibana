@@ -1,0 +1,40 @@
+From 27e4aa8d885e47a296ea78d114dbbe8fc7aa3508 Mon Sep 17 00:00:00 2001
+From: Kevin Solorio <soloriok@gmail.com>
+Date: Fri, 1 Feb 2019 14:32:42 -0800
+Subject: [PATCH] Revert-support-html-h-b-7-1
+
+---
+ entities.c | 17 -----------------
+ 1 file changed, 17 deletions(-)
+
+diff --git a/entities.c b/entities.c
+index 43549bc5..82652f6d 100644
+--- a/entities.c
++++ b/entities.c
+@@ -623,23 +623,6 @@ xmlEncodeEntitiesInternal(xmlDocPtr doc, const xmlChar *input, int attr) {
+ 	    *out++ = 't';
+ 	    *out++ = ';';
+ 	} else if (*cur == '&') {
+-	    /*
+-	     * Special handling of &{...} construct from HTML 4, see
+-	     * http://www.w3.org/TR/html401/appendix/notes.html#h-B.7.1
+-	     */
+-	    if (html && attr && (cur[1] == '{') &&
+-	        (strchr((const char *) cur, '}'))) {
+-	        while (*cur != '}') {
+-		    *out++ = *cur++;
+-		    indx = out - buffer;
+-		    if (indx + 100 > buffer_size) {
+-			growBufferReentrant();
+-			out = &buffer[indx];
+-		    }
+-		}
+-		*out++ = *cur++;
+-		continue;
+-	    }
+ 	    *out++ = '&';
+ 	    *out++ = 'a';
+ 	    *out++ = 'm';
+-- 
+2.16.2
+

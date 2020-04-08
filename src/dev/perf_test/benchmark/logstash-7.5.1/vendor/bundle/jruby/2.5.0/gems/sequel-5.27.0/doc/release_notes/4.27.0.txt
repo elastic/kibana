@@ -1,0 +1,78 @@
+= New Features
+
+* A before_after_save plugin has been added, which for newly
+  created objects refreshes the object before calling after_create,
+  and resets the modified flag before calling after_update.
+  Previously, these actions were not taken until after after_save
+  was called.  This will be the default behavior in Sequel 5.
+
+* In create_table blocks, primary_key now supports a :keep_order
+  option, which will not change the order in which the primary key
+  is added.  Without this option, Sequel's historical behavior of
+  making the primary key column the first column is used.
+
+    DB.create_table(:foo) do
+      Integer :a
+      primary_key :b, :keep_order=>true
+    end
+    # CREATE TABLE foo 
+    # (a integer, b integer PRIMARY KEY AUTOINCREMENT)
+
+  The schema dumper now uses this option if necessary, allowing it
+  to correctly dump tables where the primary key column is not the
+  first column.
+
+* Dataset#single_record! and #single_value! have been added.  These
+  are faster versions of #single_record and #single_value that
+  don't require cloning the dataset.  If you are sure the dataset
+  will only return a single row or a single value, you can use
+  these methods for better performance.
+
+* The new jsonb and json functions added in PostgreSQL 9.5 are now
+  supported by the pg_json_ops extension.
+
+    Sequel.pg_jsonb_op(:metadata).set(%w'a b', [1,2,3])
+    # jsonb_set("metadata", ARRAY['a','b'], '[1,2,3]'::jsonb, true)
+
+= Other Improvements
+
+* Sequel.synchronize is no longer a stub on MRI.  Testing has shown
+  that relying on the global interpreter lock to protect
+  multi-threaded access to hashes is not safe in all environments,
+  so Sequel now uses a mutex on MRI just as it does on other ruby
+  interpreters.
+
+* Database#schema now sets the :auto_increment option correctly for
+  auto incrementing primary keys if they are not the first column
+  in the table.
+
+* Dataset#single_value and #with_sql_single_value are now slightly
+  faster by avoiding an array allocation.
+
+* Model datasets can now use #with_sql_single_value and return a
+  single value, instead of an array in [:column_name, value] format.
+
+* Model#persisted? in the active_model plugin will now return false
+  if the transaction that inserts the row for the object is rolled
+  back.
+  
+* bin/sequel now warns if additional arguments are passed that it
+  ignores.  In Sequel 5, bin/sequel will raise an error in these
+  cases.
+
+* Database#foreign_key_list on PostgreSQL now returns referenced
+  composite keys in the correct order.
+
+* The postgres adapter now works with postgres-pr 0.7.0. Note that
+  postgres adapter users that want a pure-ruby driver are encouraged
+  to use jeremyevans-postgres-pr as that has many additional bugfixes
+  and is the version tested with Sequel on a regular basis.
+
+* The jdbc/postgresql adapter now recognizes an additional disconnect
+  error.
+
+= Backwards Compatibility
+
+* Users who were relying on #with_sql_single_value returning an array
+  instead of a single value for model datasets need to update their
+  code.

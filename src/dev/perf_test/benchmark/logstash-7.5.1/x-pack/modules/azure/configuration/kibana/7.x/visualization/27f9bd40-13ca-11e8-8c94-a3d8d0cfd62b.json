@@ -1,0 +1,10 @@
+{
+  "title": "Authorization Activity User [Azure Monitor][Activity Log]",
+  "visState": "{\"title\":\"Authorization Activity User [Azure Monitor][Activity Log]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(1,155,143,1)\",\"split_mode\":\"filter\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"3\",\"point_size\":1,\"fill\":\"0\",\"stacked\":\"none\",\"filter\":\"resultType:Success\",\"label\":\"Success\"},{\"id\":\"8a097400-13af-11e8-bdbe-d961aa20f52a\",\"color\":\"rgba(175,0,88,1)\",\"split_mode\":\"filter\",\"metrics\":[{\"id\":\"8a097401-13af-11e8-bdbe-d961aa20f52a\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"filter\":\"resultType:Fail\",\"label\":\"Failure\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":0,\"show_grid\":1,\"filter\":\"azure.group:activity_log AND operationName:*LISTKEYS* AND azure.category:Administrative AND _exists_:identity.claims.name\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

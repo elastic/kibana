@@ -1,0 +1,181 @@
+= New Features
+
+* The =~ and !~ methods are now defined on ComplexExpressions in
+  addition to GenericExpressions, allowing the following code to
+  work:
+
+    DB[:table].where{(column1 + column2) =~ column3}
+
+* Dataset#group_append has been added for appending to an existing
+  GROUP BY clause:
+
+    ds = DB[:table].group(:column1)
+    # SELECT * FROM table GROUP BY column1
+
+    ds = ds.group_append(:column2)
+    # SELECT * FROM table GROUP BY column1, column2
+
+* An inverted_subsets plugin has been added, for automatic creation of
+  methods for the inversion of the subset criteria.  For example:
+
+    Album.plugin :inverted_subsets
+    Album.subset :published, :published=>true
+
+    Album.published
+    # SELECT * FROM albums WHERE published IS TRUE
+
+    Album.not_published
+    # SELECT * FROM albums WHERE published IS NOT TRUE
+
+  By default, the subset method name is prefixed with "not_".  You can
+  pass a block to override the default behavior:
+
+    Album.plugin(:inverted_subsets){|name| "exclude_#{name}"}
+    Album.subset :published, :published=>true
+
+    Album.exclude_published
+    # SELECT * FROM albums WHERE published IS NOT TRUE
+
+* A singular_table_names plugin has been added, which changes Sequel
+  to not pluralize table names by default.
+
+    Sequel::Model.plugin :singular_table_names
+    class FooBar < Sequel::Model; end
+    FooBar.table_name # => foo_bar
+
+* Dataset#insert_conflict and #insert_ignore have been added on
+  PostgreSQL.  When using PostgreSQL 9.5+, they allow you to ignore
+  unique or exclusion constraint violations on inserting, or to do
+  an update instead:
+
+    DB[:table].insert_conflict.insert(:a=>1, :b=>2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT DO NOTHING
+
+  You can pass a specific constraint name using :constraint, to only
+  ignore a specific constraint violation:
+
+    DB[:table].insert_conflict(:constraint=>:table_a_uidx).
+      insert(:a=>1, :b=>2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT ON CONSTRAINT table_a_uidx DO NOTHING
+   
+  If the unique or exclusion constraint covers the whole table (e.g.
+  it isn't a partial unique index), then you can just specify the
+  column using the :target option:
+
+    DB[:table].insert_conflict(:target=>:a).insert(:a=>1, :b=>2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT (a) DO NOTHING
+   
+  If you want to update the existing row instead of ignoring the
+  constraint violation, you can pass an :update option with a hash of
+  values to update.  You must pass either the :target or :constraint
+  options when passing the :update option:
+
+    DB[:table].insert_conflict(:target=>:a,
+                               :update=>{:b=>:excluded__b}).
+      insert(:a=>1, :b=>2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT (a) DO UPDATE SET b = excluded.b
+   
+  Additionally, if you only want to do the update in certain cases,
+  you can specify an :update_where option, which will be used as a
+  filter.  If the row doesn't match the conditions, the constraint
+  violation will be ignored, but the row will not be updated:
+
+    DB[:table].insert_conflict(:constraint=>:table_a_uidx,
+                               :update=>{:b=>:excluded__b},
+                               :update_where=>{:table__status_id=>1}).
+      insert(:a=>1, :b=>2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT ON CONSTRAINT table_a_uidx
+    # DO UPDATE SET b = excluded.b WHERE (table.status_id = 1)
+
+* Dataset#group_rollup and #group_cube are now supported when using
+  PostgreSQL 9.5+.
+
+* Sequel now supports Dataset#returning when using prepared statements
+  and bound variables:
+
+    DB[:table].returning.prepare(:insert, :i, :col=>:$col).
+      call(:col=>42)
+    # => [{:col=>42}]
+
+= Other Improvements
+
+* The serialization plugin now integrates with the dirty plugin, so
+  that column changes are detected correctly.  However, column values
+  that are changed and then changed back to the original value are
+  still detected as changed.
+
+* Dataset#for_update and similar locking methods now cause Sequel not
+  to use the :read_only shard if sharding is used.  
+
+* The association_pks plugin now clears cached delayed associated pks
+  when the object is refreshed.
+
+* The :collate column option when adding columns now literalizes
+  non-String values on PostgreSQL. Previously, the :collate option
+  value was used verbatim. This is because PostgreSQL's collations
+  generally require quoting as they are uppercase or mixed-case.
+
+* Sequel's metadata parsing methods now support Microsoft SQL Server
+  2012+ when used in case sensitive mode.
+
+* Sequel now recognizes an addition check constraint violation
+  exception on SQLite.
+
+* Sequel now recognizes constraint violations when using the
+  swift/sqlite adapter.
+
+* Sequel now automatically REORGs tables when altering them in the
+  jdbc/db2 adapter.
+
+= Backwards Compatibility
+
+* Sequel now defaults to ignoring NULL values when using IN/NOT IN
+  with an empty array.  Previously, code such as:
+
+    DB[:table].where(:column=>[])
+
+  would be literalized as:
+
+    SELECT * FROM table WHERE (column != column)
+
+  This yields a NULL value when column is NULL, similarly to how most
+  other SQL operators work.  Unfortunately, most databases do not
+  optimize this, and such a query can require a sequential scan of the
+  table.
+
+  Sequel previously shipped with a empty_array_ignore_nulls extension
+  that literalized the query to:
+
+    SELECT * FROM table WHERE (1 = 0)
+
+  which databases will generally optimize to a constant false value,
+  resulting in much faster queries.  This behavior is now the default.
+
+  Users that desire the previous behavior can use the new
+  empty_array_consider_nulls extension.
+
+* The deprecated firebird and informix adapters have been removed.
+
+* Calling prepare on a prepared statement now raises an exception.
+  It was supported accidently before, as prepared statements are
+  dataset instances.
+
+* Model::DatasetModule#subset now calls Model.subset instead of
+  the other way around.  This makes it possible to modify the
+  behavior of subset in a plugin.
+
+* The :collate column option change on PostgreSQL can break code
+  that used already quoted values in symbols.  For example:
+
+    String :column_name, collate=>:'"C"'
+
+  would need to change to:
+
+    String :column_name, collate=>:C
+    # or
+    String :column_name, collate=>'"C"'

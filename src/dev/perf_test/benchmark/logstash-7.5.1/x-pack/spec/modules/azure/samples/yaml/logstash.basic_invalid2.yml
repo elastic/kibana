@@ -1,0 +1,8 @@
+modules:
+  - name: azure
+    var.input.azure_event_hubs.threads: 8
+    var.input.azure_event_hubs.decorate_events: true
+    var.input.azure_event_hubs.consumer_group: "logstash"
+    var.input.azure_event_hubs.storage_connection: "DefaultEndpointsProtocol=https;AccountName=example...."
+
+      

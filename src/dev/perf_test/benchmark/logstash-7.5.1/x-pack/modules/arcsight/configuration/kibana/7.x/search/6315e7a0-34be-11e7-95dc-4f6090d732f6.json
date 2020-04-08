@@ -1,0 +1,30 @@
+{
+  "title": "Network Events [ArcSight]",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "priority",
+    "name",
+    "sourceAddress",
+    "sourcePort",
+    "destinationAddress",
+    "destinationPort",
+    "applicationProtocol",
+    "message",
+    "categoryBehavior",
+    "categoryOutcome",
+    "deviceAddress",
+    "deviceProduct",
+    "deviceVendor",
+    "categoryDeviceGroup",
+    "categoryDeviceType"
+  ],
+  "sort": [
+    "deviceReceiptTime",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"arcsight-*\",\"highlightAll\":true,\"version\":true,\"query\":{\"query_string\":{\"query\":\"categoryDeviceGroup:\\\"/Firewall\\\" OR categoryDeviceGroup:\\\"/IDS/Network\\\" OR categoryDeviceGroup:\\\"/VPN\\\"\",\"analyze_wildcard\":true}},\"filter\":[]}"
+  }
+}

@@ -1,0 +1,205 @@
+:plugin: redis
+:type: output
+:default_codec: json
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Redis output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This output will send events to a Redis queue using RPUSH.
+The RPUSH command is supported in Redis v0.0.7+. Using
+PUBLISH to a channel requires at least v1.3.8+.
+While you may be able to make these Redis versions work,
+the best performance and stability will be found in more
+recent stable versions.  Versions 2.6.0+ are recommended.
+
+For more information, see http://redis.io/[the Redis homepage]
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Redis Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-batch>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-batch_events>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-batch_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-congestion_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-congestion_threshold>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-data_type>> |<<string,string>>, one of `["list", "channel"]`|No
+| <<plugins-{type}s-{plugin}-db>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-host>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-key>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-reconnect_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-shuffle_hosts>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-timeout>> |<<number,number>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-batch"]
+===== `batch` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Set to true if you want Redis to batch up values and send 1 RPUSH command
+instead of one command per value to push on the list.  Note that this only
+works with `data_type="list"` mode right now.
+
+If true, we send an RPUSH every "batch_events" events or
+"batch_timeout" seconds (whichever comes first).
+Only supported for `data_type` is "list".
+
+[id="plugins-{type}s-{plugin}-batch_events"]
+===== `batch_events` 
+
+  * Value type is <<number,number>>
+  * Default value is `50`
+
+If batch is set to true, the number of events we queue up for an RPUSH.
+
+[id="plugins-{type}s-{plugin}-batch_timeout"]
+===== `batch_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `5`
+
+If batch is set to true, the maximum amount of time between RPUSH commands
+when there are pending events to flush.
+
+[id="plugins-{type}s-{plugin}-congestion_interval"]
+===== `congestion_interval` 
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+How often to check for congestion. Default is one second.
+Zero means to check on every event.
+
+[id="plugins-{type}s-{plugin}-congestion_threshold"]
+===== `congestion_threshold` 
+
+  * Value type is <<number,number>>
+  * Default value is `0`
+
+In case Redis `data_type` is `list` and has more than `@congestion_threshold` items,
+block until someone consumes them and reduces congestion, otherwise if there are
+no consumers Redis will run out of memory, unless it was configured with OOM protection.
+But even with OOM protection, a single Redis list can block all other users of Redis,
+until Redis CPU consumption reaches the max allowed RAM size.
+A default value of 0 means that this limit is disabled.
+Only supported for `list` Redis `data_type`.
+
+[id="plugins-{type}s-{plugin}-data_type"]
+===== `data_type` 
+
+  * Value can be any of: `list`, `channel`
+  * There is no default value for this setting.
+
+Either list or channel.  If `data_type` is list, then we will set
+RPUSH to key. If `data_type` is channel, then we will PUBLISH to `key`.
+
+[id="plugins-{type}s-{plugin}-db"]
+===== `db` 
+
+  * Value type is <<number,number>>
+  * Default value is `0`
+
+The Redis database number.
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * Value type is <<array,array>>
+  * Default value is `["127.0.0.1"]`
+
+The hostname(s) of your Redis server(s). Ports may be specified on any
+hostname, which will override the global port config.
+If the hosts list is an array, Logstash will pick one random host to connect to,
+if that host is disconnected it will then pick another.
+
+For example:
+[source,ruby]
+    "127.0.0.1"
+    ["127.0.0.1", "127.0.0.2"]
+    ["127.0.0.1:6380", "127.0.0.1"]
+
+[id="plugins-{type}s-{plugin}-key"]
+===== `key` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The name of a Redis list or channel. Dynamic names are
+valid here, for example `logstash-%{type}`.
+
+[id="plugins-{type}s-{plugin}-password"]
+===== `password` 
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+Password to authenticate with.  There is no authentication by default.
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * Value type is <<number,number>>
+  * Default value is `6379`
+
+The default port to connect on. Can be overridden on any hostname.
+
+[id="plugins-{type}s-{plugin}-reconnect_interval"]
+===== `reconnect_interval` 
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+Interval for reconnecting to failed Redis connections
+
+[id="plugins-{type}s-{plugin}-shuffle_hosts"]
+===== `shuffle_hosts` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Shuffle the host list during Logstash startup.
+
+[id="plugins-{type}s-{plugin}-timeout"]
+===== `timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `5`
+
+Redis initial connection timeout in seconds.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

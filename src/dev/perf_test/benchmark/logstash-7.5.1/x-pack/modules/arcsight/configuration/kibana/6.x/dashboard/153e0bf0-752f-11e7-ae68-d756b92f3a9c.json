@@ -1,0 +1,20 @@
+{
+  "title": "[ArcSight] Microsoft DNS Overview",
+  "hits": 0,
+  "description": "",
+  "panelsJSON": "[{\"col\":11,\"id\":\"4ee62420-7523-11e7-871d-5f0fb978413c\",\"panelIndex\":1,\"row\":2,\"size_x\":2,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"1de45d60-7523-11e7-9445-91c40765092f\",\"panelIndex\":3,\"row\":2,\"size_x\":10,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"d72d7940-7529-11e7-9445-91c40765092f\",\"panelIndex\":5,\"row\":9,\"size_x\":6,\"size_y\":4,\"type\":\"visualization\"},{\"col\":1,\"id\":\"1c54cda0-752c-11e7-9445-91c40765092f\",\"panelIndex\":6,\"row\":13,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"8cda1c30-752a-11e7-9445-91c40765092f\",\"panelIndex\":7,\"row\":9,\"size_x\":6,\"size_y\":4,\"type\":\"visualization\"},{\"col\":1,\"id\":\"aa57b050-7526-11e7-b440-f1d91dc5774d\",\"panelIndex\":9,\"row\":4,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"4303de60-752b-11e7-9445-91c40765092f\",\"panelIndex\":11,\"row\":15,\"size_x\":6,\"size_y\":4,\"type\":\"visualization\"},{\"col\":1,\"id\":\"31b85570-454a-11e7-86b6-95298e9da6dc\",\"panelIndex\":12,\"row\":1,\"size_x\":12,\"size_y\":1,\"type\":\"visualization\"},{\"col\":1,\"id\":\"8f0161a0-752d-11e7-b440-f1d91dc5774d\",\"panelIndex\":13,\"row\":15,\"size_x\":6,\"size_y\":4,\"type\":\"visualization\"},{\"col\":1,\"id\":\"ebfd45a0-75a4-11e7-b440-f1d91dc5774d\",\"panelIndex\":14,\"row\":6,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":7,\"id\":\"bd1c82c0-75a7-11e7-871d-5f0fb978413c\",\"panelIndex\":15,\"row\":6,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"size_x\":6,\"size_y\":3,\"panelIndex\":16,\"type\":\"visualization\",\"id\":\"c658b300-7745-11e7-8fb2-417804dc0ec8\",\"col\":7,\"row\":19},{\"size_x\":6,\"size_y\":3,\"panelIndex\":17,\"type\":\"visualization\",\"id\":\"b1f98ce0-7745-11e7-8fb2-417804dc0ec8\",\"col\":1,\"row\":19}]",
+  "optionsJSON": "{\"darkTheme\":false}",
+  "uiStateJSON": "{\"P-11\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-13\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-3\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"P-5\":{\"vis\":{\"defaultColors\":{\"0 - 18k\":\"rgb(247,251,255)\",\"18k - 36k\":\"rgb(227,238,249)\",\"36k - 54k\":\"rgb(208,225,242)\",\"54k - 72k\":\"rgb(182,212,233)\",\"72k - 90k\":\"rgb(148,196,223)\",\"90k - 108k\":\"rgb(107,174,214)\",\"108k - 126k\":\"rgb(74,152,201)\",\"126k - 144k\":\"rgb(46,126,188)\",\"144k - 162k\":\"rgb(23,100,171)\",\"162k - 180k\":\"rgb(8,74,145)\"},\"legendOpen\":false}},\"P-16\":{\"mapZoom\":1,\"mapCenter\":[12.211180191503997,0]},\"P-17\":{\"mapZoom\":1,\"mapCenter\":[-0.17578097424708533,0]}}",
+  "version": 1,
+  "timeRestore": true,
+  "timeTo": "now",
+  "timeFrom": "now-24h",
+  "refreshInterval": {
+    "display": "Off",
+    "pause": false,
+    "value": 0
+  },
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}],\"highlightAll\":true,\"version\":true}"
+  }
+}

@@ -1,0 +1,130 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2013-11-01'
+:operations:
+- :name: CreateTrail
+  :method: :create_trail
+  :inputs:
+    Name:
+    - :string
+    - :required
+    S3BucketName:
+    - :string
+    - :required
+    S3KeyPrefix:
+    - :string
+    SnsTopicName:
+    - :string
+    IncludeGlobalServiceEvents:
+    - :boolean
+  :outputs:
+    :children:
+      CreateTrailResult:
+        :ignore: true
+        :children:
+          IncludeGlobalServiceEvents:
+            :type: :boolean
+- :name: DeleteTrail
+  :method: :delete_trail
+  :inputs:
+    Name:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteTrailResult:
+        :ignore: true
+- :name: DescribeTrails
+  :method: :describe_trails
+  :inputs:
+    trailNameList:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeTrailsResult:
+        :ignore: true
+        :children:
+          trailList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :trail_list
+                :list: true
+                :children:
+                  IncludeGlobalServiceEvents:
+                    :type: :boolean
+- :name: GetTrailStatus
+  :method: :get_trail_status
+  :inputs:
+    Name:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetTrailStatusResult:
+        :ignore: true
+        :children:
+          IsLogging:
+            :type: :boolean
+          LatestDeliveryTime:
+            :type: :time
+          LatestNotificationTime:
+            :type: :time
+          StartLoggingTime:
+            :type: :time
+          StopLoggingTime:
+            :type: :time
+- :name: StartLogging
+  :method: :start_logging
+  :inputs:
+    Name:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      StartLoggingResult:
+        :ignore: true
+- :name: StopLogging
+  :method: :stop_logging
+  :inputs:
+    Name:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      StopLoggingResult:
+        :ignore: true
+- :name: UpdateTrail
+  :method: :update_trail
+  :inputs:
+    Name:
+    - :string
+    - :required
+    S3BucketName:
+    - :string
+    S3KeyPrefix:
+    - :string
+    SnsTopicName:
+    - :string
+    IncludeGlobalServiceEvents:
+    - :boolean
+  :outputs:
+    :children:
+      UpdateTrailResult:
+        :ignore: true
+        :children:
+          IncludeGlobalServiceEvents:
+            :type: :boolean

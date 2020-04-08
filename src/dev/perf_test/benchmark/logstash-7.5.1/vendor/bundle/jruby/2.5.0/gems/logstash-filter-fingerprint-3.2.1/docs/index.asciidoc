@@ -1,0 +1,151 @@
+:plugin: fingerprint
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Fingerprint filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Create consistent hashes (fingerprints) of one or more fields and store
+the result in a new field.
+
+This can e.g. be used to create consistent document ids when inserting
+events into Elasticsearch, allowing events in Logstash to cause existing
+documents to be updated rather than new documents to be created.
+
+NOTE: When the `target` option is set to `UUID` the result won't be
+a consistent hash but a random
+https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID].
+To generate UUIDs, prefer the {logstash-ref}/plugins-filters-uuid.html[uuid filter].
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Fingerprint Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-base64encode>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-concatenate_sources>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-concatenate_all_fields>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-key>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-method>> |<<string,string>>, one of `["SHA1", "SHA256", "SHA384", "SHA512", "MD5", "MURMUR3", "IPV4_NETWORK", "UUID", "PUNCTUATION"]`|Yes
+| <<plugins-{type}s-{plugin}-source>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-base64encode"]
+===== `base64encode` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+When set to `true`, the `SHA1`, `SHA256`, `SHA384`, `SHA512` and `MD5` fingerprint methods will produce
+base64 encoded rather than hex encoded strings.
+
+[id="plugins-{type}s-{plugin}-concatenate_sources"]
+===== `concatenate_sources` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+When set to `true` and `method` isn't `UUID` or `PUNCTUATION`, the
+plugin concatenates the names and values of all fields given in the
+`source` option into one string (like the old checksum filter) before
+doing the fingerprint computation. If `false` and multiple source
+fields are given, the target field will be an array with fingerprints
+of the source fields given.
+
+[id="plugins-{type}s-{plugin}-concatenate_all_fields"]
+===== `concatenate_all_fields` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+When set to `true` and `method` isn't `UUID` or `PUNCTUATION`, the
+plugin concatenates the names and values of all fields of the event 
+into one string (like the old checksum filter) before doing the 
+fingerprint computation. If `false` and at least one source field is 
+given, the target field will be an array with fingerprints of the 
+source fields given.
+
+[id="plugins-{type}s-{plugin}-key"]
+===== `key` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+When used with the `IPV4_NETWORK` method fill in the subnet prefix length.
+With other methods, optionally fill in the HMAC key.
+
+[id="plugins-{type}s-{plugin}-method"]
+===== `method` 
+
+  * This is a required setting.
+  * Value can be any of: `SHA1`, `SHA256`, `SHA384`, `SHA512`, `MD5`, `MURMUR3`, `IPV4_NETWORK`, `UUID`, `PUNCTUATION`
+  * Default value is `"SHA1"`
+
+The fingerprint method to use.
+
+If set to `SHA1`, `SHA256`, `SHA384`, `SHA512`, or `MD5` and a key is set,
+the cryptographic hash function with the same name will be used to generate
+the fingerprint. When a key set, the keyed-hash (HMAC) digest function will
+be used.
+
+If set to `MURMUR3` the non-cryptographic MurmurHash function will be used.
+
+If set to `IPV4_NETWORK` the input data needs to be a IPv4 address and
+the hash value will be the masked-out address using the number of bits
+specified in the `key` option. For example, with "1.2.3.4" as the input
+and `key` set to 16, the hash becomes "1.2.0.0".
+
+If set to `PUNCTUATION`, all non-punctuation characters will be removed
+from the input string.
+
+If set to `UUID`, a
+https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID] will
+be generated. The result will be random and thus not a consistent hash.
+
+[id="plugins-{type}s-{plugin}-source"]
+===== `source` 
+
+  * Value type is <<array,array>>
+  * Default value is `"message"`
+
+The name(s) of the source field(s) whose contents will be used
+to create the fingerprint. If an array is given, see the
+`concatenate_sources` option.
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target` 
+
+  * Value type is <<string,string>>
+  * Default value is `"fingerprint"`
+
+The name of the field where the generated fingerprint will be stored.
+Any current contents of that field will be overwritten.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

@@ -1,0 +1,77 @@
+:plugin: anonymize
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Anonymize filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+deprecated[3.0.3,We recommend that you use the <<plugins-filters-fingerprint,fingerprint filter plugin>> instead.]
+
+Anonymize fields by replacing values with a consistent hash.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Anonymize Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-algorithm>> |<<string,string>>, one of `["SHA1", "SHA256", "SHA384", "SHA512", "MD5", "MURMUR3", "IPV4_NETWORK"]`|Yes
+| <<plugins-{type}s-{plugin}-fields>> |<<array,array>>|Yes
+| <<plugins-{type}s-{plugin}-key>> |<<string,string>>|Yes
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-algorithm"]
+===== `algorithm` 
+
+  * This is a required setting.
+  * Value can be any of: `SHA1`, `SHA256`, `SHA384`, `SHA512`, `MD5`, `MURMUR3`, `IPV4_NETWORK`
+  * Default value is `"SHA1"`
+
+digest/hash type
+
+[id="plugins-{type}s-{plugin}-fields"]
+===== `fields` 
+
+  * This is a required setting.
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+The fields to be anonymized
+
+[id="plugins-{type}s-{plugin}-key"]
+===== `key` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Hashing key
+When using MURMUR3 the key is ignored but must still be set.
+When using IPV4_NETWORK key is the subnet prefix lentgh
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

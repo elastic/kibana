@@ -1,0 +1,23 @@
+The following is a list of people who have contributed ideas, code, bug
+reports, or in general have helped logstash along its way.
+
+Contributors:
+* Aaron Mildenstein (untergeek)
+* Bernd Ahlers (bernd)
+* Brad Fritz (bfritz)
+* Colin Surprenant (colinsurprenant)
+* Jason Kendall (coolacid)
+* Jonathan Van Eenwyk (jdve)
+* Jordan Sissel (jordansissel)
+* Philippe Weber (wiibaa)
+* Pier-Hugues Pellerin (ph)
+* Raffael Schmid (luxflux)
+* Richard Pijnenburg (electrical)
+* Sam Doran (samdoran)
+* Sverre Bakke (sbakke)
+* herver (herver)
+
+Note: If you've sent us patches, bug reports, or otherwise contributed to
+Logstash, and you aren't on the list above and want to be, please let us know
+and we'll make sure you're here. Contributions from folks like you are what make
+open source awesome.

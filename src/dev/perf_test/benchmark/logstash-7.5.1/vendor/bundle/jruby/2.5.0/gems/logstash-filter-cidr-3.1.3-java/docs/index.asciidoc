@@ -1,0 +1,114 @@
+:plugin: cidr
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Cidr filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The CIDR filter is for checking IP addresses in events against a list of
+network blocks that might contain it. Multiple addresses can be checked
+against multiple networks, any match succeeds. Upon success additional tags
+and/or fields can be added to the event.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Cidr Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-address>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-network>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-network_path>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-refresh_interval>>| <<number,number>>|No
+| <<plugins-{type}s-{plugin}-separator>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-address"]
+===== `address`
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+The IP address(es) to check with. Example:
+[source,ruby]
+    filter {
+      cidr {
+        add_tag => [ "testnet" ]
+        address => [ "%{src_ip}", "%{dst_ip}" ]
+        network => [ "192.0.2.0/24" ]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-network"]
+===== `network`
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+The IP network(s) to check against. Example:
+[source,ruby]
+    filter {
+      cidr {
+        add_tag => [ "linklocal" ]
+        address => [ "%{clientip}" ]
+        network => [ "169.254.0.0/16", "fe80::/64" ]
+      }
+    }
+
+
+[id="plugins-{type}s-{plugin}-network_path"]
+===== `network_path`
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+The full path of the external file containing the networks the filter should check with.
+Networks are separated by a separator character defined in `separator`.
+[source,ruby]
+    192.168.1.0/24
+    192.167.0.0/16	
+NOTE: It is an error to specify both `network` and `network_path`.
+
+[id="plugins-{type}s-{plugin}-refresh_interval"]
+===== `refresh_interval`
+
+  * Value type is <<number,number>>
+  * Default value is `600`
+
+When using an external file, this setting will indicate how frequently
+(in seconds) Logstash will check the file for updates.
+
+
+[id="plugins-{type}s-{plugin}-separator"]
+===== `separator`
+
+  * Value type is <<string,string>>
+  * Default value is `\n`
+
+Separator character used for parsing networks from the external file
+specified by `network_path`. Defaults to newline `\n` character.
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

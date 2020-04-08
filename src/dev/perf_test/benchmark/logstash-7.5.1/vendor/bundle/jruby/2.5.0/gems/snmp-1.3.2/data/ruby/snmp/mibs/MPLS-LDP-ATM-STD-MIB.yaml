@@ -1,0 +1,36 @@
+--- 
+mplsLdpAtmStdMIB: 1.3.6.1.2.1.10.166.5
+mplsLdpAtmObjects: 1.3.6.1.2.1.10.166.5.1
+mplsLdpEntityAtmObjects: 1.3.6.1.2.1.10.166.5.1.1
+mplsLdpEntityAtmTable: 1.3.6.1.2.1.10.166.5.1.1.1
+mplsLdpEntityAtmEntry: 1.3.6.1.2.1.10.166.5.1.1.1.1
+mplsLdpEntityAtmIfIndexOrZero: 1.3.6.1.2.1.10.166.5.1.1.1.1.1
+mplsLdpEntityAtmMergeCap: 1.3.6.1.2.1.10.166.5.1.1.1.1.2
+mplsLdpEntityAtmLRComponents: 1.3.6.1.2.1.10.166.5.1.1.1.1.3
+mplsLdpEntityAtmVcDirectionality: 1.3.6.1.2.1.10.166.5.1.1.1.1.4
+mplsLdpEntityAtmLsrConnectivity: 1.3.6.1.2.1.10.166.5.1.1.1.1.5
+mplsLdpEntityAtmDefaultControlVpi: 1.3.6.1.2.1.10.166.5.1.1.1.1.6
+mplsLdpEntityAtmDefaultControlVci: 1.3.6.1.2.1.10.166.5.1.1.1.1.7
+mplsLdpEntityAtmUnlabTrafVpi: 1.3.6.1.2.1.10.166.5.1.1.1.1.8
+mplsLdpEntityAtmUnlabTrafVci: 1.3.6.1.2.1.10.166.5.1.1.1.1.9
+mplsLdpEntityAtmStorageType: 1.3.6.1.2.1.10.166.5.1.1.1.1.10
+mplsLdpEntityAtmRowStatus: 1.3.6.1.2.1.10.166.5.1.1.1.1.11
+mplsLdpEntityAtmLRTable: 1.3.6.1.2.1.10.166.5.1.1.2
+mplsLdpEntityAtmLREntry: 1.3.6.1.2.1.10.166.5.1.1.2.1
+mplsLdpEntityAtmLRMinVpi: 1.3.6.1.2.1.10.166.5.1.1.2.1.1
+mplsLdpEntityAtmLRMinVci: 1.3.6.1.2.1.10.166.5.1.1.2.1.2
+mplsLdpEntityAtmLRMaxVpi: 1.3.6.1.2.1.10.166.5.1.1.2.1.3
+mplsLdpEntityAtmLRMaxVci: 1.3.6.1.2.1.10.166.5.1.1.2.1.4
+mplsLdpEntityAtmLRStorageType: 1.3.6.1.2.1.10.166.5.1.1.2.1.5
+mplsLdpEntityAtmLRRowStatus: 1.3.6.1.2.1.10.166.5.1.1.2.1.6
+mplsLdpAtmSessionObjects: 1.3.6.1.2.1.10.166.5.1.2
+mplsLdpAtmSessionTable: 1.3.6.1.2.1.10.166.5.1.2.1
+mplsLdpAtmSessionEntry: 1.3.6.1.2.1.10.166.5.1.2.1.1
+mplsLdpSessionAtmLRLowerBoundVpi: 1.3.6.1.2.1.10.166.5.1.2.1.1.1
+mplsLdpSessionAtmLRLowerBoundVci: 1.3.6.1.2.1.10.166.5.1.2.1.1.2
+mplsLdpSessionAtmLRUpperBoundVpi: 1.3.6.1.2.1.10.166.5.1.2.1.1.3
+mplsLdpSessionAtmLRUpperBoundVci: 1.3.6.1.2.1.10.166.5.1.2.1.1.4
+mplsLdpAtmConformance: 1.3.6.1.2.1.10.166.5.2
+mplsLdpAtmGroups: 1.3.6.1.2.1.10.166.5.2.1
+mplsLdpAtmCompliances: 1.3.6.1.2.1.10.166.5.2.2
+

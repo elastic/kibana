@@ -1,0 +1,10 @@
+{
+  "title": "Firewall - Devices - Top EPS by Category Device Type",
+  "visState": "{\"title\":\"Firewall - Devices - Top EPS by Category Device Type\",\"type\":\"metrics\",\"params\":{\"id\":\"429af7e0-3d5b-11e7-8b9d-ddc45b5f6d00\",\"type\":\"top_n\",\"series\":[{\"id\":\"429af7e1-3d5b-11e7-8b9d-ddc45b5f6d00\",\"color\":\"rgba(252,220,0,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"429af7e2-3d5b-11e7-8b9d-ddc45b5f6d00\",\"type\":\"count\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"linear\",\"unit\":\"\",\"id\":\"112da8a0-3d5c-11e7-8b9d-ddc45b5f6d00\",\"type\":\"moving_average\",\"field\":\"429af7e2-3d5b-11e7-8b9d-ddc45b5f6d00\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Top EPS contributors by Category Device Type\",\"value_template\":\"{{value}}/s\",\"terms_field\":\"categoryDeviceType\"}],\"time_field\":\"deviceReceiptTime\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"filter\":\"categoryDeviceGroup:\\\"/Firewall\\\"\",\"bar_color_rules\":[{\"id\":\"77dd4e80-3d5b-11e7-8b9d-ddc45b5f6d00\"}],\"background_color_rules\":[{\"id\":\"798c5e10-3d5b-11e7-8b9d-ddc45b5f6d00\"}],\"gauge_color_rules\":[{\"value\":0,\"id\":\"988f35d0-3d5b-11e7-8b9d-ddc45b5f6d00\",\"gauge\":null}],\"gauge_width\":10,\"gauge_inner_width\":10,\"gauge_style\":\"half\",\"gauge_max\":\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

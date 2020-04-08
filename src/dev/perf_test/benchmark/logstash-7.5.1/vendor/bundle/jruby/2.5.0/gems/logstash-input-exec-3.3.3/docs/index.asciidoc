@@ -1,0 +1,117 @@
+:plugin: exec
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Exec input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Periodically run a shell command and capture the whole output as an event.
+
+Notes:
+
+* The `command` field of this event will be the command run.
+* The `message` field of this event will be the entire stdout of the command.
+
+===== IMPORTANT
+
+The exec input ultimately uses `fork` to spawn a child process.
+Using fork duplicates the parent process address space (in our case, **logstash and the JVM**); this is mitigated with OS copy-on-write but ultimately you can end up allocating lots of memory just for a "simple" executable.
+If the exec input fails with errors like `ENOMEM: Cannot allocate memory` it is an indication that there is not enough non-JVM-heap physical memory to perform the fork.
+
+
+Example:
+
+[source,ruby]
+----------------------------------
+input {
+  exec {
+    command => "ls"
+    interval => 30
+  }
+}
+----------------------------------
+
+This will execute `ls` command every 30 seconds.
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Exec Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-command>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-schedule>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-command"]
+===== `command` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Command to run. For example, `uptime`
+
+[id="plugins-{type}s-{plugin}-interval"]
+===== `interval` 
+
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+Interval to run the command. Value is in seconds.
+
+Either `interval` or `schedule` option must be defined.
+
+[id="plugins-{type}s-{plugin}-schedule"]
+===== `schedule` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Schedule of when to periodically run command.
+
+This scheduling syntax is powered by https://github.com/jmettraux/rufus-scheduler[rufus-scheduler].
+The syntax is cron-like with some extensions specific to Rufus (e.g. timezone support).
+
+Examples:
+
+|==========================================================
+| `* 5 * 1-3 *`               | will execute every minute of 5am every day of January through March.
+| `0 * * * *`                 | will execute on the 0th minute of every hour every day.
+| `0 6 * * * America/Chicago` | will execute at 6:00am (UTC/GMT -5) every day.
+|==========================================================
+
+Further documentation describing this syntax can be found https://github.com/jmettraux/rufus-scheduler#parsing-cronlines-and-time-strings[here].
+
+Either `interval` or `schedule` option must be defined.
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

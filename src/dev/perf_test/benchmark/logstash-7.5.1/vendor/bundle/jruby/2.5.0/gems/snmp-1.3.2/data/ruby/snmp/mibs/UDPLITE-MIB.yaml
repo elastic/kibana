@@ -1,0 +1,26 @@
+--- 
+udpliteMIB: 1.3.6.1.2.1.170
+udplite: 1.3.6.1.2.1.170.1
+udpliteInDatagrams: 1.3.6.1.2.1.170.1.1
+udpliteInPartialCov: 1.3.6.1.2.1.170.1.2
+udpliteNoPorts: 1.3.6.1.2.1.170.1.3
+udpliteInErrors: 1.3.6.1.2.1.170.1.4
+udpliteInBadChecksum: 1.3.6.1.2.1.170.1.5
+udpliteOutDatagrams: 1.3.6.1.2.1.170.1.6
+udpliteOutPartialCov: 1.3.6.1.2.1.170.1.7
+udpliteEndpointTable: 1.3.6.1.2.1.170.1.8
+udpliteEndpointEntry: 1.3.6.1.2.1.170.1.8.1
+udpliteEndpointLocalAddressType: 1.3.6.1.2.1.170.1.8.1.1
+udpliteEndpointLocalAddress: 1.3.6.1.2.1.170.1.8.1.2
+udpliteEndpointLocalPort: 1.3.6.1.2.1.170.1.8.1.3
+udpliteEndpointRemoteAddressType: 1.3.6.1.2.1.170.1.8.1.4
+udpliteEndpointRemoteAddress: 1.3.6.1.2.1.170.1.8.1.5
+udpliteEndpointRemotePort: 1.3.6.1.2.1.170.1.8.1.6
+udpliteEndpointInstance: 1.3.6.1.2.1.170.1.8.1.7
+udpliteEndpointProcess: 1.3.6.1.2.1.170.1.8.1.8
+udpliteEndpointMinCoverage: 1.3.6.1.2.1.170.1.8.1.9
+udpliteEndpointViolCoverage: 1.3.6.1.2.1.170.1.8.1.10
+udpliteStatsDiscontinuityTime: 1.3.6.1.2.1.170.1.9
+udpliteMIBConformance: 1.3.6.1.2.1.170.2
+udpliteMIBGroups: 1.3.6.1.2.1.170.2.2
+

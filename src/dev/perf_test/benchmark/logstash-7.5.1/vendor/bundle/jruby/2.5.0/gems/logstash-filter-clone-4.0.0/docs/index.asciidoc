@@ -1,0 +1,59 @@
+:plugin: clone
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Clone filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The clone filter is for duplicating events.
+A clone will be created for each type in the clone list.
+The original event is left unchanged.
+Created events are inserted into the pipeline 
+as normal events and will be processed by the remaining pipeline configuration 
+starting from the filter that generated them (i.e. this plugin).
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Clone Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-clones>> |<<array,array>>|Yes
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-clones"]
+===== `clones` 
+
+  * This is a required setting.
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+A new clone will be created with the given type for each type in this list.
+
+Note: setting an empty array will not create any clones. A warning message is logged.
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

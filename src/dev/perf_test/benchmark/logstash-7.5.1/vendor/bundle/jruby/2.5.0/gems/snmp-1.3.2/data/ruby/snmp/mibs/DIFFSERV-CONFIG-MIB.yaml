@@ -1,0 +1,16 @@
+--- 
+diffServConfigMib: 1.3.6.1.2.1.108
+diffServConfigMIBObjects: 1.3.6.1.2.1.108.1
+diffServConfigTable: 1.3.6.1.2.1.108.1.2
+diffServConfigEntry: 1.3.6.1.2.1.108.1.2.1
+diffServConfigId: 1.3.6.1.2.1.108.1.2.1.1
+diffServConfigDescr: 1.3.6.1.2.1.108.1.2.1.2
+diffServConfigOwner: 1.3.6.1.2.1.108.1.2.1.3
+diffServConfigLastChange: 1.3.6.1.2.1.108.1.2.1.4
+diffServConfigStart: 1.3.6.1.2.1.108.1.2.1.5
+diffServConfigStorage: 1.3.6.1.2.1.108.1.2.1.6
+diffServConfigStatus: 1.3.6.1.2.1.108.1.2.1.7
+diffServConfigMIBConformance: 1.3.6.1.2.1.108.2
+diffServConfigMIBCompliances: 1.3.6.1.2.1.108.2.1
+diffServConfigMIBGroups: 1.3.6.1.2.1.108.2.2
+

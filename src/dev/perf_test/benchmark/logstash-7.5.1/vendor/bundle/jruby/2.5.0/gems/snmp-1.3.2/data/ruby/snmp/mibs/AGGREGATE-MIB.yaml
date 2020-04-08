@@ -1,0 +1,28 @@
+--- 
+aggrMIB: 1.3.6.1.3.123
+aggrCtlTable: 1.3.6.1.3.123.1
+aggrCtlEntry: 1.3.6.1.3.123.1.1
+aggrCtlEntryID: 1.3.6.1.3.123.1.1.1
+aggrCtlMOIndex: 1.3.6.1.3.123.1.1.2
+aggrCtlMODescr: 1.3.6.1.3.123.1.1.3
+aggrCtlCompressionAlgorithm: 1.3.6.1.3.123.1.1.4
+aggrCtlEntryOwner: 1.3.6.1.3.123.1.1.5
+aggrCtlEntryStorageType: 1.3.6.1.3.123.1.1.6
+aggrCtlEntryStatus: 1.3.6.1.3.123.1.1.7
+aggrMOTable: 1.3.6.1.3.123.2
+aggrMOEntry: 1.3.6.1.3.123.2.1
+aggrMOEntryID: 1.3.6.1.3.123.2.1.1
+aggrMOEntryMOID: 1.3.6.1.3.123.2.1.2
+aggrMOInstance: 1.3.6.1.3.123.2.1.3
+aggrMODescr: 1.3.6.1.3.123.2.1.4
+aggrMOEntryStorageType: 1.3.6.1.3.123.2.1.5
+aggrMOEntryStatus: 1.3.6.1.3.123.2.1.6
+aggrDataTable: 1.3.6.1.3.123.3
+aggrDataEntry: 1.3.6.1.3.123.3.1
+aggrDataRecord: 1.3.6.1.3.123.3.1.1
+aggrDataRecordCompressed: 1.3.6.1.3.123.3.1.2
+aggrDataErrorRecord: 1.3.6.1.3.123.3.1.3
+aggrConformance: 1.3.6.1.3.123.4
+aggrGroups: 1.3.6.1.3.123.4.1
+aggrCompliances: 1.3.6.1.3.123.4.2
+

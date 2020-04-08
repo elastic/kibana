@@ -1,0 +1,250 @@
+#!/usr/bin/env jruby
+
+require 'optparse'
+require 'jruby'
+
+opts = {}
+options = {
+  :print_source => false,
+  :print_sexp   => false,
+  :print_ast    => true,
+  :print_ir     => false,
+  :print_pass   => nil,
+  :pretty_ir    => false,
+  :dot_format   => false
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options]"
+
+  opts.on('-d', '--dot', 'Display as dot data') do |h|
+    options[:dot_format] = true
+  end
+  
+  opts.on('-h', '--help', 'Display this help') do |h|
+    puts opts
+    exit true
+  end
+
+  opts.on('-i', '--ir', 'Dump all IR passes without executing') do |h|
+    options[:print_ir] = true
+  end
+
+  opts.on('-p', '--pass passes_list', 'Dump IR after running a pass') do |pass|
+    options[:print_pass] = pass
+  end
+
+  opts.on('-f', '--formatted-ir', 'Pretty printer for IR (without CFG)') do |f|
+    options[:pretty_ir] = f
+  end
+  
+  opts.on('-s', '--sexp', 'Display the S-Expression for the AST') do |t|
+    options[:print_sexp] = true
+  end
+  
+  opts.on('--source', 'Display the source') do |s|
+    options[:print_source] = true
+  end
+  
+  opts.on('--no-ast', 'Do not print out the AST for this (only useful with -s)') do |a|
+    options[:print_ast] = false
+  end
+  
+  opts.on('-e exp', '--expression') do |e|
+    options[:expression] = e
+  end
+  
+end.parse!
+
+if ARGV.length > 1
+  abort "You may only specify one script (see --help)"
+elsif ARGV.length == 1
+  if options[:expression]
+    abort "-e and a script is not a valid combination (see --help)"
+  end
+  options[:expression] = File.read(ARGV.shift)
+elsif ! options.has_key?(:expression)
+  abort "No script specified (see --help)"
+end
+
+if options[:print_ir] && options[:print_pass]
+  abort "-p and -i is not valid. Use only one of them (see --help)"
+end
+
+$indent_string = "  "
+
+def indexes(string, lindex, rindex)
+  lindex = string.index("(", lindex) if lindex != nil
+  rindex = string.index(")", rindex) if rindex != nil
+  return lindex, rindex
+end
+
+def indent(string)
+  depth = -1
+
+  lindex, rindex = indexes(string, 0, 0)
+
+  while (lindex != nil || rindex != nil)
+    if (lindex != nil && lindex < rindex)
+      depth += 1
+      string[lindex, 1] = "\n#{$indent_string * depth}"
+    else
+      depth -= 1
+      string[rindex, 1] = "\n"
+    end
+
+    lindex, rindex = indexes(string, lindex, rindex)
+  end
+  string.gsub(/,\s*$/, '').squeeze("\n")
+end
+
+if options[:print_source]
+  puts "Source:"
+  puts options[:expression]
+  puts
+end
+
+module DotGraph
+  def self.dot_label(node)
+    extra = case node
+            when org.jruby.ast.StrNode then
+              ": '#{node.value}'"
+            when org.jruby.ast.FixnumNode then
+              ": #{node.value}"
+            when org.jruby.ast.FloatNode then
+              ": #{node.value}"
+            when org.jruby.ast.types.INameNode then
+              ": #{node.name}"
+            else
+              ""
+            end
+
+    "#{short_name(node)}#{extra}"
+  end
+
+  def self.short_name(node)
+    node.class.name.split("::")[-1].gsub("Node", "")
+  end
+
+  def self.dot_node_def(node)
+    %Q{#{node.hash} [label="#{dot_label(node)}"];\n}
+  end
+
+  def self.dot(defs, parent)
+    defs[parent.hash] = dot_node_def(parent)
+
+    "".tap do |str|
+      parent.child_nodes.each do |child|
+        str << "#{parent.hash} -> #{child.hash};\n"
+        str << dot(defs, child)
+      end
+    end
+  end
+
+  def self.print_graph(root_node)
+    defs = {}
+    graph_section = DotGraph.dot(defs, root_node)
+    puts "digraph AST {"
+    puts defs.values.join('')
+    puts graph_section
+    puts "}"
+  end
+end
+
+root = JRuby.parse(options[:expression])
+
+if options[:print_ast]
+  if options[:dot_format]
+    DotGraph.print_graph(root)
+  else
+    print "AST:"
+    puts indent(root.to_string) 
+    puts
+  end
+end
+
+def print_passes_on(scope, passes)
+  if !scope.kind_of? org.jruby.ir.IRClosure
+    passes.each { |pass| pass.run(scope) } 
+  end
+
+  scope.lexical_scopes.each do |child_scope|
+    child_scope.prepare_for_compilation
+    print_passes_on(child_scope, passes)
+  end
+end
+
+def print_pass_on(scope, pass)
+  if !scope.kind_of? org.jruby.ir.IRClosure
+    pass.run(scope)
+  end
+  
+  scope.lexical_scopes.each do |child_scope|
+    print_pass_on(child_scope, pass)
+  end
+end
+
+def ir_setup(root)
+  runtime = JRuby::runtime
+  manager = runtime.ir_manager
+
+  manager.dry_run = true
+  JRuby::IR.compiler_debug = true
+
+
+  builder = org.jruby.ir.IRBuilder
+
+  scope = builder.build_root(manager, root).scope
+  scope.prepare_for_compilation
+  passes = manager.get_compiler_passes(scope)
+  [scope, passes]
+end
+
+module IRPrettyPrinter
+  def self.pretty_ir(scope, indent="")
+    i = 0
+    pretty_str = scope.instrs.map do |instr|
+      f_str = "%s%3i\s\s%s" % [indent, i, instr]
+      i += 1
+      f_str 
+    end
+    pretty_str = [indent + scope.to_s] + pretty_str
+    scope.lexical_scopes.each do |lex_scope|
+      pretty_str += pretty_ir(lex_scope, indent + "\s" * 4)
+    end
+    pretty_str
+  end
+
+  def self.print_ir(scope)
+    instrs = pretty_ir(scope)
+    instrs.each do |instr|
+      puts instr
+    end
+  end
+end
+
+if options[:pretty_ir]
+  scope, passes = ir_setup(root)
+  puts "IR:"
+  IRPrettyPrinter.print_ir(scope)
+end
+
+if options[:print_pass]
+  scope, passes = ir_setup(root)
+  pass_name = options[:print_pass]
+  pass = passes.find do |p|
+    p.java_class.to_s.include?(pass_name.to_s)
+  end
+  print_pass_on(scope, pass)
+end
+
+if options[:print_ir]
+  scope, passes = ir_setup(root)
+
+  print_passes_on(scope, passes)
+end
+
+if options[:print_sexp]
+  puts "SEXP:"
+  puts org.jruby.ast.util.SexpMaker.create(root) 
+end

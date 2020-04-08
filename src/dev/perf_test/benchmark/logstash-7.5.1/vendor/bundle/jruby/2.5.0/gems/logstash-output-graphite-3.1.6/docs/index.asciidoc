@@ -1,0 +1,176 @@
+:plugin: graphite
+:type: output
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Graphite output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This output allows you to pull metrics from your logs and ship them to
+Graphite. Graphite is an open source tool for storing and graphing metrics.
+
+An example use case: Some applications emit aggregated stats in the logs
+every 10 seconds. Using the grok filter and this output, it is possible to
+capture the metric values from the logs and emit them to Graphite.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Graphite Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-exclude_metrics>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-fields_are_metrics>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-include_metrics>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-metrics>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-metrics_format>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-nested_object_separator>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-reconnect_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-resend_on_failure>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-timestamp_field>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-exclude_metrics"]
+===== `exclude_metrics` 
+
+  * Value type is <<array,array>>
+  * Default value is `["%{[^}]+}"]`
+
+Exclude regex matched metric names, by default exclude unresolved %{field} strings.
+
+[id="plugins-{type}s-{plugin}-fields_are_metrics"]
+===== `fields_are_metrics` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+An array indicating that these event fields should be treated as metrics
+and will be sent verbatim to Graphite. You may use either `fields_are_metrics`
+or `metrics`, but not both.
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * Value type is <<string,string>>
+  * Default value is `"localhost"`
+
+The hostname or IP address of the Graphite server.
+
+[id="plugins-{type}s-{plugin}-include_metrics"]
+===== `include_metrics` 
+
+  * Value type is <<array,array>>
+  * Default value is `[".*"]`
+
+Include only regex matched metric names.
+
+[id="plugins-{type}s-{plugin}-metrics"]
+===== `metrics` 
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+The metric(s) to use. This supports dynamic strings like %{host}
+for metric names and also for values. This is a hash field with key
+being the metric name, value being the metric value. Example:
+[source,ruby]
+    metrics => { "%{host}/uptime" => "%{uptime_1m}" }
+
+The value will be coerced to a floating point value. Values which cannot be
+coerced will be set to zero (0). You may use either `metrics` or `fields_are_metrics`,
+but not both.
+
+[id="plugins-{type}s-{plugin}-metrics_format"]
+===== `metrics_format` 
+
+  * Value type is <<string,string>>
+  * Default value is `"*"`
+
+Defines the format of the metric string. The placeholder '*' will be
+replaced with the name of the actual metric.
+[source,ruby]
+    metrics_format => "foo.bar.*.sum"
+
+NOTE: If no metrics_format is defined, the name of the metric will be used as fallback.
+
+[id="plugins-{type}s-{plugin}-nested_object_separator"]
+===== `nested_object_separator` 
+
+  * Value type is <<string,string>>
+  * Default value is `"."`
+
+When hashes are passed in as values they are broken out into a dotted notation
+For instance if you configure this plugin with
+# [source,ruby]
+    metrics => "mymetrics"
+
+and "mymetrics" is a nested hash of '{a => 1, b => { c => 2 }}'
+this plugin will generate two metrics: a => 1, and b.c => 2 .
+If you've specified a 'metrics_format' it will respect that,
+but you still may want control over the separator within these nested key names.
+This config setting changes the separator from the '.' default.
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * Value type is <<number,number>>
+  * Default value is `2003`
+
+The port to connect to on the Graphite server.
+
+[id="plugins-{type}s-{plugin}-reconnect_interval"]
+===== `reconnect_interval` 
+
+  * Value type is <<number,number>>
+  * Default value is `2`
+
+Interval between reconnect attempts to Carbon.
+
+[id="plugins-{type}s-{plugin}-resend_on_failure"]
+===== `resend_on_failure` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Should metrics be resent on failure?
+
+[id="plugins-{type}s-{plugin}-timestamp_field"]
+===== `timestamp_field` 
+
+  * Value type is <<string,string>>
+  * Default value is `"@timestamp"`
+
+Use this field for the timestamp instead of '@timestamp' which is the
+default. Useful when backfilling or just getting more accurate data into
+graphite since you probably have a cache layer infront of Logstash.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

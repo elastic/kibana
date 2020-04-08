@@ -1,0 +1,16 @@
+v0.1.7 (2011-11-07)
+  - Add support for ruby 1.8
+
+v0.1.6 (2011-11-07)
+  - Add 'Dragons' mixin for times when info/debug/fatal log levels don't cut it
+    and you'd rather deal in D&D alignments instead.
+  - Add Cabin::Outputs::EmStdlibLogger which wraps ruby's stdlib logger but in
+    a way smartly usable with EventMachine. (Contributed by Sean Porter)
+  - Moved mixins to Cabin::Mixins like Logger and the new Dragon mixin.
+
+v0.1.3 through v0.1.5 were not documented here. Sad.
+
+v0.1.2 (2011-10-12)
+  - Added file+line+method context if the logger level is debug
+
+!!date +\%Y-\%m-\%d

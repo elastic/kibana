@@ -1,0 +1,23 @@
+--- 
+sFlowMIB: 1.3.6.1.4.1.4300.1
+sFlowAgent: 1.3.6.1.4.1.4300.1.1
+sFlowVersion: 1.3.6.1.4.1.4300.1.1.1
+sFlowAgentAddressType: 1.3.6.1.4.1.4300.1.1.2
+sFlowAgentAddress: 1.3.6.1.4.1.4300.1.1.3
+sFlowTable: 1.3.6.1.4.1.4300.1.1.4
+sFlowEntry: 1.3.6.1.4.1.4300.1.1.4.1
+sFlowDataSource: 1.3.6.1.4.1.4300.1.1.4.1.1
+sFlowOwner: 1.3.6.1.4.1.4300.1.1.4.1.2
+sFlowTimeout: 1.3.6.1.4.1.4300.1.1.4.1.3
+sFlowPacketSamplingRate: 1.3.6.1.4.1.4300.1.1.4.1.4
+sFlowCounterSamplingInterval: 1.3.6.1.4.1.4300.1.1.4.1.5
+sFlowMaximumHeaderSize: 1.3.6.1.4.1.4300.1.1.4.1.6
+sFlowMaximumDatagramSize: 1.3.6.1.4.1.4300.1.1.4.1.7
+sFlowCollectorAddressType: 1.3.6.1.4.1.4300.1.1.4.1.8
+sFlowCollectorAddress: 1.3.6.1.4.1.4300.1.1.4.1.9
+sFlowCollectorPort: 1.3.6.1.4.1.4300.1.1.4.1.10
+sFlowDatagramVersion: 1.3.6.1.4.1.4300.1.1.4.1.11
+sFlowMIBConformance: 1.3.6.1.4.1.4300.1.2
+sFlowMIBGroups: 1.3.6.1.4.1.4300.1.2.1
+sFlowMIBCompliances: 1.3.6.1.4.1.4300.1.2.2
+

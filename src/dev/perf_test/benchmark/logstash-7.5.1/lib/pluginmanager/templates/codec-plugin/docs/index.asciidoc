@@ -1,0 +1,102 @@
+:plugin: example
+:type: codec
+// Update header with plugin name
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Example codec plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Add plugin description here
+
+// Format anchors and links to support generated ids for versioning
+// Sample anchor: [id="plugins-{type}s-{plugin}-setting_name"]
+// Sample link: <<plugins-{type}s-{plugin}-setting_name>>
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Example Codec Configuration Options
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-a_setting_name>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-another_setting_name>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-setting_name_3>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-setting_name_4>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-setting_name_5>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-setting_name_6>> |<<bytes,bytes>>|No
+| <<plugins-{type}s-{plugin}-setting_name_7>> |<<path,path>>|No
+|=======================================================================
+
+[id="plugins-{type}s-{plugin}-a_setting_name"]
+===== `a_setting_name` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Add description here
+
+[id="plugins-{type}s-{plugin}-another_setting_name"]
+===== `another_setting_name` 
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+Add description here
+
+[id="plugins-{type}s-{plugin}-setting_name_3"]
+===== `setting_name_3` 
+
+  * Value type is <<string,string>>
+  * Default value is `{}`
+
+Add description here
+
+[id="plugins-{type}s-{plugin}-setting_name_4"]
+===== `setting_name_4` 
+
+  * Value type is <<number,number>>
+  * Default value is `0`
+
+Add description here
+
+[id="plugins-{type}s-{plugin}-setting_name_5"]
+===== `setting_name_5` 
+
+  * Value type is <<array,array>>
+  * Default value is {}
+
+Add description here
+
+[id="plugins-{type}s-{plugin}-setting_name_6"]
+===== `setting_name_6` 
+
+  * Value type is <<bytes,bytes>>
+  * Default value is {}
+
+Add description here
+
+[id="plugins-{type}s-{plugin}-setting_name_7"]
+===== `setting_name_7` 
+
+  * Value type is <<path,path>>
+  * Default value is {}
+
+Add description here
+
+// The full list of Value Types is here: 
+// https://www.elastic.co/guide/en/logstash/current/configuration-file-structure.html

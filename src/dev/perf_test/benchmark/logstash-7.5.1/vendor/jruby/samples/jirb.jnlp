@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+"
+      <!-- NOTE: Adjust codebase to your location, and make sure
+           jruby-complete.jar is in the lib directory, relative to
+           the specified codebase. The jruby-console.jar is
+           typically built via 'ant jar-console'. -->
+      codebase="file:..">
+    <information>
+        <title>JRuby IRB Console</title>
+        <vendor>The JRuby Team</vendor>
+        <description>Sample WebStart Application with JRuby</description>
+        <description kind="short">JRuby IRB Console Sample</description>
+        <homepage href="http://jruby.org"/>
+    </informationu
+    <resources>
+        <j2se version="1.6+"/>
+        <jar href="lib/jruby-console.jar" download="eager"/>
+    </resources>
+    <application-desc main-class="org.jruby.demo.readline.IRBConsole">
+    </application-desc>
+</jnlp>

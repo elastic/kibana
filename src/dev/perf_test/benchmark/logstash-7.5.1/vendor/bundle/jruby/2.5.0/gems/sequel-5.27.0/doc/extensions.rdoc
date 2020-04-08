@@ -1,0 +1,77 @@
+= Sequel Extensions
+
+Sequel has an official extension system, for adding global, Database, and Dataset extensions.
+
+== Global Extensions
+
+Global extensions can add or modify the behavior of any part of Sequel.  Technically, they are not limited to affecting Sequel, as they can also modify code outside of Sequel (e.g. the blank extension).  However, extensions that modify things outside of Sequel generally do so only for backwards compatibility.
+
+Global extensions are loaded via <tt>Sequel.extension</tt>:
+
+  Sequel.extension :named_timezones
+
+All this does is require the relevent extension from <tt>sequel/extensions/named_timezones</tt> somewhere in the ruby path.  Global extensions are just a simpler, consistent way to require code that modifies Sequel.
+
+== Database Extensions
+
+Database extensions should add or modify the behavior of a single <tt>Sequel::Database</tt> instance.  They are loaded via <tt>Sequel::Database#extension</tt>:
+
+  DB.extension :server_block
+
+The first thing that this does is load the relevent extension globally.  However, Database extensions should be structured in a way that loading the relevent extension globally just adds a module with the related behavior, it doesn't modify any other state.  After loading the extension globally, it modifies the related <tt>Sequel::Database</tt> object to modify it's behavior, usually by extending it with a module.
+
+If you want a Database extension loaded into all future Database instances, you can use <tt>Sequel::Database.extension</tt>:
+
+  Sequel::Database.extension :server_block
+
+All future <tt>Sequel::Database</tt> instances created afterward will then automatically have the server_block extension loaded.
+
+== Dataset Extensions
+
+Dataset extensions should add or modify the behavior of a single <tt>Sequel::Dataset</tt> instance.  They are loaded via <tt>Sequel::Dataset#extension</tt>.  <tt>Sequel::Dataset#extension</tt> returns a modifies copy of the dataset that includes the extension (similar to how most dataset query methods work):
+
+  ds = DB[:a].extension(:columns_introspection)
+
+The first thing loading a Dataset extension does is load the relevent extension globally.  Similar to Database extensions, loading a Dataset extension globally should not affect state other than maybe adding a module.  After loading the extension globally, it returned a modified copy of the <tt>Sequel::Dataset</tt> with the extension loaded into it.
+
+If you want to load an extension into all future datasets for a given <tt>Sequel::Database</tt> instance, you can also load it as a Database extension:
+
+  DB.extension :columns_introspection
+
+Likewise, if you want to load an extension into all future datasets for all future databases, you can load it via <tt>Sequel::Database.extension</tt>:
+
+  Sequel::Database.extension :columns_introspection
+  
+== Creating Global Extensions
+
+If you want to create a global extension, you just need to store your code so that you can require it via <tt>sequel/extensions/extension_name</tt>.  Then users can load it via:
+
+  Sequel.extension :extension_name
+
+It is recommended you only create a global extension if what you want to do would not work as a Database or Dataset extension.
+
+== Creating Database Extensions
+
+Creating Database extensions is similar to global extensions in terms of creating the file.  However, somewhere in the file, you need to call <tt>Sequel::Database.register_extension</tt>.  Usually you would call this with the module that will be added to the related <tt>Sequel::Database</tt> instance when the extension is loaded.  For example, the server_block extension uses something like:
+
+  Sequel::Database.register_extension(:server_block, Sequel::ServerBlock)
+
+The first argument is the name of the extension as a symbol, and the second is the module.
+
+In some cases, just extending the <tt>Sequel::Database</tt> instance with a module is not sufficient.  So <tt>Sequel::Database.register_extension</tt> also accepts a proc instead of a second argument.  This proc is called with the <tt>Sequel::Database</tt> instance, and can then run any related code:
+
+  Sequel::Database.register_extension(:arbitrary_servers){|db| db.pool.extend(Sequel::ArbitraryServers)}
+
+== Creating Dataset Extensions
+
+Creating Dataset extensions is very similar to creating Database extensions, but instead of calling <tt>Sequel::Database.register_extension</tt>, you call <tt>Sequel::Dataset.register_extension</tt>.  In general, you would call this with the module that will be added to the related <tt>Sequel::Dataset</tt> instance when the extension is loaded.  For example, the columns_introspection extension uses something like:
+
+  Sequel::Dataset.register_extension(:columns_introspection, Sequel::ColumnsIntrospection)
+
+The first argument is the name of the extension as a symbol, and the second is the module.  When you call the <tt>Sequel::Dataset.register_extension</tt> method with a module, it in turn calls <tt>Sequel::Database.register_extension</tt> and adds a Database extension that loads this Dataset extension into all future Datasets created from the Database.
+
+You can also call <tt>Sequel::Dataset.register_extension</tt> with a proc:
+
+  Sequel::Dataset.register_extension(:extension_name){|ds| }
+
+Note that if you use a proc, a corresponding Database extension will not be created automatically (you can still call <tt>Sequel::Database.register_extension</tt> manually in this case).

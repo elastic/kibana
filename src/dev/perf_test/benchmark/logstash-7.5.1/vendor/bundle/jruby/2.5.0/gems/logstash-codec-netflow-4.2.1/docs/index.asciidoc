@@ -1,0 +1,218 @@
+:plugin: netflow
+:type: codec
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Netflow codec plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The "netflow" codec is used for decoding Netflow v5/v9/v10 (IPFIX) flows.
+
+==== Supported Netflow/IPFIX exporters
+
+This codec supports:
+
+* Netflow v5
+* Netflow v9
+* IPFIX
+
+The following Netflow/IPFIX exporters have been seen and tested with the most recent version of the Netflow Codec:
+
+[cols="6,^2,^2,^2,12",options="header"]
+|===========================================================================================
+|Netflow exporter         | v5 | v9 | IPFIX | Remarks
+|Barracuda Firewall       |    |    |   y   | With support for Extended Uniflow
+|Cisco ACI                |    | y  |       |
+|Cisco ASA                |    | y  |       |  
+|Cisco ASR 1k             |    |    |   N   | Fails because of duplicate fields
+|Cisco ASR 9k             |    | y  |       |  
+|Cisco IOS 12.x           |    | y  |       |  
+|Cisco ISR w/ HSL         |    | N  |       | Fails because of duplicate fields, see: https://github.com/logstash-plugins/logstash-codec-netflow/issues/93
+|Cisco WLC                |    | y  |       |
+|Citrix Netscaler         |    |    |   y   | Still some unknown fields, labeled netscalerUnknown<id>
+|fprobe                   |  y |    |       |
+|Fortigate FortiOS        |    | y  |       |
+|Huawei Netstream         |    | y  |       |
+|ipt_NETFLOW              |  y | y  |   y   |
+|IXIA packet broker       |    |    |   y   |
+|Juniper MX               |  y |    |   y   | SW > 12.3R8. Fails to decode IPFIX from Junos 16.1 due to duplicate field names which we currently don't support.
+|Mikrotik                 |  y |    |   y   | http://wiki.mikrotik.com/wiki/Manual:IP/Traffic_Flow
+|nProbe                   |  y | y  |   y   | L7 DPI fields now also supported
+|Nokia BRAS               |    |    |   y   |
+|OpenBSD pflow            |  y | N  |   y   | http://man.openbsd.org/OpenBSD-current/man4/pflow.4
+|Riverbed                 |    | N  |       | Not supported due to field ID conflicts. Workaround available in the definitions directory over at Elastiflow <https://github.com/robcowart/elastiflow>
+|Sandvine Procera PacketLogic| |    |   y   | v15.1
+|Softflowd                |  y | y  |   y   | IPFIX supported in https://github.com/djmdjm/softflowd
+|Sophos UTM               |    |    |   y   |
+|Streamcore Streamgroomer |    | y  |       |
+|Palo Alto PAN-OS         |    | y  |       |
+|Ubiquiti Edgerouter X    |    | y  |       | With MPLS labels
+|VMware VDS               |    |    |   y   | Still some unknown fields
+|YAF                      |    |    |   y   | With silk and applabel, but no DPI plugin support
+|vIPtela                  |    |    |   y   |
+|===========================================================================================
+
+==== Usage
+
+Example Logstash configuration that will listen on 2055/udp for Netflow v5,v9 and IPFIX:
+
+[source, ruby]
+--------------------------
+input {
+  udp {
+    port  => 2055
+    codec => netflow
+  }
+}
+--------------------------
+
+For high-performance production environments the configuration below will decode up to 15000 flows/sec from a Cisco ASR 9000 router on a dedicated 16 CPU instance. If your total flowrate exceeds 15000 flows/sec, you should use multiple Logstash instances.
+
+Note that for richer flows from a Cisco ASA firewall this number will be at least 3x lower.
+
+[source, ruby]
+--------------------------
+input {
+  udp {
+    port                 => 2055
+    codec                => netflow
+    receive_buffer_bytes => 16777216
+    workers              => 16
+  }
+--------------------------
+
+To mitigate dropped packets, make sure to increase the Linux kernel receive buffer limit:
+
+ # sysctl -w net.core.rmem_max=$((1024*1024*16))
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Netflow Codec Configuration Options
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-cache_save_path>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-cache_ttl>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-include_flowset_id>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-ipfix_definitions>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-netflow_definitions>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-versions>> |<<array,array>>|No
+|=======================================================================
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-cache_save_path"]
+===== `cache_save_path` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+Enables the template cache and saves it in the specified directory. This
+minimizes data loss after Logstash restarts because the codec doesn't have to
+wait for the arrival of templates, but instead reload already received
+templates received during previous runs.
+
+Template caches are saved as:
+
+* <<path,path>>/netflow_templates.cache for Netflow v9 templates.
+* <<path,path>>/ipfix_templates.cache for IPFIX templates.
+
+[id="plugins-{type}s-{plugin}-cache_ttl"]
+===== `cache_ttl` 
+
+  * Value type is <<number,number>>
+  * Default value is `4000`
+
+Netflow v9/v10 template cache TTL (seconds)
+
+[id="plugins-{type}s-{plugin}-include_flowset_id"]
+===== `include_flowset_id` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Only makes sense for ipfix, v9 already includes this
+Setting to true will include the flowset_id in events
+Allows you to work with sequences, for instance with the aggregate filter
+
+[id="plugins-{type}s-{plugin}-ipfix_definitions"]
+===== `ipfix_definitions` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+Override YAML file containing IPFIX field definitions
+
+Very similar to the Netflow version except there is a top level Private
+Enterprise Number (PEN) key added:
+
+[source,yaml]
+--------------------------
+pen:
+id:
+- :uintN or :ip4_addr or :ip6_addr or :mac_addr or :string
+- :name
+id:
+- :skip
+--------------------------
+
+There is an implicit PEN 0 for the standard fields.
+
+See <https://github.com/logstash-plugins/logstash-codec-netflow/blob/master/lib/logstash/codecs/netflow/ipfix.yaml> for the base set.
+
+[id="plugins-{type}s-{plugin}-netflow_definitions"]
+===== `netflow_definitions` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+Override YAML file containing Netflow field definitions
+
+Each Netflow field is defined like so:
+
+[source,yaml]
+--------------------------
+id:
+- default length in bytes
+- :name
+id:
+- :uintN or :ip4_addr or :ip6_addr or :mac_addr or :string
+- :name
+id:
+- :skip
+--------------------------
+
+See <https://github.com/logstash-plugins/logstash-codec-netflow/blob/master/lib/logstash/codecs/netflow/netflow.yaml> for the base set.
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target` 
+
+  * Value type is <<string,string>>
+  * Default value is `"netflow"`
+
+Specify into what field you want the Netflow data.
+
+[id="plugins-{type}s-{plugin}-versions"]
+===== `versions` 
+
+  * Value type is <<array,array>>
+  * Default value is `[5, 9, 10]`
+
+Specify which Netflow versions you will accept.
+
+

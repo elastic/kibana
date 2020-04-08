@@ -1,0 +1,27 @@
+--- 
+udp: 1.3.6.1.2.1.7
+udpInDatagrams: 1.3.6.1.2.1.7.1
+udpNoPorts: 1.3.6.1.2.1.7.2
+udpInErrors: 1.3.6.1.2.1.7.3
+udpOutDatagrams: 1.3.6.1.2.1.7.4
+udpTable: 1.3.6.1.2.1.7.5
+udpEntry: 1.3.6.1.2.1.7.5.1
+udpLocalAddress: 1.3.6.1.2.1.7.5.1.1
+udpLocalPort: 1.3.6.1.2.1.7.5.1.2
+udpEndpointTable: 1.3.6.1.2.1.7.7
+udpEndpointEntry: 1.3.6.1.2.1.7.7.1
+udpEndpointLocalAddressType: 1.3.6.1.2.1.7.7.1.1
+udpEndpointLocalAddress: 1.3.6.1.2.1.7.7.1.2
+udpEndpointLocalPort: 1.3.6.1.2.1.7.7.1.3
+udpEndpointRemoteAddressType: 1.3.6.1.2.1.7.7.1.4
+udpEndpointRemoteAddress: 1.3.6.1.2.1.7.7.1.5
+udpEndpointRemotePort: 1.3.6.1.2.1.7.7.1.6
+udpEndpointInstance: 1.3.6.1.2.1.7.7.1.7
+udpEndpointProcess: 1.3.6.1.2.1.7.7.1.8
+udpHCInDatagrams: 1.3.6.1.2.1.7.8
+udpHCOutDatagrams: 1.3.6.1.2.1.7.9
+udpMIB: 1.3.6.1.2.1.50
+udpMIBConformance: 1.3.6.1.2.1.50.2
+udpMIBCompliances: 1.3.6.1.2.1.50.2.1
+udpMIBGroups: 1.3.6.1.2.1.50.2.2
+

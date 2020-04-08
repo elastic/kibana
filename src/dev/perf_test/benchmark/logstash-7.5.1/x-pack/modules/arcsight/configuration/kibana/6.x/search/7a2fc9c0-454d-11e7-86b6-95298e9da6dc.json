@@ -1,0 +1,27 @@
+{
+  "title": "Endpoint - OS Events [ArcSight]",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "deviceVendor",
+    "deviceProduct",
+    "name",
+    "deviceEventClassId",
+    "deviceEventCategory",
+    "sourceUserName",
+    "destinationUserName",
+    "destinationHostName",
+    "categoryBehavior",
+    "categoryOutcome",
+    "sourceNtDomain",
+    "destinationNTDomain"
+  ],
+  "sort": [
+    "deviceReceiptTime",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"arcsight-*\",\"highlightAll\":true,\"version\":true,\"filter\":[],\"query\":{\"query_string\":{\"query\":\"categoryDeviceGroup:\\\"/Operating System\\\"\",\"analyze_wildcard\":true}}}"
+  }
+}

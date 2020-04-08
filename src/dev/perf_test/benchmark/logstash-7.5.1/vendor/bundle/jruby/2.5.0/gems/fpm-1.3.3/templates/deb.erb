@@ -1,0 +1,52 @@
+Package: <%= name %>
+Version: <%= "#{epoch}:" if epoch %><%= version %><%= "-" + iteration.to_s if iteration %>
+License: <%= license %>
+<% if !vendor.nil? and !vendor.empty? -%>
+Vendor: <%= vendor %>
+<% end -%>
+Architecture: <%= architecture %>
+Maintainer: <%= maintainer  %>
+Installed-Size: <%= attributes[:deb_installed_size] %>
+<% if !dependencies.empty? and !attributes[:no_depends?] -%>
+Depends: <%= dependencies.collect { |d| fix_dependency(d) }.flatten.join(", ") %>
+<% end -%>
+<% if !conflicts.empty? -%>
+Conflicts: <%= conflicts.collect { |d| fix_dependency(d) }.flatten.join(", ") %>
+<% end -%>
+<% if attributes[:deb_breaks] -%>
+Breaks: <%= attributes[:deb_breaks].collect { |d| fix_dependency(d) }.flatten.join(", ") %>
+<% end -%>
+<% if attributes[:deb_pre_depends_given?] -%>
+Pre-Depends: <%= attributes[:deb_pre_depends].collect { |d| fix_dependency(d) }.flatten.join(", ") %>
+<% end -%>
+<% if attributes[:deb_build_depends_given?] -%>
+Build-Depends: <%= attributes[:deb_build_depends].collect { |d| fix_dependency(d) }.flatten.join(", ") %>
+<% end -%>
+<% if !provides.empty? -%>
+<%# Turn each provides from 'foo = 123' to simply 'foo' because Debian :\ -%>
+<%#  http://www.debian.org/doc/debian-policy/ch-relationships.html -%>
+Provides: <%= provides.map {|p| p.split(" ").first}.join ", " %>
+<% end -%>
+<% if !replaces.empty? -%>
+Replaces: <%= replaces.join(", ") %>
+<% end -%>
+<% if attributes[:deb_recommends_given?] -%>
+Recommends: <%= attributes[:deb_recommends].collect { |d| fix_dependency(d) }.flatten.join(", ") %>
+<% end -%>
+<% if attributes[:deb_suggests_given?] -%>
+Suggests: <%= attributes[:deb_suggests].collect { |d| fix_dependency(d) }.flatten.join(", ") %>
+<% end -%>
+Section: <%= category %>
+Priority: <%= attributes[:deb_priority] %>
+Homepage: <%= url or "http://nourlgiven.example.com/" %>
+<% lines = (description or "no description given").split("\n") -%>
+<% firstline, *remainder = lines -%>
+Description: <%= firstline %>
+<% if remainder.any? -%>
+<%= remainder.collect { |l| l =~ /^ *$/ ? " ." : " #{l}" }.join("\n") %>
+<% end -%>
+<% if attributes[:deb_field_given?] -%>
+<%   attributes[:deb_field].each do |field, value| -%>
+<%= field %>: <%= value %>
+<%   end -%>
+<% end -%>

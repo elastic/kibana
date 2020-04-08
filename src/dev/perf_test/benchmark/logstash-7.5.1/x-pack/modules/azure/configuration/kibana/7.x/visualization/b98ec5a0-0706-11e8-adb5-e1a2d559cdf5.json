@@ -1,0 +1,10 @@
+{
+  "title": "SQL DB Overview [Azure Monitor]",
+  "visState": "{\"title\":\"SQL DB Overview [Azure Monitor]\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"colorSchema\":\"Green to Red\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":true,\"color\":\"black\"},\"style\":{\"fontSize\":15,\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#d3d3d3\"},\"metricColorMode\":\"None\"}},\"aggs\":[{\"id\":\"3\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"azure.resource_name.keyword\",\"customLabel\":\"Databases\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"azure.server.keyword\",\"customLabel\":\"Servers\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"azure.resource_group.keyword\",\"customLabel\":\"Resource Groups\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"azure.subscription.keyword\",\"customLabel\":\"Subscriptions\"}}]}",
+  "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"},\"colors\":{\"0 - 100\":\"#64B0C8\"}}}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"azure-*\",\"filter\":[],\"query\":{\"query\":\"azure.group:\\\"sql_diagnostics\\\"\",\"language\":\"lucene\"}}"
+  }
+}

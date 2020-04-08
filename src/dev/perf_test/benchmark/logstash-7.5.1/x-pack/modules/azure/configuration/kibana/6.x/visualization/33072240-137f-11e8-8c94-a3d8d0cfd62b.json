@@ -1,0 +1,10 @@
+{
+  "title": "Service Health Count [Azure Monitor][Activity Log]",
+  "visState": "{\n  \"title\": \"Service Health Count [Azure Monitor][Activity Log]\",\n  \"type\": \"metric\",\n  \"params\": {\n    \"addTooltip\": true,\n    \"addLegend\": false,\n    \"type\": \"metric\",\n    \"metric\": {\n      \"percentageMode\": false,\n      \"useRanges\": false,\n      \"colorSchema\": \"Green to Red\",\n      \"metricColorMode\": \"None\",\n      \"colorsRange\": [\n        {\n          \"from\": 0,\n          \"to\": 10000\n        }\n      ],\n      \"labels\": {\n        \"show\": true\n      },\n      \"invertColors\": false,\n      \"style\": {\n        \"bgFill\": \"#000\",\n        \"bgColor\": false,\n        \"labelColor\": false,\n        \"subText\": \"\",\n        \"fontSize\": 12\n      }\n    }\n  },\n  \"aggs\": [\n    {\n      \"id\": \"1\",\n      \"enabled\": true,\n      \"type\": \"count\",\n      \"schema\": \"metric\",\n      \"params\": {\n        \"customLabel\": \"Incidents\"\n      }\n    },\n    {\n      \"id\": \"2\",\n      \"enabled\": true,\n      \"type\": \"filters\",\n      \"schema\": \"group\",\n      \"params\": {\n        \"filters\": [\n          {\n            \"input\": {\n              \"query\": \"resultType:Active\"\n            },\n            \"label\": \"Activated\"\n          },\n          {\n            \"input\": {\n              \"query\": \"resultType:Resolved\"\n            },\n            \"label\": \"Resolved\"\n          }\n        ]\n      }\n    }\n  ]\n}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\n  \"index\": \"azure-*\",\n  \"filter\": [],\n  \"query\": {\n    \"query\": \"azure.group:activity_log AND azure.category:ServiceHealth\",\n    \"language\": \"lucene\"\n  }\n}"
+  }
+}

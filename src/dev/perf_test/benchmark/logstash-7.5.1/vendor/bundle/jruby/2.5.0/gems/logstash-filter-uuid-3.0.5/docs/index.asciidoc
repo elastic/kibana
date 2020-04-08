@@ -1,0 +1,95 @@
+:plugin: uuid
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Uuid filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The uuid filter allows you to generate a
+https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID]
+and add it as a field to each processed event.
+
+This is useful if you need to generate a string that's unique for every
+event, even if the same input is processed multiple times. If you want
+to generate strings that are identical each time a event with a given
+content is processed (i.e. a hash) you should use the
+<<plugins-filters-fingerprint,fingerprint filter>> instead.
+
+The generated UUIDs follow the version 4 definition in
+https://tools.ietf.org/html/rfc4122[RFC 4122]) and will be
+represented as a standard hexadecimal string format, e.g.
+"e08806fe-02af-406c-bbde-8a5ae4475e57".
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Uuid Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-overwrite>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|Yes
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-overwrite"]
+===== `overwrite` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+If the value in the field currently (if any) should be overridden
+by the generated UUID. Defaults to `false` (i.e. if the field is
+present, with ANY value, it won't be overridden)
+
+Example:
+[source,ruby]
+   filter {
+      uuid {
+        target    => "uuid"
+        overwrite => true
+      }
+   }
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Select the name of the field where the generated UUID should be
+stored.
+
+Example:
+[source,ruby]
+    filter {
+      uuid {
+        target => "uuid"
+      }
+    }
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

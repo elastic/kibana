@@ -1,0 +1,1063 @@
+= Querying in Sequel
+
+This guide is based on http://guides.rubyonrails.org/active_record_querying.html
+
+== Purpose of this Guide
+
+Sequel is a flexible and powerful database library
+that supports a wide variety of different querying methods.  This guide
+aims to be a introduction to Sequel's querying support.
+
+While you can use raw SQL with Sequel, a large part of the
+advantage you get from using Sequel is Sequel's ability to abstract
+SQL from you and give you a pure-ruby interface. Sequel also ships with
+a {core_extensions extension}[rdoc-ref:doc/core_extensions.rdoc],
+which adds methods to core ruby types to work with Sequel.
+
+== Retrieving Objects
+
+Sequel provides a few separate methods for retrieving objects from the
+database.  The underlying method is Sequel::Dataset#each, which yields each
+row as the Sequel::Database provides it.  However, while Dataset#each can and
+often is used directly, in many cases there is a more convenient retrieval
+method you can use.
+
+=== Sequel::Dataset
+
+If you are new to Sequel and aren't familiar with Sequel, you should probably
+read the {"Dataset Basics" guide}[rdoc-ref:doc/dataset_basics.rdoc],
+then come back here.
+
+=== Retrieving a Single Object
+
+Sequel offers quite a few ways to to retrieve a single object.
+
+==== Using a Primary Key [Sequel::Model]
+
+The <tt>Sequel::Model.[]</tt> is the easiest method to use to find a model instance
+by its primary key value:
+
+  # Find artist with primary key (id) 1
+  artist = Artist[1]
+  # SELECT * FROM artists WHERE (id = 1)
+  # => #<Artist @values={:name=>"YJM", :id=>1}>
+
+If there is no record with the given primary key, nil will be returned. If you want
+to raise an exception if no record is found, you can use <tt>Sequel::Model.with_pk!</tt>:
+
+  artist = Artist.with_pk!(1)
+
+==== Using +first+
+
+If you want the first record in the dataset,
+<tt>Sequel::Dataset#first</tt> is probably the most obvious method to use:
+
+  artist = Artist.first
+  # SELECT * FROM artists LIMIT 1
+  # => #<Artist @values={:name=>"YJM", :id=>1}>
+
+Any options you pass to +first+ will be used as a filter:
+
+  artist = Artist.first(name: 'YJM')
+  # SELECT * FROM artists WHERE (name = 'YJM') LIMIT 1
+  # => #<Artist @values={:name=>"YJM", :id=>1}>
+  
+  artist = Artist.first(Sequel.like(:name, 'Y%'))
+  # SELECT * FROM artists WHERE (name LIKE 'Y%' ESCAPE '\') LIMIT 1
+  # => #<Artist @values={:name=>"YJM", :id=>1}>
+  
+If there is no matching row, +first+ will return nil.  If you want to
+raise an exception instead, use <tt>first!</tt>.
+
+<tt>Sequel::Dataset#[]</tt> is basically an alias for +first+, except it
+requires an argument:
+
+  DB[:artists][{name: 'YJM'}]
+  # SELECT * FROM artists WHERE (name = 'YJM') LIMIT 1
+  # => {:name=>"YJM", :id=>1}
+
+Note that while Model.[] allows you to pass a primary key directly,
+Dataset#[] does not (unless it is a model dataset).
+
+==== Using +last+
+
+If you want the last record in the dataset,
+<tt>Sequel::Dataset#last</tt> is an obvious method to use.  +last+ requires the
+dataset be ordered, unless the dataset is a model dataset in which case +last+
+will do a reverse order by the primary key field:
+
+  artist = Artist.last
+  # SELECT * FROM artists ORDER BY id DESC LIMIT 1
+  # => #<Artist @values={:name=>"YJM", :id=>1}>
+
+Note:
+
+1. +last+ is equivalent to running a +reverse.first+ query, in other words it reverses the order of the dataset and then calls +first+.  This is why +last+ raises a Sequel::Error when there is no order on a plain dataset - because it will provide the same record as +first+, and most users will find that confusing.
+2. +last+ is not necessarily going to give you the last record in the dataset unless you give the dataset an unambiguous order.
+3. +last+ will ignore +limit+ if chained together in a query because it sets a limit of 1 if no arguments are given.
+
+==== Retrieving a Single Column Value
+
+Sometimes, instead of wanting an entire row, you only want the value of
+a specific column.  For this <tt>Sequel::Dataset#get</tt> is the method
+you want:
+
+  artist_name = Artist.get(:name)
+  # SELECT name FROM artists LIMIT 1
+  # => "YJM"
+
+==== Retrieving a Multiple Column Values
+
+If you want the value for multiple columns, you can pass an array to
+<tt>Sequel::Dataset#get</tt>:
+
+  artist_id, artist_name = Artist.get([:id, :name])
+  # SELECT id, name FROM artists LIMIT 1
+  # => [1, "YJM"]
+
+=== Retrieving Multiple Objects
+
+==== As an Array of Hashes or Model Objects
+
+In many cases, you want an array of all of the rows associated with the
+dataset, in which case <tt>Sequel::Dataset#all</tt> is the method you
+want to use:
+
+  artists = Artist.all
+  # SELECT * FROM artists
+  # => [#<Artist @values={:name=>"YJM", :id=>1}>,
+  #     #<Artist @values={:name=>"AS", :id=>2}>]
+
+==== Using an Enumerable Interface
+
+<tt>Sequel::Dataset</tt> uses an Enumerable Interface, so it provides a
+method named each that yields hashes or model objects as they are retrieved
+from the database:
+
+  Artist.each{|x| p x.name}
+  # SELECT * FROM artists
+  "YJM"
+  "AS"
+
+This means that all of the methods in the Enumerable module are available,
+such as +map+:
+
+  artist_names = Artist.map{|x| x.name}
+  # SELECT * FROM artists
+  # => ["YJM", "AS"]
+
+==== As an Array of Column Values
+
+Sequel also has an extended +map+ method that takes an argument.  If you
+provide an argument to +map+, it will return an array of values for the
+given column.  So the previous example can be handled more easily with:
+
+  artist_names = Artist.map(:name)
+  # SELECT * FROM artists
+  # => ["YJM", "AS"]
+
+One difference between these two ways of returning an array of values is
+that providing +map+ with an argument is really doing:
+
+  artist_names = Artist.map{|x| x[:name]} # not x.name
+
+Note that regardless of whether you provide +map+ with an argument, it
+does not modify the columns selected.  If you only want to select a
+single column and return an array of the columns values, you can use
++select_map+:
+
+  artist_names = Artist.select_map(:name)
+  # SELECT name FROM artists
+  # => ["YJM", "AS"]
+
+It's also common to want to order such a map, so Sequel provides a
++select_order_map+ method as well:
+
+  artist_names = Artist.select_order_map(:name)
+  # SELECT name FROM artists ORDER BY name
+  # => ["AS", "YJM"]
+
+In all of these cases, you can provide an array of column symbols and
+an array of arrays of values will be returned:
+
+  artist_names = Artist.select_map([:id, :name])
+  # SELECT id, name FROM artists
+  # => [[1, "YJM"], [2, "AS"]]
+
+==== As a Hash
+
+Sequel makes it easy to take an SQL query and return it as a ruby hash,
+using the +as_hash+ method:
+
+  artist_names = Artist.as_hash(:id, :name)
+  # SELECT * FROM artists
+  # => {1=>"YJM", 2=>"AS"}
+
+As you can see, the +as_hash+ method uses the first symbol as the key
+and the second symbol as the value.  So if you swap the two arguments the hash
+will have its keys and values transposed:
+
+  artist_names = Artist.as_hash(:name, :id)
+  # SELECT * FROM artists
+  # => {"YJM"=>1, "AS"=>2}
+
+Now what if you have multiple values for the same key?  By default, +as_hash+
+will just have the last matching value.  If you care about all matching values,
+use +to_hash_groups+, which makes the values of the array an array of matching
+values, in the order they were received:
+
+  artist_names = Artist.to_hash_groups(:name, :id)
+  # SELECT * FROM artists
+  # => {"YJM"=>[1, 10, ...], "AS"=>[2, 20, ...]}
+
+If you only provide one argument to +as_hash+, it uses the entire hash
+or model object as the value:
+
+  artist_names = DB[:artists].as_hash(:name)
+  # SELECT * FROM artists
+  # => {"YJM"=>{:id=>1, :name=>"YJM"}, "AS"=>{:id=>2, :name=>"AS"}}
+
+and +to_hash_groups+ works similarly:
+
+  artist_names = DB[:artists].to_hash_groups(:name)
+  # SELECT * FROM artists
+  # => {"YJM"=>[{:id=>1, :name=>"YJM"}, {:id=>10, :name=>"YJM"}], ...}
+
+Model datasets have a +as_hash+ method that can be called without any
+arguments, in which case it will use the primary key as the key and
+the model object as the value.  This can be used to easily create an
+identity map:
+
+  artist_names = Artist.as_hash
+  # SELECT * FROM artists
+  # => {1=>#<Artist @values={:id=>1, :name=>"YGM"}>,
+  #     2=>#<Artist @values={:id=>2, :name=>"AS"}>}
+
+There is no equivalent handling to +to_hash_groups+, since there would
+only be one matching record, as the primary key must be unique.
+
+Note that +as_hash+ never modifies the columns selected.  However, just
+like Sequel has a +select_map+ method to modify the columns selected and
+return an array, Sequel also has a +select_hash+ method to modify the
+columns selected and return a hash:
+
+  artist_names = Artist.select_hash(:name, :id)
+  # SELECT name, id FROM artists
+  # => {"YJM"=>1, "AS"=>2}
+
+Likewise, +select_hash_groups+ also exists:
+
+  artist_names = Artist.select_hash_groups(:name, :id)
+  # SELECT name, id FROM artists
+  # => {"YJM"=>[1, 10, ...], "AS"=>[2, 20, ...]}
+
+== Modifying datasets 
+
+Note that the retrieval methods discussed above just return
+the row(s) included in the existing dataset.  In most cases,
+you aren't interested in every row in a table, but in a subset
+of the rows, based on some criteria.  In Sequel, filtering
+the dataset is generally done separately than retrieving
+the records.
+
+There are really two types of dataset methods that you will
+be using:
+
+1. Methods that return row(s), discussed above
+2. Methods that return modified datasets, discussed below
+
+Sequel datasets are frozen and use a method chaining, functional style API
+that returns modified datasets.  Let's start with a simple example.
+
+This is a basic dataset that includes all records in the
+table +artists+:
+
+  ds1 = DB[:artists]
+  # SELECT * FROM artists
+
+Let's say we are only interested in the artists whose names
+start with "A":
+
+  ds2 = ds1.where(Sequel.like(:name, 'A%'))
+  # SELECT * FROM artists WHERE (name LIKE 'A%' ESCAPE '\')
+
+Here we see that +where+ returns a dataset that adds a +WHERE+
+clause to the query.  It's important to note that +where+ does
+not modify the receiver:
+
+  ds1
+  # SELECT * FROM artists
+  ds2
+  # SELECT * FROM artists WHERE (name LIKE 'A%' ESCAPE '\')
+ 
+In Sequel, dataset methods do not modify the dataset itself, so you can freely use the dataset in multiple
+places without worrying that its usage in one place will affect its usage
+in another place.  This is what is meant by a functional style API.
+
+Let's say we only want to select the id and name columns, and that
+we want to order by name:
+
+  ds3 = ds2.order(:name).select(:id, :name)
+  # SELECT id, name FROM artists WHERE (name LIKE 'A%' ESCAPE '\') ORDER BY name
+  
+Note how you don't need to assign the returned value of order to a variable,
+and then call select on that.  Because order just returns a dataset, you can
+call select directly on the returned dataset.  This is what is meant by a
+method chaining API.
+
+Also note how you can call methods that modify different clauses in any order.
+In this case, the WHERE clause was added first, then the ORDER clause, then the
+SELECT clause was modified.  This makes for a flexible API, where you can modify
+any part of the query at any time.
+
+== Filters
+
+Filtering is probably the most common dataset modifying action done in Sequel.
+Both the +where+ and +filter+ methods filter the dataset by modifying the
+dataset's WHERE clause.  Both accept a wide variety of input formats, discussed
+below.
+
+=== Hashes
+
+The most common format for providing filters is via a hash.  In general, Sequel
+treats conditions specified with a hash as equality, inclusion, or identity.  What type
+of condition is used depends on the values in the hash.
+
+Unless Sequel has special support for the value's class, it uses a simple
+equality statement:
+
+  Artist.where(id: 1)
+  # SELECT * FROM artists WHERE (id = 1)
+
+  Artist.where(name: 'YJM')
+  # SELECT * FROM artists WHERE (name = 'YJM')
+
+For arrays, Sequel uses the IN operator with a value list:
+
+  Artist.where(id: [1, 2])
+  # SELECT * FROM artists WHERE (id IN (1, 2))
+
+For datasets, Sequel uses the IN operator with a subselect:
+
+  Artist.where(id: Album.select(:artist_id))
+  # SELECT * FROM artists WHERE (id IN (
+  #   SELECT artist_id FROM albums))
+
+For boolean values such as nil, true, and false, Sequel uses the IS operator:
+
+  Artist.where(id: nil)
+  # SELECT * FROM artists WHERE (id IS NULL)
+
+For ranges, Sequel uses a pair of inequality statements:
+
+  Artist.where(id: 1..5)
+  # SELECT * FROM artists WHERE ((id >= 1) AND (id <= 5))
+
+  Artist.where(id: 1...5)
+  # SELECT * FROM artists WHERE ((id >= 1) AND (id < 5))
+
+Finally, for regexps, Sequel uses an SQL regular expression.  Note that this
+is probably only supported on PostgreSQL and MySQL.
+
+  Artist.where(name: /JM$/)
+  # SELECT * FROM artists WHERE (name ~ 'JM$')
+
+If there are multiple arguments in the hash, the filters are ANDed together:
+
+  Artist.where(id: 1, name: /JM$/)
+  # SELECT * FROM artists WHERE ((id = 1) AND (name ~ 'JM$'))
+
+This works the same as if you used two separate +where+ calls:
+
+  Artist.where(id: 1).where(name: /JM$/)
+  # SELECT * FROM artists WHERE ((id = 1) AND (name ~ 'JM$'))
+
+=== Array of Two Element Arrays
+
+If you use an array of two element arrays, it is treated as a hash.  The only
+advantage to using an array of two element arrays is that it allows you to
+duplicate keys, so you can do:
+
+  Artist.where([[:name, /JM$/], [:name, /^YJ/]])
+  # SELECT * FROM artists WHERE ((name ~ 'JM$')) AND ((name ~ '^YJ'))
+
+=== Virtual Row Blocks
+
+If a block is passed to a filter, it is treated as a virtual row block:
+
+  Artist.where{id > 5}
+  # SELECT * FROM artists WHERE (id > 5)
+
+You can learn more about virtual row blocks in the {"Virtual Rows" guide}[rdoc-ref:doc/virtual_rows.rdoc].
+
+You can provide both regular arguments and a block, in which case the results
+will be ANDed together:
+
+  Artist.where(name: 'A'...'M'){id > 5}
+  # SELECT * FROM artists WHERE ((name >= 'A') AND (name < 'M') AND (id > 5))
+
+Using virtual row blocks, what you can do with single entry hash or an array with
+a single two element array can also be done using the =~ method:
+
+  Artist.where{id =~ 5}
+  # SELECT * FROM artists WHERE (id = 5)
+
+=== Symbols
+
+If you have a boolean column in the database, and you want only true
+values, you can just provide the column symbol to filter:
+
+  Artist.where(:retired)
+  # SELECT * FROM artists WHERE retired
+
+=== SQL::Expression
+
+Sequel has a DSL that allows easily creating SQL expressions.  These SQL
+expressions are instances of subclasses of Sequel::SQL::Expression. You've
+already seen an example earlier:
+
+  Artist.where(Sequel.like(:name, 'Y%'))
+  # SELECT * FROM artists WHERE name LIKE 'Y%' ESCAPE '\'
+
+In this case Sequel.like returns a Sequel::SQL::BooleanExpression object,
+which is used directly in the filter.
+
+You can use the DSL to create arbitrarily complex expressions.  SQL::Expression
+objects can be created via singleton methods on the Sequel module.  The most common
+method is Sequel.[], which takes any object and wraps it in a SQL::Expression
+object.  In most cases, the SQL::Expression returned supports the & operator for
++AND+, the | operator for +OR+, and the ~ operator for inversion:
+
+  Artist.where(Sequel.like(:name, 'Y%') & (Sequel[{b: 1}] | Sequel.~(c: 3)))
+  # SELECT * FROM artists WHERE ((name LIKE 'Y%' ESCAPE '\') AND ((b = 1) OR (c != 3)))
+
+You can combine these expression operators with the virtual row support:
+
+  Artist.where{(a > 1) & ~((b(c) < 1) | d)}
+  # SELECT * FROM artists WHERE ((a > 1) AND (b(c) >= 1) AND NOT d)
+
+Note the use of parentheses when using the & and | operators, as they have lower
+precedence than other operators.  The following will not work:
+
+  Artist.where{a > 1 & ~(b(c) < 1 | d)}
+  # Raises a TypeError
+
+=== Strings with Placeholders
+
+Assuming you want to get your hands dirty and use SQL fragments in filters, Sequel allows you
+to do so if you explicitly mark the strings as literal strings using +Sequel.lit+. You can
+use placeholders in the string and pass arguments for the placeholders:
+
+  Artist.where(Sequel.lit("name LIKE ?", 'Y%'))
+  # SELECT * FROM artists WHERE (name LIKE 'Y%')
+
+This is the most common type of placeholder, where each question mark is substituted
+with the next argument:
+
+  Artist.where(Sequel.lit("name LIKE ? AND id = ?", 'Y%', 5))
+  # SELECT * FROM artists WHERE (name LIKE 'Y%' AND id = 5)
+
+You can also use named placeholders with a hash, where the named placeholders use
+colons before the placeholder names:
+
+  Artist.where(Sequel.lit("name LIKE :name AND id = :id", name: 'Y%', id: 5))
+  # SELECT * FROM artists WHERE (name LIKE 'Y%' AND id = 5)
+
+You don't have to provide any placeholders if you don't want to:
+
+  Artist.where(Sequel.lit("id = 2"))
+  # SELECT * FROM artists WHERE id = 2
+
+However, if you are using any untrusted input, you should definitely be using placeholders.
+In general, unless you are hardcoding values in the strings, you should use placeholders.
+You should never pass a string that has been built using interpolation, unless you are
+sure of what you are doing.
+
+  Artist.where(Sequel.lit("id = #{params[:id]}")) # Don't do this!
+  Artist.where(Sequel.lit("id = ?", params[:id])) # Do this instead
+  Artist.where(id: params[:id].to_i)              # Even better
+
+=== Inverting
+
+You may be wondering how to specify a not equals condition in Sequel, or the NOT IN
+operator.  Sequel has generic support for inverting conditions, so to write a not
+equals condition, you write an equals condition, and invert it:
+
+  Artist.where(id: 5).invert
+  # SELECT * FROM artists WHERE (id != 5)
+
+Note that +invert+ inverts the entire filter:
+
+  Artist.where(id: 5).where{name > 'A'}.invert
+  # SELECT * FROM artists WHERE ((id != 5) OR (name <= 'A'))
+
+In general, +invert+ is used rarely, since +exclude+ allows you to invert only specific
+filters:
+
+  Artist.exclude(id: 5)
+  # SELECT * FROM artists WHERE (id != 5)
+  
+  Artist.where(id: 5).exclude{name > 'A'}
+  # SELECT * FROM artists WHERE ((id = 5) OR (name <= 'A')
+
+So to do a NOT IN with an array:
+
+  Artist.exclude(id: [1, 2])
+  # SELECT * FROM artists WHERE (id NOT IN (1, 2))
+
+Or to use the NOT LIKE operator:
+
+  Artist.exclude(Sequel.like(:name, '%J%'))
+  # SELECT * FROM artists WHERE (name NOT LIKE '%J%' ESCAPE '\')
+
+You can use Sequel.~ to negate expressions:
+
+  Artist.where(Sequel.~(id: 5))
+  # SELECT * FROM artists WHERE id != 5
+
+On Sequel expression objects, you can use ~ to negate them:
+ 
+  Artist.where(~Sequel.like(:name, '%J%'))
+  # SELECT * FROM artists WHERE (name NOT LIKE '%J%' ESCAPE '\')
+
+You can use !~ on Sequel expressions to create negated expressions:
+
+  Artist.where{id !~ 5}
+  # SELECT * FROM artists WHERE (id != 5)
+
+=== Removing
+
+To remove all existing filters, use +unfiltered+:
+
+  Artist.where(id: 1).unfiltered
+  # SELECT * FROM artists
+
+== Ordering
+
+Sequel offers quite a few methods to manipulate the SQL ORDER BY clause.  The
+most basic of these is +order+:
+
+  Artist.order(:id)
+  # SELECT * FROM artists ORDER BY id
+
+You can specify multiple arguments to order by more than one column:
+
+  Album.order(:artist_id, :id)
+  # SELECT * FROM album ORDER BY artist_id, id
+
+Note that unlike +where+, +order+ replaces an existing order, it does not
+append to an existing order:
+
+  Artist.order(:id).order(:name)
+  # SELECT * FROM artists ORDER BY name
+  
+If you want to add a column to the end of the existing order:
+
+  Artist.order(:id).order_append(:name)
+  # SELECT * FROM artists ORDER BY id, name
+
+If you want to add a column to the beginning of the existing order:
+
+  Artist.order(:id).order_prepend(:name)
+  # SELECT * FROM artists ORDER BY name, id
+
+=== Reversing
+
+Just like you can invert an existing filter, you can reverse an existing
+order, using +reverse+ without an order:
+
+  Artist.order(:id).reverse
+  # SELECT FROM artists ORDER BY id DESC
+
+Alternatively, you can provide reverse with the order:
+
+  Artist.reverse(:id)
+  # SELECT FROM artists ORDER BY id DESC
+
+To specify a single entry be reversed, <tt>Sequel.desc</tt> can be used:
+
+  Artist.order(Sequel.desc(:id))
+  # SELECT FROM artists ORDER BY id DESC
+
+This allows you to easily use both ascending and descending orders:
+
+  Artist.order(:name, Sequel.desc(:id))
+  # SELECT FROM artists ORDER BY name, id DESC
+
+=== Removing
+
+Just like you can remove filters with +unfiltered+, you can remove
+orders with +unordered+:
+
+  Artist.order(:name).unordered
+  # SELECT * FROM artists
+
+== Selected Columns
+
+Sequel offers a few methods to manipulate the columns selected.  As
+you may be able to guess, the main method used is +select+:
+
+  Artist.select(:id, :name)
+  # SELECT id, name FROM artists
+
+You just specify all of the columns that you are selecting as
+arguments to the method.
+
+If you are dealing with model objects, you'll want to include the
+primary key if you want to update or destroy the object.  You'll
+also want to include any keys (primary or foreign) related to
+associations you plan to use.
+
+If a column is not selected, and you attempt to access it, you will
+get nil:
+
+  artist = Artist.select(:name).first
+  # SELECT name FROM artists LIMIT 1
+
+  artist[:id]
+  # => nil
+
+Like +order+, +select+ replaces the existing selected columns:
+
+  Artist.select(:id).select(:name)
+  # SELECT name FROM artists
+
+To add to the existing selected columns, use +select_append+:
+
+  Artist.select(:id).select_append(:name)
+  # SELECT id, name FROM artists
+
+To remove specifically selected columns, and default back to all
+columns, use +select_all+:
+
+  Artist.select(:id).select_all
+  # SELECT * FROM artists
+
+To select all columns from a given table, provide an argument to
++select_all+:
+
+  Artist.select_all(:artists)
+  # SELECT artists.* FROM artists
+
+=== Distinct
+
+To treat duplicate rows as a single row when retrieving the records,
+use +distinct+:
+
+  Artist.distinct.select(:name)
+  # SELECT DISTINCT name FROM artists
+
+Note that DISTINCT is a separate SQL clause, it's not a function
+that you pass to select.
+
+== Limit and Offset
+
+You can limit the dataset to a given number of rows using +limit+:
+
+  Artist.limit(5)
+  # SELECT * FROM artists LIMIT 5
+
+You can provide a second argument to +limit+ to specify an offset:
+
+  Artist.limit(5, 10)
+  # SELECT * FROM artists LIMIT 5 OFFSET 10
+
+You can also call the +offset+ method separately:
+
+  Artist.limit(5).offset(10)
+  # SELECT * FROM artists LIMIT 5 OFFSET 10
+
+Either of these would return the 11th through 15th records in the original
+dataset.
+
+To remove a limit and offset from a dataset, use +unlimited+:
+
+  Artist.limit(5, 10).unlimited
+  # SELECT * FROM artists
+
+== Grouping
+
+The SQL GROUP BY clause is used to combine multiple rows based on
+the values of a given group of columns.
+
+To modify the GROUP BY clause of the SQL statement, you use +group+:
+
+  Album.group(:artist_id)
+  # SELECT * FROM albums GROUP BY artist_id
+
+You can remove an existing grouping using +ungrouped+:
+
+  Album.group(:artist_id).ungrouped
+  # SELECT * FROM albums
+
+If you want to add a column to the end of the existing grouping columns:
+
+  Album.group(:artist_id).group_append(:name)
+  # SELECT * FROM albums GROUP BY artist_id, name
+ 
+A common use of grouping is to count based on the number of grouped rows,
+and Sequel provides a +group_and_count+ method to make this easier:
+
+  Album.group_and_count(:artist_id)
+  # SELECT artist_id, count(*) AS count FROM albums GROUP BY artist_id
+
+This will return the number of albums for each artist_id.
+
+If you want to select and group on the same columns, you can use +select_group+:
+
+  Album.select_group(:artist_id)
+  # SELECT artist_id FROM albums GROUP BY artist_id
+
+Usually you would add a +select_append+ call after that, to add some sort of
+aggregation:
+
+  Album.select_group(:artist_id).select_append{sum(num_tracks).as(tracks)}
+  # SELECT artist_id, sum(num_tracks) AS tracks FROM albums GROUP BY artist_id
+
+== Having
+
+The SQL HAVING clause is similar to the WHERE clause, except that
+filters the results after the grouping has been applied, instead of
+before.  One possible use is if you only wanted to return artists
+who had at least 10 albums:
+
+  Album.group_and_count(:artist_id).having{count.function.* >= 10}
+  # SELECT artist_id, count(*) AS count FROM albums
+  # GROUP BY artist_id HAVING (count(*) >= 10)
+
+Both the WHERE clause and the HAVING clause are removed by +unfiltered+:
+
+  Album.group_and_count(:artist_id).having{count.function.* >= 10}.
+   where(:name.like('A%')).unfiltered
+  # SELECT artist_id, count(*) AS count FROM albums GROUP BY artist_id
+
+== Joins
+
+Sequel has support for many different SQL join types.
+The underlying method used is +join_table+:
+
+  Album.join_table(:inner, :artists, id: :artist_id)
+  # SELECT * FROM albums
+  # INNER JOIN artists ON (artists.id = albums.artist_id)
+
+In most cases, you won't call +join_table+ directly, as Sequel provides
+shortcuts for all common (and most uncommon) join types. For example
++join+ does an inner join:
+
+  Album.join(:artists, id: :artist_id)
+  # SELECT * FROM albums
+  # INNER JOIN artists ON (artists.id = albums.artist_id))))
+
+And +left_join+ does a LEFT JOIN:
+
+  Album.left_join(:artists, id: :artist_id)
+  # SELECT * FROM albums
+  # LEFT JOIN artists ON (artists.id = albums.artist_id)
+
+=== Table/Dataset to Join
+
+For all of these specialized join methods, the first argument is
+generally the name of the table to which you are joining.  However, you
+can also provide a dataset, in which case a subselect is used:
+
+  Album.join(Artist.where{name < 'A'}, id: :artist_id)
+  # SELECT * FROM albums
+  # INNER JOIN (SELECT * FROM artists WHERE (name < 'A')) AS t1
+  #  ON (t1.id = albums.artist_id)
+
+=== Join Conditions
+
+The second argument to the specialized join methods is the conditions 
+to use when joining, which is similar to a filter expression, with
+a few minor exceptions.
+
+==== Implicit Qualification
+
+A hash used as the join conditions operates similarly to a filter,
+except that unqualified symbol keys are automatically qualified
+with the table from the first argument, and unqualified symbol values
+are automatically qualified with the last table joined (or the first
+table in the dataset if there hasn't been a previous join):
+
+  Album.join(:artists, id: :artist_id)
+  # SELECT * FROM albums
+  # INNER JOIN artists ON (artists.id = albums.artist_id)
+
+Note how the +id+ symbol is automatically qualified with +artists+,
+while the +artist_id+ symbol is automatically qualified with +albums+.
+
+Because Sequel uses the last joined table for implicit qualifications
+of values, you can do things like:
+
+  Album.join(:artists, id: :artist_id).
+   join(:members, artist_id: :id)
+  # SELECT * FROM albums
+  # INNER JOIN artists ON (artists.id = albums.artist_id)
+  # INNER JOIN members ON (members.artist_id = artists.id)
+
+Note that when joining to the +members+ table, +artist_id+ is qualified
+with +members+ and +id+ is qualified with +artists+.
+
+While a good default, implicit qualification is not always correct:
+
+  Album.join(:artists, id: :artist_id).
+   join(:tracks, album_id: :id)
+  # SELECT * FROM albums
+  # INNER JOIN artists ON (artists.id = albums.artist_id)
+  # INNER JOIN tracks ON (tracks.album_id = artists.id)
+
+Note here how +id+ is qualified with +artists+ instead of +albums+. This
+is wrong as the foreign key <tt>tracks.album_id</tt> refers to <tt>albums.id</tt>, not
+<tt>artists.id</tt>.  To fix this, you need to explicitly qualify when joining:
+
+  Album.join(:artists, id: :artist_id).
+   join(:tracks, album_id: Sequel[:albums][:id])
+  # SELECT * FROM albums
+  # INNER JOIN artists ON (artists.id = albums.artist_id)
+  # INNER JOIN tracks ON (tracks.album_id = albums.id)
+
+Just like in filters, an array of two element arrays is treated the same
+as a hash, but allows for duplicate keys:
+
+  Album.join(:artists, [[:id, :artist_id], [:id, 1..5]])
+  # SELECT * FROM albums INNER JOIN artists
+  #  ON ((artists.id = albums.artist_id)
+  #   AND (artists.id >= 1) AND (artists.id <= 5))
+
+And just like in the hash case, unqualified symbol elements in the
+array are implicitly qualified.
+
+By default, Sequel only qualifies unqualified symbols in the conditions.  However,
+You can provide an options hash with a <tt>qualify: :deep</tt> option to do a deep
+qualification, which can qualify subexpressions.  For example, let's say you are doing
+a JOIN using case insensitive string comparison:
+
+  Album.join(:artists, {Sequel.function(:lower, :name) =>
+                        Sequel.function(:lower, :artist_name)},
+             qualify: :deep)
+  # SELECT * FROM albums INNER JOIN artists
+  #  ON (lower(artists.name) = lower(albums.artist_name))
+
+Note how the arguments to lower were qualified correctly in both cases.
+
+==== USING Joins
+
+The most common type of join conditions is a JOIN ON, as displayed
+above.  However, the SQL standard allows for join conditions to be
+specified with JOIN USING, assuming the column name is the same in
+both tables.
+
+For example, if instead of having a primary
+column named +id+ in all of your tables, you use +artist_id+ in your
++artists+ table and +album_id+ in your +albums+ table, you could do:
+
+  Album.join(:artists, [:artist_id])
+  # SELECT * FROM albums INNER JOIN artists USING (artist_id)
+
+See here how you specify the USING columns as an array of symbols.
+
+==== NATURAL Joins
+
+NATURAL joins take it one step further than USING joins, by assuming
+that all columns with the same names in both tables should be
+used for joining:
+
+  Album.natural_join(:artists)
+  # SELECT * FROM albums NATURAL JOIN artists
+
+In this case, you don't even need to specify any conditions.
+
+==== Join Blocks
+
+You can provide a block to any of the join methods that accept
+conditions.  This block should accept 3 arguments, the table alias
+for the table currently being joined, the table alias for the last
+table joined (or first table), and an array of previous
+<tt>Sequel::SQL::JoinClause</tt>s.
+
+This allows you to qualify columns similar to how the implicit
+qualification works, without worrying about the specific aliases
+being used.  For example, lets say you wanted to join the albums
+and artists tables, but only want albums where the artist's name
+comes before the album's name.
+
+  Album.join(:artists, id: :artist_id) do |j, lj, js|
+    Sequel[j][:name] < Sequel[lj][:name]
+  end
+  # SELECT * FROM albums INNER JOIN artists
+  # ON ((artists.id = albums.artist_id)
+  # AND (artists.name < albums.name))
+
+Because greater than can't be expressed with a hash in Sequel, you
+need to use a block and qualify the tables manually.
+
+== From
+
+In general, the FROM table is the first clause populated when creating
+a dataset.  For a standard Sequel::Model, the dataset already has the
+FROM clause populated, and the most common way to create datasets is
+with the <tt>Database#[]</tt> method, which populates the FROM clause.
+
+However, you can modify the tables you are selecting FROM using +from+:
+
+  Album.from(:albums, :old_albums)
+  # SELECT * FROM albums, old_albums
+
+Be careful with this, as multiple tables in the FROM clause use a cross
+join by default, so the number of rows will be number of albums times the
+number of old albums.
+
+Using multiple FROM tables and setting conditions in the WHERE clause is
+an old-school way of joining tables:
+
+  DB.from(:albums, :artists).where{{artists[:id]=>albums[:artist_id]}}
+  # SELECT * FROM albums, artists WHERE (artists.id = albums.artist_id)
+
+=== Using the current dataset in a subselect
+
+In some cases, you may want to wrap the current dataset in a subselect.
+Here's an example using +from_self+:
+
+  Album.order(:artist_id).limit(100).from_self.group(:artist_id)
+  # SELECT * FROM (SELECT * FROM albums ORDER BY artist_id LIMIT 100)
+  #  AS t1 GROUP BY artist_id
+
+This is different than without +from_self+:
+
+  Album.order(:artist_id).limit(100).group(:artist_id)
+  # SELECT * FROM albums GROUP BY artist_id ORDER BY name LIMIT 100
+
+Without +from_self+, you are doing the grouping, and limiting the number
+of grouped records returned to 100.  So assuming you have albums by more
+than 100 artists, you'll end up with 100 results.
+
+With +from_self+, you are limiting the number of records before grouping.
+So if the artist with the lowest id had 100 albums, you'd get 1 result,
+not 100.
+
+== Locking for Update
+
+Sequel allows you to easily add a FOR UPDATE clause to your queries so
+that the records returned can't be modified by another query until the
+current transaction commits.  You just use the +for_update+ dataset
+method when returning the rows:
+
+  DB.transaction do
+    album = Album.for_update.first(id: 1)
+    # SELECT * FROM albums WHERE (id = 1) FOR UPDATE
+    album.num_tracks += 1
+    album.save
+  end
+
+This will ensure that no other connection modifies the row between when you select
+it and when the transaction ends.
+
+=== Optimistic Locking
+
+One of the model plugins that ships with Sequel is an optimistic locking plugin, which provides
+a database independent way to detect and raise an error if two different connections
+modify the same row.  It's useful for things like web forms where you cannot keep a
+transaction open while the user is looking at the form, because of the web's
+stateless nature.
+
+== Custom SQL
+
+Sequel makes it easy to use custom SQL for the query by providing it to the <tt>Database#[]</tt>
+method as a string:
+
+  DB["SELECT * FROM artists"]
+  # SELECT * FROM artists
+
+You can also use the +with_sql+ dataset method to return a dataset that uses that
+exact SQL:
+
+  DB[:albums].with_sql("SELECT * FROM artists")
+  # SELECT * FROM artists
+
+With either of these methods, you can use placeholders:
+
+  DB["SELECT * FROM artists WHERE id = ?", 5]
+  # SELECT * FROM artists WHERE id = 5
+
+  DB[:albums].with_sql("SELECT * FROM artists WHERE id = :id", id: 5)
+  # SELECT * FROM artists WHERE id = 5
+
+Note that if you specify the dataset using custom SQL, you can still call the dataset
+modification methods, but in many cases they will appear to have no affect:
+
+  DB["SELECT * FROM artists"].select(:name).order(:id)
+  # SELECT * FROM artists
+
+You can use the implicit_subquery extension to automatically wrap queries that use
+custom SQL in subqueries if a method is called that would modify the SQL:
+
+  DB.extension :implicit_subquery
+  DB["SELECT * FROM artists"].select(:name).order(:id)
+  # SELECT name FROM (SELECT * FROM artists) AS t1 ORDER BY id"
+
+If you must drop down to using custom SQL, it's recommended that you only do so for
+specific parts of a query.  For example, if the reason you are using custom SQL is
+to use a custom operator in the database in the SELECT clause:
+
+  DB["SELECT name, (foo !@# ?) AS baz FROM artists", 'bar']
+
+it's better to use Sequel's DSL, and use a literal string for the custom operator:
+
+  DB[:artists].select(:name, Sequel.lit("(foo !@# ?)", 'bar').as(:baz))
+
+That way Sequel's method chaining still works, and it increases Sequel's ability to
+introspect the code.
+
+== Checking for Records
+
+If you just want to know whether the current dataset would return any rows, use <tt>empty?</tt>:
+
+  Album.empty?
+  # SELECT 1 FROM albums LIMIT 1
+  # => false
+
+  Album.where(id: 0).empty?
+  # SELECT 1 FROM albums WHERE (id = 0) LIMIT 1
+  # => true
+
+  Album.where(Sequel.like(:name, 'R%')).empty?
+  # SELECT 1 FROM albums WHERE (name LIKE 'R%' ESCAPE '\') LIMIT 1
+  # => false
+
+== Aggregate Calculations
+
+The SQL standard defines a few helpful methods to get aggreate information about
+datasets, such as +count+, +sum+, +avg+, +min+, and +max+.  There are dataset methods
+for each of these aggregate functions.
+
++count+ just returns the number of records in the dataset.
+
+  Album.count
+  # SELECT count(*) AS count FROM albums LIMIT 1
+  # => 2
+ 
+If you pass an expression to count, it will return the number of records where
+that expression in not NULL:
+
+  Album.count(:artist_id)
+  # SELECT count(artist_id) AS count FROM albums LIMIT 1
+  # => 1
+
+The other methods take a column argument and call the aggregate function with
+the argument:
+
+  Album.sum(:id)
+  # SELECT sum(id) AS sum FROM albums LIMIT 1
+  # => 3
+
+  Album.avg(:id)
+  # SELECT avg(id) AS avg FROM albums LIMIT 1
+  # => 1.5
+
+  Album.min(:id)
+  # SELECT min(id) AS min FROM albums LIMIT 1
+  # => 1
+
+  Album.max(:id)
+  # SELECT max(id) AS max FROM albums LIMIT 1
+  # => 2

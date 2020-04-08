@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Disabled</key><false/>
+    <key>Label</key><string>{{{ name }}}</string>
+    <key>Program</key><string>{{{ program }}}</string>
+    <key>ProgramArguments</key><array>
+      <string>{{{ program }}}</string>
+      {{{xml_args}}}
+    </array>
+    <key>KeepAlive</key> <true/>
+    <key>StandardOutPath</key> <string>{{ log_path_stdout }}</string>
+    <key>StandardErrorPath</key> <string>{{ log_path_stderr }}</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      {{#all_environment_variables}}
+      <key>{{key}}</key>
+      <string>{{#shell_quote}}{{value}}{{/shell_quote}}</string>
+      {{/all_environment_variables}}
+    </dict>
+    <!-- Things to implement eventually.
+    <key>UserName</key><string>{{{ user }}}</string>
+    <key>GroupName</key><string>{{{ group }}}</string>
+    <key>Umask</key><integer>{{{ umask }}}</integer>
+    <key>RootDirectory</key><string>{{{ chroot }}}</string>
+    <key>WorkingDirectory</key><string>{{{ chdir }}}</string>
+    <key>Nice</key><integer>0</integer>
+    <key>SoftResourceLimits</key><dict>
+      <key>Core</key><integer></integer>
+      <key>CPU</key><integer></integer>
+      <key>Data</key><integer></integer>
+      <key>FileSize</key><integer></integer>
+      <key>MemoryLock</key><integer></integer>
+      <key>NumberOfFiles</key><integer></integer>
+      <key>NumberOfProcesses</key><integer></integer>
+      <key>ResidentSetSize</key><integer></integer>
+      <key>Stack</key><integer></integer>
+    </dict>
+    <key>HardResourceLimits</key><dict>
+      <key>Core</key><integer></integer>
+      <key>CPU</key><integer></integer>
+      <key>Data</key><integer></integer>
+      <key>FileSize</key><integer></integer>
+      <key>MemoryLock</key><integer></integer>
+      <key>NumberOfFiles</key><integer></integer>
+      <key>NumberOfProcesses</key><integer></integer>
+      <key>ResidentSetSize</key><integer></integer>
+      <key>Stack</key><integer></integer>
+    </dict>
+      -->
+  </dict>
+</plist>
+

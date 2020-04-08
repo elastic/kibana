@@ -1,0 +1,17 @@
+module Fcntl
+  class Flock < FFI::Struct
+    @@@
+    struct do |s|
+      s.name 'struct flock'
+      s.include 'fcntl.h'
+      s.field :l_type, :short
+      s.field :l_whence,     :short
+      s.field :l_start,     :off_t
+      s.field :l_len,      :off_t
+      s.field :l_sysid,    :int
+      s.field :l_pid,      :int
+      s.field :l_pad,      :int
+    end
+    @@@
+  end
+end

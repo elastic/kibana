@@ -1,0 +1,33 @@
+The following is a list of people who have contributed ideas, code, bug
+reports, or in general have helped logstash along its way.
+
+Contributors:
+* Aaron Mildenstein (untergeek)
+* Bob Corsaro (dokipen)
+* Christian S. (squiddle)
+* Colin Surprenant (colinsurprenant)
+* Danny Berger (dpb587)
+* James Turnbull (jamtur01)
+* Jason Kendall (coolacid)
+* John E. Vincent (lusis)
+* Jonathan Van Eenwyk (jdve)
+* Jordan Sissel (jordansissel)
+* Kevin O'Connor (kjoconnor)
+* Kurt Hurtado (kurtado)
+* Mike Worth (MikeWorth)
+* Nick Ethier (nickethier)
+* Olivier Le Moal (olivierlemoal)
+* Pete Fritchman (fetep)
+* Philippe Weber (wiibaa)
+* Pier-Hugues Pellerin (ph)
+* Pierre Baillet (octplane)
+* Ralph Meijer (ralphm)
+* Richard Pijnenburg (electrical)
+* Suyog Rao (suyograo)
+* debadair
+* Guy Boertje (guyboertje)
+
+Note: If you've sent us patches, bug reports, or otherwise contributed to
+Logstash, and you aren't on the list above and want to be, please let us know
+and we'll make sure you're here. Contributions from folks like you are what make
+open source awesome.

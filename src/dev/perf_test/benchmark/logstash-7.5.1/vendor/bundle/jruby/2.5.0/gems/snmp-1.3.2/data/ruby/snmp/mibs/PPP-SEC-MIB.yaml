@@ -1,0 +1,21 @@
+--- 
+pppSecurity: 1.3.6.1.2.1.10.23.2
+pppSecurityProtocols: 1.3.6.1.2.1.10.23.2.1
+pppSecurityPapProtocol: 1.3.6.1.2.1.10.23.2.1.1
+pppSecurityChapMD5Protocol: 1.3.6.1.2.1.10.23.2.1.2
+pppSecurityConfigTable: 1.3.6.1.2.1.10.23.2.2
+pppSecurityConfigEntry: 1.3.6.1.2.1.10.23.2.2.1
+pppSecurityConfigLink: 1.3.6.1.2.1.10.23.2.2.1.1
+pppSecurityConfigPreference: 1.3.6.1.2.1.10.23.2.2.1.2
+pppSecurityConfigProtocol: 1.3.6.1.2.1.10.23.2.2.1.3
+pppSecurityConfigStatus: 1.3.6.1.2.1.10.23.2.2.1.4
+pppSecuritySecretsTable: 1.3.6.1.2.1.10.23.2.3
+pppSecuritySecretsEntry: 1.3.6.1.2.1.10.23.2.3.1
+pppSecuritySecretsLink: 1.3.6.1.2.1.10.23.2.3.1.1
+pppSecuritySecretsIdIndex: 1.3.6.1.2.1.10.23.2.3.1.2
+pppSecuritySecretsDirection: 1.3.6.1.2.1.10.23.2.3.1.3
+pppSecuritySecretsProtocol: 1.3.6.1.2.1.10.23.2.3.1.4
+pppSecuritySecretsIdentity: 1.3.6.1.2.1.10.23.2.3.1.5
+pppSecuritySecretsSecret: 1.3.6.1.2.1.10.23.2.3.1.6
+pppSecuritySecretsStatus: 1.3.6.1.2.1.10.23.2.3.1.7
+

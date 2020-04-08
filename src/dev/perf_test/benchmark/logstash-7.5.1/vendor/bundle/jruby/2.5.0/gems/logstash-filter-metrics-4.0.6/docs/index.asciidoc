@@ -1,0 +1,228 @@
+:plugin: metrics
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Metrics filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The metrics filter is useful for aggregating metrics.
+
+IMPORTANT: Elasticsearch 2.0 no longer allows field names with dots. Version 3.0
+of the metrics filter plugin changes behavior to use nested fields rather than
+dotted notation to avoid colliding with versions of Elasticsearch 2.0+.  Please
+note the changes in the documentation (underscores and sub-fields used).
+
+For example, if you have a field `response` that is
+a http response code, and you want to count each
+kind of response, you can do this:
+[source,ruby]
+    filter {
+      metrics {
+        meter => [ "http_%{response}" ]
+        add_tag => "metric"
+      }
+    }
+
+Metrics are flushed every 5 seconds by default or according to
+`flush_interval`. Metrics appear as
+new events in the event stream and go through any filters
+that occur after as well as outputs.
+
+In general, you will want to add a tag to your metrics and have an output
+explicitly look for that tag.
+
+The event that is flushed will include every 'meter' and 'timer'
+metric in the following way:
+
+==== `meter` values
+
+For a `meter => "thing"` you will receive the following fields:
+
+* "[thing][count]" - the total count of events
+* "[thing][rate_1m]" - the per-second event rate in a 1-minute sliding window
+* "[thing][rate_5m]" - the per-second event rate in a 5-minute sliding window
+* "[thing][rate_15m]" - the per-second event rate in a 15-minute sliding window
+
+==== `timer` values
+
+For a `timer => { "thing" => "%{duration}" }` you will receive the following fields:
+
+* "[thing][count]" - the total count of events
+* "[thing][rate_1m]" - the per-second average value in a 1-minute sliding window
+* "[thing][rate_5m]" - the per-second average value in a 5-minute sliding window
+* "[thing][rate_15m]" - the per-second average value in a 15-minute sliding window
+* "[thing][min]" - the minimum value seen for this metric
+* "[thing][max]" - the maximum value seen for this metric
+* "[thing][stddev]" - the standard deviation for this metric
+* "[thing][mean]" - the mean for this metric
+* "[thing][pXX]" - the XXth percentile for this metric (see `percentiles`)
+
+The default lengths of the event rate window (1, 5, and 15 minutes)
+can be configured with the `rates` option.
+
+==== Example: Computing event rate
+
+For a simple example, let's track how many events per second are running
+through logstash:
+[source,ruby]
+----
+    input {
+      generator {
+        type => "generated"
+      }
+    }
+
+    filter {
+      if [type] == "generated" {
+        metrics {
+          meter => "events"
+          add_tag => "metric"
+        }
+      }
+    }
+
+    output {
+      # only emit events with the 'metric' tag
+      if "metric" in [tags] {
+        stdout {
+          codec => line {
+            format => "rate: %{[events][rate_1m]}"
+          }
+        }
+      }
+    }
+----
+
+Running the above:
+[source,ruby]
+    % bin/logstash -f example.conf
+    rate: 23721.983566819246
+    rate: 24811.395722536377
+    rate: 25875.892745934525
+    rate: 26836.42375967113
+
+We see the output includes our events' 1-minute rate.
+
+In the real world, you would emit this to graphite or another metrics store,
+like so:
+[source,ruby]
+    output {
+      graphite {
+        metrics => [ "events.rate_1m", "%{[events][rate_1m]}" ]
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Metrics Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-clear_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-flush_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-ignore_older_than>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-meter>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-percentiles>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-rates>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-timer>> |<<hash,hash>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-clear_interval"]
+===== `clear_interval` 
+
+  * Value type is <<number,number>>
+  * Default value is `-1`
+
+The clear interval, when all counters are reset.
+
+If set to -1, the default value, the metrics will never be cleared.
+Otherwise, should be a multiple of 5s.
+
+[id="plugins-{type}s-{plugin}-flush_interval"]
+===== `flush_interval` 
+
+  * Value type is <<number,number>>
+  * Default value is `5`
+
+The flush interval, when the metrics event is created. Must be a multiple of 5s.
+
+[id="plugins-{type}s-{plugin}-ignore_older_than"]
+===== `ignore_older_than` 
+
+  * Value type is <<number,number>>
+  * Default value is `0`
+
+Don't track events that have `@timestamp` older than some number of seconds.
+
+This is useful if you want to only include events that are near real-time
+in your metrics.
+
+For example, to only count events that are within 10 seconds of real-time, you
+would do this:
+
+    filter {
+      metrics {
+        meter => [ "hits" ]
+        ignore_older_than => 10
+      }
+    }
+
+[id="plugins-{type}s-{plugin}-meter"]
+===== `meter` 
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+syntax: `meter => [ "name of metric", "name of metric" ]`
+
+[id="plugins-{type}s-{plugin}-percentiles"]
+===== `percentiles` 
+
+  * Value type is <<array,array>>
+  * Default value is `[1, 5, 10, 90, 95, 99, 100]`
+
+The percentiles that should be measured and emitted for timer values.
+
+[id="plugins-{type}s-{plugin}-rates"]
+===== `rates` 
+
+  * Value type is <<array,array>>
+  * Default value is `[1, 5, 15]`
+
+The rates that should be measured, in minutes.
+Possible values are 1, 5, and 15.
+
+[id="plugins-{type}s-{plugin}-timer"]
+===== `timer` 
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+syntax: `timer => [ "name of metric", "%{time_value}" ]`
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

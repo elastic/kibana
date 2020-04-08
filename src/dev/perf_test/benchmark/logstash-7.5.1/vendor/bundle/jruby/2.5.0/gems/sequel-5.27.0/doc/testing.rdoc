@@ -1,0 +1,172 @@
+= Testing with Sequel
+
+Whether or not you use Sequel in your application, you are usually going to want to have tests that ensure that your code works.  When you are using Sequel, it's helpful to integrate it into your testing framework, and it's generally best to run each test in its own transaction if possible.  That keeps all tests isolated from each other, and it's simple as it handles all of the cleanup for you.  Sequel doesn't ship with helpers for common libraries, as the exact code you need is often application-specific, but this page offers some examples that you can either use directly or build on.
+
+== Transactional tests
+
+These run each test in its own transaction, the recommended way to test.
+
+=== minitest/spec
+
+==== with minitest-hooks
+
+  require 'minitest/hooks/default'
+  class Minitest::HooksSpec
+    def around
+      DB.transaction(:rollback=>:always, :auto_savepoint=>true){super}
+    end
+  end
+
+==== without minitest-hooks
+
+  class Minitest::Spec
+    def run(*args, &block)
+      DB.transaction(:rollback=>:always, :auto_savepoint=>true){super}
+    end
+  end
+
+=== minitest/test
+
+  # Use this class as the base class for your tests
+  class SequelTestCase < Minitest::Test
+    def run(*args, &block)
+      DB.transaction(:rollback=>:always, :auto_savepoint=>true){super}
+    end
+  end
+
+=== rspec >= 2.8
+
+  RSpec.configure do |c|
+    c.around(:each) do |example|
+      DB.transaction(:rollback=>:always, :auto_savepoint=>true){example.run}
+    end
+  end
+
+== Transactional testing with multiple databases
+
+You can use the Sequel.transaction method to run a transaction on multiple databases, rolling all of them back.  Instead of:
+
+  DB.transaction(:rollback=>:always)
+
+Use Sequel.transaction with an array of databases:
+
+  Sequel.transaction([DB1, DB2, DB3], :rollback=>:always)
+
+== Transactional testing with savepoints
+
+Using minitest/spec and minitest-hooks, and assuming your database supports it, you can use
+transactions around entire test suites, using savepoints around each test.  This can sigificantly
+speed up any test suite where there is a lot of shared setup in a before all hook.  By using
+savepoints per test, each test is isolated from each other, rolling back changes after it
+completes, and by using transactions per test suite, you only pay the cost to load the data once
+for the test suite, and it is automatically rolled back after the test suite completes.
+
+Example:
+
+  require 'minitest/hooks/default'
+  class Minitest::HooksSpec
+    def around
+      DB.transaction(:rollback=>:always, :savepoint=>true, :auto_savepoint=>true){super}
+    end
+
+    def around_all
+      DB.transaction(:rollback=>:always){super}
+    end
+  end
+
+  describe "some large test suite" do
+    before(:all) do
+      DB[:table].import # Large number of rows
+    end
+  end
+
+== Nontransactional tests
+
+In some cases, it is not possible to use transactions.  For example, if you are testing a web application that is running in a separate process, you don't have access to that process's database connections, so you can't run your examples in transactions.  In that case, the best way to handle things is to cleanup after each test by deleting or truncating the database tables used in the test.
+
+The order in which you delete/truncate the tables is important if you are using referential integrity in your database (which you should be doing).  If you are using referential integrity, you need to make sure to delete in tables referencing other tables before the tables that are being referenced.  For example, if you have an +albums+ table with an +artist_id+ field referencing the +artists+ table, you want to delete/truncate the +albums+ table before the +artists+ table.  Note that if you have cyclic references in your database, you will probably need to write your own custom cleaning code.
+
+=== minitest/spec or rspec
+
+  describe "some test suite" do
+    after do
+      [:table1, :table2].each{|x| DB.from(x).truncate}
+      # or
+      [:table1, :table2].each{|x| DB.from(x).delete}
+    end
+  end
+
+=== minitest/test
+
+  class SomeTestClass < Minitest::Test
+    def teardown
+      [:table1, :table2].each{|x| DB.from(x).truncate}
+      # or
+      [:table1, :table2].each{|x| DB.from(x).delete}
+    end
+  end
+
+= Testing Sequel Itself
+
+Sequel has multiple separate test suites.  All test suites use minitest/spec, with the minitest-hooks and minitest-shared_description extensions.
+
+== rake
+
+The default rake task runs Sequel's core, model, plugin, and extension specs, the same as <tt>rake spec</tt> or <tt>rake spec_core spec_model spec_plugin</tt>.
+
+== rake spec_core
+
+The +spec_core+ rake task runs Sequel's core specs.  These specs use a mocked database connection, and test for specific SQL used and for generally correct behavior.
+
+== rake spec_model
+
+The +spec_model+ rake task runs Sequel's model specs.  These specs also use a mocked database connection, and operate similar to the core tests.
+
+== rake spec_plugin
+
+The +spec_plugin+ rake task runs the specs for the plugins and extensions that ship with Sequel.  These also use a mocked database connection, and operate very similarly to the general Sequel core and model specs.
+
+== rake spec_core_ext
+
+The +spec_core_ext+ rake task runs the specs for the core_extensions extension.  These are run separately from the other extension tests to make sure none of the other extensions require the core_extensions.
+
+== rake spec_bin
+
+The +spec_bin+ rake task runs the specs for bin/sequel.  These use an SQLite3 database, and require either the sqlite3 (non-JRuby) or jdbc-sqlite3 (JRuby) gem.
+
+== rake spec_<i>adapter</i> (e.g. rake spec_postgres)
+
+The <tt>spec_<i>adapter</i></tt> specs run against a real database connection with nothing mocked, and test for correct results.  They are slower than the standard specs, but they will catch errors that are mocked out by the default specs, as well as show issues that only occur on a certain database, adapter, or a combination of the two.
+
+These specs are broken down into two parts.  For each database, there are specific specs that only apply to that database, and these are called the adapter specs.  There are also shared specs that apply to all (or almost all) databases, these are called the integration specs. For database types that don't have specific adapter tests, you can use <tt>rake spec_integration</tt> to just run the shared integration tests.
+
+== Environment variables
+
+Sequel uses environment variables when testing to specify either the database to be tested or specify how testing should be done.  You can also specify the databases to test by copying <tt>spec/spec_config.rb.example</tt> to <tt>spec/spec_config.rb</tt> and modifying it.  See that file for details.  It may be necessary to use +spec_config.rb+ as opposed to an environment variable if your database connection cannot be specified by a connection string.
+
+Sequel does not create test databases automatically, except for file-based databases such as SQLite/H2/HSQLDB/Derby.  It's up to the user to create the test databases manually and give Sequel a valid connection string in an environment variable (or setup the connection object in +spec_config.rb+).
+
+=== Connection Strings
+
+The SEQUEL_INTEGRATION_URL environment variable specifies the Database connection URL to use for the adapter and integration specs.  Additionally, when running the adapter specs, you can also use the SEQUEL_<i>ADAPTER</i>_URL environment variable (e.g. SEQUEL_POSTGRES_URL for spec_postgres).
+
+=== Other
+
+SEQUEL_COLUMNS_INTROSPECTION :: Use the columns_introspection extension when running the specs
+SEQUEL_CONNECTION_VALIDATOR :: Use the connection validator extension when running the specs
+SEQUEL_DUPLICATE_COLUMNS_HANDLER :: Use the duplicate columns handler extension with value given when running the specs
+SEQUEL_ERROR_SQL :: Use the error_sql extension when running the specs
+SEQUEL_INDEX_CACHING :: Use the index_caching extension when running the specs
+SEQUEL_FREEZE_DATABASE :: Freeze the database before running the integration specs
+SEQUEL_IDENTIFIER_MANGLING :: Use the identifier_mangling extension when running the specs
+SEQUEL_INTEGER64 :: Use the integer64 extension when running the adapter or integration specs
+SEQUEL_MODEL_PREPARED_STATEMENTS :: Use the prepared_statements plugin when running the specs
+SEQUEL_MODEL_THROW_FAILURES :: Use the throw_failures plugin when running the specs
+SEQUEL_NO_CACHE_ASSOCIATIONS :: Don't cache association metadata when running the specs
+SEQUEL_NO_CHECK_SQLS :: Don't check for specific SQL syntax when running the specs
+SEQUEL_CHECK_PENDING :: Try running all specs (note, can cause lockups for some adapters), and raise errors for skipped specs that don't fail
+SEQUEL_NO_PENDING :: Don't skip any specs, try running all specs (note, can cause lockups for some adapters)
+SEQUEL_PG_TIMESTAMPTZ :: Use the pg_timestamptz extension when running the postgres specs
+SEQUEL_SPLIT_SYMBOLS :: Turn on symbol splitting when running the adapter and integration specs
+SEQUEL_SYNCHRONIZE_SQL :: Use the synchronize_sql extension when running the specs
+SEQUEL_TZINFO_VERSION :: Force the given tzinfo version when running the specs (e.g. '>=2')

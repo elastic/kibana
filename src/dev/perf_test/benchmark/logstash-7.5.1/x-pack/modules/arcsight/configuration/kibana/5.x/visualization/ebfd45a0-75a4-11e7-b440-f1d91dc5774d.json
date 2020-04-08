@@ -1,0 +1,10 @@
+{
+  "title": "Events by Direction [ArcSight]",
+  "visState": "{\"title\":\"Events by Direction [ArcSight]\",\"type\":\"metrics\",\"params\":{\"id\":\"12cdd300-75a2-11e7-b440-f1d91dc5774d\",\"type\":\"timeseries\",\"series\":[{\"id\":\"12cdd301-75a2-11e7-b440-f1d91dc5774d\",\"color\":\"#68BC00\",\"split_mode\":\"filters\",\"metrics\":[{\"id\":\"12cdd302-75a2-11e7-b440-f1d91dc5774d\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"bar\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.2\",\"stacked\":\"none\",\"split_filters\":[{\"filter\":\"deviceDirection:\\\"0\\\"\",\"label\":\"Inbound Requests\",\"color\":\"rgba(0,156,224,1)\",\"id\":\"2bb9d440-75a2-11e7-b440-f1d91dc5774d\"}],\"label\":\"Inbound Requests\",\"filter\":\"device\"},{\"id\":\"bbe68d10-75a2-11e7-b440-f1d91dc5774d\",\"color\":\"#68BC00\",\"split_mode\":\"filters\",\"metrics\":[{\"id\":\"bbe68d11-75a2-11e7-b440-f1d91dc5774d\",\"type\":\"count\"},{\"script\":\"params.outbound > 0 ? params.outbound * -1 : 0\",\"id\":\"d50e5ed0-75a2-11e7-b440-f1d91dc5774d\",\"type\":\"calculation\",\"variables\":[{\"id\":\"d785ee80-75a2-11e7-b440-f1d91dc5774d\",\"name\":\"outbound\",\"field\":\"bbe68d11-75a2-11e7-b440-f1d91dc5774d\"}]}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"bar\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.2\",\"stacked\":\"none\",\"split_filters\":[{\"filter\":\"deviceDirection:\\\"1\\\"\",\"label\":\"Outbound Requests\",\"color\":\"rgba(211,49,21,1)\",\"id\":\"bfad3200-75a2-11e7-b440-f1d91dc5774d\"}],\"label\":\"Outbound Requests\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"filter\":\"deviceProduct:\\\"DNS Trace Log\\\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

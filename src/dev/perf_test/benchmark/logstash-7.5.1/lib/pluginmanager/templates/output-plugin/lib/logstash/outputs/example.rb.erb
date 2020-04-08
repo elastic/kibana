@@ -1,0 +1,16 @@
+# encoding: utf-8
+require "logstash/outputs/base"
+
+# An <%= plugin_name %> output that does nothing.
+class LogStash::Outputs::<%= classify(plugin_name) %> < LogStash::Outputs::Base
+  config_name "<%= plugin_name %>"
+
+  public
+  def register
+  end # def register
+
+  public
+  def receive(event)
+    return "Event received"
+  end # def event
+end # class LogStash::Outputs::<%= classify(plugin_name) %>

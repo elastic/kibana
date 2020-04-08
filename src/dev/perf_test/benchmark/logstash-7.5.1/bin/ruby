@@ -1,0 +1,22 @@
+#!/bin/sh
+# Run a ruby script using the logstash jruby launcher
+#
+# Usage:
+#   bin/ruby [arguments]
+#
+# Supported environment variables:
+#   LS_JAVA_OPTS="xxx" to append extra options to the JVM options provided by logstash
+#   LS_GEM_HOME and LS_GEM_PATH to overwrite the path assigned to GEM_HOME and GEM_PATH
+#
+# Development environment variables:
+#   DEBUG=1 to output debugging information
+
+# use faster starting JRuby options see https://github.com/jruby/jruby/wiki/Improving-startup-time
+export JRUBY_OPTS="$JRUBY_OPTS -J-XX:+TieredCompilation -J-XX:TieredStopAtLevel=1"
+
+unset CDPATH
+
+. "$(cd `dirname $0`/..; pwd)/bin/logstash.lib.sh"
+setup
+
+ruby_exec "$@"

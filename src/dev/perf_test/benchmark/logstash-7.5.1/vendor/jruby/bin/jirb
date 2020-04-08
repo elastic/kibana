@@ -1,0 +1,21 @@
+#!/usr/bin/env jruby
+#
+#   irb.rb - intaractive ruby
+#   	$Release Version: 0.7.3 $
+#   	$Revision$
+#   	$Date$
+#   	by Keiju ISHITSUKA(keiju@ishitsuka.com)
+#
+
+require "irb"
+
+if __FILE__.sub(/file:/, '').gsub(/ /,'%20') == $0.gsub(/file:/, '').gsub(/ /,'%20')
+  IRB.start(__FILE__)
+else
+  # check -e option
+  if /^-e$/ =~ $0
+    IRB.start(__FILE__)
+  else
+    IRB.setup(__FILE__)
+  end
+end

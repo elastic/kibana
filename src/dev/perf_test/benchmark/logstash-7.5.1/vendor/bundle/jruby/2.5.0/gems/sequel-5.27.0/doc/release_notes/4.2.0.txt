@@ -1,0 +1,129 @@
+= New Features
+
+* LATERAL subqueries are now supported on PostgreSQL 9.3+, HSQLDB,
+  and DB2 via Dataset#lateral:
+
+    DB.from(:a, DB[:b].where(:c=>:a__d).lateral)
+    # SELECT * FROM a,
+    # LATERAL (SELECT * FROM b WHERE (c = a.d)) AS t1
+
+  You can use a similar syntax when joining tables:
+
+    DB[:a].cross_join(DB[:b].where(:c=>:a__d).lateral)
+    # SELECT * FROM a
+    # CROSS JOIN LATERAL (SELECT * FROM b WHERE (c = a.d)) AS t1
+
+  If you are using Microsoft SQL Server, you can use the new
+  mssql_emulate_lateral_with_apply extension to emulate LATERAL
+  subqueries via CROSS/OUTER APPLY.
+
+* The static_cache plugin now supports a :frozen=>false option.  When
+  this option is used, instead of returning the frozen cached values,
+  the model now returns new, unfrozen objects that can be modified.
+  Note that if you make any database modifications, you are
+  responsible for updating the cache manually.
+
+* A pg_static_cache_updater extension has been added.  This extension
+  can automatically update the caches used by the static_cache plugin,
+  whenever the underlying database table is updated, using PostgreSQL's
+  notification channels.
+
+  This works by defining triggers on the underlying model tables that
+  use NOTIFY, and spinning up a thread in your application processes
+  that uses LISTEN, and refreshes the cache for the related model
+  whenever it receives a notification that the underlying table has
+  been modified.
+
+  This extension should make it possible to use the static_cache plugin
+  with the :frozen=>false option for any table that is small and not
+  frequently updated.
+
+* A from_block extension has been added that makes Database#from operate
+  like Dataset#from in regards to a passed block, allowing you to write
+  code like:
+
+    DB.from{table_returning_function(arg1, arg2)}
+
+* Database#supports_partial_indexes? has been added for checking for
+  partial index support.  Partial indexes are now supported on SQLite
+  3.8.0+.
+
+* A pg_loose_count extension has been added for fast approximate counts
+  of PostgreSQL tables.  This uses the system tables and should be
+  fairly accurate if the table statistics are up to date:
+
+    DB.loose_count(:table)
+
+* The Dataset#use_cursor method in the postgres adapter now supports
+  a :cursor_name option.  You can set this option if you want to
+  use nested cursors.
+
+* The mysql2 adapter now supports a :flags Database option allowing to
+  set custom mysql2 flags (e.g. ::Mysql2::Client::MULTI_STATEMENTS).
+
+= Other Improvements
+
+* Dataset#freeze has been implemented.  Previously, it was not
+  implemented, so Object#freeze was used, which resulted in a dataset
+  that wasn't cloneable.  Dataset#freeze now works as expected,
+  resulting in a cloneable dataset, but it doesn't allow methods to
+  be called that mutate the receiver.
+
+* Dataset#dup has been implemented.  Previously, it was not
+  implemented, so Object#dup was used, which resulted in a dataset
+  that shared an options hash with the receiver, so modifying the
+  dup's opts could also change the original dataset. Now dup works
+  similarly to clone, except that the returned object will not be
+  frozen.
+
+* Model#dup has been implemented.  Previously, it was not implemented,
+  so Object#dup was used, which resulted in a model instance that
+  shared the values hash with the receiver, so modifying the dup's
+  values also changed the original's values.  Now, dup does a shallow
+  copy of some of the internal data structures as well, so the copy
+  is more independent.
+
+  Note that you still need to be careful if you mutate objects:
+
+    m = Model.new(:a=>'a')
+    m2 = m.dup
+    m.a.gsub!('a', 'b') # also changes m2
+
+* Model#clone has been implemented.  Previously, it had the same
+  issues as dup.  Now, it calls the new Model#dup, but also
+  freezes the returned object if the receiver is frozen.
+
+* Placeholder literal strings with an empty parameter hash are now
+  handled correctly.
+
+= Backwards Compatibility
+
+* The static_cache plugin now disallows saving/destroying instances
+  unless the :frozen=>false option is used.  As the cached objects
+  returned by the model were frozen anyway, this affects creating
+  new instances or saving/destroying instances returned from the
+  underlying dataset.
+
+* Model#set_values has been removed (it was deprecated starting in
+  Sequel 4.0).
+
+* The following Model class methods are no longer defined:
+  insert_multiple, set, to_csv, paginate, query, set_overrides,
+  set_defaults.  By default, these methods used call the
+  dataset method of the same name, but as those methods are no
+  longer defined on datasets by default, they also resulted in a
+  NoMethodError.
+
+* Dataset#query!, #set_defaults!, and #set_overrides! are no longer
+  defined on all datasets.  They are now only defined on datasets
+  that use the query or set_overrides extensions.
+
+* Partial indexes are no longer returned by Database#indexes on MSSQL,
+  for consistency with PostgreSQL.  Note that the same change was
+  desired for SQLite, but SQLite currently does not offer reflection
+  support for determining which indexes are partial.
+
+* Database#foreign_key_list on MSSQL now will return a
+  SQL::QualifiedIdentifier instead of a symbol for the :table entry if
+  the schema of the referenced table does not match the schema of the
+  referencing table.

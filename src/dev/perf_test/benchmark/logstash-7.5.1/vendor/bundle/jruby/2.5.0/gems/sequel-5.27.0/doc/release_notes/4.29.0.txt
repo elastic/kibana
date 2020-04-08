@@ -1,0 +1,41 @@
+= New Features
+
+* A uuid plugin has now been added.  This plugin will automatically
+  create a uuid for newly created model objects.
+
+    Model.plugin :uuid
+    Model.create.uuid => # some UUID
+
+* Model#json_serializer_opts has been added to the json_serializer
+  plugin, allowing you to override the JSON serialization options
+  on a per instance basis without passing the options directly
+  to Model#to_json.  This is useful if you are including the model
+  instance inside another datastructure that will be serialized
+  to JSON.
+
+    obj.json_serializer_opts(:root => true)
+    [obj].to_json
+    # => '[{"obj":{"id":1,"name":"Foo"}}]'
+
+= Other Improvements
+
+* The Database#transaction :retry_on option now works when using
+  savepoints.
+
+* Calling Database#table_exists? inside a transaction will now use
+  a savepoint if the database supports it, so that if the table
+  doesn't exist, it will not affect the state of the transaction.
+
+* Blobs can now be used as bound variables in the oracle adapter.
+
+* The sqlanywhere adapter now works with database sharding.
+
+* The Dataset#full_text_search :rank option has been fixed to order
+  by rank descending instead of ascending.
+
+* External adapters that do not support INSERT with DEFAULT VALUES
+  can now override Dataset#insert_empty_columns_values to set
+  the columns and values to use for an empty INSERT.
+
+* External adapters can now implement Dataset#date_add_sql_append
+  to integrate with the date_arithmetic extension.

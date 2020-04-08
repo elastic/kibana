@@ -1,0 +1,27 @@
+--- 
+vdslExtSCMMIB: 1.3.6.1.2.1.10.228
+vdslLineExtSCMMib: 1.3.6.1.2.1.10.228.1
+vdslLineExtSCMMibObjects: 1.3.6.1.2.1.10.228.1.1
+vdslLineSCMConfProfileBandTable: 1.3.6.1.2.1.10.228.1.1.1
+vdslLineSCMConfProfileBandEntry: 1.3.6.1.2.1.10.228.1.1.1.1
+vdslLineSCMConfProfileBandId: 1.3.6.1.2.1.10.228.1.1.1.1.1
+vdslLineSCMConfProfileBandInUse: 1.3.6.1.2.1.10.228.1.1.1.1.2
+vdslLineSCMConfProfileBandCenterFrequency: 1.3.6.1.2.1.10.228.1.1.1.1.3
+vdslLineSCMConfProfileBandSymbolRate: 1.3.6.1.2.1.10.228.1.1.1.1.4
+vdslLineSCMConfProfileBandConstellationSize: 1.3.6.1.2.1.10.228.1.1.1.1.5
+vdslLineSCMConfProfileBandTransmitPSDLevel: 1.3.6.1.2.1.10.228.1.1.1.1.6
+vdslLineSCMConfProfileBandRowStatus: 1.3.6.1.2.1.10.228.1.1.1.1.7
+vdslLineSCMPhysBandTable: 1.3.6.1.2.1.10.228.1.1.2
+vdslLineSCMPhysBandEntry: 1.3.6.1.2.1.10.228.1.1.2.1
+vdslLineSCMPhysBandId: 1.3.6.1.2.1.10.228.1.1.2.1.1
+vdslLineSCMPhysBandInUse: 1.3.6.1.2.1.10.228.1.1.2.1.2
+vdslLineSCMPhysBandCurrCenterFrequency: 1.3.6.1.2.1.10.228.1.1.2.1.3
+vdslLineSCMPhysBandCurrSymbolRate: 1.3.6.1.2.1.10.228.1.1.2.1.4
+vdslLineSCMPhysBandCurrConstellationSize: 1.3.6.1.2.1.10.228.1.1.2.1.5
+vdslLineSCMPhysBandCurrPSDLevel: 1.3.6.1.2.1.10.228.1.1.2.1.6
+vdslLineSCMPhysBandCurrSnrMgn: 1.3.6.1.2.1.10.228.1.1.2.1.7
+vdslLineSCMPhysBandCurrAtn: 1.3.6.1.2.1.10.228.1.1.2.1.8
+vdslLineExtSCMConformance: 1.3.6.1.2.1.10.228.1.2
+vdslLineExtSCMGroups: 1.3.6.1.2.1.10.228.1.2.1
+vdslLineExtSCMCompliances: 1.3.6.1.2.1.10.228.1.2.2
+

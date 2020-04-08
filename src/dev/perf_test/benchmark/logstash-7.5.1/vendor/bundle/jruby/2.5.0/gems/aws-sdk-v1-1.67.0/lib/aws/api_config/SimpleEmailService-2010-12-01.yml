@@ -1,0 +1,346 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2010-12-01'
+:operations:
+- :name: DeleteIdentity
+  :method: :delete_identity
+  :inputs:
+    Identity:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteIdentityResult:
+        :ignore: true
+- :name: DeleteVerifiedEmailAddress
+  :method: :delete_verified_email_address
+  :inputs:
+    EmailAddress:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteVerifiedEmailAddressResult:
+        :ignore: true
+- :name: GetIdentityDkimAttributes
+  :method: :get_identity_dkim_attributes
+  :inputs:
+    Identities:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      GetIdentityDkimAttributesResult:
+        :ignore: true
+        :children:
+          DkimAttributes:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :dkim_attributes
+                :map:
+                - key
+                - value
+                :children:
+                  value:
+                    :children:
+                      DkimEnabled:
+                        :type: :boolean
+                      DkimTokens:
+                        :ignore: true
+                        :children:
+                          member:
+                            :rename: :dkim_tokens
+                            :list: true
+- :name: GetIdentityNotificationAttributes
+  :method: :get_identity_notification_attributes
+  :inputs:
+    Identities:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      GetIdentityNotificationAttributesResult:
+        :ignore: true
+        :children:
+          NotificationAttributes:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :notification_attributes
+                :map:
+                - key
+                - value
+                :children:
+                  value:
+                    :children:
+                      ForwardingEnabled:
+                        :type: :boolean
+- :name: GetIdentityVerificationAttributes
+  :method: :get_identity_verification_attributes
+  :inputs:
+    Identities:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      GetIdentityVerificationAttributesResult:
+        :ignore: true
+        :children:
+          VerificationAttributes:
+            :ignore: true
+            :children:
+              entry:
+                :rename: :verification_attributes
+                :map:
+                - key
+                - value
+- :name: GetSendQuota
+  :method: :get_send_quota
+  :inputs: {}
+  :outputs:
+    :children:
+      GetSendQuotaResult:
+        :ignore: true
+        :children:
+          Max24HourSend:
+            :type: :float
+          MaxSendRate:
+            :type: :float
+          SentLast24Hours:
+            :type: :float
+- :name: GetSendStatistics
+  :method: :get_send_statistics
+  :inputs: {}
+  :outputs:
+    :children:
+      GetSendStatisticsResult:
+        :ignore: true
+        :children:
+          SendDataPoints:
+            :ignore: true
+            :children:
+              member:
+                :rename: :send_data_points
+                :list: true
+                :children:
+                  Timestamp:
+                    :type: :time
+                  DeliveryAttempts:
+                    :type: :integer
+                  Bounces:
+                    :type: :integer
+                  Complaints:
+                    :type: :integer
+                  Rejects:
+                    :type: :integer
+- :name: ListIdentities
+  :method: :list_identities
+  :inputs:
+    IdentityType:
+    - :string
+    NextToken:
+    - :string
+    MaxItems:
+    - :integer
+  :outputs:
+    :children:
+      ListIdentitiesResult:
+        :ignore: true
+        :children:
+          Identities:
+            :ignore: true
+            :children:
+              member:
+                :rename: :identities
+                :list: true
+- :name: ListVerifiedEmailAddresses
+  :method: :list_verified_email_addresses
+  :inputs: {}
+  :outputs:
+    :children:
+      ListVerifiedEmailAddressesResult:
+        :ignore: true
+        :children:
+          VerifiedEmailAddresses:
+            :ignore: true
+            :children:
+              member:
+                :rename: :verified_email_addresses
+                :list: true
+- :name: SendEmail
+  :method: :send_email
+  :inputs:
+    Source:
+    - :string
+    - :required
+    Destination:
+    - :structure:
+        ToAddresses:
+        - :membered_list:
+          - :string
+        CcAddresses:
+        - :membered_list:
+          - :string
+        BccAddresses:
+        - :membered_list:
+          - :string
+    - :required
+    Message:
+    - :structure:
+        Subject:
+        - :structure:
+            Data:
+            - :string
+            - :required
+            Charset:
+            - :string
+        - :required
+        Body:
+        - :structure:
+            Text:
+            - :structure:
+                Data:
+                - :string
+                - :required
+                Charset:
+                - :string
+            Html:
+            - :structure:
+                Data:
+                - :string
+                - :required
+                Charset:
+                - :string
+        - :required
+    - :required
+    ReplyToAddresses:
+    - :membered_list:
+      - :string
+    ReturnPath:
+    - :string
+  :outputs:
+    :children:
+      SendEmailResult:
+        :ignore: true
+- :name: SendRawEmail
+  :method: :send_raw_email
+  :inputs:
+    Source:
+    - :string
+    Destinations:
+    - :membered_list:
+      - :string
+    RawMessage:
+    - :structure:
+        Data:
+        - :blob
+        - :required
+    - :required
+  :outputs:
+    :children:
+      SendRawEmailResult:
+        :ignore: true
+- :name: SetIdentityDkimEnabled
+  :method: :set_identity_dkim_enabled
+  :inputs:
+    Identity:
+    - :string
+    - :required
+    DkimEnabled:
+    - :boolean
+    - :required
+  :outputs:
+    :children:
+      SetIdentityDkimEnabledResult:
+        :ignore: true
+- :name: SetIdentityFeedbackForwardingEnabled
+  :method: :set_identity_feedback_forwarding_enabled
+  :inputs:
+    Identity:
+    - :string
+    - :required
+    ForwardingEnabled:
+    - :boolean
+    - :required
+  :outputs:
+    :children:
+      SetIdentityFeedbackForwardingEnabledResult:
+        :ignore: true
+- :name: SetIdentityNotificationTopic
+  :method: :set_identity_notification_topic
+  :inputs:
+    Identity:
+    - :string
+    - :required
+    NotificationType:
+    - :string
+    - :required
+    SnsTopic:
+    - :string
+  :outputs:
+    :children:
+      SetIdentityNotificationTopicResult:
+        :ignore: true
+- :name: VerifyDomainDkim
+  :method: :verify_domain_dkim
+  :inputs:
+    Domain:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      VerifyDomainDkimResult:
+        :ignore: true
+        :children:
+          DkimTokens:
+            :ignore: true
+            :children:
+              member:
+                :rename: :dkim_tokens
+                :list: true
+- :name: VerifyDomainIdentity
+  :method: :verify_domain_identity
+  :inputs:
+    Domain:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      VerifyDomainIdentityResult:
+        :ignore: true
+- :name: VerifyEmailAddress
+  :method: :verify_email_address
+  :inputs:
+    EmailAddress:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      VerifyEmailAddressResult:
+        :ignore: true
+- :name: VerifyEmailIdentity
+  :method: :verify_email_identity
+  :inputs:
+    EmailAddress:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      VerifyEmailIdentityResult:
+        :ignore: true

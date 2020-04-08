@@ -1,0 +1,27 @@
+before_remove() {
+<% if script?(:before_remove) -%>
+<%=  script(:before_remove) %>
+<% end -%>
+}
+
+dummy() {
+}
+
+if [ "${1}" = "remove" -a -z "${2}" ]
+then
+    # "before remove" goes here
+    before_remove
+elif [ "${1}" = "upgrade" ]
+then
+    upgradeVersionTo="${2}"
+    # Executed before the old version is removed
+    # upon upgrade.
+    # We should generally not do anything here. The newly installed package
+    # should do the upgrade, not the uninstalled one, since it can't anticipate
+    # what new things it will have to do to upgrade for the new version.
+    dummy "${2}"
+elif echo "${1}" | grep -E -q "(fail|abort)"
+then
+    echo "Failed to install before the pre-removal script was run." >&2
+    exit 1
+fi

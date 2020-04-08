@@ -1,0 +1,63 @@
+= New Features
+
+* The :nulls option when creating ordered expressions is now supported
+  on all databases that Sequel ships support for.  For databases that
+  do not support NULLS FIRST/NULLS LAST, support is emulated.
+
+    ds.order(Sequel.asc(:name, :nulls=>:last))
+    # When emulated:
+    # ORDER BY (CASE WHEN (name IS NULL) THEN 2 ELSE 1 END), name ASC
+
+* Model#pk_equal? has been added as a more descriptive name for
+  Model#===.  Model#=== is now an alias of Model#pk_equal?.
+
+* The roots and roots_dataset class methods in the tree plugin are now
+  also available as dataset methods.
+
+= Other Improvements
+
+* Inverting expressions using the ANY/SOME/ALL SQL operators now works
+  correctly:
+
+    # Sequel <5.14.0
+    Sequel.~(:a=>Sequel.function(:any, :x))
+    # "(a != any(x))"
+
+    # Sequel >=5.14.0
+    Sequel.~(:a=>Sequel.function(:any, :x))
+    # "NOT (a = any(x))"
+
+  Sequel has always tried to push inversion down to create SQL that is
+  easier to reason about.  However, inversion cannot be pushed down if
+  an ANY/SOME/ALL SQL operator is used, because that is a different
+  type of operation that just happens to use the same syntax.  Sequel
+  now avoids inversion push down for boolean operators where the
+  right hand side is an SQL::Function, LiteralString, or
+  SQL::PlaceholderLiteralString.
+
+* When creating a boolean expression from a hash or array of pairs, if
+  the right hand side is an unfrozen array and string, use a frozen
+  copy in the expression, so that mutating the array or string
+  argument later does not affect the expression.
+
+* When using the defaults_setter plugin with the :cache option, do not
+  cache values for columns without parseable defaults.  If the default
+  value exists but is not parseable, caching such values could result
+  in incorrect behavior if the model instance is saved later.
+
+* For models with composite primary keys, Model#=== now returns false
+  if any primary key value is nil, mirroring the behavior for the
+  scalar primary key case.
+
+* Model datasets no longer cache SQL if they include a subquery that
+  cannot cache SQL.
+
+* The SQL used for constraints in the constraint_validations
+  extension when the :allow_nil option is used is now clearer and
+  easier to understand.
+
+* The postgres adapter no longer specifies a default port when using
+  the pg driver, in order to work with configurations where the
+  :service option is used in the :driver_options hash.  The pg driver
+  defaults to port 5432 if no port is given, so this should not affect
+  backwards compatibility.

@@ -1,0 +1,82 @@
+:plugin: de_dot
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== De_dot filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This filter _appears_ to rename fields by replacing `.` characters with a different
+separator.  In reality, it's a somewhat expensive filter that has to copy the
+source field contents to a new destination field (whose name no longer contains
+dots), and then remove the corresponding source field.
+
+It should only be used if no other options are available.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== De_dot Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-fields>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-nested>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-separator>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-fields"]
+===== `fields` 
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+The `fields` array should contain a list of known fields to act on.
+If undefined, all top-level fields will be checked.  Sub-fields must be
+manually specified in the array.  For example: `["field.suffix","[foo][bar.suffix]"]`
+will result in "field_suffix" and nested or sub field ["foo"]["bar_suffix"]
+
+WARNING: This is an expensive operation.
+
+
+[id="plugins-{type}s-{plugin}-nested"]
+===== `nested` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+If `nested` is _true_, then create sub-fields instead of replacing dots with
+a different separator.
+
+[id="plugins-{type}s-{plugin}-separator"]
+===== `separator` 
+
+  * Value type is <<string,string>>
+  * Default value is `"_"`
+
+Replace dots with this value.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

@@ -1,0 +1,53 @@
+{
+  "_comment": "Service health example from https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-activity-log-schema",
+  "channels": "Admin",
+  "correlationId": "c550176b-8f52-4380-bdc5-36c1b59d3a44",
+  "description": "Active: Network Infrastructure - UK South",
+  "eventDataId": "c5bc4514-6642-2be3-453e-c6a67841b073",
+  "eventName": {
+    "value": null
+  },
+  "category": {
+    "value": "ServiceHealth",
+    "localizedValue": "Service Health"
+  },
+  "eventTimestamp": "2017-07-20T23:30:14.8022297Z",
+  "id": "/subscriptions/mySubscriptionID/events/c5bc4514-6642-2be3-453e-c6a67841b073/ticks/636361902148022297",
+  "level": "Warning",
+  "operationName": {
+    "value": "Microsoft.ServiceHealth/incident/action",
+    "localizedValue": "Microsoft.ServiceHealth/incident/action"
+  },
+  "resourceProviderName": {
+    "value": null
+  },
+  "resourceType": {
+    "value": null,
+    "localizedValue": ""
+  },
+  "resourceId": "/subscriptions/mySubscriptionID",
+  "status": {
+    "value": "Active",
+    "localizedValue": "Active"
+  },
+  "subStatus": {
+    "value": null
+  },
+  "submissionTimestamp": "2017-07-20T23:30:34.7431946Z",
+  "subscriptionId": "mySubscriptionID",
+  "properties": {
+    "title": "Network Infrastructure - UK South",
+    "service": "Service Fabric",
+    "region": "UK South",
+    "communication": "Starting at approximately 21:41 UTC on 20 Jul 2017, a subset of customers in UK South may experience degraded performance, connectivity drops or timeouts when accessing their Azure resources hosted in this region. Engineers are investigating underlying Network Infrastructure issues in this region. Impacted services may include, but are not limited to App Services, Automation, Service Bus, Log Analytics, Key Vault, SQL Database, Service Fabric, Event Hubs, Stream Analytics, Azure Data Movement, API Management, and Azure Search. Multiple engineering teams are engaged in multiple workflows to mitigate the impact. The next update will be provided in 60 minutes, or as events warrant.",
+    "incidentType": "Incident",
+    "trackingId": "NA0F-BJG",
+    "impactStartTime": "2017-07-20T21:41:00.0000000Z",
+    "impactedServices": "[{\"ImpactedRegions\":[{\"RegionName\":\"UK South\"}],\"ServiceName\":\"Service Fabric\"}]",
+    "defaultLanguageTitle": "Network Infrastructure - UK South",
+    "defaultLanguageContent": "Starting at approximately 21:41 UTC on 20 Jul 2017, a subset of customers in UK South may experience degraded performance, connectivity drops or timeouts when accessing their Azure resources hosted in this region. Engineers are investigating underlying Network Infrastructure issues in this region. Impacted services may include, but are not limited to App Services, Automation, Service Bus, Log Analytics, Key Vault, SQL Database, Service Fabric, Event Hubs, Stream Analytics, Azure Data Movement, API Management, and Azure Search. Multiple engineering teams are engaged in multiple workflows to mitigate the impact. The next update will be provided in 60 minutes, or as events warrant.",
+    "stage": "Active",
+    "communicationId": "636361902146035247",
+    "version": "0.1.1"
+  }
+}

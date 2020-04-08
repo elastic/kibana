@@ -1,0 +1,4 @@
+#!/bin/sh
+
+mv $1.edn $2.edn
+mv $1.rb $2.rb

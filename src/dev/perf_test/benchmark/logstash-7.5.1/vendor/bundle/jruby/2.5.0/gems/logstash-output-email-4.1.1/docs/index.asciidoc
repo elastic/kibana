@@ -1,0 +1,259 @@
+:plugin: email
+:type: output
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Email output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Sends email when an output is received. Alternatively, you may include or
+exclude the email output execution using conditionals.
+
+==== Usage Example
+[source,ruby]
+----------------------------------
+output {
+  if "shouldmail" in [tags] {
+    email {
+      to => 'technical@example.com'
+      from => 'monitor@example.com'
+      subject => 'Alert - %{title}'
+      body => "Tags: %{tags}\\n\\Content:\\n%{message}"
+      template_file => "/tmp/email_template.mustache"
+      domain => 'mail.example.com'
+      port => 25
+    }
+  }
+}
+----------------------------------
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Email Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-address>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-attachments>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-authentication>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-body>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-cc>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-bcc>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-contenttype>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-debug>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-domain>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-from>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-htmlbody>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-password>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-replyto>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-subject>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-to>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-use_tls>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-username>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-via>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-template_file>> |<<path,path>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-address"]
+===== `address` 
+
+  * Value type is <<string,string>>
+  * Default value is `"localhost"`
+
+The address used to connect to the mail server
+
+[id="plugins-{type}s-{plugin}-attachments"]
+===== `attachments` 
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+Attachments - specify the name(s) and location(s) of the files.
+
+[id="plugins-{type}s-{plugin}-authentication"]
+===== `authentication` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Authentication method used when identifying with the server
+
+[id="plugins-{type}s-{plugin}-body"]
+===== `body` 
+
+  * Value type is <<string,string>>
+  * Default value is `""`
+
+Body for the email - plain text only.
+
+[id="plugins-{type}s-{plugin}-cc"]
+===== `cc` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The fully-qualified email address(es) to include as cc: address(es).
+
+This field also accepts a comma-separated string of addresses, for example:
+`"me@example.com, you@example.com"`
+
+[id="plugins-{type}s-{plugin}-bcc"]
+===== `bcc` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The fully-qualified email address(es) to include as bcc: address(es).
+
+This field accepts several addresses like cc.
+
+[id="plugins-{type}s-{plugin}-contenttype"]
+===== `contenttype` 
+
+  * Value type is <<string,string>>
+  * Default value is `"text/html; charset=UTF-8"`
+
+contenttype : for multipart messages, set the content-type and/or charset of the HTML part.
+NOTE: this may not be functional (KH)
+
+[id="plugins-{type}s-{plugin}-debug"]
+===== `debug` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Run the mail relay in debug mode
+
+[id="plugins-{type}s-{plugin}-domain"]
+===== `domain` 
+
+  * Value type is <<string,string>>
+  * Default value is `"localhost"`
+
+The HELO/EHLO domain name used in the greeting message when connecting
+to a remote SMTP server. Some servers require this name to match the
+actual hostname of the connecting client.
+
+[id="plugins-{type}s-{plugin}-from"]
+===== `from` 
+
+  * Value type is <<string,string>>
+  * Default value is `"logstash.alert@example.com"`
+
+The fully-qualified email address for the From: field in the email.
+
+[id="plugins-{type}s-{plugin}-htmlbody"]
+===== `htmlbody` 
+
+  * Value type is <<string,string>>
+  * Default value is `""`
+
+HTML Body for the email, which may contain HTML markup.
+
+[id="plugins-{type}s-{plugin}-password"]
+===== `password` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Password to authenticate with the server
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * Value type is <<number,number>>
+  * Default value is `25`
+
+Port used to communicate with the mail server
+
+[id="plugins-{type}s-{plugin}-replyto"]
+===== `replyto` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The fully qualified email address for the Reply-To: field.
+
+[id="plugins-{type}s-{plugin}-subject"]
+===== `subject` 
+
+  * Value type is <<string,string>>
+  * Default value is `""`
+
+Subject: for the email.
+
+[id="plugins-{type}s-{plugin}-to"]
+===== `to` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The fully-qualified email address to send the email to.
+
+This field also accepts a comma-separated string of addresses, for example:
+`"me@example.com, you@example.com"`
+
+You can also use dynamic fields from the event with the `%{fieldname}` syntax.
+
+[id="plugins-{type}s-{plugin}-use_tls"]
+===== `use_tls` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Enables TLS when communicating with the server
+
+[id="plugins-{type}s-{plugin}-username"]
+===== `username` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Username to authenticate with the server
+
+[id="plugins-{type}s-{plugin}-via"]
+===== `via` 
+
+  * Value type is <<string,string>>
+  * Default value is `"smtp"`
+
+How Logstash should send the email, either via SMTP or by invoking sendmail.
+
+[id="plugins-{type}s-{plugin}-template_file"]
+===== `template_file` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+Path of a [Mustache templating](https://mustache.github.io/) file used for email templating. See example in test fixture.
+Can be used with `body` to send multi-part emails. Takes precedence over `htmlBody`.
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

@@ -1,0 +1,37 @@
+after_remove() {
+<% if script?(:after_remove) -%>
+<%=  script(:after_remove) %>
+<% end -%>
+}
+
+dummy() {
+}
+
+
+if [ "${1}" = "remove" ]
+then
+    # "after remove" goes here
+    after_remove
+elif [ "${1}" = "purge" -a -z "${2}" ]
+then
+    # like "on remove", but executes after dpkg deletes config files
+    # 'apt-get purge' runs 'on remove' section, then this section.
+    # Maybe we ignore this; it seems really fine-grained.
+    # There is no equivalent in RPM or ARCH. A debian-specific argument
+    # might perhaps be used here, but most people
+    # probably don't need it.
+    dummy
+elif [ "${1}" = "upgrade" ]
+then
+    # This represents the case where the old package's postrm is called after
+    # the 'preinst' script is called.
+    # We should ignore this and just use 'preinst upgrade' and
+    # 'postinst configure'. The newly installed package should do the
+    # upgrade, not the uninstalled one, since it can't anticipate what new
+    # things it will have to do to upgrade for the new version.
+    dummy
+elif echo "${1}" | grep -E -q '(fail|abort)'
+then
+    echo "Failed to install before the post-removal script was run." >&2
+    exit 1
+fi

@@ -1,0 +1,44 @@
+From ffc08467744bd2305d41ca882c37fa30adf3a067 Mon Sep 17 00:00:00 2001
+From: Kevin Solorio <soloriok@gmail.com>
+Date: Wed, 27 Feb 2019 14:34:17 -0800
+Subject: [PATCH 2/2] update entities.c to remove handling of ssi
+
+---
+ entities.c | 21 ---------------------
+ 1 file changed, 21 deletions(-)
+
+diff --git a/entities.c b/entities.c
+index 43549bc5..5c4a2a60 100644
+--- a/entities.c
++++ b/entities.c
+@@ -592,27 +592,6 @@ xmlEncodeEntitiesInternal(xmlDocPtr doc, const xmlChar *input, int attr) {
+ 	 * By default one have to encode at least '<', '>', '"' and '&' !
+ 	 */
+ 	if (*cur == '<') {
+-	    const xmlChar *end;
+-
+-	    /*
+-	     * Special handling of server side include in HTML attributes
+-	     */
+-	    if (html && attr &&
+-	        (cur[1] == '!') && (cur[2] == '-') && (cur[3] == '-') &&
+-	        ((end = xmlStrstr(cur, BAD_CAST "-->")) != NULL)) {
+-	        while (cur != end) {
+-		    *out++ = *cur++;
+-		    indx = out - buffer;
+-		    if (indx + 100 > buffer_size) {
+-			growBufferReentrant();
+-			out = &buffer[indx];
+-		    }
+-		}
+-		*out++ = *cur++;
+-		*out++ = *cur++;
+-		*out++ = *cur++;
+-		continue;
+-	    }
+ 	    *out++ = '&';
+ 	    *out++ = 'l';
+ 	    *out++ = 't';
+-- 
+2.16.2
+

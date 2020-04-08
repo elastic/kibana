@@ -1,0 +1,1375 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2014-03-24'
+:operations:
+- :name: AuthorizeCacheSecurityGroupIngress
+  :method: :authorize_cache_security_group_ingress
+  :inputs:
+    CacheSecurityGroupName:
+    - :string
+    - :required
+    EC2SecurityGroupName:
+    - :string
+    - :required
+    EC2SecurityGroupOwnerId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AuthorizeCacheSecurityGroupIngressResult:
+        :ignore: true
+        :children:
+          CacheSecurityGroup:
+            :children:
+              EC2SecurityGroups:
+                :ignore: true
+                :children:
+                  EC2SecurityGroup:
+                    :rename: :ec2_security_groups
+                    :list: true
+            :ignore: true
+- :name: CopySnapshot
+  :method: :copy_snapshot
+  :inputs:
+    SourceSnapshotName:
+    - :string
+    - :required
+    TargetSnapshotName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CopySnapshotResult:
+        :ignore: true
+        :children:
+          Snapshot:
+            :children:
+              NumCacheNodes:
+                :type: :integer
+              CacheClusterCreateTime:
+                :type: :time
+              Port:
+                :type: :integer
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              SnapshotRetentionLimit:
+                :type: :integer
+              NodeSnapshots:
+                :ignore: true
+                :children:
+                  NodeSnapshot:
+                    :rename: :node_snapshots
+                    :list: true
+                    :children:
+                      CacheNodeCreateTime:
+                        :type: :time
+                      SnapshotCreateTime:
+                        :type: :time
+            :ignore: true
+- :name: CreateCacheCluster
+  :method: :create_cache_cluster
+  :inputs:
+    CacheClusterId:
+    - :string
+    - :required
+    ReplicationGroupId:
+    - :string
+    NumCacheNodes:
+    - :integer
+    CacheNodeType:
+    - :string
+    Engine:
+    - :string
+    EngineVersion:
+    - :string
+    CacheParameterGroupName:
+    - :string
+    CacheSubnetGroupName:
+    - :string
+    CacheSecurityGroupNames:
+    - :membered_list:
+      - :string
+    SecurityGroupIds:
+    - :membered_list:
+      - :string
+    SnapshotArns:
+    - :membered_list:
+      - :string
+    SnapshotName:
+    - :string
+    PreferredAvailabilityZone:
+    - :string
+    PreferredMaintenanceWindow:
+    - :string
+    Port:
+    - :integer
+    NotificationTopicArn:
+    - :string
+    AutoMinorVersionUpgrade:
+    - :boolean
+    SnapshotRetentionLimit:
+    - :integer
+    SnapshotWindow:
+    - :string
+  :outputs:
+    :children:
+      CreateCacheClusterResult:
+        :ignore: true
+        :children:
+          CacheCluster:
+            :children:
+              ConfigurationEndpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              NumCacheNodes:
+                :type: :integer
+              CacheClusterCreateTime:
+                :type: :time
+              PendingModifiedValues:
+                :children:
+                  NumCacheNodes:
+                    :type: :integer
+                  CacheNodeIdsToRemove:
+                    :ignore: true
+                    :children:
+                      CacheNodeId:
+                        :rename: :cache_node_ids_to_remove
+                        :list: true
+              CacheSecurityGroups:
+                :ignore: true
+                :children:
+                  CacheSecurityGroup:
+                    :rename: :cache_security_groups
+                    :list: true
+              CacheParameterGroup:
+                :children:
+                  CacheNodeIdsToReboot:
+                    :ignore: true
+                    :children:
+                      CacheNodeId:
+                        :rename: :cache_node_ids_to_reboot
+                        :list: true
+              CacheNodes:
+                :ignore: true
+                :children:
+                  CacheNode:
+                    :rename: :cache_nodes
+                    :list: true
+                    :children:
+                      CacheNodeCreateTime:
+                        :type: :time
+                      Endpoint:
+                        :children:
+                          Port:
+                            :type: :integer
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              SecurityGroups:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :security_groups
+                    :list: true
+              SnapshotRetentionLimit:
+                :type: :integer
+            :ignore: true
+- :name: CreateCacheParameterGroup
+  :method: :create_cache_parameter_group
+  :inputs:
+    CacheParameterGroupName:
+    - :string
+    - :required
+    CacheParameterGroupFamily:
+    - :string
+    - :required
+    Description:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateCacheParameterGroupResult:
+        :ignore: true
+        :children:
+          CacheParameterGroup:
+            :ignore: true
+- :name: CreateCacheSecurityGroup
+  :method: :create_cache_security_group
+  :inputs:
+    CacheSecurityGroupName:
+    - :string
+    - :required
+    Description:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateCacheSecurityGroupResult:
+        :ignore: true
+        :children:
+          CacheSecurityGroup:
+            :children:
+              EC2SecurityGroups:
+                :ignore: true
+                :children:
+                  EC2SecurityGroup:
+                    :rename: :ec2_security_groups
+                    :list: true
+            :ignore: true
+- :name: CreateCacheSubnetGroup
+  :method: :create_cache_subnet_group
+  :inputs:
+    CacheSubnetGroupName:
+    - :string
+    - :required
+    CacheSubnetGroupDescription:
+    - :string
+    - :required
+    SubnetIds:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      CreateCacheSubnetGroupResult:
+        :ignore: true
+        :children:
+          CacheSubnetGroup:
+            :children:
+              Subnets:
+                :ignore: true
+                :children:
+                  Subnet:
+                    :rename: :subnets
+                    :list: true
+            :ignore: true
+- :name: CreateReplicationGroup
+  :method: :create_replication_group
+  :inputs:
+    ReplicationGroupId:
+    - :string
+    - :required
+    PrimaryClusterId:
+    - :string
+    - :required
+    ReplicationGroupDescription:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateReplicationGroupResult:
+        :ignore: true
+        :children:
+          ReplicationGroup:
+            :children:
+              MemberClusters:
+                :ignore: true
+                :children:
+                  ClusterId:
+                    :rename: :member_clusters
+                    :list: true
+              NodeGroups:
+                :ignore: true
+                :children:
+                  NodeGroup:
+                    :rename: :node_groups
+                    :list: true
+                    :children:
+                      PrimaryEndpoint:
+                        :children:
+                          Port:
+                            :type: :integer
+                      NodeGroupMembers:
+                        :ignore: true
+                        :children:
+                          NodeGroupMember:
+                            :rename: :node_group_members
+                            :list: true
+                            :children:
+                              ReadEndpoint:
+                                :children:
+                                  Port:
+                                    :type: :integer
+            :ignore: true
+- :name: CreateSnapshot
+  :method: :create_snapshot
+  :inputs:
+    CacheClusterId:
+    - :string
+    - :required
+    SnapshotName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateSnapshotResult:
+        :ignore: true
+        :children:
+          Snapshot:
+            :children:
+              NumCacheNodes:
+                :type: :integer
+              CacheClusterCreateTime:
+                :type: :time
+              Port:
+                :type: :integer
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              SnapshotRetentionLimit:
+                :type: :integer
+              NodeSnapshots:
+                :ignore: true
+                :children:
+                  NodeSnapshot:
+                    :rename: :node_snapshots
+                    :list: true
+                    :children:
+                      CacheNodeCreateTime:
+                        :type: :time
+                      SnapshotCreateTime:
+                        :type: :time
+            :ignore: true
+- :name: DeleteCacheCluster
+  :method: :delete_cache_cluster
+  :inputs:
+    CacheClusterId:
+    - :string
+    - :required
+    FinalSnapshotIdentifier:
+    - :string
+  :outputs:
+    :children:
+      DeleteCacheClusterResult:
+        :ignore: true
+        :children:
+          CacheCluster:
+            :children:
+              ConfigurationEndpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              NumCacheNodes:
+                :type: :integer
+              CacheClusterCreateTime:
+                :type: :time
+              PendingModifiedValues:
+                :children:
+                  NumCacheNodes:
+                    :type: :integer
+                  CacheNodeIdsToRemove:
+                    :ignore: true
+                    :children:
+                      CacheNodeId:
+                        :rename: :cache_node_ids_to_remove
+                        :list: true
+              CacheSecurityGroups:
+                :ignore: true
+                :children:
+                  CacheSecurityGroup:
+                    :rename: :cache_security_groups
+                    :list: true
+              CacheParameterGroup:
+                :children:
+                  CacheNodeIdsToReboot:
+                    :ignore: true
+                    :children:
+                      CacheNodeId:
+                        :rename: :cache_node_ids_to_reboot
+                        :list: true
+              CacheNodes:
+                :ignore: true
+                :children:
+                  CacheNode:
+                    :rename: :cache_nodes
+                    :list: true
+                    :children:
+                      CacheNodeCreateTime:
+                        :type: :time
+                      Endpoint:
+                        :children:
+                          Port:
+                            :type: :integer
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              SecurityGroups:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :security_groups
+                    :list: true
+              SnapshotRetentionLimit:
+                :type: :integer
+            :ignore: true
+- :name: DeleteCacheParameterGroup
+  :method: :delete_cache_parameter_group
+  :inputs:
+    CacheParameterGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteCacheParameterGroupResult:
+        :ignore: true
+- :name: DeleteCacheSecurityGroup
+  :method: :delete_cache_security_group
+  :inputs:
+    CacheSecurityGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteCacheSecurityGroupResult:
+        :ignore: true
+- :name: DeleteCacheSubnetGroup
+  :method: :delete_cache_subnet_group
+  :inputs:
+    CacheSubnetGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteCacheSubnetGroupResult:
+        :ignore: true
+- :name: DeleteReplicationGroup
+  :method: :delete_replication_group
+  :inputs:
+    ReplicationGroupId:
+    - :string
+    - :required
+    RetainPrimaryCluster:
+    - :boolean
+    FinalSnapshotIdentifier:
+    - :string
+  :outputs:
+    :children:
+      DeleteReplicationGroupResult:
+        :ignore: true
+        :children:
+          ReplicationGroup:
+            :children:
+              MemberClusters:
+                :ignore: true
+                :children:
+                  ClusterId:
+                    :rename: :member_clusters
+                    :list: true
+              NodeGroups:
+                :ignore: true
+                :children:
+                  NodeGroup:
+                    :rename: :node_groups
+                    :list: true
+                    :children:
+                      PrimaryEndpoint:
+                        :children:
+                          Port:
+                            :type: :integer
+                      NodeGroupMembers:
+                        :ignore: true
+                        :children:
+                          NodeGroupMember:
+                            :rename: :node_group_members
+                            :list: true
+                            :children:
+                              ReadEndpoint:
+                                :children:
+                                  Port:
+                                    :type: :integer
+            :ignore: true
+- :name: DeleteSnapshot
+  :method: :delete_snapshot
+  :inputs:
+    SnapshotName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteSnapshotResult:
+        :ignore: true
+        :children:
+          Snapshot:
+            :children:
+              NumCacheNodes:
+                :type: :integer
+              CacheClusterCreateTime:
+                :type: :time
+              Port:
+                :type: :integer
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              SnapshotRetentionLimit:
+                :type: :integer
+              NodeSnapshots:
+                :ignore: true
+                :children:
+                  NodeSnapshot:
+                    :rename: :node_snapshots
+                    :list: true
+                    :children:
+                      CacheNodeCreateTime:
+                        :type: :time
+                      SnapshotCreateTime:
+                        :type: :time
+            :ignore: true
+- :name: DescribeCacheClusters
+  :method: :describe_cache_clusters
+  :inputs:
+    CacheClusterId:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+    ShowCacheNodeInfo:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeCacheClustersResult:
+        :ignore: true
+        :children:
+          CacheClusters:
+            :ignore: true
+            :children:
+              CacheCluster:
+                :rename: :cache_clusters
+                :list: true
+                :children:
+                  ConfigurationEndpoint:
+                    :children:
+                      Port:
+                        :type: :integer
+                  NumCacheNodes:
+                    :type: :integer
+                  CacheClusterCreateTime:
+                    :type: :time
+                  PendingModifiedValues:
+                    :children:
+                      NumCacheNodes:
+                        :type: :integer
+                      CacheNodeIdsToRemove:
+                        :ignore: true
+                        :children:
+                          CacheNodeId:
+                            :rename: :cache_node_ids_to_remove
+                            :list: true
+                  CacheSecurityGroups:
+                    :ignore: true
+                    :children:
+                      CacheSecurityGroup:
+                        :rename: :cache_security_groups
+                        :list: true
+                  CacheParameterGroup:
+                    :children:
+                      CacheNodeIdsToReboot:
+                        :ignore: true
+                        :children:
+                          CacheNodeId:
+                            :rename: :cache_node_ids_to_reboot
+                            :list: true
+                  CacheNodes:
+                    :ignore: true
+                    :children:
+                      CacheNode:
+                        :rename: :cache_nodes
+                        :list: true
+                        :children:
+                          CacheNodeCreateTime:
+                            :type: :time
+                          Endpoint:
+                            :children:
+                              Port:
+                                :type: :integer
+                  AutoMinorVersionUpgrade:
+                    :type: :boolean
+                  SecurityGroups:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :security_groups
+                        :list: true
+                  SnapshotRetentionLimit:
+                    :type: :integer
+- :name: DescribeCacheEngineVersions
+  :method: :describe_cache_engine_versions
+  :inputs:
+    Engine:
+    - :string
+    EngineVersion:
+    - :string
+    CacheParameterGroupFamily:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+    DefaultOnly:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeCacheEngineVersionsResult:
+        :ignore: true
+        :children:
+          CacheEngineVersions:
+            :ignore: true
+            :children:
+              CacheEngineVersion:
+                :rename: :cache_engine_versions
+                :list: true
+- :name: DescribeCacheParameterGroups
+  :method: :describe_cache_parameter_groups
+  :inputs:
+    CacheParameterGroupName:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeCacheParameterGroupsResult:
+        :ignore: true
+        :children:
+          CacheParameterGroups:
+            :ignore: true
+            :children:
+              CacheParameterGroup:
+                :rename: :cache_parameter_groups
+                :list: true
+- :name: DescribeCacheParameters
+  :method: :describe_cache_parameters
+  :inputs:
+    CacheParameterGroupName:
+    - :string
+    - :required
+    Source:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeCacheParametersResult:
+        :ignore: true
+        :children:
+          Parameters:
+            :ignore: true
+            :children:
+              Parameter:
+                :rename: :parameters
+                :list: true
+                :children:
+                  IsModifiable:
+                    :type: :boolean
+          CacheNodeTypeSpecificParameters:
+            :ignore: true
+            :children:
+              CacheNodeTypeSpecificParameter:
+                :rename: :cache_node_type_specific_parameters
+                :list: true
+                :children:
+                  IsModifiable:
+                    :type: :boolean
+                  CacheNodeTypeSpecificValues:
+                    :ignore: true
+                    :children:
+                      CacheNodeTypeSpecificValue:
+                        :rename: :cache_node_type_specific_values
+                        :list: true
+- :name: DescribeCacheSecurityGroups
+  :method: :describe_cache_security_groups
+  :inputs:
+    CacheSecurityGroupName:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeCacheSecurityGroupsResult:
+        :ignore: true
+        :children:
+          CacheSecurityGroups:
+            :ignore: true
+            :children:
+              CacheSecurityGroup:
+                :rename: :cache_security_groups
+                :list: true
+                :children:
+                  EC2SecurityGroups:
+                    :ignore: true
+                    :children:
+                      EC2SecurityGroup:
+                        :rename: :ec2_security_groups
+                        :list: true
+- :name: DescribeCacheSubnetGroups
+  :method: :describe_cache_subnet_groups
+  :inputs:
+    CacheSubnetGroupName:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeCacheSubnetGroupsResult:
+        :ignore: true
+        :children:
+          CacheSubnetGroups:
+            :ignore: true
+            :children:
+              CacheSubnetGroup:
+                :rename: :cache_subnet_groups
+                :list: true
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+- :name: DescribeEngineDefaultParameters
+  :method: :describe_engine_default_parameters
+  :inputs:
+    CacheParameterGroupFamily:
+    - :string
+    - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeEngineDefaultParametersResult:
+        :ignore: true
+        :children:
+          EngineDefaults:
+            :children:
+              Parameters:
+                :ignore: true
+                :children:
+                  Parameter:
+                    :rename: :parameters
+                    :list: true
+                    :children:
+                      IsModifiable:
+                        :type: :boolean
+              CacheNodeTypeSpecificParameters:
+                :ignore: true
+                :children:
+                  CacheNodeTypeSpecificParameter:
+                    :rename: :cache_node_type_specific_parameters
+                    :list: true
+                    :children:
+                      IsModifiable:
+                        :type: :boolean
+                      CacheNodeTypeSpecificValues:
+                        :ignore: true
+                        :children:
+                          CacheNodeTypeSpecificValue:
+                            :rename: :cache_node_type_specific_values
+                            :list: true
+            :ignore: true
+- :name: DescribeEvents
+  :method: :describe_events
+  :inputs:
+    SourceIdentifier:
+    - :string
+    SourceType:
+    - :string
+    StartTime:
+    - :timestamp
+    EndTime:
+    - :timestamp
+    Duration:
+    - :integer
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeEventsResult:
+        :ignore: true
+        :children:
+          Events:
+            :ignore: true
+            :children:
+              Event:
+                :rename: :events
+                :list: true
+                :children:
+                  Date:
+                    :type: :time
+- :name: DescribeReplicationGroups
+  :method: :describe_replication_groups
+  :inputs:
+    ReplicationGroupId:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeReplicationGroupsResult:
+        :ignore: true
+        :children:
+          ReplicationGroups:
+            :ignore: true
+            :children:
+              ReplicationGroup:
+                :rename: :replication_groups
+                :list: true
+                :children:
+                  MemberClusters:
+                    :ignore: true
+                    :children:
+                      ClusterId:
+                        :rename: :member_clusters
+                        :list: true
+                  NodeGroups:
+                    :ignore: true
+                    :children:
+                      NodeGroup:
+                        :rename: :node_groups
+                        :list: true
+                        :children:
+                          PrimaryEndpoint:
+                            :children:
+                              Port:
+                                :type: :integer
+                          NodeGroupMembers:
+                            :ignore: true
+                            :children:
+                              NodeGroupMember:
+                                :rename: :node_group_members
+                                :list: true
+                                :children:
+                                  ReadEndpoint:
+                                    :children:
+                                      Port:
+                                        :type: :integer
+- :name: DescribeReservedCacheNodes
+  :method: :describe_reserved_cache_nodes
+  :inputs:
+    ReservedCacheNodeId:
+    - :string
+    ReservedCacheNodesOfferingId:
+    - :string
+    CacheNodeType:
+    - :string
+    Duration:
+    - :string
+    ProductDescription:
+    - :string
+    OfferingType:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeReservedCacheNodesResult:
+        :ignore: true
+        :children:
+          ReservedCacheNodes:
+            :ignore: true
+            :children:
+              ReservedCacheNode:
+                :rename: :reserved_cache_nodes
+                :list: true
+                :children:
+                  StartTime:
+                    :type: :time
+                  Duration:
+                    :type: :integer
+                  FixedPrice:
+                    :type: :float
+                  UsagePrice:
+                    :type: :float
+                  CacheNodeCount:
+                    :type: :integer
+                  RecurringCharges:
+                    :ignore: true
+                    :children:
+                      RecurringCharge:
+                        :rename: :recurring_charges
+                        :list: true
+                        :children:
+                          RecurringChargeAmount:
+                            :type: :float
+- :name: DescribeReservedCacheNodesOfferings
+  :method: :describe_reserved_cache_nodes_offerings
+  :inputs:
+    ReservedCacheNodesOfferingId:
+    - :string
+    CacheNodeType:
+    - :string
+    Duration:
+    - :string
+    ProductDescription:
+    - :string
+    OfferingType:
+    - :string
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeReservedCacheNodesOfferingsResult:
+        :ignore: true
+        :children:
+          ReservedCacheNodesOfferings:
+            :ignore: true
+            :children:
+              ReservedCacheNodesOffering:
+                :rename: :reserved_cache_nodes_offerings
+                :list: true
+                :children:
+                  Duration:
+                    :type: :integer
+                  FixedPrice:
+                    :type: :float
+                  UsagePrice:
+                    :type: :float
+                  RecurringCharges:
+                    :ignore: true
+                    :children:
+                      RecurringCharge:
+                        :rename: :recurring_charges
+                        :list: true
+                        :children:
+                          RecurringChargeAmount:
+                            :type: :float
+- :name: DescribeSnapshots
+  :method: :describe_snapshots
+  :inputs:
+    CacheClusterId:
+    - :string
+    SnapshotName:
+    - :string
+    SnapshotSource:
+    - :string
+    Marker:
+    - :string
+    MaxRecords:
+    - :integer
+  :outputs:
+    :children:
+      DescribeSnapshotsResult:
+        :ignore: true
+        :children:
+          Snapshots:
+            :ignore: true
+            :children:
+              Snapshot:
+                :rename: :snapshots
+                :list: true
+                :children:
+                  NumCacheNodes:
+                    :type: :integer
+                  CacheClusterCreateTime:
+                    :type: :time
+                  Port:
+                    :type: :integer
+                  AutoMinorVersionUpgrade:
+                    :type: :boolean
+                  SnapshotRetentionLimit:
+                    :type: :integer
+                  NodeSnapshots:
+                    :ignore: true
+                    :children:
+                      NodeSnapshot:
+                        :rename: :node_snapshots
+                        :list: true
+                        :children:
+                          CacheNodeCreateTime:
+                            :type: :time
+                          SnapshotCreateTime:
+                            :type: :time
+- :name: ModifyCacheCluster
+  :method: :modify_cache_cluster
+  :inputs:
+    CacheClusterId:
+    - :string
+    - :required
+    NumCacheNodes:
+    - :integer
+    CacheNodeIdsToRemove:
+    - :membered_list:
+      - :string
+    CacheSecurityGroupNames:
+    - :membered_list:
+      - :string
+    SecurityGroupIds:
+    - :membered_list:
+      - :string
+    PreferredMaintenanceWindow:
+    - :string
+    NotificationTopicArn:
+    - :string
+    CacheParameterGroupName:
+    - :string
+    NotificationTopicStatus:
+    - :string
+    ApplyImmediately:
+    - :boolean
+    EngineVersion:
+    - :string
+    AutoMinorVersionUpgrade:
+    - :boolean
+    SnapshotRetentionLimit:
+    - :integer
+    SnapshotWindow:
+    - :string
+  :outputs:
+    :children:
+      ModifyCacheClusterResult:
+        :ignore: true
+        :children:
+          CacheCluster:
+            :children:
+              ConfigurationEndpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              NumCacheNodes:
+                :type: :integer
+              CacheClusterCreateTime:
+                :type: :time
+              PendingModifiedValues:
+                :children:
+                  NumCacheNodes:
+                    :type: :integer
+                  CacheNodeIdsToRemove:
+                    :ignore: true
+                    :children:
+                      CacheNodeId:
+                        :rename: :cache_node_ids_to_remove
+                        :list: true
+              CacheSecurityGroups:
+                :ignore: true
+                :children:
+                  CacheSecurityGroup:
+                    :rename: :cache_security_groups
+                    :list: true
+              CacheParameterGroup:
+                :children:
+                  CacheNodeIdsToReboot:
+                    :ignore: true
+                    :children:
+                      CacheNodeId:
+                        :rename: :cache_node_ids_to_reboot
+                        :list: true
+              CacheNodes:
+                :ignore: true
+                :children:
+                  CacheNode:
+                    :rename: :cache_nodes
+                    :list: true
+                    :children:
+                      CacheNodeCreateTime:
+                        :type: :time
+                      Endpoint:
+                        :children:
+                          Port:
+                            :type: :integer
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              SecurityGroups:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :security_groups
+                    :list: true
+              SnapshotRetentionLimit:
+                :type: :integer
+            :ignore: true
+- :name: ModifyCacheParameterGroup
+  :method: :modify_cache_parameter_group
+  :inputs:
+    CacheParameterGroupName:
+    - :string
+    - :required
+    ParameterNameValues:
+    - :membered_list:
+      - :structure:
+          ParameterName:
+          - :string
+          ParameterValue:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      ModifyCacheParameterGroupResult:
+        :ignore: true
+- :name: ModifyCacheSubnetGroup
+  :method: :modify_cache_subnet_group
+  :inputs:
+    CacheSubnetGroupName:
+    - :string
+    - :required
+    CacheSubnetGroupDescription:
+    - :string
+    SubnetIds:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      ModifyCacheSubnetGroupResult:
+        :ignore: true
+        :children:
+          CacheSubnetGroup:
+            :children:
+              Subnets:
+                :ignore: true
+                :children:
+                  Subnet:
+                    :rename: :subnets
+                    :list: true
+            :ignore: true
+- :name: ModifyReplicationGroup
+  :method: :modify_replication_group
+  :inputs:
+    ReplicationGroupId:
+    - :string
+    - :required
+    ReplicationGroupDescription:
+    - :string
+    CacheSecurityGroupNames:
+    - :membered_list:
+      - :string
+    SecurityGroupIds:
+    - :membered_list:
+      - :string
+    PreferredMaintenanceWindow:
+    - :string
+    NotificationTopicArn:
+    - :string
+    CacheParameterGroupName:
+    - :string
+    NotificationTopicStatus:
+    - :string
+    ApplyImmediately:
+    - :boolean
+    EngineVersion:
+    - :string
+    AutoMinorVersionUpgrade:
+    - :boolean
+    PrimaryClusterId:
+    - :string
+    SnapshotRetentionLimit:
+    - :integer
+    SnapshotWindow:
+    - :string
+    SnapshottingClusterId:
+    - :string
+  :outputs:
+    :children:
+      ModifyReplicationGroupResult:
+        :ignore: true
+        :children:
+          ReplicationGroup:
+            :children:
+              MemberClusters:
+                :ignore: true
+                :children:
+                  ClusterId:
+                    :rename: :member_clusters
+                    :list: true
+              NodeGroups:
+                :ignore: true
+                :children:
+                  NodeGroup:
+                    :rename: :node_groups
+                    :list: true
+                    :children:
+                      PrimaryEndpoint:
+                        :children:
+                          Port:
+                            :type: :integer
+                      NodeGroupMembers:
+                        :ignore: true
+                        :children:
+                          NodeGroupMember:
+                            :rename: :node_group_members
+                            :list: true
+                            :children:
+                              ReadEndpoint:
+                                :children:
+                                  Port:
+                                    :type: :integer
+            :ignore: true
+- :name: PurchaseReservedCacheNodesOffering
+  :method: :purchase_reserved_cache_nodes_offering
+  :inputs:
+    ReservedCacheNodesOfferingId:
+    - :string
+    - :required
+    ReservedCacheNodeId:
+    - :string
+    CacheNodeCount:
+    - :integer
+  :outputs:
+    :children:
+      PurchaseReservedCacheNodesOfferingResult:
+        :ignore: true
+        :children:
+          ReservedCacheNode:
+            :children:
+              StartTime:
+                :type: :time
+              Duration:
+                :type: :integer
+              FixedPrice:
+                :type: :float
+              UsagePrice:
+                :type: :float
+              CacheNodeCount:
+                :type: :integer
+              RecurringCharges:
+                :ignore: true
+                :children:
+                  RecurringCharge:
+                    :rename: :recurring_charges
+                    :list: true
+                    :children:
+                      RecurringChargeAmount:
+                        :type: :float
+            :ignore: true
+- :name: RebootCacheCluster
+  :method: :reboot_cache_cluster
+  :inputs:
+    CacheClusterId:
+    - :string
+    - :required
+    CacheNodeIdsToReboot:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      RebootCacheClusterResult:
+        :ignore: true
+        :children:
+          CacheCluster:
+            :children:
+              ConfigurationEndpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              NumCacheNodes:
+                :type: :integer
+              CacheClusterCreateTime:
+                :type: :time
+              PendingModifiedValues:
+                :children:
+                  NumCacheNodes:
+                    :type: :integer
+                  CacheNodeIdsToRemove:
+                    :ignore: true
+                    :children:
+                      CacheNodeId:
+                        :rename: :cache_node_ids_to_remove
+                        :list: true
+              CacheSecurityGroups:
+                :ignore: true
+                :children:
+                  CacheSecurityGroup:
+                    :rename: :cache_security_groups
+                    :list: true
+              CacheParameterGroup:
+                :children:
+                  CacheNodeIdsToReboot:
+                    :ignore: true
+                    :children:
+                      CacheNodeId:
+                        :rename: :cache_node_ids_to_reboot
+                        :list: true
+              CacheNodes:
+                :ignore: true
+                :children:
+                  CacheNode:
+                    :rename: :cache_nodes
+                    :list: true
+                    :children:
+                      CacheNodeCreateTime:
+                        :type: :time
+                      Endpoint:
+                        :children:
+                          Port:
+                            :type: :integer
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              SecurityGroups:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :security_groups
+                    :list: true
+              SnapshotRetentionLimit:
+                :type: :integer
+            :ignore: true
+- :name: ResetCacheParameterGroup
+  :method: :reset_cache_parameter_group
+  :inputs:
+    CacheParameterGroupName:
+    - :string
+    - :required
+    ResetAllParameters:
+    - :boolean
+    ParameterNameValues:
+    - :membered_list:
+      - :structure:
+          ParameterName:
+          - :string
+          ParameterValue:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      ResetCacheParameterGroupResult:
+        :ignore: true
+- :name: RevokeCacheSecurityGroupIngress
+  :method: :revoke_cache_security_group_ingress
+  :inputs:
+    CacheSecurityGroupName:
+    - :string
+    - :required
+    EC2SecurityGroupName:
+    - :string
+    - :required
+    EC2SecurityGroupOwnerId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RevokeCacheSecurityGroupIngressResult:
+        :ignore: true
+        :children:
+          CacheSecurityGroup:
+            :children:
+              EC2SecurityGroups:
+                :ignore: true
+                :children:
+                  EC2SecurityGroup:
+                    :rename: :ec2_security_groups
+                    :list: true
+            :ignore: true

@@ -1,0 +1,84 @@
+= New Features
+
+* Ruby 2.6+ endless ranges are now supported as condition specifier
+  values, using a >= operator for them:
+
+    DB[:t].where(c: 1...)
+    # SELECT * FROM t WHERE (c >= 1)
+
+* Ruby 2.6+ endless ranges are now supported in the pg_range
+  extension:
+
+    DB[:t].where(id: 1).update(r: 1...)
+    # UPDATE t SET r = '[1,)' WHERE (id = 1)
+
+* The :include option when creating indexes is now supported on
+  PostgreSQL 11, specifying additional columns to include in the index
+  without indexing them.  This is useful to allow index only scans in
+  additional cases.
+
+* The :tablespace option is now supported when creating tables,
+  indexes, and materialized views on PostgreSQL.
+
+* The list plugin now supports a :top option, which can be used to
+  specify the top of the list.  The default value for the top of the
+  list is 1, but using this option you can make the top of the list be
+  0.
+
+= Other Improvements
+
+* In the pg_array_associations plugin, filtering by associations for
+  many_to_pg_array associations now works correctly on PostgreSQL 11.
+  Previously it did not work on PostgreSQL 11 due to new restrictions
+  on using set returning functions in the the SELECT list.
+
+* When setting the value of a column to the same value the column
+  already has, for a new model object that has not yet been persisted,
+  where the column is used as the foreign key for at least one
+  many_to_one association, do not clear any related associations from
+  the associations cache.
+
+* In the pg_array extension, if there are separate conversion procs for
+  timetz and time types, the conversion proc for the timetz[] type now
+  correctly uses the conversion proc for the timetz type to convert
+  scalar values, instead of the conversion proc for the time type.
+
+* Empty arrays and hashes are now correctly handled in
+  Dataset#{first,where_all,where_each,where_single_value} when a
+  cached placeholder literalizer is used.
+
+* In the tree plugin, Model#{ancestors,descendants,self_and_siblings}
+  now work correctly when custom parent/children association names
+  are used.
+
+* The inner loop of the postgres adapter row fetching code is now
+  2-3% faster.
+
+* When using the postgres adapter with pg-0.18+, set a
+  type_map_for_queries for the connection to allow it to handle input
+  type casts for Integer, Float, TrueClass, and FalseClass values
+  without allocating strings.
+
+* SQLTime.parse (and therefore Sequel.string_to_time) now respects the
+  SQLTime.date and Sequel.application_timezone settings.
+
+* The jdbc/postgresql adapter now correctly parses timetz types.
+
+* On JRuby 9.2.0.0, when handling BC timestamps without timezones in
+  the pg_extended_date_support extension, assume local time and not
+  UTC time if the database timezone is not specified and
+  Sequel.datetime_class is Time.
+
+* Errors indicating that a MySQL database is in read-only mode are
+  now treated as disconnect errors in the mysql and mysql2 adapters,
+  for better behavior in failover scenarios.
+
+* Sequel::Model datasets now support the use of IN/NOT IN operators
+  where the second argument for the operator (the right hand side) is
+  a set returning function.  Previously, the Sequel::Model code
+  assumed the right hand side of an IN/NOT IN operator was a datasets
+  or array, since those are the only values where Sequel will
+  automatically create such an operator.
+
+* Sequel no longer loads the strscan library in the pg_array extension
+  if it is not necessary because the parser from sequel_pg is used.

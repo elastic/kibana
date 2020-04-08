@@ -1,0 +1,3 @@
+label	expected	target
+empty string	true	""
+plain string	false	hello

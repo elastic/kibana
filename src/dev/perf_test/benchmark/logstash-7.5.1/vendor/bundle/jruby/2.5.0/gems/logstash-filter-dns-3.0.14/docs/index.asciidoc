@@ -1,0 +1,168 @@
+:plugin: dns
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Dns filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The DNS filter performs a lookup (either an A record/CNAME record lookup
+or a reverse lookup at the PTR record) on records specified under the
+`reverse` arrays or respectively under the `resolve` arrays.
+
+The config should look like this:
+[source,ruby]
+    filter {
+      dns {
+        reverse => [ "source_host", "field_with_address" ]
+        resolve => [ "field_with_fqdn" ]
+        action => "replace"
+      }
+    }
+
+This filter, like all filters, only processes 1 event at a time, so the use
+of this plugin can significantly slow down your pipeline's throughput if you
+have a high latency network. By way of example, if each DNS lookup takes 2
+milliseconds, the maximum throughput you can achieve with a single filter
+worker is 500 events per second (1000 milliseconds / 2 milliseconds).
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Dns Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-action>> |<<string,string>>, one of `["append", "replace"]`|No
+| <<plugins-{type}s-{plugin}-failed_cache_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-failed_cache_ttl>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-hit_cache_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-hit_cache_ttl>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-hostsfile>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-max_retries>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-nameserver>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-resolve>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-reverse>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-timeout>> |<<number,number>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-action"]
+===== `action` 
+
+  * Value can be any of: `append`, `replace`
+  * Default value is `"append"`
+
+Determine what action to do: append or replace the values in the fields
+specified under `reverse` and `resolve`.
+
+[id="plugins-{type}s-{plugin}-failed_cache_size"]
+===== `failed_cache_size` 
+
+  * Value type is <<number,number>>
+  * Default value is `0`
+
+cache size for failed requests
+
+[id="plugins-{type}s-{plugin}-failed_cache_ttl"]
+===== `failed_cache_ttl` 
+
+  * Value type is <<number,number>>
+  * Default value is `5`
+
+how long to cache failed requests (in seconds)
+
+[id="plugins-{type}s-{plugin}-hit_cache_size"]
+===== `hit_cache_size` 
+
+  * Value type is <<number,number>>
+  * Default value is `0`
+
+set the size of cache for successful requests
+
+[id="plugins-{type}s-{plugin}-hit_cache_ttl"]
+===== `hit_cache_ttl` 
+
+  * Value type is <<number,number>>
+  * Default value is `60`
+
+how long to cache successful requests (in seconds)
+
+[id="plugins-{type}s-{plugin}-hostsfile"]
+===== `hostsfile` 
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Use custom hosts file(s). For example: `["/var/db/my_custom_hosts"]`
+
+[id="plugins-{type}s-{plugin}-max_retries"]
+===== `max_retries` 
+
+  * Value type is <<number,number>>
+  * Default value is `2`
+
+number of times to retry a failed resolve/reverse
+
+[id="plugins-{type}s-{plugin}-nameserver"]
+===== `nameserver` 
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Use custom nameserver(s). For example: `["8.8.8.8", "8.8.4.4"]`.
+If `nameserver` is not specified then `/etc/resolv.conf` will be read to
+configure the resolver using the `nameserver`, `domain`,
+`search` and `ndots` directives in `/etc/resolv.conf`.
+
+Note that nameservers normally resolve fully qualified domain names (FQDN)
+and relying on `/etc/resolv.conf` can be useful to provide a domains search
+list to resolve underqualified host names for example.
+
+[id="plugins-{type}s-{plugin}-resolve"]
+===== `resolve` 
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Forward resolve one or more fields.
+
+[id="plugins-{type}s-{plugin}-reverse"]
+===== `reverse` 
+
+  * Value type is <<array,array>>
+  * There is no default value for this setting.
+
+Reverse resolve one or more fields.
+
+[id="plugins-{type}s-{plugin}-timeout"]
+===== `timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `0.5`
+
+`resolv` calls will be wrapped in a timeout instance
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

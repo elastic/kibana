@@ -1,0 +1,17 @@
+{
+  "title": "Errors Viewer [Azure Monitor][SQL DB]",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "sql_diagnostics_Errors_properties.message",
+    "sql_diagnostics_Errors_properties.error_number"
+  ],
+  "sort": [
+    "@timestamp",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"azure-*\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"azure.group:sql_diagnostics AND azure.category:Errors\"},\"filter\":[]}"
+  }
+}

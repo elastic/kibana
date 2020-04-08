@@ -1,0 +1,11 @@
+{
+  "title": "Query Type by Device",
+  "visState": "{\"title\":\"Query Type by Device\",\"type\":\"heatmap\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"enableHover\":false,\"legendPosition\":\"right\",\"times\":[],\"colorsNumber\":4,\"colorSchema\":\"Yellow to Red\",\"setColorRange\":false,\"colorsRange\":[],\"invertColors\":false,\"percentageMode\":false,\"valueAxes\":[{\"show\":false,\"id\":\"ValueAxis-1\",\"type\":\"value\",\"scale\":{\"type\":\"linear\",\"defaultYExtents\":false},\"labels\":{\"show\":false,\"rotate\":0,\"color\":\"#555\"}}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Event Count\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"deviceHostName\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"DNS Device\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"deviceCustomString1\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"DNS Query Types\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 33\":\"rgb(255,255,204)\",\"33 - 65\":\"rgb(254,217,118)\",\"65 - 98\":\"rgb(253,141,60)\",\"98 - 130\":\"rgb(227,27,28)\"}}}",
+  "description": "",
+  "savedSearchId": "16a72e70-4543-11e7-9510-4b0b4978ab0e",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

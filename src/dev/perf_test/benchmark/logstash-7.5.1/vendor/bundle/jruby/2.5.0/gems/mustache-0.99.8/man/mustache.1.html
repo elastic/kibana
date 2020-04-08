@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>mustache(1) - Mustache processor</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#OPTIONS">OPTIONS</a>
+    <a href="#INSTALLATION">INSTALLATION</a>
+    <a href="#EXAMPLES">EXAMPLES</a>
+    <a href="#COPYRIGHT">COPYRIGHT</a>
+    <a href="#SEE-ALSO">SEE ALSO</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>mustache(1)</li>
+    <li class='tc'>Mustache Manual</li>
+    <li class='tr'>mustache(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>mustache</code> - <span class="man-whatis">Mustache processor</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<pre><code>mustache &lt;YAML> &lt;FILE>
+mustache --compile &lt;FILE>
+mustache --tokens &lt;FILE>
+</code></pre>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p>Mustache is a logic-less templating system for HTML, config files,
+anything.</p>
+
+<p>The <code>mustache</code> command processes a Mustache template preceded by YAML
+frontmatter from standard input and prints one or more documents to
+standard output.</p>
+
+<p>YAML frontmatter begins with <code>---</code> on a single line, followed by YAML,
+ending with another <code>---</code> on a single line, e.g.</p>
+
+<pre><code>---
+names: [ {name: chris}, {name: mark}, {name: scott} ]
+---
+</code></pre>
+
+<p>If you are unfamiliar with YAML, it is a superset of JSON. Valid JSON
+should work fine.</p>
+
+<p>After the frontmatter should come any valid Mustache template. See
+<a class="man-ref" href="mustache.5.ron.html">mustache<span class="s">(5)</span></a> for an overview of Mustache templates.</p>
+
+<p>For example:</p>
+
+<pre><code>{{#names}}
+  Hi {{name}}!
+{{/names}}
+</code></pre>
+
+<p>Now let's combine them.</p>
+
+<pre><code>$ cat data.yml
+---
+names: [ {name: chris}, {name: mark}, {name: scott} ]
+---
+
+$ cat template.mustache
+{{#names}}
+  Hi {{name}}!
+{{/names}}
+
+$ cat data.yml template.mustache | mustache
+Hi chris!
+Hi mark!
+Hi scott!
+</code></pre>
+
+<p>If you provide multiple YAML documents (as delimited by <code>---</code>), your
+template will be rendered multiple times. Like a mail merge.</p>
+
+<p>For example:</p>
+
+<pre><code>$ cat data.yml
+---
+name: chris
+---
+name: mark
+---
+name: scott
+---
+
+$ cat template.mustache
+Hi {{name}}!
+
+$ cat data.yml template.mustache | mustache
+Hi chris!
+Hi mark!
+Hi scott!
+</code></pre>
+
+<h2 id="OPTIONS">OPTIONS</h2>
+
+<p>By default <code>mustache</code> will try to render a Mustache template using the
+YAML frontmatter you provide. It can do a few other things, however.</p>
+
+<dl>
+<dt><code>-c</code>, <code>--compile</code></dt><dd><p>Print the compiled Ruby version of a given template. This is the
+code that is actually used when rendering a template into a
+string. Useful for debugging but only if you are familiar with
+Mustache's internals.</p></dd>
+<dt><code>-t</code>, <code>--tokens</code></dt><dd><p>Print the tokenized form of a given Mustache template. This can be
+used to understand how Mustache parses a template. The tokens are
+handed to a generator which compiles them into a Ruby
+string. Syntax errors and confused tags, therefore, can probably be
+identified by examining the tokens produced.</p></dd>
+</dl>
+
+
+<h2 id="INSTALLATION">INSTALLATION</h2>
+
+<p>If you have RubyGems installed:</p>
+
+<pre><code>gem install mustache
+</code></pre>
+
+<h2 id="EXAMPLES">EXAMPLES</h2>
+
+<pre><code>$ mustache data.yml template.mustache
+$ cat data.yml | mustache - template.mustache
+$ mustache -c template.mustache
+$ cat &lt;&lt;data | ruby mustache - template.mustache
+---
+name: Bob
+age: 30
+---
+data
+</code></pre>
+
+<h2 id="COPYRIGHT">COPYRIGHT</h2>
+
+<p>Mustache is Copyright (C) 2009 Chris Wanstrath</p>
+
+<p>Original CTemplate by Google</p>
+
+<h2 id="SEE-ALSO">SEE ALSO</h2>
+
+<p><a class="man-ref" href="mustache.5.ron.html">mustache<span class="s">(5)</span></a>, <span class="man-ref">gem<span class="s">(1)</span></span>,
+<a href="http://mustache.github.io/" data-bare-link="true">http://mustache.github.io/</a></p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'>DEFUNKT</li>
+    <li class='tc'>October 2014</li>
+    <li class='tr'>mustache(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>

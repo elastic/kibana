@@ -1,0 +1,10 @@
+{
+  "title": "Endpoint - OS Average EPS [ArcSight]",
+  "visState": "{\"title\":\"Endpoint - OS Average EPS [ArcSight]\",\"type\":\"metrics\",\"params\":{\"id\":\"3f2cf630-3e4b-11e7-af78-9fc514b4e118\",\"type\":\"gauge\",\"series\":[{\"id\":\"3f2cf631-3e4b-11e7-af78-9fc514b4e118\",\"color\":\"rgba(0,156,224,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"3f2cf632-3e4b-11e7-af78-9fc514b4e118\",\"type\":\"count\"},{\"id\":\"2f12f3d0-7dc5-11e7-95f6-690ab80d4e85\",\"type\":\"cumulative_sum\",\"field\":\"3f2cf632-3e4b-11e7-af78-9fc514b4e118\"},{\"unit\":\"1s\",\"id\":\"330d7a00-7dc5-11e7-95f6-690ab80d4e85\",\"type\":\"derivative\",\"field\":\"2f12f3d0-7dc5-11e7-95f6-690ab80d4e85\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"373fd910-7dc5-11e7-95f6-690ab80d4e85\",\"type\":\"moving_average\",\"field\":\"330d7a00-7dc5-11e7-95f6-690ab80d4e85\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Event Throughput\",\"offset_time\":\"1m\",\"value_template\":\"{{value}} / s\"}],\"time_field\":\"deviceReceiptTime\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"bar_color_rules\":[{\"id\":\"527ca820-3e4b-11e7-af78-9fc514b4e118\"}],\"gauge_color_rules\":[{\"id\":\"52cee6d0-3e4b-11e7-af78-9fc514b4e118\"}],\"gauge_width\":10,\"gauge_inner_width\":10,\"gauge_style\":\"half\",\"filter\":\"categoryDeviceGroup:\\\"/Operating System\\\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

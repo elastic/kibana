@@ -1,0 +1,2324 @@
+---
+:json_version: '1.1'
+:target_prefix: OpsWorks_20130218.
+:api_version: '2013-02-18'
+:operations:
+- :name: AssignInstance
+  :method: :assign_instance
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+    LayerIds:
+    - :list:
+      - :string
+    - :required
+  :outputs: {}
+- :name: AssignVolume
+  :method: :assign_volume
+  :inputs:
+    VolumeId:
+    - :string
+    - :required
+    InstanceId:
+    - :string
+  :outputs: {}
+- :name: AssociateElasticIp
+  :method: :associate_elastic_ip
+  :inputs:
+    ElasticIp:
+    - :string
+    - :required
+    InstanceId:
+    - :string
+  :outputs: {}
+- :name: AttachElasticLoadBalancer
+  :method: :attach_elastic_load_balancer
+  :inputs:
+    ElasticLoadBalancerName:
+    - :string
+    - :required
+    LayerId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: CloneStack
+  :method: :clone_stack
+  :inputs:
+    SourceStackId:
+    - :string
+    - :required
+    Name:
+    - :string
+    Region:
+    - :string
+    VpcId:
+    - :string
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    ServiceRoleArn:
+    - :string
+    - :required
+    DefaultInstanceProfileArn:
+    - :string
+    DefaultOs:
+    - :string
+    HostnameTheme:
+    - :string
+    DefaultAvailabilityZone:
+    - :string
+    DefaultSubnetId:
+    - :string
+    CustomJson:
+    - :string
+    ConfigurationManager:
+    - :structure:
+        Name:
+        - :string
+        Version:
+        - :string
+    ChefConfiguration:
+    - :structure:
+        ManageBerkshelf:
+        - :boolean
+        BerkshelfVersion:
+        - :string
+    UseCustomCookbooks:
+    - :boolean
+    UseOpsworksSecurityGroups:
+    - :boolean
+    CustomCookbooksSource:
+    - :structure:
+        Type:
+        - :string
+        Url:
+        - :string
+        Username:
+        - :string
+        Password:
+        - :string
+        SshKey:
+        - :string
+        Revision:
+        - :string
+    DefaultSshKeyName:
+    - :string
+    ClonePermissions:
+    - :boolean
+    CloneAppIds:
+    - :list:
+      - :string
+    DefaultRootDeviceType:
+    - :string
+    AgentVersion:
+    - :string
+  :outputs:
+    StackId:
+      :sym: :stack_id
+      :type: :string
+- :name: CreateApp
+  :method: :create_app
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    Shortname:
+    - :string
+    Name:
+    - :string
+    - :required
+    Description:
+    - :string
+    DataSources:
+    - :list:
+      - :structure:
+          Type:
+          - :string
+          Arn:
+          - :string
+          DatabaseName:
+          - :string
+    Type:
+    - :string
+    - :required
+    AppSource:
+    - :structure:
+        Type:
+        - :string
+        Url:
+        - :string
+        Username:
+        - :string
+        Password:
+        - :string
+        SshKey:
+        - :string
+        Revision:
+        - :string
+    Domains:
+    - :list:
+      - :string
+    EnableSsl:
+    - :boolean
+    SslConfiguration:
+    - :structure:
+        Certificate:
+        - :string
+        - :required
+        PrivateKey:
+        - :string
+        - :required
+        Chain:
+        - :string
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    Environment:
+    - :list:
+      - :structure:
+          Key:
+          - :string
+          - :required
+          Value:
+          - :string
+          - :required
+          Secure:
+          - :boolean
+  :outputs:
+    AppId:
+      :sym: :app_id
+      :type: :string
+- :name: CreateDeployment
+  :method: :create_deployment
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    AppId:
+    - :string
+    InstanceIds:
+    - :list:
+      - :string
+    Command:
+    - :structure:
+        Name:
+        - :string
+        - :required
+        Args:
+        - :map:
+            :key:
+            - :string
+            :value:
+            - :list:
+              - :string
+    - :required
+    Comment:
+    - :string
+    CustomJson:
+    - :string
+  :outputs:
+    DeploymentId:
+      :sym: :deployment_id
+      :type: :string
+- :name: CreateInstance
+  :method: :create_instance
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    LayerIds:
+    - :list:
+      - :string
+    - :required
+    InstanceType:
+    - :string
+    - :required
+    AutoScalingType:
+    - :string
+    Hostname:
+    - :string
+    Os:
+    - :string
+    AmiId:
+    - :string
+    SshKeyName:
+    - :string
+    AvailabilityZone:
+    - :string
+    VirtualizationType:
+    - :string
+    SubnetId:
+    - :string
+    Architecture:
+    - :string
+    RootDeviceType:
+    - :string
+    BlockDeviceMappings:
+    - :list:
+      - :structure:
+          DeviceName:
+          - :string
+          NoDevice:
+          - :string
+          VirtualName:
+          - :string
+          Ebs:
+          - :structure:
+              SnapshotId:
+              - :string
+              Iops:
+              - :integer
+              VolumeSize:
+              - :integer
+              VolumeType:
+              - :string
+              DeleteOnTermination:
+              - :boolean
+    InstallUpdatesOnBoot:
+    - :boolean
+    EbsOptimized:
+    - :boolean
+    AgentVersion:
+    - :string
+  :outputs:
+    InstanceId:
+      :sym: :instance_id
+      :type: :string
+- :name: CreateLayer
+  :method: :create_layer
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    Type:
+    - :string
+    - :required
+    Name:
+    - :string
+    - :required
+    Shortname:
+    - :string
+    - :required
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    CustomInstanceProfileArn:
+    - :string
+    CustomSecurityGroupIds:
+    - :list:
+      - :string
+    Packages:
+    - :list:
+      - :string
+    VolumeConfigurations:
+    - :list:
+      - :structure:
+          MountPoint:
+          - :string
+          - :required
+          RaidLevel:
+          - :integer
+          NumberOfDisks:
+          - :integer
+          - :required
+          Size:
+          - :integer
+          - :required
+          VolumeType:
+          - :string
+          Iops:
+          - :integer
+    EnableAutoHealing:
+    - :boolean
+    AutoAssignElasticIps:
+    - :boolean
+    AutoAssignPublicIps:
+    - :boolean
+    CustomRecipes:
+    - :structure:
+        Setup:
+        - :list:
+          - :string
+        Configure:
+        - :list:
+          - :string
+        Deploy:
+        - :list:
+          - :string
+        Undeploy:
+        - :list:
+          - :string
+        Shutdown:
+        - :list:
+          - :string
+    InstallUpdatesOnBoot:
+    - :boolean
+    UseEbsOptimizedInstances:
+    - :boolean
+    LifecycleEventConfiguration:
+    - :structure:
+        Shutdown:
+        - :structure:
+            ExecutionTimeout:
+            - :integer
+            DelayUntilElbConnectionsDrained:
+            - :boolean
+  :outputs:
+    LayerId:
+      :sym: :layer_id
+      :type: :string
+- :name: CreateStack
+  :method: :create_stack
+  :inputs:
+    Name:
+    - :string
+    - :required
+    Region:
+    - :string
+    - :required
+    VpcId:
+    - :string
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    ServiceRoleArn:
+    - :string
+    - :required
+    DefaultInstanceProfileArn:
+    - :string
+    - :required
+    DefaultOs:
+    - :string
+    HostnameTheme:
+    - :string
+    DefaultAvailabilityZone:
+    - :string
+    DefaultSubnetId:
+    - :string
+    CustomJson:
+    - :string
+    ConfigurationManager:
+    - :structure:
+        Name:
+        - :string
+        Version:
+        - :string
+    ChefConfiguration:
+    - :structure:
+        ManageBerkshelf:
+        - :boolean
+        BerkshelfVersion:
+        - :string
+    UseCustomCookbooks:
+    - :boolean
+    UseOpsworksSecurityGroups:
+    - :boolean
+    CustomCookbooksSource:
+    - :structure:
+        Type:
+        - :string
+        Url:
+        - :string
+        Username:
+        - :string
+        Password:
+        - :string
+        SshKey:
+        - :string
+        Revision:
+        - :string
+    DefaultSshKeyName:
+    - :string
+    DefaultRootDeviceType:
+    - :string
+    AgentVersion:
+    - :string
+  :outputs:
+    StackId:
+      :sym: :stack_id
+      :type: :string
+- :name: CreateUserProfile
+  :method: :create_user_profile
+  :inputs:
+    IamUserArn:
+    - :string
+    - :required
+    SshUsername:
+    - :string
+    SshPublicKey:
+    - :string
+    AllowSelfManagement:
+    - :boolean
+  :outputs:
+    IamUserArn:
+      :sym: :iam_user_arn
+      :type: :string
+- :name: DeleteApp
+  :method: :delete_app
+  :inputs:
+    AppId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteInstance
+  :method: :delete_instance
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+    DeleteElasticIp:
+    - :boolean
+    DeleteVolumes:
+    - :boolean
+  :outputs: {}
+- :name: DeleteLayer
+  :method: :delete_layer
+  :inputs:
+    LayerId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteStack
+  :method: :delete_stack
+  :inputs:
+    StackId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeleteUserProfile
+  :method: :delete_user_profile
+  :inputs:
+    IamUserArn:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeregisterElasticIp
+  :method: :deregister_elastic_ip
+  :inputs:
+    ElasticIp:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeregisterInstance
+  :method: :deregister_instance
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeregisterRdsDbInstance
+  :method: :deregister_rds_db_instance
+  :inputs:
+    RdsDbInstanceArn:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DeregisterVolume
+  :method: :deregister_volume
+  :inputs:
+    VolumeId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DescribeAgentVersions
+  :method: :describe_agent_versions
+  :inputs:
+    StackId:
+    - :string
+    ConfigurationManager:
+    - :structure:
+        Name:
+        - :string
+        Version:
+        - :string
+  :outputs:
+    AgentVersions:
+      :sym: :agent_versions
+      :type: :hash
+      :members:
+        Version:
+          :sym: :version
+          :type: :string
+        ConfigurationManager:
+          :sym: :configuration_manager
+          :type: :hash
+          :members:
+            Name:
+              :sym: :name
+              :type: :string
+            Version:
+              :sym: :version
+              :type: :string
+- :name: DescribeApps
+  :method: :describe_apps
+  :inputs:
+    StackId:
+    - :string
+    AppIds:
+    - :list:
+      - :string
+  :outputs:
+    Apps:
+      :sym: :apps
+      :type: :hash
+      :members:
+        AppId:
+          :sym: :app_id
+          :type: :string
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        Shortname:
+          :sym: :shortname
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Description:
+          :sym: :description
+          :type: :string
+        DataSources:
+          :sym: :data_sources
+          :type: :hash
+          :members:
+            Type:
+              :sym: :type
+              :type: :string
+            Arn:
+              :sym: :arn
+              :type: :string
+            DatabaseName:
+              :sym: :database_name
+              :type: :string
+        Type:
+          :sym: :type
+          :type: :string
+        AppSource:
+          :sym: :app_source
+          :type: :hash
+          :members:
+            Type:
+              :sym: :type
+              :type: :string
+            Url:
+              :sym: :url
+              :type: :string
+            Username:
+              :sym: :username
+              :type: :string
+            Password:
+              :sym: :password
+              :type: :string
+            SshKey:
+              :sym: :ssh_key
+              :type: :string
+            Revision:
+              :sym: :revision
+              :type: :string
+        Domains:
+          :sym: :domains
+          :type: :string
+        EnableSsl:
+          :sym: :enable_ssl
+          :type: :boolean
+        SslConfiguration:
+          :sym: :ssl_configuration
+          :type: :hash
+          :members:
+            Certificate:
+              :sym: :certificate
+              :type: :string
+            PrivateKey:
+              :sym: :private_key
+              :type: :string
+            Chain:
+              :sym: :chain
+              :type: :string
+        Attributes:
+          :sym: :attributes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
+        CreatedAt:
+          :sym: :created_at
+          :type: :string
+        Environment:
+          :sym: :environment
+          :type: :hash
+          :members:
+            Key:
+              :sym: :key
+              :type: :string
+            Value:
+              :sym: :value
+              :type: :string
+            Secure:
+              :sym: :secure
+              :type: :boolean
+- :name: DescribeCommands
+  :method: :describe_commands
+  :inputs:
+    DeploymentId:
+    - :string
+    InstanceId:
+    - :string
+    CommandIds:
+    - :list:
+      - :string
+  :outputs:
+    Commands:
+      :sym: :commands
+      :type: :hash
+      :members:
+        CommandId:
+          :sym: :command_id
+          :type: :string
+        InstanceId:
+          :sym: :instance_id
+          :type: :string
+        DeploymentId:
+          :sym: :deployment_id
+          :type: :string
+        CreatedAt:
+          :sym: :created_at
+          :type: :string
+        AcknowledgedAt:
+          :sym: :acknowledged_at
+          :type: :string
+        CompletedAt:
+          :sym: :completed_at
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        ExitCode:
+          :sym: :exit_code
+          :type: :integer
+        LogUrl:
+          :sym: :log_url
+          :type: :string
+        Type:
+          :sym: :type
+          :type: :string
+- :name: DescribeDeployments
+  :method: :describe_deployments
+  :inputs:
+    StackId:
+    - :string
+    AppId:
+    - :string
+    DeploymentIds:
+    - :list:
+      - :string
+  :outputs:
+    Deployments:
+      :sym: :deployments
+      :type: :hash
+      :members:
+        DeploymentId:
+          :sym: :deployment_id
+          :type: :string
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        AppId:
+          :sym: :app_id
+          :type: :string
+        CreatedAt:
+          :sym: :created_at
+          :type: :string
+        CompletedAt:
+          :sym: :completed_at
+          :type: :string
+        Duration:
+          :sym: :duration
+          :type: :integer
+        IamUserArn:
+          :sym: :iam_user_arn
+          :type: :string
+        Comment:
+          :sym: :comment
+          :type: :string
+        Command:
+          :sym: :command
+          :type: :hash
+          :members:
+            Name:
+              :sym: :name
+              :type: :string
+            Args:
+              :sym: :args
+              :type: :map
+              :members:
+                :sym: :value
+                :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        CustomJson:
+          :sym: :custom_json
+          :type: :string
+        InstanceIds:
+          :sym: :instance_ids
+          :type: :string
+- :name: DescribeElasticIps
+  :method: :describe_elastic_ips
+  :inputs:
+    InstanceId:
+    - :string
+    StackId:
+    - :string
+    Ips:
+    - :list:
+      - :string
+  :outputs:
+    ElasticIps:
+      :sym: :elastic_ips
+      :type: :hash
+      :members:
+        Ip:
+          :sym: :ip
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Domain:
+          :sym: :domain
+          :type: :string
+        Region:
+          :sym: :region
+          :type: :string
+        InstanceId:
+          :sym: :instance_id
+          :type: :string
+- :name: DescribeElasticLoadBalancers
+  :method: :describe_elastic_load_balancers
+  :inputs:
+    StackId:
+    - :string
+    LayerIds:
+    - :list:
+      - :string
+  :outputs:
+    ElasticLoadBalancers:
+      :sym: :elastic_load_balancers
+      :type: :hash
+      :members:
+        ElasticLoadBalancerName:
+          :sym: :elastic_load_balancer_name
+          :type: :string
+        Region:
+          :sym: :region
+          :type: :string
+        DnsName:
+          :sym: :dns_name
+          :type: :string
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        LayerId:
+          :sym: :layer_id
+          :type: :string
+        VpcId:
+          :sym: :vpc_id
+          :type: :string
+        AvailabilityZones:
+          :sym: :availability_zones
+          :type: :string
+        SubnetIds:
+          :sym: :subnet_ids
+          :type: :string
+        Ec2InstanceIds:
+          :sym: :ec_2_instance_ids
+          :type: :string
+- :name: DescribeInstances
+  :method: :describe_instances
+  :inputs:
+    StackId:
+    - :string
+    LayerId:
+    - :string
+    InstanceIds:
+    - :list:
+      - :string
+  :outputs:
+    Instances:
+      :sym: :instances
+      :type: :hash
+      :members:
+        AgentVersion:
+          :sym: :agent_version
+          :type: :string
+        AmiId:
+          :sym: :ami_id
+          :type: :string
+        Architecture:
+          :sym: :architecture
+          :type: :string
+        AutoScalingType:
+          :sym: :auto_scaling_type
+          :type: :string
+        AvailabilityZone:
+          :sym: :availability_zone
+          :type: :string
+        BlockDeviceMappings:
+          :sym: :block_device_mappings
+          :type: :hash
+          :members:
+            DeviceName:
+              :sym: :device_name
+              :type: :string
+            NoDevice:
+              :sym: :no_device
+              :type: :string
+            VirtualName:
+              :sym: :virtual_name
+              :type: :string
+            Ebs:
+              :sym: :ebs
+              :type: :hash
+              :members:
+                SnapshotId:
+                  :sym: :snapshot_id
+                  :type: :string
+                Iops:
+                  :sym: :iops
+                  :type: :integer
+                VolumeSize:
+                  :sym: :volume_size
+                  :type: :integer
+                VolumeType:
+                  :sym: :volume_type
+                  :type: :string
+                DeleteOnTermination:
+                  :sym: :delete_on_termination
+                  :type: :boolean
+        CreatedAt:
+          :sym: :created_at
+          :type: :string
+        EbsOptimized:
+          :sym: :ebs_optimized
+          :type: :boolean
+        Ec2InstanceId:
+          :sym: :ec2_instance_id
+          :type: :string
+        ElasticIp:
+          :sym: :elastic_ip
+          :type: :string
+        Hostname:
+          :sym: :hostname
+          :type: :string
+        InfrastructureClass:
+          :sym: :infrastructure_class
+          :type: :string
+        InstallUpdatesOnBoot:
+          :sym: :install_updates_on_boot
+          :type: :boolean
+        InstanceId:
+          :sym: :instance_id
+          :type: :string
+        InstanceProfileArn:
+          :sym: :instance_profile_arn
+          :type: :string
+        InstanceType:
+          :sym: :instance_type
+          :type: :string
+        LastServiceErrorId:
+          :sym: :last_service_error_id
+          :type: :string
+        LayerIds:
+          :sym: :layer_ids
+          :type: :string
+        Os:
+          :sym: :os
+          :type: :string
+        Platform:
+          :sym: :platform
+          :type: :string
+        PrivateDns:
+          :sym: :private_dns
+          :type: :string
+        PrivateIp:
+          :sym: :private_ip
+          :type: :string
+        PublicDns:
+          :sym: :public_dns
+          :type: :string
+        PublicIp:
+          :sym: :public_ip
+          :type: :string
+        RegisteredBy:
+          :sym: :registered_by
+          :type: :string
+        ReportedAgentVersion:
+          :sym: :reported_agent_version
+          :type: :string
+        ReportedOs:
+          :sym: :reported_os
+          :type: :hash
+          :members:
+            Family:
+              :sym: :family
+              :type: :string
+            Name:
+              :sym: :name
+              :type: :string
+            Version:
+              :sym: :version
+              :type: :string
+        RootDeviceType:
+          :sym: :root_device_type
+          :type: :string
+        RootDeviceVolumeId:
+          :sym: :root_device_volume_id
+          :type: :string
+        SecurityGroupIds:
+          :sym: :security_group_ids
+          :type: :string
+        SshHostDsaKeyFingerprint:
+          :sym: :ssh_host_dsa_key_fingerprint
+          :type: :string
+        SshHostRsaKeyFingerprint:
+          :sym: :ssh_host_rsa_key_fingerprint
+          :type: :string
+        SshKeyName:
+          :sym: :ssh_key_name
+          :type: :string
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        SubnetId:
+          :sym: :subnet_id
+          :type: :string
+        VirtualizationType:
+          :sym: :virtualization_type
+          :type: :string
+- :name: DescribeLayers
+  :method: :describe_layers
+  :inputs:
+    StackId:
+    - :string
+    LayerIds:
+    - :list:
+      - :string
+  :outputs:
+    Layers:
+      :sym: :layers
+      :type: :hash
+      :members:
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        LayerId:
+          :sym: :layer_id
+          :type: :string
+        Type:
+          :sym: :type
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Shortname:
+          :sym: :shortname
+          :type: :string
+        Attributes:
+          :sym: :attributes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
+        CustomInstanceProfileArn:
+          :sym: :custom_instance_profile_arn
+          :type: :string
+        CustomSecurityGroupIds:
+          :sym: :custom_security_group_ids
+          :type: :string
+        DefaultSecurityGroupNames:
+          :sym: :default_security_group_names
+          :type: :string
+        Packages:
+          :sym: :packages
+          :type: :string
+        VolumeConfigurations:
+          :sym: :volume_configurations
+          :type: :hash
+          :members:
+            MountPoint:
+              :sym: :mount_point
+              :type: :string
+            RaidLevel:
+              :sym: :raid_level
+              :type: :integer
+            NumberOfDisks:
+              :sym: :number_of_disks
+              :type: :integer
+            Size:
+              :sym: :size
+              :type: :integer
+            VolumeType:
+              :sym: :volume_type
+              :type: :string
+            Iops:
+              :sym: :iops
+              :type: :integer
+        EnableAutoHealing:
+          :sym: :enable_auto_healing
+          :type: :boolean
+        AutoAssignElasticIps:
+          :sym: :auto_assign_elastic_ips
+          :type: :boolean
+        AutoAssignPublicIps:
+          :sym: :auto_assign_public_ips
+          :type: :boolean
+        DefaultRecipes:
+          :sym: :default_recipes
+          :type: :hash
+          :members:
+            Setup:
+              :sym: :setup
+              :type: :string
+            Configure:
+              :sym: :configure
+              :type: :string
+            Deploy:
+              :sym: :deploy
+              :type: :string
+            Undeploy:
+              :sym: :undeploy
+              :type: :string
+            Shutdown:
+              :sym: :shutdown
+              :type: :string
+        CustomRecipes:
+          :sym: :custom_recipes
+          :type: :hash
+          :members:
+            Setup:
+              :sym: :setup
+              :type: :string
+            Configure:
+              :sym: :configure
+              :type: :string
+            Deploy:
+              :sym: :deploy
+              :type: :string
+            Undeploy:
+              :sym: :undeploy
+              :type: :string
+            Shutdown:
+              :sym: :shutdown
+              :type: :string
+        CreatedAt:
+          :sym: :created_at
+          :type: :string
+        InstallUpdatesOnBoot:
+          :sym: :install_updates_on_boot
+          :type: :boolean
+        UseEbsOptimizedInstances:
+          :sym: :use_ebs_optimized_instances
+          :type: :boolean
+        LifecycleEventConfiguration:
+          :sym: :lifecycle_event_configuration
+          :type: :hash
+          :members:
+            Shutdown:
+              :sym: :shutdown
+              :type: :hash
+              :members:
+                ExecutionTimeout:
+                  :sym: :execution_timeout
+                  :type: :integer
+                DelayUntilElbConnectionsDrained:
+                  :sym: :delay_until_elb_connections_drained
+                  :type: :boolean
+- :name: DescribeLoadBasedAutoScaling
+  :method: :describe_load_based_auto_scaling
+  :inputs:
+    LayerIds:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    LoadBasedAutoScalingConfigurations:
+      :sym: :load_based_auto_scaling_configurations
+      :type: :hash
+      :members:
+        LayerId:
+          :sym: :layer_id
+          :type: :string
+        Enable:
+          :sym: :enable
+          :type: :boolean
+        UpScaling:
+          :sym: :up_scaling
+          :type: :hash
+          :members:
+            InstanceCount:
+              :sym: :instance_count
+              :type: :integer
+            ThresholdsWaitTime:
+              :sym: :thresholds_wait_time
+              :type: :integer
+            IgnoreMetricsTime:
+              :sym: :ignore_metrics_time
+              :type: :integer
+            CpuThreshold:
+              :sym: :cpu_threshold
+              :type: :float
+            MemoryThreshold:
+              :sym: :memory_threshold
+              :type: :float
+            LoadThreshold:
+              :sym: :load_threshold
+              :type: :float
+            Alarms:
+              :sym: :alarms
+              :type: :string
+        DownScaling:
+          :sym: :down_scaling
+          :type: :hash
+          :members:
+            InstanceCount:
+              :sym: :instance_count
+              :type: :integer
+            ThresholdsWaitTime:
+              :sym: :thresholds_wait_time
+              :type: :integer
+            IgnoreMetricsTime:
+              :sym: :ignore_metrics_time
+              :type: :integer
+            CpuThreshold:
+              :sym: :cpu_threshold
+              :type: :float
+            MemoryThreshold:
+              :sym: :memory_threshold
+              :type: :float
+            LoadThreshold:
+              :sym: :load_threshold
+              :type: :float
+            Alarms:
+              :sym: :alarms
+              :type: :string
+- :name: DescribeMyUserProfile
+  :method: :describe_my_user_profile
+  :inputs: {}
+  :outputs:
+    UserProfile:
+      :sym: :user_profile
+      :type: :hash
+      :members:
+        IamUserArn:
+          :sym: :iam_user_arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        SshUsername:
+          :sym: :ssh_username
+          :type: :string
+        SshPublicKey:
+          :sym: :ssh_public_key
+          :type: :string
+- :name: DescribePermissions
+  :method: :describe_permissions
+  :inputs:
+    IamUserArn:
+    - :string
+    StackId:
+    - :string
+  :outputs:
+    Permissions:
+      :sym: :permissions
+      :type: :hash
+      :members:
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        IamUserArn:
+          :sym: :iam_user_arn
+          :type: :string
+        AllowSsh:
+          :sym: :allow_ssh
+          :type: :boolean
+        AllowSudo:
+          :sym: :allow_sudo
+          :type: :boolean
+        Level:
+          :sym: :level
+          :type: :string
+- :name: DescribeRaidArrays
+  :method: :describe_raid_arrays
+  :inputs:
+    InstanceId:
+    - :string
+    StackId:
+    - :string
+    RaidArrayIds:
+    - :list:
+      - :string
+  :outputs:
+    RaidArrays:
+      :sym: :raid_arrays
+      :type: :hash
+      :members:
+        RaidArrayId:
+          :sym: :raid_array_id
+          :type: :string
+        InstanceId:
+          :sym: :instance_id
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        RaidLevel:
+          :sym: :raid_level
+          :type: :integer
+        NumberOfDisks:
+          :sym: :number_of_disks
+          :type: :integer
+        Size:
+          :sym: :size
+          :type: :integer
+        Device:
+          :sym: :device
+          :type: :string
+        MountPoint:
+          :sym: :mount_point
+          :type: :string
+        AvailabilityZone:
+          :sym: :availability_zone
+          :type: :string
+        CreatedAt:
+          :sym: :created_at
+          :type: :string
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        VolumeType:
+          :sym: :volume_type
+          :type: :string
+        Iops:
+          :sym: :iops
+          :type: :integer
+- :name: DescribeRdsDbInstances
+  :method: :describe_rds_db_instances
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    RdsDbInstanceArns:
+    - :list:
+      - :string
+  :outputs:
+    RdsDbInstances:
+      :sym: :rds_db_instances
+      :type: :hash
+      :members:
+        RdsDbInstanceArn:
+          :sym: :rds_db_instance_arn
+          :type: :string
+        DbInstanceIdentifier:
+          :sym: :db_instance_identifier
+          :type: :string
+        DbUser:
+          :sym: :db_user
+          :type: :string
+        DbPassword:
+          :sym: :db_password
+          :type: :string
+        Region:
+          :sym: :region
+          :type: :string
+        Address:
+          :sym: :address
+          :type: :string
+        Engine:
+          :sym: :engine
+          :type: :string
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        MissingOnRds:
+          :sym: :missing_on_rds
+          :type: :boolean
+- :name: DescribeServiceErrors
+  :method: :describe_service_errors
+  :inputs:
+    StackId:
+    - :string
+    InstanceId:
+    - :string
+    ServiceErrorIds:
+    - :list:
+      - :string
+  :outputs:
+    ServiceErrors:
+      :sym: :service_errors
+      :type: :hash
+      :members:
+        ServiceErrorId:
+          :sym: :service_error_id
+          :type: :string
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        InstanceId:
+          :sym: :instance_id
+          :type: :string
+        Type:
+          :sym: :type
+          :type: :string
+        Message:
+          :sym: :message
+          :type: :string
+        CreatedAt:
+          :sym: :created_at
+          :type: :string
+- :name: DescribeStackProvisioningParameters
+  :method: :describe_stack_provisioning_parameters
+  :inputs:
+    StackId:
+    - :string
+    - :required
+  :outputs:
+    AgentInstallerUrl:
+      :sym: :agent_installer_url
+      :type: :string
+    Parameters:
+      :sym: :parameters
+      :type: :map
+      :members:
+        :sym: :map_value
+        :type: :string
+- :name: DescribeStackSummary
+  :method: :describe_stack_summary
+  :inputs:
+    StackId:
+    - :string
+    - :required
+  :outputs:
+    StackSummary:
+      :sym: :stack_summary
+      :type: :hash
+      :members:
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        LayersCount:
+          :sym: :layers_count
+          :type: :integer
+        AppsCount:
+          :sym: :apps_count
+          :type: :integer
+        InstancesCount:
+          :sym: :instances_count
+          :type: :hash
+          :members:
+            Assigning:
+              :sym: :assigning
+              :type: :integer
+            Booting:
+              :sym: :booting
+              :type: :integer
+            ConnectionLost:
+              :sym: :connection_lost
+              :type: :integer
+            Deregistering:
+              :sym: :deregistering
+              :type: :integer
+            Online:
+              :sym: :online
+              :type: :integer
+            Pending:
+              :sym: :pending
+              :type: :integer
+            Rebooting:
+              :sym: :rebooting
+              :type: :integer
+            Registered:
+              :sym: :registered
+              :type: :integer
+            Registering:
+              :sym: :registering
+              :type: :integer
+            Requested:
+              :sym: :requested
+              :type: :integer
+            RunningSetup:
+              :sym: :running_setup
+              :type: :integer
+            SetupFailed:
+              :sym: :setup_failed
+              :type: :integer
+            ShuttingDown:
+              :sym: :shutting_down
+              :type: :integer
+            StartFailed:
+              :sym: :start_failed
+              :type: :integer
+            Stopped:
+              :sym: :stopped
+              :type: :integer
+            Stopping:
+              :sym: :stopping
+              :type: :integer
+            Terminated:
+              :sym: :terminated
+              :type: :integer
+            Terminating:
+              :sym: :terminating
+              :type: :integer
+            Unassigning:
+              :sym: :unassigning
+              :type: :integer
+- :name: DescribeStacks
+  :method: :describe_stacks
+  :inputs:
+    StackIds:
+    - :list:
+      - :string
+  :outputs:
+    Stacks:
+      :sym: :stacks
+      :type: :hash
+      :members:
+        StackId:
+          :sym: :stack_id
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        Arn:
+          :sym: :arn
+          :type: :string
+        Region:
+          :sym: :region
+          :type: :string
+        VpcId:
+          :sym: :vpc_id
+          :type: :string
+        Attributes:
+          :sym: :attributes
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :string
+        ServiceRoleArn:
+          :sym: :service_role_arn
+          :type: :string
+        DefaultInstanceProfileArn:
+          :sym: :default_instance_profile_arn
+          :type: :string
+        DefaultOs:
+          :sym: :default_os
+          :type: :string
+        HostnameTheme:
+          :sym: :hostname_theme
+          :type: :string
+        DefaultAvailabilityZone:
+          :sym: :default_availability_zone
+          :type: :string
+        DefaultSubnetId:
+          :sym: :default_subnet_id
+          :type: :string
+        CustomJson:
+          :sym: :custom_json
+          :type: :string
+        ConfigurationManager:
+          :sym: :configuration_manager
+          :type: :hash
+          :members:
+            Name:
+              :sym: :name
+              :type: :string
+            Version:
+              :sym: :version
+              :type: :string
+        ChefConfiguration:
+          :sym: :chef_configuration
+          :type: :hash
+          :members:
+            ManageBerkshelf:
+              :sym: :manage_berkshelf
+              :type: :boolean
+            BerkshelfVersion:
+              :sym: :berkshelf_version
+              :type: :string
+        UseCustomCookbooks:
+          :sym: :use_custom_cookbooks
+          :type: :boolean
+        UseOpsworksSecurityGroups:
+          :sym: :use_opsworks_security_groups
+          :type: :boolean
+        CustomCookbooksSource:
+          :sym: :custom_cookbooks_source
+          :type: :hash
+          :members:
+            Type:
+              :sym: :type
+              :type: :string
+            Url:
+              :sym: :url
+              :type: :string
+            Username:
+              :sym: :username
+              :type: :string
+            Password:
+              :sym: :password
+              :type: :string
+            SshKey:
+              :sym: :ssh_key
+              :type: :string
+            Revision:
+              :sym: :revision
+              :type: :string
+        DefaultSshKeyName:
+          :sym: :default_ssh_key_name
+          :type: :string
+        CreatedAt:
+          :sym: :created_at
+          :type: :string
+        DefaultRootDeviceType:
+          :sym: :default_root_device_type
+          :type: :string
+        AgentVersion:
+          :sym: :agent_version
+          :type: :string
+- :name: DescribeTimeBasedAutoScaling
+  :method: :describe_time_based_auto_scaling
+  :inputs:
+    InstanceIds:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    TimeBasedAutoScalingConfigurations:
+      :sym: :time_based_auto_scaling_configurations
+      :type: :hash
+      :members:
+        InstanceId:
+          :sym: :instance_id
+          :type: :string
+        AutoScalingSchedule:
+          :sym: :auto_scaling_schedule
+          :type: :hash
+          :members:
+            Monday:
+              :sym: :monday
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            Tuesday:
+              :sym: :tuesday
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            Wednesday:
+              :sym: :wednesday
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            Thursday:
+              :sym: :thursday
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            Friday:
+              :sym: :friday
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            Saturday:
+              :sym: :saturday
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+            Sunday:
+              :sym: :sunday
+              :type: :map
+              :members:
+                :sym: :map_value
+                :type: :string
+- :name: DescribeUserProfiles
+  :method: :describe_user_profiles
+  :inputs:
+    IamUserArns:
+    - :list:
+      - :string
+  :outputs:
+    UserProfiles:
+      :sym: :user_profiles
+      :type: :hash
+      :members:
+        IamUserArn:
+          :sym: :iam_user_arn
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        SshUsername:
+          :sym: :ssh_username
+          :type: :string
+        SshPublicKey:
+          :sym: :ssh_public_key
+          :type: :string
+        AllowSelfManagement:
+          :sym: :allow_self_management
+          :type: :boolean
+- :name: DescribeVolumes
+  :method: :describe_volumes
+  :inputs:
+    InstanceId:
+    - :string
+    StackId:
+    - :string
+    RaidArrayId:
+    - :string
+    VolumeIds:
+    - :list:
+      - :string
+  :outputs:
+    Volumes:
+      :sym: :volumes
+      :type: :hash
+      :members:
+        VolumeId:
+          :sym: :volume_id
+          :type: :string
+        Ec2VolumeId:
+          :sym: :ec2_volume_id
+          :type: :string
+        Name:
+          :sym: :name
+          :type: :string
+        RaidArrayId:
+          :sym: :raid_array_id
+          :type: :string
+        InstanceId:
+          :sym: :instance_id
+          :type: :string
+        Status:
+          :sym: :status
+          :type: :string
+        Size:
+          :sym: :size
+          :type: :integer
+        Device:
+          :sym: :device
+          :type: :string
+        MountPoint:
+          :sym: :mount_point
+          :type: :string
+        Region:
+          :sym: :region
+          :type: :string
+        AvailabilityZone:
+          :sym: :availability_zone
+          :type: :string
+        VolumeType:
+          :sym: :volume_type
+          :type: :string
+        Iops:
+          :sym: :iops
+          :type: :integer
+- :name: DetachElasticLoadBalancer
+  :method: :detach_elastic_load_balancer
+  :inputs:
+    ElasticLoadBalancerName:
+    - :string
+    - :required
+    LayerId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DisassociateElasticIp
+  :method: :disassociate_elastic_ip
+  :inputs:
+    ElasticIp:
+    - :string
+    - :required
+  :outputs: {}
+- :name: GetHostnameSuggestion
+  :method: :get_hostname_suggestion
+  :inputs:
+    LayerId:
+    - :string
+    - :required
+  :outputs:
+    LayerId:
+      :sym: :layer_id
+      :type: :string
+    Hostname:
+      :sym: :hostname
+      :type: :string
+- :name: GrantAccess
+  :method: :grant_access
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+    ValidForInMinutes:
+    - :integer
+  :outputs:
+    TemporaryCredential:
+      :sym: :temporary_credential
+      :type: :hash
+      :members:
+        Username:
+          :sym: :username
+          :type: :string
+        Password:
+          :sym: :password
+          :type: :string
+        ValidForInMinutes:
+          :sym: :valid_for_in_minutes
+          :type: :integer
+        InstanceId:
+          :sym: :instance_id
+          :type: :string
+- :name: RebootInstance
+  :method: :reboot_instance
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: RegisterElasticIp
+  :method: :register_elastic_ip
+  :inputs:
+    ElasticIp:
+    - :string
+    - :required
+    StackId:
+    - :string
+    - :required
+  :outputs:
+    ElasticIp:
+      :sym: :elastic_ip
+      :type: :string
+- :name: RegisterInstance
+  :method: :register_instance
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    Hostname:
+    - :string
+    PublicIp:
+    - :string
+    PrivateIp:
+    - :string
+    RsaPublicKey:
+    - :string
+    RsaPublicKeyFingerprint:
+    - :string
+    InstanceIdentity:
+    - :structure:
+        Document:
+        - :string
+        Signature:
+        - :string
+  :outputs:
+    InstanceId:
+      :sym: :instance_id
+      :type: :string
+- :name: RegisterRdsDbInstance
+  :method: :register_rds_db_instance
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    RdsDbInstanceArn:
+    - :string
+    - :required
+    DbUser:
+    - :string
+    - :required
+    DbPassword:
+    - :string
+    - :required
+  :outputs: {}
+- :name: RegisterVolume
+  :method: :register_volume
+  :inputs:
+    Ec2VolumeId:
+    - :string
+    StackId:
+    - :string
+    - :required
+  :outputs:
+    VolumeId:
+      :sym: :volume_id
+      :type: :string
+- :name: SetLoadBasedAutoScaling
+  :method: :set_load_based_auto_scaling
+  :inputs:
+    LayerId:
+    - :string
+    - :required
+    Enable:
+    - :boolean
+    UpScaling:
+    - :structure:
+        InstanceCount:
+        - :integer
+        ThresholdsWaitTime:
+        - :integer
+        IgnoreMetricsTime:
+        - :integer
+        CpuThreshold:
+        - :double
+        MemoryThreshold:
+        - :double
+        LoadThreshold:
+        - :double
+        Alarms:
+        - :list:
+          - :string
+    DownScaling:
+    - :structure:
+        InstanceCount:
+        - :integer
+        ThresholdsWaitTime:
+        - :integer
+        IgnoreMetricsTime:
+        - :integer
+        CpuThreshold:
+        - :double
+        MemoryThreshold:
+        - :double
+        LoadThreshold:
+        - :double
+        Alarms:
+        - :list:
+          - :string
+  :outputs: {}
+- :name: SetPermission
+  :method: :set_permission
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    IamUserArn:
+    - :string
+    - :required
+    AllowSsh:
+    - :boolean
+    AllowSudo:
+    - :boolean
+    Level:
+    - :string
+  :outputs: {}
+- :name: SetTimeBasedAutoScaling
+  :method: :set_time_based_auto_scaling
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+    AutoScalingSchedule:
+    - :structure:
+        Monday:
+        - :map:
+            :key:
+            - :string
+            :value:
+            - :string
+        Tuesday:
+        - :map:
+            :key:
+            - :string
+            :value:
+            - :string
+        Wednesday:
+        - :map:
+            :key:
+            - :string
+            :value:
+            - :string
+        Thursday:
+        - :map:
+            :key:
+            - :string
+            :value:
+            - :string
+        Friday:
+        - :map:
+            :key:
+            - :string
+            :value:
+            - :string
+        Saturday:
+        - :map:
+            :key:
+            - :string
+            :value:
+            - :string
+        Sunday:
+        - :map:
+            :key:
+            - :string
+            :value:
+            - :string
+  :outputs: {}
+- :name: StartInstance
+  :method: :start_instance
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: StartStack
+  :method: :start_stack
+  :inputs:
+    StackId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: StopInstance
+  :method: :stop_instance
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: StopStack
+  :method: :stop_stack
+  :inputs:
+    StackId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: UnassignInstance
+  :method: :unassign_instance
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: UnassignVolume
+  :method: :unassign_volume
+  :inputs:
+    VolumeId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: UpdateApp
+  :method: :update_app
+  :inputs:
+    AppId:
+    - :string
+    - :required
+    Name:
+    - :string
+    Description:
+    - :string
+    DataSources:
+    - :list:
+      - :structure:
+          Type:
+          - :string
+          Arn:
+          - :string
+          DatabaseName:
+          - :string
+    Type:
+    - :string
+    AppSource:
+    - :structure:
+        Type:
+        - :string
+        Url:
+        - :string
+        Username:
+        - :string
+        Password:
+        - :string
+        SshKey:
+        - :string
+        Revision:
+        - :string
+    Domains:
+    - :list:
+      - :string
+    EnableSsl:
+    - :boolean
+    SslConfiguration:
+    - :structure:
+        Certificate:
+        - :string
+        - :required
+        PrivateKey:
+        - :string
+        - :required
+        Chain:
+        - :string
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    Environment:
+    - :list:
+      - :structure:
+          Key:
+          - :string
+          - :required
+          Value:
+          - :string
+          - :required
+          Secure:
+          - :boolean
+  :outputs: {}
+- :name: UpdateElasticIp
+  :method: :update_elastic_ip
+  :inputs:
+    ElasticIp:
+    - :string
+    - :required
+    Name:
+    - :string
+  :outputs: {}
+- :name: UpdateInstance
+  :method: :update_instance
+  :inputs:
+    InstanceId:
+    - :string
+    - :required
+    LayerIds:
+    - :list:
+      - :string
+    InstanceType:
+    - :string
+    AutoScalingType:
+    - :string
+    Hostname:
+    - :string
+    Os:
+    - :string
+    AmiId:
+    - :string
+    SshKeyName:
+    - :string
+    Architecture:
+    - :string
+    InstallUpdatesOnBoot:
+    - :boolean
+    EbsOptimized:
+    - :boolean
+    AgentVersion:
+    - :string
+  :outputs: {}
+- :name: UpdateLayer
+  :method: :update_layer
+  :inputs:
+    LayerId:
+    - :string
+    - :required
+    Name:
+    - :string
+    Shortname:
+    - :string
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    CustomInstanceProfileArn:
+    - :string
+    CustomSecurityGroupIds:
+    - :list:
+      - :string
+    Packages:
+    - :list:
+      - :string
+    VolumeConfigurations:
+    - :list:
+      - :structure:
+          MountPoint:
+          - :string
+          - :required
+          RaidLevel:
+          - :integer
+          NumberOfDisks:
+          - :integer
+          - :required
+          Size:
+          - :integer
+          - :required
+          VolumeType:
+          - :string
+          Iops:
+          - :integer
+    EnableAutoHealing:
+    - :boolean
+    AutoAssignElasticIps:
+    - :boolean
+    AutoAssignPublicIps:
+    - :boolean
+    CustomRecipes:
+    - :structure:
+        Setup:
+        - :list:
+          - :string
+        Configure:
+        - :list:
+          - :string
+        Deploy:
+        - :list:
+          - :string
+        Undeploy:
+        - :list:
+          - :string
+        Shutdown:
+        - :list:
+          - :string
+    InstallUpdatesOnBoot:
+    - :boolean
+    UseEbsOptimizedInstances:
+    - :boolean
+    LifecycleEventConfiguration:
+    - :structure:
+        Shutdown:
+        - :structure:
+            ExecutionTimeout:
+            - :integer
+            DelayUntilElbConnectionsDrained:
+            - :boolean
+  :outputs: {}
+- :name: UpdateMyUserProfile
+  :method: :update_my_user_profile
+  :inputs:
+    SshPublicKey:
+    - :string
+  :outputs: {}
+- :name: UpdateRdsDbInstance
+  :method: :update_rds_db_instance
+  :inputs:
+    RdsDbInstanceArn:
+    - :string
+    - :required
+    DbUser:
+    - :string
+    DbPassword:
+    - :string
+  :outputs: {}
+- :name: UpdateStack
+  :method: :update_stack
+  :inputs:
+    StackId:
+    - :string
+    - :required
+    Name:
+    - :string
+    Attributes:
+    - :map:
+        :key:
+        - :string
+        :value:
+        - :string
+    ServiceRoleArn:
+    - :string
+    DefaultInstanceProfileArn:
+    - :string
+    DefaultOs:
+    - :string
+    HostnameTheme:
+    - :string
+    DefaultAvailabilityZone:
+    - :string
+    DefaultSubnetId:
+    - :string
+    CustomJson:
+    - :string
+    ConfigurationManager:
+    - :structure:
+        Name:
+        - :string
+        Version:
+        - :string
+    ChefConfiguration:
+    - :structure:
+        ManageBerkshelf:
+        - :boolean
+        BerkshelfVersion:
+        - :string
+    UseCustomCookbooks:
+    - :boolean
+    CustomCookbooksSource:
+    - :structure:
+        Type:
+        - :string
+        Url:
+        - :string
+        Username:
+        - :string
+        Password:
+        - :string
+        SshKey:
+        - :string
+        Revision:
+        - :string
+    DefaultSshKeyName:
+    - :string
+    DefaultRootDeviceType:
+    - :string
+    UseOpsworksSecurityGroups:
+    - :boolean
+    AgentVersion:
+    - :string
+  :outputs: {}
+- :name: UpdateUserProfile
+  :method: :update_user_profile
+  :inputs:
+    IamUserArn:
+    - :string
+    - :required
+    SshUsername:
+    - :string
+    SshPublicKey:
+    - :string
+    AllowSelfManagement:
+    - :boolean
+  :outputs: {}
+- :name: UpdateVolume
+  :method: :update_volume
+  :inputs:
+    VolumeId:
+    - :string
+    - :required
+    Name:
+    - :string
+    MountPoint:
+    - :string
+  :outputs: {}

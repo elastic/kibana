@@ -1,0 +1,35 @@
+= New Features
+
+* Support for SQL/JSON path expressions has been added to the
+  pg_json_ops extension. These are supported in PostgreSQL 12+.
+  Examples:
+
+    j = Sequel.pg_json_op(:json_column)
+    j.path_exists('$.foo')      # (jsonb_column @? '$.foo')
+    j.path_match('$.foo')       # (jsonb_column @@ '$.foo')
+    j.path_exists!('$.foo')     # jsonb_path_exists(jsonb_column, '$.foo')
+    j.path_match!('$.foo')      # jsonb_path_match(jsonb_column, '$.foo')
+    j.path_query('$.foo')       # jsonb_path_query(jsonb_column, '$.foo')
+    j.path_query_array('$.foo') # jsonb_path_query_array(jsonb_column, '$.foo')
+    j.path_query_first('$.foo') # jsonb_path_query_first(jsonb_column, '$.foo')
+
+* The nested_attributes method in the nested_attributes plugin now
+  supports a :require_modification option, which can override the
+  default require_modification setting for the nested objects. This
+  can be useful to avoid errors if multiple requests are submitted
+  simultaneously to delete the same nested row.
+
+= Other Improvements
+
+* The dirty plugin now works correctly with the typecast_on_load
+  plugin.
+
+* Sequel::Postgres::PGRange#hash has been added to the pg_range
+  extension, allowing PGRange instances to be usable as hash keys.
+
+* Table aliases are now supported for single table INSERT
+  statements on PostgreSQL 9.5+, which can make some insert_conflict
+  usage easier.
+
+* Two more foreign key constraint violation types are now recognized
+  on MySQL 8.0.13+.

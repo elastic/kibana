@@ -1,0 +1,2796 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2014-09-01'
+:operations:
+- :name: AddSourceIdentifierToSubscription
+  :method: :add_source_identifier_to_subscription
+  :inputs:
+    SubscriptionName:
+    - :string
+    - :required
+    SourceIdentifier:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      AddSourceIdentifierToSubscriptionResult:
+        :ignore: true
+        :children:
+          EventSubscription:
+            :children:
+              SourceIdsList:
+                :ignore: true
+                :children:
+                  SourceId:
+                    :rename: :source_ids_list
+                    :list: true
+              EventCategoriesList:
+                :ignore: true
+                :children:
+                  EventCategory:
+                    :rename: :event_categories_list
+                    :list: true
+              Enabled:
+                :type: :boolean
+            :ignore: true
+- :name: AddTagsToResource
+  :method: :add_tags_to_resource
+  :inputs:
+    ResourceName:
+    - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      AddTagsToResourceResult:
+        :ignore: true
+- :name: AuthorizeDBSecurityGroupIngress
+  :method: :authorize_db_security_group_ingress
+  :inputs:
+    DBSecurityGroupName:
+    - :string
+    CIDRIP:
+    - :string
+    EC2SecurityGroupName:
+    - :string
+    EC2SecurityGroupId:
+    - :string
+    EC2SecurityGroupOwnerId:
+    - :string
+  :outputs:
+    :children:
+      AuthorizeDBSecurityGroupIngressResult:
+        :ignore: true
+        :children:
+          DBSecurityGroup:
+            :children:
+              EC2SecurityGroups:
+                :ignore: true
+                :children:
+                  EC2SecurityGroup:
+                    :rename: :ec2_security_groups
+                    :list: true
+              IPRanges:
+                :ignore: true
+                :children:
+                  IPRange:
+                    :rename: :ip_ranges
+                    :list: true
+            :ignore: true
+- :name: CopyDBParameterGroup
+  :method: :copy_db_parameter_group
+  :inputs:
+    SourceDBParameterGroupIdentifier:
+    - :string
+    - :required
+    TargetDBParameterGroupIdentifier:
+    - :string
+    - :required
+    TargetDBParameterGroupDescription:
+    - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CopyDBParameterGroupResult:
+        :ignore: true
+        :children:
+          DBParameterGroup:
+            :ignore: true
+- :name: CopyDBSnapshot
+  :method: :copy_db_snapshot
+  :inputs:
+    SourceDBSnapshotIdentifier:
+    - :string
+    - :required
+    TargetDBSnapshotIdentifier:
+    - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CopyDBSnapshotResult:
+        :ignore: true
+        :children:
+          DBSnapshot:
+            :children:
+              SnapshotCreateTime:
+                :type: :time
+              AllocatedStorage:
+                :type: :integer
+              Port:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              Iops:
+                :type: :integer
+              PercentProgress:
+                :type: :integer
+            :ignore: true
+- :name: CopyOptionGroup
+  :method: :copy_option_group
+  :inputs:
+    SourceOptionGroupIdentifier:
+    - :string
+    - :required
+    TargetOptionGroupIdentifier:
+    - :string
+    - :required
+    TargetOptionGroupDescription:
+    - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CopyOptionGroupResult:
+        :ignore: true
+        :children:
+          OptionGroup:
+            :children:
+              Options:
+                :ignore: true
+                :children:
+                  Option:
+                    :rename: :options
+                    :list: true
+                    :children:
+                      Persistent:
+                        :type: :boolean
+                      Permanent:
+                        :type: :boolean
+                      Port:
+                        :type: :integer
+                      OptionSettings:
+                        :ignore: true
+                        :children:
+                          OptionSetting:
+                            :rename: :option_settings
+                            :list: true
+                            :children:
+                              IsModifiable:
+                                :type: :boolean
+                              IsCollection:
+                                :type: :boolean
+                      DBSecurityGroupMemberships:
+                        :ignore: true
+                        :children:
+                          DBSecurityGroup:
+                            :rename: :db_security_group_memberships
+                            :list: true
+                      VpcSecurityGroupMemberships:
+                        :ignore: true
+                        :children:
+                          VpcSecurityGroupMembership:
+                            :rename: :vpc_security_group_memberships
+                            :list: true
+              AllowsVpcAndNonVpcInstanceMemberships:
+                :type: :boolean
+            :ignore: true
+- :name: CreateDBInstance
+  :method: :create_db_instance
+  :inputs:
+    DBName:
+    - :string
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    AllocatedStorage:
+    - :integer
+    - :required
+    DBInstanceClass:
+    - :string
+    - :required
+    Engine:
+    - :string
+    - :required
+    MasterUsername:
+    - :string
+    - :required
+    MasterUserPassword:
+    - :string
+    - :required
+    DBSecurityGroups:
+    - :membered_list:
+      - :string
+    VpcSecurityGroupIds:
+    - :membered_list:
+      - :string
+    AvailabilityZone:
+    - :string
+    DBSubnetGroupName:
+    - :string
+    PreferredMaintenanceWindow:
+    - :string
+    DBParameterGroupName:
+    - :string
+    BackupRetentionPeriod:
+    - :integer
+    PreferredBackupWindow:
+    - :string
+    Port:
+    - :integer
+    MultiAZ:
+    - :boolean
+    EngineVersion:
+    - :string
+    AutoMinorVersionUpgrade:
+    - :boolean
+    LicenseModel:
+    - :string
+    Iops:
+    - :integer
+    OptionGroupName:
+    - :string
+    CharacterSetName:
+    - :string
+    PubliclyAccessible:
+    - :boolean
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+    StorageType:
+    - :string
+    TdeCredentialArn:
+    - :string
+    TdeCredentialPassword:
+    - :string
+  :outputs:
+    :children:
+      CreateDBInstanceResult:
+        :ignore: true
+        :children:
+          DBInstance:
+            :children:
+              Endpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              AllocatedStorage:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              BackupRetentionPeriod:
+                :type: :integer
+              DBSecurityGroups:
+                :ignore: true
+                :children:
+                  DBSecurityGroup:
+                    :rename: :db_security_groups
+                    :list: true
+              VpcSecurityGroups:
+                :ignore: true
+                :children:
+                  VpcSecurityGroupMembership:
+                    :rename: :vpc_security_groups
+                    :list: true
+              DBParameterGroups:
+                :ignore: true
+                :children:
+                  DBParameterGroup:
+                    :rename: :db_parameter_groups
+                    :list: true
+              DBSubnetGroup:
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+              PendingModifiedValues:
+                :children:
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  Iops:
+                    :type: :integer
+              LatestRestorableTime:
+                :type: :time
+              MultiAZ:
+                :type: :boolean
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              ReadReplicaDBInstanceIdentifiers:
+                :ignore: true
+                :children:
+                  ReadReplicaDBInstanceIdentifier:
+                    :rename: :read_replica_db_instance_identifiers
+                    :list: true
+              Iops:
+                :type: :integer
+              OptionGroupMemberships:
+                :ignore: true
+                :children:
+                  OptionGroupMembership:
+                    :rename: :option_group_memberships
+                    :list: true
+              PubliclyAccessible:
+                :type: :boolean
+              StatusInfos:
+                :ignore: true
+                :children:
+                  DBInstanceStatusInfo:
+                    :rename: :status_infos
+                    :list: true
+                    :children:
+                      Normal:
+                        :type: :boolean
+            :ignore: true
+- :name: CreateDBInstanceReadReplica
+  :method: :create_db_instance_read_replica
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    SourceDBInstanceIdentifier:
+    - :string
+    - :required
+    DBInstanceClass:
+    - :string
+    AvailabilityZone:
+    - :string
+    Port:
+    - :integer
+    AutoMinorVersionUpgrade:
+    - :boolean
+    Iops:
+    - :integer
+    OptionGroupName:
+    - :string
+    PubliclyAccessible:
+    - :boolean
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+    DBSubnetGroupName:
+    - :string
+    StorageType:
+    - :string
+  :outputs:
+    :children:
+      CreateDBInstanceReadReplicaResult:
+        :ignore: true
+        :children:
+          DBInstance:
+            :children:
+              Endpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              AllocatedStorage:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              BackupRetentionPeriod:
+                :type: :integer
+              DBSecurityGroups:
+                :ignore: true
+                :children:
+                  DBSecurityGroup:
+                    :rename: :db_security_groups
+                    :list: true
+              VpcSecurityGroups:
+                :ignore: true
+                :children:
+                  VpcSecurityGroupMembership:
+                    :rename: :vpc_security_groups
+                    :list: true
+              DBParameterGroups:
+                :ignore: true
+                :children:
+                  DBParameterGroup:
+                    :rename: :db_parameter_groups
+                    :list: true
+              DBSubnetGroup:
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+              PendingModifiedValues:
+                :children:
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  Iops:
+                    :type: :integer
+              LatestRestorableTime:
+                :type: :time
+              MultiAZ:
+                :type: :boolean
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              ReadReplicaDBInstanceIdentifiers:
+                :ignore: true
+                :children:
+                  ReadReplicaDBInstanceIdentifier:
+                    :rename: :read_replica_db_instance_identifiers
+                    :list: true
+              Iops:
+                :type: :integer
+              OptionGroupMemberships:
+                :ignore: true
+                :children:
+                  OptionGroupMembership:
+                    :rename: :option_group_memberships
+                    :list: true
+              PubliclyAccessible:
+                :type: :boolean
+              StatusInfos:
+                :ignore: true
+                :children:
+                  DBInstanceStatusInfo:
+                    :rename: :status_infos
+                    :list: true
+                    :children:
+                      Normal:
+                        :type: :boolean
+            :ignore: true
+- :name: CreateDBParameterGroup
+  :method: :create_db_parameter_group
+  :inputs:
+    DBParameterGroupName:
+    - :string
+    - :required
+    DBParameterGroupFamily:
+    - :string
+    - :required
+    Description:
+    - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateDBParameterGroupResult:
+        :ignore: true
+        :children:
+          DBParameterGroup:
+            :ignore: true
+- :name: CreateDBSecurityGroup
+  :method: :create_db_security_group
+  :inputs:
+    DBSecurityGroupName:
+    - :string
+    - :required
+    DBSecurityGroupDescription:
+    - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateDBSecurityGroupResult:
+        :ignore: true
+        :children:
+          DBSecurityGroup:
+            :children:
+              EC2SecurityGroups:
+                :ignore: true
+                :children:
+                  EC2SecurityGroup:
+                    :rename: :ec2_security_groups
+                    :list: true
+              IPRanges:
+                :ignore: true
+                :children:
+                  IPRange:
+                    :rename: :ip_ranges
+                    :list: true
+            :ignore: true
+- :name: CreateDBSnapshot
+  :method: :create_db_snapshot
+  :inputs:
+    DBSnapshotIdentifier:
+    - :string
+    - :required
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateDBSnapshotResult:
+        :ignore: true
+        :children:
+          DBSnapshot:
+            :children:
+              SnapshotCreateTime:
+                :type: :time
+              AllocatedStorage:
+                :type: :integer
+              Port:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              Iops:
+                :type: :integer
+              PercentProgress:
+                :type: :integer
+            :ignore: true
+- :name: CreateDBSubnetGroup
+  :method: :create_db_subnet_group
+  :inputs:
+    DBSubnetGroupName:
+    - :string
+    - :required
+    DBSubnetGroupDescription:
+    - :string
+    - :required
+    SubnetIds:
+    - :membered_list:
+      - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateDBSubnetGroupResult:
+        :ignore: true
+        :children:
+          DBSubnetGroup:
+            :children:
+              Subnets:
+                :ignore: true
+                :children:
+                  Subnet:
+                    :rename: :subnets
+                    :list: true
+            :ignore: true
+- :name: CreateEventSubscription
+  :method: :create_event_subscription
+  :inputs:
+    SubscriptionName:
+    - :string
+    - :required
+    SnsTopicArn:
+    - :string
+    - :required
+    SourceType:
+    - :string
+    EventCategories:
+    - :membered_list:
+      - :string
+    SourceIds:
+    - :membered_list:
+      - :string
+    Enabled:
+    - :boolean
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateEventSubscriptionResult:
+        :ignore: true
+        :children:
+          EventSubscription:
+            :children:
+              SourceIdsList:
+                :ignore: true
+                :children:
+                  SourceId:
+                    :rename: :source_ids_list
+                    :list: true
+              EventCategoriesList:
+                :ignore: true
+                :children:
+                  EventCategory:
+                    :rename: :event_categories_list
+                    :list: true
+              Enabled:
+                :type: :boolean
+            :ignore: true
+- :name: CreateOptionGroup
+  :method: :create_option_group
+  :inputs:
+    OptionGroupName:
+    - :string
+    - :required
+    EngineName:
+    - :string
+    - :required
+    MajorEngineVersion:
+    - :string
+    - :required
+    OptionGroupDescription:
+    - :string
+    - :required
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateOptionGroupResult:
+        :ignore: true
+        :children:
+          OptionGroup:
+            :children:
+              Options:
+                :ignore: true
+                :children:
+                  Option:
+                    :rename: :options
+                    :list: true
+                    :children:
+                      Persistent:
+                        :type: :boolean
+                      Permanent:
+                        :type: :boolean
+                      Port:
+                        :type: :integer
+                      OptionSettings:
+                        :ignore: true
+                        :children:
+                          OptionSetting:
+                            :rename: :option_settings
+                            :list: true
+                            :children:
+                              IsModifiable:
+                                :type: :boolean
+                              IsCollection:
+                                :type: :boolean
+                      DBSecurityGroupMemberships:
+                        :ignore: true
+                        :children:
+                          DBSecurityGroup:
+                            :rename: :db_security_group_memberships
+                            :list: true
+                      VpcSecurityGroupMemberships:
+                        :ignore: true
+                        :children:
+                          VpcSecurityGroupMembership:
+                            :rename: :vpc_security_group_memberships
+                            :list: true
+              AllowsVpcAndNonVpcInstanceMemberships:
+                :type: :boolean
+            :ignore: true
+- :name: DeleteDBInstance
+  :method: :delete_db_instance
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    SkipFinalSnapshot:
+    - :boolean
+    FinalDBSnapshotIdentifier:
+    - :string
+  :outputs:
+    :children:
+      DeleteDBInstanceResult:
+        :ignore: true
+        :children:
+          DBInstance:
+            :children:
+              Endpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              AllocatedStorage:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              BackupRetentionPeriod:
+                :type: :integer
+              DBSecurityGroups:
+                :ignore: true
+                :children:
+                  DBSecurityGroup:
+                    :rename: :db_security_groups
+                    :list: true
+              VpcSecurityGroups:
+                :ignore: true
+                :children:
+                  VpcSecurityGroupMembership:
+                    :rename: :vpc_security_groups
+                    :list: true
+              DBParameterGroups:
+                :ignore: true
+                :children:
+                  DBParameterGroup:
+                    :rename: :db_parameter_groups
+                    :list: true
+              DBSubnetGroup:
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+              PendingModifiedValues:
+                :children:
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  Iops:
+                    :type: :integer
+              LatestRestorableTime:
+                :type: :time
+              MultiAZ:
+                :type: :boolean
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              ReadReplicaDBInstanceIdentifiers:
+                :ignore: true
+                :children:
+                  ReadReplicaDBInstanceIdentifier:
+                    :rename: :read_replica_db_instance_identifiers
+                    :list: true
+              Iops:
+                :type: :integer
+              OptionGroupMemberships:
+                :ignore: true
+                :children:
+                  OptionGroupMembership:
+                    :rename: :option_group_memberships
+                    :list: true
+              PubliclyAccessible:
+                :type: :boolean
+              StatusInfos:
+                :ignore: true
+                :children:
+                  DBInstanceStatusInfo:
+                    :rename: :status_infos
+                    :list: true
+                    :children:
+                      Normal:
+                        :type: :boolean
+            :ignore: true
+- :name: DeleteDBParameterGroup
+  :method: :delete_db_parameter_group
+  :inputs:
+    DBParameterGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteDBParameterGroupResult:
+        :ignore: true
+- :name: DeleteDBSecurityGroup
+  :method: :delete_db_security_group
+  :inputs:
+    DBSecurityGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteDBSecurityGroupResult:
+        :ignore: true
+- :name: DeleteDBSnapshot
+  :method: :delete_db_snapshot
+  :inputs:
+    DBSnapshotIdentifier:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteDBSnapshotResult:
+        :ignore: true
+        :children:
+          DBSnapshot:
+            :children:
+              SnapshotCreateTime:
+                :type: :time
+              AllocatedStorage:
+                :type: :integer
+              Port:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              Iops:
+                :type: :integer
+              PercentProgress:
+                :type: :integer
+            :ignore: true
+- :name: DeleteDBSubnetGroup
+  :method: :delete_db_subnet_group
+  :inputs:
+    DBSubnetGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteDBSubnetGroupResult:
+        :ignore: true
+- :name: DeleteEventSubscription
+  :method: :delete_event_subscription
+  :inputs:
+    SubscriptionName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteEventSubscriptionResult:
+        :ignore: true
+        :children:
+          EventSubscription:
+            :children:
+              SourceIdsList:
+                :ignore: true
+                :children:
+                  SourceId:
+                    :rename: :source_ids_list
+                    :list: true
+              EventCategoriesList:
+                :ignore: true
+                :children:
+                  EventCategory:
+                    :rename: :event_categories_list
+                    :list: true
+              Enabled:
+                :type: :boolean
+            :ignore: true
+- :name: DeleteOptionGroup
+  :method: :delete_option_group
+  :inputs:
+    OptionGroupName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteOptionGroupResult:
+        :ignore: true
+- :name: DescribeDBEngineVersions
+  :method: :describe_db_engine_versions
+  :inputs:
+    Engine:
+    - :string
+    EngineVersion:
+    - :string
+    DBParameterGroupFamily:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+    DefaultOnly:
+    - :boolean
+    ListSupportedCharacterSets:
+    - :boolean
+  :outputs:
+    :children:
+      DescribeDBEngineVersionsResult:
+        :ignore: true
+        :children:
+          DBEngineVersions:
+            :ignore: true
+            :children:
+              DBEngineVersion:
+                :rename: :db_engine_versions
+                :list: true
+                :children:
+                  SupportedCharacterSets:
+                    :ignore: true
+                    :children:
+                      CharacterSet:
+                        :rename: :supported_character_sets
+                        :list: true
+- :name: DescribeDBInstances
+  :method: :describe_db_instances
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeDBInstancesResult:
+        :ignore: true
+        :children:
+          DBInstances:
+            :ignore: true
+            :children:
+              DBInstance:
+                :rename: :db_instances
+                :list: true
+                :children:
+                  Endpoint:
+                    :children:
+                      Port:
+                        :type: :integer
+                  AllocatedStorage:
+                    :type: :integer
+                  InstanceCreateTime:
+                    :type: :time
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  DBSecurityGroups:
+                    :ignore: true
+                    :children:
+                      DBSecurityGroup:
+                        :rename: :db_security_groups
+                        :list: true
+                  VpcSecurityGroups:
+                    :ignore: true
+                    :children:
+                      VpcSecurityGroupMembership:
+                        :rename: :vpc_security_groups
+                        :list: true
+                  DBParameterGroups:
+                    :ignore: true
+                    :children:
+                      DBParameterGroup:
+                        :rename: :db_parameter_groups
+                        :list: true
+                  DBSubnetGroup:
+                    :children:
+                      Subnets:
+                        :ignore: true
+                        :children:
+                          Subnet:
+                            :rename: :subnets
+                            :list: true
+                  PendingModifiedValues:
+                    :children:
+                      AllocatedStorage:
+                        :type: :integer
+                      Port:
+                        :type: :integer
+                      BackupRetentionPeriod:
+                        :type: :integer
+                      MultiAZ:
+                        :type: :boolean
+                      Iops:
+                        :type: :integer
+                  LatestRestorableTime:
+                    :type: :time
+                  MultiAZ:
+                    :type: :boolean
+                  AutoMinorVersionUpgrade:
+                    :type: :boolean
+                  ReadReplicaDBInstanceIdentifiers:
+                    :ignore: true
+                    :children:
+                      ReadReplicaDBInstanceIdentifier:
+                        :rename: :read_replica_db_instance_identifiers
+                        :list: true
+                  Iops:
+                    :type: :integer
+                  OptionGroupMemberships:
+                    :ignore: true
+                    :children:
+                      OptionGroupMembership:
+                        :rename: :option_group_memberships
+                        :list: true
+                  PubliclyAccessible:
+                    :type: :boolean
+                  StatusInfos:
+                    :ignore: true
+                    :children:
+                      DBInstanceStatusInfo:
+                        :rename: :status_infos
+                        :list: true
+                        :children:
+                          Normal:
+                            :type: :boolean
+- :name: DescribeDBLogFiles
+  :method: :describe_db_log_files
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    FilenameContains:
+    - :string
+    FileLastWritten:
+    - :long
+    FileSize:
+    - :long
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeDBLogFilesResult:
+        :ignore: true
+        :children:
+          DescribeDBLogFiles:
+            :ignore: true
+            :children:
+              DescribeDBLogFilesDetails:
+                :rename: :describe_db_log_files
+                :list: true
+                :children:
+                  LastWritten:
+                    :type: :integer
+                  Size:
+                    :type: :integer
+- :name: DescribeDBParameterGroups
+  :method: :describe_db_parameter_groups
+  :inputs:
+    DBParameterGroupName:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeDBParameterGroupsResult:
+        :ignore: true
+        :children:
+          DBParameterGroups:
+            :ignore: true
+            :children:
+              DBParameterGroup:
+                :rename: :db_parameter_groups
+                :list: true
+- :name: DescribeDBParameters
+  :method: :describe_db_parameters
+  :inputs:
+    DBParameterGroupName:
+    - :string
+    - :required
+    Source:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeDBParametersResult:
+        :ignore: true
+        :children:
+          Parameters:
+            :ignore: true
+            :children:
+              Parameter:
+                :rename: :parameters
+                :list: true
+                :children:
+                  IsModifiable:
+                    :type: :boolean
+- :name: DescribeDBSecurityGroups
+  :method: :describe_db_security_groups
+  :inputs:
+    DBSecurityGroupName:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeDBSecurityGroupsResult:
+        :ignore: true
+        :children:
+          DBSecurityGroups:
+            :ignore: true
+            :children:
+              DBSecurityGroup:
+                :rename: :db_security_groups
+                :list: true
+                :children:
+                  EC2SecurityGroups:
+                    :ignore: true
+                    :children:
+                      EC2SecurityGroup:
+                        :rename: :ec2_security_groups
+                        :list: true
+                  IPRanges:
+                    :ignore: true
+                    :children:
+                      IPRange:
+                        :rename: :ip_ranges
+                        :list: true
+- :name: DescribeDBSnapshots
+  :method: :describe_db_snapshots
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    DBSnapshotIdentifier:
+    - :string
+    SnapshotType:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeDBSnapshotsResult:
+        :ignore: true
+        :children:
+          DBSnapshots:
+            :ignore: true
+            :children:
+              DBSnapshot:
+                :rename: :db_snapshots
+                :list: true
+                :children:
+                  SnapshotCreateTime:
+                    :type: :time
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  InstanceCreateTime:
+                    :type: :time
+                  Iops:
+                    :type: :integer
+                  PercentProgress:
+                    :type: :integer
+- :name: DescribeDBSubnetGroups
+  :method: :describe_db_subnet_groups
+  :inputs:
+    DBSubnetGroupName:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeDBSubnetGroupsResult:
+        :ignore: true
+        :children:
+          DBSubnetGroups:
+            :ignore: true
+            :children:
+              DBSubnetGroup:
+                :rename: :db_subnet_groups
+                :list: true
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+- :name: DescribeEngineDefaultParameters
+  :method: :describe_engine_default_parameters
+  :inputs:
+    DBParameterGroupFamily:
+    - :string
+    - :required
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeEngineDefaultParametersResult:
+        :ignore: true
+        :children:
+          EngineDefaults:
+            :children:
+              Parameters:
+                :ignore: true
+                :children:
+                  Parameter:
+                    :rename: :parameters
+                    :list: true
+                    :children:
+                      IsModifiable:
+                        :type: :boolean
+            :ignore: true
+- :name: DescribeEventCategories
+  :method: :describe_event_categories
+  :inputs:
+    SourceType:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+  :outputs:
+    :children:
+      DescribeEventCategoriesResult:
+        :ignore: true
+        :children:
+          EventCategoriesMapList:
+            :ignore: true
+            :children:
+              EventCategoriesMap:
+                :rename: :event_categories_map_list
+                :list: true
+                :children:
+                  EventCategories:
+                    :ignore: true
+                    :children:
+                      EventCategory:
+                        :rename: :event_categories
+                        :list: true
+- :name: DescribeEventSubscriptions
+  :method: :describe_event_subscriptions
+  :inputs:
+    SubscriptionName:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeEventSubscriptionsResult:
+        :ignore: true
+        :children:
+          EventSubscriptionsList:
+            :ignore: true
+            :children:
+              EventSubscription:
+                :rename: :event_subscriptions_list
+                :list: true
+                :children:
+                  SourceIdsList:
+                    :ignore: true
+                    :children:
+                      SourceId:
+                        :rename: :source_ids_list
+                        :list: true
+                  EventCategoriesList:
+                    :ignore: true
+                    :children:
+                      EventCategory:
+                        :rename: :event_categories_list
+                        :list: true
+                  Enabled:
+                    :type: :boolean
+- :name: DescribeEvents
+  :method: :describe_events
+  :inputs:
+    SourceIdentifier:
+    - :string
+    SourceType:
+    - :string
+    StartTime:
+    - :timestamp
+    EndTime:
+    - :timestamp
+    Duration:
+    - :integer
+    EventCategories:
+    - :membered_list:
+      - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeEventsResult:
+        :ignore: true
+        :children:
+          Events:
+            :ignore: true
+            :children:
+              Event:
+                :rename: :events
+                :list: true
+                :children:
+                  EventCategories:
+                    :ignore: true
+                    :children:
+                      EventCategory:
+                        :rename: :event_categories
+                        :list: true
+                  Date:
+                    :type: :time
+- :name: DescribeOptionGroupOptions
+  :method: :describe_option_group_options
+  :inputs:
+    EngineName:
+    - :string
+    - :required
+    MajorEngineVersion:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeOptionGroupOptionsResult:
+        :ignore: true
+        :children:
+          OptionGroupOptions:
+            :ignore: true
+            :children:
+              OptionGroupOption:
+                :rename: :option_group_options
+                :list: true
+                :children:
+                  PortRequired:
+                    :type: :boolean
+                  DefaultPort:
+                    :type: :integer
+                  OptionsDependedOn:
+                    :ignore: true
+                    :children:
+                      OptionName:
+                        :rename: :options_depended_on
+                        :list: true
+                  Persistent:
+                    :type: :boolean
+                  Permanent:
+                    :type: :boolean
+                  OptionGroupOptionSettings:
+                    :ignore: true
+                    :children:
+                      OptionGroupOptionSetting:
+                        :rename: :option_group_option_settings
+                        :list: true
+                        :children:
+                          IsModifiable:
+                            :type: :boolean
+- :name: DescribeOptionGroups
+  :method: :describe_option_groups
+  :inputs:
+    OptionGroupName:
+    - :string
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    Marker:
+    - :string
+    MaxRecords:
+    - :integer
+    EngineName:
+    - :string
+    MajorEngineVersion:
+    - :string
+  :outputs:
+    :children:
+      DescribeOptionGroupsResult:
+        :ignore: true
+        :children:
+          OptionGroupsList:
+            :ignore: true
+            :children:
+              OptionGroup:
+                :rename: :option_groups_list
+                :list: true
+                :children:
+                  Options:
+                    :ignore: true
+                    :children:
+                      Option:
+                        :rename: :options
+                        :list: true
+                        :children:
+                          Persistent:
+                            :type: :boolean
+                          Permanent:
+                            :type: :boolean
+                          Port:
+                            :type: :integer
+                          OptionSettings:
+                            :ignore: true
+                            :children:
+                              OptionSetting:
+                                :rename: :option_settings
+                                :list: true
+                                :children:
+                                  IsModifiable:
+                                    :type: :boolean
+                                  IsCollection:
+                                    :type: :boolean
+                          DBSecurityGroupMemberships:
+                            :ignore: true
+                            :children:
+                              DBSecurityGroup:
+                                :rename: :db_security_group_memberships
+                                :list: true
+                          VpcSecurityGroupMemberships:
+                            :ignore: true
+                            :children:
+                              VpcSecurityGroupMembership:
+                                :rename: :vpc_security_group_memberships
+                                :list: true
+                  AllowsVpcAndNonVpcInstanceMemberships:
+                    :type: :boolean
+- :name: DescribeOrderableDBInstanceOptions
+  :method: :describe_orderable_db_instance_options
+  :inputs:
+    Engine:
+    - :string
+    - :required
+    EngineVersion:
+    - :string
+    DBInstanceClass:
+    - :string
+    LicenseModel:
+    - :string
+    Vpc:
+    - :boolean
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeOrderableDBInstanceOptionsResult:
+        :ignore: true
+        :children:
+          OrderableDBInstanceOptions:
+            :ignore: true
+            :children:
+              OrderableDBInstanceOption:
+                :rename: :orderable_db_instance_options
+                :list: true
+                :children:
+                  AvailabilityZones:
+                    :ignore: true
+                    :children:
+                      AvailabilityZone:
+                        :rename: :availability_zones
+                        :list: true
+                  MultiAZCapable:
+                    :type: :boolean
+                  ReadReplicaCapable:
+                    :type: :boolean
+                  Vpc:
+                    :type: :boolean
+                  SupportsIops:
+                    :type: :boolean
+- :name: DescribeReservedDBInstances
+  :method: :describe_reserved_db_instances
+  :inputs:
+    ReservedDBInstanceId:
+    - :string
+    ReservedDBInstancesOfferingId:
+    - :string
+    DBInstanceClass:
+    - :string
+    Duration:
+    - :string
+    ProductDescription:
+    - :string
+    OfferingType:
+    - :string
+    MultiAZ:
+    - :boolean
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeReservedDBInstancesResult:
+        :ignore: true
+        :children:
+          ReservedDBInstances:
+            :ignore: true
+            :children:
+              ReservedDBInstance:
+                :rename: :reserved_db_instances
+                :list: true
+                :children:
+                  StartTime:
+                    :type: :time
+                  Duration:
+                    :type: :integer
+                  FixedPrice:
+                    :type: :float
+                  UsagePrice:
+                    :type: :float
+                  DBInstanceCount:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  RecurringCharges:
+                    :ignore: true
+                    :children:
+                      RecurringCharge:
+                        :rename: :recurring_charges
+                        :list: true
+                        :children:
+                          RecurringChargeAmount:
+                            :type: :float
+- :name: DescribeReservedDBInstancesOfferings
+  :method: :describe_reserved_db_instances_offerings
+  :inputs:
+    ReservedDBInstancesOfferingId:
+    - :string
+    DBInstanceClass:
+    - :string
+    Duration:
+    - :string
+    ProductDescription:
+    - :string
+    OfferingType:
+    - :string
+    MultiAZ:
+    - :boolean
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+    MaxRecords:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      DescribeReservedDBInstancesOfferingsResult:
+        :ignore: true
+        :children:
+          ReservedDBInstancesOfferings:
+            :ignore: true
+            :children:
+              ReservedDBInstancesOffering:
+                :rename: :reserved_db_instances_offerings
+                :list: true
+                :children:
+                  Duration:
+                    :type: :integer
+                  FixedPrice:
+                    :type: :float
+                  UsagePrice:
+                    :type: :float
+                  MultiAZ:
+                    :type: :boolean
+                  RecurringCharges:
+                    :ignore: true
+                    :children:
+                      RecurringCharge:
+                        :rename: :recurring_charges
+                        :list: true
+                        :children:
+                          RecurringChargeAmount:
+                            :type: :float
+- :name: DownloadDBLogFilePortion
+  :method: :download_db_log_file_portion
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    LogFileName:
+    - :string
+    Marker:
+    - :string
+    NumberOfLines:
+    - :integer
+  :outputs:
+    :children:
+      DownloadDBLogFilePortionResult:
+        :ignore: true
+        :children:
+          AdditionalDataPending:
+            :type: :boolean
+- :name: ListTagsForResource
+  :method: :list_tags_for_resource
+  :inputs:
+    ResourceName:
+    - :string
+    - :required
+    Filters:
+    - :membered_list:
+      - :structure:
+          Name:
+          - :string
+          - :required
+          Values:
+          - :membered_list:
+            - :string
+          - :required
+  :outputs:
+    :children:
+      ListTagsForResourceResult:
+        :ignore: true
+        :children:
+          TagList:
+            :ignore: true
+            :children:
+              Tag:
+                :rename: :tag_list
+                :list: true
+- :name: ModifyDBInstance
+  :method: :modify_db_instance
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    AllocatedStorage:
+    - :integer
+    DBInstanceClass:
+    - :string
+    DBSecurityGroups:
+    - :membered_list:
+      - :string
+    VpcSecurityGroupIds:
+    - :membered_list:
+      - :string
+    ApplyImmediately:
+    - :boolean
+    MasterUserPassword:
+    - :string
+    DBParameterGroupName:
+    - :string
+    BackupRetentionPeriod:
+    - :integer
+    PreferredBackupWindow:
+    - :string
+    PreferredMaintenanceWindow:
+    - :string
+    MultiAZ:
+    - :boolean
+    EngineVersion:
+    - :string
+    AllowMajorVersionUpgrade:
+    - :boolean
+    AutoMinorVersionUpgrade:
+    - :boolean
+    Iops:
+    - :integer
+    OptionGroupName:
+    - :string
+    NewDBInstanceIdentifier:
+    - :string
+    StorageType:
+    - :string
+    TdeCredentialArn:
+    - :string
+    TdeCredentialPassword:
+    - :string
+  :outputs:
+    :children:
+      ModifyDBInstanceResult:
+        :ignore: true
+        :children:
+          DBInstance:
+            :children:
+              Endpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              AllocatedStorage:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              BackupRetentionPeriod:
+                :type: :integer
+              DBSecurityGroups:
+                :ignore: true
+                :children:
+                  DBSecurityGroup:
+                    :rename: :db_security_groups
+                    :list: true
+              VpcSecurityGroups:
+                :ignore: true
+                :children:
+                  VpcSecurityGroupMembership:
+                    :rename: :vpc_security_groups
+                    :list: true
+              DBParameterGroups:
+                :ignore: true
+                :children:
+                  DBParameterGroup:
+                    :rename: :db_parameter_groups
+                    :list: true
+              DBSubnetGroup:
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+              PendingModifiedValues:
+                :children:
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  Iops:
+                    :type: :integer
+              LatestRestorableTime:
+                :type: :time
+              MultiAZ:
+                :type: :boolean
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              ReadReplicaDBInstanceIdentifiers:
+                :ignore: true
+                :children:
+                  ReadReplicaDBInstanceIdentifier:
+                    :rename: :read_replica_db_instance_identifiers
+                    :list: true
+              Iops:
+                :type: :integer
+              OptionGroupMemberships:
+                :ignore: true
+                :children:
+                  OptionGroupMembership:
+                    :rename: :option_group_memberships
+                    :list: true
+              PubliclyAccessible:
+                :type: :boolean
+              StatusInfos:
+                :ignore: true
+                :children:
+                  DBInstanceStatusInfo:
+                    :rename: :status_infos
+                    :list: true
+                    :children:
+                      Normal:
+                        :type: :boolean
+            :ignore: true
+- :name: ModifyDBParameterGroup
+  :method: :modify_db_parameter_group
+  :inputs:
+    DBParameterGroupName:
+    - :string
+    - :required
+    Parameters:
+    - :membered_list:
+      - :structure:
+          ParameterName:
+          - :string
+          ParameterValue:
+          - :string
+          Description:
+          - :string
+          Source:
+          - :string
+          ApplyType:
+          - :string
+          DataType:
+          - :string
+          AllowedValues:
+          - :string
+          IsModifiable:
+          - :boolean
+          MinimumEngineVersion:
+          - :string
+          ApplyMethod:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      ModifyDBParameterGroupResult:
+        :ignore: true
+- :name: ModifyDBSubnetGroup
+  :method: :modify_db_subnet_group
+  :inputs:
+    DBSubnetGroupName:
+    - :string
+    - :required
+    DBSubnetGroupDescription:
+    - :string
+    SubnetIds:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      ModifyDBSubnetGroupResult:
+        :ignore: true
+        :children:
+          DBSubnetGroup:
+            :children:
+              Subnets:
+                :ignore: true
+                :children:
+                  Subnet:
+                    :rename: :subnets
+                    :list: true
+            :ignore: true
+- :name: ModifyEventSubscription
+  :method: :modify_event_subscription
+  :inputs:
+    SubscriptionName:
+    - :string
+    - :required
+    SnsTopicArn:
+    - :string
+    SourceType:
+    - :string
+    EventCategories:
+    - :membered_list:
+      - :string
+    Enabled:
+    - :boolean
+  :outputs:
+    :children:
+      ModifyEventSubscriptionResult:
+        :ignore: true
+        :children:
+          EventSubscription:
+            :children:
+              SourceIdsList:
+                :ignore: true
+                :children:
+                  SourceId:
+                    :rename: :source_ids_list
+                    :list: true
+              EventCategoriesList:
+                :ignore: true
+                :children:
+                  EventCategory:
+                    :rename: :event_categories_list
+                    :list: true
+              Enabled:
+                :type: :boolean
+            :ignore: true
+- :name: ModifyOptionGroup
+  :method: :modify_option_group
+  :inputs:
+    OptionGroupName:
+    - :string
+    - :required
+    OptionsToInclude:
+    - :membered_list:
+      - :structure:
+          OptionName:
+          - :string
+          - :required
+          Port:
+          - :integer
+          DBSecurityGroupMemberships:
+          - :membered_list:
+            - :string
+          VpcSecurityGroupMemberships:
+          - :membered_list:
+            - :string
+          OptionSettings:
+          - :membered_list:
+            - :structure:
+                Name:
+                - :string
+                Value:
+                - :string
+                DefaultValue:
+                - :string
+                Description:
+                - :string
+                ApplyType:
+                - :string
+                DataType:
+                - :string
+                AllowedValues:
+                - :string
+                IsModifiable:
+                - :boolean
+                IsCollection:
+                - :boolean
+    OptionsToRemove:
+    - :membered_list:
+      - :string
+    ApplyImmediately:
+    - :boolean
+  :outputs:
+    :children:
+      ModifyOptionGroupResult:
+        :ignore: true
+        :children:
+          OptionGroup:
+            :children:
+              Options:
+                :ignore: true
+                :children:
+                  Option:
+                    :rename: :options
+                    :list: true
+                    :children:
+                      Persistent:
+                        :type: :boolean
+                      Permanent:
+                        :type: :boolean
+                      Port:
+                        :type: :integer
+                      OptionSettings:
+                        :ignore: true
+                        :children:
+                          OptionSetting:
+                            :rename: :option_settings
+                            :list: true
+                            :children:
+                              IsModifiable:
+                                :type: :boolean
+                              IsCollection:
+                                :type: :boolean
+                      DBSecurityGroupMemberships:
+                        :ignore: true
+                        :children:
+                          DBSecurityGroup:
+                            :rename: :db_security_group_memberships
+                            :list: true
+                      VpcSecurityGroupMemberships:
+                        :ignore: true
+                        :children:
+                          VpcSecurityGroupMembership:
+                            :rename: :vpc_security_group_memberships
+                            :list: true
+              AllowsVpcAndNonVpcInstanceMemberships:
+                :type: :boolean
+            :ignore: true
+- :name: PromoteReadReplica
+  :method: :promote_read_replica
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    BackupRetentionPeriod:
+    - :integer
+    PreferredBackupWindow:
+    - :string
+  :outputs:
+    :children:
+      PromoteReadReplicaResult:
+        :ignore: true
+        :children:
+          DBInstance:
+            :children:
+              Endpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              AllocatedStorage:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              BackupRetentionPeriod:
+                :type: :integer
+              DBSecurityGroups:
+                :ignore: true
+                :children:
+                  DBSecurityGroup:
+                    :rename: :db_security_groups
+                    :list: true
+              VpcSecurityGroups:
+                :ignore: true
+                :children:
+                  VpcSecurityGroupMembership:
+                    :rename: :vpc_security_groups
+                    :list: true
+              DBParameterGroups:
+                :ignore: true
+                :children:
+                  DBParameterGroup:
+                    :rename: :db_parameter_groups
+                    :list: true
+              DBSubnetGroup:
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+              PendingModifiedValues:
+                :children:
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  Iops:
+                    :type: :integer
+              LatestRestorableTime:
+                :type: :time
+              MultiAZ:
+                :type: :boolean
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              ReadReplicaDBInstanceIdentifiers:
+                :ignore: true
+                :children:
+                  ReadReplicaDBInstanceIdentifier:
+                    :rename: :read_replica_db_instance_identifiers
+                    :list: true
+              Iops:
+                :type: :integer
+              OptionGroupMemberships:
+                :ignore: true
+                :children:
+                  OptionGroupMembership:
+                    :rename: :option_group_memberships
+                    :list: true
+              PubliclyAccessible:
+                :type: :boolean
+              StatusInfos:
+                :ignore: true
+                :children:
+                  DBInstanceStatusInfo:
+                    :rename: :status_infos
+                    :list: true
+                    :children:
+                      Normal:
+                        :type: :boolean
+            :ignore: true
+- :name: PurchaseReservedDBInstancesOffering
+  :method: :purchase_reserved_db_instances_offering
+  :inputs:
+    ReservedDBInstancesOfferingId:
+    - :string
+    - :required
+    ReservedDBInstanceId:
+    - :string
+    DBInstanceCount:
+    - :integer
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      PurchaseReservedDBInstancesOfferingResult:
+        :ignore: true
+        :children:
+          ReservedDBInstance:
+            :children:
+              StartTime:
+                :type: :time
+              Duration:
+                :type: :integer
+              FixedPrice:
+                :type: :float
+              UsagePrice:
+                :type: :float
+              DBInstanceCount:
+                :type: :integer
+              MultiAZ:
+                :type: :boolean
+              RecurringCharges:
+                :ignore: true
+                :children:
+                  RecurringCharge:
+                    :rename: :recurring_charges
+                    :list: true
+                    :children:
+                      RecurringChargeAmount:
+                        :type: :float
+            :ignore: true
+- :name: RebootDBInstance
+  :method: :reboot_db_instance
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    ForceFailover:
+    - :boolean
+  :outputs:
+    :children:
+      RebootDBInstanceResult:
+        :ignore: true
+        :children:
+          DBInstance:
+            :children:
+              Endpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              AllocatedStorage:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              BackupRetentionPeriod:
+                :type: :integer
+              DBSecurityGroups:
+                :ignore: true
+                :children:
+                  DBSecurityGroup:
+                    :rename: :db_security_groups
+                    :list: true
+              VpcSecurityGroups:
+                :ignore: true
+                :children:
+                  VpcSecurityGroupMembership:
+                    :rename: :vpc_security_groups
+                    :list: true
+              DBParameterGroups:
+                :ignore: true
+                :children:
+                  DBParameterGroup:
+                    :rename: :db_parameter_groups
+                    :list: true
+              DBSubnetGroup:
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+              PendingModifiedValues:
+                :children:
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  Iops:
+                    :type: :integer
+              LatestRestorableTime:
+                :type: :time
+              MultiAZ:
+                :type: :boolean
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              ReadReplicaDBInstanceIdentifiers:
+                :ignore: true
+                :children:
+                  ReadReplicaDBInstanceIdentifier:
+                    :rename: :read_replica_db_instance_identifiers
+                    :list: true
+              Iops:
+                :type: :integer
+              OptionGroupMemberships:
+                :ignore: true
+                :children:
+                  OptionGroupMembership:
+                    :rename: :option_group_memberships
+                    :list: true
+              PubliclyAccessible:
+                :type: :boolean
+              StatusInfos:
+                :ignore: true
+                :children:
+                  DBInstanceStatusInfo:
+                    :rename: :status_infos
+                    :list: true
+                    :children:
+                      Normal:
+                        :type: :boolean
+            :ignore: true
+- :name: RemoveSourceIdentifierFromSubscription
+  :method: :remove_source_identifier_from_subscription
+  :inputs:
+    SubscriptionName:
+    - :string
+    - :required
+    SourceIdentifier:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RemoveSourceIdentifierFromSubscriptionResult:
+        :ignore: true
+        :children:
+          EventSubscription:
+            :children:
+              SourceIdsList:
+                :ignore: true
+                :children:
+                  SourceId:
+                    :rename: :source_ids_list
+                    :list: true
+              EventCategoriesList:
+                :ignore: true
+                :children:
+                  EventCategory:
+                    :rename: :event_categories_list
+                    :list: true
+              Enabled:
+                :type: :boolean
+            :ignore: true
+- :name: RemoveTagsFromResource
+  :method: :remove_tags_from_resource
+  :inputs:
+    ResourceName:
+    - :string
+    - :required
+    TagKeys:
+    - :membered_list:
+      - :string
+    - :required
+  :outputs:
+    :children:
+      RemoveTagsFromResourceResult:
+        :ignore: true
+- :name: ResetDBParameterGroup
+  :method: :reset_db_parameter_group
+  :inputs:
+    DBParameterGroupName:
+    - :string
+    - :required
+    ResetAllParameters:
+    - :boolean
+    Parameters:
+    - :membered_list:
+      - :structure:
+          ParameterName:
+          - :string
+          ParameterValue:
+          - :string
+          Description:
+          - :string
+          Source:
+          - :string
+          ApplyType:
+          - :string
+          DataType:
+          - :string
+          AllowedValues:
+          - :string
+          IsModifiable:
+          - :boolean
+          MinimumEngineVersion:
+          - :string
+          ApplyMethod:
+          - :string
+  :outputs:
+    :children:
+      ResetDBParameterGroupResult:
+        :ignore: true
+- :name: RestoreDBInstanceFromDBSnapshot
+  :method: :restore_db_instance_from_db_snapshot
+  :inputs:
+    DBInstanceIdentifier:
+    - :string
+    - :required
+    DBSnapshotIdentifier:
+    - :string
+    - :required
+    DBInstanceClass:
+    - :string
+    Port:
+    - :integer
+    AvailabilityZone:
+    - :string
+    DBSubnetGroupName:
+    - :string
+    MultiAZ:
+    - :boolean
+    PubliclyAccessible:
+    - :boolean
+    AutoMinorVersionUpgrade:
+    - :boolean
+    LicenseModel:
+    - :string
+    DBName:
+    - :string
+    Engine:
+    - :string
+    Iops:
+    - :integer
+    OptionGroupName:
+    - :string
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+    StorageType:
+    - :string
+    TdeCredentialArn:
+    - :string
+    TdeCredentialPassword:
+    - :string
+  :outputs:
+    :children:
+      RestoreDBInstanceFromDBSnapshotResult:
+        :ignore: true
+        :children:
+          DBInstance:
+            :children:
+              Endpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              AllocatedStorage:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              BackupRetentionPeriod:
+                :type: :integer
+              DBSecurityGroups:
+                :ignore: true
+                :children:
+                  DBSecurityGroup:
+                    :rename: :db_security_groups
+                    :list: true
+              VpcSecurityGroups:
+                :ignore: true
+                :children:
+                  VpcSecurityGroupMembership:
+                    :rename: :vpc_security_groups
+                    :list: true
+              DBParameterGroups:
+                :ignore: true
+                :children:
+                  DBParameterGroup:
+                    :rename: :db_parameter_groups
+                    :list: true
+              DBSubnetGroup:
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+              PendingModifiedValues:
+                :children:
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  Iops:
+                    :type: :integer
+              LatestRestorableTime:
+                :type: :time
+              MultiAZ:
+                :type: :boolean
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              ReadReplicaDBInstanceIdentifiers:
+                :ignore: true
+                :children:
+                  ReadReplicaDBInstanceIdentifier:
+                    :rename: :read_replica_db_instance_identifiers
+                    :list: true
+              Iops:
+                :type: :integer
+              OptionGroupMemberships:
+                :ignore: true
+                :children:
+                  OptionGroupMembership:
+                    :rename: :option_group_memberships
+                    :list: true
+              PubliclyAccessible:
+                :type: :boolean
+              StatusInfos:
+                :ignore: true
+                :children:
+                  DBInstanceStatusInfo:
+                    :rename: :status_infos
+                    :list: true
+                    :children:
+                      Normal:
+                        :type: :boolean
+            :ignore: true
+- :name: RestoreDBInstanceToPointInTime
+  :method: :restore_db_instance_to_point_in_time
+  :inputs:
+    SourceDBInstanceIdentifier:
+    - :string
+    - :required
+    TargetDBInstanceIdentifier:
+    - :string
+    - :required
+    RestoreTime:
+    - :timestamp
+    UseLatestRestorableTime:
+    - :boolean
+    DBInstanceClass:
+    - :string
+    Port:
+    - :integer
+    AvailabilityZone:
+    - :string
+    DBSubnetGroupName:
+    - :string
+    MultiAZ:
+    - :boolean
+    PubliclyAccessible:
+    - :boolean
+    AutoMinorVersionUpgrade:
+    - :boolean
+    LicenseModel:
+    - :string
+    DBName:
+    - :string
+    Engine:
+    - :string
+    Iops:
+    - :integer
+    OptionGroupName:
+    - :string
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+    StorageType:
+    - :string
+    TdeCredentialArn:
+    - :string
+    TdeCredentialPassword:
+    - :string
+  :outputs:
+    :children:
+      RestoreDBInstanceToPointInTimeResult:
+        :ignore: true
+        :children:
+          DBInstance:
+            :children:
+              Endpoint:
+                :children:
+                  Port:
+                    :type: :integer
+              AllocatedStorage:
+                :type: :integer
+              InstanceCreateTime:
+                :type: :time
+              BackupRetentionPeriod:
+                :type: :integer
+              DBSecurityGroups:
+                :ignore: true
+                :children:
+                  DBSecurityGroup:
+                    :rename: :db_security_groups
+                    :list: true
+              VpcSecurityGroups:
+                :ignore: true
+                :children:
+                  VpcSecurityGroupMembership:
+                    :rename: :vpc_security_groups
+                    :list: true
+              DBParameterGroups:
+                :ignore: true
+                :children:
+                  DBParameterGroup:
+                    :rename: :db_parameter_groups
+                    :list: true
+              DBSubnetGroup:
+                :children:
+                  Subnets:
+                    :ignore: true
+                    :children:
+                      Subnet:
+                        :rename: :subnets
+                        :list: true
+              PendingModifiedValues:
+                :children:
+                  AllocatedStorage:
+                    :type: :integer
+                  Port:
+                    :type: :integer
+                  BackupRetentionPeriod:
+                    :type: :integer
+                  MultiAZ:
+                    :type: :boolean
+                  Iops:
+                    :type: :integer
+              LatestRestorableTime:
+                :type: :time
+              MultiAZ:
+                :type: :boolean
+              AutoMinorVersionUpgrade:
+                :type: :boolean
+              ReadReplicaDBInstanceIdentifiers:
+                :ignore: true
+                :children:
+                  ReadReplicaDBInstanceIdentifier:
+                    :rename: :read_replica_db_instance_identifiers
+                    :list: true
+              Iops:
+                :type: :integer
+              OptionGroupMemberships:
+                :ignore: true
+                :children:
+                  OptionGroupMembership:
+                    :rename: :option_group_memberships
+                    :list: true
+              PubliclyAccessible:
+                :type: :boolean
+              StatusInfos:
+                :ignore: true
+                :children:
+                  DBInstanceStatusInfo:
+                    :rename: :status_infos
+                    :list: true
+                    :children:
+                      Normal:
+                        :type: :boolean
+            :ignore: true
+- :name: RevokeDBSecurityGroupIngress
+  :method: :revoke_db_security_group_ingress
+  :inputs:
+    DBSecurityGroupName:
+    - :string
+    - :required
+    CIDRIP:
+    - :string
+    EC2SecurityGroupName:
+    - :string
+    EC2SecurityGroupId:
+    - :string
+    EC2SecurityGroupOwnerId:
+    - :string
+  :outputs:
+    :children:
+      RevokeDBSecurityGroupIngressResult:
+        :ignore: true
+        :children:
+          DBSecurityGroup:
+            :children:
+              EC2SecurityGroups:
+                :ignore: true
+                :children:
+                  EC2SecurityGroup:
+                    :rename: :ec2_security_groups
+                    :list: true
+              IPRanges:
+                :ignore: true
+                :children:
+                  IPRange:
+                    :rename: :ip_ranges
+                    :list: true
+            :ignore: true

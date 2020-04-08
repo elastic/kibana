@@ -1,0 +1,10 @@
+{
+  "title": "Select Resource Group [Azure Monitor]",
+  "visState": "{\"title\":\"Select Resource Group [Azure Monitor]\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1517598395667\",\"indexPattern\":\"d6962b40-06f5-11e8-adb5-e1a2d559cdf5\",\"fieldName\":\"resource_group.keyword\",\"label\":\"Resource Group\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}}],\"updateFiltersOnChange\":true},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

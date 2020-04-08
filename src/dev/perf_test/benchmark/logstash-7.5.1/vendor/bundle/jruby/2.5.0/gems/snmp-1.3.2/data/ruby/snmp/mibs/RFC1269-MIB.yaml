@@ -1,0 +1,32 @@
+--- 
+bgp: 1.3.6.1.2.1.15
+bgpVersion: 1.3.6.1.2.1.15.1
+bgpLocalAs: 1.3.6.1.2.1.15.2
+bgpPeerTable: 1.3.6.1.2.1.15.3
+bgpPeerEntry: 1.3.6.1.2.1.15.3.1
+bgpPeerIdentifier: 1.3.6.1.2.1.15.3.1.1
+bgpPeerState: 1.3.6.1.2.1.15.3.1.2
+bgpPeerAdminStatus: 1.3.6.1.2.1.15.3.1.3
+bgpPeerNegotiatedVersion: 1.3.6.1.2.1.15.3.1.4
+bgpPeerLocalAddr: 1.3.6.1.2.1.15.3.1.5
+bgpPeerLocalPort: 1.3.6.1.2.1.15.3.1.6
+bgpPeerRemoteAddr: 1.3.6.1.2.1.15.3.1.7
+bgpPeerRemotePort: 1.3.6.1.2.1.15.3.1.8
+bgpPeerRemoteAs: 1.3.6.1.2.1.15.3.1.9
+bgpPeerInUpdates: 1.3.6.1.2.1.15.3.1.10
+bgpPeerOutUpdates: 1.3.6.1.2.1.15.3.1.11
+bgpPeerInTotalMessages: 1.3.6.1.2.1.15.3.1.12
+bgpPeerOutTotalMessages: 1.3.6.1.2.1.15.3.1.13
+bgpPeerLastError: 1.3.6.1.2.1.15.3.1.14
+bgpIdentifier: 1.3.6.1.2.1.15.4
+bgpRcvdPathAttrTable: 1.3.6.1.2.1.15.5
+bgpPathAttrEntry: 1.3.6.1.2.1.15.5.1
+bgpPathAttrPeer: 1.3.6.1.2.1.15.5.1.1
+bgpPathAttrDestNetwork: 1.3.6.1.2.1.15.5.1.2
+bgpPathAttrOrigin: 1.3.6.1.2.1.15.5.1.3
+bgpPathAttrASPath: 1.3.6.1.2.1.15.5.1.4
+bgpPathAttrNextHop: 1.3.6.1.2.1.15.5.1.5
+bgpPathAttrInterASMetric: 1.3.6.1.2.1.15.5.1.6
+bgpEstablished: 1.3.6.1.2.1.15.0.1
+bgpBackwardTransition: 1.3.6.1.2.1.15.0.2
+

@@ -1,0 +1,11 @@
+{
+  "title": "Top Destinations by Traffic Size [ArcSight]",
+  "visState": "{\"title\":\"Top Destinations by Traffic Size [ArcSight]\",\"type\":\"heatmap\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"enableHover\":true,\"legendPosition\":\"top\",\"times\":[],\"colorsNumber\":10,\"colorSchema\":\"Blues\",\"setColorRange\":false,\"colorsRange\":[{\"from\":0,\"to\":null}],\"invertColors\":false,\"percentageMode\":false,\"valueAxes\":[{\"show\":false,\"id\":\"ValueAxis-1\",\"type\":\"value\",\"scale\":{\"type\":\"linear\",\"defaultYExtents\":false},\"labels\":{\"show\":false,\"rotate\":0,\"color\":\"#555\"}}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"schema\":\"metric\",\"params\":{\"field\":\"bytesIn\",\"customLabel\":\"Bytes\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query_string\":{\"query\":\"deviceDirection:\\\"0\\\"\",\"analyze_wildcard\":true}}},\"label\":\"Inbound\"},{\"input\":{\"query\":{\"query_string\":{\"query\":\"deviceDirection:\\\"1\\\"\",\"analyze_wildcard\":true}}},\"label\":\"Outbound\"}]}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"destinationHostName\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 18k\":\"rgb(247,251,255)\",\"18k - 36k\":\"rgb(227,238,249)\",\"36k - 54k\":\"rgb(208,225,242)\",\"54k - 72k\":\"rgb(182,212,233)\",\"72k - 90k\":\"rgb(148,196,223)\",\"90k - 108k\":\"rgb(107,174,214)\",\"108k - 126k\":\"rgb(74,152,201)\",\"126k - 144k\":\"rgb(46,126,188)\",\"144k - 162k\":\"rgb(23,100,171)\",\"162k - 180k\":\"rgb(8,74,145)\"}}}",
+  "description": "",
+  "savedSearchId": "bb1f4bc0-73fd-11e7-b4d0-0fc7dfb45744",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

@@ -1,0 +1,83 @@
+:plugin: pipe
+:type: output
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Pipe output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Pipe output.
+
+Pipe events to stdin of another program. You can use fields from the
+event as parts of the command.
+WARNING: This feature can cause logstash to fork off multiple children if you are not carefull with per-event commandline.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Pipe Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-command>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-message_format>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-ttl>> |<<number,number>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-command"]
+===== `command` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Command line to launch and pipe to
+
+[id="plugins-{type}s-{plugin}-message_format"]
+===== `message_format` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The format to use when writing events to the pipe. This value
+supports any string and can include `%{name}` and other dynamic
+strings.
+
+If this setting is omitted, the full json representation of the
+event will be written as a single line.
+
+[id="plugins-{type}s-{plugin}-ttl"]
+===== `ttl` 
+
+  * Value type is <<number,number>>
+  * Default value is `10`
+
+Close pipe that hasn't been used for TTL seconds. -1 or 0 means never close.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

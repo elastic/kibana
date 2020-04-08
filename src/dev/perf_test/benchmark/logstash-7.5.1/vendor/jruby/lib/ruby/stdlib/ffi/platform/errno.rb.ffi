@@ -1,0 +1,71 @@
+module Platform; end
+module Platform::Errno
+  @@@
+  constants do |c|
+    c.include 'errno.h'
+    %w[
+      EPERM
+      ENOENT
+      ESRCH
+      EINTR
+      EIO
+      ENXIO
+      E2BIG
+      ENOEXEC
+      EBADF
+      ECHILD
+      EDEADLK
+      ENOMEM
+      EACCES
+      EFAULT
+      EBUSY
+      EEXIST
+      EXDEV
+      ENODEV
+      ENOTDIR
+      EISDIR
+      EINVAL
+      ENFILE
+      EMFILE
+      ENOTTY
+      ETXTBSY
+      EFBIG
+      ENOSPC
+      ESPIPE
+      EROFS
+      EMLINK
+      EPIPE
+      EAGAIN
+      EWOULDBLOCK
+      EINPROGRESS
+      EALREADY
+      ENOTSOCK
+      EDESTADDRREQ
+      EMSGSIZE
+      EPROTOTYPE
+      ENOPROTOOPT
+      EPROTONOSUPPORT
+      EOPNOTSUPP
+      EAFNOSUPPORT
+      EADDRINUSE
+      EADDRNOTAVAIL
+      ENETDOWN
+      ENETUNREACH
+      ENETRESET
+      ECONNABORTED
+      ECONNRESET
+      ENOBUFS
+      EISCONN
+      ENOTCONN
+      ETIMEDOUT
+      ECONNREFUSED
+      ELOOP
+      ENAMETOOLONG
+      EHOSTDOWN
+      EHOSTUNREACH
+      ENOTEMPTY
+    ].each { |errno| c.const errno }
+  end
+  @@@
+end
+

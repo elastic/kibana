@@ -1,0 +1,151 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2011-06-15'
+:operations:
+- :name: AssumeRole
+  :method: :assume_role
+  :inputs:
+    RoleArn:
+    - :string
+    - :required
+    RoleSessionName:
+    - :string
+    - :required
+    Policy:
+    - :string
+    DurationSeconds:
+    - :integer
+    ExternalId:
+    - :string
+    SerialNumber:
+    - :string
+    TokenCode:
+    - :string
+  :outputs:
+    :children:
+      AssumeRoleResult:
+        :ignore: true
+        :children:
+          Credentials:
+            :children:
+              Expiration:
+                :type: :time
+          PackedPolicySize:
+            :type: :integer
+- :name: AssumeRoleWithSAML
+  :method: :assume_role_with_saml
+  :inputs:
+    RoleArn:
+    - :string
+    - :required
+    PrincipalArn:
+    - :string
+    - :required
+    SAMLAssertion:
+    - :string
+    - :required
+    Policy:
+    - :string
+    DurationSeconds:
+    - :integer
+  :outputs:
+    :children:
+      AssumeRoleWithSAMLResult:
+        :ignore: true
+        :children:
+          Credentials:
+            :children:
+              Expiration:
+                :type: :time
+          PackedPolicySize:
+            :type: :integer
+- :name: AssumeRoleWithWebIdentity
+  :method: :assume_role_with_web_identity
+  :inputs:
+    RoleArn:
+    - :string
+    - :required
+    RoleSessionName:
+    - :string
+    - :required
+    WebIdentityToken:
+    - :string
+    - :required
+    ProviderId:
+    - :string
+    Policy:
+    - :string
+    DurationSeconds:
+    - :integer
+  :outputs:
+    :children:
+      AssumeRoleWithWebIdentityResult:
+        :ignore: true
+        :children:
+          Credentials:
+            :children:
+              Expiration:
+                :type: :time
+          PackedPolicySize:
+            :type: :integer
+- :name: DecodeAuthorizationMessage
+  :method: :decode_authorization_message
+  :inputs:
+    EncodedMessage:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DecodeAuthorizationMessageResult:
+        :ignore: true
+- :name: GetFederationToken
+  :method: :get_federation_token
+  :inputs:
+    Name:
+    - :string
+    - :required
+    Policy:
+    - :string
+    DurationSeconds:
+    - :integer
+  :outputs:
+    :children:
+      GetFederationTokenResult:
+        :ignore: true
+        :children:
+          Credentials:
+            :children:
+              Expiration:
+                :type: :time
+          PackedPolicySize:
+            :type: :integer
+- :name: GetSessionToken
+  :method: :get_session_token
+  :inputs:
+    DurationSeconds:
+    - :integer
+    SerialNumber:
+    - :string
+    TokenCode:
+    - :string
+  :outputs:
+    :children:
+      GetSessionTokenResult:
+        :ignore: true
+        :children:
+          Credentials:
+            :children:
+              Expiration:
+                :type: :time

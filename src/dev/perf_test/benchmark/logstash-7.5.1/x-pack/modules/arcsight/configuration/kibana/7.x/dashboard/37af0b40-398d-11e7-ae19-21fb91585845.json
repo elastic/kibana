@@ -1,0 +1,20 @@
+{
+  "title": "[ArcSight] Network Overview Dashboard",
+  "hits": 0,
+  "description": "",
+  "panelsJSON": "[{\"col\":1,\"id\":\"77cb1470-3989-11e7-8b9d-ddc45b5f6d00\",\"panelIndex\":1,\"row\":12,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"801fff70-395a-11e7-ae19-21fb91585845\",\"panelIndex\":2,\"row\":18,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"d6d526f0-395b-11e7-ae19-21fb91585845\",\"panelIndex\":5,\"row\":4,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"f57ea930-395d-11e7-ae19-21fb91585845\",\"panelIndex\":6,\"row\":16,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"161e27e0-3988-11e7-8b9d-ddc45b5f6d00\",\"panelIndex\":7,\"row\":2,\"size_x\":10,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"75582a90-3987-11e7-8b9d-ddc45b5f6d00\",\"panelIndex\":9,\"row\":6,\"size_x\":4,\"size_y\":3,\"type\":\"visualization\"},{\"col\":5,\"id\":\"e9c3ee00-3978-11e7-ae19-21fb91585845\",\"panelIndex\":11,\"row\":6,\"size_x\":4,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"ad802c10-3973-11e7-ae19-21fb91585845\",\"panelIndex\":13,\"row\":9,\"size_x\":8,\"size_y\":3,\"type\":\"visualization\"},{\"col\":9,\"id\":\"ec926660-396f-11e7-ae19-21fb91585845\",\"panelIndex\":15,\"row\":9,\"size_x\":4,\"size_y\":3,\"type\":\"visualization\"},{\"col\":9,\"id\":\"154ff7e0-3987-11e7-8b9d-ddc45b5f6d00\",\"panelIndex\":16,\"row\":6,\"size_x\":4,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"5acb74d0-398b-11e7-ae19-21fb91585845\",\"panelIndex\":17,\"row\":14,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"7a043760-3990-11e7-8b9d-ddc45b5f6d00\",\"panelIndex\":18,\"row\":20,\"size_x\":6,\"size_y\":4,\"type\":\"visualization\"},{\"col\":7,\"id\":\"fd70bca0-398f-11e7-8b9d-ddc45b5f6d00\",\"panelIndex\":19,\"row\":20,\"size_x\":6,\"size_y\":4,\"type\":\"visualization\"},{\"col\":11,\"id\":\"ed2f5570-3d5b-11e7-8b9d-ddc45b5f6d00\",\"panelIndex\":20,\"row\":2,\"size_x\":2,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"31b85570-454a-11e7-86b6-95298e9da6dc\",\"panelIndex\":21,\"row\":1,\"size_x\":12,\"size_y\":1,\"type\":\"visualization\"},{\"size_x\":6,\"size_y\":6,\"panelIndex\":24,\"type\":\"visualization\",\"id\":\"45387480-3989-11e7-8b9d-ddc45b5f6d00\",\"col\":1,\"row\":24},{\"size_x\":6,\"size_y\":6,\"panelIndex\":25,\"type\":\"visualization\",\"id\":\"35ce1310-3989-11e7-8b9d-ddc45b5f6d00\",\"col\":7,\"row\":24}]",
+  "optionsJSON": "{\"darkTheme\":false}",
+  "uiStateJSON": "{\"P-11\":{\"vis\":{\"colors\":{\"/Attempt\":\"#0A50A1\",\"/Failure\":\"#BF1B00\",\"/Success\":\"#629E51\"}}},\"P-13\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-15\":{\"vis\":{\"defaultColors\":{\"0% - 17%\":\"rgb(255,255,204)\",\"17% - 34%\":\"rgb(255,230,146)\",\"34% - 50%\":\"rgb(254,191,90)\",\"50% - 67%\":\"rgb(253,141,60)\",\"67% - 84%\":\"rgb(244,61,37)\",\"84% - 100%\":\"rgb(202,8,35)\"},\"legendOpen\":false}},\"P-16\":{\"vis\":{\"colors\":{\"Anti-Virus\":\"#EF843C\",\"Content Security\":\"#7EB26D\",\"Firewall\":\"#E24D42\",\"Integrated Security\":\"#962D82\",\"Network-based IDS/IPS\":\"#1F78C1\",\"Operating System\":\"#1F78C1\",\"VPN\":\"#EAB839\"}}},\"P-18\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-7\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"},\"legendOpen\":false}},\"P-8\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"P-9\":{\"vis\":{\"colors\":{\"/Attempt\":\"#0A50A1\",\"/Failure\":\"#BF1B00\",\"/Success\":\"#629E51\"}}},\"P-25\":{\"mapZoom\":1,\"mapCenter\":[-0.3515602939922709,0]},\"P-24\":{\"mapZoom\":1,\"mapCenter\":[-0.3515602939922709,0]}}",
+  "version": 1,
+  "timeRestore": true,
+  "timeTo": "now",
+  "timeFrom": "now-24h",
+  "refreshInterval": {
+    "display": "Off",
+    "pause": false,
+    "value": 0
+  },
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}],\"highlightAll\":true,\"version\":true}"
+  }
+}

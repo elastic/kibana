@@ -1,0 +1,16 @@
+--- 
+mplsLcFrStdMIB: 1.3.6.1.2.1.10.166.10
+mplsLcFrStdNotifications: 1.3.6.1.2.1.10.166.10.0
+mplsLcFrStdObjects: 1.3.6.1.2.1.10.166.10.1
+mplsLcFrStdInterfaceConfTable: 1.3.6.1.2.1.10.166.10.1.1
+mplsLcFrStdInterfaceConfEntry: 1.3.6.1.2.1.10.166.10.1.1.1
+mplsLcFrStdTrafficMinDlci: 1.3.6.1.2.1.10.166.10.1.1.1.1
+mplsLcFrStdTrafficMaxDlci: 1.3.6.1.2.1.10.166.10.1.1.1.2
+mplsLcFrStdCtrlMinDlci: 1.3.6.1.2.1.10.166.10.1.1.1.3
+mplsLcFrStdCtrlMaxDlci: 1.3.6.1.2.1.10.166.10.1.1.1.4
+mplsLcFrStdInterfaceConfRowStatus: 1.3.6.1.2.1.10.166.10.1.1.1.5
+mplsLcFrStdInterfaceConfStorageType: 1.3.6.1.2.1.10.166.10.1.1.1.6
+mplsLcFrStdConformance: 1.3.6.1.2.1.10.166.10.2
+mplsLcFrStdCompliances: 1.3.6.1.2.1.10.166.10.2.1
+mplsLcFrStdGroups: 1.3.6.1.2.1.10.166.10.2.2
+

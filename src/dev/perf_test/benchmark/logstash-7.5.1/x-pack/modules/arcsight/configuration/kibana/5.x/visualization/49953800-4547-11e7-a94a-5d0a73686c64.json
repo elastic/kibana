@@ -1,0 +1,10 @@
+{
+  "title": "Top Destination Domains",
+  "visState": "{\"title\":\"Top Destination Domains\",\"type\":\"metrics\",\"params\":{\"id\":\"45479ab0-4545-11e7-a94a-5d0a73686c64\",\"type\":\"top_n\",\"series\":[{\"id\":\"45479ab1-4545-11e7-a94a-5d0a73686c64\",\"color\":\"rgba(0,156,224,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"45479ab2-4545-11e7-a94a-5d0a73686c64\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"bar\",\"line_width\":1,\"point_size\":1,\"fill\":\"0.3\",\"stacked\":\"none\",\"label\":\"Top Destination Domains\",\"terms_field\":\"destinationDnsDomain\"}],\"time_field\":\"deviceReceiptTime\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"filter\":\"deviceEventCategory:\\\"dns\\\"\",\"background_color_rules\":[{\"id\":\"efe6b130-4546-11e7-a94a-5d0a73686c64\"}],\"bar_color_rules\":[{\"id\":\"f596fdb0-4546-11e7-a94a-5d0a73686c64\"}]},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

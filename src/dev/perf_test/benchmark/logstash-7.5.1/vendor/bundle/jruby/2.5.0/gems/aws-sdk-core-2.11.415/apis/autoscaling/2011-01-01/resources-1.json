@@ -1,0 +1,1624 @@
+{
+    "service": {
+        "actions": {
+            "CreateGroup": {
+                "request": { "operation": "CreateAutoScalingGroup" },
+                "resource": {
+                    "type": "AutoScalingGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "requestParameter",
+                            "path": "AutoScalingGroupName"
+                        }
+                    ]
+                }
+            },
+            "CreateLaunchConfiguration": {
+                "request": { "operation": "CreateLaunchConfiguration" },
+                "resource": {
+                    "type": "LaunchConfiguration",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "requestParameter",
+                            "path": "LaunchConfigurationName"
+                        }
+                    ]
+                }
+            }
+        },
+        "has": {
+            "Activity": {
+                "resource": {
+                    "type": "Activity",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "Group": {
+                "resource": {
+                    "type": "AutoScalingGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "LaunchConfiguration": {
+                "resource": {
+                    "type": "LaunchConfiguration",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "Policy": {
+                "resource": {
+                    "type": "ScalingPolicy",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            },
+            "ScheduledAction": {
+                "resource": {
+                    "type": "ScheduledAction",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "input"
+                        }
+                    ]
+                }
+            }
+        },
+        "hasMany": {
+            "Activities": {
+                "request": { "operation": "DescribeScalingActivities" },
+                "resource": {
+                    "type": "Activity",
+                    "identifiers": [
+                        {
+                            "target": "Id",
+                            "source": "response",
+                            "path": "Activities[].ActivityId"
+                        }
+                    ],
+                    "path": "Activities[]"
+                }
+            },
+            "Groups": {
+                "request": { "operation": "DescribeAutoScalingGroups" },
+                "resource": {
+                    "type": "AutoScalingGroup",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "AutoScalingGroups[].AutoScalingGroupName"
+                        }
+                    ],
+                    "path": "AutoScalingGroups[]"
+                }
+            },
+            "Instances": {
+                "request": { "operation": "DescribeAutoScalingInstances" },
+                "resource": {
+                    "type": "Instance",
+                    "identifiers": [
+                        {
+                            "target": "GroupName",
+                            "source": "response",
+                            "path": "AutoScalingInstances[].AutoScalingGroupName"
+                        },
+                        {
+                            "target": "Id",
+                            "source": "response",
+                            "path": "AutoScalingInstances[].InstanceId"
+                        }
+                    ],
+                    "path": "AutoScalingInstances[]"
+                }
+            },
+            "LaunchConfigurations": {
+                "request": { "operation": "DescribeLaunchConfigurations" },
+                "resource": {
+                    "type": "LaunchConfiguration",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "LaunchConfigurations[].LaunchConfigurationName"
+                        }
+                    ],
+                    "path": "LaunchConfigurations[]"
+                }
+            },
+            "Policies": {
+                "request": { "operation": "DescribePolicies" },
+                "resource": {
+                    "type": "ScalingPolicy",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "ScalingPolicies[].PolicyName"
+                        }
+                    ],
+                    "path": "ScalingPolicies[]"
+                }
+            },
+            "ScheduledActions": {
+                "request": { "operation": "DescribeScheduledActions" },
+                "resource": {
+                    "type": "ScheduledAction",
+                    "identifiers": [
+                        {
+                            "target": "Name",
+                            "source": "response",
+                            "path": "ScheduledUpdateGroupActions[].ScheduledActionName"
+                        }
+                    ],
+                    "path": "ScheduledUpdateGroupActions[]"
+                }
+            },
+            "Tags": {
+                "request": { "operation": "DescribeTags" },
+                "resource": {
+                    "type": "Tag",
+                    "identifiers": [
+                        {
+                            "target": "Key",
+                            "source": "response",
+                            "path": "Tags[].Key"
+                        },
+                        {
+                            "target": "ResourceId",
+                            "source": "response",
+                            "path": "Tags[].ResourceId"
+                        },
+                        {
+                            "target": "ResourceType",
+                            "source": "response",
+                            "path": "Tags[].ResourceType"
+                        }
+                    ],
+                    "path": "Tags[]"
+                }
+            }
+        }
+    },
+    "resources": {
+        "Activity": {
+            "identifiers": [
+                {
+                    "name": "Id",
+                    "memberName": "ActivityId"
+                }
+            ],
+            "shape": "Activity",
+            "load": {
+                "request": {
+                    "operation": "DescribeScalingActivities",
+                    "params": [
+                        {
+                            "target": "ActivityIds[0]",
+                            "source": "identifier",
+                            "name": "Id"
+                        }
+                    ]
+                },
+                "path": "Activities[0]"
+            },
+            "has": {
+                "Group": {
+                    "resource": {
+                        "type": "AutoScalingGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "AutoScalingGroupName"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "AutoScalingGroup": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "AutoScalingGroupName"
+                }
+            ],
+            "shape": "AutoScalingGroup",
+            "load": {
+                "request": {
+                    "operation": "DescribeAutoScalingGroups",
+                    "params": [
+                        {
+                            "target": "AutoScalingGroupNames[0]",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "AutoScalingGroups[0]"
+            },
+            "actions": {
+                "AttachInstances": {
+                    "request": {
+                        "operation": "AttachInstances",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteAutoScalingGroup",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "DetachInstances": {
+                    "request": {
+                        "operation": "DetachInstances",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activities[].ActivityId"
+                            }
+                        ],
+                        "path": "Activities[]"
+                    }
+                },
+                "DisableMetricsCollection": {
+                    "request": {
+                        "operation": "DisableMetricsCollection",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "EnableMetricsCollection": {
+                    "request": {
+                        "operation": "EnableMetricsCollection",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "PutScalingPolicy": {
+                    "request": {
+                        "operation": "PutScalingPolicy",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "ScalingPolicy",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "requestParameter",
+                                "path": "PolicyName"
+                            }
+                        ]
+                    }
+                },
+                "PutScheduledUpdateGroupAction": {
+                    "request": {
+                        "operation": "PutScheduledUpdateGroupAction",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "ScheduledAction",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "requestParameter",
+                                "path": "ScheduledActionName"
+                            }
+                        ]
+                    }
+                },
+                "ResumeProcesses": {
+                    "request": {
+                        "operation": "ResumeProcesses",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "SetDesiredCapacity": {
+                    "request": {
+                        "operation": "SetDesiredCapacity",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "SuspendProcesses": {
+                    "request": {
+                        "operation": "SuspendProcesses",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Update": {
+                    "request": {
+                        "operation": "UpdateAutoScalingGroup",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "AutoScalingGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "requestParameter",
+                                "path": "AutoScalingGroupName"
+                            }
+                        ]
+                    }
+                }
+            },
+            "waiters": {
+                "Exists": {
+                    "waiterName": "GroupExists",
+                    "params": [
+                        {
+                            "target": "AutoScalingGroupNames[0]",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "InService": {
+                    "waiterName": "GroupInService",
+                    "params": [
+                        {
+                            "target": "AutoScalingGroupNames[0]",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "NotExists": {
+                    "waiterName": "GroupNotExists",
+                    "params": [
+                        {
+                            "target": "AutoScalingGroupNames[0]",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                }
+            },
+            "has": {
+                "Instances": {
+                    "resource": {
+                        "type": "Instance",
+                        "identifiers": [
+                            {
+                                "target": "GroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "Id",
+                                "source": "data",
+                                "path": "Instances[].InstanceId"
+                            }
+                        ],
+                        "path": "Instances[]"
+                    }
+                },
+                "LaunchConfiguration": {
+                    "resource": {
+                        "type": "LaunchConfiguration",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "LaunchConfigurationName"
+                            }
+                        ]
+                    }
+                },
+                "LifecycleHook": {
+                    "resource": {
+                        "type": "LifecycleHook",
+                        "identifiers": [
+                            {
+                                "target": "GroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "Name",
+                                "source": "input"
+                            }
+                        ]
+                    }
+                },
+                "LoadBalancer": {
+                    "resource": {
+                        "type": "LoadBalancer",
+                        "identifiers": [
+                            {
+                                "target": "GroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "Name",
+                                "source": "input"
+                            }
+                        ]
+                    }
+                },
+                "Tag": {
+                    "resource": {
+                        "type": "Tag",
+                        "identifiers": [
+                            {
+                                "target": "Key",
+                                "source": "input"
+                            },
+                            {
+                                "target": "ResourceId",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "ResourceType",
+                                "source": "string",
+                                "value": "auto-scaling-group"
+                            }
+                        ]
+                    }
+                },
+                "Tags": {
+                    "resource": {
+                        "type": "Tag",
+                        "identifiers": [
+                            {
+                                "target": "Key",
+                                "source": "data",
+                                "path": "Tags[].Key"
+                            },
+                            {
+                                "target": "ResourceId",
+                                "source": "data",
+                                "path": "Tags[].ResourceId"
+                            },
+                            {
+                                "target": "ResourceType",
+                                "source": "data",
+                                "path": "Tags[].ResourceType"
+                            }
+                        ],
+                        "path": "Tags[]"
+                    }
+                }
+            },
+            "hasMany": {
+                "Activities": {
+                    "request": {
+                        "operation": "DescribeScalingActivities",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activities[].ActivityId"
+                            }
+                        ],
+                        "path": "Activities[]"
+                    }
+                },
+                "LifecycleHooks": {
+                    "request": {
+                        "operation": "DescribeLifecycleHooks",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "LifecycleHook",
+                        "identifiers": [
+                            {
+                                "target": "GroupName",
+                                "source": "response",
+                                "path": "LifecycleHooks[].AutoScalingGroupName"
+                            },
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "LifecycleHooks[].LifecycleHookName"
+                            }
+                        ],
+                        "path": "LifecycleHooks[]"
+                    }
+                },
+                "LoadBalancers": {
+                    "request": {
+                        "operation": "DescribeLoadBalancers",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "LoadBalancer",
+                        "identifiers": [
+                            {
+                                "target": "GroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "LoadBalancers[].LoadBalancerName"
+                            }
+                        ],
+                        "path": "LoadBalancers[]"
+                    }
+                },
+                "NotificationConfigurations": {
+                    "request": {
+                        "operation": "DescribeNotificationConfigurations",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupNames[0]",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "NotificationConfiguration",
+                        "identifiers": [
+                            {
+                                "target": "GroupName",
+                                "source": "response",
+                                "path": "NotificationConfigurations[].AutoScalingGroupName"
+                            },
+                            {
+                                "target": "Type",
+                                "source": "response",
+                                "path": "NotificationConfigurations[].NotificationType"
+                            },
+                            {
+                                "target": "TopicARN",
+                                "source": "response",
+                                "path": "NotificationConfigurations[].TopicARN"
+                            }
+                        ],
+                        "path": "NotificationConfigurations[]"
+                    }
+                },
+                "Policies": {
+                    "request": {
+                        "operation": "DescribePolicies",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "ScalingPolicy",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "ScalingPolicies[].PolicyName"
+                            }
+                        ],
+                        "path": "ScalingPolicies[]"
+                    }
+                },
+                "ScheduledActions": {
+                    "request": {
+                        "operation": "DescribeScheduledActions",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "ScheduledAction",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "response",
+                                "path": "ScheduledUpdateGroupActions[].ScheduledActionName"
+                            }
+                        ],
+                        "path": "ScheduledUpdateGroupActions[]"
+                    }
+                }
+            }
+        },
+        "Instance": {
+            "identifiers": [
+                {
+                    "name": "GroupName",
+                    "memberName": "AutoScalingGroupName"
+                },
+                {
+                    "name": "Id",
+                    "memberName": "InstanceId"
+                }
+            ],
+            "shape": "AutoScalingInstanceDetails",
+            "load": {
+                "request": {
+                    "operation": "DescribeAutoScalingInstances",
+                    "params": [
+                        {
+                            "target": "InstanceIds[0]",
+                            "source": "identifier",
+                            "name": "Id"
+                        }
+                    ]
+                },
+                "path": "AutoScalingInstances[0]"
+            },
+            "actions": {
+                "Attach": {
+                    "request": {
+                        "operation": "AttachInstances",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "InstanceIds[0]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    }
+                },
+                "Detach": {
+                    "request": {
+                        "operation": "DetachInstances",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "InstanceIds[0]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activities[].ActivityId"
+                            }
+                        ],
+                        "path": "Activities[]"
+                    }
+                },
+                "EnterStandby": {
+                    "request": {
+                        "operation": "EnterStandby",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "InstanceIds[0]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activities[].ActivityId"
+                            }
+                        ],
+                        "path": "Activities[]"
+                    }
+                },
+                "ExitStandby": {
+                    "request": {
+                        "operation": "ExitStandby",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "InstanceIds[0]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activities[].ActivityId"
+                            }
+                        ],
+                        "path": "Activities[]"
+                    }
+                },
+                "SetHealth": {
+                    "request": {
+                        "operation": "SetInstanceHealth",
+                        "params": [
+                            {
+                                "target": "InstanceId",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    }
+                },
+                "Terminate": {
+                    "request": {
+                        "operation": "TerminateInstanceInAutoScalingGroup",
+                        "params": [
+                            {
+                                "target": "InstanceId",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activity.ActivityId"
+                            }
+                        ],
+                        "path": "Activity"
+                    }
+                }
+            },
+            "batchActions": {
+                "Attach": {
+                    "request": {
+                        "operation": "AttachInstances",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "InstanceIds[]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    }
+                },
+                "Detach": {
+                    "request": {
+                        "operation": "DetachInstances",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "InstanceIds[]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activities[].ActivityId"
+                            }
+                        ],
+                        "path": "Activities[]"
+                    }
+                },
+                "EnterStandby": {
+                    "request": {
+                        "operation": "EnterStandby",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "InstanceIds[]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activities[].ActivityId"
+                            }
+                        ],
+                        "path": "Activities[]"
+                    }
+                },
+                "ExitStandby": {
+                    "request": {
+                        "operation": "ExitStandby",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "InstanceIds[]",
+                                "source": "identifier",
+                                "name": "Id"
+                            }
+                        ]
+                    },
+                    "resource": {
+                        "type": "Activity",
+                        "identifiers": [
+                            {
+                                "target": "Id",
+                                "source": "response",
+                                "path": "Activities[].ActivityId"
+                            }
+                        ],
+                        "path": "Activities[]"
+                    }
+                }
+            },
+            "has": {
+                "Group": {
+                    "resource": {
+                        "type": "AutoScalingGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            }
+                        ]
+                    }
+                },
+                "LaunchConfiguration": {
+                    "resource": {
+                        "type": "LaunchConfiguration",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "LaunchConfigurationName"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "LaunchConfiguration": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "LaunchConfigurationName"
+                }
+            ],
+            "shape": "LaunchConfiguration",
+            "load": {
+                "request": {
+                    "operation": "DescribeLaunchConfigurations",
+                    "params": [
+                        {
+                            "target": "LaunchConfigurationNames[0]",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "LaunchConfigurations[0]"
+            },
+            "actions": {
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteLaunchConfiguration",
+                        "params": [
+                            {
+                                "target": "LaunchConfigurationName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "LifecycleHook": {
+            "identifiers": [
+                {
+                    "name": "GroupName",
+                    "memberName": "AutoScalingGroupName"
+                },
+                {
+                    "name": "Name",
+                    "memberName": "LifecycleHookName"
+                }
+            ],
+            "shape": "LifecycleHook",
+            "actions": {
+                "Complete": {
+                    "request": {
+                        "operation": "CompleteLifecycleAction",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "LifecycleHookName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteLifecycleHook",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "LifecycleHookName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Put": {
+                    "request": {
+                        "operation": "PutLifecycleHook",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "LifecycleHookName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "RecordHeartbeat": {
+                    "request": {
+                        "operation": "RecordLifecycleActionHeartbeat",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "LifecycleHookName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                }
+            },
+            "load": {
+                "request": {
+                    "operation": "DescribeLifecycleHooks",
+                    "params": [
+                        {
+                            "target": "AutoScalingGroupName",
+                            "source": "identifier",
+                            "name": "GroupName"
+                        },
+                        {
+                            "target": "LifecycleHookNames[0]",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "LifecycleHooks[0]"
+            },
+            "has": {
+                "Group": {
+                    "resource": {
+                        "type": "AutoScalingGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "LoadBalancer": {
+            "identifiers": [
+                {"name": "GroupName"},
+                {
+                    "name": "Name",
+                    "memberName": "LoadBalancerName"
+                }
+            ],
+            "shape": "LoadBalancerState",
+            "actions": {
+                "Attach": {
+                    "request": {
+                        "operation": "AttachLoadBalancers",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "LoadBalancerNames[0]",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Detach": {
+                    "request": {
+                        "operation": "DetachLoadBalancers",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "LoadBalancerNames[0]",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                }
+            },
+            "batchActions": {
+                "Attach": {
+                    "request": {
+                        "operation": "AttachLoadBalancers",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "LoadBalancerNames[]",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Detach": {
+                    "request": {
+                        "operation": "DetachLoadBalancers",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "LoadBalancerNames[]",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                }
+            },
+            "has": {
+                "Group": {
+                    "resource": {
+                        "type": "AutoScalingGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "NotificationConfiguration": {
+            "identifiers": [
+                {
+                    "name": "GroupName",
+                    "memberName": "AutoScalingGroupName"
+                },
+                {
+                    "name": "Type",
+                    "memberName": "NotificationType"
+                },
+                {
+                    "name": "TopicARN",
+                    "memberName": "TopicARN"
+                }
+            ],
+            "shape": "NotificationConfiguration",
+            "actions": {
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteNotificationConfiguration",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            },
+                            {
+                                "target": "TopicARN",
+                                "source": "identifier",
+                                "name": "TopicARN"
+                            }
+                        ]
+                    }
+                },
+                "Put": {
+                    "request": {
+                        "operation": "PutNotificationConfiguration",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "TopicARN",
+                                "source": "identifier",
+                                "name": "TopicARN"
+                            },
+                            {
+                                "target": "NotificationTypes[0]",
+                                "source": "identifier",
+                                "name": "NotificationType"
+                            }
+                        ]
+                    }
+                }
+            },
+            "batchActions": {
+                "Put": {
+                    "request": {
+                        "operation": "PutNotificationConfiguration",
+                        "params": [
+                            {
+                                "target": "AutoScalingGroupName",
+                                "source": "identifier",
+                                "name": "Name"
+                            },
+                            {
+                                "target": "TopicARN",
+                                "source": "identifier",
+                                "name": "TopicARN"
+                            },
+                            {
+                                "target": "NotificationTypes[]",
+                                "source": "identifier",
+                                "name": "NotificationType"
+                            }
+                        ]
+                    }
+                }
+            },
+            "has": {
+                "Group": {
+                    "resource": {
+                        "type": "AutoScalingGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "identifier",
+                                "name": "GroupName"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "ScalingPolicy": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "PolicyName"
+                }
+            ],
+            "shape": "ScalingPolicy",
+            "load": {
+                "request": {
+                    "operation": "DescribePolicies",
+                    "params": [
+                        {
+                            "target": "PolicyNames[0]",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "ScalingPolicies[0]"
+            },
+            "actions": {
+                "Delete": {
+                    "request": {
+                        "operation": "DeletePolicy",
+                        "params": [
+                            {
+                                "target": "PolicyName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                },
+                "Execute": {
+                    "request": {
+                        "operation": "ExecutePolicy",
+                        "params": [
+                            {
+                                "target": "PolicyName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                }
+            },
+            "has": {
+                "Group": {
+                    "resource": {
+                        "type": "AutoScalingGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "AutoScalingGroupName"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "ScheduledAction": {
+            "identifiers": [
+                {
+                    "name": "Name",
+                    "memberName": "ScheduledActionName"
+                }
+            ],
+            "shape": "ScheduledUpdateGroupAction",
+            "load": {
+                "request": {
+                    "operation": "DescribeScheduledActions",
+                    "params": [
+                        {
+                            "target": "ScheduledActionNames[0]",
+                            "source": "identifier",
+                            "name": "Name"
+                        }
+                    ]
+                },
+                "path": "ScheduledUpdateGroupActions[0]"
+            },
+            "actions": {
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteScheduledAction",
+                        "params": [
+                            {
+                                "target": "ScheduledActionName",
+                                "source": "identifier",
+                                "name": "Name"
+                            }
+                        ]
+                    }
+                }
+            },
+            "has": {
+                "Group": {
+                    "resource": {
+                        "type": "AutoScalingGroup",
+                        "identifiers": [
+                            {
+                                "target": "Name",
+                                "source": "data",
+                                "path": "AutoScalingGroupName"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "Tag": {
+            "identifiers": [
+                {
+                    "name": "Key",
+                    "memberName": "Key"
+                },
+                {
+                    "name": "ResourceId",
+                    "memberName": "ResourceId"
+                },
+                {
+                    "name": "ResourceType",
+                    "memberName": "ResourceType"
+                }
+            ],
+            "shape": "TagDescription",
+            "load": {
+                "request": {
+                    "operation": "DescribeTags",
+                    "params": [
+                        {
+                            "target": "Filters[0].Name",
+                            "source": "string",
+                            "value": "key"
+                        },
+                        {
+                            "target": "Filters[0].Values[0]",
+                            "source": "identifier",
+                            "name": "Key"
+                        },
+                        {
+                            "target": "Filters[1].Name",
+                            "source": "identifier",
+                            "name": "ResourceType"
+                        },
+                        {
+                            "target": "Filters[1].Values[0]",
+                            "source": "identifier",
+                            "name": "ResourceId"
+                        }
+                    ]
+                },
+                "path": "Tags[0]"
+            },
+            "actions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateOrUpdateTags",
+                        "params": [
+                            {
+                                "target": "Tags[0].ResourceType",
+                                "source": "identifier",
+                                "name": "ResourceType"
+                            },
+                            {
+                                "target": "Tags[0].ResourceId",
+                                "source": "identifier",
+                                "name": "ResourceId"
+                            },
+                            {
+                                "target": "Tags[0].Key",
+                                "source": "identifier",
+                                "name": "Key"
+                            }
+                        ]
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteTags",
+                        "params": [
+                            {
+                                "target": "Tags[0].ResourceType",
+                                "source": "identifier",
+                                "name": "ResourceType"
+                            },
+                            {
+                                "target": "Tags[0].ResourceId",
+                                "source": "identifier",
+                                "name": "ResourceId"
+                            },
+                            {
+                                "target": "Tags[0].Key",
+                                "source": "identifier",
+                                "name": "Key"
+                            }
+                        ]
+                    }
+                }
+            },
+            "batchActions": {
+                "Create": {
+                    "request": {
+                        "operation": "CreateOrUpdateTags",
+                        "params": [
+                            {
+                                "target": "Tags[].ResourceType",
+                                "source": "identifier",
+                                "name": "ResourceType"
+                            },
+                            {
+                                "target": "Tags[].ResourceId",
+                                "source": "identifier",
+                                "name": "ResourceId"
+                            },
+                            {
+                                "target": "Tags[].Key",
+                                "source": "identifier",
+                                "name": "Key"
+                            }
+                        ]
+                    }
+                },
+                "Delete": {
+                    "request": {
+                        "operation": "DeleteTags",
+                        "params": [
+                            {
+                                "target": "Tags[].ResourceType",
+                                "source": "identifier",
+                                "name": "ResourceType"
+                            },
+                            {
+                                "target": "Tags[].ResourceId",
+                                "source": "identifier",
+                                "name": "ResourceId"
+                            },
+                            {
+                                "target": "Tags[].Key",
+                                "source": "identifier",
+                                "name": "Key"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

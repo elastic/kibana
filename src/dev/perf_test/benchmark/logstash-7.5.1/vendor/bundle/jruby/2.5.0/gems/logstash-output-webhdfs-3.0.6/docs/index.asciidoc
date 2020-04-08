@@ -1,0 +1,296 @@
+:plugin: webhdfs
+:type: output
+:default_codec: line
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Webhdfs output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This plugin sends Logstash events into files in HDFS via
+the https://hadoop.apache.org/docs/r1.0.4/webhdfs.html[webhdfs] REST API.
+
+==== Dependencies
+This plugin has no dependency on jars from hadoop, thus reducing configuration and compatibility
+problems. It uses the webhdfs gem from Kazuki Ohta and TAGOMORI Satoshi (@see: https://github.com/kzk/webhdfs).
+Optional dependencies are zlib and snappy gem if you use the compression functionality.
+
+==== Operational Notes
+If you get an error like:
+
+    Max write retries reached. Exception: initialize: name or service not known {:level=>:error}
+
+make sure that the hostname of your namenode is resolvable on the host running Logstash. When creating/appending
+to a file, webhdfs somtime sends a `307 TEMPORARY_REDIRECT` with the `HOSTNAME` of the machine its running on.
+
+==== Usage
+This is an example of Logstash config:
+
+[source,ruby]
+----------------------------------
+input {
+  ...
+}
+filter {
+  ...
+}
+output {
+  webhdfs {
+    host => "127.0.0.1"                 # (required)
+    port => 50070                       # (optional, default: 50070)
+    path => "/user/logstash/dt=%{+YYYY-MM-dd}/logstash-%{+HH}.log"  # (required)
+    user => "hue"                       # (required)
+  }
+}
+----------------------------------
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Webhdfs Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-compression>> |<<string,string>>, one of `["none", "snappy", "gzip"]`|No
+| <<plugins-{type}s-{plugin}-flush_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-idle_flush_time>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-kerberos_keytab>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-open_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-path>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-read_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-retry_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-retry_known_errors>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-retry_times>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-single_file_per_thread>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-snappy_bufsize>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-snappy_format>> |<<string,string>>, one of `["stream", "file"]`|No
+| <<plugins-{type}s-{plugin}-ssl_cert>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-ssl_key>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-standby_host>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-standby_port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-use_httpfs>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-use_kerberos_auth>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-use_ssl_auth>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-user>> |<<string,string>>|Yes
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-compression"]
+===== `compression` 
+
+  * Value can be any of: `none`, `snappy`, `gzip`
+  * Default value is `"none"`
+
+Compress output. One of ['none', 'snappy', 'gzip']
+
+[id="plugins-{type}s-{plugin}-flush_size"]
+===== `flush_size` 
+
+  * Value type is <<number,number>>
+  * Default value is `500`
+
+Sending data to webhdfs if event count is above, even if `store_interval_in_secs` is not reached.
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The server name for webhdfs/httpfs connections.
+
+[id="plugins-{type}s-{plugin}-idle_flush_time"]
+===== `idle_flush_time` 
+
+  * Value type is <<number,number>>
+  * Default value is `1`
+
+Sending data to webhdfs in x seconds intervals.
+
+[id="plugins-{type}s-{plugin}-kerberos_keytab"]
+===== `kerberos_keytab` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Set kerberos keytab file. Note that the gssapi library needs to be available to use this.
+
+[id="plugins-{type}s-{plugin}-open_timeout"]
+===== `open_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `30`
+
+WebHdfs open timeout, default 30s.
+
+[id="plugins-{type}s-{plugin}-path"]
+===== `path` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The path to the file to write to. Event fields can be used here,
+as well as date fields in the joda time format, e.g.:
+`/user/logstash/dt=%{+YYYY-MM-dd}/%{@source_host}-%{+HH}.log`
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * Value type is <<number,number>>
+  * Default value is `50070`
+
+The server port for webhdfs/httpfs connections.
+
+[id="plugins-{type}s-{plugin}-read_timeout"]
+===== `read_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `30`
+
+The WebHdfs read timeout, default 30s.
+
+[id="plugins-{type}s-{plugin}-retry_interval"]
+===== `retry_interval` 
+
+  * Value type is <<number,number>>
+  * Default value is `0.5`
+
+How long should we wait between retries.
+
+[id="plugins-{type}s-{plugin}-retry_known_errors"]
+===== `retry_known_errors` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Retry some known webhdfs errors. These may be caused by race conditions when appending to same file, etc.
+
+[id="plugins-{type}s-{plugin}-retry_times"]
+===== `retry_times` 
+
+  * Value type is <<number,number>>
+  * Default value is `5`
+
+How many times should we retry. If retry_times is exceeded, an error will be logged and the event will be discarded.
+
+[id="plugins-{type}s-{plugin}-single_file_per_thread"]
+===== `single_file_per_thread` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Avoid appending to same file in multiple threads.
+This solves some problems with multiple logstash output threads and locked file leases in webhdfs.
+If this option is set to true, %{[@metadata][thread_id]} needs to be used in path config settting.
+
+[id="plugins-{type}s-{plugin}-snappy_bufsize"]
+===== `snappy_bufsize` 
+
+  * Value type is <<number,number>>
+  * Default value is `32768`
+
+Set snappy chunksize. Only neccessary for stream format. Defaults to 32k. Max is 65536
+@see http://code.google.com/p/snappy/source/browse/trunk/framing_format.txt
+
+[id="plugins-{type}s-{plugin}-snappy_format"]
+===== `snappy_format` 
+
+  * Value can be any of: `stream`, `file`
+  * Default value is `"stream"`
+
+Set snappy format. One of "stream", "file". Set to stream to be hive compatible.
+
+[id="plugins-{type}s-{plugin}-ssl_cert"]
+===== `ssl_cert` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Set ssl cert file.
+
+[id="plugins-{type}s-{plugin}-ssl_key"]
+===== `ssl_key` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Set ssl key file.
+
+[id="plugins-{type}s-{plugin}-standby_host"]
+===== `standby_host` 
+
+  * Value type is <<string,string>>
+  * Default value is `false`
+
+Standby namenode for ha hdfs.
+
+[id="plugins-{type}s-{plugin}-standby_port"]
+===== `standby_port` 
+
+  * Value type is <<number,number>>
+  * Default value is `50070`
+
+Standby namenode port for ha hdfs.
+
+[id="plugins-{type}s-{plugin}-use_httpfs"]
+===== `use_httpfs` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Use httpfs mode if set to true, else webhdfs.
+
+[id="plugins-{type}s-{plugin}-use_kerberos_auth"]
+===== `use_kerberos_auth` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Set kerberos authentication.
+
+[id="plugins-{type}s-{plugin}-use_ssl_auth"]
+===== `use_ssl_auth` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Set ssl authentication. Note that the openssl library needs to be available to use this.
+
+[id="plugins-{type}s-{plugin}-user"]
+===== `user` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The Username for webhdfs.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

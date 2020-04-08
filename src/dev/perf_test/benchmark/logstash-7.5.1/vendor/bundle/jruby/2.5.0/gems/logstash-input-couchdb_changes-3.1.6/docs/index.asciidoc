@@ -1,0 +1,223 @@
+:plugin: couchdb_changes
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Couchdb_changes input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This CouchDB input allows you to automatically stream events from the
+CouchDB http://guide.couchdb.org/draft/notifications.html[_changes] URI.
+Moreover, any "future" changes will automatically be streamed as well making it easy to synchronize
+your CouchDB data with any target destination
+
+===== Upsert and delete
+You can use event metadata to allow for document deletion.
+All non-delete operations are treated as upserts
+
+===== Starting at a Specific Sequence
+The CouchDB input stores the last sequence number value in location defined by `sequence_path`.
+You can use this fact to start or resume the stream at a particular sequence.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Couchdb_changes Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-always_reconnect>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-ca_file>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-db>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-heartbeat>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-ignore_attachments>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-initial_sequence>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-keep_id>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-keep_revision>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-reconnect_delay>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-secure>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-sequence_path>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-username>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-always_reconnect"]
+===== `always_reconnect` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Reconnect flag.  When true, always try to reconnect after a failure
+
+[id="plugins-{type}s-{plugin}-ca_file"]
+===== `ca_file` 
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+Path to a CA certificate file, used to validate certificates
+
+[id="plugins-{type}s-{plugin}-db"]
+===== `db` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The CouchDB db to connect to.
+Required parameter.
+
+[id="plugins-{type}s-{plugin}-heartbeat"]
+===== `heartbeat` 
+
+  * Value type is <<number,number>>
+  * Default value is `1000`
+
+Logstash connects to CouchDB's _changes with feed=continuous
+The heartbeat is how often (in milliseconds) Logstash will ping
+CouchDB to ensure the connection is maintained.  Changing this
+setting is not recommended unless you know what you are doing.
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * Value type is <<string,string>>
+  * Default value is `"localhost"`
+
+IP or hostname of your CouchDB instance
+
+[id="plugins-{type}s-{plugin}-ignore_attachments"]
+===== `ignore_attachments` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Future feature! Until implemented, changing this from the default
+will not do anything.
+
+Ignore attachments associated with CouchDB documents.
+
+[id="plugins-{type}s-{plugin}-initial_sequence"]
+===== `initial_sequence` 
+
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+If unspecified, Logstash will attempt to read the last sequence number
+from the `sequence_path` file.  If that is empty or non-existent, it will
+begin with 0 (the beginning).
+
+If you specify this value, it is anticipated that you will
+only be doing so for an initial read under special circumstances
+and that you will unset this value afterwards.
+
+[id="plugins-{type}s-{plugin}-keep_id"]
+===== `keep_id` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Preserve the CouchDB document id "_id" value in the
+output.
+
+[id="plugins-{type}s-{plugin}-keep_revision"]
+===== `keep_revision` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Preserve the CouchDB document revision "_rev" value in the
+output.
+
+[id="plugins-{type}s-{plugin}-password"]
+===== `password` 
+
+  * Value type is <<password,password>>
+  * Default value is `nil`
+
+Password, if authentication is needed to connect to
+CouchDB
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * Value type is <<number,number>>
+  * Default value is `5984`
+
+Port of your CouchDB instance.
+
+[id="plugins-{type}s-{plugin}-reconnect_delay"]
+===== `reconnect_delay` 
+
+  * Value type is <<number,number>>
+  * Default value is `10`
+
+Reconnect delay: time between reconnect attempts, in seconds.
+
+[id="plugins-{type}s-{plugin}-secure"]
+===== `secure` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Connect to CouchDB's _changes feed securely (via https)
+Default: false (via http)
+
+[id="plugins-{type}s-{plugin}-sequence_path"]
+===== `sequence_path` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+File path where the last sequence number in the _changes
+stream is stored. If unset it will write to `$HOME/.couchdb_seq`
+
+[id="plugins-{type}s-{plugin}-timeout"]
+===== `timeout` 
+
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+Timeout: Number of milliseconds to wait for new data before
+terminating the connection.  If a timeout is set it will disable
+the heartbeat configuration option.
+
+[id="plugins-{type}s-{plugin}-username"]
+===== `username` 
+
+  * Value type is <<string,string>>
+  * Default value is `nil`
+
+Username, if authentication is needed to connect to
+CouchDB
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

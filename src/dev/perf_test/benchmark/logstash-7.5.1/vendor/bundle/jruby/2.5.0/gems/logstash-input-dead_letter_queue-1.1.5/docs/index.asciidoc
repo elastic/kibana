@@ -1,0 +1,115 @@
+:plugin: dead_letter_queue
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Dead_letter_queue input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Logstash input to read events from Logstash's dead letter queue.
+
+[source, sh]
+-----------------------------------------
+input {
+  dead_letter_queue {
+    path => "/var/logstash/data/dead_letter_queue"
+    start_timestamp => "2017-04-04T23:40:37"
+  }
+}
+-----------------------------------------
+
+
+For more information about processing events in the dead letter queue, see
+{logstash-ref}/dead-letter-queues.html[Dead Letter Queues].
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Dead_letter_queue Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-commit_offsets>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-path>> |a valid filesystem path|Yes
+| <<plugins-{type}s-{plugin}-pipeline_id>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-sincedb_path>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-start_timestamp>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-commit_offsets"]
+===== `commit_offsets` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Specifies whether this input should commit offsets as it processes the events.
+Typically you specify `false` when you want to iterate multiple times over the
+events in the dead letter queue, but don't want to save state. This is when you
+are exploring the events in the dead letter queue. 
+
+[id="plugins-{type}s-{plugin}-path"]
+===== `path` 
+
+  * This is a required setting.
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+Path to the dead letter queue directory that was created by a Logstash instance.
+This is the path from which "dead" events are read and is typically configured 
+in the original Logstash instance with the setting `path.dead_letter_queue`.
+
+[id="plugins-{type}s-{plugin}-pipeline_id"]
+===== `pipeline_id` 
+
+  * Value type is <<string,string>>
+  * Default value is `"main"`
+
+ID of the pipeline whose events you want to read from.
+
+[id="plugins-{type}s-{plugin}-sincedb_path"]
+===== `sincedb_path` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Path of the sincedb database file (keeps track of the current position of dead letter queue) that 
+will be written to disk. The default will write sincedb files to `<path.data>/plugins/inputs/dead_letter_queue`.
+
+NOTE: This value must be a file path and not a directory path.
+
+[id="plugins-{type}s-{plugin}-start_timestamp"]
+===== `start_timestamp` 
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Timestamp in ISO8601 format from when you want to start processing the events from. 
+For example, `2017-04-04T23:40:37`.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

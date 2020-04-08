@@ -1,0 +1,56 @@
+= New Features
+
+* fdbsql and jdbc/fdbsql adapters have been added, for connecting to
+  FoundationDB SQL Layer.
+
+* A split_values plugin has been added, for moving non-column entries
+  from the values hash into a separate hash.  This allows you to
+  select additional columns (e.g. computed columns) when retrieving
+  model instances, and be able to save those instances without
+  removing the additional columns.
+
+* A Sequel::Model.cache_associations accessor has been added, which
+  can be set to false to not cache any association metadata.  This
+  can fix issues in a development environment that uses code
+  reloading.
+
+* The active_model plugin now supports activemodel 4.2.0beta1.
+
+* More PostgreSQL array types are handled automatically by the
+  pg_array extension, such as xml[] and uuid[].
+
+* Creating foreign tables is now supported on PostgreSQL via the
+  :foreign and :options create_table options.
+
+* The :nolog Database option is now supported in the informix
+  adapter, where it disables the use of transactions.
+
+* PlaceholderLiteralizer#with_dataset has been added, allowing you
+  to create another PlaceholderLiteralizer with a modified dataset,
+  useful if you want to change the row_proc or any non-SQL dataset
+  options.
+
+= Other Improvements
+
+* The tactical_eager_loading plugin once again works correctly with
+  limited associations.
+
+* A bug in older versions of MySQL is now worked around when schema
+  dumping a table with multiple timestamp columns.
+
+* On PostgreSQL, create_view(:view_name, dataset, :materialized=>true)
+  is now reversible.
+
+* Postgres::{JSON,JSONB}Op#to_record and #to_recordset no longer take
+  an optional argument.  This was supported in PostgreSQL 9.4beta1,
+  but removed before PostgreSQL 9.4beta2.
+
+* Dataset#insert now returns the last inserted id in the informix
+  adapter.
+
+* Sequel no longer raises an exception in
+  AssociationReflection#reciprocal if the associated class has an
+  association that does not have a valid associated class.
+
+* Sequel now raises an exception if a primary key is necessary to use
+  an association, but the model does not have a primary key.

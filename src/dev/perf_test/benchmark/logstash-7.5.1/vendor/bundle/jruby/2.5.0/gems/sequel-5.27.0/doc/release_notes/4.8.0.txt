@@ -1,0 +1,175 @@
+= New Features
+
+* A one_through_one association type has been added.  This is similar
+  to the many_to_many association type in that it uses a join table,
+  but it returns a single record instead of an array of records.
+  This is designed for cases where the foreign key in the join table
+  that references the current table has a unique constraint, or where
+  you want to use an order to just pick the first matching record.
+
+  Similarly, the many_through_many plugin now also offers a
+  one_through_many association.
+
+* An association_join method has been added to model datasets, for
+  setting up joins based on associations.  This basically does the
+  same join that eager_graph would do, but does not make the other
+  changes that eager_graph makes.
+
+  Unlike eager_graph (which uses LEFT OUTER JOINs by default),
+  association_join uses INNER JOINs, but there are also
+  association_*_join methods (e.g. association_left_join) for
+  using different join types.
+
+  Similar to eager_graph, you can use cascading of associations or
+  multiple associations.
+
+    Album.association_join(:artist, :tracks)
+    Artist.association_left_join(:albums=>:tracks)
+
+* Dataset#eager_graph_with_options has been added for model
+  datasets.  It currently supports a :join_type option, for
+  overriding the type of join to use on a per-call basis, as well
+  as a :limit_strategy option.  The API is similar to eager_graph,
+  except that the associations to eagerly load are passed in as
+  a single argument, and it takes an options hash.
+
+  The :limit_strategy option works similarly to the
+  :eager_limit_strategy option when eagerly loading.  If set to
+  true and the database supports window functions, it will join
+  the current dataset to a subquery that uses a window function
+  to correctly restrict the join to only those objects that fall
+  within the association's limit/offset.
+
+  The :limit_strategy option is not on by default.  It is possible
+  for it to perform significantly worse than the default strategy
+  (which uses array slicing in ruby).  The :limit_strategy
+  significantly changes the SQL used, and can change the results
+  of the query if any filters/orders related to the association
+  are used.
+
+  It's recommended you only use the :limit_strategy option if you
+  are experiencing a bottleneck and you have benchmarked that it
+  is faster and still produces the desired results.
+
+    Artist.eager_graph_with_options(:first_10_albums,
+      :limit_strategy=>true)
+    # SELECT artists.id, artists.name,
+    #   first_10_albums.id AS first_10_albums_id,
+    #   first_10_albums.name AS first_10_albums_name,
+    #   first_10_albums.artist_id,
+    #   first_10_albums.release_date
+    # FROM artists
+    # LEFT OUTER JOIN (
+    #   SELECT id, name, artist_id, release_date
+    #   FROM (
+    #     SELECT *, row_number() OVER (PARTITION BY tracks.album_id)
+    #       AS x_sequel_row_number_x
+    #     FROM albums
+    #   ) AS t1 WHERE (x_sequel_row_number_x <= 10)
+    # ) AS first_10_albums ON (first_10_albums.artist_id = artists.id)
+
+* Dataset#full_text_search on PostgreSQL now supports :plain and
+  :phrase options.  :plain takes the search terms as a single
+  string, and searches for rows where all terms are used.
+  :phrase is similar to :plain, but also adds a substring search
+  to ensure that the string given appears verbatim in the text.
+
+* A :graph_order association option has been added, for using a
+  different order when using eager_graph.  This is mostly
+  designed for cases where :order should be qualified in other
+  cases, but using a qualification breaks eager_graph because the
+  correct qualifier is not known until runtime.
+
+* SQL::AliasedExpression#alias has been added as an alias for #aliaz.
+
+= Other Improvements
+
+* Sequel will now automatically use an eager limit strategy for
+  *_one associations that use an :order option.  For associations
+  that are truly one-to-one, an :order option is not needed, so it
+  only makes sense to have an :order option if the association
+  could theoretically return multiple results (in which case an
+  eager limit strategy is helpful).
+
+* The queries that Sequel uses to filter by associations when
+  those associations have conditions are now simpler and easier
+  for the database to execute.
+
+* The queries that Sequel uses for dataset associations now handle
+  cases where unqualified identifiers were used in the receiving
+  dataset that would be made ambiguous by a join.
+
+* A limit strategy is now used when filtering by associations if
+  the association has a limit and the database supports window
+  functions.  This allows Sequel to setup a correct filter in
+  such cases.
+
+    Artist.where(:first_10_albums=>Album[1]).all
+    # SELECT *
+    # FROM artists
+    # WHERE (artists.id IN (
+    #   SELECT albums.artist_id
+    #   FROM albums
+    #   WHERE ((albums.artist_id IS NOT NULL) AND (albums.id IN (
+    #     SELECT id FROM (
+    #       SELECT albums.id, row_number() OVER
+    #         (PARTITION BY albums.artist_id ORDER BY release_date)
+    #         AS x_sequel_row_number_x
+    #       FROM albums
+    #     ) AS t1
+    #     WHERE (x_sequel_row_number_x <= 10)
+    #   )) AND (albums.id = 1))))
+
+* A limit strategy is now used in the dataset_associations plugin
+  if the association has a limit and the database supports window
+  functions.  This makes the resulting datasets return correct
+  results.
+
+    Artist.first_10_albums
+    # SELECT *
+    # FROM albums
+    # WHERE ((albums.artist_id IN (
+    #   SELECT artists.id FROM artists)
+    # ) AND (albums.id IN (
+    #   SELECT id FROM (
+    #     SELECT albums.id, row_number() OVER
+    #       (PARTITION BY albums.artist_id ORDER BY release_date)
+    #       AS x_sequel_row_number_x
+    #     FROM albums
+    #   ) AS t1
+    #   WHERE (x_sequel_row_number_x <= 10)
+    # )))
+    # ORDER BY release_date
+
+* You can now pass symbols with embedded qualifiers or aliases,
+  as well as SQL::Identifier, SQL::QualifiedIdentifier, and
+  SQL::AliasedExpression objects as the first argument to
+  Dataset#graph.
+
+* The nested_attributes plugin now automatically handles presence
+  validations on foreign keys when creating associated objects.
+  It now sets the foreign key value (or a placeholder value)
+  before validating such objects.
+
+* Offsets on *_one associations are now respected when using
+  eager_graph.
+
+* eager graphing *_many associations with offsets no longer breaks
+  if there are no associated results.
+
+* Database#register_array_type in the pg_array extension now works
+  correctly if there is no existing scalar conversion proc for
+  the type.
+
+* Unique, foreign key, and not null constraint violations are now
+  recognized correctly on SQLite 3.8.2+.
+
+* The odbc adapter now returns fractional seconds in timestamps.
+
+* The obdc/mssql adapter now inputs timestamps with 3 decimal
+  places.
+
+= Backwards Compatibility
+
+* The private Model.apply_window_function_eager_limit_strategy
+  method has been removed.

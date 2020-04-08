@@ -1,0 +1,10 @@
+{
+  "title": "Database Wait Time (ms) Single [Azure Monitor]",
+  "visState": "{\"title\":\"Database Wait Time (ms) Single [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"0dc3f820-07fc-11e8-92fe-81a50acfdb07\",\"color\":\"rgba(0,191,179,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"0dc3f821-07fc-11e8-92fe-81a50acfdb07\",\"type\":\"avg\",\"field\":\"sql_diagnostics_DatabaseWaitStatistics_properties.delta_wait_time_ms\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"2fecef10-07fc-11e8-92fe-81a50acfdb07\",\"type\":\"moving_average\",\"field\":\"0dc3f821-07fc-11e8-92fe-81a50acfdb07\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0a\",\"chart_type\":\"bar\",\"line_width\":\"1\",\"point_size\":1,\"fill\":\"0.2\",\"stacked\":\"none\",\"label\":\"Database Wait Time (ms)\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":0,\"show_grid\":1,\"filter\":\"azure.group:sql_diagnostics\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

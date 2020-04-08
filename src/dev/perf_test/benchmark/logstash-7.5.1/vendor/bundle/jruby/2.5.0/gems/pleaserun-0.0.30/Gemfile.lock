@@ -1,0 +1,103 @@
+PATH
+  remote: .
+  specs:
+    pleaserun (0.0.29)
+      cabin (> 0)
+      clamp
+      dotenv
+      insist
+      mustache (= 0.99.8)
+      stud
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    cabin (0.9.0)
+    celluloid (0.16.0)
+      timers (~> 4.0.0)
+    clamp (1.1.2)
+    coderay (1.1.0)
+    diff-lcs (1.2.5)
+    dotenv (2.2.0)
+    ffi (1.9.6)
+    ffi (1.9.6-java)
+    flores (0.0.3)
+    formatador (0.2.5)
+    guard (2.12.4)
+      formatador (>= 0.2.4)
+      listen (~> 2.7)
+      lumberjack (~> 1.0)
+      nenv (~> 0.1)
+      notiffany (~> 0.0)
+      pry (>= 0.9.12)
+      shellany (~> 0.0)
+      thor (>= 0.18.1)
+    guard-compat (1.2.1)
+    guard-rspec (4.5.0)
+      guard (~> 2.1)
+      guard-compat (~> 1.1)
+      rspec (>= 2.99.0, < 4.0)
+    hitimes (1.2.2)
+    hitimes (1.2.2-java)
+    insist (1.0.0)
+    listen (2.8.5)
+      celluloid (>= 0.15.2)
+      rb-fsevent (>= 0.9.3)
+      rb-inotify (>= 0.9)
+    lumberjack (1.0.9)
+    method_source (0.8.2)
+    mustache (0.99.8)
+    nenv (0.2.0)
+    net-ssh (2.9.2)
+    notiffany (0.0.6)
+      nenv (~> 0.1)
+      shellany (~> 0.0)
+    peach (0.5.1)
+    pry (0.10.1)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    pry (0.10.1-java)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+      spoon (~> 0.0)
+    rb-fsevent (0.9.4)
+    rb-inotify (0.9.5)
+      ffi (>= 0.5.0)
+    rspec (3.0.0)
+      rspec-core (~> 3.0.0)
+      rspec-expectations (~> 3.0.0)
+      rspec-mocks (~> 3.0.0)
+    rspec-core (3.0.4)
+      rspec-support (~> 3.0.0)
+    rspec-expectations (3.0.4)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.0.0)
+    rspec-mocks (3.0.4)
+      rspec-support (~> 3.0.0)
+    rspec-support (3.0.4)
+    shellany (0.0.1)
+    slop (3.6.0)
+    spoon (0.0.4)
+      ffi
+    stud (0.0.22)
+    thor (0.19.1)
+    timers (4.0.1)
+      hitimes
+
+PLATFORMS
+  java
+  ruby
+
+DEPENDENCIES
+  flores
+  guard
+  guard-rspec
+  net-ssh
+  peach
+  pleaserun!
+  rspec (~> 3.0.0)
+
+BUNDLED WITH
+   1.13.5

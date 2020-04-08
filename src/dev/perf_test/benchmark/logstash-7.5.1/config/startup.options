@@ -1,0 +1,53 @@
+################################################################################
+# These settings are ONLY used by $LS_HOME/bin/system-install to create a custom
+# startup script for Logstash and is not used by Logstash itself. It should
+# automagically use the init system (systemd, upstart, sysv, etc.) that your
+# Linux distribution uses.
+#
+# After changing anything here, you need to re-run $LS_HOME/bin/system-install
+# as root to push the changes to the init script.
+################################################################################
+
+# Override Java location
+#JAVACMD=/usr/bin/java
+
+# Set a home directory
+LS_HOME=/usr/share/logstash
+
+# logstash settings directory, the path which contains logstash.yml
+LS_SETTINGS_DIR=/etc/logstash
+
+# Arguments to pass to logstash
+LS_OPTS="--path.settings ${LS_SETTINGS_DIR}"
+
+# Arguments to pass to java
+LS_JAVA_OPTS=""
+
+# pidfiles aren't used the same way for upstart and systemd; this is for sysv users.
+LS_PIDFILE=/var/run/logstash.pid
+
+# user and group id to be invoked as
+LS_USER=logstash
+LS_GROUP=logstash
+
+# Enable GC logging by uncommenting the appropriate lines in the GC logging
+# section in jvm.options
+LS_GC_LOG_FILE=/var/log/logstash/gc.log
+
+# Open file limit
+LS_OPEN_FILES=16384
+
+# Nice level
+LS_NICE=19
+
+# Change these to have the init script named and described differently
+# This is useful when running multiple instances of Logstash on the same
+# physical box or vm
+SERVICE_NAME="logstash"
+SERVICE_DESCRIPTION="logstash"
+
+# If you need to run a command or script before launching Logstash, put it
+# between the lines beginning with `read` and `EOM`, and uncomment those lines.
+###
+## read -r -d '' PRESTART << EOM
+## EOM

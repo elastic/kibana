@@ -1,0 +1,1 @@
+load 'jopenssl22/openssl/config.rb'

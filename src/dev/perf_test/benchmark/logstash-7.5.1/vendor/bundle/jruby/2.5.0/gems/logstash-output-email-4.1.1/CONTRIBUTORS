@@ -1,0 +1,23 @@
+The following is a list of people who have contributed ideas, code, bug
+reports, or in general have helped logstash along its way.
+
+Contributors:
+* Alexander Fortin (shaftoe)
+* Colin Surprenant (colinsurprenant)
+* Greg Mefford (GregMefford)
+* James Turnbull (jamtur01)
+* John E. Vincent (lusis)
+* Jordan Sissel (jordansissel)
+* Kurt Hurtado (kurtado)
+* Kushal Pisavadia (KushalP)
+* Nick Padilla (NickPadilla)
+* Philippe Weber (wiibaa)
+* Pier-Hugues Pellerin (ph)
+* Richard Pijnenburg (electrical)
+* Stian Mathiassen (smat)
+* Tim Meighen (tmeighen)
+
+Note: If you've sent us patches, bug reports, or otherwise contributed to
+Logstash, and you aren't on the list above and want to be, please let us know
+and we'll make sure you're here. Contributions from folks like you are what make
+open source awesome.

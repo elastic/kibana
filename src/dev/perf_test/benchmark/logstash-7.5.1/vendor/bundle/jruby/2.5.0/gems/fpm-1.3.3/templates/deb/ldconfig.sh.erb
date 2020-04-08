@@ -1,0 +1,13 @@
+#!/bin/sh
+# This script is automatically added by fpm when you specify
+# conditions that usually require running ldconfig upon
+# package installation and removal.
+#
+# For example, if you set '--deb-shlibs' in creating your package,
+# fpm will use this script if you don't provide your own --after-install or
+# --after-remove
+set -e
+
+case $1 in
+  configure|remove) ldconfig ;;
+esac

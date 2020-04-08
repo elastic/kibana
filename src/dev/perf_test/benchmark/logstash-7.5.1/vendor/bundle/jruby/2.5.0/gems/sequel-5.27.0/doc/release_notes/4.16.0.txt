@@ -1,0 +1,36 @@
+= New Features
+
+* Model#qualified_pk_hash has been added, which is similar to
+  Model#pk_hash, but uses qualified keys.
+
+* Dataset#distinct now accepts a virtual row block.
+
+* Database#drop_table with :foreign=>true option now drops foreign
+  tables on PostgreSQL.  Database#create_table with :foreign option
+  is now reversible on PostgreSQL.
+
+= Other Improvements
+
+* Sequel::Model.cache_associations = false now skips the database's
+  schema cache when loading the schema for a model.  This fixes
+  some issues in environments that use code reloading.
+
+* Database#create_table? and #create_join_table? no longer use
+  IF NOT EXISTS if indexes are being created.
+
+* Model.primary_key_hash and .qualified_primary_key_hash have been
+  optimized.
+
+* validates_unique in the validation_helpers plugin now uses a
+  qualified primary key if the model's dataset is joined.  This fixes
+  a case when the auto_validations and class_table_inheritance
+  plugins are used together.
+
+* Disconnect errors are now recognized in the postgres adapter when
+  SSL is used for connecting.
+
+* Empty string default values are no longer converted to nil default
+  values on MySQL.
+
+* Database#foreign_key_list now works correctly on Microsoft SQL
+  Server 2005.

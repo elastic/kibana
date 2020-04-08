@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" codebase="file:.">
+    <information>
+        <title>JRuby IRB Console</title>
+        <vendor>The JRuby Team</vendor>
+        <description>Sample WebStart Application with JRuby</description>
+        <description kind="short">JRuby IRB Console Sample</description>
+        <homepage href="http://jruby.org/"/>
+    </information>
+    <resources>
+        <j2se version="1.6+"/>
+        <jar href="jars/jruby-console.jar" download="eager"/>
+    </resources>
+    <application-desc main-class="org.jruby.demo.readline.IRBConsole"/>
+</jnlp>

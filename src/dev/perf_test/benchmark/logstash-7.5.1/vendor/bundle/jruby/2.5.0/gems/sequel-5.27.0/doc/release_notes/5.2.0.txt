@@ -1,0 +1,33 @@
+= New Features
+
+* A pg_extended_date_support extension has been added.  This
+  extension adds support for infinite and BC dates/timestamps on
+  PostgreSQL.
+
+  The postgres adapter already had a convert_infinite_timestamps
+  setting, but it wasn't supported in the jdbc/postgresql adapter
+  and it didn't handle BC dates/timestamps.  Setting a non-default
+  convert_infinite_timestamps setting in the postgres adapter will
+  now automatically load the extension for backwards compatibility.
+
+  The pg_extended_date_support extension by default just fixes the
+  handling of BC dates/timestamps.  To get it to handle infinite
+  timestamps, you need to choose the appropriate setting for your
+  application:
+
+    DB.extension :pg_extended_date_support
+    DB.convert_infinite_timestamps = :string # or :float or :nil
+
+  This extension also enables the handling of timezone offsets
+  with seconds, which is not natively supported by ruby's Time
+  class in ruby <2.5.
+
+= Improvements
+
+* The jdbc/mysql adapter now handles smallint unsigned and
+  integer unsigned column types where the value for the column
+  is outside of the range of a Java short or integer.
+
+* Sequel::Model.inherited no longer modifies an existing @dataset
+  instance variable if one has already been set.  This fixes a
+  regression that was introduced in Sequel 5.0.0.

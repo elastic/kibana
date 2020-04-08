@@ -1,0 +1,109 @@
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2010-06-01'
+:operations:
+- :name: CancelJob
+  :method: :cancel_job
+  :inputs:
+    JobId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CancelJobResult:
+        :ignore: true
+        :children:
+          Success:
+            :type: :boolean
+- :name: CreateJob
+  :method: :create_job
+  :inputs:
+    JobType:
+    - :string
+    - :required
+    Manifest:
+    - :string
+    - :required
+    ManifestAddendum:
+    - :string
+    ValidateOnly:
+    - :boolean
+    - :required
+  :outputs:
+    :children:
+      CreateJobResult:
+        :ignore: true
+- :name: GetStatus
+  :method: :get_status
+  :inputs:
+    JobId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetStatusResult:
+        :ignore: true
+        :children:
+          ErrorCount:
+            :type: :integer
+          CreationDate:
+            :type: :time
+- :name: ListJobs
+  :method: :list_jobs
+  :inputs:
+    MaxJobs:
+    - :integer
+    Marker:
+    - :string
+  :outputs:
+    :children:
+      ListJobsResult:
+        :ignore: true
+        :children:
+          Jobs:
+            :ignore: true
+            :children:
+              member:
+                :rename: :jobs
+                :list: true
+                :children:
+                  CreationDate:
+                    :type: :time
+                  IsCanceled:
+                    :type: :boolean
+          IsTruncated:
+            :type: :boolean
+- :name: UpdateJob
+  :method: :update_job
+  :inputs:
+    JobId:
+    - :string
+    - :required
+    Manifest:
+    - :string
+    - :required
+    JobType:
+    - :string
+    - :required
+    ValidateOnly:
+    - :boolean
+    - :required
+  :outputs:
+    :children:
+      UpdateJobResult:
+        :ignore: true
+        :children:
+          Success:
+            :type: :boolean

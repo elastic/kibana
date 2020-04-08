@@ -1,0 +1,44 @@
+= New Features
+
+* Add Dataset#grouping_sets to support GROUP BY GROUPING SETS on
+  PostgreSQL 9.5+, MSSQL 2008+, Oracle, DB2, and SQLAnywhere:
+
+    DB[:test].group([:type_id, :b], :type_id, []).grouping_sets
+    # SELECT * FROM test
+    # GROUP BY GROUPING SETS((type_id, b), (type_id), ())
+
+* Sequel::NoMatchingRow exceptions raised by Sequel now give access
+  to the dataset that raised the exception via the dataset method.
+  This makes it easier to write generic error handling code.
+
+* Support :if_exists option to drop_column on PostgreSQL:
+
+    DB.drop_column :t, :col, :if_exists=>true 
+    ALTER TABLE t DROP COLUMN IF EXISTS col
+
+= Other Improvements
+
+* Make the class_table_inheritance plugin work correctly without an
+  sti_key.  This was broken in a recent refactoring to make class
+  table inheritance support multiple classes for a single table.
+
+* Make Class.new(ModelClass){set_dataset :table} work correctly on
+  ruby 1.8.  This was broken in a refactoring to allow the
+  singular_table_names plugin to work.
+
+* Make offset emulation via ROW_NUMBER better handle ambiguous column
+  names for datasets without an ORDER BY clause, but with an explicit
+  SELECT clause.
+
+* Make pg_range extension use PostgreSQL range function constructors
+  instead of casting string literals to the appropriate range type,
+  if the range type is known.  This allows arbitrary expressions to
+  be used inside ranges, such as CURRENT_TIMESTAMP in timestamp
+  ranges.
+
+* Make Dataset#== not consider frozen status.
+
+* Allow Dataset#prepare on already prepared statements in situations
+  where determining the SQL for a prepared statement requires it.
+
+* Detect additional disconnect errors when using the tinytds adapter.

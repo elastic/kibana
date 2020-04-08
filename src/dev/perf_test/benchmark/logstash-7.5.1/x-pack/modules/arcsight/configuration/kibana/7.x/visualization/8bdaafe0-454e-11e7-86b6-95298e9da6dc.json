@@ -1,0 +1,11 @@
+{
+  "title": "OS Source and Destination Overview",
+  "visState": "{\"title\":\"OS Source and Destination Overview\",\"type\":\"metric\",\"params\":{\"handleNoResults\":true,\"fontSize\":\"25\"},\"aggs\":[{\"id\":\"9\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"sourceHostName\",\"customLabel\":\"Source Hosts\"}},{\"id\":\"10\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"destinationHostName\",\"customLabel\":\"Destination Hosts\"}},{\"id\":\"11\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"sourceUserName\",\"customLabel\":\"Source Users\"}},{\"id\":\"12\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"destinationUserName\",\"customLabel\":\"Destination Users\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "savedSearchId": "7a2fc9c0-454d-11e7-86b6-95298e9da6dc",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

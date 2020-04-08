@@ -1,0 +1,2583 @@
+=== 5.27.0 (2019-12-01)
+
+* Add Sequel::DEFAULT for a DEFAULT expression, useful for assigning to default values (jeremyevans)
+
+* Make Postgres::ArrayOp#join in pg_array_ops extension work correctly on PostgreSQL <9.1 (jeremyevans)
+
+* Make pg_enum extension work correctly on PostgreSQL 8.3-9.0 (jeremyevans)
+
+* Emulate FILTER clause for aggregate functions using CASE on databases not supporting it directly (jeremyevans)
+
+* Support ordering by NULLS FIRST/NULLS LAST without emulation on SQLite 3.30+ (jeremyevans)
+
+=== 5.26.0 (2019-11-01)
+
+* Recognize two additional foreign key constraint violation codes on MySQL 8.0.13+ (rianmcguire) (#1657)
+
+* Support table aliases for single-table INSERT statements on PostgreSQL 9.5+ (jeremyevans) (#1656)
+
+* Implement Sequel::Postgres::PGRange#hash so instances work correctly in hashes (jeremyevans) (#1648)
+
+* Make dirty plugin work correctly with typecast_on_load plugin (jeremyevans) (#1647)
+
+* Add support for :require_modification option when setting up nested_attributes (jeremyevans)
+
+* Add support for SQL/JSON path expressions to the pg_json_ops extension, supported by PostgreSQL 12+ (jeremyevans)
+
+=== 5.25.0 (2019-10-01)
+
+* Fix Sequel::SQL::NumericMethods#coerce to not raise NoMethodError if super method is not defined (jeremyevans) (#1645)
+
+* Allow setting a default for a column that already has a default on Microsoft SQL Server (jeremyevans)
+
+* Fix keyword argument separation warnings on Ruby master branch in csv_serializer plugin (jeremyevans)
+
+* Add association_multi_add_remove plugin for adding/removing multiple associated objects in a single method call (AlexWayfer, jeremyevans) (#1641, #1643)
+
+* Make sharding plugin integrate with server_block extension (jeremyevans)
+
+=== 5.24.0 (2019-09-01)
+
+* Add Database#skip_logging? private method designed for extensions to force query timing even if no logger is present (adam12) (#1640)
+
+* Allow a hostname specified in a defaults_file in the mysql2 adapter, by not explicitly setting :host (sapio-bdeamer) (#1638)
+
+* Convert all database array types to Ruby arrays in the jdbc adapter (jeremyevans)
+
+* Add static_cache_cache plugin for caching rows for static_cache models to a file to avoid database queries during model initialization (jeremyevans)
+
+* Add :cache_file plugin option to pg_auto_constraint_validations plugin, for caching metadata to a file for faster initialization (jeremyevans)
+
+* Support :unique_deferrable and :primary_key_deferrable column options (jeremyevans)
+
+* Support :generated_always_as column option on PostgreSQL 12+ (jeremyevans)
+
+=== 5.23.0 (2019-08-01)
+
+* Work around a bug on jdbc-sqlite3 3.27.2.1 when parsing schema for tables with columns with default values (jeremyevans)
+
+* Work around a bug in jdbc-sqlite3 3.27.2.1 when in Database#foreign_key_list in the jdbc/sqlite3 adapter (jeremyevans)
+
+* Make Dataset#execute* private methods respect explicit servers option, fixing Dataset#paged_each in the postgres adapter when sharding (jeremyevans) (#1632)
+
+* Handle instances of subclasses of core classes when wrapping objects in the pg_json extension (jeremyevans) (#1631)
+
+* Support :ansi Database option in the tinytds adapter (kenaniah) (#1629)
+
+* Support cross-database and linked servers when parsing schema on Microsoft SQL Server (kenaniah) (#1629)
+
+* Add insert_conflict plugin for automatically handling unique constraint conflicts when saving new model instances on PostgreSQL 9.5+ and SQLite 3.24.0+ (jeremyevans)
+
+* Avoid errors when parsing schema in the mock sqlite adapter (jeremyevans)
+
+* Avoid possible thread-safety issue in the timezones support (jeremyevans)
+
+* Handle offsets when typecasting an array or hash to datetime when Sequel.datetime_class = Time (jeremyevans)
+
+* Support Sequel.datetime_class = Time when using the named_timezones extension (jeremyevans)
+
+=== 5.22.0 (2019-07-01)
+
+* Fix Dataset#multi_insert and #import with return: :primary_key on MSSQL when the dataset has a row_proc (jeremyevans) (#1627)
+
+* Support Dataset#with :materialized option on PostgreSQL 12 for [NOT] MATERIALIZED (jeremyevans)
+
+* Make Database#primary_key_sequence work on tables without serial sequences on PostgreSQL 12 (jeremyevans)
+
+* Support ruby 2.7+ startless ranges in the pg_range extension (jeremyevans)
+
+* Support ruby 2.7+ startless, endless ranges in filters, using an always true condition for them (jeremyevans)
+
+* Support ruby 2.7+ startless ranges in filters, using just a <= or < operator for them (jeremyevans)
+
+=== 5.21.0 (2019-06-01)
+
+* Recognize additional DatabaseLockTimeout errors in mysql and mysql2 adapters (jeremyevans)
+
+* Disallow eager_graph of ancestors and descendants associations when using the rcte_tree plugin (jeremyevans)
+
+* Make jdbc/mysql adapter work when using JRuby with Java 11 (jeremyevans)
+
+* Support window function options :window, :exclude, and :frame :type=>:groups, :start, and :end on SQLite 3.28.0+ (jeremyevans)
+
+* Make the server_block extension respect the :servers_hash Database option (jeremyevans)
+
+* Typecast string input for json/jsonb types as JSON strings instead of parsing as JSON in the pg_json extension when Database#typecast_json_strings is set to true (jeremyevans)
+
+* Wrap JSON primitives (string, number, true, false, nil) in the pg_json extension when Database#wrap_json_primitives is set to true (jeremyevans)
+
+* Convert the Database :timeout option to an integer in the sqlite adapter (jeremyevans) (#1620)
+
+* Improve performance in ado adapter using more efficient inner loop (jeremyevans)
+
+* Improve performance in ado adapter using faster callables for type conversion (jeremyevans)
+
+* Fix handling of decimal values in the ado adapter when using locales where the decimal separator is , and not . (jeremyevans) (#1619)
+
+=== 5.20.0 (2019-05-01)
+
+* Fix reversing of alter_table add_foreign_key when :type option is used (jeremyevans) (#1615)
+
+* Switch from using instance_exec to define_method for model associations and in some plugins (jeremyevans)
+
+* Fix Database#server_version when using mysql2 adapter with mysql driver on MariaDB 10+ database (v-kolesnikov) (#1614)
+
+* Make one_to_one setter method handle models that use joined datasets (jeremyevans) (#1612)
+
+* Make auto_validations plugin work with the class_table_inheritance plugin (jeremyevans) (#1611)
+
+* Avoid use of instance_exec for PlaceholderLiteralString#with_dataset (jeremyevans)
+
+* Recognize float unsigned database types as float (keeguon, jeremyevans) (#1609)
+
+* Support :savepoint options to Database#{after_commit,after_rollback} for making the hooks handle savepoints (jeremyevans)
+
+* Avoid use of instance_exec in association_dependencies plugin (jeremyevans)
+
+* Add pg_auto_constraint_validation_override to the pg_auto_constraint_validations plugin, for customizing columns and error message per constraint (jeremyevans)
+
+* Make Database#check_constraints on PostgreSQL also include constraints where the related columns are not known (jeremyevans)
+
+=== 5.19.0 (2019-04-02)
+
+* Use more optimized approach to merging hashes in ruby 2.5+ (jeremyevans)
+
+* Use SQLite extended result codes when using ruby-sqlite3 1.4.0+ (jeremyevans)
+
+* Recognize additional SQLite extended result codes in the shared sqlite adapter (jeremyevans)
+
+* Add Database#rename_enum_value to the pg_enum extension (AlexWayfer) (#1603)
+
+* Make Database#drop_table delete constraint validations metadata for that table if using the constraint_validations extension (jeremyevans)
+
+* Speed up row fetching in the sqlite adapter (jeremyevans)
+
+* Speed up row fetching and type conversion in the sqlanywhere adapter (jeremyevans)
+
+=== 5.18.0 (2019-03-01)
+
+* Use singleton .call methods on plain objects instead of procs/methods for faster type conversion (jeremyevans)
+
+* Add Sequel::SQL::Blob.call to avoid indirection when converting values from the database (jeremyevans)
+
+* Use while instead of each for inner loops in sqlite and jdbc adapters for better performance (jeremyevans)
+
+* Make after_initialize plugin not make the argument to Model.call optional (jeremyevans)
+
+* Allow Dataset#paged_each to be called without a block in the postgres and mysql2 adapters (jeremyevans)
+
+* Remove flow-control exceptions in connection_expiration and connection_validator extensions (jeremyevans)
+
+* Add throw_failures plugin for throwing ValidationFailed and HookFailed exceptions instead of raising them, up to 10x performance increase on JRuby (jeremyevans)
+
+* Support tzinfo 2 in addition to tzinfo 1 in the named_timezones extension (jeremyevans) (#1596)
+
+=== 5.17.0 (2019-02-01)
+
+* Support skip_auto_validations instance method in auto_validations plugin (oldgreen, jeremyevans) (#1592)
+
+* Support :preconnect_extensions Database option for loading extensions before :preconnect option (jeremyevans)
+
+* Avoid usage of Proc.new with implicit block as ruby 2.7+ deprecates this behavior (jeremyevans)
+
+* Allow Sequel[].as to be used for constructing aliases with eager_graph (e.g. Model.eager_graph(Sequel[:a].as(:b))) (jeremyevans) (#1588)
+
+=== 5.16.0 (2019-01-02)
+
+* Convert integer columns to bigint columns when copying SQLite databases to other databases using bin/sequel -C (jeremyevans) (#1584)
+
+* Use nicer error messages for missing or empty migration directories (Lavode) (#1585)
+
+* Make alter table emulation work correctly in SQLite 3.26.0+ (jeremyevans) (#1582)
+
+* Do not unset new one_to_one associated objects' reciprocal associations before saving associated objects in the nested_attributes plugin (jeremyevans)
+
+* Do not validate new one_to_one associated objects twice when saving in the nested_attributes plugin (jeremyevans)
+
+* Fix :qualify_tables option to class_table_inheritance plugin to work correctly with subclasses of subclasses (benalavi) (#1581)
+
+* Make class_table_inheritance plugin use the schema cache instead of sending a query to get columns for tables (kenaniah) (#1580)
+
+* Remove loading of mysqlplus in the mysql adapter (jeremyevans)
+
+* Make mysql adapter work correctly on ruby 2.6+ (jeremyevans)
+
+* Add Database#rollback_on_exit to rollback transactions instead of committing them when exiting the transaction block (jeremyevans)
+
+* Enable window functions in SQLite 3.26.0+ (jeremyevans)
+
+* Do not override existing methods when creating Sequel::Model attribute getter/setter methods (jeremyevans) (#1578)
+
+* Use parentheses for expressions being subscripted (e.g. (array_agg(column))[1]) (jeremyevans)
+
+=== 5.15.0 (2018-12-01)
+
+* Add :conn_str option in the postgres adapter for PostgreSQL connection strings, if the pg driver is used (graywolf) (#1572)
+
+* Add :qualify_tables option to class_table_inheritance plugin to automatically qualify subclass tables with superclass qualifier (benalavi) (#1571)
+
+* Access already allocated connections in a thread safe manner when checking out connections in the sharded threaded connection pool (jeremyevans)
+
+* Automatically support datasets using qualified tables in the class_table_inheritance plugin without having to use the :alias option (benalavi) (#1565)
+
+* Support rename_column without emulation on SQLite 3.25+ (jeremyevans)
+
+* Do not remove currently cached many_to_one associated objects when changing the related foreign key value from nil to non-nil (jeremyevans)
+
+* Do not validate new *_to_many associated objects twice when saving in the nested_attributes plugin (jeremyevans)
+
+* Add Model#skip_validation_on_next_save! for skipping validation on next save call (jeremyevans)
+
+=== 5.14.0 (2018-11-01)
+
+* Drop defaulting the :port option to 5432 in the postgres adapter, so that setting the :service option in :driver_options works (jeremyevans) (#1558)
+
+* Do not cache values for columns without parseable defaults when using :cache option in defaults_setter plugin (jeremyevans)
+
+* Emulate NULLS FIRST/LAST ordering on databases that do not natively support it (jeremyevans)
+
+* Do not modify boolean expressions created from string or array if string or array is modified (jeremyevans)
+
+* Make roots and roots_dataset dataset methods instead of class methods in the tree plugin (JelF) (#1554)
+
+* Do not cache dataset SQL if dataset uses subquery that cannot cache SQL (jeremyevans)
+
+* Make Model#=== work correctly for models with composite primary keys (jeremyevans)
+
+* Add Model#pk_equal? as a more descriptive name for Model#=== (AlexWayfer) (#1550)
+
+* Do not push down expression inversion in cases where it may result in incorrect behavior (e.g. ANY/SOME/ALL operators) (jeremyevans) (#1549)
+
+=== 5.13.0 (2018-10-01)
+
+* Support :single_value type in prepared statements (rintaun) (#1547)
+
+* Make Model.all in static_cache plugin accept a block (AlexWayfer, jeremyevans) (#1543)
+
+* Add constant_sql_override extension for overriding SQL used for constants such as CURRENT_TIMESTAMP (celsworth) (#1538)
+
+* Do not cache from_self datasets if options are given (jeremyevans)
+
+=== 5.12.0 (2018-08-31)
+
+* Make constraint_validations extension respect Database#constraint_validations_table setting (jeremyevans)
+
+* Make Sequel.extension load files from gems (jeremyevans)
+
+* Map clob prepared statement argument type to OCI8::CLOB in the oracle adapter (pipistrellka) (#1534)
+
+* Make Model.load_cache public in the static_cache plugin (AlexWayfer) (#1533)
+
+* Enable support for NOWAIT on MariaDB 10.3+ (jeremyevans)
+
+* Enable support for INTERSECT and EXCEPT on MariaDB 10.3+ (jeremyevans)
+
+* Make tactical_eager_loading plugin handle automatic eager loading for associated objects created by eager_graph (jeremyevans)
+
+* Cache eager_graph loader to speed up subsequent loads from the same dataset (jeremyevans)
+
+* Add caller_logging database extension to log callers before queries, useful during development (jeremyevans)
+
+* Add Database#call_procedure in the postgres adapter for calling PostgreSQL 11+ procedures (jeremyevans)
+
+* Add eager_graph_eager plugin for chaining eager association loads after eager_graph association loads (jeremyevans)
+
+* Support using Dataset#eager_graph in eager load callback for associations using join tables (jeremyevans)
+
+* Make Dataset#graph handle existing selections without determinable aliases by forcing a subselect (jeremyevans)
+
+* Freeze prepared statement arguments before returning the prepared statement (jeremyevans)
+
+* Refactor emulated prepared statement internals to use a placeholder literalizer (jeremyevans)
+
+=== 5.11.0 (2018-08-01)
+
+* Fix using the jdbc/sqlserver adapter on JRuby 9.2+ (jeremyevans)
+
+* Fix dumping schema for numeric/decimal columns with default values, broken starting in 5.9.0 (jeremyevans)
+
+* Recognize additional check constraint violations on certain versions of SQLite (jeremyevans)
+
+* Use cached model instances for Model.first calls without an argument or with a single integer argument in the static_cache plugin (AlexWayfer) (#1529)
+
+* Support ON CONFLICT clause for INSERT on SQLite 3.24+ (jeremyevans)
+
+* Support Dataset#window for WINDOW clause on MySQL 8 and SQLAnywhere (jeremyevans)
+
+* Enable window function support on SQLAnywhere (jeremyevans)
+
+* Support using a hash as a window function :frame option value, with support for ROWS/RANGE/GROUPS, numeric offsets, and EXCLUDE (jeremyevans)
+
+* Allow using set_column_default with a nil value to remove the default value for a column on MySQL when the column is NOT NULL (jeremyevans)
+
+=== 5.10.0 (2018-07-01)
+
+* Use input type casts when using the postgres adapter with pg 0.18+ to reduce string allocations for some primitive types used as prepared statement arguments (jeremyevans)
+
+* Assume local time if database timezone not specified when handling BC timestamps on JRuby 9.2.0.0 in the pg_extended_date_support extension (jeremyevans)
+
+* Fix parsing of timetz types in the jdbc/postgresql adapter (jeremyevans)
+
+* Make SQLTime.parse respect SQLTime.date and Sequel.application_timezone (jeremyevans)
+
+* Add :top as an option in the list plugin (celsworth) (#1526)
+
+* Fix Model#{ancestors,descendants,self_and_siblings} in the tree plugin when custom parent/children association names are used (jeremyevans) (#1525)
+
+* Treat read-only mode error as disconnect error on mysql and mysql2 adapters, for better behavior on AWS Aurora cluster (jeremyevans)
+
+* Don't use cached placeholder literalizers for in Dataset#{first,where_all,where_each,where_single_value} if argument is empty array or hash (jeremyevans)
+
+* Support :tablespace option when adding tables, indexes, and materialized views on PostgreSQL (jeremyevans)
+
+* Support :include option for indexes on PostgreSQL 11+ (jeremyevans)
+
+* Allow the use of IN/NOT IN operators with set returning functions for Sequel::Model datasets (jeremyevans)
+
+* Make many_to_pg_array associations in the pg_array_associations plugin work on PostgreSQL 11 (jeremyevans)
+
+* Only load strscan library in pg_array extension if it is needed (jeremyevans)
+
+* Don't remove related many_to_one associations from cache when setting column value to existing value for model instances that have not been persisted (jeremyevans) (#1521)
+
+* Support ruby 2.6+ endless ranges in the pg_range extension (jeremyevans)
+
+* Support ruby 2.6+ endless ranges in filters, using just a >= operator for them (jeremyevans)
+
+=== 5.9.0 (2018-06-01)
+
+* Support generated columns on MySQL 5.7+ and MariaDB 5.2+ (wjordan, jeremyevans) (#1517)
+
+* Add escaped_like extension for creation of LIKE expressions with placeholders in the pattern without access to a dataset (jeremyevans)
+
+* Modify jdbc adapter exception handling to work around ::NativeException deprecation in JRuby 9.2 (jeremyevans)
+
+* Work around broken BC date handling in JRuby 9.2.0.0 (jeremyevans)
+
+* Switch use of BigDecimal.new() to BigDecimal(), since the former is deprecated (jeremyevans)
+
+* Add Sequel::VERSION_NUMBER for easier version comparisons (jeremyevans)
+
+* Add Model.has_dataset? to determine if the model class has a dataset (AlexWayfer) (#1508)
+
+* Support use of LIKE with ANY function on PostgreSQL by avoiding unnecessary use of ESCAPE syntax (jeremyevans)
+
+* Disconnect connections left allocated by dead threads instead of returning the connections to the pool (jeremyevans)
+
+* Make both threaded connection pools avoid disconnecting connections while holding the connection pool mutex (jeremyevans)
+
+* Don't deadlock when disconnecting connections in the sharded_threaded connection pool when using connection_validator or connection_expiration extensions (jeremyevans)
+
+* Don't modify hash argument passed in Model.nested_attributes in the nested_attributes plugin (jeremyevans)
+
+* Avoid unnecessary hash creation in many places (jeremyevans)
+
+* Fix duplicate objects in nested associations when eager_graphing cascaded many_to_one=>one_to_many associations (jeremyevans)
+
+=== 5.8.0 (2018-05-01)
+
+* Don't mark SQLAnywhere as supporting WITH in INSERT statement (jeremyevans)
+
+* Support :search_path as a shard option on PostgreSQL (jeremyevans)
+
+* Add Dataset#nowait for raising a Sequel::DatabaseLockTimeout when a locked row is encountered, supported on PostgreSQL, MySQL 8+, MSSQL, and Oracle (jeremyevans)
+
+* Support Dataset#skip_locked on MySQL 8+ (jeremyevans)
+
+* Make schema modification methods in the pg_enum extension work on a frozen Database object (jeremyevans)
+
+* Support common table expressions and window functions on MySQL 8+ (jeremyevans)
+
+* Ignore Dataset#explain :extended option on MySQL 5.7+, since extended output is then the MySQL default (jeremyevans)
+
+* Work around REGEXP BINARY not working correctly on MySQL 8+ by using REGEXP_LIKE with the 'c' match_type (jeremyevans)
+
+* Force correct column order in Database#foreign_key_list on MySQL (jeremyevans)
+
+* Add ConnectionPool#connection_expiration_random_delay to connection_expiration extension, to avoid thundering herd if preallocating connections (hex2a, jeremyevans) (#1503)
+
+* Emit deprecation warning in association_proxies plugin if using #filter on an association proxy, since behavior will change on ruby 2.6+ (utilum) (#1497)
+
+* Handle multiple add_constraint calls and a set_column_null call in the same alter_table block on SQLite (jeremyevans) (#1498)
+
+* Add Database#rename_enum to the pg_enum extension (AlexWayfer) (#1495)
+
+* Make tactical_eager_loading plugin respect the :allow_eager association option (jeremyevans) (#1494)
+
+* Add pg_auto_constraint_validations plugin, for automatically converting constraint violations to validation failures on PostgreSQL (jeremyevans)
+
+* Don't make Model#_valid? public in the error_splitter plugin (jeremyevans)
+
+* Support Database#indexes :include_partial option on PostgreSQL for including partial indexes (jeremyevans)
+
+* Include more diagnostic information in Database#error_info on PostgreSQL (jeremyevans)
+
+* Support Database#foreign_key_list :reverse option on PostgreSQL for parsing foreign key constraints that reference a given table (jeremyevans)
+
+* Add Database#check_constraints on PostgreSQL for parsing CHECK constraints (jeremyevans)
+
+* Don't use identity columns if :serial=>true or :type=>:serial|:bigserial column options are used (#1490) (jeremyevans)
+
+* Cache Dataset#select_all datasets if no arguments are given (jeremyevans)
+
+* Cache Dataset#returning datasets if no arguments are given (jeremyevans)
+
+* Cache Dataset#qualify datasets if no argument is given (jeremyevans)
+
+* Cache Dataset#lateral datasets (jeremyevans)
+
+* Cache Dataset#from_self datasets if no options are given (jeremyevans)
+
+* Cache Dataset#distinct datasets if no arguments or block is given (jeremyevans)
+
+=== 5.7.0 (2018-04-01)
+
+* Add Sequel.start_timer and .elapsed_seconds_since for more accurate elapsed time calculations on ruby 2.1+ (jeremyevans)
+
+* Run Dataset#with_sql_{all,each,first,single_value} using a cached dataset to avoid clobbering the dataset's columns (jeremyevans)
+
+* Add Database#convert_serial_to_identity on PostgreSQL 10.2+, which requires superuser access (jeremyevans)
+
+* Fix Database#server_version when connecting to PostgreSQL 10.1+ in certain cases (jeremyevans)
+
+* Free temporary clobs in the jdbc/oracle adapter to prevent a memory leak (jeremyevans) (#1482)
+
+* Treat prepared statement errors due to changing types as disconnect errors in the postgres adapter (jeremyevans) (#1481)
+
+* Add integer64 extension for treating Integer as a 64-bit integer when used as a generic type (jeremyevans)
+
+* Allow many_to_pg_array remove_all_* method cast appropriately to work correctly for non-integer types (jeremyevans)
+
+* Fix array_type for pg_array_to_many and many_to_pg_array associations in pg_array_associations plugin (jeremyevans)
+
+* Use identity columns instead of serial columns for primary keys on PostgreSQL 10.2+ (jeremyevans)
+
+* Support :identity option when creating columns on PostgreSQL 10+ to create identity columns (jeremyevans)
+
+* Add Dataset#overriding_{system,user}_value on PostgreSQL for use with PostgreSQL 10+ identity columns (jeremyevans)
+
+* Set :auto_increment schema entry correctly for PostgreSQL 10+ identity columns (jeremyevans)
+
+=== 5.6.0 (2018-03-01)
+
+* Dedup :db_type strings in schema hashes on Ruby 2.5+ (jeremyevans)
+
+* Make schema_caching extension work with :callable_default schema values (jeremyevans)
+
+* Freeze string valuse in hashes returned by Database#schema when using the schema_caching extension (jeremyevans)
+
+* Protect migration file loading with a mutex to not break when multiple threads load migration files simultaneously (jeremyevans)
+
+* Respect identifier mangling rules when renaming columns on Microsoft SQL Server (jeremyevans)
+
+=== 5.5.0 (2018-01-31)
+
+* Make Database#copy_table in the postgres adapter handle errors that occur while processing rows (jeremyevans) (#1470)
+
+* Cache results of changed_columns method in local variables in many places for better performance (jeremyevans)
+
+* Make modification_detection plugin not break column change detection for new objects (jeremyevans) (#1468)
+
+* Make pg_range extension set :ruby_default schema value for recognized range defaults (jeremyevans)
+
+* Make pg_interval extension set :ruby_default schema value for recognized interval defaults (jeremyevans)
+
+* Make pg_json extension set :callable_default schema value for empty json/jsonb array/hash defaults (jeremyevans)
+
+* Make pg_inet extension set :ruby_default schema value for recognized inet/cidr defaults (jeremyevans)
+
+* Make pg_hstore extension set :callable_default schema value for empty hstore defaults (jeremyevans)
+
+* Make pg_array extension set :callable_default schema value for recognized empty array defaults (jeremyevans) (#1466)
+
+* Make defaults_setter plugin prefer :callable_default db_schema values over :ruby_default db_schema values (jeremyevans)
+
+* Add defaults_setter plugin :cache option for caching default values returned (jeremyevans)
+
+* Freeze string values in hashes returned by Database#schema (jeremyevans)
+
+=== 5.4.0 (2018-01-04)
+
+* Enable fractional seconds in timestamps on DB2 (jeremyevans) (#1463)
+
+* Don't attempt to insert a second time if insert_select runs a query that doesn't return results, which can happen when triggers are used (jeremyevans)
+
+* Make Dataset#insert_select on PostgreSQL and MSSQL return false instead of nil if the INSERT query is sent to the database but returns no rows (jeremyevans)
+
+* Add index_caching extension for caching calls to Database#indexes (kenaniah, jeremyevans) (#1461)
+
+* Allow Database#indexes on SQLite, MSSQL, SQLAnywhere, and DB2 to handle SQL::Identifier values (jeremyevans)
+
+* Add pg_timestamptz extension for using timestamptz (timestamp with time zone) as the default timestamp type (jeremyevans)
+
+* Support Sequel.date_{add,sub} :cast option for setting cast type in date_arithmetic extension (jeremyevans)
+
+* Optimize Database#synchronize implementation on ruby 2.5+ (jeremyevans)
+
+* Add class_table_inheritance plugin :ignore_subclass_columns option (brianphillips) (#1459)
+
+* Make Dataset#to_xml in xml_serializer work with eager_graphed datasets (jeremyevans)
+
+* Make Dataset#to_json in json_serializer work with eager_graphed datasets (jeremyevans)
+
+* Cache Dataset#nullify dataset in the null_dataset extension (chanks) (#1456)
+
+* Add datetime_parse_to_time extension, for parsing timestamp strings without offsets using DateTime.parse.to_time (jeremyevans) (#1455)
+
+* Add WHERE NULL filter for Dataset#where calls with no existing filter, no argument, and where the virtual row block returns nil (jeremyevans)
+
+=== 5.3.0 (2017-12-01)
+
+* Add logger to Database instance before making first connection in bin/sequel (jeremyevans)
+
+* Drop support for PostgreSQL <8.1 in Database#indexes (jeremyevans)
+
+* Add synchronize_sql extension, for checking out a connection around SQL generation (KJTsanaktsidis, jeremyevans) (#1451)
+
+* Deprecate Dataset#where calls with no existing filter, no argument, and where the virtual row block returns nil (jeremyevans) (#1454)
+
+* Add DatasetModule#reverse for simpler use of descending orders (jeremyevans)
+
+* Support WITH clauses in subqueries on SQLite, but not in UNION/INTERSECT/EXCEPT (jeremyevans)
+
+* Hoist WITH clauses to INSERT statement level if INSERT subquery uses a CTE on MSSQL (jeremyevans)
+
+* Respect indislive and ignore indcheckxmin index attributes when using Database#indexes on PostgreSQL (jeremyevans)
+
+* Explicitly disallow use of server-side prepared statements when using Dataset#call in the jdbc/postgresql adapter (jeremyevans) (#1448)
+
+* Support common table expressions, window functions, dropping CHECK constraints, and recognizing CURRENT_DATE defaults on MariaDB 10.2+ (jeremyevans)
+
+* Make Database#reset_primary_key_sequence work on PostgreSQL 10+ (jeremyevans)
+
+* Support :connect_sqls Database option for easily issuing sql commands on all new connections (jeremyevans)
+
+* Support :extensions Database option for loading extensions when initializing, useful in connection strings (jeremyevans)
+
+* Avoid warning if trying to rollback after a commit or rollback raises an exception in the postgres adapter (jeremyevans)
+
+* Support Date::Infinity values in the pg_extended_date_support extension (jeremyevans)
+
+=== 5.2.0 (2017-10-27)
+
+* Fix type conversion for smallint unsigned and integer unsigned types on jdbc/mysql (jeremyevans) (#1443)
+
+* Add pg_extended_date_support extension, for handling infinite and BC dates/timestamps (jeremyevans)
+
+* Do not ignore existing @dataset instance variable when subclassing Sequel::Model (bjmllr) (#1435)
+
+=== 5.1.0 (2017-10-01)
+
+* Make jdbc/h2 and jdbc/hsqldb adapters respect :foreign_key_constraint_name option when adding new foreign key column (jeremyevans)
+
+* Do not issue unnecessary query for macaddr type oid when loading the pg_inet extension (jeltz) (#1423)
+
+* Make alter_table add_foreign_key with a column symbol reversible when using the :foreign_key_constraint_name option (jeremyevans) (#1422)
+
+* Do not raise an error if calling Model.freeze on a frozen model (jeremyevans) (#1421)
+
+* Make Database#copy_into in the jdbc/postgresql adapter handle multi-byte strings (ckoenig) (#1416)
+
+* Remove deprecated Model use_after_commit_rollback class and instance methods (jeremyevans)
+
+* Remove deprecated Model.allowed_columns method in the base model support (jeremyevans)
+
+* Remove deprecated Model.plugin_module_defined? private method (jeremyevans)
+
+* Remove deprecated support for Model#_before_validation private method (jeremyevans)
+
+=== 5.0.0 (2017-09-01)
+
+* Make bin/sequel -M option always use base 10 (jeremyevans)
+
+* Don't use savepoints when creating indexes inside a transaction on databases that don't support transactional schema modifications (jeremyevans) (#1407)
+
+* Support :if_not_exists option when creating indexes on PostgreSQL 9.5+ (DyegoCosta) (#1405)
+
+* Make threaded connection pools not block while connections are being made (jeremyevans)
+
+* SQL::Expression#clone and #dup now return self, since all expressions should be frozen value objects (jeremyevans)
+
+* Don't create empty arrays for unused association callbacks (jeremyevans)
+
+* Cache association method name symbols instead of recomputing them everytime (jeremyevans)
+
+* Raise an exception if attempting to create a prepared statement using a dataset with a delayed evaluation (jeremyevans)
+
+* Make ConnectionPool#size thread safe by using the pool mutex (jeremyevans)
+
+* Use instance_exec instead of instance_eval when passing a block, to work with lambdas that accept no arguments (jeremyevans)
+
+* Freeze SQL::StringAgg instances in string_agg extension (jeremyevans)
+
+* Freeze SQL::DateAdd instances in date_arithmetic extension (jeremyevans)
+
+* Freeze SQL::Expression.comparison_attrs (jeremyevans)
+
+* Rename SQL::Subscript#f to #expression, keeping #f as an alias (jeremyevans)
+
+* Require the :pool_class Database option be a class to use a custom connection pool (jeremyevans)
+
+* Make the class_table_inheritance plugin raise an Error during update if any UPDATE query does not affect a single row (jeremyevans)
+
+* Change most send calls to public_send unless calling private methods is expected (jeremyevans)
+
+* Database schema and schema generator methods now return nil (jeremyevans)
+
+* Model#validates_unique in the validation helpers plugin now defaults to only checking on new or modified values (jeremyevans)
+
+* Deprecate Model#_before_validation (private_method), use Model#before_validation now (jeremyevans)
+
+* Always run before/after/around validation hooks when saving, even when not validating the object (jeremyevans)
+
+* Deprecate Model use_after_commit_rollback class and instance accessors (jeremyevans)
+
+* Deprecate Model.allowed_columns reader (jeremyevans)
+
+* Freeze internal constants that shouldn't be modified at runtime (jeremyevans)
+
+* Attempt to connect to the database immediately when creating the Database instance (jeremyevans)
+
+* Make association_pks plugin delay the setting of associated objects until the current object is saved by default (jeremyevans)
+
+* Joined datasets used as model datasets are now automatically wrapped in a subquery (jeremyevans)
+
+* Setting an invalid dataset for a model class now raises an exception by default (jeremyevans)
+
+* Getting all values for newly created models now happens before calling after_create, instead of after (jeremyevans)
+
+* Remove use of @was_new/@columns_updated instance variables when saving model objects (jeremyevans)
+
+* Disable symbol splitting by default (jeremyevans)
+
+* Make datasets frozen by default (jeremyevans)
+
+* Drop support for ruby 1.8.7, minimum now is 1.9.2 (jeremyevans) 
+
+* Remove deprecated adapters, extensions, plugins, constants, and features (jeremyevans)
+
+=== 4.49.0 (2017-08-01)
+
+* Make dataset_associations plugin automatically alias tables when using many_through_many associations that join the same table multiple times (jeremyevans)
+
+* Deprecate using a :pool_class Database that is not a class or a symbol for a supported pool class (jeremyevans)
+
+* Deprecate :eager_loading_predicate_key association option and association reflection method (jeremyevans)
+
+* Deprecate Model.serialized_columns in the serialization plugin (jeremyevans)
+
+* Deprecate Model.cti_columns in the class_table_inheritance plugin (jeremyevans)
+
+* Deprecate SQL::AliasedExpression#aliaz, use #alias instead (jeremyevans)
+
+* Deprecate SQL::Function#f, use #name instead (jeremyevans)
+
+* Deprecate treating cross join with conditions as inner join on MySQL (jeremyevans)
+
+* Deprecate ConnectionPool#created_count, use #size instead (jeremyevans)
+
+* Deprecate ConnectionPool::CONNECTION_POOL_MAP, use the :pool_class option to specify a non-default connection pool (jeremyevans)
+
+* Deprecate Sequel::IBMDB::Connection#prepared_statements= in the ibmdb adapter (jeremyevans)
+
+* Deprecate DEFAULT_OPTIONS in validation_helpers, override default_validation_helpers_options private method instead (jeremyevans)
+
+* Deprecate model association before callbacks returning false to cancel the action (jeremyevans)
+
+* Support native offset syntax on Oracle 12 (timon) (#1397)
+
+* Deprecate Dataset#nullify! in the null_dataset extension (jeremyevans)
+
+* Deprecate Dataset#autoid=, #_fetch=, and #numrows= in the mock adapter (jeremyevans)
+
+* Deprecate loading plugins by requiring sequel_#{plugin} (jeremyevans)
+
+* Add Model.sti_class_from_sti_key in the single_table_inheritance plugin to get the appropriate class to use (Aryk) (#1396)
+
+* Make Sequel::Error#cause use #wrapped_exception if it exists on ruby 2.1+ (jeremyevans)
+
+* Make Dataset#where_all, #where_each, #where_single_value core dataset methods instead of just model dataset methods (jeremyevans)
+
+* Make Database#extend_datasets and Dataset#with_extend now use a Dataset::DatasetModule instance if given a block (jeremyevans)
+
+* Add Sequel::Dataset::DatasetModule, now a superclass of Sequel::Model::DatasetModule (jeremyevans)
+
+* Make composition plugin with :mapping option work correctly if Model#get_column_value is overridden (jeremyevans)
+
+* Support Dataset#paged_each :stream => false option on mysql2 to disable streaming (Aryk) (#1395)
+
+* Make datetimeoffset handling in the jdbc/sqlserver adapter work on more drivers (jeremyevans)
+
+* Make alter_table add_primary_key work correctly on H2 1.4+ (jeremyevans)
+
+* Support :sslrootcert Database option in the postgres adapter (dleavitt) (#1391)
+
+=== 4.48.0 (2017-07-01)
+
+* Deprecate Model.<< (jeremyevans)
+
+* Deprecate Dataset#{and,exclude_where,range,interval}, move to sequel_4_dataset_methods extension (jeremyevans)
+
+* Make Database#indexes not include partial indexes on SQLite 3.8.8+ (jeremyevans)
+
+* Make Database#indexes include indexes created automatically from unique constraints on SQLite 3.8.8+ (jeremyevans)
+
+* Deprecate Sequel::Postgres::PG_TYPES, conversion procs should not be registered per-Database (jeremyevans)
+
+* Add Database#add_conversion_proc method on PostgreSQL for registering conversion procs (jeremyevans)
+
+* Deprecate unexpected values passed to Dataset#insert_conflict on SQLite (jeremyevans)
+
+* Deprecate Sequel::SqlAnywhere::Dataset#convert_smallint_to_bool= method (jeremyevans)
+
+* Deprecate Sequel::SqlAnywhere.convert_smallint_to_bool accessor (jeremyevans)
+
+* Use savepoints around index creation if creating table inside transaction if ignore_index_errors is used (jeremyevans)
+
+* Deprecate treating :natrual_inner join type on MySQL as NATURAL LEFT JOIN (jeremyevans)
+
+* Deprecate Dataset#mssql_unicode_strings= on Microsoft SQL Server (jeremyevans)
+
+* Preserve encoding when parsing PostgreSQL arrays (jeltz) (#1387)
+
+* Deprecate external modification of Sequel::JDBC::TypeConvertor (jeremyevans)
+
+* Deprecate Sequel::DB2.use_clob_as_blob accessor (jeremyevans)
+
+* Add Database#use_clob_as_blob accessor on DB2 (jeremyevans)
+
+* Deprecate SEQUEL_POSTGRES_USES_PG constant (jeremyevans)
+
+* Do not swallow original exception if exception is raised inside Database#copy_table on PostgreSQL (jeremyevans)
+
+* Deprecate Sequel::Postgres.client_min_messages and force_standard_strings accessors (jeremyevans)
+
+* Deprecate Sequel::Postgres.use_iso_date_format accessor (jeremyevans)
+
+* Do not allow connection in postgres adapter if postgres-pr driver is used and force_standard_strings is false (jeremyevans)
+
+* Drop support for ancient postgres driver in postgres adapter, now only pg and postgres-pr drivers are supported (jeremyevans)
+
+* Deprecate Sequel::MySQL.convert_invalid_date_time accessor (jeremyevans)
+
+* Deprecate Sequel::MySQL.convert_tinyint_to_bool accessor (jeremyevans)
+
+* Deprecate Sequel::MySQL.default_{charset,collate,engine} accessors (jeremyevans)
+
+* Add Database#default_{charset,collate,engine} accessors on MySQL (jeremyevans)
+
+* Make mock adapter thread safe (jeremyevans)
+
+* Deprecate Sequel::JDBC::Dataset#convert_types accessor (jeremyevans)
+
+* Add Dataset#with_convert_types in jdbc adapter (jeremyevans)
+
+* Deprecate Sequel::IBMDB::Dataset#convert_smallint_to_bool= method (jeremyevans)
+
+* Deprecate Sequel::IBMDB.convert_smallint_to_bool accessor (jeremyevans)
+
+* Add Database#convert_smallint_to_bool accessor in the ibmdb adapter (jeremyevans)
+
+* Deprecate sequel_3_dataset_methods extension (jeremyevans)
+
+* Deprecate query_literals extension (jeremyevans)
+
+* Deprecate using subtype conversion procs added after registering composite type in the pg_row extension (jeremyevans)
+
+* Don't try canceling copy in Database#copy_into if copier is not created yet (aakashAu) (#1384)
+
+* Deprecate global conversion procs added by pg_* extensions, when extension isn't loaded into Database instance (jeremyevans)
+
+* Deprecate Sequel::Postgres::PGRange.register in the pg_range extension (jeremyevans)
+
+* Deprecate Sequel::Postgres::PGArray.register in the pg_array extension (jeremyevans)
+
+* Deprecate Database#copy_conversion_procs (private method) on PostgreSQL (jeremyevans)
+
+* Deprecate Database#reset_conversion_procs on PostgreSQL (jeremyevans)
+
+* Deprecate meta_def extension (jeremyevans)
+
+* Make class_table_inheritance plugin with :alias option not use subquery for datasets that don't join (jeremyevans)
+
+* Deprecate hash_aliases extension (jeremyevans)
+
+* Deprecate filter_having extension (jeremyevans)
+
+* Deprecate empty_array_ignore_nulls extension (jeremyevans)
+
+* Deprecate Array#sql_array in the core_extensions extension (jeremyevans)
+
+* Make validation_helpers plugin :allow_blank option work correctly when the blank extension is not loaded (jeremyevans)
+
+* Make validation_class_methods plugin no longer require the blank extension (jeremyevans)
+
+* Clear cached associations when touching associations in the touch plugin (jeremyevans)
+
+* Make pg_array_associations model plugin load pg_array extension into database (jeremyevans)
+
+* Remove support for :strict option in nested_attributes plugin, use :unmatched_pk option instead (jeremyevans)
+
+* Make to_json class/dataset method in json_serializer plugin accept :instance_block option to pass block to Model#to_json (jeremyevans)
+
+* Make to_json methods in json_serializer plugin accept blocks that are used to transform values before serializing to JSON (jeremyevans)
+
+* Make Sequel.object_to_json pass block to #to_json (jeremyevans)
+
+* Deprecate identifier_columns plugin, not needed with Sequel.split_symbols = false (jeremyevans)
+
+* Make reloading column_conflicts plugin not remove existing conflict markings (jeremyevans)
+
+* Deprecate cti_base_model, cti_key, and cti_model_map class methods in class_table_inheritance plugin (jeremyevans)
+
+* Make Model.skip_auto_validations(:not_null) in the auto_validations plugin skip not null checks for columns with default values (jeremyevans)
+
+* Make Database#copy_into in jdbc/postgresql adapter respect :server option (jeremyevans)
+
+* Make #to_hash and #to_hash_groups handle options in the static_cache plugin, and add rename #to_hash to #as_hash (jeremyevans)
+
+* Rename Dataset#to_hash to #as_hash, and add #to_hash as an alias, to allow undefing #to_hash to fix ruby calling it implicitly (jeremyevans) (#1375)
+
+* Handle PG* constants deprecated in pg 0.21.0 in the postgres adapter (jeremyevans) (#1377, #1378)
+
+* Support :association_pks_use_associated_table association option in association_pks plugin (jeremyevans)
+
+* Make pg_hstore extension reset hstore conversion proc when running Database#reset_conversion_procs (jeremyevans)
+
+* Fix incorrect SQL used for inserting into a CTI subclass sharing the primary table when using the :alias option (jeremyevans)
+
+=== 4.47.0 (2017-06-01)
+
+* Deprecate pg_typecast_on_load plugin, only useful on deprecated do and swift adapters (jeremyevans)
+
+* Deprecate association_autoreloading and many_to_one_pk_lookup plugins, which were made the default model behavior in Sequel 4 (jeremyevans)
+
+* Deprecate setting invalid datasets for models unless required_valid_table = false (jeremyevans)
+
+* Make Model.require_valid_table = true not raise for datasets where Database#schema raises an error but Dataset#columns works (jeremyevans)
+
+* Make Database#with_server in the server_block extension accept a second argument for a different read_only shard (jeremyevans) (#1355)
+
+* Make schema_dumper extension handle Oracle 11g XE inclusion of not null in the db_type (StevenCregan, jeremyevans) (#1351)
+
+* Add Model.default_association_type_options for changing default association options per association type (jeremyevans)
+
+* Add :materialized option to Database#views on PostgreSQL to return materialized views (Blargel) (#1348)
+
+* Make defaults_setter plugin inherit custom default values when subclassing (jeremyevans)
+
+=== 4.46.0 (2017-05-01)
+
+* Recognize additional disconnect error on MySQL (jeremyevans)
+
+* Deconstantize dataset SQL generation, speeding up ruby 2.3+, slowing down earlier versions (jeremyevans)
+
+* Deprecate calling Dataset#set_graph_aliases before Dataset#graph (jeremyevans)
+
+* Don't swallow exception if there is an exception when rolling back a transaction when using :rollback=>:always option (jeremyevans)
+
+* Deprecate passing 2 arguments to Database#alter_table (jeremyevans)
+
+* Deprecate passing Schema::CreateTableGenerator instance as second argument to Database#create_table (jeremyevans)
+
+* Deprecate Database::DatasetClass as a way for getting default dataset classes for datasets (jeremyevans)
+
+* Deprecate SQLite pragma getting and setting methods (jeremyevans)
+
+* Remove handling of EMULATED_FUNCTION_MAP from adapter dataset classes, overide Dataset#native_function_name instead (jeremyevans)
+
+* Deprecate {Integer,Timestamp}Migrator::DEFAULT_SCHEMA_{COLUMN,TABLE} (jeremyevans)
+
+* Deprecate Database#jdbc_* methods for jdbc/db2 adapter Database instances (jeremyevans)
+
+* Remove addition of Database#jdbc_* to JDBC::Database in jdbc/db2 adapter (jeremyevans)
+
+* Deprecate many internal Database and Dataset string/regexp constants in core and included adapters (jeremyevans)
+
+* Remove use of Fixnum in sqlanywhere shared adapter (jeremyevans)
+
+* Deprecate Sequel::Schema::Generator constant, use Sequel::Schema::CreateTableGenerator instead (jeremyevans)
+
+* Deprecate Database#log_yield (jeremyevans)
+
+* Deprecate the set_overrides extension (jeremyevans)
+
+* If passing an empty array or hash and a block to a filtering method, ignore the array or hash and just use the block (jeremyevans)
+
+* Deprecate ignoring explicit nil argument when there is no existing filter (jeremyevans)
+
+* Deprecate ignoring explicit nil argument to filtering methods when passing a block (jeremyevans)
+
+* Deprecate ignoring empty strings and other empty? arguments passed to the filtering methods without a block (jeremyevans)
+
+* Deprecate calling filtering methods without an argument or a block (jeremyevans)
+
+* Deprecate Sequel::VirtualRow#` to create literal SQL, use Sequel.lit instead (jeremyevans)
+
+* Add auto_literal_strings extensions for treating plain strings passed to filtering/update methods as literal SQL (jeremyevans)
+
+* Deprecate automatically treating plain strings passed to filtering/update methods as literal SQL (jeremyevans)
+
+* Passing a PlaceholderLiteralString to a filtering method now uses parentheses around the expression (jeremyevans)
+
+* Make Dataset#full_text_search work on Microsoft SQL Server when no_auto_literal_strings extension is used (jeremyevans)
+
+* Fix Database#disconnect when using the single connection pool without an active connection (jeremyevans) (#1339)
+
+* Handle conversion of datetimeoffset values when using the jdbc/sqlserver adapter in some configurations (iaddict, jeremyevans) (#1338)
+
+* Fix conversion of some time values when using the jdbc/sqlserver adapter in some configurations (iaddict, jeremyevans) (#1337)
+
+* Use microsecond precision for time values on Microsoft SQL Server, instead of millisecond precision (jeremyevans)
+
+* Add Dataset#sqltime_precision private method for adapters to use different precision for Sequel::SQLTime than Time and Date (jeremyevans)
+
+* Use utc timezone in Sequel::SQLTime.create if Sequel.application_timezone is :utc (jeremyevans) (#1336)
+
+* Include migration filename in message about migration file without a single migration (jmettraux) (#1334)
+
+* Deprecate conversion of - to _ in adapter schemes (jeremyevans)
+
+* Don't quote function names that are SQL::Identifiers, unless SQL::Function#quoted is used (jeremyevans)
+
+* Deprecate splitting virtual row method names (jeremyevans)
+
+* Deprecate passing blocks to virtual row methods, move to virtual_row_method_block extension (jeremyevans)
+
+* Deprecate Sequel::SQL::Expression#sql_literal and #lit (jeremyevans)
+
+* Don't issue deprecation warnings on ruby 1.8.7, as Sequel 5 is dropping support for it (jeremyevans)
+
+* Deprecate Sequel::BasicObject#remove_methods! (jeremyevans)
+
+* Deprecate sequel/no_core_ext file (jeremyevans)
+
+* Deprecate model dataset #insert_sql accepting model instances (jeremyevans)
+
+* Deprecate model dataset #join_table and #graph accepting model classes (jeremyevans)
+
+* Support :alias option to class_table_inheritance plugin, wrapping subclass datasets in a subquery to fix ambiguous column issues (jeremyevans)
+
+* Deprecate Model.set_allowed_columns and Model#{set_all,set_only,update_all,update_only}, move to whitelist security plugin (jeremyevans)
+
+* Do not raise MassAssignmentRestriction when setting nested attributes and using the :fields option, only check for fields given (jeremyevans)
+
+* Do not add class methods for private methods definined in dataset_module (jeremyevans)
+
+* Deprecate Model.def_dataset_method and Model.subset, move to def_dataset_method plugin (jeremyevans)
+
+* Deprecate Model.finder and Model.prepared_finder, move to finder plugin (jeremyevans)
+
+* Deprecate calling Model.db= on a model with a dataset (jeremyevans)
+
+* Deprecate splitting symbols to look for qualified/aliased identifiers (e.g. :table__column) (jeremyevans)
+
+* Allow optimized lookups and deletes for models using SQL::Identifier and SQL::QualifiedIdentifier values as the FROM table (jeremyevans)
+
+=== 4.45.0 (2017-04-01)
+
+* Correctly handle datasets with offsets but no limits used in compound datasets on MSSQL <2012 (jeremyevans)
+
+* Correctly handle false values in the split_values plugin (bananarne) (#1333)
+
+* Deprecate Dataset#dup/clone and Model.dup/clone (jeremyevans)
+
+* Deprecate the schema and scissors plugins (jeremyevans)
+
+* Deprecate Model.{lazy_attributes,nested_attributes,composition,serialization}_module accessors (jeremyevans)
+
+* Deprecate Database#database_name on MySQL (jeremyevans)
+
+* Deprecate Database#use on MySQL (jeremyevans)
+
+* Make pg_hstore extension no longer update PG_NAMED_TYPES (jeremyevans)
+
+* Deprecate Sequel::PG_NAMED_TYPES (jeremyevans)
+
+* Add columns_updated plugin for making updated columns hash available in after_update and after_save hooks (jeremyevans)
+
+* Deprecate accessing @columns_updated directly in model after_update and after_save hooks (jeremyevans)
+
+* Deprecate Database#{add,remove}_servers when not using a sharded connection pool (jeremyevans)
+
+* Deprecate Database#each_server (jeremyevans)
+
+* Make Model#_valid? private method accept only an options hash (jeremyevans)
+
+* Deprecate returning false from model before hooks to cancel the action, use Model#cancel_action (jeremyevans)
+
+* Handle Model#cancel_action correctly in before hooks when Model#valid? is called (jeremyevans)
+
+* Deprecate Sequel::BeforeHookFailed (jeremyevans)
+
+* Deprecate passing multiple arguments as filter arguments when not using a conditions specifier (jeremyevans)
+
+* Deprecate passing Procs as filter arguments, require they be passed as blocks (jeremyevans)
+
+* Deprecate Sequel::Error::* exception class aliases (jeremyevans)
+
+* Deprecate prepared_statements_associations and prepared_statements_with_pk plugins (jeremyevans)
+
+* Deprecate Sequel::Unbinder, Sequel::UnbindDuplicate, and Dataset#unbind (jeremyevans)
+
+* Deprecating calling Sequel::Qualifier with two arguments (jeremyevans)
+
+* Add validation_contexts plugin for supporting custom contexts when validating (jeremyevans)
+
+* Deprecate Sequel::Database.single_threaded singleton accessor (jeremyevans)
+
+* Deprecate treating unrecognized prepared statement type as :select (jeremyevans)
+
+* Deprecate Sequel.identifier_{in,out}put_method= and .quote_identifiers= singleton setters (jeremyevans)
+
+* Deprecate Sequel::Database.identifier_{in,out}put_method and .quote_identifiers singleton accessors (jeremyevans)
+
+* Deprecate loading the identifier_mangling by default, require it be loaded explicitly if needed (jeremyevans)
+
+* Make Database#dump_{table_schema,schema_migration} in schema_dumper extension support :schema option (dadario) (#1328)
+
+* Make Dataset#delete respect an existing limit on Microsoft SQL Server (jeremyevans)
+
+* Add Dataset#skip_limit_check to mark a dataset as skipping the limit/offset check for updates and deletes (jeremyevans)
+
+* Deprecate calling Dataset#{update/delete/truncate} on datasets with limits or offsets unless the database supports it (jeremyevans)
+
+* Add deprecation message for using association_pks setter method with :delay_pks=>true association option (jeremyevans)
+
+* Add deprecation message for using association_pks setter method without :delay_pks association option (jeremyevans)
+
+* Deprecate having duplicate column names in subclass tables when using the class_table_inheritance plugin (jeremyevans)
+
+* Deprecate do (DataObjects), swift, and jdbc/as400 adapters (jeremyevans)
+
+* Deprecate support for Cubrid, Firebird, Informix, and Progress databases (jeremyevans)
+
+* The :proxy_argument option passed to association_proxies plugin block is now an empty hash if no arguments are passed to the association method (jeremyevans)
+
+* Deprecate passing non-hash arguments to association methods (jeremyevans)
+
+* Deprecate passing multiple arguments to association methods (jeremyevans)
+
+* Deprecate model transaction hook methods (jeremyevans)
+
+* Drop support for pg <0.8.0 in the postgres adapter (jeremyevans)
+
+* Deprecate passing a block to Database#from (jeremyevans)
+
+* Deprecate Sequel::Model::ANONYMOUS_MODEL_CLASSES{,_MUTEX} (jeremyevans)
+
+* Deprecate Sequel.cache_anonymous_models and Sequel.cache_anonymous_models= (jeremyevans)
+
+* Automatically use from_self when using a dataset as part of a compound if it has an offset but no limit (jeremyevans)
+
+* Drop order on existing datasets when using Dataset#union/intersect/except on Microsoft SQL Server unless a limit or offset is used (jeremyevans)
+
+* Deprecate dataset mutation (jeremyevans)
+
+* Handle dumping of autoincrementing 64-bit integer primary key columns correctly when using :same_db option in the schema dumper (jeremyevans) (#1324)
+
+* Add Model.dataset_module_class accessor, allowing plugins to support custom behavior in dataset_module blocks (jeremyevans)
+
+* Make ORDER BY come after UNION/INTERSECT/EXCEPT on Microsoft SQL Server and SQLAnywhere (jeremyevans)
+
+* Make Database#indexes on MySQL handle qualified identifiers (jeremyevans) (#1316)
+
+* Add oracle support to the odbc adapter (samuel02) (#1315)
+
+=== 4.44.0 (2017-03-01)
+
+* Add where_all, where_each, where_single_value model dataset methods, optimized for frozen datasets (jeremyevans)
+
+* Add eager method to dataset_module (jeremyevans)
+
+* Add implicit_subquery extension, for implicitly using a subquery for datasets using raw SQL when calling dataset methods that modify SQL (jeremyevans)
+
+* Make Dataset#from_self keep the columns from the current dataset if present (jeremyevans)
+
+* Add implicit_subquery extension, implicitly using subqueries for dataset methods if the current dataset uses raw SQL (jeremyevans)
+
+* Make SQL::ValueList#inspect show that it is a value list (jeremyevans)
+
+* Make LiteralString#inspect show that it is a literal string (jeremyevans)
+
+* Make Model::Associations::AssociationReflection#inspect show reflection class and guess at association definition line (jeremyevans)
+
+* Make SQLTime#inspect show it is an SQLTime instance, and only the time component (jeremyevans)
+
+* Make SQL::Blob#inspect show that it is a blob, the number of bytes, and some or all of the content (jeremyevans)
+
+* Make plugins not modify the constant namespace for the model class that uses them (jeremyevans)
+
+* Do not modify encoding of SQL::Blob instances in force_encoding plugin (jeremyevans)
+
+* Add Model.freeze_descendents to subclasses plugin, for easier finalizing associations/freezing of descendent classes (jeremyevans)
+
+* Add Model.finalize_associations method for finalizing associations, speeding up some association reflections methods almost 10x (jeremyevans)
+
+* Implement Model.freeze such that it can be used in production (jeremyevans)
+
+* Recognize another disconnect error in the jdbc/as400 adapter (perlun) (#1300)
+
+* Correctly handle conversion of false values when typecasting PostgreSQL arrays (mistoo) (#1299)
+
+* Raise error if the postgres adapter attempts to load an incompatible version of sequel_pg (mahlonsmith) (#1298)
+
+* Fix jdbc adapter so basic_type_convertor_map is not shared between instances, work with Database#freeze (jeremyevans)
+
+=== 4.43.0 (2017-02-01)
+
+* Make jdbc/postgresql adapter work if pg_hstore extension is loaded first (jeremyevans) (#1296)
+
+* Make prepared_statements_associations plugin work correctly on some instance specific associations (jeremyevans)
+
+* Make prepared_statements plugin not use prepared statements in cases where it is probably slower (jeremyevans)
+
+* Optimize Model#refresh similar to Model.with_pk (jeremyevans)
+
+* Make Database#extension not attempt to load the same extension more than once (jeremyevans)
+
+* Implement Database#freeze such that it can be used in production (jeremyevans)
+
+* Freeze enum_labels in the pg_enum extension (jeremyevans)
+
+* Handle Database#type_supported? thread-safely on PostgreSQL (jeremyevans)
+
+* Handle primary_key_sequences thread-safely on Oracle (jeremyevans)
+
+* Handle sharding better when using mysql2 native prepared statements (jeremyevans)
+
+* Use thread-safe incrementor for mock adapter autoid handling (jeremyevans)
+
+* Make Model#freeze not freeze associations hash until after validating the model instance (jeremyevans)
+
+* Make prepared_statements_associations plugin work correctly when model object explicitly specifies server to use when also using sharding plugin (jeremyevans)
+
+* Make prepared_statements_with_pk plugin work correctly when dataset explicitly specifies server to use (jeremyevans)
+
+* Make prepared_statements plugin work correctly when model object explicitly specifies server to use (jeremyevans)
+
+* Make dataset_module inherited to subclasses when using the single_table_inheritance plugin (jeremyevans) (#1284)
+
+* Support use of SQLite result codes in the jdbc-sqlite adapter, if the jdbc sqlite driver supports them (flash-gordon, jeremyevans) (#1283)
+
+* Make timestamp migrator handle key length limitations when using MySQL with InnoDB engine and utf8mb4 charset default (jeremyevans) (#1282)
+
+=== 4.42.0 (2017-01-01)
+
+* Handle eager load callbacks correctly for one_to_one associations with orders or offsets when window functions are not supported (jeremyevans)
+
+* Raise Sequel::Error if using an :eager_limit dataset option when eager loading a singular association (jeremyevans)
+
+* Replace internal uses of Dataset#select_more with #select_append to save a method call (jeremyevans)
+
+* Make Dataset#order_append the primary method, and #order_more the alias, for similarity to #select_append and #select_more (jeremyevans)
+
+* Replace internal uses of Dataset#filter with #where to save a method call (jeremyevans)
+
+* Do not set :auto_increment in the schema information for integer columns that are part of a composite primary key on SQLite (jeremyevans)
+
+* Use autoincrement setting on integer primary key columns when emulating table modification methods on SQLite (thenrio, jeremyevans) (#1277, #1278)
+
+* Make the pagination extension work on frozen datasets (jeremyevans)
+
+* Make Dataset#server work for frozen model datasets using the sharding plugin (jeremyevans)
+
+* Make Dataset#nullify in the null_dataset extension work on frozen datasets (jeremyevans)
+
+* Make Model#set_server work when using a frozen model dataset (jeremyevans)
+
+* Make Dataset#ungraphed work on a frozen model dataset (jeremyevans)
+
+* Add Dataset#with_{autoid,fetch,numrows} to the mock adapter, returning cloned datasets with the setting changed (jeremyevans)
+
+* Make looser_typecasting extension handle the strict BigDecimal parsing introduced in ruby 2.4rc1 (jeremyevans)
+
+* Make Database#{db,opts}= in the sequel_3_dataset_methods extension raise for frozen datasets (jeremyevans)
+
+* Speed up repeated calls to Dataset#{interval,range} for frozen datasets using a cached placeholder literalizer (jeremyevans)
+
+* Speed up repeated calls to Dataset#get with a single argument for frozen datasets using a cached placeholder literalizer (jeremyevans)
+
+* Speed up repeated calls to Dataset#{first,last} with arguments/blocks for frozen datasets using a cached placeholder literalizer (jeremyevans)
+
+* Speed up repeated calls to Dataset#{avg,min,max,sum} for frozen datasets using a cached placeholder literalizer (jeremyevans)
+
+* Cache dataset returned by Dataset#skip_locked for frozen datasets (jeremyevans)
+
+* Cache dataset returned by Dataset#for_update for frozen datasets (jeremyevans)
+
+* Cache dataset returned by Dataset#un{filtered,grouped,limited,ordered} for frozen datasets (jeremyevans)
+
+* Cache dataset returned by Dataset#reverse (no args) for frozen datasets (jeremyevans)
+
+* Cache dataset returned by Dataset#invert for frozen datasets (jeremyevans)
+
+* Speed up repeated calls to Dataset#count with an argument or block for frozen datasets using a cached placeholder literalizer (jeremyevans)
+
+* Using :on_duplicate_columns=>:warn Database option with duplicate_columns_handler now prepends file/line to the warning message (jeremyevans)
+
+* Move identifier mangling code to identifier_mangling extension, load by default unless using :identifier_mangling=>false Database option (jeremyevans)
+
+* Allow Dataset#with_extend to accept a block and create a module with that block that the object is extended with (jeremyevans)
+
+* Speed up repeated calls to with_pk on the same frozen model dataset using a cached placeholder literalizer (jeremyevans)
+
+* Add dataset_module methods such as select and order that define dataset methods which support caching for frozen datasets (jeremyevans)
+
+* Cache subset datasets if they don't use blocks or procs for frozen model datasets (jeremyevans)
+
+* Cache intermediate dataset used in Dataset#{last,paged_each} for frozen model datasets without an order (jeremyevans)
+
+* Cache dataset returned by Dataset#naked for frozen datasets (jeremyevans)
+
+* Cache intermediate dataset used in Dataset#last (no args) for frozen datasets (jeremyevans)
+
+* Cache intermediate dataset used in Dataset#first (no args) and #single_record for frozen datasets (jeremyevans)
+
+* Cache intermediate dataset used in Dataset#empty? for frozen datasets (jeremyevans)
+
+* Cache intermediate dataset used in Dataset#count (no args) for frozen datasets (jeremyevans)
+
+* Warn if :conditions option may be unexpectedly ignored during eager_graph/association_join (jeremyevans) (#1272)
+
+* Cache SELECT and DELETE SQL for most frozen datasets (jeremyevans)
+
+* Freeze most SQL::Expression objects and internal state by default (jeremyevans)
+
+* Freeze Dataset::PlaceholderLiteralizer and Dataset::PlaceholderLiteralizer::Argument instances (jeremyevans)
+
+* Freeze most dataset opts values to avoid unintentional modification (jeremyevans)
+
+* Add Dataset#with_convert_smallint_to_bool on DB2, returning a clone with convert_smallint_to_bool set (jeremyevans)
+
+* Make Dataset#freeze actually freeze the dataset on ruby 2.4+ (jeremyevans)
+
+* Avoid using instance variables other than @opts for dataset data storage (jeremyevans)
+
+* Add freeze_datasets extension, making all datasets for a given Database frozen (jeremyevans)
+
+* Refactor prepared statement internals, using opts instead of instance variables (jeremyevans)
+
+* Model.set_dataset now operates on a clone of the dataset given instead of modifying it, so it works with frozen datasets (jeremyevans)
+
+=== 4.41.0 (2016-12-01)
+
+* Add Dataset#with_mssql_unicode_strings on Microsoft SQL Server, returning a clone with mssql_unicode_strings set (jeremyevans)
+
+* Add Dataset#with_identifier_output_method, returning a clone with identifier_output_method set (jeremyevans)
+
+* Add Dataset#with_identifier_input_method, returning a clone with identifier_input_method set (jeremyevans)
+
+* Add Dataset#with_quote_identifiers, returning a clone with quote_identifiers set (jeremyevans)
+
+* Add Dataset#with_extend, returning a clone extended with given modules (jeremyevans)
+
+* Add Dataset#with_row_proc, returning a clone with row_proc set (jeremyevans)
+
+* Support use of SQL::AliasedExpressions as Model#to_json :include option keys in the json_serializer plugin (sensadrome) (#1269)
+
+* Major improvements to type conversion in the ado adapter (vais, jeremyevans) (#1265)
+
+* Avoid memory leak in ado adapter by closing result sets after yielding them (vais, jeremyevans) (#1259)
+
+* Fix hook_class_methods plugin handling of commit hooks (jeremyevans)
+
+* Make association dataset method correctly handle cases where key fields are nil (jeremyevans)
+
+* Handle pure java exceptions that don't support message= when reraising the exception in the jdbc adapter (jeremyevans)
+
+* Add support for :offset_strategy Database option on DB2, with :limit_offset and :offset_fetch values, to disable OFFSET emulation (#1254) (jeremyevans)
+
+* Remove deprecated support for using Bignum class as a generic type (jeremyevans)
+
+=== 4.40.0 (2016-10-28)
+
+* Make column_select plugin not raise an exception if the model's table does not exist (jeremyevans)
+
+* Make dataset_associations plugin correctly handle (many|one)_through_many associations with single join table (jeremyevans) (#1253)
+
+* Add s extension, with adds Sequel::S module that includes private #S method for calling Sequel.expr, including use as refinement (jeremyevans)
+
+* Add symbol_as and symbol_as_refinement extensions so that :column.as(:alias) is treated as Sequel.as(:column, :alias) (jeremyevans)
+
+* Add symbol_aref and symbol_aref_refinement extensions so that :table[:column] is treated as Sequel.qualify(:table, :column) (jeremyevans)
+
+* Add Sequel.split_symbols=, to support the disabling of splitting symbols with double/triple underscores (jeremyevans)
+
+* Make SQL::QualifiedIdentifier convert SQL::Identifier arguments to strings, fixing Sequel[:schema][:table] usage in schema methods (jeremyevans)
+
+* Do not attempt to combine non-associative operators (jeremyevans) (#1246)
+
+* Automatically add NOT NULL to columns when adding primary keys if the database doesn't handle it (jeremyevans)
+
+* Make prepared_statements plugin correctly handle lookup on joined datasets (jeremyevans) (#1244)
+
+* Make Database#tables with :qualify=>true option handle table names with double underscores correctly (jeremyevans) (#1241)
+
+* Add SQL::Identifier#[] and SQL::QualifiedIdentifier#[] for creating qualified identifiers (jeremyevans)
+
+* Add support for Dataset#insert_conflict :conflict_where option, for a predicate to use in ON CONFLICT clauses (chanks) (#1240)
+
+* Freeze Dataset::NON_SQL_OPTIONS, add private Dataset#non_sql_options, fixing thread safety issues during require (jeremyevans)
+
+* Make the callable returned by Database#rollback_checker thread safe (jeremyevans)
+
+* Make lazy_attributes and dataset_associations plugins work if insert_returning_select plugin is loaded before on model with no dataset (jeremyevans)
+
+=== 4.39.0 (2016-10-01)
+
+* Make active_model plugin use rollback_checker instead of after_rollback hook (jeremyevans)
+
+* Add Database#rollback_checker, which returns a proc that returns whether the in progress transaction is rolled back (jeremyevans)
+
+* Add Sequel::Database.set_shared_adapter_scheme to allow external adapters to support the mock adapter (jeremyevans)
+
+* Make hook_class_methods plugin not use after commit/rollback model hooks (jeremyevans)
+
+* Support add_column :after and :first options on MySQL (AnthonyBobsin, jeremyevans) (#1234)
+
+* Support ActiveSupport 5 in pg_interval extension when weeks/hours are used in ActiveSupport::Duration objects (chanks) (#1233)
+
+* Support IntegerMigrator :relative option, for running only the specified number of migrations up or down (jeremyevans)
+
+* Make the touch plugin also touch associations on create in addition to update and delete (jeremyevans)
+
+* Add :allow_manual_update timestamps plugin option for not overriding a manually set update timestamp (jeremyevans)
+
+* Add Sequel.[] as an alias to Sequel.expr, for easier expression creation (jeremyevans)
+
+* Add PostgreSQL full_text_search :to_tsquery=>:phrase option, for using PostgreSQL 9.6+ full text search phrase searching (jeremyevans)
+
+* Add JSONBOp#insert in pg_json_ops extension, for jsonb_insert support on PostgreSQL 9.6+ (jeremyevans)
+
+* Support add_column :if_not_exists option on PostgreSQL 9.6+ (jeremyevans)
+
+=== 4.38.0 (2016-09-01)
+
+* Support :driver_options option when using the postgres adapter with pg driver (jeremyevans)
+
+* Don't use after commit/rollback database hooks if the model instance methods are not overridden (jeremyevans)
+
+* Add SQL::NumericMethods#coerce, allowing code such as Sequel.expr{1 - x} (jeremyevans)
+
+* Support ** operator for exponentiation on expressions, similar to +, -, *, and / (jeremyevans)
+
+* Add Sequel::SQLTime.date= to set the date used for SQLTime instances (jeremyevans)
+
+=== 4.37.0 (2016-08-01)
+
+* Add support for regular expression matching on Oracle 10g+ using REGEXP_LIKE (johndcaldwell) (#1221)
+
+* Recognize an additional disconnect error in the postgres adapter (jeremyevans)
+
+* Make connection pool remove connections for disconnect errors not raised as DatabaseDisconnectError (jeremyevans)
+
+* Support mysql2 0.4+ native prepared statements and bound variables (jeremyevans)
+
+* Add Database#values for VALUES support on SQLite 3.8.3+ (jeremyevans)
+
+* Support create_view :columns option on SQLite 3.9.0+ (jeremyevans)
+
+* Make migration reverser handle alter_table add_constraint using a hash as the first argument (soupmatt) (#1215)
+
+* Make ASTTransformer handle Sequel.extract (jeremyevans) (#1213)
+
+=== 4.36.0 (2016-07-01)
+
+* Deprecate use of Bignum class as generic type, since the behavior will change in ruby 2.4 (jeremyevans)
+
+* Don't hold connection pool mutex while disconnecting connections (jeremyevans)
+
+* Don't hold references to disconnected connections in the connection_validator extension (jeremyevans)
+
+* Don't overwrite existing connection_validation_timeout when loading connection_validator extension multiple times (jeremyevans)
+
+* Add connection_expiration extension, for automatically removing connections open for too long (pdrakeweb) (#1208, #1209)
+
+* Handle disconnection errors raised during string literalization in mysql2 and postgres adapters (jeremyevans)
+
+* Add string_agg extension for aggregate string concatenation support on many databases (jeremyevans)
+
+* Add SQL::Function#order for ordered aggregate functions (jeremyevans)
+
+* Support operator validation in constraint_validations for <, <=, >, and >= operators with string and integer arguments (jeremyevans)
+
+* Make validates_operator validation consider nil values invalid unless :allow_nil or similar option is used (jeremyevans)
+
+* Close cursors for non-SELECT queries in the oracle adapter after execution, instead of waiting until GC (jeremyevans) (#1203)
+
+* Add :class_namespace association option for setting default namespace for :class option given as symbol/string (jeremyevans)
+
+* Add Sequel::Model.cache_anonymous_models accessor for changing caching on a per-model basis (jeremyevans)
+
+* Add Sequel::Model.def_Model for adding a Model() method to a module, for easier use of namespaced models (jeremyevans)
+
+* Add Sequel::Model::Model() for creating subclasses of Sequel::Model subclasses, instead of just Sequel::Model itself (jeremyevans)
+
+=== 4.35.0 (2016-06-01)
+
+* Add :headline option to PostgreSQL Dataset#full_text_search for adding an extract of the matched text to the SELECT list (jeremyevans)
+
+* Make :rollback=>:always inside a transaction use a savepoint automatically if supported (jeremyevans) (#1193)
+
+* Recognize bool type as boolean in the schema dumper (jeremyevans) (#1192)
+
+* Make Dataset#to_hash and #to_hash_groups work correctly for model datasets doing eager loading (jeremyevans)
+
+* Make delay_add_association plugin handle hashes and primary keys passed to add_* association methods (jeremyevans) (#1187)
+
+* Treat :Bignum as a generic type, to support 64-bit integers on ruby 2.4+, where Bignum == Integer (jeremyevans)
+
+* Add server_logging extension for including server/shard information when logging queries (jeremyevans)
+
+* Add Database#log_connection_info, for including connection information when logging queries (jeremyevans)
+
+* Add Dataset#skip_locked for skipping locked rows on PostgreSQL 9.5+, MSSQL, and Oracle (jeremyevans)
+
+* Allow Sequel::Model#lock! to accept an optional lock style (petedmarsh) (#1183)
+
+* Add sql_comments extension for setting SQL comments on queries (jeremyevans)
+
+* Make Postgres::PGRange#cover? handle empty, unbounded, and exclusive beginning ranges (jeremyevans)
+
+* Fix frozen string literal issues on JRuby 9.1.0.0 (jeremyevans)
+
+* Allow json_serializer :include option with cascaded values to work correctly when used with association_proxies (jeremyevans)
+
+=== 4.34.0 (2016-05-01)
+
+* Add support for :dataset_associations_join association option to dataset_associations plugin, for making resulting datasets have appropriate joins (jeremyevans)
+
+* Log server connection was attempted to in PoolTimeout exception messages in sharded connection pool (jeremyevans)
+
+* Log Database :name option in PoolTimeout exception messages (bigkevmcd, jeremyevans) (#1176)
+
+* Add duplicate_columns_handler extension, for raising or warning if a dataset returns multiple columns with the same name (TSMMark, jeremyevans) (#1175)
+
+* Support registering per-Database custom range types in the pg_range extension (steveh) (#1174)
+
+* Support :preconnect=>:concurrently Database option for preconnecting in separate threads (kch, jeremyevans) (#1172)
+
+* Make prepared_statements_safe plugin work correctly with CURRENT_DATE/CURRENT_TIMESTAMP defaults (jeremyevans) (#1168)
+
+* Add validates_operator validation helper (petedmarsh) (#1170)
+
+* Recognize additional unique constraint violation on Microsoft SQL Server (jeremyevans)
+
+* Add :hash option to Dataset#(select|to)_hash(_groups)? methods for choosing object to populate (mwpastore) (#1167)
+
+=== 4.33.0 (2016-04-01)
+
+* Handle arbitrary objects passed as arguments to the association method (jeremyevans) (#1166)
+
+* Handle array with multiple columns as Dataset#insert_conflict :target value on PostgreSQL (chanks) (#1165)
+
+* Add Database#transaction :savepoint=>:only option, for only creating a savepoint if already inside a transaction (jeremyevans)
+
+* Make Database#sequence_for_table on Oracle handle cases where the schema for a table cannot be determined (jeremyevans)
+
+* The boolean_readers, boolean_subsets, and class_table_inheritance plugins no longer do blind rescues (jeremyevans) (#1162)
+
+* Add Model.require_valid_table setting, if set to true doesn't swallow any errors for invalid tables (jeremyevans)
+
+* Creating model classes inside a transaction when the table doesn't exist no longer rolls back the transaction on PostgreSQL (jeremyevans) (#1160)
+
+* Sequel::Model no longer swallows many errors when subclassing or setting datasets (jeremyevans) (#1160)
+
+* Handle altering column NULL settings for varchar(max) and text columns on MSSQL (Ilja Resch)
+
+* Remove Sequel.firebird and Sequel.informix adapter methods (jeremyevans)
+
+* Make graph_each extension handle result set splitting when using Dataset#first (jeremyevans)
+
+* Allow raising Sequel::ValidationFailed and Sequel::HookFailed without an argument (jeremyevans)
+
+* Allow schema_dumper to handle :qualify=>true option on PostgreSQL (jeremyevans)
+
+* Allow foreign_key schema method to handle SQL::Identifier and SQL::QualifiedIdentifier as 2nd argument (jeremyevans)
+
+=== 4.32.0 (2016-03-01)
+
+* Use mutex for synchronizing access to association reflection cache on MRI (jeremyevans)
+
+* Add Dataset#delete_from on MySQL, allowing deletions from multiple tables in a single query (jeremyevans) (#1146)
+
+* Add no_auto_literal_strings extension, which makes SQL injection vulnerabilities less likely (jeremyevans)
+
+* Add Model.default_association_options, for setting option defaults for all future associations (jeremyevans)
+
+* Support :association_pks_nil association option in association_pks setter for determining how to handle nil (jeremyevans)
+
+* Make association_pks setter handle empty array correctly when :delay_pks is set (jeremyevans)
+
+* Add a setter method for one_through_one associations (jeremyevans)
+
+* Include :remarks entry in JDBC schema parsing output, containing comments on the column (olleolleolle) (#1143)
+
+* Support :eager_reload and :eager options to associations in tactical_eager_loading plugin (jeremyevans)
+
+* Make tactical_eager_loading not eager load if passing proc or block to association method (jeremyevans)
+
+* Make eager_each plugin handle eager loading for Dataset#first and similar methods (jeremyevans)
+
+=== 4.31.0 (2016-02-01)
+
+* Convert types in association_pks setters before saving them, instead of just before running queries (jeremyevans)
+
+* Use getField and getOID instead of field and oid in the jdbc/postgresql adapter to work around JRuby 9.0.5.0 regression (jeremyevans) (#1137)
+
+* Support using PostgreSQL-specific types in bound variables in the jdbc/postgresql adapter (jeremyevans)
+
+* Add support for running with --enable-frozen-string-literal on ruby 2.3 (jeremyevans)
+
+* Make Database#disconnect in the oracle adapter work correctly on newer versions of oci8 (jeremyevans)
+
+* Support parsing PostgreSQL arrays with explicit bounds (jeremyevans) (#1131)
+
+* Raise an error if attempting to use a migration file not containing a single migration (jeremyevans) (#1127)
+
+* Automatically set referenced key for self referential foriegn key constraint for simple non-autoincrementing primary key on MySQL (jeremyevans) (#1126)
+
+=== 4.30.0 (2016-01-04)
+
+* Add Dataset#insert_conflict and #insert_ignore on SQLite for handling uniqueness violations (Sharpie) (#1121)
+
+* Make Database#row_type in pg_row extension handle different formats of schema-qualified types (jeremyevans) (#1119)
+
+* Add identifier_columns plugin for handling column names containing 2 or more consecutive underscores when saving (jeremyevans) (#1117)
+
+* Support :eager_limit and :eager_limit_strategy dataset options in model eager loaders for per-call limits and strategies (chanks) (#1115)
+
+* Allow IPv6 addresses in database URLs on ruby 1.9+ (hellvinz, jeremyevans) (#1113)
+
+* Make Database#schema :db_type entries include sizes for string types on DB2 (jeremyevans)
+
+* Make Database#schema :db_type entries include sizes for string and decimal types in the jdbc adapter's schema parsing (jeremyevans)
+
+* Recognize another disconnect error in the tinytds adapter (jeremyevans)
+
+=== 4.29.0 (2015-12-01)
+
+* Add Model#json_serializer_opts method to json_serializer plugin, allowing for setting to_json defaults on per-instance basis (jeremyevans)
+
+* Add uuid plugin for automatically setting UUID column when creating a model object (pdrakeweb, jeremyevans) (#1106)
+
+* Allow the sqlanywhere adapter to work with sharding (jeremyevans)
+
+* Support blobs as bound variables in the oracle adapter (jeremyevans) (#1104)
+
+* Order by best results first when using the Database#full_text_search :rank option on PostgreSQL (chanks) (#1101)
+
+* Run Database#table_exists? inside a savepoint if currently in a transaction and the database supports savepoints (jeremyevans) (#1100)
+
+* Allow Database#transaction :retry_on option to work when using savepoints (jeremyevans)
+
+* Allow for external adapters to implement Dataset#date_add_sql_append to integrate with the date_arithmetic extension (jeremyevans)
+
+* Add Dataset#insert_empty_columns_values private method for easy overriding for databases that don't support INSERT with DEFAULT VALUES (jeremyevans)
+
+=== 4.28.0 (2015-11-02)
+
+* Add boolean_subsets plugin, which adds a subset for each boolean column (jeremyevans)
+
+* Add subset_conditions plugin, which adds a method for each subset returning the filter conditions for the subset (jeremyevans)
+
+* Make the list plugin work better with the auto_validations plugin when there is a validation on the position column (jeremyevans)
+
+* Make to_csv for model datasets call instance methods, just like Model#to_csv, in the csv_serializer plugin (skrobul) (#1088)
+
+* Raise Sequel::NoExistingObject instead of generic error if Model#refresh can't find the related row (jeremyevans)
+
+=== 4.27.0 (2015-10-01)
+
+* Don't stub Sequel.synchronize on MRI (YorickPeterse) (#1083)
+
+* Make bin/sequel warn if given arguments that it doesn't use (jeremyevans)
+
+* Fix the order of referenced composite keys returned by Database#foreign_key_list on PostgreSQL (jeremyevans) (#1081)
+
+* Recognize another disconnect error in the jdbc/postgresql adapter (jeremyevans)
+
+* In the active model plugin, make Model#persisted? return false if the transaction used for creation is rolled back (jeremyevans) (#1076)
+
+* Use primary_key :keep_order option in the schema dumper if the auto incrementing column is not the first column in the table (jeremyevans)
+
+* Set :auto_increment option correctly in the schema parser when the auto incrementing column is not the first column in the table (jeremyevans)
+
+* Support :keep_order option to primary_key in schema generator, to not automatically make the primary key the first column (jeremyevans)
+
+* Add new jsonb/json functions and operators supported in PostgreSQL 9.5+ (jeremyevans)
+
+* Add before_after_save plugin, for refreshing created objects and resetting modified flag before calling after_create/update/save hooks (jeremyevans)
+
+* Add Dataset#single_record! and #single_value! which don't require cloning the receiver (jeremyevans)
+
+* Dataset#with_sql_single_value now works correctly for model datasets (jeremyevans)
+
+* Optimize Dataset#single_value and #with_sql_single_value to not create an unnecessary array (jeremyevans)
+
+* Make postgres adapter work with postgres-pr 0.7.0 (jeremyevans) (#1074)
+
+=== 4.26.0 (2015-09-01)
+
+* Make Dataset#== not consider frozen status in determining equality (jeremyevans)
+
+* Support :if_exists option to drop_column on PostgreSQL (jeremyevans)
+
+* Add Dataset#grouping_sets to support GROUP BY GROUPING SETS on PostgreSQL 9.5+, MSSQL 2008+, Oracle, DB2, and SQLAnywhere (jeremyevans)
+
+* Fix handling of Class.new(ModelClass){set_dataset :table} on ruby 1.8 (jeremyevans)
+
+* Use range function constructors instead of casts for known range types in pg_range (jeremyevans) (#1066)
+
+* Make class_table_inheritance plugin work without sti_key (jeremyevans)
+
+* Detect additional disconnect errors when using the tinytds adapter (jeremyevans)
+
+* Make offset emulation without order but with explicit selection handle ambiguous column names (jeremyevans)
+
+* Allow preparing already prepared statements when emulating limits and/or offsets (jeremyevans)
+
+* Have Sequel::NoMatchingRow exceptions record the dataset related to the exception (pedro, jeremyevans) (#1060)
+
+=== 4.25.0 (2015-08-01)
+
+* Add Dataset#insert_conflict on PostgreSQL 9.5+, for upsert/insert ignore support using INSERT ON CONFLICT (jeremyevans)
+
+* Support Dataset#group_rollup and #group_cube on PostgreSQL 9.5+ (jeremyevans)
+
+* Automatically REORG tables when altering when using jdbc/db2 (karlhe) (#1054)
+
+* Recognize constraint violation exceptions on swift/sqlite (jeremyevans)
+
+* Recognize another check constraint violation exception message on SQLite (jeremyevans)
+
+* Allow =~ and !~ to be used on ComplexExpressions (janko-m) (#1050)
+
+* Support case sensitive SQL Server 2012 in MSSQL metadata queries (knut2) (#1049)
+
+* Add Dataset#group_append, for appending to the existing GROUP BY clause (YorickPeterse) (#1047)
+
+* Add inverted_subsets plugin, for creating an inverted subset method for each subset (celsworth) (#1042)
+
+* Make Dataset#for_update not use the :read_only database when the dataset is executed (jeremyevans) (#1041)
+
+* Add singular_table_names plugin, for changing Sequel to not pluralize table names by default (jeremyevans)
+
+* PreparedStatement#prepare now raises an Error (jeremyevans)
+
+* Clear delayed association pks when refreshing an object (jeremyevans)
+
+* Add empty_array_consider_nulls extension to make Sequel consider NULL values when using IN/NOT IN with an empty array (jeremyevans)
+
+* Make Sequel default to ignoring NULL values when using IN/NOT IN with an empty array (jeremyevans)
+
+* Remove the deprecated firebird and informix adapters (jeremyevans)
+
+* Make :collate option when creating columns literalize non-String values on PostgreSQL (jeremyevans) (#1040)
+
+* Make dirty plugin notice when serialized column is changed (celsworth) (#1039)
+
+* Allow prepared statements to use RETURNING (jeremyevans) (#1036)
+
+=== 4.24.0 (2015-07-01)
+
+* Allow class_table_inheritance plugin to support subclasses that don't add additional columns (QuinnHarris, jeremyevans) (#1030)
+
+* Add :columns option to update_refresh plugin, specifying the columns to include in the RETURNING clause (celsworth) (#1029)
+
+* Use column symbol key for auto validation unique errors if the unique index is on a single column (jeremyevans)
+
+* Allow :timeout option to Database#listen in the postgres adapter to be a callable object (celsworth) (#1028)
+
+* Add pg_inet_ops extension, for DSL support for PostgreSQL inet/cidr operators and functions (celsworth, jeremyevans) (#1024)
+
+* Support :*_opts options in auto_validations plugin, for setting options for the underlying validation methods (celsworth, jeremyevans) (#1026)
+
+* Support :delay_pks association option in association_pks to delay setting of associated_pks until after saving (jeremyevans)
+
+* Make jdbc subadapters work if they issue queries while the subadapter is being loaded (jeremyevans) (#1022)
+
+* Handle 64-bit auto incrementing primary keys in jdbc subadapters (DougEverly) (#1018, #1019)
+
+* Remove the deprecated db2 and dbi adapters (jeremyevans)
+
+* Make auto_validation plugin use :from=>:values option to setup validations on the underlying columns (jeremyevans)
+
+* Add :from=>:values option to validation_helpers methods, for getting values from the values hash instead of a method call (jeremyevans)
+
+=== 4.23.0 (2015-06-01)
+
+* Make dataset.call_sproc(:insert) work in the jdbc adapter (flash-gordon) (#1013)
+
+* Add update_refresh plugin, for refreshing a model instance when updating (jeremyevans)
+
+* Add delay_add_association plugin, for delaying add_* method calls on new objects until after saving the object (jeremyevans)
+
+* Add validate_associated plugin, for validating associated objects when validating the current object (jeremyevans)
+
+* Make Postgres::JSONBOp#[] and #get_text return JSONBOp instances (jeremyevans) (#1005)
+
+* Remove the fdbsql, jdbc/fdbsql, and openbase adapters (jeremyevans)
+
+* Database#transaction now returns block return value if :rollback=>:always is used (jeremyevans)
+
+* Allow postgresql:// connection strings as aliases to postgres://, for compatibility with libpq (jeremyevans) (#1004)
+
+* Make Model#move_to in the list plugin handle out-of-range targets without raising an exception (jeremyevans) (#1003)
+
+* Make Database#add_named_conversion_proc on PostgreSQL handle conversion procs for enum types (celsworth) (#1002)
+
+=== 4.22.0 (2015-05-01)
+
+* Deprecate the db2, dbi, fdbsql, firebird, jdbc/fdbsql, informix, and openbase adapters (jeremyevans)
+
+* Avoid hash allocations and rehashes (jeremyevans)
+
+* Don't silently ignore :jdbc_properties Database option in jdbc adapter (jeremyevans)
+
+* Make tree plugin set reciprocal association for children association correctly (lpil, jeremyevans) (#995)
+
+* Add Sequel::MassAssignmentRestriction exception, raised for mass assignment errors in strict mode (jeremyevans) (#994)
+
+* Handle ODBC::SQL_BIT type as boolean in the odbc adapter, fixing boolean handling on odbc/mssql (jrgns) (#993)
+
+* Make :auto_validations plugin check :default entry instead of :ruby_default entry for checking existence of default value (jeremyevans) (#990)
+
+* Adapters should now set :default schema option to nil when adapter can determine that the value is nil (jeremyevans)
+
+* Do not add a schema :max_length entry for a varchar(max) column on MSSQL (jeremyevans)
+
+* Allow :default value for PostgreSQL array columns to be a ruby array when using the pg_array extension (jeremyevans) (#989)
+
+* Add csv_serializer plugin for serializing model objects to and from csv (bjmllr, jeremyevans) (#988)
+
+* Make Dataset#to_hash and #to_hash_groups handle single array argument for model datasets (jeremyevans)
+
+* Handle Model#cancel_action in association before hooks (jeremyevans)
+
+* Use a condition variable instead of busy waiting in the threaded connection pools on ruby 1.9+ (jeremyevans)
+
+* Use Symbol#to_proc instead of explicit blocks (jeremyevans)
+
+=== 4.21.0 (2015-04-01)
+
+* Support :tsquery and :tsvector options in Dataset#full_text_search on PostgreSQL, for using existing tsquery/tsvector expressions (jeremyevans)
+
+* Fix TinyTds::Error being raised when trying to cancel a query on a closed connection in the tinytds adapter (jeremyevans)
+
+* Add GenericExpression#!~ for inverting =~ on ruby 1.9 (similar to inverting a hash) (jeremyevans) (#979)
+
+* Add GenericExpression#=~ for equality, inclusion, and pattern matching (similar to using a hash) (jeremyevans) (#979)
+
+* Add Database#add_named_conversion_proc on PostgreSQL to make it easier to add conversion procs for types by name (jeremyevans)
+
+* Make Sequel.pg_jsonb return JSONBOp instances instead of JSONOp instances when passed other than Array or Hash (jeremyevans) (#977)
+
+* Demodulize default root name in json_serializer plugin (janko-m) (#968)
+
+* Make Database#transaction work in after_commit/after_rollback blocks (jeremyevans)
+
+=== 4.20.0 (2015-03-03)
+
+* Restore the use of AUTOINCREMENT on SQLite (jeremyevans) (#965)
+
+* Duplicate the associations hash when duplicating a model object (jeremyevans)
+
+* Correctly apply association limit when eager loading with an eager block using default limit strategy on some databases (jeremyevans)
+
+* Fix eager loading when using the :window_function limit strategy with an eager block and cascaded associations (jeremyevans)
+
+* Add support for set_column_type :auto_increment=>true to add AUTO_INCREMENT to existing column on MySQL (jeremyevans) (#959)
+
+* Add support for overridding the :instance_specific association option (jeremyevans)
+
+* Recognize MSSQL bit type as boolean in the schema_dumper (jeremyevans)
+
+* Skip eager loading queries if there are no matching keys (jeremyevans) (#952)
+
+* Dataset#paged_each now returns an enumerator if not passed a block (jeremyevans)
+
+* Use to_json :root option with string value as the JSON object key in the json_serializer plugin (jeremyevans)
+
+* Allow create_enum in the pg_enum extension be reversible in migrations (celsworth) (#951)
+
+* Have swift adapter respect database and application timezone settings (asppsa, jeremyevans) (#946)
+
+* Don't have the static cache plugin attempt to validate objects (jeremyevans)
+
+* Make freeze not validate objects if their errors are already frozen (jeremyevans)
+
+* Only use prepared statements for associations if caching association metadata (jeremyevans)
+
+* Set parent association when loading descendants in the rcte_tree plugin (jeremyevans)
+
+* Add Database#transaction :before_retry option, specifying a proc to call before retrying (uhoh-itsmaciek) (#941)
+
+=== 4.19.0 (2015-02-01)
+
+* Make jdbc/sqlanywhere correctly set :auto_increment entry in schema hashes (jeremyevans)
+
+* Add Model#cancel_action for canceling actions in before hooks, instead of having the hooks return false (jeremyevans)
+
+* Support not setting @@wait_timeout on MySQL via :timeout=>nil Database option (jeremyevans)
+
+* Add accessed_columns plugin, recording which columns have been accessed for a model instance (jeremyevans)
+
+* Use correct migration version when using IntegerMigrator with :allow_missing_migration_files (blerins) (#938)
+
+* Make Dataset#union, #intersect, and #except automatically handle datasets with raw SQL (jeremyevans) (#934)
+
+* Add column_conflicts plugin to automatically handle columns that conflict with method names (jeremyevans) (#929)
+
+* Add Model#get_column_value and #set_column_value to get/set column values (jeremyevans) (#929)
+
+=== 4.18.0 (2015-01-02)
+
+* Make Dataset#empty? work when the dataset is ordered by a non-column expression (pete) (#923)
+
+* Fix passing a hash value to :eager association option (jeremyevans)
+
+* Treat all PG::ConnectionBad exceptions as disconnect errors in the postgres adapter (jeremyevans)
+
+* Add :auto_increment key to schema information for primary key columns (jeremyevans) (#919)
+
+* Fix handling of schema qualified tables in many_through_many associations (jeremyevans)
+
+=== 4.17.0 (2014-12-01)
+
+* Fix handling of Sequel::SQL::Blob instances in bound variables in the postgres adapter (jeremyevans) (#917)
+
+* Add :preconnect Database option for immediately creating the maximum number of connections (jeremyevans)
+
+* Support DB.pool.max_size for the single connection pools (jeremyevans)
+
+* Work around regression in jdbc-sqlite3 3.8.7 where empty blobs are returned as nil (jeremyevans)
+
+* Work around regression in jdbc-sqlite3 3.8.7 when using JDBC getDate method for date parsing (jeremyevans)
+
+* Make Model#update_or_create return object if existing object exists but updates are not necessary (contentfree) (#916)
+
+* Add Dataset#server? for conditionally setting a default server to use if no default is present (jeremyevans)
+
+* Add Database#sharded? for determining if database uses sharding (jeremyevans)
+
+* Fix server used by Dataset#insert_select on PostgreSQL (jeremyevans)
+
+* Fix server used for deleting model instances when using sharding (jeremyevans)
+
+=== 4.16.0 (2014-11-01)
+
+* Make Database#create_table? and #create_join_table? not use IF NOT EXISTS if indexes are being added (jeremyevans) (#904)
+
+* Dataset#distinct now accepts virtual row blocks (chanks) (#901)
+
+* Recognize disconnect errors in the postgres adapter when SSL is used (jeremyevans) (#900)
+
+* Stop converting '' default values to nil default values on MySQL (jeremyevans)
+
+* Add Model#qualified_pk_hash, for returning a hash with qualified pk keys (jeremyevans)
+
+* Make validates_unique use a qualified primary key if the dataset is joined (jeremyevans) (#895)
+
+* Make Sequel::Model.cache_associations = false skip the database's schema cache when loading the schema (jeremyevans)
+
+* Make Database#foreign_key_list work on Microsoft SQL Server 2005 (jeremyevans)
+
+* Make create_table with :foreign option reversible on PostgreSQL (jeremyevans)
+
+* Make drop_table with :foreign option on PostgreSQL drop a foreign table (johnnyt) (#892)
+
+=== 4.15.0 (2014-10-01)
+
+* Make AssociationReflection#reciprocal not raise error if associated class contains association with invalid associated class (jeremyevans)
+
+* Make create_view(:view_name, dataset, :materialized=>true) reversible on PostgreSQL (jeremyevans)
+
+* Add support for creating foreign tables on PostgreSQL using :foreign and :options create_table options (jeremyevans)
+
+* Raise Error if a primary key is necessary to use an association, but the model doesn't have a primary key (jeremyevans)
+
+* Make tactical_eager_loading plugin work for limited associations (jeremyevans)
+
+* Add PlaceholderLiteralizer#with_dataset, for returning a new literalizer using a modified dataset (jeremyevans)
+
+* Support active_model 4.2.0beta1 in the active_model plugin (jeremyevans)
+
+* Make Dataset#insert in the informix adapter return last inserted id (jihwans) (#887)
+
+* Support :nolog option in the informix adapter to disable transactions (jihwans) (#887)
+
+* Remove optional argument for Postgres::{JSON,JSONB}Op#to_record and #to_recordset (jeremyevans)
+
+* Add support for FoundationDB SQL Layer, via fdbsql and jdbc/fdbsql adapters (ScottDugas, jeremyevans) (#884)
+
+* Work around bug in old versions of MySQL when schema dumping a table with multiple timestamp columns (jeremyevans) (#882)
+
+* Support more array types by default in the pg_array extension, such as xml[] and uuid[] (jeremyevans)
+
+* Add Sequel::Model.cache_associations accessor, which can be set to false to not cache association metadata (jeremyevans)
+
+* Add split_values plugin, for moving noncolumn entries from the values hash into a separate hash (jeremyevans) (#868)
+
+=== 4.14.0 (2014-09-01)
+
+* Raise original exception if there is an exception raised when rolling back transaction/savepoint (jeremyevans) (#875)
+
+* Allow delayed evaluation blocks to take dataset as an argument (jeremyevans)
+
+* Allow more types as filter expressions, only specifically disallow Numeric/String expressions (jeremyevans)
+
+* Remove objects from cached association array at time of nested_attributes call instead of waiting until save (jeremyevans)
+
+* Handle composite primary keys when working around validation issues for one_to_(one|many) associations in nested_attributes plugin (jeremyevans) (#870)
+
+* Recognize additional disconnect error in jdbc/jtds adapter (jeremyevans)
+
+* Have association_join work with existing model selections (jeremyevans)
+
+* Fix regression in class_table_inheritance plugin when lazily loading column in middle table (jeremyevans) (#862)
+
+* Add cache_key_prefix method to caching plugin, which can be overridden for custom handling (pete) (#861)
+
+* Add :when option to PostgreSQL create_trigger method, for adding a filter to the trigger (aschrab) (#860)
+
+* Recognize an additional serialization failure on PostgreSQL (tmtm) (#857)
+
+=== 4.13.0 (2014-08-01)
+
+* Use copy constructors instead of overriding Model#dup and #clone (ged, jeremyevans) (#852)
+
+* Fix handling of MySQL create_table foreign_key calls using :key option (mimperatore, jeremyevans) (#850)
+
+* Handle another disconnection error in the postgres adapter (lbosque) (#848)
+
+* Make list plugin update remaining positions after destroying an instance (ehq, jeremyevans) (#847)
+
+* Unalias aliased tables in Dataset#insert (jeremyevans)
+
+* Add insert_returning_select plugin, for setting up RETURNING for inserts for models selecting explicit columns (jeremyevans)
+
+* Make Model#save use insert_select if the dataset used for inserting already uses returning (jeremyevans)
+
+* Add Dataset#unqualified_column_for helper method, returning unqualified version of possibly qualified column (jeremyevans)
+
+* Calling Dataset#returning when the Database does not support or emulate RETURNING now raises an Error (jeremyevans)
+
+* Emulate RETURNING on Microsoft SQL Server using OUTPUT, as long as only simple column references are used (jeremyevans)
+
+* Switch class_table_inheritance plugin to use JOIN ON instead of JOIN USING (jeremyevans)
+
+* Qualify primary keys for models with joined datasets when looking up model instances by primary key (jeremyevans)
+
+* Fix qualification of columns when Dataset#graph automatically wraps the initially graphed dataset in a subselect (jeremyevans)
+
+* Make Dataset#joined_dataset? a public method (jeremyevans)
+
+* Allow external jdbc, odbc, and do subadapters to be loaded automatically (jeremyevans)
+
+* Recognize another disconnect error in the jdbc/mysql adapter (jeremyevans)
+
+* Set primary keys correctly for models even if datasets select specific columns (jeremyevans)
+
+* Add dataset_source_alias extension, for automatically aliasing datasets to their first source (jeremyevans)
+
+* Use qualified columns in the lazy_attributes plugin (jeremyevans)
+
+* Add column_select plugin, for using explicit column selections in model datasets (jeremyevans)
+
+* Use associated model's existing selection for join associations if it consists solely of explicitly quailfied columns (jeremyevans)
+
+* Add round_timestamps extension for automatically rounding timestamp values to database precision before literalizing (jeremyevans)
+
+* Make rake default task run plugin specs as well as core/model specs (jeremyevans)
+
+* Use all_tables and all_views for Database#tables and #views on Oracle (jeremyevans)
+
+* Use all_tab_cols instead of user_tab cols for defaults parsing in the oracle adapter (jeremyevans)
+
+* Fix recursive mutex locking issue on JRuby when using Sequel::Model(dataset) (jeremyevans) (#841)
+
+* Make composition and serialization plugins support validations on underlying columns (jeremyevans)
+
+* Fix regression in timestamps and table inheritance plugin where column values would not be saved if validation is skipped (jeremyevans) (#839)
+
+* Add pg_enum extension, for dealing with PostgreSQL enums (jeremyevans)
+
+* Add modification_detection plugin, for automatic detection of in-place column value modifications (jeremyevans)
+
+* Speed up using plain strings, numbers, true, false, and nil in json columns if underlying json library supports them (jeremyevans) (#834)
+
+=== 4.12.0 (2014-07-01)
+
+* Support :readonly Database option in sqlite adapter (ippeiukai, jeremyevans) (#832)
+
+* Automatically setup max_length validations for string columns in the auto_validations plugin (jeremyevans)
+
+* Add :max_length entry to column schema hashes for string types (jeremyevans)
+
+* Add :before_thread_exit option to Database#listen_for_static_cache_updates in pg_static_cache_updater extension (jeremyevans)
+
+* Add Database#values on PostgreSQL to create a dataset that uses VALUES instead of SELECT (jeremyevans)
+
+* Add Model#set_nested_attributes to nested_attributes, allowing setting nested attributes options per-call (jeremyevans)
+
+* Use explicit columns when using automatically prepared SELECT statements in the prepared statement plugins (jeremyevans)
+
+* Make Dataset#insert_select on PostgreSQL respect existing RETURNING clause (jeremyevans)
+
+* Fix eager loading limited associations via a UNION when an association block is used (jeremyevans)
+
+* Associate reciprocal object before saving associated object when creating new objects in nested_attributes (chanks, jeremyevans) (#831)
+
+* Handle intervals containing more than 100 hours in the pg_interval extension's parser (will) (#827)
+
+* Remove methods/class deprecated in 4.11.0 (jeremyevans)
+
+* Allow Dataset#natural_join/cross_join and related methods to take a options hash passed to join_table (jeremyevans)
+
+* Add :reset_implicit_qualifier option to Dataset#join_table, to set false to not reset the implicit qualifier (jeremyevans)
+
+* Support :notice_receiver Database option when postgres adapter is used with pg driver (jeltz, jeremyevans) (#825)
+
+=== 4.11.0 (2014-06-03)
+
+* Add :model_map option to class_table_inheritance plugin so class names don't need to be stored in the database (jeremyevans)
+
+* Set version when using for MySQL/SQLite emulation in the mock adapter (jeremyevans)
+
+* Add support for CUBRID/SQLAnywhere emulation to the mock adapter (jeremyevans)
+
+* Add support for the jsonb operators added in PostgreSQL 9.4 to the pg_json_ops extension (jeremyevans)
+
+* Add support for new json/jsonb functions added in PostgreSQL 9.4 to the pg_json_ops extension (jeremyevans)
+
+* Add support for the PostgreSQL 9.4+ jsonb type to the pg_json_ops extension (jeremyevans)
+
+* Add support for derived column lists to Sequel.as and SQL::AliasMethods#as (jeremyevans)
+
+* Support connecting to a DB2 catalog name in the ibmdb adapter (calh) (#821)
+
+* Fix warnings in some cases in the ibmdb adapter (calh) (#820)
+
+* Add SQL::Function#with_ordinality for creating set returning functions WITH ORDINALITY (jeremyevans)
+
+* Add SQL::Function#filter for creating filtered aggregate function calls (jeremyevans)
+
+* Add SQL::Function#within_group for creating ordered-set and hypothetical-set aggregate functions (jeremyevans)
+
+* Add SQL::Function#lateral, for creating set returning functions that will be preceded by LATERAL (jeremyevans)
+
+* Add SQL::Function#quoted and #unquoted methods, to enable/disable quoting of function names (jeremyevans)
+
+* Deprecate Dataset#{window,emulated,}_function_sql_append (jeremyevans)
+
+* Deprecate SQL::WindowFunction and SQL::EmulatedFunction classes, switch to using options on SQL::Function (jeremyevans)
+
+* Only modify changed_columns if deserialized value changes in the serialization plugin (jeremyevans) (#818)
+
+* Support PostgreSQL 9.4+ jsonb type in the pg_json extension (jeremyevans)
+
+* Allow Postgres::ArrayOp#unnest to accept arguments in the pg_array_ops extension (jeremyevans)
+
+* Add Postgres::ArrayOp#cardinality to the pg_array_ops extension (jeremyevans)
+
+* Add :check option to Database#create_view for WITH [LOCAL] CHECK OPTION support (jeremyevans)
+
+* Add :concurrently option to Database#refresh_view on PostgreSQL to support concurrent refresh of materialized views (jeremyevans)
+
+* Call the :after_connect Database option proc with both the connection and server/shard if it accepts 2 arguments (pedro, jeremyevans) (#813)
+
+* Make multiple plugins set values before validation instead of before create, works better with auto_validations (jeremyevans)
+
+* Support a default Dataset#import slice size, set to 500 on SQLite (jeremyevans) (#810)
+
+* Make :read_only transaction option be per-savepoint on PostgreSQL (jeremyevans) (#807)
+
+* Add :rank option to Dataset#full_text_search on PostgreSQL, to order by the ranking (jeremyevans) (#809)
+
+* Remove methods deprecated in 4.10.0 (jeremyevans)
+
+=== 4.10.0 (2014-05-01)
+
+* Make Model.include API same as Module.include (ged) (#803)
+
+* Dataset::PlaceholderLiteralizer now handles DelayedEvaluations correctly (jeremyevans)
+
+* Refactor type conversion in the jdbc adapter, for up to a 20% speedup (jeremyevans)
+
+* Add Dataset#with_fetch_size to jdbc adapter, for setting fetch size for JDBC ResultSets (jeremyevans)
+
+* Default to a fetch_size of 100 in the jdbc/oracle adapter, similar to the oci8-based oracle adapter (jeremyevans)
+
+* Add Database#fetch_size accessor and :fetch_size option to jdbc adapter, for setting JDBC Statement fetch size (jeremyevans)
+
+* Automatically determine array type in pg_array_associations plugin, explicitly cast arrays in more places (jeremyevans, maccman) (#800)
+
+* Speed up Dataset#literal for symbols 60% by caching results, speeding up dataset literalization up to 40% or more (jeremyevans)
+
+* Speed up Sequel.split_symbol 10-20x by caching results, speeding up dataset literalization up to 80% or more (jeremyevans)
+
+* Speed up dataset literalization for simple datasets by up to 100% (jeremyevans)
+
+* Support :fractional_seconds Database option on MySQL 5.6.5+ to support fractional seconds by default (jeremyevans) (#797)
+
+* Work around MySQL 5.6+ bug when combining DROP FOREIGN KEY and DROP INDEX in same ALTER TABLE statement (jeremyevans)
+
+* Make auto_validations plugin handle models that select from subqueries (jeremyevans)
+
+* Recognize additional disconnect errors in the postgres adapter (jeremyevans)
+
+* Make import/multi_insert insert multiple rows in a single query using a UNION on Oracle, DB2, and Firebird (jeremyevans)
+
+* Speed up association_pks many_to_many setter method by using Dataset#import (jeremyevans)
+
+* Add Model.prepared_finder, similar to .finder but using a prepared statement (jeremyevans)
+
+* Model.def_{add_method,association_dataset_methods,remove_methods} are now deprecated (jeremyevans)
+
+* Model.eager_loading_dataset and Model.apply_association_dataset_opts are now deprecated (jeremyevans)
+
+* Make prepared_statement_associations plugin handle one_through_one and one_through_many associations (jeremyevans)
+
+* Use placeholder literalizer for regular association loading for up to 85% speedup (jeremyevans)
+
+* Use placeholder literalizer for eager association loading for up to 20% speedup (jeremyevans)
+
+* Make Model#marshallable! work correctly when using the tactical_eager_loading plugin (jeremyevans)
+
+* Respect :foreign_key_constraint_name option when adding columns to existing table on MySQL (noah256) (#795)
+
+* AssociationReflection#association_dataset now handles joining tables if necessary (jeremyevans)
+
+* Support drop_view :if_exists option on SQLite, MySQL, H2, and HSQLDB (jeremyevans) (#793)
+
+* Support drop_table :if_exists option on HSQLDB (jeremyevans)
+
+* Add Database#transaction :auto_savepoint option, for automatically using a savepoint in nested transactions (jeremyevans)
+
+* Add :server_version Database option on Microsoft SQL Server, instead of querying the database for it (jeremyevans)
+
+* Support :correlated_subquery as an eager_graph and filter by associations limit strategy for one_to_* associations (jeremyevans)
+
+* Support named paramters in call_mssql_sproc on Microsoft SQL Server (y.zemlyanukhin, jeremyevans) (#792)
+
+* Handle placeholder literalizer arguments when emulating offsets (jeremyevans)
+
+* Don't attempt to emulate offsets if the dataset uses literal SQL (jeremyevans)
+
+* Use a UNION-based strategy by default to eagerly load limited associations (jeremyevans)
+
+* Support offsets without limits on MySQL, SQLite, H2, SQLAnywhere and CUBRID (jeremyevans)
+
+* Remove the install/uninstall rake tasks (jeremyevans)
+
+* Use INSERT VALUES with multiple rows for Dataset#import and #multi_insert on more databases (jeremyevans)
+
+* Support common table expressions (WITH clause) on SQLite >=3.8.3 (jeremyevans)
+
+=== 4.9.0 (2014-04-01)
+
+* Recognize CHECK constraint violations on newer versions of SQLite (jeremyevans)
+
+* Do not attempt to eager load when calling Dataset#columns in the eager_each plugin (jeremyevans)
+
+* Support :driver option for jdbc adapter, for specifying driver class for cases where getConnection doesn't work (jeremyevans) (#785)
+
+* Massive speedup for PostgreSQL array parser (jeremyevans) (#788)
+
+* Add current_datetime_timestamp extension, for current Time/DateTime instances that are literalized as CURRENT_TIMESTAMP (jeremyevans)
+
+* Recognize additional unique constraint violations on SQLite (jeremyevans) (#782)
+
+* Don't remove column value when validating nested attributes for one_to_* association where association foreign key is the model's primary key (jeremyevans)
+
+* Add Dataset#disable_insert_returning on PostgreSQL for skipping implicit use of RETURNING (jeremyevans)
+
+* Automatically optimize Model.[], .with_pk, and .with_pk! for models with composite keys (jeremyevans)
+
+* Automatically optimize Model.[] when called with a hash (jeremyevans)
+
+* Automatically optimize Model.find, .first, and .first! when called with a single argument (jeremyevans)
+
+* Add Model.finder for creating optimized finder methods using Dataset::PlaceholderLiteralizer (jeremyevans)
+
+* Add Dataset::PlaceholderLiteralizer optimization framework (jeremyevans)
+
+* Add Dataset#with_sql_{each,all,first,single_value,insert,update} optimized methods (jeremyevans)
+
+* Make pg_array extension use correct type when typecasting column values for smallint, oid, real, character, and varchar arrays (jeremyevans)
+
+* Make Database#column_schema_to_ruby_default a public method in the schema_dumper extension (jeremyevans) (#776)
+
+* Fix multiple corner cases in the eager_graph support (jeremyevans) (#771)
+
+* Use streaming to implement paging for Dataset#paged_each in the mysql2 adapter (jeremyevans)
+
+* Use a cursor to implement paging for Dataset#paged_each in the postgres adapter (jeremyevans)
+
+* Add Database#create_join_table? and #create_join_table! for consistency (jeremyevans)
+
+* Add Dataset#where_current_of to the postgres adapter for supporting updating rows based on a cursor's current position (jeremyevans)
+
+* Add Dataset#use_cursor :hold option in the postgres adapter for supporting cursor use outside of a transaction (jeremyevans)
+
+* Add Dataset#paged_each :strategy=>:filter option for increased performance (jeremyevans)
+
+=== 4.8.0 (2014-03-01)
+
+* Add SQL::AliasedExpression#alias alias for #aliaz (jeremyevans)
+
+* Handle SQL::Identifier, SQL::QualifiedIdentifier, and SQL::AliasedExpression objects as first argument to Dataset#graph (jeremyevans)
+
+* Respect qualification and aliases in symbols passed as first argument to Dataset#graph (dividedmind) (#769)
+
+* Recognize new constraint violation error messages in SQLite 3.8.2+ (itswindtw) (#766)
+
+* Use limit strategy to correctly handle limited associations in the dataset_associations plugin (jeremyevans)
+
+* Handle issues in dataset_associations plugin when dataset uses unqualified identifiers for associations requiring joins (jeremyevans)
+
+* Handle fractional seconds in input timestamps in the odbc/mssql adapter (Ross Attrill, jeremyevans)
+
+* Return fractional seconds in timestamps in the odbc adapter (jeremyevans)
+
+* Support :plain and :phrase options to Dataset#full_text_search on PostgreSQL (jeremyevans)
+
+* Use limit strategy to correctly handle filtering by limited associations (jeremyevans)
+
+* Simplify queries used for filtering by associations with conditions (jeremyevans)
+
+* Use an eager limit strategy by default for *_one associations with orders (jeremyevans)
+
+* Support :limit_strategy eager_graph option, for specifying strategy used for limited associations in that eager graph (jeremyevans)
+
+* Add eager_graph_with_options to model datasets, for specifying options specific to the eager_graph call (jeremyevans)
+
+* Handle offsets on *_many associations when eager graphing when there are no associated results (jeremyevans)
+
+* Make Database#register_array_type work without existing scalar conversion proc in the pg_array extension (jeremyevans)
+
+* Handle presence validations on foreign keys in associated objects when creating new associated objects in the nested_attributes plugin (jeremyevans)
+
+* Respect offsets when eager graphing *_one associations (jeremyevans)
+
+* Add association_join to model datasets, for setting up joins based on associations (jeremyevans)
+
+* Add one_through_many association to many_through_many plugin, for only returning a single record (jeremyevans)
+
+* Add :graph_order association option, useful when :order needs to contain qualified identifiers (jeremyevans)
+
+* Add one_through_one association, similar to many_to_many but only returning a single record (jeremyevans)
+
+=== 4.7.0 (2014-02-01)
+
+* Don't swallow underlying exception if there is an exception closing the cursor on PostgreSQL (jeremyevans) (#761)
+
+* Recognize primary key unique constraint violations on MSSQL and SQLAnywhere (jeremyevans)
+
+* Recognize composite unique constraint violations on SQLite (timcraft) (#758)
+
+* Make #* method without arguments on SQL::Function return a Function with * prepended to the arguments (jeremyevans)
+
+* Add #function to SQL::Identifier and SQL::QualifiedIdentifier, allowing for easy use of schema qualified functions or functions names that need quoting (jeremyevans)
+
+* Add SQL::Function#distinct for easier creation of aggregate functions using DISTINCT (jeremyevans)
+
+* Add SQL::Function#over for easier creation of window functions (jeremyevans)
+
+* Don't clear validation instance_hooks until after a successful save (jeremyevans)
+
+* Support :raise_on_save_failure option for one_to_many, pg_array_to_many, and many_to_pg_array associations (jeremyevans)
+
+* Make SQLTime#to_s return a string in HH:MM:SS format, since it shouldn't include date information (jeremyevans)
+
+* Support the Database#tables :schema option in the jdbc adapter (robbiegill, jeremyevans) (#755)
+
+* Automatically rollback transactions in killed threads in ruby 2.0+ (chanks) (#752)
+
+* Add update_or_create plugin, for updating an object if it exists, or creating such an object if it does not (jeremyevans)
+
+* Make auto_validations uniqueness validations work correctly for STI subclasses (jeremyevans)
+
+* Support :dataset option to validates_unique vaildation (jeremyevans)
+
+=== 4.6.0 (2014-01-02)
+
+* Add Database#call_mssql_sproc on MSSQL for calling stored procedures and handling output parameters (jrgns, jeremyevans) (#748)
+
+* Handle RuntimeErrors raised by oci8 in the oracle adapter (jeremyevans)
+
+* Support OFFSET/FETCH on Microsoft SQL Server 2012 (jeremyevans)
+
+* Support :server option for Database#{commit,rollback}_prepared_transaction on PostgreSQL, MySQL, and H2 (jeremyevans) (#743)
+
+* Do not attempt to eager load and raise an exception when doing Model.eager(...).naked.all (jeremyevans)
+
+* Recognize a couple additional disconnect errors in the jdbc/postgresql adapter (jeremyevans) (#742)
+
+=== 4.5.0 (2013-12-02)
+
+* Support :on_commit=>(:drop|:delete_rows|:preserve_rows) options when creating temp tables on PostgreSQL (rosenfeld) (#737)
+
+* Make Dataset#insert work on PostgreSQL if the table name is a SQL::PlaceholderLiteralString (jeremyevans) (#736)
+
+* Copy unique constraints when emulating alter_table operations on SQLite (jeremyevans) (#735)
+
+* Don't return clob column values as SQL::Blob instances in the db2 and ibmdb adapters unless use_clob_as_blob is true (jeremyevans)
+
+* Make use_clob_as_blob false by default on DB2 (jeremyevans)
+
+* Fix usage of Sequel::SQL::Blob objects as prepared statement arguments in jdbc/db2 adapter when use_clob_as_blob is false (jeremyevans)
+
+* Add mssql_optimistic_locking plugin, using a timestamp/rowversion column to protect against concurrent updates (pinx, jeremyevans) (#731)
+
+* Make Model.primary_key array immutable for composite keys (chanks) (#730)
+
+=== 4.4.0 (2013-11-01)
+
+* Make Database#tables not show tables in the recycle bin on Oracle (jeremyevans) (#728)
+
+* Don't automatically order on all columns when emulating offsets for unordered datasets on DB2 (jeremyevans)
+
+* Improve PostgreSQL type support in the jdbc/postgresql adapter (jeremyevans)
+
+* Make offset emulation on Oracle work when using columns that can't be ordered (jeremyevans, sdeming) (#724, #725)
+
+* Make filter by associations support handle associations with :conditions or block (jeremyevans)
+
+* Make association cloning handle :block correctly for clones of clones (jeremyevans)
+
+* Make association cloning handle :eager_block option correctly (jeremyevans)
+
+* Make add_primary_key work on h2 (jeremyevans)
+
+* Add support for foreign key parsing on Oracle (jeremyevans)
+
+* Add support for foreign key parsing to the jdbc adapter (jeremyevans)
+
+* Make add_foreign_key work on HSQLDB (jeremyevans)
+
+* Add table_select plugin for selecting table.* instead of * for model datasets (jeremyevans)
+
+* Issue constraint_validation table deletes before inserts, so modifying constraint via drop/add in same alter_table block works (jeremyevans)
+
+* Support add_*/remove_*/remove_all_* pg_array_to_many association methods on unsaved model objects (jeremyevans)
+
+* Add Sybase SQLAnywhere support via new sqlanywhere and jdbc/sqlanywhere adapters (gditrick, jeremyevans)
+
+* Add Dataset#offset for setting the offset separately from the limit (Paul Henry, jeremyevans) (#717)
+
+=== 4.3.0 (2013-10-02)
+
+* Fix literalization of empty blobs on MySQL (jeremyevans) (#715)
+
+* Ensure Dataset#page_count in pagination extension is at least one (jeremyevans) (#714)
+
+* Recognize another disconnect error in the jdbc/as400 adapter (jeremyevans)
+
+* Make Dataset#qualify and Sequel.delay work together (jeremyevans)
+
+* Recognize citext type as string on PostgreSQL (isc) (#710)
+
+* Support composite keys in the rcte_tree plugin (jeremyevans)
+
+* Support composite keys in the tree plugin (jeremyevans)
+
+* Make Migrator.migrator_class public (robertjpayne, jeremyevans) (#708)
+
+* Make PostgreSQL empty array literalization work correctly on PostgreSQL <8.4 (jeremyevans)
+
+* Add Sequel extensions guide (jeremyevans)
+
+* Add model plugins guide (jeremyevans)
+
+* Add error_sql Database extension, allowing DatabaseError#sql to return SQL query that caused underlying exception (jeremyevans)
+
+* Make Dataset#each_page in pagination extension return enumerator if no block is given (justinj) (#702)
+
+=== 4.2.0 (2013-09-01)
+
+* Support custom :flags option in mysql2 adapter (jeremyevans) (#700)
+
+* Add implementations of Dataset#freeze and Dataset#dup (jeremyevans)
+
+* Add implementations of Model#dup and Model#clone (jeremyevans)
+
+* Don't have partial_indexes returned by Database#indexes on MSSQL 2008+ (jeremyevans)
+
+* Support partial indexes on SQLite 3.8.0+ (jeremyevans)
+
+* Add Database#supports_partial_indexes? to check for partial index support (mluu, jeremyevans) (#698)
+
+* The static_cache plugin now disallows saving/destroying if the :frozen=>false option is not used (jeremyevans)
+
+* Support :frozen=>false option in static_cache plugin, for having new instances returned instead of frozen cached instances (jeremyevans)
+
+* Add pg_static_cache_updater Database extension for listening for changes to tables and updating static_cache caches automatically (jeremyevans)
+
+* Add mssql_emulate_lateral_with_apply extension for emulating LATERAL queries using CROSS/OUTER APPLY (jeremyevans)
+
+* Support LATERAL queries via Dataset#lateral (jeremyevans)
+
+* Add pg_loose_count Database extension, for fast approximate counts of PostgreSQL tables (jeremyevans)
+
+* Add from_block Database extension, for having Database#from block affect FROM instead of WHERE (jeremyevans)
+
+* Support :cursor_name option in postgres adapter Dataset#use_cursor (heeringa, jeremyevans) (#696)
+
+* Fix placeholder literal strings when used with an empty placeholder hash (trydionel, jeremyevans) (#695)
+
+=== 4.1.1 (2013-08-01)
+
+* Fix select_map, select_order_map, and single_value methods on eager_graphed datasets (jeremyevans)
+
+=== 4.1.0 (2013-08-01)
+
+* Support :inherits option in Database#create_table on PostgreSQL, for table inheritance (jeremyevans)
+
+* Handle dropping indexes for schema qualified tables on PostgreSQL (jeremyevans)
+
+* Add Database#error_info on PostgreSQL 9.3+ if pg-0.16.0+ is used, to get a hash of metadata for a given database exception (jeremyevans)
+
+* Allow prepared_statements plugin to work with instance_filters and update_primary_key plugins (jeremyevans)
+
+* Support deferrable exclusion constraints on PostgreSQL using the :deferrable option (mfoody) (#687)
+
+* Make Database#run and #<< accept SQL::PlaceholderLiteralString values (jeremyevans)
+
+* Deprecate :driver option in odbc adapter since it appears to be broken (jeremyevans)
+
+* Support :drvconnect option in odbc adapter for supplying the ODBC connection string directly (jeremyevans)
+
+* Support mysql2 0.3.12+ result streaming via Dataset#stream (jeremyevans)
+
+* Convert Java::JavaUtil::HashMap to ruby Hash in jdbc adapter, for better handling of PostgreSQL hstore type (jeremyevans) (#686)
+
+* Raise NoMatchingRow if calling add_association with a primary key value that doesn't match an existing row (jeremyevans)
+
+* Allow PostgreSQL add_constraint to support :not_valid option (jeremyevans)
+
+* Allow CHECK constraints to have options by using an options hash as the constraint name (jeremyevans)
+
+* Correctly raise error when using an invalid virtual row block function call (jeremyevans)
+
+* Support REPLACE on SQLite via Dataset#replace and #multi_replace (etehtsea) (#681)
+
+=== 4.0.0 (2013-07-01)
+
+* Correctly parse composite primary keys on SQLite 3.7.16+ (jeremyevans)
+
+* Recognize another disconnect error in the jdbc/oracle adapter (jeremyevans)
+
+* Add pg_json_ops extension for calling JSON functions and operators in PostgreSQL 9.3+ (jeremyevans)
+
+* Handle non-JSON plain strings, integers, and floats in PostgreSQL JSON columns in pg_json extension (jeremyevans)
+
+* Dataset#from now accepts virtual row blocks (jeremyevans)
+
+* Add Database#refresh_view on PostgreSQL to support refreshing materialized views (jeremyevans)
+
+* Support the Database#drop_view :if_exists option on PostgreSQL (jeremyevans)
+
+* Support the Database#{create,drop}_view :materialized option for creating materialized views in PostgreSQL 9.3+ (jeremyevans)
+
+* Support the Database#create_view :recursive option for creating recursive views in PostgreSQL 9.3+ (jeremyevans)
+
+* Support the Database#create_view :columns option for using explicit columns (jeremyevans)
+
+* Support the Database#create_schema :owner and :if_not_exists options on PostgreSQL (jeremyevans)
+
+* Support :index_type=>:gist option to create GIST full text indexes on PostgreSQL (jeremyevans)
+
+* Add Postgres::ArrayOp#replace for the array_replace function in PostgreSQL 9.3+ (jeremyevans)
+
+* Add Postgres::ArrayOp#remove for the array_remove function in PostgreSQL 9.3+ (jeremyevans)
+
+* Add Postgres::ArrayOp#hstore for creating hstores from arrays (jeremyevans)
+
+* Make Postgres::ArrayOp#[] return ArrayOp if given a range (jeremyevans)
+
+* Ensure that CHECK constraints are surrounded with parentheses (jeremyevans)
+
+* Ensure Dataset#unbind returned variable hash uses symbol keys (jeremyevans)
+
+* Add pg_array_associations plugin, for associations based on PostgreSQL arrays containing foreign keys (jeremyevans)
+
+* Add Sequel.deep_qualify, for easily doing a deep qualification (jeremyevans)
+
+* Enable use of window functions for limited eager loading by default (jeremyevans)
+
+* Handle offsets correctly when eager loading one_to_one associations (jeremyevans)
+
+* Raise exception for infinite and NaN floats on MySQL (jeremyevans) (#677)
+
+* Make dataset string literalization that requires database connection use dataset's chosen server (jeremyevans)
+
+* Make sure an offset without a limit is handled correctly when eager loading (jeremyevans)
+
+* Allow providing ranges as subscripts for array[start:end] (jeremyevans)
+
+* Prepare one_to_one associations in the prepared_statements_associations plugin (jeremyevans)
+
+* Use prepared statements when the association has :conditions in the prepared_statements_associations plugin (jeremyevans)
+
+* Fix prepared statement usage in some additional cases in the prepared_statements_associations plugin (jeremyevans)
+
+* Hex escape blob input on MySQL (jeremyevans)
+
+* Handle more disconnect errors when using the postgres adapter with the postgres-pr driver (jeremyevans)
+
+* Model#setter_methods private method now accepts 1 argument instead of 2 (jeremyevans)
+
+* Model#set_restricted and #update_restricted private methods now accept 2 arguments instead of 3 (jeremyevans)
+
+* ungraphed on an eager_graph dataset now resets the original row_proc (jeremyevans)
+
+* eager_graph now returns a naked dataset (jeremyevans)
+
+* All behavior deprecated in Sequel 3.48.0 has been removed (jeremyevans)
+
+* Make adapter/integration spec environment variables more consistent (jeremyevans)
+
+* Sequel no longer provides default databases for adapter/integration specs (jeremyevans)
+
+* Model#save no longer calls #_refresh internally (jeremyevans)
+
+* Model#set_all and #update_all can now update the primary key (jeremyevans)
+
+* Integrate many_to_one_pk_lookup and association_autoreloading plugins into main associations plugin (jeremyevans)
+
+* Make defaults_setter plugin operate in a lazy manner (jeremyevans)
+
+* Plugins now extend the model class with ClassMethods before including InstanceMethods (jeremyevans)
+
+* Remove Model::EMPTY_INSTANCE_VARIABLES (jeremyevans)
+
+* Model.raise_on_typecast_failure now defaults to false (jeremyevans)
+
+* Model#_save private method now only takes a single argument (jeremyevans)
+
+* Remove Dataset#columns_without_introspection from columns_introspection extension (jeremyevans)
+
+* Make boolean prepared statement arguments work on sqlite adapter when integer_booleans is true (jeremyevans)
+
+* Make Database#tables and #views reflect search_path on PostgreSQL (jeremyevans)
+
+* SQLite now defaults to true for integer_booleans and false for use_timestamp_timezones (jeremyevans)
+
+* Make the default value for most option hashes a shared frozen hash (jeremyevans)
+
+* Remove Sequel::NotImplemented exception (jeremyevans)
+
+* Automatically alias single expressions in Dataset#get, #select_map, and #select_order_map, to work around possible DoS issues (jeremyevans)
+
+* Use a connection queue instead of stack by default for threaded connection pools (jeremyevans)
+
+* Remove SQL::SQLArray alias for SQL::ValueList (jeremyevans)
+
+* Remove SQL::NoBooleanInputMethods empty module (jeremyevans)
+
+=== Older
+
+See doc/CHANGELOG.old

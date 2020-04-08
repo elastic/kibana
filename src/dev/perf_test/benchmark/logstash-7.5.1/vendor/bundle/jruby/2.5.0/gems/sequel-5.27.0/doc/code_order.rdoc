@@ -1,0 +1,104 @@
+= Code Order
+
+In Sequel, the order in which code is executed during initialization is important.  This
+guide provides the recommended way to order your Sequel code.  Some
+of these guidelines are not strictly necessary, but others are, and
+this guide will be specific about which are strictly necessary.
+
+== Require Sequel
+
+This is sort of a no brainer, but you need to require the library
+first.  This is a strict requirement, none of the other code can
+be executed unless the library has been required first. Example:
+
+  require 'sequel'
+
+== Add Global Extensions
+
+Global extensions are loaded with Sequel.extension, and affect
+other parts of Sequel or the general ruby environment.  It's not
+necessary to load them first, but it is a recommended practice.
+Example:
+
+  Sequel.extension :blank
+
+== Add Extensions Applied to All Databases/Datasets
+
+If you want database or datasets extensions applied to all databases
+and datasets, you must use Sequel::Database.extension to load the
+extension before connecting to a database.  If you connect to a
+database before using Sequel::Database.extension, it will not have
+that extension loaded. Example:
+
+  Sequel::Database.extension :columns_introspection
+
+== Connect to Databases
+
+Connecting to a database is required before running any queries against
+that database, or creating any datasets or models.  You cannot create
+model classes without having a database object created first.  The
+convention for an application with a single Database instance is to
+store that instance in a constant named DB.  Example:
+
+  DB = Sequel.connect('postgres://user:pass@host/database')
+
+== Add Extensions Specific to a Database or All Datasets in that Database
+
+If you want specific databases to use specific extensions, or have all
+datasets in that database use a specific extension, you need to load that
+extension into the database after creating it using
+Sequel::Database#extension.  Example:
+
+  DB.extension :pg_array
+
+== Configure Global Model Behavior
+
+If you want to change the configuration for all model classes, you must do
+so before loading your model classes, as configuration is copied into the
+subclass when model subclasses are created.  Example:
+
+  Sequel::Model.raise_on_save_failure = false
+
+== Add Global Model Plugins
+
+If you want to load a plugin into all models classes, you must do so
+before loading your model classes, as plugin specific data may need to be
+copied into the subclass when model subclasses are created.  Example:
+
+  Sequel::Model.plugin :prepared_statements
+
+== Load Model Classes
+
+After you have established a database connection, and configured your
+global model configration and global plugins, you can load your model
+classes.  It's recommended to have a separate file for each model class,
+unless the model classes are very simple.  Example:
+
+  Dir['./models/*.rb'].each{|f| require f}
+
+== Finalize Associations and Freeze Model Classes and Database
+
+After all the models have been setup, you can finalize the associations.
+This can speed up association reflection methods by doing a lookup in
+advance to find the associated class, and cache related association
+information in the association itself.
+
+Additionally, in production and testing, you should freeze the
+model classes and Database instance, so that you can detect
+unsafe runtime modification of the configuration:
+
+  model_classes.each(&:finalize_associations)
+  model_classes.each(&:freeze)
+  DB.freeze
+
+== Disconnect If Using Forking Webserver with Code Preloading
+
+If you are using a forking webserver such as unicorn or passenger, with
+a feature that loads your Sequel code before forking connections (code
+preloading), then you must disconnect your database connections before
+forking.  If you don't do this, you can end up with child processes
+sharing database connections and all sorts of weird behavior.  Sequel
+will automatically reconnect on an as needed basis in the child
+processes, so you only need to do the following in the parent process:
+
+  DB.disconnect

@@ -1,0 +1,11 @@
+jobs:
+- job: macOS
+  pool:
+    vmImage: 'macos-10.13'
+  steps:
+  - script: |
+      gem install bundler
+      bundle install --retry=3 --jobs=4
+    displayName: 'bundle install'
+  - script: ruby -Ilib exe/rake
+    displayName: 'ruby -Ilib exe/rake'

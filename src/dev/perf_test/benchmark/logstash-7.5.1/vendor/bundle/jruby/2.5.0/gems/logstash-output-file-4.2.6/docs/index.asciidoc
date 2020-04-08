@@ -1,0 +1,147 @@
+:plugin: file
+:type: output
+:default_codec: json_lines
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== File output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This output writes events to files on disk. You can use fields
+from the event as parts of the filename and/or path.
+
+By default, this output writes one event per line in **json** format.
+You can customise the line format using the `line` codec like
+[source,ruby]
+output {
+ file {
+   path => ...
+   codec => line { format => "custom format: %{message}"}
+ }
+}
+
+[id="plugins-{type}s-{plugin}-options"]
+==== File Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-create_if_deleted>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-dir_mode>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-file_mode>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-filename_failure>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-flush_interval>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-gzip>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-path>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-write_behavior>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-create_if_deleted"]
+===== `create_if_deleted`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+If the configured file is deleted, but an event is handled by the plugin,
+the plugin will recreate the file. Default => true
+
+[id="plugins-{type}s-{plugin}-dir_mode"]
+===== `dir_mode`
+
+  * Value type is <<number,number>>
+  * Default value is `-1`
+
+Dir access mode to use. Note that due to the bug in jruby system umask
+is ignored on linux: https://github.com/jruby/jruby/issues/3426
+Setting it to -1 uses default OS value.
+Example: `"dir_mode" => 0750`
+
+[id="plugins-{type}s-{plugin}-file_mode"]
+===== `file_mode`
+
+  * Value type is <<number,number>>
+  * Default value is `-1`
+
+File access mode to use. Note that due to the bug in jruby system umask
+is ignored on linux: https://github.com/jruby/jruby/issues/3426
+Setting it to -1 uses default OS value.
+Example: `"file_mode" => 0640`
+
+[id="plugins-{type}s-{plugin}-filename_failure"]
+===== `filename_failure`
+
+  * Value type is <<string,string>>
+  * Default value is `"_filepath_failures"`
+
+If the generated path is invalid, the events will be saved
+into this file and inside the defined path.
+
+[id="plugins-{type}s-{plugin}-flush_interval"]
+===== `flush_interval`
+
+  * Value type is <<number,number>>
+  * Default value is `2`
+
+Flush interval (in seconds) for flushing writes to log files.
+0 will flush on every message.
+
+[id="plugins-{type}s-{plugin}-gzip"]
+===== `gzip`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Gzip the output stream before writing to disk.
+
+[id="plugins-{type}s-{plugin}-path"]
+===== `path`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+The path to the file to write. Event fields can be used here,
+like `/var/log/logstash/%{host}/%{application}`
+One may also utilize the path option for date-based log
+rotation via the joda time format. This will use the event
+timestamp.
+E.g.: `path => "./test-%{+YYYY-MM-dd}.txt"` to create
+`./test-2013-05-29.txt`
+
+If you use an absolute path you cannot start with a dynamic string.
+E.g: `/%{myfield}/`, `/test-%{myfield}/` are not valid paths
+
+[id="plugins-{type}s-{plugin}-write_behavior"]
+===== `write_behavior`
+
+  * Value type is <<string,string>>
+  * Default value is `append`
+
+If `append`, the file will be opened for appending and each new event will be written at the end of the file.
+If `overwrite`, the file will be truncated before writing and only the most recent event will appear in the file.
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

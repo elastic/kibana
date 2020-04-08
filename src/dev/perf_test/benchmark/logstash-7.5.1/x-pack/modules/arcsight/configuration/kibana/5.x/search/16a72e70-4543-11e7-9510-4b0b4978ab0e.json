@@ -1,0 +1,35 @@
+{
+  "title": "DNS Events",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "deviceVendor",
+    "deviceProduct",
+    "applicationProtocol",
+    "categoryBehavior",
+    "categoryOutcome",
+    "destinationAddress",
+    "destinationDnsDomain",
+    "destinationPort",
+    "deviceCustomString1Label",
+    "deviceCustomString1",
+    "deviceCustomString3Label",
+    "deviceCustomString3",
+    "deviceCustomString4Label",
+    "deviceCustomString4",
+    "deviceEventCategory",
+    "deviceHostName",
+    "deviceSeverity",
+    "sourceAddress",
+    "sourcePort",
+    "transportProtocol"
+  ],
+  "sort": [
+    "deviceReceiptTime",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"arcsight-*\",\"highlightAll\":true,\"version\":true,\"query\":{\"query_string\":{\"query\":\"deviceEventCategory:\\\"dns\\\"\",\"analyze_wildcard\":true}},\"filter\":[]}"
+  }
+}

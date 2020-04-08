@@ -1,0 +1,106 @@
+:plugin: unix
+:type: input
+:default_codec: line
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Unix input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Read events over a UNIX socket.
+
+Like `stdin` and `file` inputs, each event is assumed to be one line of text.
+
+Can either accept connections from clients or connect to a server,
+depending on `mode`.
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Unix Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-data_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-force_unlink>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-mode>> |<<string,string>>, one of `["server", "client"]`|No
+| <<plugins-{type}s-{plugin}-path>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-socket_not_present_retry_interval_seconds>> |<<number,number>>|Yes
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-data_timeout"]
+===== `data_timeout` 
+
+  * Value type is <<number,number>>
+  * Default value is `-1`
+
+The 'read' timeout in seconds. If a particular connection is idle for
+more than this timeout period, we will assume it is dead and close it.
+
+If you never want to timeout, use -1.
+
+[id="plugins-{type}s-{plugin}-force_unlink"]
+===== `force_unlink` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Remove socket file in case of EADDRINUSE failure
+
+[id="plugins-{type}s-{plugin}-mode"]
+===== `mode` 
+
+  * Value can be any of: `server`, `client`
+  * Default value is `"server"`
+
+Mode to operate in. `server` listens for client connections,
+`client` connects to a server.
+
+[id="plugins-{type}s-{plugin}-path"]
+===== `path` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+When mode is `server`, the path to listen on.
+When mode is `client`, the path to connect to.
+
+[id="plugins-{type}s-{plugin}-socket_not_present_retry_interval_seconds"]
+===== `socket_not_present_retry_interval_seconds` 
+
+  * This is a required setting.
+  * Value type is <<number,number>>
+  * Default value is `5`
+
+Amount of time in seconds to wait if the socket file is not present, before retrying.
+Only positive values are allowed.
+
+This setting is only used if `mode` is `client`.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

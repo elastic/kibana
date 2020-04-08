@@ -1,0 +1,58 @@
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+
+input{
+<%=
+require 'azure_module_config_generator'
+config_generator = LogStash::Azure::ConfigGenerator.new
+config_generator.generate_input(@settings)
+%>
+}
+
+filter {
+  json {
+    source => "message"
+  }
+
+  if "_jsonparsefailure" not in [tags] {
+    split {
+      field => "records"
+      target => "data"
+    }
+
+    if "_split_type_failure" not in [tags] {
+      ruby{
+        code => "
+          event.get('data').each { |k,v|
+            event.set(k, v)
+          }
+          event.remove('data')
+        "
+        remove_field => ["message", "records"]
+      }
+
+      if "_rubyexception" not in [tags] {
+        azure_event{}
+
+        if "_azure_event_failure" not in [tags] {
+          if [callerIpAddress]{
+            geoip {
+              source => "callerIpAddress"
+            }
+          }
+          date {
+              match => [ "time", "ISO8601" ]
+          }
+          mutate {
+              copy => { "@metadata" => "[azure][metadata]" }
+          }
+        }
+      }
+    }
+  }
+}
+
+output {
+<%= elasticsearch_output_config('_doc') %>
+}

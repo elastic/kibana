@@ -1,0 +1,679 @@
+= Schema modification methods
+
+Here's a brief description of the most common schema modification methods:
+
+== +create_table+
+
++create_table+ is the most common schema modification method, and it's used for adding new tables
+to the database.  You provide it with the name of the table as a symbol, as well a block:
+
+  create_table(:artists) do
+    primary_key :id
+    String :name
+  end
+
+Note that if you want a primary key for the table, you need to specify it, Sequel does not create one
+by default.
+
+=== Column types
+
+Most method calls inside the create_table block will create columns, since +method_missing+ calls +column+.
+Columns are generally created by specifying the column type as the method
+name, followed by the column name symbol to use, and after that any options that should be used.
+If the method is a ruby class name that Sequel recognizes, Sequel will transform it into the appropriate
+type for the given database.  So while you specified +String+, Sequel will actually use +varchar+ or
++text+ depending on the underlying database.  Here's a list of all ruby classes that Sequel will
+convert to database types:
+
+  create_table(:columns_types) do     # common database type used
+    Integer :a0                       # integer
+    String :a1                        # varchar(255)
+    String :a2, size: 50              # varchar(50)
+    String :a3, fixed: true           # char(255)
+    String :a4, fixed: true, size: 50 # char(50)
+    String :a5, text: true            # text
+    File :b                           # blob
+    Fixnum :c                         # integer
+    Bignum :d                         # bigint
+    Float :e                          # double precision
+    BigDecimal :f                     # numeric
+    BigDecimal :f2, size: 10          # numeric(10)
+    BigDecimal :f3, size: [10, 2]     # numeric(10, 2)
+    Date :g                           # date
+    DateTime :h                       # timestamp
+    Time :i                           # timestamp
+    Time :i2, only_time: true         # time
+    Numeric :j                        # numeric
+    TrueClass :k                      # boolean
+    FalseClass :l                     # boolean
+  end
+
+Note that in addition to the ruby class name, Sequel also pays attention to the column options when
+determining which database type to use.  Also note that for boolean columns, you can use either
+TrueClass or FalseClass, they are treated the same way (ruby doesn't have a Boolean class).
+
+Also note that this conversion is only done if you use a supported ruby class name.  In all other
+cases, Sequel uses the type specified verbatim:
+
+  create_table(:columns_types) do  # database type used
+    string :a1                     # string
+    datetime :a2                   # datetime
+    blob :a3                       # blob
+    inet :a4                       # inet
+  end
+
+In addition to specifying the types as methods, you can use the +column+ method and specify the types
+as the second argument, either as ruby classes, symbols, or strings:
+
+  create_table(:columns_types) do  # database type used
+    column :a1, :string            # string
+    column :a2, String             # varchar(255)
+    column :a3, 'string'           # string
+    column :a4, :datetime          # datetime
+    column :a5, DateTime           # timestamp
+    column :a6, 'timestamp(6)'     # timestamp(6)
+  end
+
+If you use a ruby class as the type, Sequel will try to guess the appropriate type name for the
+database you are using.  If a symbol or string is used as the type, it is used verbatim as the type
+name in SQL, with the exception of :Bignum.  Using the symbol :Bignum as a type will use the
+appropriate 64-bit integer type for the database you are using.
+
+=== Column options
+
+When using the type name as method, the third argument is an options hash, and when using the +column+
+method, the fourth argument is the options hash.  The following options are supported:
+
+:default :: The default value for the column.
+:index :: Create an index on this column. If given a hash, use the hash as the
+          options for the index.
+:null :: Mark the column as allowing NULL values (if true),
+         or not allowing NULL values (if false).  If unspecified, will default
+         to whatever the database default is (usually true).
+:primary_key :: Mark this column as the primary key.  This is used instead of the
+                primary key method if you want a non-autoincrementing primary key.
+:primary_key_constraint_name :: The name to give the primary key constraint.
+:type :: Overrides the type given as the method name or a separate argument.
+         Not usually used by +column+ itself, but often by other methods such
+         as +primary_key+ or +foreign_key+.
+:unique :: Mark the column as unique, generally has the same effect as
+           creating a unique index on the column.
+:unique_constraint_name :: The name to give the unique constraint.
+
+=== Other methods
+
+In addition to the +column+ method and other methods that create columns, there are other methods that can be used:
+
+==== +primary_key+
+
+You've seen this one used already.  It's used to create an autoincrementing integer primary key column.
+
+  create_table(:a0){primary_key :id}
+
+If you want an autoincrementing 64-bit integer:
+
+  create_table(:a0){primary_key :id, type: :Bignum}
+
+If you want to create a primary key column that doesn't use an autoincrementing integer, you should
+not use this method.  Instead, you should use the :primary_key option to the +column+ method or type
+method:
+
+  create_table(:a1){Integer :id, primary_key: true} # Non autoincrementing integer primary key
+  create_table(:a2){String :name, primary_key: true} # varchar(255) primary key
+
+If you want to create a composite primary key, you should call the +primary_key+ method with an
+array of column symbols.  You can provide a specific name to use for the primary key constraint
+via the :name option:
+
+  create_table(:items) do
+    Integer :group_id
+    Integer :position
+    primary_key [:group_id, :position], name: :items_pk
+  end
+
+If provided with an array, +primary_key+ does not create a column, it just sets up the primary key constraint.
+
+==== +foreign_key+
+
++foreign_key+ is used to create a foreign key column that references a column in another table (or the same table).
+It takes the column name as the first argument, the table it references as the second argument, and an options hash
+as its third argument.  A simple example is:
+
+  create_table(:albums) do
+    primary_key :id
+    foreign_key :artist_id, :artists
+    String :name
+  end
+
++foreign_key+ accepts the same options as +column+.  For example, to have a unique foreign key with varchar(16) type:
+
+  foreign_key :column_name, :table, unique: true, type: 'varchar(16)'
+
++foreign_key+ also accepts some specific options:
+
+:deferrable :: Makes the foreign key constraint checks deferrable, so they aren't checked
+               until the end of the transaction.
+:foreign_key_constraint_name :: The name to give the foreign key constraint.
+:key :: The column in the associated table
+        that this column references.  Unnecessary if this column
+        references the primary key of the associated table, at least
+        on most databases.
+:on_delete :: Specify the behavior of this foreign key column when the row with the primary key
+              it references is deleted, can be :restrict, :cascade, :set_null, or :set_default.
+              You can also use a string, which is used literally.
+:on_update :: Specify the behavior of this foreign key column when the row with the primary key
+              it references modifies the value of the primary key.  Takes the same options as
+              :on_delete.
+
+Like +primary_key+, if you provide +foreign_key+ with an array of symbols, it will not create a
+column, but create a foreign key constraint:
+
+  create_table(:artists) do
+    String :name
+    String :location
+    primary_key [:name, :location]
+  end
+  create_table(:albums) do
+    String :artist_name
+    String :artist_location
+    String :name
+    foreign_key [:artist_name, :artist_location], :artists
+  end
+
+When using an array of symbols, you can also provide a :name option to name the constraint:
+
+  create_table(:albums) do
+    String :artist_name
+    String :artist_location
+    String :name
+    foreign_key [:artist_name, :artist_location], :artists, name: 'albums_artist_name_location_fkey'
+  end
+
+If you want to add a foreign key for a single column with a named constraint, you must use
+the array form with a single symbol:
+
+  create_table(:albums) do
+    primary_key :id
+    Integer :artist_id
+    String :name
+    foreign_key [:artist_id], :artists, name: 'albums_artist_id_fkey'
+  end
+
+==== +index+
+
++index+ creates indexes on the table.  For single columns, calling index is the same as using the
+<tt>:index</tt> option when creating the column:
+
+  create_table(:a){Integer :id, index: true}
+  # Same as:
+  create_table(:a) do
+    Integer :id
+    index :id
+  end
+
+  create_table(:a){Integer :id, index: {unique: true}}
+  # Same as:
+  create_table(:a) do
+    Integer :id
+    index :id, unique: true
+  end
+
+Similar to the +primary_key+ and +foreign_key+ methods, calling +index+ with an array of symbols
+will create a multiple column index:
+
+  create_table(:albums) do
+    primary_key :id
+    foreign_key :artist_id, :artists
+    Integer :position
+    index [:artist_id, :position]
+  end
+
+The +index+ method also accepts some options:
+
+:name :: The name of the index (generated based on the table and column names if not provided).
+:type :: The type of index to use (only supported by some databases)
+:unique :: Make the index unique, so duplicate values are not allowed.
+:where :: Create a partial index (only supported by some databases)
+
+==== +unique+
+
+The +unique+ method creates a unique constraint on the table.  A unique constraint generally
+operates identically to a unique index, so the following three +create_table+ blocks are
+pretty much identical:
+
+  create_table(:a){Integer :a, unique: true}
+
+  create_table(:a) do
+    Integer :a
+    index :a, unique: true
+  end
+
+  create_table(:a) do
+    Integer :a
+    unique :a
+  end
+
+Just like +index+, +unique+ can set up a multiple column unique constraint, where the
+combination of the columns must be unique:
+
+  create_table(:a) do
+    Integer :a
+    Integer :b
+    unique [:a, :b]
+  end
+
+==== +full_text_index+ and +spatial_index+
+
+Both of these create specialized index types supported by some databases.  They
+both take the same options as +index+.
+
+==== +constraint+
+
++constraint+ creates a named table constraint:
+
+  create_table(:artists) do
+    primary_key :id
+    String :name
+    constraint(:name_min_length){char_length(name) > 2}
+  end
+
+Instead of using a block, you can use arguments that will be handled similarly
+to <tt>Dataset#where</tt>:
+
+  create_table(:artists) do
+    primary_key :id
+    String :name
+    constraint(:name_length_range, Sequel.function(:char_length, :name)=>3..50)
+  end
+
+==== +check+
+
++check+ operates just like +constraint+, except that it doesn't take a name
+and it creates an unnamed constraint:
+
+  create_table(:artists) do
+    primary_key :id
+    String :name
+    check{char_length(name) > 2}
+  end
+
+It's recommended that you use the +constraint+ method and provide a name for the
+constraint, as that makes it easier to drop the constraint later if necessary.
+
+== +create_join_table+
+
++create_join_table+ is a shortcut that you can use to create simple many-to-many join tables:
+
+  create_join_table(artist_id: :artists, album_id: :albums)
+
+which expands to:
+
+  create_table(:albums_artists) do
+    foreign_key :album_id, :albums
+    foreign_key :artist_id, :artists
+    primary_key [:album_id, :artist_id]
+    index [:artist_id, :album_id]
+  end
+
+== <tt>create_table :as</tt>
+
+To create a table from the result of a SELECT query, instead of passing a block
+to +create_table+, provide a dataset to the :as option:
+
+  create_table(:older_items, as: DB[:items].where{updated_at < Date.today << 6})
+
+== +alter_table+
+
++alter_table+ is used to alter existing tables, changing their columns, indexes,
+or constraints.  It it used just like +create_table+, accepting a block which
+is instance_evaled, and providing its own methods:
+
+=== +add_column+
+
+One of the most common methods, +add_column+ is used to add a column to the table.
+Its API is similar to that of +create_table+'s +column+ method, where the first
+argument is the column name, the second is the type, and the third is an options
+hash:
+
+  alter_table(:albums) do
+    add_column :copies_sold, Integer, default: 0
+  end
+
+=== +drop_column+
+
+As you may expect, +drop_column+ takes a column name and drops the column.  It's
+often used in the +down+ block of a migration to drop a column added in an +up+ block:
+
+  alter_table(:albums) do
+    drop_column :copies_sold
+  end
+
+=== +rename_column+
+
++rename_column+ is used to rename a column.  It takes the old column name as the first
+argument, and the new column name as the second argument:
+
+  alter_table(:albums) do
+    rename_column :copies_sold, :total_sales
+  end
+
+=== +add_primary_key+
+
+If you forgot to include a primary key on the table, and want to add one later, you
+can use +add_primary_key+.  A common use of this is to make many_to_many association
+join tables into real models:
+
+  alter_table(:albums_artists) do
+    add_primary_key :id
+  end
+
+Just like +create_table+'s +primary_key+ method, if you provide an array of symbols,
+Sequel will not add a column, but will add a composite primary key constraint:
+
+  alter_table(:albums_artists) do
+    add_primary_key [:album_id, :artist_id]
+  end
+
+It is possible to specify a name for the primary key constraint: via the :name option:
+
+  alter_table(:albums_artists) do
+    add_primary_key [:album_id, :artist_id], :name=>:albums_artists_pkey
+  end
+
+If you just want to take an existing single column and make it a primary key, call
++add_primary_key+ with an array with a single symbol:
+
+  alter_table(:artists) do
+    add_primary_key [:id]
+  end
+
+=== +add_foreign_key+
+
++add_foreign_key+ can be used to add a new foreign key column or constraint to a table.
+Like +add_primary_key+, if you provide it with a symbol as the first argument, it
+creates a new column:
+
+  alter_table(:albums) do
+    add_foreign_key :artist_id, :artists
+  end
+
+If you want to add a new foreign key constraint to an existing column, you provide an
+array with a single element:
+
+  alter_table(:albums) do
+    add_foreign_key [:artist_id], :artists
+  end
+
+It's encouraged to provide a name when adding the constraint, via the :foreign_key_constraint_name
+option if adding the column and the constraint:
+
+  alter_table(:albums) do
+    add_foreign_key :artist_id, :artists, foreign_key_constraint_name: :albums_artist_id_fkey
+  end
+
+or via the :name option if just adding the constraint:
+
+  alter_table(:albums) do
+    add_foreign_key [:artist_id], :artists, name: :albums_artist_id_fkey
+  end
+
+To set up a multiple column foreign key constraint, use an array with multiple column symbols:
+
+  alter_table(:albums) do
+    add_foreign_key [:artist_name, :artist_location], :artists, name: :albums_artist_name_location_fkey
+  end
+
+=== +drop_foreign_key+
+
++drop_foreign_key+ is used to drop foreign keys from tables.  If you provide a symbol as
+the first argument, it drops both the foreign key constraint and the column:
+
+  alter_table(:albums) do
+    drop_foreign_key :artist_id
+  end
+
+If you want to just drop the foreign key constraint without dropping the column, use
+an array.  It's encouraged to use the :name option to provide the constraint name to
+drop, though on some databases Sequel may be able to find the name through introspection:
+
+  alter_table(:albums) do
+    drop_foreign_key [:artist_id], name: :albums_artist_id_fkey
+  end
+
+An array is also used to drop a composite foreign key constraint:
+
+  alter_table(:albums) do
+    drop_foreign_key [:artist_name, :artist_location], name: :albums_artist_name_location_fkey
+  end
+
+If you do not provide a :name option and Sequel is not able to determine the name
+to use, it will probably raise a Sequel::Error exception.
+
+=== +add_index+
+
++add_index+ works just like +create_table+'s +index+ method, creating a new index on
+the table:
+
+  alter_table(:albums) do
+    add_index :artist_id
+  end
+
+It accepts the same options as +create_table+'s +index+ method, and you can set up
+a multiple column index using an array:
+
+  alter_table(:albums_artists) do
+    add_index [:album_id, :artist_id], unique: true
+  end
+
+=== +drop_index+
+
+As you may expect, +drop_index+ drops an existing index:
+
+  alter_table(:albums) do
+    drop_index :artist_id
+  end
+
+Just like +drop_column+, it is often used in the +down+ block of a migration.
+
+To drop an index with a specific name, use the <tt>:name</tt> option:
+
+  alter_table(:albums) do
+    drop_index :artist_id, name: :artists_id_index
+  end
+
+=== +add_full_text_index+, +add_spatial_index+
+
+Corresponding to +create_table+'s +full_text_index+ and +spatial_index+ methods,
+these two methods create new indexes on the table.
+
+=== +add_constraint+
+
+This adds a named constraint to the table, similar to +create_table+'s +constraint+
+method:
+
+  alter_table(:albums) do
+    add_constraint(:name_min_length){char_length(name) > 2}
+  end
+
+There is no method to add an unnamed constraint, but you can pass +nil+ as the first
+argument of +add_constraint+ to do so.  However, it's not recommended to do that
+as it is more difficult to drop such a constraint.
+
+=== +add_unique_constraint+
+
+This adds a unique constraint to the table, similar to +create_table+'s +unique+
+method.  This usually has the same effect as adding a unique index.
+
+  alter_table(:albums) do
+    add_unique_constraint [:artist_id, :name]
+  end
+
+You can also specify a name via the :name option when adding the constraint:
+
+  alter_table(:albums) do
+    add_unique_constraint [:artist_id, :name], name: :albums_artist_id_name_ukey
+  end
+
+=== +drop_constraint+
+
+This method drops an existing named constraint:
+
+  alter_table(:albums) do
+    drop_constraint(:name_min_length)
+  end
+
+There is no database independent method to drop an unnamed constraint.  Generally, the
+database will give it a name automatically, and you will have to figure out what it is.
+For that reason, you should not add unnamed constraints that you ever might need to remove.
+
+On some databases, you must specify the type of constraint via a <tt>:type</tt> option:
+
+  alter_table(:albums) do
+    drop_constraint(:albums_pk, type: :primary_key)
+    drop_constraint(:albums_fk, type: :foreign_key)
+    drop_constraint(:albums_uk, type: :unique)
+  end
+
+=== +set_column_default+
+
+This modifies the default value of a column:
+
+  alter_table(:albums) do
+    set_column_default :copies_sold, 0
+  end
+
+To remove a default value for a column, use +nil+ as the value:
+
+  alter_table(:albums) do
+    set_column_default :copies_sold, nil
+  end
+
+=== +set_column_type+
+
+This modifies a column's type.  Most databases will attempt to convert existing values in
+the columns to the new type:
+
+  alter_table(:albums) do
+    set_column_type :copies_sold, :Bignum
+  end
+
+You can specify the type as a string or symbol, in which case it is used verbatim, or as a supported
+ruby class or the :Bignum symbol, in which case it gets converted to an appropriate database type.
+
+=== +set_column_allow_null+
+
+This allows you to set the column as allowing NULL values:
+
+  alter_table(:albums) do
+    set_column_allow_null :artist_id
+  end
+
+=== +set_column_not_null+
+
+This allows you to set the column as not allowing NULL values:
+
+  alter_table(:albums) do
+    set_column_not_null :artist_id
+  end
+
+== Other +Database+ schema modification methods
+
+<tt>Sequel::Database</tt> has many schema modification instance methods,
+most of which are shortcuts to the same methods in +alter_table+.  The
+following +Database+ instance methods just call +alter_table+ with a
+block that calls the method with the same name inside the +alter_table+
+block with all arguments after the first argument (which is used as
+the table name):
+
+* +add_column+
+* +drop_column+
+* +rename_column+
+* +add_index+
+* +drop_index+
+* +set_column_default+
+* +set_column_type+
+
+For example, the following two method calls do the same thing:
+
+  alter_table(:artists){add_column :copies_sold, Integer}
+  add_column :artists, :copies_sold, Integer
+
+There are some other schema modification methods that have no +alter_table+
+counterpart:
+
+=== +drop_table+
+
++drop_table+ takes multiple arguments and treats all arguments as a
+table name to drop:
+
+  drop_table(:albums_artists, :albums, :artists)
+
+Note that when dropping tables, you may need to drop them in a specific order
+if you are using foreign keys and the database is enforcing referential
+integrity.  In general, you need to drop the tables containing the foreign
+keys before the tables containing the primary keys they reference.
+
+=== <tt>drop_table?</tt>
+
+<tt>drop_table?</tt> is similar to drop_table, except that it only drops
+the table if the table already exists.  On some databases, it uses
+<tt>IF NOT EXISTS</tt>, on others it does a separate query to check for
+existence.
+
+=== +rename_table+
+
+You can rename an existing table using +rename_table+.  Like +rename_column+,
+the first argument is the current name, and the second is the new name:
+
+  rename_table(:artist, :artists)
+
+=== <tt>create_table!</tt>
+
+<tt>create_table!</tt> drops the table if it exists
+before attempting to create it, so:
+
+  create_table!(:artists) do
+    primary_key :id
+  end
+
+is the same as:
+
+  drop_table?(:artists)
+  create_table(:artists) do
+    primary_key :id
+  end
+
+=== <tt>create_table?</tt>
+
+<tt>create_table?</tt> only creates the table if it does
+not already exist, so:
+
+  create_table?(:artists) do
+    primary_key :id
+  end
+
+is the same as:
+
+  unless table_exists?(:artists)
+    create_table(:artists) do
+      primary_key :id
+    end
+  end
+
+=== +create_view+ and +create_or_replace_view+
+
+These can be used to create views.  The difference between them is that
++create_or_replace_view+ will unconditionally replace an existing view of
+the same name, while +create_view+ will probably raise an error.  Both methods
+take the name as the first argument, and either an string or a dataset as the
+second argument:
+
+  create_view(:gold_albums, DB[:albums].where{copies_sold > 500000})
+  create_or_replace_view(:gold_albums, "SELECT * FROM albums WHERE copies_sold > 500000")
+
+=== +drop_view+
+
++drop_view+ drops existing views.  Just like +drop_table+, it can accept multiple
+arguments:
+
+  drop_view(:gold_albums, :platinum_albums)

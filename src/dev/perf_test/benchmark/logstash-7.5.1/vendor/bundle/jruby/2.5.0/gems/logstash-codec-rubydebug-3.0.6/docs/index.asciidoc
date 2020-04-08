@@ -1,0 +1,46 @@
+:plugin: rubydebug
+:type: codec
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Rubydebug codec plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The rubydebug codec will output your Logstash event data using
+the Ruby Awesome Print library.
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Rubydebug Codec Configuration Options
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-metadata>> |<<boolean,boolean>>|No
+|=======================================================================
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-metadata"]
+===== `metadata` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Should the event's metadata be included?
+
+

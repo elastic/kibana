@@ -1,0 +1,10 @@
+{
+  "title": "Events by Size [ArcSight]",
+  "visState": "{\"title\":\"Events by Size [ArcSight]\",\"type\":\"metrics\",\"params\":{\"id\":\"8d6c10a0-75a6-11e7-871d-5f0fb978413c\",\"type\":\"timeseries\",\"series\":[{\"id\":\"8d6c10a1-75a6-11e7-871d-5f0fb978413c\",\"color\":\"rgba(0,156,224,1)\",\"split_mode\":\"filter\",\"metrics\":[{\"id\":\"8d6c10a2-75a6-11e7-871d-5f0fb978413c\",\"type\":\"sum\",\"field\":\"bytesIn\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"filter\":\"deviceDirection:\\\"0\\\"\",\"label\":\"Inbound Bytes\"},{\"id\":\"b15b6fb0-75a6-11e7-871d-5f0fb978413c\",\"color\":\"rgba(244,78,59,1)\",\"split_mode\":\"filter\",\"metrics\":[{\"id\":\"b15b6fb1-75a6-11e7-871d-5f0fb978413c\",\"type\":\"sum\",\"field\":\"bytesIn\"},{\"script\":\"params.outbound_bytes >= 0 ? params.outbound_bytes * -1 : 0\",\"id\":\"b6e2b060-75a6-11e7-871d-5f0fb978413c\",\"type\":\"calculation\",\"variables\":[{\"id\":\"b9031f60-75a6-11e7-871d-5f0fb978413c\",\"name\":\"outbound_bytes\",\"field\":\"b15b6fb1-75a6-11e7-871d-5f0fb978413c\"}]}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"filter\":\"deviceDirection:\\\"1\\\"\",\"label\":\"Outbound Bytes\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"filter\":\"deviceProduct:\\\"DNS Trace Log\\\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

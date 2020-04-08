@@ -1,0 +1,191 @@
+:plugin: syslog
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Syslog input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Read syslog messages as events over the network.
+
+This input is a good choice if you already use syslog today.
+It is also a good choice if you want to receive logs from
+appliances and network devices where you cannot run your own
+log collector.
+
+Of course, 'syslog' is a very muddy term. By default, this input only
+supports `RFC3164` syslog with some small modifications. However, some
+non-standard syslog formats can be read and parsed if a functional
+`grok_pattern` is provided. The date format is still only allowed to be
+`RFC3164` style or `ISO8601`.
+
+For more information see the http://www.ietf.org/rfc/rfc3164.txt[RFC3164 page].
+
+Note: This input will start listeners on both TCP and UDP.
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Syslog Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-facility_labels>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-grok_pattern>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-locale>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-proxy_protocol>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-severity_labels>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-syslog_field>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-timezone>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-use_labels>> |<<boolean,boolean>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-facility_labels"]
+===== `facility_labels`
+
+  * Value type is <<array,array>>
+  * Default value is `["kernel", "user-level", "mail", "system", "security/authorization", "syslogd", "line printer", "network news", "UUCP", "clock", "security/authorization", "FTP", "NTP", "log audit", "log alert", "clock", "local0", "local1", "local2", "local3", "local4", "local5", "local6", "local7"]`
+
+Labels for facility levels. These are defined in RFC3164.
+
+[id="plugins-{type}s-{plugin}-grok_pattern"]
+===== `grok_pattern`
+
+  * Value type is <<string,string>>
+  * Default value is `"<%{POSINT:priority}>%{SYSLOGLINE}"`
+
+The default value should read and properly parse syslog lines which are
+fully compliant with http://www.ietf.org/rfc/rfc3164.txt[RFC3164].
+
+You can override this value to parse non-standard lines with a valid grok
+pattern which will parse the received lines.  If the line is unable to
+be parsed, the `_grokparsefailure_sysloginput` tag will be added.
+
+The grok pattern must provide a `timestamp` field. If the `timestamp`
+field is omitted, or is unable to be parsed as `RFC3164` style or
+`ISO8601`, a `_dateparsefailure` tag will be added.
+
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host`
+
+  * Value type is <<string,string>>
+  * Default value is `"0.0.0.0"`
+
+The address to listen on.
+
+[id="plugins-{type}s-{plugin}-locale"]
+===== `locale`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Specify a locale to be used for date parsing using either IETF-BCP47 or POSIX language tag.
+Simple examples are `en`,`en-US` for BCP47 or `en_US` for POSIX.
+If not specified, the platform default will be used.
+
+The locale is mostly necessary to be set for parsing month names (pattern with MMM) and
+weekday names (pattern with EEE).
+
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port`
+
+  * Value type is <<number,number>>
+  * Default value is `514`
+
+The port to listen on. Remember that ports less than 1024 (privileged
+ports) may require root to use.
+
+[id="plugins-{type}s-{plugin}-proxy_protocol"]
+===== `proxy_protocol`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Proxy protocol support, only v1 is supported at this time
+http://www.haproxy.org/download/1.5/doc/proxy-protocol.txt
+
+[id="plugins-{type}s-{plugin}-severity_labels"]
+===== `severity_labels`
+
+  * Value type is <<array,array>>
+  * Default value is `["Emergency", "Alert", "Critical", "Error", "Warning", "Notice", "Informational", "Debug"]`
+
+Labels for severity levels. These are defined in RFC3164.
+
+[id="plugins-{type}s-{plugin}-syslog_field"]
+===== `syslog_field`
+
+  * Value type is <<string,string>>
+  * Default value is `"message"`
+
+Codecs process the data before the rest of the data is parsed. Some codecs,
+like CEF, put the syslog data into another field after pre-processing the
+data.  Use this option in conjunction with the `grok_pattern` configuration
+to allow the syslog input plugin to fully parse the syslog data in this case.
+
+[source,sh]
+-------
+input {
+  syslog {
+    port => 12345
+    codec => cef
+    syslog_field => "syslog"
+    grok_pattern => "<%{POSINT:priority}>%{SYSLOGTIMESTAMP:timestamp} CUSTOM GROK HERE"
+  }
+}
+-------
+
+[id="plugins-{type}s-{plugin}-timezone"]
+===== `timezone`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Specify a time zone canonical ID to be used for date parsing.
+The valid IDs are listed on the [Joda.org available time zones page](http://joda-time.sourceforge.net/timezones.html).
+This is useful in case the time zone cannot be extracted from the value,
+and is not the platform default.
+If this is not specified the platform default will be used.
+Canonical ID is good as it takes care of daylight saving time for you
+For example, `America/Los_Angeles` or `Europe/France` are valid IDs.
+
+[id="plugins-{type}s-{plugin}-use_labels"]
+===== `use_labels`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Use label parsing for severity and facility levels.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

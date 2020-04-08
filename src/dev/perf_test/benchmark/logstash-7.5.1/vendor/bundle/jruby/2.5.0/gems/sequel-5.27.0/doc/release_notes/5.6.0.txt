@@ -1,0 +1,31 @@
+= Improvements
+
+* Running migrations using one of the included migrators on separate
+  Database objects in separate threads simultaneously is now
+  supported.  Previously, the migrators were not thread-safe.
+
+* On Ruby 2.5+, :db_type entries in the schema hashes are now deduped
+  for a slight memory savings when using many columns with the same
+  database type.
+
+* The schema_caching extension now freezes string values in the
+  resulting hashes, just as the default schema parsing code started
+  doing in 5.5.0.
+
+* The schema_caching extension now supports the :callable_default
+  schema values used by the pg_json, pg_array, and pg_hstore
+  extensions, by removing the entry before caching and resetting it
+  after restoring the cache.
+
+* Identifier mangling rules are now respected when renaming columns on
+  Microsoft SQL Server.
+
+= Backwards Compatibility
+
+* The migrator internals were modified in order to support
+  thread-safety.  The private Migrator#remove_migration_classes
+  method has been removed, and #load_migration_file now returns the
+  migration object/class instead of populating Migration.descendants.
+  Migration.descendants is now only used for temporary storage, and
+  will no longer contain all migration objects/classes used by the
+  migrator.

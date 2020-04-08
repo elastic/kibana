@@ -1,0 +1,317 @@
+:plugin: jdbc_streaming
+:type: filter
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Jdbc_streaming filter plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+This filter executes a SQL query and store the result set in the field
+specified as `target`.
+It will cache the results locally in an LRU cache with expiry.
+
+For example, you can load a row based on an id in the event.
+
+[source,ruby]
+-----
+filter {
+  jdbc_streaming {
+    jdbc_driver_library => "/path/to/mysql-connector-java-5.1.34-bin.jar"
+    jdbc_driver_class => "com.mysql.jdbc.Driver"
+    jdbc_connection_string => "jdbc:mysql://localhost:3306/mydatabase"
+    jdbc_user => "me"
+    jdbc_password => "secret"
+    statement => "select * from WORLD.COUNTRY WHERE Code = :code"
+    parameters => { "code" => "country_code"}
+    target => "country_details"
+  }
+}
+-----
+
+[id="plugins-{type}s-{plugin}-prepared_statements"]
+==== Prepared Statements
+
+Using server side prepared statements can speed up execution times as the server optimises the query plan and execution.
+
+NOTE: Not all JDBC accessible technologies will support prepared statements.
+
+With the introduction of Prepared Statement support comes a different code execution path and some new settings. Most of the existing settings are still useful but there are several new settings for Prepared Statements to read up on.
+
+Use the boolean setting `use_prepared_statements` to enable this execution mode.
+
+Use the `prepared_statement_name` setting to specify a name for the Prepared Statement, this identifies the prepared statement locally and remotely and it should be unique in your config and on the database.
+
+Use the `prepared_statement_bind_values` array setting to specify the bind values. Typically, these values are indirectly extracted from your event, i.e. the string in the array refers to a field name in your event. You can also use constant values like numbers or strings but ensure that any string constants (e.g. a locale constant of "en" or "de") is not also an event field name. It is a good idea to use the bracketed field reference syntax for fields and normal strings for constants, e.g. `prepared_statement_bind_values => ["[src_ip]", "tokyo"],`.
+
+There are 3 possible parameter schemes. Interpolated, field references and constants. Use interpolation when you are prefixing, suffixing or concatenating field values to create a value that exists in your database, e.g. "%{username}@%{domain}" -> "alice@example.org", "%{distance}km" -> "42km". Use field references for exact field values e.g. "[srcip]" -> "192.168.1.2". Use constants when a database column holds values that slice or categorise a number of similar records e.g. language translations.
+
+A boolean setting `prepared_statement_warn_on_constant_usage`, defaulting to true, controls whether you will see a WARN message logged that warns when constants could be missing the bracketed field reference syntax. If you have set your field references and constants correctly you should set `prepared_statement_warn_on_constant_usage` to false. This setting and code checks should be deprecated in a future major Logstash release.
+
+The `statement` (or `statement_path`) setting still holds the SQL statement but to use bind variables you must use the `?` character as a placeholder in the exact order found in the `prepared_statement_bind_values` array.
+Some technologies may require connection string properties to be set, see MySQL example below.
+
+Example:
+[source,ruby]
+-----
+filter {
+  jdbc_streaming {
+    jdbc_driver_library => "/path/to/mysql-connector-java-5.1.34-bin.jar"
+    jdbc_driver_class => "com.mysql.jdbc.Driver"
+    jdbc_connection_string => "jdbc:mysql://localhost:3306/mydatabase?cachePrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048&useServerPrepStmts=true"
+    jdbc_user => "me"
+    jdbc_password => "secret"
+    statement => "select * from WORLD.COUNTRY WHERE Code = ?"
+    use_prepared_statements => true
+    prepared_statement_name => "lookup_country_info"
+    prepared_statement_bind_values => ["[country_code]"]
+    target => "country_details"
+  }
+}
+-----
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Jdbc_streaming Filter Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-cache_expiration>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-cache_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-default_hash>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-jdbc_connection_string>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-jdbc_driver_class>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-jdbc_driver_library>> |a valid filesystem path|No
+| <<plugins-{type}s-{plugin}-jdbc_password>> |<<password,password>>|No
+| <<plugins-{type}s-{plugin}-jdbc_user>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-jdbc_validate_connection>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-jdbc_validation_timeout>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-parameters>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-prepared_statement_bind_values>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-prepared_statement_name>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-prepared_statement_warn_on_constant_usage>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-sequel_opts>> |<<hash,hash>>|No
+| <<plugins-{type}s-{plugin}-statement>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-tag_on_default_use>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-tag_on_failure>> |<<array,array>>|No
+| <<plugins-{type}s-{plugin}-target>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-use_cache>> |<<boolean,boolean>>|No
+| <<plugins-{type}s-{plugin}-use_prepared_statements>> |<<boolean,boolean>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+filter plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-cache_expiration"]
+===== `cache_expiration`
+
+  * Value type is <<number,number>>
+  * Default value is `5.0`
+
+The minimum number of seconds any entry should remain in the cache. Defaults to 5 seconds.
+
+A numeric value. You can use decimals for example: `cache_expiration => 0.25`.
+If there are transient jdbc errors, the cache will store empty results for a
+given parameter set and bypass the jbdc lookup. This will merge the default_hash
+into the event until the cache entry expires. Then the jdbc lookup will be tried
+again for the same parameters. Conversely, while the cache contains valid results,
+any external problem that would cause jdbc errors will not be noticed for the
+cache_expiration period.
+
+[id="plugins-{type}s-{plugin}-cache_size"]
+===== `cache_size`
+
+  * Value type is <<number,number>>
+  * Default value is `500`
+
+The maximum number of cache entries that will be stored. Defaults to 500 entries.
+The least recently used entry will be evicted.
+
+[id="plugins-{type}s-{plugin}-default_hash"]
+===== `default_hash`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+Define a default object to use when lookup fails to return a matching row.
+Ensure that the key names of this object match the columns from the statement.
+
+[id="plugins-{type}s-{plugin}-jdbc_connection_string"]
+===== `jdbc_connection_string`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+JDBC connection string
+
+[id="plugins-{type}s-{plugin}-jdbc_driver_class"]
+===== `jdbc_driver_class`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+JDBC driver class to load, for example "oracle.jdbc.OracleDriver" or "org.apache.derby.jdbc.ClientDriver"
+
+[id="plugins-{type}s-{plugin}-jdbc_driver_library"]
+===== `jdbc_driver_library`
+
+  * Value type is <<path,path>>
+  * There is no default value for this setting.
+
+JDBC driver library path to third party driver library.
+
+[id="plugins-{type}s-{plugin}-jdbc_password"]
+===== `jdbc_password`
+
+  * Value type is <<password,password>>
+  * There is no default value for this setting.
+
+JDBC password
+
+[id="plugins-{type}s-{plugin}-jdbc_user"]
+===== `jdbc_user`
+
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+JDBC user
+
+[id="plugins-{type}s-{plugin}-jdbc_validate_connection"]
+===== `jdbc_validate_connection`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+Connection pool configuration.
+Validate connection before use.
+
+[id="plugins-{type}s-{plugin}-jdbc_validation_timeout"]
+===== `jdbc_validation_timeout`
+
+  * Value type is <<number,number>>
+  * Default value is `3600`
+
+Connection pool configuration.
+How often to validate a connection (in seconds).
+
+[id="plugins-{type}s-{plugin}-parameters"]
+===== `parameters`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+Hash of query parameter, for example `{ "id" => "id_field" }`.
+
+[id="plugins-{type}s-{plugin}-prepared_statement_bind_values"]
+===== `prepared_statement_bind_values`
+
+  * Value type is <<array,array>>
+  * Default value is `[]`
+
+Array of bind values for the prepared statement. Use field references and constants. See the section on <<plugins-{type}s-{plugin}-prepared_statements,prepared_statements>> for more info.
+
+[id="plugins-{type}s-{plugin}-prepared_statement_name"]
+===== `prepared_statement_name`
+
+  * Value type is <<string,string>>
+  * Default value is `""`
+
+Name given to the prepared statement. It must be unique in your config and in the database.
+You need to supply this if `use_prepared_statements` is true.
+
+[id="plugins-{type}s-{plugin}-prepared_statement_warn_on_constant_usage"]
+===== `prepared_statement_warn_on_constant_usage`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+A flag that controls whether a warning is logged if, in `prepared_statement_bind_values`,
+a String constant is detected that might be intended as a field reference.
+
+[id="plugins-{type}s-{plugin}-sequel_opts"]
+===== `sequel_opts`
+
+  * Value type is <<hash,hash>>
+  * Default value is `{}`
+
+General/Vendor-specific Sequel configuration options
+
+An example of an optional connection pool configuration
+   max_connections - The maximum number of connections the connection pool
+
+examples of vendor-specific options can be found in this documentation page:
+https://github.com/jeremyevans/sequel/blob/master/doc/opening_databases.rdoc
+
+[id="plugins-{type}s-{plugin}-statement"]
+===== `statement`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Statement to execute.
+To use parameters, use named parameter syntax, for example "SELECT * FROM MYTABLE WHERE ID = :id".
+
+[id="plugins-{type}s-{plugin}-tag_on_default_use"]
+===== `tag_on_default_use`
+
+  * Value type is <<array,array>>
+  * Default value is `["_jdbcstreamingdefaultsused"]`
+
+Append values to the `tags` field if no record was found and default values were used.
+
+[id="plugins-{type}s-{plugin}-tag_on_failure"]
+===== `tag_on_failure`
+
+  * Value type is <<array,array>>
+  * Default value is `["_jdbcstreamingfailure"]`
+
+Append values to the `tags` field if sql error occurred.
+
+[id="plugins-{type}s-{plugin}-target"]
+===== `target`
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+Define the target field to store the extracted result(s).
+Field is overwritten if exists.
+
+[id="plugins-{type}s-{plugin}-use_cache"]
+===== `use_cache`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `true`
+
+Enable or disable caching, boolean true or false. Defaults to true.
+
+[id="plugins-{type}s-{plugin}-use_prepared_statements"]
+===== `use_prepared_statements`
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+When set to `true`, enables prepare statement usage
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]

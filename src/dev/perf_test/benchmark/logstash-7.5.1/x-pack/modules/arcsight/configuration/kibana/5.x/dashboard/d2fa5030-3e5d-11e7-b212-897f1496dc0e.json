@@ -1,0 +1,20 @@
+{
+  "title": "[ArcSight] Endpoint Overview Dashboard",
+  "hits": 0,
+  "description": "",
+  "panelsJSON": "[{\"col\":11,\"id\":\"c53825b0-3e4b-11e7-af78-9fc514b4e118\",\"panelIndex\":1,\"row\":2,\"size_x\":2,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"e301a830-3e4d-11e7-af78-9fc514b4e118\",\"panelIndex\":2,\"row\":9,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"9de87d40-3e4e-11e7-af78-9fc514b4e118\",\"panelIndex\":3,\"row\":9,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"96af5bf0-3e50-11e7-af78-9fc514b4e118\",\"panelIndex\":5,\"row\":4,\"size_x\":12,\"size_y\":2,\"type\":\"visualization\"},{\"col\":7,\"id\":\"ff476320-3e4a-11e7-af78-9fc514b4e118\",\"panelIndex\":6,\"row\":12,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"b74e59b0-3e5f-11e7-899c-f940f646009b\",\"panelIndex\":7,\"row\":2,\"size_x\":10,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"7c6875e0-3e61-11e7-899c-f940f646009b\",\"panelIndex\":8,\"row\":12,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"columns\":[\"categoryDeviceGroup\",\"categoryTechnique\",\"categoryOutcome\",\"categorySignificance\",\"categoryObject\",\"categoryBehavior\",\"categoryDeviceType\"],\"id\":\"1d9ba830-3e47-11e7-af78-9fc514b4e118\",\"panelIndex\":9,\"row\":20,\"size_x\":12,\"size_y\":5,\"sort\":[\"deviceReceiptTime\",\"desc\"],\"type\":\"search\"},{\"col\":7,\"id\":\"cc8affd0-3e65-11e7-899c-f940f646009b\",\"panelIndex\":10,\"row\":15,\"size_x\":6,\"size_y\":2,\"type\":\"visualization\"},{\"col\":1,\"id\":\"1bde8be0-3e68-11e7-899c-f940f646009b\",\"panelIndex\":11,\"row\":6,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"7c414c90-3e66-11e7-899c-f940f646009b\",\"panelIndex\":12,\"row\":15,\"size_x\":6,\"size_y\":5,\"type\":\"visualization\"},{\"col\":7,\"id\":\"6fb90a30-3e6b-11e7-9d4a-89ea81333ea4\",\"panelIndex\":14,\"row\":6,\"size_x\":6,\"size_y\":3,\"type\":\"visualization\"},{\"col\":1,\"id\":\"31b85570-454a-11e7-86b6-95298e9da6dc\",\"panelIndex\":15,\"row\":1,\"size_x\":12,\"size_y\":1,\"type\":\"visualization\"},{\"size_x\":6,\"size_y\":3,\"panelIndex\":17,\"type\":\"visualization\",\"id\":\"2a33c810-3e4d-11e7-af78-9fc514b4e118\",\"col\":7,\"row\":17}]",
+  "optionsJSON": "{\"darkTheme\":false}",
+  "uiStateJSON": "{\"P-11\":{\"vis\":{\"colors\":{\"Anti-Virus\":\"#EAB839\",\"Database\":\"#629E51\",\"Host-based IDS/IPS\":\"#E0752D\",\"Operating System\":\"#BF1B00\",\"Security Mangement\":\"#64B0C8\"}}},\"P-12\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"P-14\":{\"vis\":{\"colors\":{\"/Attempt\":\"#0A50A1\",\"/Failure\":\"#BF1B00\",\"/Informational\":\"#7EB26D\",\"/Informational/Warning\":\"#EF843C\",\"/Success\":\"#629E51\",\"Anti-Virus\":\"#EAB839\",\"Database\":\"#629E51\",\"Host-based IDS/IPS\":\"#E0752D\",\"Log Consolidator\":\"#E0F9D7\",\"Operating System\":\"#BF1B00\",\"Recon\":\"#BF1B00\",\"Security Mangement\":\"#64B0C8\"}}},\"P-2\":{\"vis\":{\"colors\":{\"/Attempt\":\"#0A50A1\",\"/Failure\":\"#BF1B00\",\"/Success\":\"#629E51\"}}},\"P-3\":{\"vis\":{\"colors\":{\"/Attempt\":\"#0A50A1\",\"/Failure\":\"#BF1B00\",\"/Success\":\"#629E51\"}}},\"P-7\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"P-8\":{\"vis\":{\"colors\":{\"/Attempt\":\"#0A50A1\",\"/Failure\":\"#BF1B00\",\"/Success\":\"#629E51\"}}},\"P-17\":{\"mapZoom\":1,\"mapCenter\":[12.897489183755892,0]}}",
+  "version": 1,
+  "timeRestore": true,
+  "timeTo": "now",
+  "timeFrom": "now-24h",
+  "refreshInterval": {
+    "display": "Off",
+    "pause": false,
+    "value": 0
+  },
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"*\"}}}],\"highlightAll\":true,\"version\":true}"
+  }
+}

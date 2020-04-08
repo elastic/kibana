@@ -1,0 +1,3 @@
+{{#all_environment_variables}}
+{{key}}={{#shell_quote}}{{value}}{{/shell_quote}}
+{{/all_environment_variables}}

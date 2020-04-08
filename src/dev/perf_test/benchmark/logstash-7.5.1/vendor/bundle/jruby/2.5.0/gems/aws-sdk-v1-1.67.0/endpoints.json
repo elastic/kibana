@@ -1,0 +1,1838 @@
+{
+  "regions": {
+    "us-east-1": {
+      "cognito-sync": {
+        "http": false,
+        "https": true,
+        "hostname": "cognito-sync.us-east-1.amazonaws.com"
+      },
+      "cognito-identity": {
+        "http": false,
+        "https": true,
+        "hostname": "cognito-identity.us-east-1.amazonaws.com"
+      },
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.us-east-1.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.us-east-1.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.us-east-1.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.us-east-1.amazonaws.com"
+      },
+      "logs": {
+        "http": true,
+        "https": true,
+        "hostname": "logs.us-east-1.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.us-east-1.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.us-east-1.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.us-east-1.amazonaws.com"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.us-east-1.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.us-east-1.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "email": {
+        "http": false,
+        "https": true,
+        "hostname": "email.us-east-1.amazonaws.com"
+      },
+      "sdb": {
+        "http": true,
+        "https": true,
+        "hostname": "sdb.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.us-east-1.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.us-east-1.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.us-east-1.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.us-east-1.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com"
+      },
+      "importexport": {
+        "http": false,
+        "https": true,
+        "hostname": "importexport.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.us-east-1.amazonaws.com"
+      },
+      "support": {
+        "http": false,
+        "https": true,
+        "hostname": "support.us-east-1.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.us-east-1.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.us-east-1.amazonaws.com"
+      },
+      "glacier": {
+        "http": true,
+        "https": true,
+        "hostname": "glacier.us-east-1.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.us-east-1.amazonaws.com"
+      },
+      "datapipeline": {
+        "http": false,
+        "https": true,
+        "hostname": "datapipeline.us-east-1.amazonaws.com"
+      },
+      "redshift": {
+        "http": false,
+        "https": true,
+        "hostname": "redshift.us-east-1.amazonaws.com"
+      },
+      "kinesis": {
+        "http": false,
+        "https": true,
+        "hostname": "kinesis.us-east-1.amazonaws.com"
+      },
+      "opsworks": {
+        "http": false,
+        "https": true,
+        "hostname": "opsworks.us-east-1.amazonaws.com"
+      },
+      "elastictranscoder": {
+        "http": false,
+        "https": true,
+        "hostname": "elastictranscoder.us-east-1.amazonaws.com"
+      }
+    },
+    "us-west-1": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.us-west-1.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.us-west-1.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.us-west-1.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.us-west-1.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.us-west-1.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.us-west-1.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.us-west-1.amazonaws.com"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.us-west-1.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.us-west-1.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "sdb": {
+        "http": true,
+        "https": true,
+        "hostname": "sdb.us-west-1.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.us-west-1.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.us-west-1.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3-us-west-1.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.us-west-1.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.us-west-1.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "importexport": {
+        "http": false,
+        "https": true,
+        "hostname": "importexport.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.us-west-1.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.us-west-1.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.us-west-1.amazonaws.com"
+      },
+      "glacier": {
+        "http": true,
+        "https": true,
+        "hostname": "glacier.us-west-1.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.us-west-1.amazonaws.com"
+      },
+      "elastictranscoder": {
+        "http": false,
+        "https": true,
+        "hostname": "elastictranscoder.us-west-1.amazonaws.com"
+      }
+    },
+    "us-west-2": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.us-west-2.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.us-west-2.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.us-west-2.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.us-west-2.amazonaws.com"
+      },
+      "logs": {
+        "http": true,
+        "https": true,
+        "hostname": "logs.us-west-2.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.us-west-2.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.us-west-2.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.us-west-2.amazonaws.com"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.us-west-2.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.us-west-2.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "email": {
+        "http": false,
+        "https": true,
+        "hostname": "email.us-west-2.amazonaws.com"
+      },
+      "sdb": {
+        "http": true,
+        "https": true,
+        "hostname": "sdb.us-west-2.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.us-west-2.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.us-west-2.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3-us-west-2.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.us-west-2.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.us-west-2.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "importexport": {
+        "http": false,
+        "https": true,
+        "hostname": "importexport.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.us-west-2.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.us-west-2.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.us-west-2.amazonaws.com"
+      },
+      "glacier": {
+        "http": true,
+        "https": true,
+        "hostname": "glacier.us-west-2.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.us-west-2.amazonaws.com"
+      },
+      "datapipeline": {
+        "http": false,
+        "https": true,
+        "hostname": "datapipeline.us-west-2.amazonaws.com"
+      },
+      "redshift": {
+        "http": false,
+        "https": true,
+        "hostname": "redshift.us-west-2.amazonaws.com"
+      },
+      "kinesis": {
+        "http": false,
+        "https": true,
+        "hostname": "kinesis.us-west-2.amazonaws.com"
+      },
+      "elastictranscoder": {
+        "http": false,
+        "https": true,
+        "hostname": "elastictranscoder.us-west-2.amazonaws.com"
+      }
+    },
+    "ap-northeast-1": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.ap-northeast-1.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.ap-northeast-1.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.ap-northeast-1.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.ap-northeast-1.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.ap-northeast-1.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.ap-northeast-1.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.ap-northeast-1.amazonaws.com"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.ap-northeast-1.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.ap-northeast-1.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "sdb": {
+        "http": true,
+        "https": true,
+        "hostname": "sdb.ap-northeast-1.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.ap-northeast-1.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.ap-northeast-1.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3-ap-northeast-1.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.ap-northeast-1.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.ap-northeast-1.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "importexport": {
+        "http": false,
+        "https": true,
+        "hostname": "importexport.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.ap-northeast-1.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.ap-northeast-1.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.ap-northeast-1.amazonaws.com"
+      },
+      "glacier": {
+        "http": true,
+        "https": true,
+        "hostname": "glacier.ap-northeast-1.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.ap-northeast-1.amazonaws.com"
+      },
+      "datapipeline": {
+        "http": false,
+        "https": true,
+        "hostname": "datapipeline.ap-northeast-1.amazonaws.com"
+      },
+      "redshift": {
+        "http": false,
+        "https": true,
+        "hostname": "redshift.ap-northeast-1.amazonaws.com"
+      },
+      "kinesis": {
+        "http": false,
+        "https": true,
+        "hostname": "kinesis.ap-northeast-1.amazonaws.com"
+      },
+      "elastictranscoder": {
+        "http": false,
+        "https": true,
+        "hostname": "elastictranscoder.ap-northeast-1.amazonaws.com"
+      }
+    },
+    "ap-southeast-1": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.ap-southeast-1.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.ap-southeast-1.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.ap-southeast-1.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.ap-southeast-1.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.ap-southeast-1.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.ap-southeast-1.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.ap-southeast-1.amazonaws.com"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.ap-southeast-1.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.ap-southeast-1.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "sdb": {
+        "http": true,
+        "https": true,
+        "hostname": "sdb.ap-southeast-1.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.ap-southeast-1.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.ap-southeast-1.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3-ap-southeast-1.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.ap-southeast-1.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.ap-southeast-1.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "importexport": {
+        "http": false,
+        "https": true,
+        "hostname": "importexport.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.ap-southeast-1.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.ap-southeast-1.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.ap-southeast-1.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.ap-southeast-1.amazonaws.com"
+      },
+      "redshift": {
+        "http": false,
+        "https": true,
+        "hostname": "redshift.ap-southeast-1.amazonaws.com"
+      },
+      "kinesis": {
+        "http": false,
+        "https": true,
+        "hostname": "kinesis.ap-southeast-1.amazonaws.com"
+      },
+      "elastictranscoder": {
+        "http": false,
+        "https": true,
+        "hostname": "elastictranscoder.ap-southeast-1.amazonaws.com"
+      }
+    },
+    "ap-southeast-2": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.ap-southeast-2.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.ap-southeast-2.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.ap-southeast-2.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.ap-southeast-2.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.ap-southeast-2.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.ap-southeast-2.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.ap-southeast-2.amazonaws.com"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.ap-southeast-2.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.ap-southeast-2.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "sdb": {
+        "http": true,
+        "https": true,
+        "hostname": "sdb.ap-southeast-2.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.ap-southeast-2.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.ap-southeast-2.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3-ap-southeast-2.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.ap-southeast-2.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.ap-southeast-2.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "importexport": {
+        "http": false,
+        "https": true,
+        "hostname": "importexport.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.ap-southeast-2.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.ap-southeast-2.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.ap-southeast-2.amazonaws.com"
+      },
+      "glacier": {
+        "http": true,
+        "https": true,
+        "hostname": "glacier.ap-southeast-2.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.ap-southeast-2.amazonaws.com"
+      },
+      "datapipeline": {
+        "http": false,
+        "https": true,
+        "hostname": "datapipeline.ap-southeast-2.amazonaws.com"
+      },
+      "redshift": {
+        "http": false,
+        "https": true,
+        "hostname": "redshift.ap-southeast-2.amazonaws.com"
+      },
+      "kinesis": {
+        "http": false,
+        "https": true,
+        "hostname": "kinesis.ap-southeast-2.amazonaws.com"
+      }
+    },
+    "sa-east-1": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.sa-east-1.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.sa-east-1.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.sa-east-1.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.sa-east-1.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.sa-east-1.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.sa-east-1.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.sa-east-1.amazonaws.com"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.sa-east-1.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.sa-east-1.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "sdb": {
+        "http": true,
+        "https": true,
+        "hostname": "sdb.sa-east-1.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.sa-east-1.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.sa-east-1.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3-sa-east-1.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.sa-east-1.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.sa-east-1.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "importexport": {
+        "http": false,
+        "https": true,
+        "hostname": "importexport.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.sa-east-1.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.sa-east-1.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.sa-east-1.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.sa-east-1.amazonaws.com"
+      }
+    },
+    "eu-west-1": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.eu-west-1.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.eu-west-1.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.eu-west-1.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.eu-west-1.amazonaws.com"
+      },
+      "logs": {
+        "http": true,
+        "https": true,
+        "hostname": "logs.eu-west-1.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.eu-west-1.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.eu-west-1.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.eu-west-1.amazonaws.com"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.eu-west-1.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.eu-west-1.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "email": {
+        "http": false,
+        "https": true,
+        "hostname": "email.eu-west-1.amazonaws.com"
+      },
+      "sdb": {
+        "http": true,
+        "https": true,
+        "hostname": "sdb.eu-west-1.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.eu-west-1.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.eu-west-1.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3-eu-west-1.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.eu-west-1.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.eu-west-1.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "importexport": {
+        "http": false,
+        "https": true,
+        "hostname": "importexport.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.eu-west-1.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.eu-west-1.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.eu-west-1.amazonaws.com"
+      },
+      "glacier": {
+        "http": true,
+        "https": true,
+        "hostname": "glacier.eu-west-1.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.eu-west-1.amazonaws.com"
+      },
+      "datapipeline": {
+        "http": false,
+        "https": true,
+        "hostname": "datapipeline.eu-west-1.amazonaws.com"
+      },
+      "redshift": {
+        "http": false,
+        "https": true,
+        "hostname": "redshift.eu-west-1.amazonaws.com"
+      },
+      "kinesis": {
+        "http": false,
+        "https": true,
+        "hostname": "kinesis.eu-west-1.amazonaws.com"
+      },
+      "elastictranscoder": {
+        "http": false,
+        "https": true,
+        "hostname": "elastictranscoder.eu-west-1.amazonaws.com"
+      }
+    },
+    "eu-central-1": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.eu-central-1.amazonaws.com"
+      },
+      "cloudfront": {
+        "http": true,
+        "https": true,
+        "hostname": "cloudfront.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "cloudsearch": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudsearch.eu-central-1.amazonaws.com"
+      },
+      "cloudtrail": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudtrail.eu-central-1.amazonaws.com"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.eu-central-1.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.eu-central-1.amazonaws.com"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.eu-central-1.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.eu-central-1.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.eu-central-1.amazonaws.com"
+      },
+      "route53": {
+        "http": false,
+        "https": true,
+        "hostname": "route53.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.eu-central-1.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.eu-central-1.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3.eu-central-1.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.eu-central-1.amazonaws.com"
+      },
+      "elasticbeanstalk": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticbeanstalk.eu-central-1.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.amazonaws.com",
+        "authregion": "us-east-1"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.eu-central-1.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.eu-central-1.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.eu-central-1.amazonaws.com"
+      },
+      "glacier": {
+        "http": true,
+        "https": true,
+        "hostname": "glacier.eu-central-1.amazonaws.com"
+      },
+      "directconnect": {
+        "http": false,
+        "https": true,
+        "hostname": "directconnect.eu-central-1.amazonaws.com"
+      },
+      "redshift": {
+        "http": false,
+        "https": true,
+        "hostname": "redshift.eu-central-1.amazonaws.com"
+      },
+      "kinesis": {
+        "http": false,
+        "https": true,
+        "hostname": "kinesis.eu-central-1.amazonaws.com"
+      }
+    },
+    "cn-north-1": {
+      "cloudformation": {
+        "http": false,
+        "https": true,
+        "hostname": "cloudformation.cn-north-1.amazonaws.com.cn"
+      },
+      "monitoring": {
+        "http": true,
+        "https": true,
+        "hostname": "monitoring.cn-north-1.amazonaws.com.cn"
+      },
+      "dynamodb": {
+        "http": true,
+        "https": true,
+        "hostname": "dynamodb.cn-north-1.amazonaws.com.cn"
+      },
+      "ec2": {
+        "http": true,
+        "https": true,
+        "hostname": "ec2.cn-north-1.amazonaws.com.cn"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.cn-north-1.amazonaws.com.cn"
+      },
+      "elasticache": {
+        "http": false,
+        "https": true,
+        "hostname": "elasticache.cn-north-1.amazonaws.com.cn"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.cn-north-1.amazonaws.com.cn"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.cn-north-1.amazonaws.com.cn"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.cn-north-1.amazonaws.com.cn"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3.cn-north-1.amazonaws.com.cn"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.cn-north-1.amazonaws.com.cn"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.cn-north-1.amazonaws.com.cn"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.cn-north-1.amazonaws.com.cn"
+      },
+      "storagegateway": {
+        "http": false,
+        "https": true,
+        "hostname": "storagegateway.cn-north-1.amazonaws.com.cn"
+      },
+      "support": {
+        "http": false,
+        "https": true,
+        "hostname": "support.cn-north-1.amazonaws.com.cn"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.cn-north-1.amazonaws.com.cn"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.cn-north-1.amazonaws.com.cn"
+      },
+      "glacier": {
+        "http": true,
+        "https": true,
+        "hostname": "glacier.cn-north-1.amazonaws.com.cn"
+      }
+    },
+    "us-gov-west-1": {
+      "monitoring": {
+        "http": false,
+        "https": true,
+        "hostname": "monitoring.us-gov-west-1.amazonaws.com"
+      },
+      "dynamodb": {
+        "http": false,
+        "https": true,
+        "hostname": "dynamodb.us-gov-west-1.amazonaws.com"
+      },
+      "ec2": {
+        "http": false,
+        "https": true,
+        "hostname": "ec2.us-gov-west-1.amazonaws.com"
+      },
+      "elasticmapreduce": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticmapreduce.us-gov-west-1.amazonaws.com"
+      },
+      "rds": {
+        "http": false,
+        "https": true,
+        "hostname": "rds.us-gov-west-1.amazonaws.com"
+      },
+      "sns": {
+        "http": true,
+        "https": true,
+        "hostname": "sns.us-gov-west-1.amazonaws.com"
+      },
+      "sqs": {
+        "http": true,
+        "https": true,
+        "hostname": "sqs.us-gov-west-1.amazonaws.com"
+      },
+      "s3": {
+        "http": true,
+        "https": true,
+        "hostname": "s3-us-gov-west-1.amazonaws.com"
+      },
+      "autoscaling": {
+        "http": true,
+        "https": true,
+        "hostname": "autoscaling.us-gov-west-1.amazonaws.com"
+      },
+      "iam": {
+        "http": false,
+        "https": true,
+        "hostname": "iam.us-gov.amazonaws.com"
+      },
+      "sts": {
+        "http": false,
+        "https": true,
+        "hostname": "sts.us-gov-west-1.amazonaws.com"
+      },
+      "elasticloadbalancing": {
+        "http": true,
+        "https": true,
+        "hostname": "elasticloadbalancing.us-gov-west-1.amazonaws.com"
+      },
+      "swf": {
+        "http": false,
+        "https": true,
+        "hostname": "swf.us-gov-west-1.amazonaws.com"
+      }
+    }
+  },
+  "services": {
+    "cognito-sync": [
+      "us-east-1"
+    ],
+    "cognito-identity": [
+      "us-east-1"
+    ],
+    "cloudformation": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1"
+    ],
+    "cloudfront": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1"
+    ],
+    "cloudsearch": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-southeast-1",
+      "ap-northeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-central-1"
+    ],
+    "cloudtrail": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "ap-northeast-1",
+      "sa-east-1",
+      "eu-central-1"
+    ],
+    "monitoring": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "logs": [
+      "us-east-1",
+      "us-west-2",
+      "eu-west-1"
+    ],
+    "dynamodb": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "ec2": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "elasticmapreduce": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "elasticache": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "cn-north-1"
+    ],
+    "rds": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "route53": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1"
+    ],
+    "email": [
+      "us-east-1",
+      "eu-west-1",
+      "us-west-2"
+    ],
+    "sdb": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1"
+    ],
+    "sns": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "sqs": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "s3": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "autoscaling": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "elasticbeanstalk": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-central-1"
+    ],
+    "iam": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "importexport": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1"
+    ],
+    "sts": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "storagegateway": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1"
+    ],
+    "support": [
+      "us-east-1",
+      "cn-north-1"
+    ],
+    "elasticloadbalancing": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "swf": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1",
+      "cn-north-1",
+      "us-gov-west-1"
+    ],
+    "glacier": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-southeast-2",
+      "ap-northeast-1",
+      "cn-north-1",
+      "eu-central-1"
+    ],
+    "directconnect": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "ap-northeast-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "sa-east-1",
+      "eu-west-1",
+      "eu-central-1"
+    ],
+    "datapipeline": [
+      "us-east-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-northeast-1",
+      "ap-southeast-2"
+    ],
+    "redshift": [
+      "us-east-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "ap-northeast-1",
+      "eu-central-1"
+    ],
+    "kinesis": [
+      "us-east-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-southeast-1",
+      "ap-southeast-2",
+      "ap-northeast-1",
+      "eu-central-1"
+    ],
+    "opsworks": [
+      "us-east-1"
+    ],
+    "elastictranscoder": [
+      "us-east-1",
+      "us-west-1",
+      "us-west-2",
+      "eu-west-1",
+      "ap-northeast-1",
+      "ap-southeast-1"
+    ]
+  }
+}

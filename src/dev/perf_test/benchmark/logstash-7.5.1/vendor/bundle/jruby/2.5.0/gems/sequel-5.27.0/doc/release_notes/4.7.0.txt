@@ -1,0 +1,103 @@
+= New Features
+
+* Alternatives for the more complex virtual row method calls have
+  been added:
+
+    # Window Functions using SQL::Function#over
+    # before: select{sum(:over, :args=>:col1, :partition=>:col2){}}
+    select{sum(:col1).over(:partition=>:col2)}
+
+    # count(*) using SQL::Function#*
+    # before: select{count(:*){}}
+    select{count{}.*}
+
+    # count(distinct col) using SQL::Function#distinct
+    # before: select{count(:distinct, :col){}}
+    select{count(:col).distinct}
+
+  Additionally, schema qualified functions are now supported via
+  SQL::QualifiedIdentifier#function, and quoted functions are now
+  supported via SQL::Identifier#function on some databases:
+
+    # "func"("col")
+    select{func.function(:col)}
+
+    # "schema"."func"("col1")
+    select{schema__func.function(:col1)}
+
+  If the database does not support quoting function names, then
+  Sequel will not quote them.
+
+* An update_or_create plugin has been added, for updating a matching
+  object if one exists, or creating an object if it does not. For
+  example, the following code will update the number of copies sold
+  for album with the name 'Hello', or it will create an album with
+  the name 'Hello' and 1000 number of copies sold:
+
+    Album.plugin :update_or_create
+    Album.update_or_create(:name=>'Hello') do |album|
+      album.num_copies_sold = 1000
+    end
+
+  You can also use a shorter form of this, with two hashes:
+    
+    Album.update_or_create({:name=>'Hello'}, {:num_copies_sold=>1000})
+
+  This plugin also adds a method named find_or_new, which does the
+  same thing as update_or_create, except it doesn't persist any
+  changes.
+
+* A :raise_on_save_failure option has been added for one_to_many,
+  pg_array_to_many, and many_to_pg_array associations.  This mirrors
+  the Model.raise_on_save_failure setting, and if set to false, it
+  will make the add/remove methods return nil instead of raising
+  an error if there is a validation/hook error when saving the
+  associated record.
+
+* The validates_unique validation in validation_helpers now supports a
+  :dataset option to provide the base dataset to use to check
+  uniqueness.  This is useful when the model itself uses a filtered
+  dataset, but the unique index in the database is on an unfiltered
+  dataset.
+
+  The auto_validations plugin uses this option to ensure that unique
+  validations are setup correctly in subclasses using single table
+  inheritance.
+
+= Other Improvements
+
+* Sequel now automatically rolls back transactions in killed threads
+  on ruby 2.0+.  It is still impossible to do so on ruby 1.9.
+
+* In the instance_hooks plugin, validation instance hooks are now
+  not cleared until after a successful save.
+
+* Composite unique key constraint violations are now recognized
+  and raised as Sequel::UniqueConstraintViolation on SQLite.
+
+* Primary key unique constraint violations are now recognized and
+  and raised as Sequel::UniqueConstraintViolation on Microsoft
+  SQL Server and SQLAnywhere.
+
+* If an exception occurs when using a cursor in the postgres adapter,
+  and an exception also occurs when closing the cursor when cleaning
+  up, the initial exception is now raised.
+
+* You can now get tables in a specific schema in the jdbc adapter
+  using the :schema option to Database#tables.  This was already
+  supported in most jdbc subadapters because they implement #tables
+  using database specific code instead of looking at the JDBC
+  metadata, but it should now work for all jdbc subadapters.
+
+* Sequel::SQLTime#to_s is now defined and returns a string in
+  HH:MM:SS format (leaving off the date).
+
+= Backwards Compatibility
+
+* The odbc adapter's :driver option is no longer deprecated, as reports
+  were received that it still works.
+
+* If you were re-adding instance validation hooks using instance_hooks
+  after a save failure, and then retrying the save, you may now end up
+  with duplicate validations.  You no longer need to re-add validation
+  hooks unless the object was saved successfully.

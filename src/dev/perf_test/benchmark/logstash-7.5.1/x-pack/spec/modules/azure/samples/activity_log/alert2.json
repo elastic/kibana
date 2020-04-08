@@ -1,0 +1,16 @@
+{
+  "comment": "as observed",
+  "time": "2017-12-20T02:45:46.9935702Z",
+  "resourceId": "/SUBSCRIPTIONS/C27F13D5-E19A-4A4C-8415-4056C7C752BC/RESOURCEGROUPS/DEFAULT-ACTIVITYLOGALERTS/PROVIDERS/MICROSOFT.INSIGHTS/ACTIVITYLOGALERTS/NOTIFY OPEN HEALTH ALERT",
+  "correlationId": "6b87b2d4-e788-4169-849d-456450ea1965",
+  "operationName": "Microsoft.Insights/ActivityLogAlerts/Activated/action",
+  "level": "Information",
+  "resultType": "Succeeded",
+  "resultDescription": "Alert: Notify Open Health Alert called on action groups : Notify%20Open",
+  "category": "Action",
+  "location": "global",
+  "properties": {
+    "eventCategory": "Alert",
+    "eventProperties": "{\"authorization\":null,\"channels\":\"Operation\",\"claims\":\"{\\\"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/spn\\\":\\\"Microsoft.Insights/activityLogAlerts\\\"}\",\"caller\":null,\"correlationId\":\"6b87b2d4-e788-4169-849d-456450ea1965\",\"description\":\"Alert: Notify Open Health Alert called on action groups : Notify%20Open\",\"eventSource\":\"Alert\",\"eventTimestamp\":\"2017-12-20T02:45:46.9935702+00:00\",\"httpRequest\":null,\"eventDataId\":\"68b67da7-9504-4fa8-8223-c7bb51789c5c\",\"level\":\"Informational\",\"operationName\":\"Microsoft.Insights/ActivityLogAlerts/Activated/action\",\"operationId\":\"2db0b2c1-bf63-4379-bf8a-de3ebd11203a\",\"properties\":{\"subscriptionId\":\"C27F13D5-E19A-4A4C-8415-4056C7C752BC\",\"eventDataId\":\"a9e82a0d-3580-aa96-a7aa-5b0419107a04\",\"resourceGroup\":null,\"resourceId\":null,\"eventTimestamp\":\"2017-12-20T02:45:39.3441022Z\",\"operationName\":\"Microsoft.ServiceHealth/actionrequired/action\",\"status\":\"Active\"},\"resourceId\":\"/subscriptions/C27F13D5-E19A-4A4C-8415-4056C7C752BC/resourceGroups/Default-ActivityLogAlerts/providers/microsoft.insights/activityLogAlerts/Notify Open Health Alert\",\"resourceGroupName\":\"Default-ActivityLogAlerts\",\"resourceProviderName\":\"microsoft.insights\",\"status\":\"Succeeded\",\"subStatus\":null,\"subscriptionId\":\"C27F13D5-E19A-4A4C-8415-4056C7C752BC\",\"submissionTimestamp\":\"0001-01-01T00:00:00+00:00\",\"ResourceType\":\"microsoft.insights/activityLogAlerts\"}"
+  }
+}

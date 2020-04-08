@@ -1,0 +1,87 @@
+= New Features
+
+* Database#freeze has now been implemented.  It is now recommended
+  to use it in production and during testing, after loading
+  extensions and making other changes to Database state.  Once frozen,
+  the Database settings cannot be modified, but the Database can
+  execute queries and return results.  By freezing the Database, you
+  gain greater thread-safety assurance and will be alerted via an
+  exception if runtime code attempts to modify Database state.
+
+= Other Improvements
+
+* Model#refresh now uses the same optimization that Model.with_pk
+  uses, resulting in faster refreshing for most models.
+
+* The prepared_statements plugin no longer automatically uses
+  prepared statements in cases where it is likely to be slower.
+  Now, prepared statements are only used by default for INSERT
+  and UPDATE statements (and DELETE on Oracle and DB2).  This
+  change was made after benchmarking showed that using prepared
+  statements for primary key lookups, refreshes, and deletes is
+  significantly slower than non-prepared statements across almost
+  all adapters.
+
+* Database#extension no longer attempts to load the same extension
+  more than once.
+
+* The timestamp migrator now handles key length limitations when
+  using MySQL with InnoDB engine and utf8mb4 charset default.
+
+* The jdbc/sqlite adapter will now use SQLite result codes for
+  more accurate exception types, if the jdbc-sqlite driver
+  supports them.
+
+* dataset_module is now inherited correctly if using the
+  single_table_inheritance plugin.  This was broken in 4.42.0,
+  and fixed in 4.42.1.
+
+* The prepared_statements plugin now respects a server specified
+  for the model instance, instead of always using the default
+  server.
+
+* The prepared_statements_associations plugin now respects a
+  server specified for the model instance if using the sharding
+  plugin, instead of always using the default server.
+
+* The prepared_statements_associations plugin now works correctly
+  when using some instance-specific associations, such as
+  many_to_one associations using a nil :key option.
+
+* The prepared_statements_with_pk plugin now respects a server
+  specified for the dataset, instead of always using the default
+  server.
+
+* Model#freeze now freezes the associations hash after validating
+  the model instance, instead of before, fixing cases where
+  validation calls association methods.
+
+* Sequel no longer continually tries to determine the server
+  version on HSQLDB, if the first attempt fails.
+
+* The mock adapter now uses a thread-safe incrementor for autoid.
+
+* Mysql2 native prepared statement support now better handles
+  sharding where connection options differ per shard.
+
+* On Oracle, Database#sequence_for_table is now thread-safe.
+
+* On PostgreSQL, Database#type_supported? is now thread-safe.
+
+* On MySQL, Database#supports_timestamp_usecs? now correctly
+  memoizes false values.
+
+* The jdbc/postgresql adapter now works correctly if the
+  pg_hstore extension is loaded first.
+
+= Backwards Compatibility
+
+* Maintainers of external adapters and Database extensions
+  should update their code to support Database#freeze.
+
+* Code that relies on Database extensions being loaded multiple
+  times if called multiple times needs to be updated, because
+  now the extension only gets loaded the first time
+  Database#extension is called.
+
+* @enum_labels in the pg_enum extension is now frozen by default.

@@ -1,0 +1,11 @@
+{
+  "title": "Top 10 Behaviors by Outcome [ArcSight]",
+  "visState": "{\"title\":\"Top 10 Behaviors by Outcome [ArcSight]\",\"type\":\"heatmap\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"enableHover\":true,\"legendPosition\":\"right\",\"times\":[],\"colorsNumber\":10,\"colorSchema\":\"Yellow to Red\",\"setColorRange\":false,\"colorsRange\":[],\"invertColors\":false,\"percentageMode\":false,\"valueAxes\":[{\"show\":false,\"id\":\"ValueAxis-1\",\"type\":\"value\",\"scale\":{\"type\":\"linear\",\"defaultYExtents\":false},\"labels\":{\"show\":false,\"rotate\":0,\"color\":\"#555\"}}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"categoryBehavior\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Event Type\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"categoryOutcome\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Event Outcome\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 9,000\":\"rgb(255,255,204)\",\"9,000 - 18,000\":\"rgb(255,241,170)\",\"18,000 - 27,000\":\"rgb(254,225,135)\",\"27,000 - 36,000\":\"rgb(254,201,101)\",\"36,000 - 45,000\":\"rgb(254,171,73)\",\"45,000 - 54,000\":\"rgb(253,141,60)\",\"54,000 - 63,000\":\"rgb(252,91,46)\",\"63,000 - 72,000\":\"rgb(237,47,34)\",\"72,000 - 81,000\":\"rgb(212,16,32)\",\"81,000 - 90,000\":\"rgb(176,0,38)\"}}}",
+  "description": "",
+  "savedSearchId": "7a2fc9c0-454d-11e7-86b6-95298e9da6dc",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

@@ -1,0 +1,116 @@
+:plugin: udp
+:type: input
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Udp input plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Read messages as events over the network via udp. The only required
+configuration item is `port`, which specifies the udp port logstash
+will listen on for event streams.
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Udp Input Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-buffer_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-host>> |<<string,string>>|No
+| <<plugins-{type}s-{plugin}-port>> |<<number,number>>|Yes
+| <<plugins-{type}s-{plugin}-queue_size>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-receive_buffer_bytes>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-workers>> |<<number,number>>|No
+| <<plugins-{type}s-{plugin}-source_ip_fieldname>> |<<string,string>>|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+input plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-buffer_size"]
+===== `buffer_size` 
+
+  * Value type is <<number,number>>
+  * Default value is `65536`
+
+The maximum packet size to read from the network
+
+[id="plugins-{type}s-{plugin}-host"]
+===== `host` 
+
+  * Value type is <<string,string>>
+  * Default value is `"0.0.0.0"`
+
+The address which logstash will listen on.
+
+[id="plugins-{type}s-{plugin}-port"]
+===== `port` 
+
+  * This is a required setting.
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+The port which logstash will listen on. Remember that ports less
+than 1024 (privileged ports) may require root or elevated privileges to use.
+
+[id="plugins-{type}s-{plugin}-queue_size"]
+===== `queue_size` 
+
+  * Value type is <<number,number>>
+  * Default value is `2000`
+
+This is the number of unprocessed UDP packets you can hold in memory
+before packets will start dropping.
+
+[id="plugins-{type}s-{plugin}-receive_buffer_bytes"]
+===== `receive_buffer_bytes` 
+
+  * Value type is <<number,number>>
+  * There is no default value for this setting.
+
+The socket receive buffer size in bytes.
+If option is not set, the operating system default is used.
+The operating system will use the max allowed value if receive_buffer_bytes is larger than allowed.
+Consult your operating system documentation if you need to increase this max allowed value.
+
+[id="plugins-{type}s-{plugin}-workers"]
+===== `workers` 
+
+  * Value type is <<number,number>>
+  * Default value is `2`
+
+Number of threads processing packets
+
+[id="plugins-{type}s-{plugin}-source_ip_fieldname"]
+===== `source_ip_fieldname`
+
+  * Value type is <<string,string>>
+  * Default value is `"host"`
+
+The name of the field where the source IP address will be stored.
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

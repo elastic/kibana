@@ -1,0 +1,31 @@
+= New Features
+
+* An instance-level skip_auto_validations method has been added to
+  the auto_validations plugin, allowing you to skip all or specific
+  types of auto validations inside the block:
+
+    model_instance.skip_auto_validations(:unique) do
+      puts model_instance.valid?
+    end
+
+* A Database :preconnect_extensions option has been added.  This
+  option is similar to :extensions, but the extensions are loaded
+  before the :preconnect option is processed.  This allows you to
+  use the server_logging extension with the :preconnect option.
+
+* For specifying custom table aliases when using eager_graph and
+  association_join, you can now use:
+
+    Sequel[:association].as(:table_alias)
+
+  in addition to:
+
+    Sequel.as(:association, :table_alias)
+
+= Other Improvements
+
+* The ado/mssql adapter now retrieves the number of deleted or
+  updated rows for a query without issuing a separate query.
+
+* Sequel now avoids the use of Proc.new with an implicit block, as
+  that feature will be deprecated starting in Ruby 2.7.

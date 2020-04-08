@@ -1,0 +1,20 @@
+--- 
+atmTrafficDescriptorTypes: 1.3.6.1.2.1.37.1.1
+atmNoTrafficDescriptor: 1.3.6.1.2.1.37.1.1.1
+atmNoClpNoScr: 1.3.6.1.2.1.37.1.1.2
+atmClpNoTaggingNoScr: 1.3.6.1.2.1.37.1.1.3
+atmClpTaggingNoScr: 1.3.6.1.2.1.37.1.1.4
+atmNoClpScr: 1.3.6.1.2.1.37.1.1.5
+atmClpNoTaggingScr: 1.3.6.1.2.1.37.1.1.6
+atmClpTaggingScr: 1.3.6.1.2.1.37.1.1.7
+atmClpNoTaggingMcr: 1.3.6.1.2.1.37.1.1.8
+atmClpTransparentNoScr: 1.3.6.1.2.1.37.1.1.9
+atmClpTransparentScr: 1.3.6.1.2.1.37.1.1.10
+atmNoClpTaggingNoScr: 1.3.6.1.2.1.37.1.1.11
+atmNoClpNoScrCdvt: 1.3.6.1.2.1.37.1.1.12
+atmNoClpScrCdvt: 1.3.6.1.2.1.37.1.1.13
+atmClpNoTaggingScrCdvt: 1.3.6.1.2.1.37.1.1.14
+atmClpTaggingScrCdvt: 1.3.6.1.2.1.37.1.1.15
+atmTCMIB: 1.3.6.1.2.1.37.3
+atmObjectIdentities: 1.3.6.1.2.1.37.3.1
+

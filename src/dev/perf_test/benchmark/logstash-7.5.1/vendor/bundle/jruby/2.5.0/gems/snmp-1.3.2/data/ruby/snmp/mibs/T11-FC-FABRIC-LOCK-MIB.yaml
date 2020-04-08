@@ -1,0 +1,22 @@
+--- 
+t11FabricLockMIB: 1.3.6.1.2.1.159
+t11FLockMIBNotifications: 1.3.6.1.2.1.159.0
+t11FLockMIBObjects: 1.3.6.1.2.1.159.1
+t11FLockConfiguration: 1.3.6.1.2.1.159.1.1
+t11FLockTable: 1.3.6.1.2.1.159.1.1.1
+t11FLockEntry: 1.3.6.1.2.1.159.1.1.1.1
+t11FLockFabricIndex: 1.3.6.1.2.1.159.1.1.1.1.1
+t11FLockApplicationID: 1.3.6.1.2.1.159.1.1.1.1.2
+t11FLockInitiatorType: 1.3.6.1.2.1.159.1.1.1.1.3
+t11FLockInitiator: 1.3.6.1.2.1.159.1.1.1.1.4
+t11FLockInitiatorIpAddrType: 1.3.6.1.2.1.159.1.1.1.1.5
+t11FLockInitiatorIpAddr: 1.3.6.1.2.1.159.1.1.1.1.6
+t11FLockStatus: 1.3.6.1.2.1.159.1.1.1.1.7
+t11FLockRejectReasonCode: 1.3.6.1.2.1.159.1.1.1.1.8
+t11FLockRejectReasonCodeExp: 1.3.6.1.2.1.159.1.1.1.1.9
+t11FLockRejectReasonVendorCode: 1.3.6.1.2.1.159.1.1.1.1.10
+t11FLockRowStatus: 1.3.6.1.2.1.159.1.1.1.1.11
+t11FLockMIBConformance: 1.3.6.1.2.1.159.2
+t11FLockMIBCompliances: 1.3.6.1.2.1.159.2.1
+t11FLockMIBGroups: 1.3.6.1.2.1.159.2.2
+

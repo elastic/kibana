@@ -1,0 +1,46 @@
+<script type="text/javascript">
+$(function() {
+  $('#mustache_variables .variable').each(function() {
+    var el = $(this)
+    if (el.text().length > 500) {
+      var txt = el.text()
+      el.click(function() {
+        $(this).text(txt)
+      }).text( el.text().slice(0, 500) + '...' )
+    }
+  })
+});
+</script>
+
+<h3>Render Times</h3>
+
+<table>
+  <tr>
+    <th>View</th>
+    <th>Render Time</th>
+  </tr>
+
+  {{# times }}
+    <tr>
+      <td>{{ key }}</td>
+      <td>{{ value }}</td>
+    </tr>
+  {{/ times }}
+</table>
+
+<h3>Variables</h3>
+
+<table id="mustache_variables">
+  <tr>
+    <th>Name</th>
+    <th>Value</th>
+  </tr>
+
+  {{# variables }}
+    <tr>
+      <td>{{ key }}</td>
+      <td class="variable">{{ value }}</td>
+    </tr>
+  {{/ variables }}
+</table>
+

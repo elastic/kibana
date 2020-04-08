@@ -1,0 +1,10 @@
+{
+  "title": "Databases++ [Azure Monitor]",
+  "visState": "{\"title\":\"Databases++ [Azure Monitor]\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showMeticsAtAllLevels\":false,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"avg\",\"schema\":\"metric\",\"params\":{\"field\":\"data.average\",\"customLabel\":\"Average DTU %\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"resource_name.keyword\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"_term\",\"customLabel\":\"Database\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"server.keyword\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"_term\",\"customLabel\":\"Server\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"resource_group.keyword\",\"size\":20,\"order\":\"desc\",\"orderBy\":\"_term\",\"customLabel\":\"Resource Group\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"data.average\",\"customLabel\":\"Max DTU %\"}}]}",
+  "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"73e18ac0-104c-11e8-8c94-a3d8d0cfd62b\",\"filter\":[],\"query\":{\"query\":\"data.metricName:dtu_consumption_percent\",\"language\":\"lucene\"}}"
+  }
+}

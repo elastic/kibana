@@ -1,0 +1,10 @@
+{
+  "title": "Select Database [Azure Monitor]",
+  "visState": "{\"title\":\"Select Database [Azure Monitor]\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1517598395667\",\"indexPattern\":\"azure-*\",\"fieldName\":\"azure.db_unique_id.keyword\",\"label\":\"Database\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":false,\"size\":20,\"order\":\"desc\"}}],\"updateFiltersOnChange\":true,\"useTimeFilter\":false},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

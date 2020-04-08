@@ -1,0 +1,30 @@
+= New Features
+
+* Database#call_mssql_sproc is now available for calling
+  stored procedures on Microsoft SQL Server, including the use
+  of output parameters.
+
+* The Database#{commit,rollback}_prepared_transaction methods now
+  support a :server option for the server on which to operate.
+
+= Other Improvements
+
+* On Microsoft SQL Server 2012, the native OFFSET/FETCH support
+  is now used for offsets, instead of emulating support via the
+  ROW_NUMBER window function.
+
+* Eager loading is now skipped when doing eager(...).naked.all on
+  a model dataset, instead of raising an error.  This can fix issues
+  when the eager_each plugin is used.
+
+* A couple additional disconnection errors are now detected in the
+  jdbc/postgresql adapter.
+
+* The tinytds adapter now handles returning rows when the fields
+  are not immediately available.
+
+* RuntimeErrors raised by oci8 are now handled correctly in the
+  oracle adapter.
+
+* Sequel's specs now work with RSpec 3, while still running
+  correctly on RSpec 1.3 and 2.

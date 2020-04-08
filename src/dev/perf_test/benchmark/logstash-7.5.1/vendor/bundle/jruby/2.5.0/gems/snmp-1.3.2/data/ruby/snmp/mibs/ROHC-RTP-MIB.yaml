@@ -1,0 +1,30 @@
+--- 
+rohcRtpMIB: 1.3.6.1.2.1.114
+rohcRtpObjects: 1.3.6.1.2.1.114.1
+rohcRtpContextTable: 1.3.6.1.2.1.114.1.1
+rohcRtpContextEntry: 1.3.6.1.2.1.114.1.1.1
+rohcRtpContextState: 1.3.6.1.2.1.114.1.1.1.3
+rohcRtpContextMode: 1.3.6.1.2.1.114.1.1.1.4
+rohcRtpContextAlwaysPad: 1.3.6.1.2.1.114.1.1.1.5
+rohcRtpContextLargePktsAllowed: 1.3.6.1.2.1.114.1.1.1.6
+rohcRtpContextVerifyPeriod: 1.3.6.1.2.1.114.1.1.1.7
+rohcRtpContextSizesAllowed: 1.3.6.1.2.1.114.1.1.1.8
+rohcRtpContextSizesUsed: 1.3.6.1.2.1.114.1.1.1.9
+rohcRtpContextACKs: 1.3.6.1.2.1.114.1.1.1.10
+rohcRtpContextNACKs: 1.3.6.1.2.1.114.1.1.1.11
+rohcRtpContextSNACKs: 1.3.6.1.2.1.114.1.1.1.12
+rohcRtpContextNHPs: 1.3.6.1.2.1.114.1.1.1.13
+rohcRtpContextCSPs: 1.3.6.1.2.1.114.1.1.1.14
+rohcRtpContextCCPs: 1.3.6.1.2.1.114.1.1.1.15
+rohcRtpContextPktsLostPhysical: 1.3.6.1.2.1.114.1.1.1.16
+rohcRtpContextPktsLostPreLink: 1.3.6.1.2.1.114.1.1.1.17
+rohcRtpPacketSizeTable: 1.3.6.1.2.1.114.1.2
+rohcRtpPacketSizeEntry: 1.3.6.1.2.1.114.1.2.1
+rohcRtpPacketSize: 1.3.6.1.2.1.114.1.2.1.3
+rohcRtpPacketSizePreferred: 1.3.6.1.2.1.114.1.2.1.4
+rohcRtpPacketSizeUsed: 1.3.6.1.2.1.114.1.2.1.5
+rohcRtpPacketSizeRestrictedType: 1.3.6.1.2.1.114.1.2.1.6
+rohcRtpConformance: 1.3.6.1.2.1.114.2
+rohcRtpCompliances: 1.3.6.1.2.1.114.2.1
+rohcRtpGroups: 1.3.6.1.2.1.114.2.2
+

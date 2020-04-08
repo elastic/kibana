@@ -1,0 +1,10 @@
+{
+  "title": "Alerts Overview [Azure Monitor][Activity Log]",
+  "visState": "{\"title\":\"Alerts Overview [Azure Monitor][Activity Log]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(175,0,88,1)\",\"split_mode\":\"filter\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"bar\",\"line_width\":\"3\",\"point_size\":1,\"fill\":\"0.5\",\"stacked\":\"none\",\"terms_field\":\"resultType.keyword\",\"filter\":\"resultType:Activated\",\"label\":\"Activated\"},{\"id\":\"8b100950-1214-11e8-bd17-77879a6f9d49\",\"color\":\"rgba(0,191,179,1)\",\"split_mode\":\"filter\",\"metrics\":[{\"id\":\"8b100951-1214-11e8-bd17-77879a6f9d49\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"bar\",\"line_width\":\"1\",\"point_size\":1,\"fill\":\"0.6\",\"stacked\":\"none\",\"label\":\"Resolved or Succeeded\",\"filter\":\"resultType:Resolved OR resultType:Succeeded\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":0,\"show_grid\":1,\"filter\":\"azure.group:activity_log AND azure.category:Alert\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

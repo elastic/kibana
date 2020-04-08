@@ -1,0 +1,82 @@
+The following is a list of people who have contributed ideas, code, bug
+reports, or in general have helped logstash along its way.
+
+Contributors:
+* Jordan Sissel (jordansissel)
+* Pete Fritchman (fetep)
+* Brice Figureau (masterzen)
+* Vladimir Vuksan (vvuksan)
+* Alexandre Dulaunoy (adulau)
+* Ryan Ausanka-Crues (rausanka) / tello.com (startupseven)
+* Piotr Usewicz (pusewicz)
+* Charles Duffy (charles-dyfis-net)
+* Naresh V (nareshov)
+* John Vincent (lusis)
+* Bob Corsaro (dokipen)
+* kjoconnor
+* Evgeny Zislis (kesor)
+* Johan Venter
+* Jeff Buchbinder (freemed)
+* Dan Peterson (dpiddy)
+* Nick Ethier (nickethier)
+* Joel Merrick (joelio)
+* Michael Leinartas (mleinart)
+* Jesse Newland (jnewland)
+* Yuval Oren (yuvaloren)
+* cmclaughlin
+* Graham Bleach (bleach)
+* Jan Seidl (jseidl)
+* Jean-Luc Geering (jlgeering)
+* Avishai Ish-Shalom (avishai-ish-shalom)
+* turtlebender
+* Nick Padilla (NickPadilla)
+* tucker250
+* gja
+* Max Horbul (mhorbul)
+* Aaron Mildenstein (untergeek)
+* Greg Mefford (gregmefford)
+* JB Barth (jbbarth)
+* Tom Hodder (tolland)
+* David Castro (arimus)
+* Parker DeBardelaben (parkerd)
+* Max Horbul (mhorbul)
+* Harlan Barnes (harlanbarnes)
+* Jeremiah Shirk (jeremiahshirk)
+* Patrick Debois (jedi4ever)
+* bodik
+* Philippe Weber
+* Marc Huffnagle (mhuffnagle)
+* Oliver Gorwits (ollyg)
+* Rashid Khan (rashidkpc)
+* squiddle
+* Andrew Rowson (growse)
+* Cameron Stokes (clstokes)
+* Francesco Salbaroli (wathrog)
+* goblin
+* Mike Worth (MikeWorth)
+* Nic Williams (drnic)
+* Tomas Doran (bobtfish)
+* Xabier de Zuazo (zuazo)
+* Louis Zuckerman (semiosis)
+* Richard Pijnenburg (electrical)
+* James Turnbull (jamesturnbull)
+* Neil Prosser (neilprosser)
+* Alex Dean (alexdean)
+* Jonathan Quail (jonathanq)
+* Kushal Pisavadia (KushalP)
+* Gang Chen (goncha)
+* Michael Klishin (michaelklishin)
+* Marc Fournier (mfournier)
+* Helmut Duregger (hduregger)
+* Matt Dainty (bodgit)
+* Juarez Bochi (jbochi)
+* Bernd Ahlers (bernd)
+* Andrea Forni (andreaforni)
+* Leandro Moreira (leandromoreira)
+* Hao Chen (haoch)
+* Jake Landis (jakelandis)
+
+Note: If you've sent me patches, bug reports, or otherwise contributed to
+logstash, and you aren't on the list above and want to be, please let me know
+and I'll make sure you're here. Contributions from folks like you are what make
+open source awesome.

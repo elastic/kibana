@@ -1,0 +1,10 @@
+{
+  "title": "Firewall - Devices - Top Devices by Event Count",
+  "visState": "{\"title\":\"Firewall - Devices - Top Devices by Event Count\",\"type\":\"metrics\",\"params\":{\"id\":\"e1a58ab0-3957-11e7-ae19-21fb91585845\",\"type\":\"top_n\",\"series\":[{\"id\":\"e1a58ab1-3957-11e7-ae19-21fb91585845\",\"color\":\"rgba(174,161,255,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"id\":\"e1a58ab2-3957-11e7-ae19-21fb91585845\",\"type\":\"count\",\"field\":\"deviceHostName\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Top Firewall Devices\",\"terms_field\":\"deviceHostName\"}],\"time_field\":\"deviceReceiptTime\",\"index_pattern\":\"arcsight-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":1,\"bar_color_rules\":[{\"id\":\"e4772140-3957-11e7-ae19-21fb91585845\"}],\"background_color\":null,\"filter\":\"categoryDeviceGroup:\\\"/Firewall\\\"\"},\"aggs\":[],\"listeners\":{}}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\"}},\"filter\":[]}"
+  }
+}

@@ -1,0 +1,96 @@
+:plugin: avro
+:type: codec
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Avro codec plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+Read serialized Avro records as Logstash events
+
+This plugin is used to serialize Logstash events as 
+Avro datums, as well as deserializing Avro datums into 
+Logstash events.
+
+==== Encoding
+
+This codec is for serializing individual Logstash events 
+as Avro datums that are Avro binary blobs. It does not encode 
+Logstash events into an Avro file.
+
+
+==== Decoding
+
+This codec is for deserializing individual Avro records. It is not for reading
+Avro files. Avro files have a unique format that must be handled upon input.
+
+
+==== Usage
+Example usage with Kafka input.
+
+[source,ruby]
+----------------------------------
+input {
+  kafka {
+    codec => avro {
+        schema_uri => "/tmp/schema.avsc"
+    }
+  }
+}
+filter {
+  ...
+}
+output {
+  ...
+}
+----------------------------------
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Avro Codec Configuration Options
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-schema_uri>> |<<string,string>>|Yes
+| <<plugins-{type}s-{plugin}-tag_on_failure>> |<<boolean,boolean>>|No
+|=======================================================================
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-schema_uri"]
+===== `schema_uri` 
+
+  * This is a required setting.
+  * Value type is <<string,string>>
+  * There is no default value for this setting.
+
+schema path to fetch the schema from.
+This can be a 'http' or 'file' scheme URI
+example:
+
+* http - `http://example.com/schema.avsc`
+* file - `/path/to/schema.avsc`
+
+[id="plugins-{type}s-{plugin}-tag_on_failure"]
+===== `tag_on_failure` 
+
+  * Value type is <<boolean,boolean>>
+  * Default value is `false`
+
+tag events with `_avroparsefailure` when decode fails
+
+

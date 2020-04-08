@@ -1,0 +1,127 @@
+mustache(1) -- Mustache processor
+=================================
+
+## SYNOPSIS
+
+    mustache <YAML> <FILE>
+    mustache --compile <FILE>
+    mustache --tokens <FILE>
+
+
+## DESCRIPTION
+
+Mustache is a logic-less templating system for HTML, config files,
+anything.
+
+The `mustache` command processes a Mustache template preceded by YAML
+frontmatter from standard input and prints one or more documents to
+standard output.
+
+YAML frontmatter begins with `---` on a single line, followed by YAML,
+ending with another `---` on a single line, e.g.
+
+    ---
+    names: [ {name: chris}, {name: mark}, {name: scott} ]
+    ---
+
+If you are unfamiliar with YAML, it is a superset of JSON. Valid JSON
+should work fine.
+
+After the frontmatter should come any valid Mustache template. See
+mustache(5) for an overview of Mustache templates.
+
+For example:
+
+    {{#names}}
+      Hi {{name}}!
+    {{/names}}
+
+Now let's combine them.
+
+    $ cat data.yml
+    ---
+    names: [ {name: chris}, {name: mark}, {name: scott} ]
+    ---
+
+    $ cat template.mustache
+    {{#names}}
+      Hi {{name}}!
+    {{/names}}
+
+    $ cat data.yml template.mustache | mustache
+    Hi chris!
+    Hi mark!
+    Hi scott!
+
+If you provide multiple YAML documents (as delimited by `---`), your
+template will be rendered multiple times. Like a mail merge.
+
+For example:
+
+    $ cat data.yml
+    ---
+    name: chris
+    ---
+    name: mark
+    ---
+    name: scott
+    ---
+
+    $ cat template.mustache
+    Hi {{name}}!
+
+    $ cat data.yml template.mustache | mustache
+    Hi chris!
+    Hi mark!
+    Hi scott!
+
+## OPTIONS
+
+By default `mustache` will try to render a Mustache template using the
+YAML frontmatter you provide. It can do a few other things, however.
+
+  * `-c`, `--compile`:
+    Print the compiled Ruby version of a given template. This is the
+    code that is actually used when rendering a template into a
+    string. Useful for debugging but only if you are familiar with
+    Mustache's internals.
+
+  * `-t`, `--tokens`:
+    Print the tokenized form of a given Mustache template. This can be
+    used to understand how Mustache parses a template. The tokens are
+    handed to a generator which compiles them into a Ruby
+    string. Syntax errors and confused tags, therefore, can probably be
+    identified by examining the tokens produced.
+
+
+## INSTALLATION
+
+If you have RubyGems installed:
+
+    gem install mustache
+
+
+## EXAMPLES
+
+    $ mustache data.yml template.mustache
+    $ cat data.yml | mustache - template.mustache
+    $ mustache -c template.mustache
+    $ cat <<data | ruby mustache - template.mustache
+    ---
+    name: Bob
+    age: 30
+    ---
+    data
+
+
+## COPYRIGHT
+
+Mustache is Copyright (C) 2009 Chris Wanstrath
+
+Original CTemplate by Google
+
+
+## SEE ALSO
+
+mustache(5), gem(1),
+<http://mustache.github.io/>

@@ -1,0 +1,159 @@
+= Major Changes
+
+* Datasets are now frozen by default.  Since Sequel's inception,
+  datasets have used a method-chaining API that returned modified
+  copies, but previously they still supported direct mutation.  Now,
+  datasets are always frozen and cannot be mutated. This allows many
+  additional default optimizations related to caching, and provides
+  greater thread safety.
+
+    ds = DB[:table]
+
+    # Before
+    ds.row_proc = lambda{|h| h}
+
+    # Now
+    ds = ds.with_row_proc(lambda{|h| h})
+
+* Symbol splitting to create qualified and/or aliased identifiers is
+  now disabled by default.  While symbol splitting allowed for shorter
+  code, it was not obvious and caused significant issues when using
+  column names with embedded double or triple underscores.  Sequel now
+  offers many ways to create qualified and/or aliased identifiers.
+
+    # Before
+    :table__column          # "table"."column"
+
+    # Now
+    :table__column          # "table__column"
+    Sequel[:table][:column] # "table"."column"
+
+    # To get back historical behavior
+    Sequel.split_symbols = true
+
+* Sequel no longer allows the use of plain ruby strings as SQL code
+  fragments in the dataset filtering methods, as that makes it
+  easier to introduce SQL injection vulnerabilities.  You can use
+  Sequel.lit to create literal strings (SQL code fragments), which
+  makes it easier to do security auditing of applications using
+  Sequel.
+
+    # Before
+    DB[:table].where("column = 1").all
+
+    # Now 
+    DB[:table].where(Sequel.lit("column = 1")).all
+    # or better
+    DB[:table].where(column: 1).all
+
+    # To get back historical behavior
+    DB.extension :auto_literal_strings
+
+= Backwards Compatibility
+
+* All adapters, extensions, plugins, features, and constants
+  deprecated in 4.49.0 have been removed.  Before upgrading to Sequel
+  5.0.0, upgrade to 4.49.0 and fix all deprecation warnings.
+
+* Support for ruby 1.8.7 has been dropped, the minimum ruby version is
+  now 1.9.2.
+
+* The {before,after,around}_validation hooks are now always called
+  when saving, even if the validate: false option is used.  This
+  allows you to use the before_validation hook to make changes
+  to the model instance that are required before validation and
+  before saving even if not validating.
+
+* Getting column values for newly created model instances after
+  insertion now happens before after_create is called, instead of
+  after.
+
+* Sequel now immediately attempts to the connect to the database
+  when a Database instance is created, in order to fail fast if the
+  connection parameters are invalid.
+
+* The validates_unique method in the validation_helpers plugin
+  now only checks for uniqueness by default if the record is new or
+  one of the related columns has been modified by default.
+
+* Database schema modification methods and schema generator methods
+  now return nil instead of some internal value.
+
+* Many cases where Sequel used Kernel#send internally have been
+  switched to Kernel#public_send so they only call public methods.
+
+* Model association hooks are now nil instead of empty arrays by
+  default.
+
+* Internal uses of instance_eval with a block have been changed to
+  instance_exec.  This allows them to be used with lambdas that
+  take no arguments.
+
+* Most internal constants are now frozen, unless there is a
+  requirement that they be modified at runtime.
+  
+* The Model @was_new instance variable is now no longer set when
+  saving new model instances.
+
+* The private Sequel::Postgres::PGArray::Parser#new_entry_buffer
+  method in the pg_array extension has been removed.
+
+* Modifying Model.input_transformer_order in the input_transformer
+  plugin no longer has an effect.
+
+= New Features
+
+* Database#add_index :if_not_exists option is now supported on
+  PostgreSQL 9.5+.
+
+* SQL::Subscript#expression has been added to retrieve the
+  expression that is subscripted.
+
+= Other Improvements
+
+* Threaded connection pools no longer block while new connections
+  are being made.  Previously, attempting to establish a new
+  connection blocked all connection pool activity until the new
+  connection was made.
+
+* Many minor performance improvements have been made.
+
+* The class_table_inheritance plugin now raises an error during
+  Model#update if a query does not modify a single row, just as
+  the default Model#update does.
+
+* ConnectionPool#size is now thread-safe in both threaded
+  connection pools. Internal callers that already have the
+  connection pool mutex should switch to using #_size (a new
+  private method).
+
+* Registration of new serialization formats in the serialization
+  plugin is now thread-safe.
+
+* If transactional schema modifications are not supported, a
+  savepoint will not automatically be created when adding
+  indexes for new tables inside transactions.  This fixes issues
+  when making schema changes inside transactions on MySQL.
+
+* Attempting to create a prepared statement using a dataset that
+  uses a delayed evaluation now raises an error, because the
+  prepared statement would not respect the delayed evaluation.
+
+* The bin/sequel -M option now uses base 10.  Previously, it
+  used the Kernel#Integer default, which was base 8 if there was
+  a preceding 0.
+
+= Deprecated Features
+
+These deprecated features will be removed in Sequel 5.1.0.
+
+* Model.allowed_columns in the base plugin is now deprecated. Use
+  the whitelist_security plugin if you want to call it.
+
+* Model use_after_commit_rollback class and instance accessors are
+  now deprecated.
+
+* Defining the Model#_before_validation method is now deprecated.
+  You can change to using before_validation.
+
+* The private Model.plugin_module_defined? method is now deprecated.

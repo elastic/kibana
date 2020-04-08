@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="default-task" name="jnlp">
+  <description>
+    A testbed for getting JRuby to work with web start.
+  </description>
+
+  <!-- First try to load machine-specific properties. -->
+  <property file="build.properties"/>
+
+  <!-- And then load the defaults. It seems backwards to set defaults AFTER 
+  setting local overrides, but that's how Ant works. -->
+  <property file="default.build.properties"/>
+
+  <condition property="jnlp-sample-keystore.exists">
+    <available file="jnlp-sample-keystore"/>
+  </condition>
+    
+  <target name="generate-keystore" unless="jnlp-sample-keystore.exists">
+    <genkey alias="jnlp-sample-keystore" keystore="jnlp-sample-keystore" storepass="jnlp-sample-keystore" keypass="jnlp-sample-keystore">
+      <dname>
+        <param name="CN" value="JRuby"/>
+        <param name="OU" value="JRuby"/>
+        <param name="O"  value="jruby.org"/>
+        <param name="C"  value="US"/>
+      </dname>
+    </genkey>
+  </target>  
+
+  <target name="clean" description="delete signed-jars and jnlp-sample-keystore">
+    <delete file="jnlp-sample-keystore"/>
+    <delete dir="jars"/>
+    <delete dir="signed-jars"/>
+  </target>  
+
+  <target name="copy-jars" description="copy selected jars to the jars directory">
+    <copy file="../../lib/jruby-console.jar" todir="jars" />
+  </target>
+
+  <target name="sign-jars" depends="copy-jars, generate-keystore">
+    <mkdir dir="signed-jars"/>
+    <signjar destDir="signed-jars"
+      keystore="${keystore}"
+      storepass="${storepass}"
+      keypass="${keypass}"
+      alias="${alias}" 
+      lazy="false"
+      preservelastmodified="true">
+      <path>
+        <fileset dir="jars" includes="*.jar" />
+      </path>
+      <flattenmapper />
+    </signjar>
+  </target>
+  
+  <target name="default-task" depends="sign-jars">
+    <echo>
+      Testing the jnlp samples:
+      
+        javaws jirb.jnlp
+        
+        javaws signed-jirb.jnlp
+    </echo>
+  </target>
+</project>

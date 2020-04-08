@@ -1,0 +1,68 @@
+= New Features
+
+* Delayed evaluation blocks can now accept the dataset literalizing
+  the delayed evaluation as an argument.  This makes it so the
+  delayed evaluation result can depend on the dataset doing the
+  literalization:
+
+    ds = DB[:a].where(Sequel.delay do |ds|
+      {Sequel.qualify(ds.first_source, :col)=>1}
+    end)
+    ds.sql          # SELECT * FROM a WHERE (a.col = 1)
+    ds.from(:b).sql # SELECT * FROM b WHERE (b.col = 1)
+
+* Database#create_trigger on PostgreSQL now supports a :when option
+  to create a filter for the trigger, so that it is only triggered
+  when the filter condition is true.
+
+* You can now override the cache key prefix in the caching plugin
+  by overriding the cache_key_prefix class method.  This can be
+  useful when using a table inheritance plugin.
+
+= Other Improvements
+
+* You can now pass arbitrary types to Dataset#where and related
+  methods.  Previously, if a type was not explicitly handled, an
+  exception would be raised.  Now you can pass any object that can
+  be literalized.  The only exception is that you can't pass
+  Numeric objects, since #where and similar methods should
+  only deal with boolean expressions.
+
+* association_join and related methods now work correctly if the
+  dataset already has an explicit selection.
+
+* A regression has been fixed in the class_table_inheritance plugin
+  when using a hierarchy of more than 2 levels, when using the
+  superclass to load a subclass instance more than 2 levels below,
+  and later attempting to load a column contained in one of the
+  middle tables.
+ 
+* When using _delete or _remove keys in the nested_attributes plugin
+  to remove existing associated objects, the associated objects are
+  now deleted from the cached association array at time of call.
+  This is for consistency when adding new associated objects, where
+  the new associated objects are added to the cached association
+  array at time of call.
+
+* The nested_attributes plugin now handles composite primary keys
+  correctly when working around validation issues for one_to_one
+  and one_to_many associations.
+
+* If exception A is raised during a transaction, and exception B
+  is raised while attempting to rollback the transaction, the
+  transaction code will now raise exception A instead of exception B.
+
+* An additional serialization failure is now detected on PostgreSQL.
+
+* An additional disconnect error is now recognized in the jdbc/jtds
+  adapter.
+
+* The code examples in the RDoc are now syntax highlighted, and
+  many minor fixes to the code examples in the RDoc were made.
+  Additionally, many other improvements were made to the RDoc.
+
+= Backwards Compatibility
+
+* Dataset#delayed_evaluation_sql_append now accepts the delayed
+  evaluation as an argument, instead of the callable contained by the
+  delayed evaluation.

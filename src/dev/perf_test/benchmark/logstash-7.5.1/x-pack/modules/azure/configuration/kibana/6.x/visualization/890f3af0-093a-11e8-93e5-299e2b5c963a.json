@@ -1,0 +1,10 @@
+{
+  "title": "Select Subscription [Azure Monitor]",
+  "visState": "{\"title\":\"Select Subscription [Azure Monitor]\",\"type\":\"input_control_vis\",\"params\":{\"controls\":[{\"id\":\"1517598395667\",\"indexPattern\":\"azure-*\",\"fieldName\":\"azure.subscription.keyword\",\"label\":\"Select Subscription\",\"type\":\"list\",\"options\":{\"type\":\"terms\",\"multiselect\":true,\"size\":100,\"order\":\"desc\"}}],\"updateFiltersOnChange\":true,\"useTimeFilter\":false},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

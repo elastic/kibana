@@ -1,0 +1,10 @@
+{
+  "title": "Errors Single [Azure Monitor]",
+  "visState": "{\"title\":\"Errors Single [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(223,73,152,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":1,\"fill\":\"0.3\",\"stacked\":\"none\",\"label\":\"Errors\",\"split_filters\":[{\"filter\":\"data.category:Errors\",\"label\":\"Errors\",\"color\":\"rgba(255,57,36,1)\",\"id\":\"ead38060-07d8-11e8-ac3e-4b165adb3935\"}]}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":0,\"show_grid\":1,\"filter\":\"azure.group:sql_diagnostics AND azure.category:Errors\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

@@ -1,0 +1,47 @@
+module Syslog
+  module Constants
+    @@@
+    constants do |c|
+      c.include 'syslog.h'
+
+      c.const 'LOG_EMERG'
+      c.const 'LOG_ALERT'
+      c.const 'LOG_ERR'
+      c.const 'LOG_CRIT'
+      c.const 'LOG_WARNING'
+      c.const 'LOG_NOTICE'
+      c.const 'LOG_INFO'
+      c.const 'LOG_DEBUG'
+      c.const 'LOG_PID'
+      c.const 'LOG_CONS'
+      c.const 'LOG_ODELAY'
+      c.const 'LOG_NDELAY'
+      c.const 'LOG_NOWAIT'
+      c.const 'LOG_PERROR'
+      c.const 'LOG_AUTH'
+      c.const 'LOG_AUTHPRIV'
+      c.const 'LOG_CONSOLE'
+      c.const 'LOG_CRON'
+      c.const 'LOG_DAEMON'
+      c.const 'LOG_FTP'
+      c.const 'LOG_KERN'
+      c.const 'LOG_LPR'
+      c.const 'LOG_MAIL'
+      c.const 'LOG_NEWS'
+      c.const 'LOG_NTP'
+      c.const 'LOG_SECURITY'
+      c.const 'LOG_SYSLOG'
+      c.const 'LOG_USER'
+      c.const 'LOG_UUCP'
+      c.const 'LOG_LOCAL0'
+      c.const 'LOG_LOCAL1'
+      c.const 'LOG_LOCAL2'
+      c.const 'LOG_LOCAL3'
+      c.const 'LOG_LOCAL4'
+      c.const 'LOG_LOCAL5'
+      c.const 'LOG_LOCAL6'
+      c.const 'LOG_LOCAL7'
+    end
+    @@@
+  end
+end

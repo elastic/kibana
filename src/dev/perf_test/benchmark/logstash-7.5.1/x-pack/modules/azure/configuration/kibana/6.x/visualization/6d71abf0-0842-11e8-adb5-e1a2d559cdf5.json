@@ -1,0 +1,10 @@
+{
+  "title": "Query Wait Time (ms) Single [Azure Monitor]",
+  "visState": "{\"title\":\"Query Wait Time (ms) Single [Azure Monitor]\",\"type\":\"metrics\",\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"07fbc160-07fd-11e8-92fe-81a50acfdb07\",\"color\":\"rgba(0,191,179,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"07fbc161-07fd-11e8-92fe-81a50acfdb07\",\"type\":\"avg\",\"field\":\"sql_diagnostics_QueryStoreWaitStatistics_properties.total_query_wait_time_ms\"},{\"settings\":\"\",\"minimize\":0,\"window\":\"\",\"model\":\"simple\",\"id\":\"197b9550-07fd-11e8-92fe-81a50acfdb07\",\"type\":\"moving_average\",\"field\":\"07fbc161-07fd-11e8-92fe-81a50acfdb07\"}],\"seperate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"0a\",\"chart_type\":\"bar\",\"line_width\":\"1\",\"point_size\":\"1\",\"fill\":\"0.1\",\"stacked\":\"none\",\"label\":\"Query Wait Time\",\"value_template\":\"{{value}} ms\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"azure-*\",\"interval\":\"auto\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"show_legend\":0,\"show_grid\":1,\"filter\":\"azure.group:sql_diagnostics\"},\"aggs\":[]}",
+  "uiStateJSON": "{}",
+  "description": "",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{}"
+  }
+}

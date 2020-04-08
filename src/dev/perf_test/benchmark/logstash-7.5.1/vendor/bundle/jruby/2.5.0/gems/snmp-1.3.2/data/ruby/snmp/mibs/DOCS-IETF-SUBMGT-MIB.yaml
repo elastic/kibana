@@ -1,0 +1,32 @@
+--- 
+docsSubMgt: 1.3.6.1.2.1.125
+docsSubMgtObjects: 1.3.6.1.2.1.125.1
+docsSubMgtCpeControlTable: 1.3.6.1.2.1.125.1.1
+docsSubMgtCpeControlEntry: 1.3.6.1.2.1.125.1.1.1
+docsSubMgtCpeControlMaxCpeIp: 1.3.6.1.2.1.125.1.1.1.1
+docsSubMgtCpeControlActive: 1.3.6.1.2.1.125.1.1.1.2
+docsSubMgtCpeControlLearnable: 1.3.6.1.2.1.125.1.1.1.3
+docsSubMgtCpeControlReset: 1.3.6.1.2.1.125.1.1.1.4
+docsSubMgtCpeControlLastReset: 1.3.6.1.2.1.125.1.1.1.5
+docsSubMgtCpeMaxIpDefault: 1.3.6.1.2.1.125.1.2
+docsSubMgtCpeActiveDefault: 1.3.6.1.2.1.125.1.3
+docsSubMgtCpeLearnableDefault: 1.3.6.1.2.1.125.1.4
+docsSubMgtCpeIpTable: 1.3.6.1.2.1.125.1.5
+docsSubMgtCpeIpEntry: 1.3.6.1.2.1.125.1.5.1
+docsSubMgtCpeIpIndex: 1.3.6.1.2.1.125.1.5.1.1
+docsSubMgtCpeIpAddressType: 1.3.6.1.2.1.125.1.5.1.2
+docsSubMgtCpeIpAddr: 1.3.6.1.2.1.125.1.5.1.3
+docsSubMgtCpeIpLearned: 1.3.6.1.2.1.125.1.5.1.4
+docsSubMgtCmFilterTable: 1.3.6.1.2.1.125.1.6
+docsSubMgtCmFilterEntry: 1.3.6.1.2.1.125.1.6.1
+docsSubMgtCmFilterSubDownstream: 1.3.6.1.2.1.125.1.6.1.1
+docsSubMgtCmFilterSubUpstream: 1.3.6.1.2.1.125.1.6.1.2
+docsSubMgtCmFilterCmDownstream: 1.3.6.1.2.1.125.1.6.1.3
+docsSubMgtCmFilterCmUpstream: 1.3.6.1.2.1.125.1.6.1.4
+docsSubMgtFilterGroupTable: 1.3.6.1.2.1.125.1.7
+docsSubMgtFilterGroupEntry: 1.3.6.1.2.1.125.1.7.1
+docsSubMgtFilterGroupIndex: 1.3.6.1.2.1.125.1.7.1.1
+docsSubMgtConformance: 1.3.6.1.2.1.125.2
+docsSubMgtCompliances: 1.3.6.1.2.1.125.2.1
+docsSubMgtGroups: 1.3.6.1.2.1.125.2.2
+

@@ -1,0 +1,65 @@
+= New Features
+
+* An update_refresh plugin has been added, for refreshing a model
+  instance when updating.  The default behavior is to only refresh
+  when inserting.  However, if you have triggers on the model's table,
+  it's a good idea to refresh when updating to pick up the possibly
+  changed values.  On databases that support UPDATE RETURNING, such as
+  PostgreSQL, the update and refresh are done in a single query.
+
+* A delay_add_association plugin has been added, for delaying add_*
+  method calls for associations until after the receiver has been
+  saved, if the receiver is a new object. Example:
+
+    artist = Artist.new(:name=>'Foo')
+    artist.add_album(Album.new(:name=>'Bar'))
+    # No database queries yet
+
+    artist.save # Saves artist, then album
+
+* A validate_associated plugin has been added, for validating
+  associated objects when validating the current object.  This
+  was extracted from the nested_attributes plugin, and is also
+  used by the delay_add_association plugin.  For example,
+  if you have an albums association and you want to validate all
+  associated objects before saving the current object, you can
+  cal validate_associated_object for each object:
+
+    def validate
+      super
+      reflection = association_reflection(:albums)
+      associations[:albums].each do |obj|
+        validate_associated_object(reflection, obj)
+      end
+    end
+
+= Other Improvements
+
+* Database#transaction now returns the block return value if
+  :rollback=>:always is used.  Previously, it would return nil in
+  that case.
+
+* Postgres::JSONBOp#[] and #get_text now return JSONBOp instances
+  instead of JSONOp instances.
+
+* Model#move_to, #move_up, and #move_down in the list plugin now
+  automatically handle out-of-range targets by defaulting to the first
+  or last position in the list.  Previously, using an out of range
+  target would raise an exception.
+
+* Database#add_named_conversion_proc on PostgreSQL now works for enum
+  types.
+
+* dataset.call_sproc(:insert, ...) now works correctly on JDBC.
+
+* postgresql:// connection strings are now supported, since that is
+  the protocol name supported by libpq.
+
+* Sequel has switched from rspec to minitest/spec for testing, and
+  now uses random test order when testing. During the conversion
+  process, many test order dependency bugs were fixed.
+
+= Backwards Compatibility
+
+* The deprecated fdbsql, jdbc/fdbsql, and openbase adapters have been
+  removed.

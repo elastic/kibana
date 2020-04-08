@@ -1,0 +1,190 @@
+= Performance Enhancements
+
+* Dataset::PlaceholderLiteralizer has been added as an optimization
+  framework.  This allows you to record changes to a given dataset
+  using placeholder arguments, and later quickly execute the query
+  providing values for the placeholders.  This is similar in idea
+  to prepared statements, except that the SQL for each query can
+  change depending on the values for the placeholders.
+
+  Using this optimization framework, generating the SQL for query
+  is about 3x faster, and since SQL generation time is a significant
+  portion of total time for simple queries, simple queries can
+  execute up to 50% faster.
+
+  There are two APIs for this optimization framework.  There is a
+  lower level dataset API:
+
+    loader = Sequel::Dataset::PlaceholderLiteralizer.
+     loader(DB[:items]) do |pl, ds|
+      ds.where(:id=>pl.arg).exclude(:name=>pl.arg).limit(1)
+    end
+
+    loader.first(1, "foo")
+    # SELECT * FROM items WHERE ((id = 1) AND (name != 'foo')) LIMIT 1 
+
+    loader.first([1, 2], %w"foo bar")
+    # SELECT * FROM items WHERE ((id IN (1, 2)) AND
+    #   (name NOT IN ('foo', 'bar'))) LIMIT 1
+
+  There is also a higher level model API (Model.finder):
+
+    class Item < Sequel::Model
+      # Given class method that returns a dataset
+      def self.by_id_and_not_name(id, not_name)
+        where(:id=>id).exclude(:name=>not_name)
+      end
+
+      # Create optimized method that returns first value
+      finder :by_id_and_not_name
+    end
+    
+    # Call optimized method
+    Album.first_by_id_and_not_name(1, 'foo')
+    # SELECT * FROM items WHERE ((id = 1) AND (name != 'foo')) LIMIT 1 
+
+  Model.finder defaults to creating a method that returns the first
+  matching row, but using the :type option you can create methods
+  that call each, all, or get.  There is also an option to choose the
+  method name (:name), as well as one to specify the number of
+  arguments to use if the method doesn't take a fixed number
+  (:arity).
+
+  Finally, Model.find, .first, and .first! now automatically use an
+  optimized finder if given a single argument. Model.[] uses an
+  optimized finder if given a single hash, and Model.[], .with_pk,
+  and .with_pk! use an optimized finder if the model has a composite
+  primary key.  In all of these cases, these methods are about 50%
+  faster than before.
+
+* The pure-ruby PostgreSQL array parser that ships with Sequel has
+  been replaced with a strscan-based parser.  This parser avoids
+  O(n^2) performance for arrays with multibyte strings, and in general
+  is much faster.  Parsing an array with a single string with 100,000
+  multibyte characters is about 1000x faster, and now about half the
+  speed of the C implementation in sequel_pg.
+
+* Dataset#paged_each now has a :strategy=>:filter option that
+  dramatically improves performance, especially if the columns
+  being ordered by are indexed.
+
+  Unfortunately, there are enough corner cases to this approach
+  that it cannot be used by default.  At the least, the dataset
+  needs to be selecting the columns it is ordering by, not aliasing
+  the columns it is ordering by in the SELECT clause, not have
+  NULLs in any of the columns being ordered by, and not itself use
+  a limit or offset.
+
+  If you are ordering by expressions that are not simple column
+  values, you can provide a :filter_value option proc that takes the
+  last retrieved row and array of order by expressions, and returns 
+  an array of values in the last retrieved row for those order by
+  expressions.
+
+* In the postgres adapter, Dataset#paged_each now automatically uses
+  a cursor for improved performance.
+
+* In the mysql2 adapter, Dataset#paged_each now automatically uses
+  streaming for improved performance, if streaming is supported.
+
+* Dataset#with_sql_{each,all,first,single_value,insert,update}
+  have been added.  These methods take specific SQL and execute
+  it on the database, returning the appropriate value.  They
+  are significantly faster than the previous approach of
+  with_sql(SQL).{each,all,first,single_value,insert,update},
+  as they don't require cloning the dataset.
+
+= New Features
+
+* Database#create_join_table! and #create_join_table? have been added,
+  for consistency with #create_table! and #create_table?.
+
+* A :hold option has been added to Dataset#use_cursor in the postgres
+  adapter, which uses WITH HOLD in the query, allowing for usage of
+  the cursor outside the enclosing transaction.  When :hold is used,
+  Sequel does not automatically use a transaction around the cursor
+  call.
+
+* Dataset#where_current_of has been added to the postgres adapter,
+  for updating rows based on a cursor's current position.  This can
+  be used to update a large dataset where new values depend on
+  some ruby method, without keeping all rows in memory.
+
+    ds = DB[:huge_table]
+    ds.use_cursor(:rows_per_fetch=>1).each do |row|
+      ds.where_current_of.update(:column=>ruby_method(row))
+    end
+
+* A current_datetime_timestamp extension has been added, for
+  creating Time/DateTime instances that are literalized as
+  CURRENT_TIMESTAMP.  When the dataset uses this extension, models
+  that use the touch and timestamps plugins will use
+  CURRENT_TIMESTAMP for the timestamps.
+
+* The jdbc adapter now supports a :driver option, useful when
+  Sequel doesn't have direct support for the underlying driver, and
+  where java.sql.DriverManager.getConnection does not work
+  correctly due to Java class loading issues.
+
+= Other Improvements
+
+* Multiple corner cases in Dataset#eager_graph have been fixed.
+
+* Calling Dataset#columns when using the eager_each plugin no
+  longer triggers eager loading.
+
+* Database#column_schema_to_ruby_default is now a public method
+  in the schema_dumper extension.
+
+* When validating associated objects for one_to_many and one_to_one
+  associations in the nested_attributes plugin, don't remove column
+  values if the association's foreign key is the associated model's
+  primary key.
+
+* On PostgreSQL, Dataset#disable_insert_returning has been added
+  back.  This disables the automatic use of RETURNING for INSERTs
+  for the dataset.  This is necessary in cases where INSERT
+  RETURNING doesn't work, such as PostgreSQL <8.2 (or PostgreSQL
+  variants that forked before 8.2), or when using partitioning
+  with trigger functions, or conditional rules.
+
+  Note that if you use disable_insert_returning, insert will not
+  return the autoincremented primary key.  You need to call
+  currval or lastval manually using the same connection to get
+  the value, or use nextval to get the value to use before
+  inserting.
+
+* The pg_array extension now uses the correct database type when
+  typecasting values for smallint, oid, real, character, and varchar
+  arrays.  Previously, Sequel did not use the correct database type
+  in some cases (e.g. text[] for a varchar[]), which resulted in
+  errors if the value was used in a filter expression.
+
+* Additional unique constraint violations are now recognized on
+  SQLite.
+
+* Check constraint violations are now recognized on SQLite >=3.8.2.
+
+* Adapters that emulate bitwise operators now do so using an append
+  only design, similar to how all other queries are built in Sequel.
+
+= Backwards Compatibility
+
+* In some cases Sequel no longer adds superfluous parentheses when
+  constructing SQL strings.  If you are testing for specific SQL,
+  this can cause test failures.
+
+* The pg_array extension no longer recognizes the :typecast_method
+  option when registering an array type.  The option allowed reuse
+  of an existing typecast method, but as that results in an incorrect
+  type at the database level, the option was fundementally broken.
+
+* The internals of the PostgreSQL array parser have changed.  If you
+  were relying on them, you'll need to update your code.
+
+* Dataset#complex_expression_arg_pairs private method now returns
+  nested expression objects instead of an already literalized string
+  in some cases.  Custom adapters that call this method will probably
+  need to be changed.  It's recommended that such adapters switch to
+  using the new Dataset#complex_expression_emulate_append method if
+  possible.

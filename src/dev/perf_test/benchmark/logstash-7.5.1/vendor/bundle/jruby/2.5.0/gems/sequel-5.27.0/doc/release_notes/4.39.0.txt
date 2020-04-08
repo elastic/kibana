@@ -1,0 +1,127 @@
+= New Features
+
+* Sequel.[] has been added as an alias to Sequel.expr. This makes it
+  a little easier to get Sequel-specific objects:
+
+    Sequel[:table].*                  # "table".*
+    Sequel[:table__column].as(:alias) # "table"."column" AS "alias"
+    Sequel[:column] + 1               # ("column" + 1)
+
+* The timestamps plugin now supports an :allow_manual_update option.
+  If this option is used, the timestamps plugin will not override the 
+  update timestamp when saving if the user has modified it since
+  retrieving the object.
+
+* The touch plugin now also touches associations on create in addition
+  to update and delete.
+
+* The IntegerMigrator now supports a :relative option, which will
+  migrate that many migrations up (for positive numbers) or down (for
+  negative numbers).
+
+* Database#rollback_checker has been added, which returns a callable
+  that can be called later to determine whether the transaction ended
+  up committing or rolling back.  So if you may need to check
+  transaction status at some future point, and don't need immediate
+  action on rollback/commit, it is better to use a rollback checker
+  than to add an after commit/rollback hook.
+
+    rbc = nil
+    DB.transaction do
+      rbc = DB.rollback_checker
+      rbc.call #=> nil
+    end
+    rbc.call # => false
+
+    DB.transaction(:rollback=>:always) do
+      rbc = DB.rollback_checker
+    end
+    rbc.call # => true
+
+* The add_column schema method now supports an :if_not_exists option
+  on PostgreSQL 9.6+, which will only add the column if it does not
+  already exist:
+
+    DB.add_column :t, :c, Integer, :if_not_exists=>true
+    # ALTER TABLE "t" ADD COLUMN IF NOT EXISTS "c" integer
+
+* The add_column schema method now supports an :after and :first
+  option on MySQL to add the column after an existing column or as
+  the first column:
+
+    DB.add_column :t, :c, Integer, :first=>true
+    # ALTER TABLE `t` ADD COLUMN `c` integer FIRST
+    DB.add_column :t, :c1, Integer, :after=>:c2
+    # ALTER TABLE `t` ADD COLUMN `c1` integer AFTER `c2`
+
+* JSONBOp#insert has been added to the pg_json_ops extension, which
+  supports the new jsonb_insert function added in PostgreSQL 9.6+:
+
+    Sequel.pg_jsonb_op(:c).insert(%w'0 a', 'a'=>1)
+    # jsonb_insert("c", ARRAY['0','a'], '{"a":1}'::jsonb, false)
+
+* Dataset#full_text_search on PostgreSQL now supports a
+  :to_tsquery=>:phrase option, to enable the native phrase searching
+  added in PostgreSQL 9.6+:
+
+    DB[:t].full_text_search(:c, 'foo bar', :to_tsquery=>:phrase)
+    # SELECT * FROM "t"
+    # WHERE
+    #   (to_tsvector(CAST('simple' AS regconfig), (COALESCE("c", '')))
+    #   @@ phraseto_tsquery(CAST('simple' AS regconfig), 'foo bar'))
+
+* Sequel::Database.set_shared_adapter_scheme has been added, allowing
+  external adapters to add support for Sequel's mock adapter.
+  External adapters should have a shared adapter requirable at
+  sequel/adapters/shared/adapter_name, that uses the following
+  format:
+
+    # in sequel/adapters/shared/mydb
+    module Sequel::MyDB
+      Sequel::Database.set_shared_adapter_scheme :mydb, self
+
+      def self.mock_adapter_setup(db)
+        # Any mock-adapter specific setup to perform on the
+        # given Database instance
+      end
+
+      module DatabaseMethods
+        # methods for all Database objects using this adapter
+      end
+
+      module DatasetMethods
+        # methods for all Dataset objects using this adapter
+      end
+    end
+
+
+= Other Improvements
+
+* The hook_class_methods plugin only adds a Database transaction
+  hook if one of the after commit/rollback hook class methods is
+  actually used.  This means that loading the plugin no longer
+  keeps all saved/deleted objects in memory until transaction
+  commit.
+
+* The active_model plugin now uses a rollback checker instead of
+  an after_rollback hook, so models that use the active_model plugin
+  no longer store all saved model instances in memory until
+  transaction commit.
+
+* When using the IntegerMigrator, attempting to migrate to a
+  migration number above the maximum will now migrate to the lastest
+  version, and attempting to migrate to a migration number below 0
+  will now migrate all the way down.
+
+* The pg_interval extension now supports ActiveSupport::Duration
+  objects that use week and hour parts (new in ActiveSupport 5).
+
+= Backwards Compatibility
+
+* The change to the touch plugin to touch associations on create could
+  possibly affect existing behavior, so if you are using this plugin,
+  you should test that this does not cause any problems.
+
+* External adapters that tried to add support for the mock adapter
+  now need to update their code to use the new
+  Sequel::Database.set_shared_adapter_scheme method.

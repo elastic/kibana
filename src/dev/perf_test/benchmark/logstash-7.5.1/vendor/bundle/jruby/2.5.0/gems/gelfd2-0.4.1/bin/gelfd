@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), "..", "lib")))
+require 'socket'
+require 'gelfd2'
+
+server = UDPSocket.new
+puts "Starting up"
+server.bind(nil, 11211)
+trap("INT") { puts "Shutting down"; exit }
+
+loop do
+  data, addr = server.recvfrom(8192)
+  begin
+    res = Gelfd2::Parser.parse(data)
+  rescue Exception => e
+    puts e.message
+  end
+  puts res unless res.nil?
+end

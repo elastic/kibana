@@ -1,0 +1,258 @@
+= Database Transactions 
+
+Sequel uses autocommit mode by default for all of its database adapters, so in general in Sequel if you want to use database transactions, you need to be explicit about it.  There are a few cases where transactions are used implicitly by default:
+
+* Dataset#import to insert many records at once
+* Dataset#paged_each to iterate over large datasets in batches
+* Model#save
+* Model#destroy
+* Migrations if the database supports transactional schema
+* Database#use_cursor in the postgres adapter
+* Dataset#lock on PostgreSQL if given a block
+* setter methods created by the association_pks plugin
+* move* methods in the list plugin
+
+Everywhere else, it is up to you to use a database transaction if you want to.
+
+== Basic Transaction Usage
+
+In Sequel, the <tt>Database#transaction</tt> method should be called if you want to use a database transaction.  This method must be called with a block.  If the block does not raise an exception, the transaction is committed:
+
+  DB.transaction do # BEGIN
+    DB[:foo].insert(1) # INSERT
+  end # COMMIT
+   
+If the block raises a Sequel::Rollback exception, the transaction is rolled back, but no exception is raised outside the block:
+
+  DB.transaction do # BEGIN
+    raise Sequel::Rollback
+  end # ROLLBACK
+  # no exception raised
+
+If any other exception is raised, the transaction is rolled back, and the exception is raised outside the block:
+
+  DB.transaction do # BEGIN
+    raise ArgumentError
+  end # ROLLBACK
+  # ArgumentError raised
+
+If you want the current transaction to be rolled back when the transaction block exits instead of being committed (even if an exception is not raised), use <tt>Database#rollback_on_exit</tt>
+
+  DB.transaction do # BEGIN
+    DB.rollback_on_exit
+  end # ROLLBACK
+
+If you want Sequel::Rollback exceptions to be reraised, use the <tt>rollback: :reraise</tt> option:
+
+  DB.transaction(rollback: :reraise) do # BEGIN
+    raise Sequel::Rollback
+  end # ROLLBACK
+  # Sequel::Rollback raised
+
+If you always want to rollback (useful for testing), use the <tt>rollback: :always</tt> option:
+
+  DB.transaction(rollback: :always) do # BEGIN
+    DB[:foo].insert(1) # INSERT
+  end # ROLLBACK
+  # no exception raised
+
+If you want to check whether you are currently in a transaction, use the Database#in_transaction? method:
+
+  DB.in_transaction? # false
+  DB.transaction do
+    DB.in_transaction? # true
+  end
+
+== Transaction Hooks
+
+You can add hooks to an in progress transaction that are called after the transaction commits or rolls back:
+
+  x = nil
+  DB.transaction do
+    DB.after_commit{x = 1}
+    DB.after_rollback{x = 2}
+    x # nil
+  end
+  x # 1
+  
+  x = nil
+  DB.transaction do
+    DB.after_commit{x = 1}
+    DB.after_rollback{x = 2}
+    raise Sequel::Rollback
+  end
+  x # 2
+
+== Nested Transaction Calls / Savepoints
+
+You can nest calls to transaction, which by default just reuses the existing transaction:
+
+  DB.transaction do # BEGIN
+    DB.transaction do
+      DB[:foo].insert(1) # INSERT
+    end
+  end # COMMIT
+
+You can use the <tt>savepoint: true</tt> option in the inner transaction to explicitly use a savepoint (if the database supports it):
+
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB[:foo].insert(1) # INSERT
+    end # RELEASE SAVEPOINT
+  end # COMMIT
+
+You can use the <tt>auto_savepoint: true</tt> option in the outer transaction to explicitly use a savepoint in the inner transaction (if the database supports it):
+
+  DB.transaction(auto_savepoint: true) do # BEGIN
+    DB.transaction do # SAVEPOINT
+      DB[:foo].insert(1) # INSERT
+    end # RELEASE SAVEPOINT
+  end # COMMIT
+
+If a Sequel::Rollback exception is raised inside the savepoint block, it will only rollback to the savepoint:
+
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      raise Sequel::Rollback
+    end # ROLLBACK TO SAVEPOINT
+    # no exception raised
+  end # COMMIT
+
+Other exceptions, unless rescued inside the outer transaction block, will rollback the savepoint and the outer transactions, since they are reraised by the transaction code:
+
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      raise ArgumentError
+    end # ROLLBACK TO SAVEPOINT
+  end # ROLLBACK
+  # ArgumentError raised
+
+If you want the current savepoint to be rolled back when the savepoint block exits instead of being committed (even if an exception is not raised), use <tt>Database#rollback_on_exit(:savepoint=>true)</tt>
+
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB.rollback_on_exit(:savepoint=>true)
+    end # ROLLBACK TO SAVEPOINT
+  end # COMMIT
+
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.rollback_on_exit(:savepoint=>true)
+      end # ROLLBACK TO SAVEPOINT
+    end # RELEASE SAVEPOINT
+  end # COMMIT
+
+If you want the current savepoint to be rolled back when the savepoint block exits (even if an exception is not raised), use <tt>Database#rollback_on_exit(:savepoint=>true)</tt>
+
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB.rollback_on_exit(:savepoint=>true)
+    end # ROLLBACK TO SAVEPOINT
+  end # COMMIT
+
+If you want the current savepoint and potentially enclosing savepoints to be rolled back when the savepoint blocks exit  (even if an exception is not raised), use <tt>Database#rollback_on_exit(:savepoint=>integer)</tt>
+
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.rollback_on_exit(:savepoint=>2)
+      end # ROLLBACK TO SAVEPOINT
+    end # ROLLBACK TO SAVEPOINT
+  end # COMMIT
+
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB.transaction(savepoint: true) do # SAVEPOINT
+        DB.rollback_on_exit(:savepoint=>3)
+      end # ROLLBACK TO SAVEPOINT
+    end # ROLLBACK TO SAVEPOINT
+  end # ROLLBACK
+
+=== Savepoint Hooks
+
+When using savepoints, you can use the +:savepoint+ option to +after_commit+ or +after_rollback+ to use a savepoint hook.  For +after_commit+, this will only run the hook after transaction commit if all enclosing savepoints are released (not rolled back). For +after_rollback+, this will run the hook after any enclosing savepoint is rolled back (before transaction commit), or after the transaction is rolled back if all enclosing savepoints are released:
+
+  x = nil
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB.after_commit(savepoint: true){x = 1}
+      DB.after_rollback(savepoint: true){x = 2}
+      x # nil
+    end # RELEASE SAVEPOINT
+    x # nil
+  end # COMMIT
+  x # 1
+  
+  x = nil
+  DB.transaction do  # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB.after_commit(savepoint: true){x = 1}
+      DB.after_rollback(savepoint: true){x = 2}
+      x # nil
+      raise Sequel::Rollback
+    end # ROLLBACK TO SAVEPOINT
+    x # 2
+  end # COMMIT
+  x # 2
+  
+  x = nil
+  DB.transaction do # BEGIN
+    DB.transaction(savepoint: true) do # SAVEPOINT
+      DB.after_commit(savepoint: true){x = 1}
+      DB.after_rollback(savepoint: true){x = 2}
+    end # RELEASE SAVEPOINT
+    x # nil
+    raise Sequel::Rollback
+  end
+  x # 2
+
+== Prepared Transactions / Two-Phase Commit
+
+Sequel supports database prepared transactions on PostgreSQL, MySQL, and H2.  With prepared transactions, at the end of the transaction, the transaction is not immediately committed (it acts like a rollback).  Later, you can call +commit_prepared_transaction+ to commit the transaction or +rollback_prepared_transaction+ to roll the transaction back.  Prepared transactions are usually used with distributed databases to make sure all databases commit the same transaction or none of them do.
+
+To use prepared transactions in Sequel, you provide a string as the value of the :prepare option:
+
+  DB.transaction(prepare: 'foo') do # BEGIN
+    DB[:foo].insert(1) # INSERT
+  end # PREPARE TRANSACTION 'foo'
+   
+Later, you can commit the prepared transaction:
+
+  DB.commit_prepared_transaction('foo')
+
+or roll the prepared transaction back:
+
+  DB.rollback_prepared_transaction('foo')
+
+== Transaction Isolation Levels
+
+The SQL standard supports 4 isolation levels: READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ, and SERIALIZABLE.  Not all databases implement the levels as specified in the standard (or implement the levels at all), but on most databases, you can specify which transaction isolation level you want to use via the :isolation option to <tt>Database#transaction</tt>.  The isolation level is specified as one of the following symbols: :uncommitted, :committed, :repeatable, and :serializable.  Using this option makes Sequel use the correct transaction isolation syntax for your database:
+
+  DB.transaction(isolation: :serializable) do # BEGIN
+    # SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+    DB[:foo].insert(1) # INSERT
+  end # COMMIT
+
+== Automatically Restarting Transactions
+
+Sequel offers the ability to automatically restart transactions if specific types of errors are detected.  For example, if you want to automatically restart a transaction if a serialization failure is detected:
+
+  DB.transaction(isolation: :serializable, retry_on: [Sequel::SerializationFailure]) do
+    ModelClass.find_or_create(name: 'Foo')
+  end
+
+At the serializable transaction isolation level, find_or_create may raises a Sequel::SerializationFailure exception if multiple threads simultaneously run that code.  With the :retry_on option set, the transaction will be automatically retried until it succeeds.
+
+Note that automatic retrying should not be used unless the entire transaction
+block is idempotent, as otherwise it can cause non-idempotent
+behavior to execute multiple times.  For example, with the following code:
+
+  DB.transaction(isolation: :serializable, retry_on: [Sequel::SerializationFailure]) do
+    logger.info 'Ensuring existence of ModelClass with name Foo'
+    ModelClass.find_or_create(name: 'Foo')
+  end
+
+The logger.info method will be called multiple times if there is a serialization failure.
+
+The :num_retries option can be used to set the maximum number of times to retry.  It is set to 5 times by default.

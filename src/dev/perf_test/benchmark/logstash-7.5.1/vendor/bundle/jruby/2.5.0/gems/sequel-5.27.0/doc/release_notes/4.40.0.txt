@@ -1,0 +1,179 @@
+= New Features
+
+* A Sequel.split_symbols setting has been added.  This setting is
+  true by default, so there is no change to backwards compatibility
+  by default.  However, users can now do:
+
+    Sequel.split_symbols = false
+
+  to disable the splitting of symbols.  This will make Sequel no
+  longer treat symbols with double or triple underscores as qualified
+  or aliased identifiers, instead treating them as plain identifiers.
+  It will also make Sequel no longer treat virtual row methods with
+  double underscores as qualified identifiers.  Examples:
+
+    # Sequel.split_symbols = true
+    :column                    # "column"
+    :table__column             # "table"."column"
+    :column___alias            # "column" AS "alias"
+    :table__column___alias     # "table"."column" AS "alias"
+    Sequel.expr{table__column} # "table"."column"
+
+    # Sequel.split_symbols = false
+    :column                    # "column"
+    :table__column             # "table__column"
+    :column___alias            # "column___alias"
+    :table__column___alias     # "table__column___alias"
+    Sequel.expr{table__column} # "table__column"
+
+  Disabling symbol splitting can make things much easier if leading
+  trailing, double, or triple underscores are used in identifiers
+  in your database.
+
+  Disabling symbol splitting makes Sequel simpler, even if it does
+  make it slightly less easy to create qualified and aliased
+  identifiers.  It is possible that the symbol splitting will be
+  disabled by default starting in Sequel 5.
+
+  Note that due to Database symbol literal caching, you should not
+  change the Sequel.split_symbols setting after creating a
+  Database instance.
+
+* SQL::Identifier#[] and SQL::QualifiedIdentifier#[] have been added
+  for creating qualified identifiers.  This makes it easier and more
+  natural to create qualified identifiers from existing identifiers.
+  Previously, you could do:
+
+    Sequel[:column].qualify(:table)
+
+  You can now use the more natural:
+
+    Sequel[:table][:column]
+
+  This can also be used in virtual rows:
+
+    Sequel.expr{table[:column]}
+
+  This offers a easy way to create qualified identifers when symbol
+  splitting has been disabled.
+
+* A symbol_aref extension has been added, allowing the use of
+  Symbol#[] to create qualified identifiers if passed a Symbol,
+  SQL::Identifier, or SQL::QualifiedIdentifier.  This doesn't
+  break any existing ruby behavior, as ruby currrently raises
+  an exception in such cases.  Example:
+  
+    :table[:column] # "table"."column"
+
+  This extension can make it easier to create qualified identifiers
+  if symbol splitting is disabled.
+
+  A symbol_aref_refinement extension has also been added, which
+  adds a refinement version of the extension that can be enabled via:
+
+    using Sequel::SymbolAref
+
+* A symbol_as extension has been added, which adds the Symbol#as method
+  to create aliased identifiers.  This was previously part of the core
+  extensions, but has been separated so it can be included by itself.
+  Example:
+
+    :column.as(:alias) # "column" AS "alias"
+
+  This extension can make it easier to create aliased identifiers if
+  symbol splitting is disabled.
+
+  A symbol_as_refinement extension has also been added, which
+  adds a refinement version of the extension that can be enabled via:
+
+    using Sequel::SymbolAs
+
+* An s extension has been added, which adds the Sequel::S module,
+  containing a private #S method that calls Sequel.expr.  You can
+  include this module in any module or class where you would like the
+  S method to be available:
+
+    class Album < Sequel::Model
+      extend Sequel::S
+      one_to_many :tracks, :order=>S(:number).desc
+    end
+
+  You can include this in Object if you want the S method to be
+  available globally:
+
+    Object.send(:include, Sequel::S)
+
+  Sequel::S also works if it is used as a refinement, adding the S
+  method to Object while the refinement is active:
+
+    using Sequel::S
+
+  This extension can make it easier to create qualified and aliased
+  identifiers if symbol splitting is disabled:
+
+    S(:table)[:column]
+    S(:column).as(:alias)
+
+* Dataset#insert_conflict on PostgreSQL now supports a :conflict_where
+  option, allowing for the handling of insert conflicts when using a
+  partial unique index:
+
+    DB[:table].insert_conflict(:target=>:a,
+      :conflict_where=>{:c=>true}).insert(:a=>1, :b=>2)
+    # INSERT INTO TABLE (a, b) VALUES (1, 2)
+    # ON CONFLICT (a) WHERE (c IS TRUE) DO NOTHING
+
+= Other Improvements
+
+* Sequel no longer attempts to combine arguments for non-associative
+  operators, as doing so leads to invalid code in cases such as:
+
+    Sequel.expr{column1 - (column2 - 1)}
+
+* Sequel now automatically adds NOT NULL constraints on columns when
+  adding a primary key constraint on the columns, if the database
+  doesn't handle that situation correctly.
+
+* Database#rollback_checker now returns a thread-safe object.
+
+* SQL::QualifiedIdentifier#initialize now converts SQL::Identifier
+  arguments to strings, fixing usage of such objects in the
+  schema methods.
+
+* The prepared_statements plugin now correctly handles lookup by
+  primary key on models with joined datasets.
+
+* The dataset_associations plugin now handles many_through_many and
+  one_through_many associations that use a single join table.  Note
+  there is no reason to create such associations, as many_to_many
+  and one_through_one associations will work for such cases.
+
+* The insert_returning_select plugin now handles cases where the
+  model doesn't have a valid dataset, fixing usage with the
+  lazy_attributes and dataset_associations plugins, and potentially
+  other plugins.
+
+* The column_select plugin no longer raises an exception if the
+  model's table does not exist.
+
+* The class_table_inheritance plugin now works when the
+  prepared_statements plugin is also used.
+
+* Some adapters now avoid thread-safety issues during loading on
+  ruby implementations without a GVL by avoiding the modification of
+  shared datastructures.
+
+* When using Database#tables with the :qualify=>true option on
+  PostgreSQL, table names with double or triple underscores are
+  now handled correctly.
+
+= Backwards Compatibility
+
+* The following Dataset constants are now frozen: NON_SQL_OPTIONS,
+  ACTION_METHODS, QUERY_METHODS, CONDITIONED_JOIN_TYPES,
+  UNCONDITIONED_JOIN_TYPES, and JOIN_METHODS.  Of these,
+  NON_SQL_OPTIONS was previously modified in a non-thread-safe manner
+  by some adapters.  External adapters should switch to having the
+  adapter's dataset non_sql_options method return an array of options
+  that do not affect the SELECT SQL for the adapter's datasets, rather
+  than modifying NON_SQL_OPTIONS.

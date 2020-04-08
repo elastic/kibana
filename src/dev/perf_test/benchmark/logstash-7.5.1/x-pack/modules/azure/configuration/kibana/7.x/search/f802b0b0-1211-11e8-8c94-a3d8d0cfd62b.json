@@ -1,0 +1,20 @@
+{
+  "title": "Alerts Search [Azure Monitor][Activity Log]",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "resultDescription",
+    "resultType",
+    "azure.provider",
+    "azure.resource_name",
+    "azure.resource_group"
+  ],
+  "sort": [
+    "@timestamp",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"azure-*\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"azure.group:activity_log AND azure.category:Alert\"},\"filter\":[]}"
+  }
+}

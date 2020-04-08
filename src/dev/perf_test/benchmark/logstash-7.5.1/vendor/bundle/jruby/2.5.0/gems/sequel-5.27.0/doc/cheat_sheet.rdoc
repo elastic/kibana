@@ -1,0 +1,246 @@
+= Cheat Sheet   
+
+== Open a database
+
+  require 'sequel'
+
+  DB = Sequel.sqlite('my_blog.db')
+  DB = Sequel.connect('postgres://user:password@localhost/my_db')
+  DB = Sequel.postgres('my_db', user: 'user', password: 'password', host: 'localhost')
+  DB = Sequel.ado('mydb')
+
+== Open an SQLite memory database
+
+Without a filename argument, the sqlite adapter will setup a new sqlite database in memory.
+
+  DB = Sequel.sqlite
+
+== Logging SQL statements
+
+  require 'logger'
+  DB = Sequel.sqlite(loggers: [Logger.new($stdout)])
+  # or
+  DB.loggers << Logger.new($stdout)
+
+== Using raw SQL
+
+  DB.run "CREATE TABLE users (name VARCHAR(255) NOT NULL, age INT(3) NOT NULL)"
+  dataset = DB["SELECT age FROM users WHERE name = ?", name]
+  dataset.map(:age)
+  DB.fetch("SELECT name FROM users") do |row|
+    p row[:name]
+  end
+
+== Create a dataset
+
+  dataset = DB[:items]
+  dataset = DB.from(:items)
+
+== Most dataset methods are chainable
+
+  dataset = DB[:managers].where(salary: 5000..10000).order(:name, :department)
+
+== Insert rows
+
+  dataset.insert(name: 'Sharon', grade: 50)
+
+== Retrieve rows
+
+  dataset.each{|r| p r}
+  dataset.all # => [{...}, {...}, ...]
+  dataset.first # => {...}
+  dataset.last # => {...}
+
+== Update/Delete rows
+
+  dataset.exclude(:active).delete
+  dataset.where{price < 100}.update(:active => true)
+
+== Datasets are Enumerable
+
+  dataset.map{|r| r[:name]}
+  dataset.map(:name) # same as above
+
+  dataset.inject(0){|sum, r| sum + r[:value]}
+  dataset.sum(:value) # better
+
+== Filtering (see also {Dataset Filtering}[rdoc-ref:doc/dataset_filtering.rdoc])
+
+=== Equality
+
+  dataset.where(name: 'abc')
+
+=== Inequality
+
+  dataset.where{value > 100}
+  dataset.exclude{value <= 100}
+
+=== Inclusion
+
+  dataset.where(value: 50..100)
+  dataset.where{(value >= 50) & (value <= 100)}
+
+  dataset.where(value: [50,75,100])
+  dataset.where(id: other_dataset.select(:other_id))
+
+=== Subselects as scalar values
+
+  dataset.where{price > dataset.select(avg(price) + 100)}
+
+=== LIKE/Regexp
+
+  DB[:items].where(Sequel.like(:name, 'AL%'))
+  DB[:items].where(name: /^AL/)
+
+=== AND/OR/NOT
+
+  DB[:items].where{(x > 5) & (y > 10)}.sql 
+  # SELECT * FROM items WHERE ((x > 5) AND (y > 10))
+
+  DB[:items].where(Sequel.or(x: 1, y: 2) & Sequel.~(z: 3)).sql 
+  # SELECT * FROM items WHERE (((x = 1) OR (y = 2)) AND (z != 3))
+
+=== Mathematical operators
+
+  DB[:items].where{x + y > z}.sql 
+  # SELECT * FROM items WHERE ((x + y) > z)
+
+  DB[:items].where{price - 100 < avg(price)}.sql 
+  # SELECT * FROM items WHERE ((price - 100) < avg(price))
+
+=== Raw SQL Fragments
+
+  dataset.where(Sequel.lit('id= 1'))
+  dataset.where(Sequel.lit('name = ?', 'abc'))
+  dataset.where(Sequel.lit('value IN ?', [50,75,100]))
+  dataset.where(Sequel.lit('price > (SELECT avg(price) + 100 FROM table)'))
+
+== Ordering
+
+  dataset.order(:kind) # kind
+  dataset.reverse(:kind) # kind DESC
+  dataset.order(Sequel.desc(:kind), :name) # kind DESC, name
+
+== Limit/Offset
+
+  dataset.limit(30) # LIMIT 30
+  dataset.limit(30, 10) # LIMIT 30 OFFSET 10
+  dataset.limit(30).offset(10) # LIMIT 30 OFFSET 10
+
+== Joins
+
+  DB[:items].left_outer_join(:categories, id: :category_id).sql 
+  # SELECT * FROM items
+  # LEFT OUTER JOIN categories ON categories.id = items.category_id
+
+  DB[:items].join(:categories, id: :category_id).
+    join(:groups, id: Sequel[:items][:group_id]) 
+  # SELECT * FROM items
+  # INNER JOIN categories ON categories.id = items.category_id
+  # INNER JOIN groups ON groups.id = items.group_id
+	
+== Aggregate functions methods
+
+  dataset.count #=> record count
+  dataset.max(:price)
+  dataset.min(:price)
+  dataset.avg(:price)
+  dataset.sum(:stock)
+
+  dataset.group_and_count(:category).all
+  dataset.select_group(:category).select_append{avg(:price)}
+
+== SQL Functions / Literals
+
+  dataset.update(updated_at: Sequel.function(:NOW))
+  dataset.update(updated_at: Sequel.lit('NOW()'))
+
+  dataset.update(updated_at: Sequel.lit("DateValue('1/1/2001')"))
+  dataset.update(updated_at: Sequel.function(:DateValue, '1/1/2001'))
+
+== Schema Manipulation
+
+  DB.create_table :items do
+    primary_key :id
+    String :name, unique: true, null: false
+    TrueClass :active, default: true
+    foreign_key :category_id, :categories
+    DateTime :created_at, default: Sequel::CURRENT_TIMESTAMP, :index=>true
+    
+    index [:category_id, :active]
+  end
+
+  DB.drop_table :items
+
+== Aliasing
+
+  DB[:items].select(Sequel[:name].as(:item_name))
+  DB[:items].select(Sequel.as(:name, :item_name))
+  DB[:items].select{name.as(:item_name)}
+  # SELECT name AS item_name FROM items
+
+  DB[Sequel[:items].as(:items_table)].select{items_table[:name].as(:item_name)}
+  # SELECT items_table.name AS item_name FROM items AS items_table
+
+== Transactions
+
+  DB.transaction do
+    # BEGIN
+    dataset.insert(first_name: 'Inigo', last_name: 'Montoya')
+    dataset.insert(first_name: 'Farm', last_name: 'Boy')
+  end
+  # COMMIT
+
+
+Transactions are reentrant:
+
+  DB.transaction do
+    # BEGIN
+    DB.transaction do
+      dataset.insert(first_name: 'Inigo', last_name: 'Montoya')
+    end
+  end
+  # COMMIT
+
+Transactions are aborted if an error is raised:
+
+  DB.transaction do
+    # BEGIN
+    raise "some error occurred"
+  end
+  # ROLLBACK issued and the error is re-raised
+
+Transactions can also be aborted by raising Sequel::Rollback:
+
+  DB.transaction do
+    # BEGIN
+    raise(Sequel::Rollback)
+  end
+  # ROLLBACK issued and no error raised
+
+Savepoints can be used if the database supports it:
+
+  DB.transaction do
+    dataset.insert(first_name: 'Farm', last_name: 'Boy') # Inserted
+    DB.transaction(savepoint: true) do # This savepoint is rolled back
+      dataset.insert(first_name: 'Inigo', last_name: 'Montoya') # Not inserted
+      raise(Sequel::Rollback)
+    end
+    dataset.insert(first_name: 'Prince', last_name: 'Humperdink') # Inserted
+  end
+
+== Retrieving SQL
+
+  dataset.sql # "SELECT * FROM items"
+  dataset.insert_sql(a: 1) # "INSERT INTO items (a) VALUES (1)"
+  dataset.update_sql(a: 1) # "UPDATE items SET a = 1"
+  dataset.delete_sql # "DELETE FROM items"
+
+== Basic introspection
+
+  dataset.columns # => [:id, :name, ...]
+  DB.tables # => [:items, ...]
+  DB.views # => [:new_items, ...]
+  DB.schema(:items) # => [[:id, {:type=>:integer, ...}], [:name, {:type=>:string, ...}], ...]
+  DB.indexes(:items) # => {:index_name => {:columns=>[:a], :unique=>false}, ...}
+  DB.foreign_key_list(:items) # => [{:name=>:items_a_fk, :columns=>[:a], :key=>[:id], :table=>:other_table}, ...]

@@ -1,0 +1,3 @@
+In Ruby's source distribution, this would describe a number of C source files
+that have different licenses than Ruby itself. None of those apply to JRuby,
+so we have this file here as a placeholder because Ola said so.

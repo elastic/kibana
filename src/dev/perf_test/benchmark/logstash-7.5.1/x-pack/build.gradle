@@ -1,0 +1,37 @@
+description = """Logstash X-Pack"""
+
+repositories {
+  mavenCentral()
+}
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+}
+
+dependencies {
+  testCompile project(':logstash-core')
+  testCompile 'org.assertj:assertj-core:3.8.0'
+  testCompile 'junit:junit:4.12'
+}
+
+test {
+  exclude '/**'
+}
+
+task rubyTests(type: Test) {
+  inputs.files fileTree("${projectDir}/spec")
+  inputs.files fileTree("${projectDir}/lib")
+  inputs.files fileTree("${projectDir}/modules")
+  systemProperty 'logstash.core.root.dir', projectDir.absolutePath
+  include '/org/logstash/xpack/test/RSpecTests.class'
+}
+
+task rubyIntegrationTests(type: Test) {
+  inputs.files fileTree("${projectDir}/qa")
+  inputs.files fileTree("${projectDir}/lib")
+  inputs.files fileTree("${projectDir}/modules")
+  systemProperty 'logstash.core.root.dir', projectDir.absolutePath
+  include '/org/logstash/xpack/test/RSpecIntegrationTests.class'
+}

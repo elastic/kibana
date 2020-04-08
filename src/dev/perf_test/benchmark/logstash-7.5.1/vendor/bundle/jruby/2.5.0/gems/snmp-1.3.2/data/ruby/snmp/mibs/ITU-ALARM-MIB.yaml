@@ -1,0 +1,34 @@
+--- 
+ituAlarmMIB: 1.3.6.1.2.1.121
+ituAlarmObjects: 1.3.6.1.2.1.121.1
+ituAlarmModel: 1.3.6.1.2.1.121.1.1
+ituAlarmTable: 1.3.6.1.2.1.121.1.1.1
+ituAlarmEntry: 1.3.6.1.2.1.121.1.1.1.1
+ituAlarmPerceivedSeverity: 1.3.6.1.2.1.121.1.1.1.1.1
+ituAlarmEventType: 1.3.6.1.2.1.121.1.1.1.1.2
+ituAlarmProbableCause: 1.3.6.1.2.1.121.1.1.1.1.3
+ituAlarmAdditionalText: 1.3.6.1.2.1.121.1.1.1.1.4
+ituAlarmGenericModel: 1.3.6.1.2.1.121.1.1.1.1.5
+ituAlarmActive: 1.3.6.1.2.1.121.1.2
+ituAlarmActiveTable: 1.3.6.1.2.1.121.1.2.1
+ituAlarmActiveEntry: 1.3.6.1.2.1.121.1.2.1.1
+ituAlarmActiveTrendIndication: 1.3.6.1.2.1.121.1.2.1.1.1
+ituAlarmActiveDetector: 1.3.6.1.2.1.121.1.2.1.1.2
+ituAlarmActiveServiceProvider: 1.3.6.1.2.1.121.1.2.1.1.3
+ituAlarmActiveServiceUser: 1.3.6.1.2.1.121.1.2.1.1.4
+ituAlarmActiveStatsTable: 1.3.6.1.2.1.121.1.2.2
+ituAlarmActiveStatsEntry: 1.3.6.1.2.1.121.1.2.2.1
+ituAlarmActiveStatsIndeterminateCurrent: 1.3.6.1.2.1.121.1.2.2.1.1
+ituAlarmActiveStatsCriticalCurrent: 1.3.6.1.2.1.121.1.2.2.1.2
+ituAlarmActiveStatsMajorCurrent: 1.3.6.1.2.1.121.1.2.2.1.3
+ituAlarmActiveStatsMinorCurrent: 1.3.6.1.2.1.121.1.2.2.1.4
+ituAlarmActiveStatsWarningCurrent: 1.3.6.1.2.1.121.1.2.2.1.5
+ituAlarmActiveStatsIndeterminates: 1.3.6.1.2.1.121.1.2.2.1.6
+ituAlarmActiveStatsCriticals: 1.3.6.1.2.1.121.1.2.2.1.7
+ituAlarmActiveStatsMajors: 1.3.6.1.2.1.121.1.2.2.1.8
+ituAlarmActiveStatsMinors: 1.3.6.1.2.1.121.1.2.2.1.9
+ituAlarmActiveStatsWarnings: 1.3.6.1.2.1.121.1.2.2.1.10
+ituAlarmConformance: 1.3.6.1.2.1.121.2
+ituAlarmCompliances: 1.3.6.1.2.1.121.2.1
+ituAlarmGroups: 1.3.6.1.2.1.121.2.2
+

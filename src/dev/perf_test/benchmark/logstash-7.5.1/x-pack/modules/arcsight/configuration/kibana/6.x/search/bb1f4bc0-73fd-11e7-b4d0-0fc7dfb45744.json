@@ -1,0 +1,38 @@
+{
+  "title": "Microsoft DNS Events [ArcSight]",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "deviceVendor",
+    "deviceProduct",
+    "categoryBehavior",
+    "categoryOutcome",
+    "destinationAddress",
+    "destinationPort",
+    "destinationHostName",
+    "deviceEventClassId",
+    "deviceCustomString1Label",
+    "deviceCustomString1",
+    "deviceCustomString2Label",
+    "deviceCustomString2",
+    "deviceCustomString3Label",
+    "deviceCustomString3",
+    "deviceCustomString4Label",
+    "deviceCustomString4",
+    "deviceEventCategory",
+    "deviceSeverity",
+    "sourceAddress",
+    "sourcePort",
+    "transportProtocol",
+    "bytesIn",
+    "requestUrl"
+  ],
+  "sort": [
+    "deviceReceiptTime",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"arcsight-*\",\"highlightAll\":true,\"version\":true,\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"deviceProduct:\\\"DNS Trace Log\\\"\"}},\"filter\":[]}"
+  }
+}

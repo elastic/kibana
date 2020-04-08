@@ -1,0 +1,8 @@
+<% releases.each do |release| %>
+## [<%= release.name %>](https://github.com/<%= repository %>/tree/<%= release.tag_name %>)
+
+_<sup>released at <%= release.published_at %></sup>_
+
+<%= release.body.gsub(/\r\n/, "\n") %>
+
+<% end %>

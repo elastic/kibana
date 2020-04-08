@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "edge": {
+      "type": "object",
+      "properties": {
+        "from": {"type": "string"},
+        "id": {"type": "string"},
+        "to": {"type": "string"},
+        "type": {"type": "string"}
+      }
+    },
+    "vertex": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "explicit_id": {"type": "boolean"},
+        "type": {"type": "string"},
+        "meta": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "protocol": {"type": "string"},
+                    "id": {"type": "string"},
+                    "line": {"type": "number"},
+                    "column": {"type": "number"},
+                    "text": {"type": "string"}
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "properties": {
+    "pipeline": {
+    "properties": {
+      "batch_size": {"type": "integer"},
+      "workers": {"type": "integer"},
+      "hash": {"type": "string"},
+      "ephemeral_id": {"type": "string"},
+      "type": {"type": "string"},
+      "name": {"type": "string"},
+      "representation": {
+        "type": "object",
+        "properties": {
+          "hash": {"type": "string"},
+          "version": {"type": "string"},
+          "graph": {
+            "type": "object",
+            "properties": {
+              "edges": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/edge"}
+              },
+              "vertices": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/vertex"}
+              }
+            }
+          },
+          "plugins": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "version": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

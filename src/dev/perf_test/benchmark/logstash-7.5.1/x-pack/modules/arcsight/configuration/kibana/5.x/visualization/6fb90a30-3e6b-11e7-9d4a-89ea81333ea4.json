@@ -1,0 +1,11 @@
+{
+  "title": "Outcomes by User Names [ArcSight]",
+  "visState": "{\"title\":\"Outcomes by User Names [ArcSight]\",\"type\":\"pie\",\"params\":{\"addLegend\":true,\"addTooltip\":true,\"isDonut\":false,\"legendPosition\":\"right\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"categoryDeviceType\",\"exclude\":\"Network-based IDS/IPS\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"categoryOutcome\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"destinationUserName\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+  "uiStateJSON": "{\"vis\":{\"colors\":{\"/Informational\":\"#7EB26D\",\"/Informational/Warning\":\"#EF843C\",\"/Success\":\"#64B0C8\",\"Anti-Virus\":\"#B7DBAB\",\"Host-based IDS/IPS\":\"#629E51\",\"Log Consolidator\":\"#E0F9D7\",\"Operating System\":\"#3F6833\",\"Recon\":\"#BF1B00\",\"Security Mangement\":\"#CFFAFF\"},\"legendOpen\":true}}",
+  "description": "",
+  "savedSearchId": "1d9ba830-3e47-11e7-af78-9fc514b4e118",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"filter\":[]}"
+  }
+}

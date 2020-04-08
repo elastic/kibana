@@ -1,0 +1,93 @@
+:plugin: nagios
+:type: output
+:default_codec: plain
+
+///////////////////////////////////////////
+START - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+:version: %VERSION%
+:release_date: %RELEASE_DATE%
+:changelog_url: %CHANGELOG_URL%
+:include_path: ../../../../logstash/docs/include
+///////////////////////////////////////////
+END - GENERATED VARIABLES, DO NOT EDIT!
+///////////////////////////////////////////
+
+[id="plugins-{type}s-{plugin}"]
+
+=== Nagios output plugin
+
+include::{include_path}/plugin_header.asciidoc[]
+
+==== Description
+
+The Nagios output is used for sending passive check results to Nagios via the
+Nagios command file. This output currently supports Nagios 3.
+
+For this output to work, your event _must_ have the following Logstash event fields:
+
+ * `nagios_host`
+ * `nagios_service`
+
+These Logstash event fields are supported, but optional:
+
+ * `nagios_annotation`
+ * `nagios_level` (overrides `nagios_level` configuration option)
+
+There are two configuration options:
+
+ * `commandfile` - The location of the Nagios external command file. Defaults
+   to '/var/lib/nagios3/rw/nagios.cmd'
+ * `nagios_level` - Specifies the level of the check to be sent. Defaults to
+   CRITICAL and can be overriden by setting the "nagios_level" field to one
+   of "OK", "WARNING", "CRITICAL", or "UNKNOWN"
+[source,ruby]
+    output{
+      if [message] =~ /(error|ERROR|CRITICAL)/ {
+        nagios {
+          # your config here
+        }
+      }
+    }
+
+
+[id="plugins-{type}s-{plugin}-options"]
+==== Nagios Output Configuration Options
+
+This plugin supports the following configuration options plus the <<plugins-{type}s-{plugin}-common-options>> described later.
+
+[cols="<,<,<",options="header",]
+|=======================================================================
+|Setting |Input type|Required
+| <<plugins-{type}s-{plugin}-commandfile>> |<<,>>|No
+| <<plugins-{type}s-{plugin}-nagios_level>> |<<string,string>>, one of `["0", "1", "2", "3"]`|No
+|=======================================================================
+
+Also see <<plugins-{type}s-{plugin}-common-options>> for a list of options supported by all
+output plugins.
+
+&nbsp;
+
+[id="plugins-{type}s-{plugin}-commandfile"]
+===== `commandfile` 
+
+  * Value type is <<string,string>>
+  * Default value is `"/var/lib/nagios3/rw/nagios.cmd"`
+
+The full path to your Nagios command file.
+
+[id="plugins-{type}s-{plugin}-nagios_level"]
+===== `nagios_level` 
+
+  * Value can be any of: `0`, `1`, `2`, `3`
+  * Default value is `"2"`
+
+The Nagios check level. Should be one of 0=OK, 1=WARNING, 2=CRITICAL,
+3=UNKNOWN. Defaults to 2 - CRITICAL.
+
+
+
+[id="plugins-{type}s-{plugin}-common-options"]
+include::{include_path}/{type}.asciidoc[]
+
+:default_codec!:

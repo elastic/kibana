@@ -1,0 +1,48 @@
+= New Features
+
+* Sequel now supports Ruby 2.7+ startless ranges in filters:
+
+    DB[:table].where(:column=>(..10))
+    # SELECT * FROM table WHERE (column <= 10)
+
+    DB[:table].where(:column=>(...10))
+    # SELECT * FROM table WHERE (column < 10)
+
+  It also supports startless, endless ranges in filters, using a
+  condition that is always true:
+
+    DB[:table].where(:column=>(nil..nil))
+    # SELECT * FROM table WHERE (1 = 1)
+
+* Sequel now supports startless ranges in the pg_range extension:
+
+    DB.extension :pg_range
+
+    DB[:table].insert(:column=>(..10))
+    # INSERT INTO "table" ("column") VALUES ('[,10]') RETURNING "id"
+
+    DB[:table].insert(:column=>(...10))
+    # INSERT INTO "table" ("column") VALUES ('[,10)') RETURNING "id"
+
+    DB[:table].insert(:column=>(nil..nil))
+    # INSERT INTO "table" ("column") VALUES ('[,]') RETURNING "id"
+
+* Sequel now supports a :materialized option in Dataset#with on
+  PostgreSQL 12+, to control the inlining of common table expressions:
+
+    DB[:t].with(:t, DB[:t2], :materialized=>false)
+    # WITH "t" AS NOT MATERIALIZED (SELECT * FROM "t2")
+    # SELECT * FROM "t"
+
+    DB[:t].with(:t, DB[:t2], :materialized=>true)
+    # WITH "t" AS MATERIALIZED (SELECT * FROM "t2")
+    # SELECT * FROM "t"
+
+= Other Improvements
+
+* Database#primary_key_sequence now works for tables without serial
+  sequences on PostgreSQL 12+.
+
+* Dataset#multi_insert and #import with return: :primary_key option
+  on Microsoft SQL Server now work correctly if the dataset uses
+  a row_proc (e.g. for model datasets).

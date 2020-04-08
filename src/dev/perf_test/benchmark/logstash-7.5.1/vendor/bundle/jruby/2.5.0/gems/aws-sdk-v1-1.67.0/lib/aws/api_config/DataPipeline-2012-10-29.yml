@@ -1,0 +1,422 @@
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:json_version: '1.1'
+:target_prefix: DataPipeline.
+:api_version: '2012-10-29'
+:operations:
+- :name: ActivatePipeline
+  :method: :activate_pipeline
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: CreatePipeline
+  :method: :create_pipeline
+  :inputs:
+    name:
+    - :string
+    - :required
+    uniqueId:
+    - :string
+    - :required
+    description:
+    - :string
+  :outputs:
+    pipelineId:
+      :sym: :pipeline_id
+      :type: :string
+- :name: DeletePipeline
+  :method: :delete_pipeline
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+  :outputs: {}
+- :name: DescribeObjects
+  :method: :describe_objects
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+    objectIds:
+    - :list:
+      - :string
+    - :required
+    evaluateExpressions:
+    - :boolean
+    marker:
+    - :string
+  :outputs:
+    pipelineObjects:
+      :sym: :pipeline_objects
+      :type: :hash
+      :members:
+        id:
+          :sym: :id
+          :type: :string
+        name:
+          :sym: :name
+          :type: :string
+        fields:
+          :sym: :fields
+          :type: :hash
+          :members:
+            key:
+              :sym: :key
+              :type: :string
+            stringValue:
+              :sym: :string_value
+              :type: :string
+            refValue:
+              :sym: :ref_value
+              :type: :string
+    marker:
+      :sym: :marker
+      :type: :string
+    hasMoreResults:
+      :sym: :has_more_results
+      :type: :boolean
+- :name: DescribePipelines
+  :method: :describe_pipelines
+  :inputs:
+    pipelineIds:
+    - :list:
+      - :string
+    - :required
+  :outputs:
+    pipelineDescriptionList:
+      :sym: :pipeline_description_list
+      :type: :hash
+      :members:
+        pipelineId:
+          :sym: :pipeline_id
+          :type: :string
+        name:
+          :sym: :name
+          :type: :string
+        fields:
+          :sym: :fields
+          :type: :hash
+          :members:
+            key:
+              :sym: :key
+              :type: :string
+            stringValue:
+              :sym: :string_value
+              :type: :string
+            refValue:
+              :sym: :ref_value
+              :type: :string
+        description:
+          :sym: :description
+          :type: :string
+- :name: EvaluateExpression
+  :method: :evaluate_expression
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+    objectId:
+    - :string
+    - :required
+    expression:
+    - :string
+    - :required
+  :outputs:
+    evaluatedExpression:
+      :sym: :evaluated_expression
+      :type: :string
+- :name: GetPipelineDefinition
+  :method: :get_pipeline_definition
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+    version:
+    - :string
+  :outputs:
+    pipelineObjects:
+      :sym: :pipeline_objects
+      :type: :hash
+      :members:
+        id:
+          :sym: :id
+          :type: :string
+        name:
+          :sym: :name
+          :type: :string
+        fields:
+          :sym: :fields
+          :type: :hash
+          :members:
+            key:
+              :sym: :key
+              :type: :string
+            stringValue:
+              :sym: :string_value
+              :type: :string
+            refValue:
+              :sym: :ref_value
+              :type: :string
+- :name: ListPipelines
+  :method: :list_pipelines
+  :inputs:
+    marker:
+    - :string
+  :outputs:
+    pipelineIdList:
+      :sym: :pipeline_id_list
+      :type: :hash
+      :members:
+        id:
+          :sym: :id
+          :type: :string
+        name:
+          :sym: :name
+          :type: :string
+    marker:
+      :sym: :marker
+      :type: :string
+    hasMoreResults:
+      :sym: :has_more_results
+      :type: :boolean
+- :name: PollForTask
+  :method: :poll_for_task
+  :inputs:
+    workerGroup:
+    - :string
+    - :required
+    hostname:
+    - :string
+    instanceIdentity:
+    - :structure:
+        document:
+        - :string
+        signature:
+        - :string
+  :outputs:
+    taskObject:
+      :sym: :task_object
+      :type: :hash
+      :members:
+        taskId:
+          :sym: :task_id
+          :type: :string
+        pipelineId:
+          :sym: :pipeline_id
+          :type: :string
+        attemptId:
+          :sym: :attempt_id
+          :type: :string
+        objects:
+          :sym: :objects
+          :type: :map
+          :members:
+            :sym: :map_value
+            :type: :hash
+            :members:
+              id:
+                :sym: :id
+                :type: :string
+              name:
+                :sym: :name
+                :type: :string
+              fields:
+                :sym: :fields
+                :type: :hash
+                :members:
+                  key:
+                    :sym: :key
+                    :type: :string
+                  stringValue:
+                    :sym: :string_value
+                    :type: :string
+                  refValue:
+                    :sym: :ref_value
+                    :type: :string
+- :name: PutPipelineDefinition
+  :method: :put_pipeline_definition
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+    pipelineObjects:
+    - :list:
+      - :structure:
+          id:
+          - :string
+          - :required
+          name:
+          - :string
+          - :required
+          fields:
+          - :list:
+            - :structure:
+                key:
+                - :string
+                - :required
+                stringValue:
+                - :string
+                refValue:
+                - :string
+          - :required
+    - :required
+  :outputs:
+    validationErrors:
+      :sym: :validation_errors
+      :type: :hash
+      :members:
+        id:
+          :sym: :id
+          :type: :string
+        errors:
+          :sym: :errors
+          :type: :string
+    errored:
+      :sym: :errored
+      :type: :boolean
+- :name: QueryObjects
+  :method: :query_objects
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+    query:
+    - :structure:
+        selectors:
+        - :list:
+          - :structure:
+              fieldName:
+              - :string
+              operator:
+              - :structure:
+                  type:
+                  - :string
+                  values:
+                  - :list:
+                    - :string
+    sphere:
+    - :string
+    - :required
+    marker:
+    - :string
+    limit:
+    - :integer
+  :outputs:
+    ids:
+      :sym: :ids
+      :type: :string
+    marker:
+      :sym: :marker
+      :type: :string
+    hasMoreResults:
+      :sym: :has_more_results
+      :type: :boolean
+- :name: ReportTaskProgress
+  :method: :report_task_progress
+  :inputs:
+    taskId:
+    - :string
+    - :required
+  :outputs:
+    canceled:
+      :sym: :canceled
+      :type: :boolean
+- :name: ReportTaskRunnerHeartbeat
+  :method: :report_task_runner_heartbeat
+  :inputs:
+    taskrunnerId:
+    - :string
+    - :required
+    workerGroup:
+    - :string
+    hostname:
+    - :string
+  :outputs:
+    terminate:
+      :sym: :terminate
+      :type: :boolean
+- :name: SetStatus
+  :method: :set_status
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+    objectIds:
+    - :list:
+      - :string
+    - :required
+    status:
+    - :string
+    - :required
+  :outputs: {}
+- :name: SetTaskStatus
+  :method: :set_task_status
+  :inputs:
+    taskId:
+    - :string
+    - :required
+    taskStatus:
+    - :string
+    - :required
+    errorCode:
+    - :integer
+    errorMessage:
+    - :string
+    errorStackTrace:
+    - :string
+  :outputs: {}
+- :name: ValidatePipelineDefinition
+  :method: :validate_pipeline_definition
+  :inputs:
+    pipelineId:
+    - :string
+    - :required
+    pipelineObjects:
+    - :list:
+      - :structure:
+          id:
+          - :string
+          - :required
+          name:
+          - :string
+          - :required
+          fields:
+          - :list:
+            - :structure:
+                key:
+                - :string
+                - :required
+                stringValue:
+                - :string
+                refValue:
+                - :string
+          - :required
+    - :required
+  :outputs:
+    validationErrors:
+      :sym: :validation_errors
+      :type: :hash
+      :members:
+        id:
+          :sym: :id
+          :type: :string
+        errors:
+          :sym: :errors
+          :type: :string
+    errored:
+      :sym: :errored
+      :type: :boolean

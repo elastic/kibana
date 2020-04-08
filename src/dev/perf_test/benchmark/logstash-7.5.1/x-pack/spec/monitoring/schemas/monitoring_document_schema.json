@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "reloads": {
+      "type": "object",
+      "required": ["failures", "successes"],
+      "properties": {
+        "failures": { "type": "number" },
+        "successes": { "type": "number" }
+      }
+    },
+    "events": {
+      "type": "object",
+      "required": ["filtered", "in", "duration_in_millis", "out"],
+      "properties": {
+        "filtered": { "type": "number" },
+        "in": { "type": "number" },
+        "duration_in_millis": { "type": "number" },
+        "out": { "type": "number" }
+      }
+    }
+  },
+  "type": "object",
+  "required": ["jvm", "logstash", "process", "os", "events", "queue", "reloads", "pipelines"],
+  "properties": {
+    "jvm": {
+      "type": "object",
+      "required": ["mem", "uptime_in_millis", "gc"],
+      "properties": {
+        "mem": {
+          "type": "object",
+          "require": ["heap_used_in_bytes", "heap_max_in_bytes", "heap_used_percent"],
+          "properties": {
+            "heap_used_percent": { "type": "number" },
+            "heap_max_in_bytes": { "type": "number" },
+            "heap_used_in_bytes": { "type": "number" }
+          }
+        },
+        "uptime_in_millis": { "type": "number" },
+        "gc": {
+          "type": "object",
+          "required": ["collectors"],
+          "properties": {
+            "collectors": {
+              "type": "object",
+              "required": ["young", "old"],
+              "properties": {
+                "young": {
+                  "type": "object",
+                  "required": ["collection_count", "collection_time_in_millis"],
+                  "properties": {
+                    "collection_count": {"type": "number"},
+                    "collection_time_in_millis": {"type": "number"}
+                  }
+                },
+                "old": {
+                  "type": "object",
+                  "required": ["collection_count", "collection_time_in_millis"],
+                  "properties": {
+                    "collection_count": {"type": "number"},
+                    "collection_time_in_millis": {"type": "number"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "logstash": {
+      "type": "object",
+      "required": ["http_address", "uuid", "ephemeral_id"],
+      "properties": {
+        "http_address": { "type": "string" },
+        "uuid": { "type": "string" },
+        "ephemeral_id": { "type": "string" }
+      }
+    },
+    "process": {
+      "type": "object",
+      "required": ["open_file_descriptors", "max_file_descriptors", "cpu"],
+      "properties": {
+        "open_file_descriptors": { "type": "number" },
+        "max_file_descriptors": { "type": "number" },
+        "cpu": {
+          "type": "object",
+          "required": ["percent"],
+          "properties": { "percent": { "type": "number"} }
+        }
+      }
+    },
+    "os": {
+      "type": "object",
+      "required": ["cpu"],
+      "properties": {
+        "cpu": {
+          "type": "object",
+          "required": ["load_average"],
+          "properties": {
+            "load_average": {
+              "type": "object",
+              "required": ["1m"],
+              "properties": {
+                "1m": {"type": "number"},
+                "5m": {"type": "number"},
+                "15m": {"type": "number"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "events": {"$ref": "#/definitions/events"},
+    "queue": {
+      "type": "object",
+      "required": ["events_count"],
+      "properties": {
+        "events_count": { "type": "number" }
+      }
+    },
+    "reloads": {"$ref": "#/definitions/reloads"},
+    "timestamp": { "type": "string" },
+    "pipelines": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["id", "hash", "ephemeral_id", "events", "queue", "reloads", "vertices"],
+        "properties": {
+          "id": {"type": "string"},
+          "hash": {"type": "string"},
+          "ephemeral_id": {"type": "string"},
+          "reloads": {"$ref": "#/definitions/reloads"},
+          "queue": {
+            "type": "object",
+            "required": ["events_count", "type", "queue_size_in_bytes", "max_queue_size_in_bytes"],
+            "properties": {
+              "type": { "type": "string" },
+              "events_count": { "type": "number" },
+              "queue_size_in_bytes": { "type": "number" },
+              "max_queue_size_in_bytes": { "type": "number" }
+            }
+          },
+          "events": {"$ref": "#/definitions/events"},
+          "vertices": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "patternProperties": {
+                "long_counters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {"type": "string"},
+                      "value": {"type": "number"}
+                    }
+                  }
+                },
+                "double_gauges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {"type": "string"},
+                      "value": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

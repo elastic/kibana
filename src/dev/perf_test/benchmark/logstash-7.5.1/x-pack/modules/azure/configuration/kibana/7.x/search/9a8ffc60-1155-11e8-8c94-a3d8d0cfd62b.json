@@ -1,0 +1,16 @@
+{
+  "title": "SQL Diagnostics [Azure Monitor]",
+  "description": "",
+  "hits": 0,
+  "columns": [
+    "_source"
+  ],
+  "sort": [
+    "@timestamp",
+    "desc"
+  ],
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"73e18ac0-104c-11e8-8c94-a3d8d0cfd62b\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"azure.group: \\\"sql_diagnostics\\\"\",\"language\":\"lucene\"},\"filter\":[]}"
+  }
+}

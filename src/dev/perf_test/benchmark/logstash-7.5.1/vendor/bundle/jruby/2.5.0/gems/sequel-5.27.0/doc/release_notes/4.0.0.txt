@@ -1,0 +1,262 @@
+= Backwards Compatibility
+
+* All behavior resulting in deprecation messages in 3.48.0 has been
+  removed or modified.  If you plan on upgrading to Sequel 4.0.0 and
+  have not yet upgraded to 3.48.0, upgrade to 3.48.0 first, fix code
+  that results in deprecation warnings, and then upgrade to 4.0.0.
+
+* The threaded connection pools now default to
+  :connection_handling=>:queue.  You can manually set
+  :connection_handling=>:stack to get the previous behavior.
+
+* Model.raise_on_typecast_failure now defaults to false.  Set this to
+  true to get the previous behavior of raising typecast errors in the
+  setter methods.
+
+* Model#save no longer calls Model#_refresh or Model#set_values
+  internally after an insert.  Manual refreshes are now treated
+  differently than after creation refreshes.
+
+* On SQLite, integer_booleans now defaults to true.  Set this to
+  false to get the previous behavior of 't' for true and 'f' for
+  false.  Sequel will not automatically upgrade your data, users
+  are responsible for doing that if they want to switch the
+  integer_booleans setting.  Note that regardless of the setting,
+  Sequel will return the correct ruby values when retrieving the
+  rows.
+
+  Example Code to Migrate Existing Data:
+
+    DB[:table].where(:column=>'t').update(:column=>1)
+    DB[:table].where(:column=>'f').update(:column=>0)
+
+* On SQLite, use_timestamp_timezones is now false by default.  Set
+  this to true to get the previous behavior with timezone information
+  in timestamps. Sequel will not automatically upgrade your data,
+  users are responsible for doing that if they want to switch the
+  use_timestamp_timezones setting.  Note that regardless of the
+  setting, Sequel will return the correct ruby values when
+  retrieving the rows.
+
+* Using window functions when eagerly loading associations with
+  limits or offsets is now done automatically if the database
+  supports it.  Previously, this had to be enabled manually.  If
+  you would like to disable this optimization and just do the
+  slicing in ruby, set default_eager_limit_strategy = nil.
+
+* The default value for most option hash arguments is now an shared
+  empty frozen hash.  If you are overriding methods and modifying
+  option hashes, fix your code.
+
+* The defaults_setter plugin now works in a lazy manner instead of
+  an eager manner.  So calling the related method returns the
+  default value if there is no value stored, but Sequel does not
+  add the default values to the internal values hash, and will not
+  attempt to insert what it thinks is the default value when
+  saving the new object.
+
+* Model#set_all and #update_all now allow setting the primary key
+  columns.
+
+* The many_to_one_pk_lookup and association_autoreloading plugins
+  are now integrated into the default associations support.
+
+* Plugins now extend the class with ClassMethods before including
+  InstanceMethods in the class.
+
+* Dataset#get, #select_map, and #select_order_map now automatically
+  add aliases for unaliased expressions if given a single expression.
+
+* Database#tables and #views on PostgreSQL now check against
+  the current schemas in the search path.
+
+* Calling ungraphed on an eager_graph dataset will restore the
+  row_proc for that dataset.  This is not backwards compatible if
+  your method chain does:
+
+    dataset.eager_graph.naked.ungraphed
+
+  Switch such code to:
+
+    dataset.eager_graph.ungraphed.naked
+
+* The Model#set_restricted and #update_restricted private methods
+  have a slightly different API now.
+
+* Sequel::SQL::SQLArray alias for ValueList has been removed.
+
+* Sequel::SQL::NoBooleanInputMethods has been removed.
+
+* Sequel::NotImplemented has been removed.  Default implementations
+  of methods that used to raise this exception have been removed.
+
+* Sequel::Model::EMPTY_INSTANCE_VARIABLES has been removed.
+
+* The Sequel::Postgres::DatabaseMethods::EXCLUDE_SCHEMAS and
+  SYSTEM_TABLE_REGEXP constants have been removed.
+
+* Dataset#columns_without_introspection has been removed from the
+  columns_introspection extension.
+
+* Sequel no longer provides a default database for the adapter or
+  integration specs.  Additionally, if you are using spec_config.rb
+  to configure a database to use when adapter/integration testing,
+  you may need to modify it, as Sequel now uses the DB constant for
+  the database being tested.
+
+* The SEQUEL_MSSQL_SPEC_REQUIRE and SEQUEL_DB2_SPEC_REQUIRE
+  environment variables are no longer respected when
+  adapter/integration testing those databases.  Use RUBYOPT with the
+  -r flag.
+
+* In the 3.48.0 release notes, it was announced that
+  Dataset#join_table would default to :qualify=>:deep in 4.0.0.  This
+  change was made but reverted before the release of 4.0.0 as it was
+  determined too likely to break existing code, there was no
+  deprecation warning (since it just changed a setting), and the
+  benefit was minimal. You can make deep qualification the default by
+  by overriding Dataset#default_join_table_qualification.
+
+= New Features
+
+* A pg_array_associations plugin has been added, for creating
+  an association based on a PostgreSQL array column containing
+  foreign keys.  Example:
+
+    # Database schema:
+    #   tags                albums
+    #   :id (int4) <--\    :id
+    #   :name          \-- :tag_ids (int4[])
+    #                      :name
+
+    class Album
+      plugin :pg_array_associations
+      pg_array_to_many :tags
+    end
+    class Tag
+      plugin :pg_array_associations
+      many_to_pg_array :albums
+    end
+
+  This operates similarly to a many_to_many association, but does not
+  require a join table.  All of the usual Sequel association features
+  are supported, such as adding, removing, and clearing associations,
+  eager loading via eager and eager_graph, filtering by associations,
+  and dataset associations.
+
+  Note that until PostgreSQL gains the ability to enforce foreign key
+  constraints in array columns, this plugin is not recommended for
+  production use unless you plan on emulating referential integrity
+  constraints via triggers.
+  
+* Dataset#from now accepts virtual_row blocks, making it easy to use
+  with table returning functions:
+
+    DB.from{table_returning_function(arg)}
+
+* Sequel.deep_qualify has been added, for easily doing a deep
+  qualification of objects:
+
+    Sequel.deep_qualify(:table, Sequel.+(:column, 1))
+    # ("table"."column" + 1)
+    Sequel.deep_qualify(:table, Sequel.like(:a, 'b'))
+    # ("table"."a" LIKE 'b' ESCAPE '\')
+    
+* The prepared_statements_associations plugin now handles one_to_one
+  associations.
+
+* SQL::Subscript objects now handle ruby range arguments, operating as
+  an SQL array slice:
+
+    Sequel.subscript(:a, 1..2) # a[1:2]
+
+* Database#create_view now accepts a :columns option to provide
+  explicit column names for the view.
+
+* Postgres::ArrayOp#[] now returns an ArrayOp if given a range, since
+  a PostgreSQL array slice can be treated as an array.
+
+* Postgres::ArrayOp#hstore has been added for creating hstores from
+  PostgreSQL arrays.
+
+* When creating full text indexes on PostgreSQL, the :index_type=>:gist
+  option can be used to use a gist index instead of the default gin
+  index.  This can be useful if insert/update speed is more important
+  than lookup speed.
+
+* You can now provide the :owner option to Database#create_schema on
+  PostgreSQL to specify the owner of the schema.
+
+* You can now provide the :if_exists option to Database#drop_view
+  on PostgreSQL to not raise an error if the view doesn't exist.
+
+* The pg_json extension now handles non-JSON plain strings, integers
+  and floats in PostgreSQL JSON columns.
+
+= Support for New Features in PostgreSQL 9.3
+
+* A pg_json_ops extension has been added to support the new json
+  operators and functions.
+
+* Postgres::ArrayOp#replace and #remove have been added for using the
+  array_replace and array_remove functions.
+
+* You can now provide the :if_not_exists option when using
+  Database#create_schema on PostgreSQL to not raise an error if the
+  schema already exists.
+
+* Database#create_view now supports a :recursive option on PostgreSQL
+  for creating recursive views.
+
+* Database#create_view and #drop_view now support a :materialized option
+  on PostgreSQL for creating/dropping materialized views.
+
+* Database#refresh_view has been added on PostgreSQL for refreshing
+  materialized views.
+
+= Other Improvements
+
+* Check constraints are now always surrounded by parantheses, since that
+  is required by the SQL standard.  This fixes issues in the cases where
+  parentheses were not used automatically, such as when a function call
+  was used.
+
+* Using an offset without a limit when eager loading now works
+  correctly.
+
+* The prepared_statements_associations plugin now works correctly when
+  the associated class uses a filtered dataset.
+
+* The prepared_statements_associations plugin can now use a prepared
+  statement for cases where the association uses :conditions.
+
+* Boolean prepared statement arguments now work correctly in the sqlite
+  adapter when the integer_booleans setting is true.
+
+* Dataset#inspect on prepared statements now handles anonymous dataset
+  classes correctly.
+
+* When dataset string/blob literalization depends on having a database
+  connection and the dataset has an assigned server, a connection to
+  the assigned server is used.
+
+* More disconnect errors are now handled when using the postgres
+  adapter with the postgres-pr driver, and in the jdbc/oracle adapter.
+
+* Composite primary keys are now parsed correctly on SQLite 3.7.16+.
+
+* Blobs are now hex escaped on MySQL, which can solve some encoding
+  issues when blobs are used as literals in the same SQL query with
+  UTF-8 strings.
+
+* BigDecimals instances are now formatted nicer in the pretty_table
+  extension.
+
+* Sequel now raises an exception when attempting to literalize infinite
+  and NaN floats on MySQL.  In general, this would result in MySQL
+  raising an error, but in extreme cases it could have failed silently.
+
+* You can now use a NO_SEQUEL_PG environment variable to not
+  automatically require sequel_pg in the postgres adapter.
+
+* Dataset#unbind now always uses symbol keys in the bind variable hash.

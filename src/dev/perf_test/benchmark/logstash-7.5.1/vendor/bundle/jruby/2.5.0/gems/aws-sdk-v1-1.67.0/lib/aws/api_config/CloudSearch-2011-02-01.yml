@@ -1,0 +1,681 @@
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2011-02-01'
+:operations:
+- :name: CreateDomain
+  :method: :create_domain
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CreateDomainResult:
+        :ignore: true
+        :children:
+          DomainStatus:
+            :children:
+              Created:
+                :type: :boolean
+              Deleted:
+                :type: :boolean
+              NumSearchableDocs:
+                :type: :integer
+              RequiresIndexDocuments:
+                :type: :boolean
+              Processing:
+                :type: :boolean
+              SearchPartitionCount:
+                :type: :integer
+              SearchInstanceCount:
+                :type: :integer
+- :name: DefineIndexField
+  :method: :define_index_field
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    IndexField:
+    - :structure:
+        IndexFieldName:
+        - :string
+        - :required
+        IndexFieldType:
+        - :string
+        - :required
+        UIntOptions:
+        - :structure:
+            DefaultValue:
+            - :integer
+        LiteralOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            SearchEnabled:
+            - :boolean
+            FacetEnabled:
+            - :boolean
+            ResultEnabled:
+            - :boolean
+        TextOptions:
+        - :structure:
+            DefaultValue:
+            - :string
+            FacetEnabled:
+            - :boolean
+            ResultEnabled:
+            - :boolean
+        SourceAttributes:
+        - :membered_list:
+          - :structure:
+              SourceDataFunction:
+              - :string
+              - :required
+              SourceDataCopy:
+              - :structure:
+                  SourceName:
+                  - :string
+                  - :required
+                  DefaultValue:
+                  - :string
+              SourceDataTrimTitle:
+              - :structure:
+                  SourceName:
+                  - :string
+                  - :required
+                  DefaultValue:
+                  - :string
+                  Separator:
+                  - :string
+                  Language:
+                  - :string
+              SourceDataMap:
+              - :structure:
+                  SourceName:
+                  - :string
+                  - :required
+                  DefaultValue:
+                  - :string
+                  Cases:
+                  - :map:
+                      :key:
+                      - :string
+                      :value:
+                      - :string
+    - :required
+  :outputs:
+    :children:
+      DefineIndexFieldResult:
+        :ignore: true
+        :children:
+          IndexField:
+            :children:
+              Options:
+                :children:
+                  UIntOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :integer
+                  LiteralOptions:
+                    :children:
+                      SearchEnabled:
+                        :type: :boolean
+                      FacetEnabled:
+                        :type: :boolean
+                      ResultEnabled:
+                        :type: :boolean
+                  TextOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      ResultEnabled:
+                        :type: :boolean
+                  SourceAttributes:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :source_attributes
+                        :list: true
+                        :children:
+                          SourceDataMap:
+                            :children:
+                              Cases:
+                                :ignore: true
+                                :children:
+                                  entry:
+                                    :rename: :cases
+                                    :map:
+                                    - key
+                                    - value
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: DefineRankExpression
+  :method: :define_rank_expression
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    RankExpression:
+    - :structure:
+        RankName:
+        - :string
+        - :required
+        RankExpression:
+        - :string
+        - :required
+    - :required
+  :outputs:
+    :children:
+      DefineRankExpressionResult:
+        :ignore: true
+        :children:
+          RankExpression:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: DeleteDomain
+  :method: :delete_domain
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteDomainResult:
+        :ignore: true
+        :children:
+          DomainStatus:
+            :children:
+              Created:
+                :type: :boolean
+              Deleted:
+                :type: :boolean
+              NumSearchableDocs:
+                :type: :integer
+              RequiresIndexDocuments:
+                :type: :boolean
+              Processing:
+                :type: :boolean
+              SearchPartitionCount:
+                :type: :integer
+              SearchInstanceCount:
+                :type: :integer
+- :name: DeleteIndexField
+  :method: :delete_index_field
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    IndexFieldName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteIndexFieldResult:
+        :ignore: true
+        :children:
+          IndexField:
+            :children:
+              Options:
+                :children:
+                  UIntOptions:
+                    :children:
+                      DefaultValue:
+                        :type: :integer
+                  LiteralOptions:
+                    :children:
+                      SearchEnabled:
+                        :type: :boolean
+                      FacetEnabled:
+                        :type: :boolean
+                      ResultEnabled:
+                        :type: :boolean
+                  TextOptions:
+                    :children:
+                      FacetEnabled:
+                        :type: :boolean
+                      ResultEnabled:
+                        :type: :boolean
+                  SourceAttributes:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :source_attributes
+                        :list: true
+                        :children:
+                          SourceDataMap:
+                            :children:
+                              Cases:
+                                :ignore: true
+                                :children:
+                                  entry:
+                                    :rename: :cases
+                                    :map:
+                                    - key
+                                    - value
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: DeleteRankExpression
+  :method: :delete_rank_expression
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    RankName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteRankExpressionResult:
+        :ignore: true
+        :children:
+          RankExpression:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: DescribeDefaultSearchField
+  :method: :describe_default_search_field
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeDefaultSearchFieldResult:
+        :ignore: true
+        :children:
+          DefaultSearchField:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: DescribeDomains
+  :method: :describe_domains
+  :inputs:
+    DomainNames:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeDomainsResult:
+        :ignore: true
+        :children:
+          DomainStatusList:
+            :ignore: true
+            :children:
+              member:
+                :rename: :domain_status_list
+                :list: true
+                :children:
+                  Created:
+                    :type: :boolean
+                  Deleted:
+                    :type: :boolean
+                  NumSearchableDocs:
+                    :type: :integer
+                  RequiresIndexDocuments:
+                    :type: :boolean
+                  Processing:
+                    :type: :boolean
+                  SearchPartitionCount:
+                    :type: :integer
+                  SearchInstanceCount:
+                    :type: :integer
+- :name: DescribeIndexFields
+  :method: :describe_index_fields
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    FieldNames:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeIndexFieldsResult:
+        :ignore: true
+        :children:
+          IndexFields:
+            :ignore: true
+            :children:
+              member:
+                :rename: :index_fields
+                :list: true
+                :children:
+                  Options:
+                    :children:
+                      UIntOptions:
+                        :children:
+                          DefaultValue:
+                            :type: :integer
+                      LiteralOptions:
+                        :children:
+                          SearchEnabled:
+                            :type: :boolean
+                          FacetEnabled:
+                            :type: :boolean
+                          ResultEnabled:
+                            :type: :boolean
+                      TextOptions:
+                        :children:
+                          FacetEnabled:
+                            :type: :boolean
+                          ResultEnabled:
+                            :type: :boolean
+                      SourceAttributes:
+                        :ignore: true
+                        :children:
+                          member:
+                            :rename: :source_attributes
+                            :list: true
+                            :children:
+                              SourceDataMap:
+                                :children:
+                                  Cases:
+                                    :ignore: true
+                                    :children:
+                                      entry:
+                                        :rename: :cases
+                                        :map:
+                                        - key
+                                        - value
+                  Status:
+                    :children:
+                      CreationDate:
+                        :type: :time
+                      UpdateDate:
+                        :type: :time
+                      UpdateVersion:
+                        :type: :integer
+- :name: DescribeRankExpressions
+  :method: :describe_rank_expressions
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    RankNames:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeRankExpressionsResult:
+        :ignore: true
+        :children:
+          RankExpressions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :rank_expressions
+                :list: true
+                :children:
+                  Status:
+                    :children:
+                      CreationDate:
+                        :type: :time
+                      UpdateDate:
+                        :type: :time
+                      UpdateVersion:
+                        :type: :integer
+- :name: DescribeServiceAccessPolicies
+  :method: :describe_service_access_policies
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeServiceAccessPoliciesResult:
+        :ignore: true
+        :children:
+          AccessPolicies:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: DescribeStemmingOptions
+  :method: :describe_stemming_options
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeStemmingOptionsResult:
+        :ignore: true
+        :children:
+          Stems:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: DescribeStopwordOptions
+  :method: :describe_stopword_options
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeStopwordOptionsResult:
+        :ignore: true
+        :children:
+          Stopwords:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: DescribeSynonymOptions
+  :method: :describe_synonym_options
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeSynonymOptionsResult:
+        :ignore: true
+        :children:
+          Synonyms:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: IndexDocuments
+  :method: :index_documents
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    - :required
+  :outputs:
+    :children:
+      IndexDocumentsResult:
+        :ignore: true
+        :children:
+          FieldNames:
+            :ignore: true
+            :children:
+              member:
+                :rename: :field_names
+                :list: true
+- :name: UpdateDefaultSearchField
+  :method: :update_default_search_field
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    DefaultSearchField:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateDefaultSearchFieldResult:
+        :ignore: true
+        :children:
+          DefaultSearchField:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: UpdateServiceAccessPolicies
+  :method: :update_service_access_policies
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    AccessPolicies:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateServiceAccessPoliciesResult:
+        :ignore: true
+        :children:
+          AccessPolicies:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: UpdateStemmingOptions
+  :method: :update_stemming_options
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    Stems:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateStemmingOptionsResult:
+        :ignore: true
+        :children:
+          Stems:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: UpdateStopwordOptions
+  :method: :update_stopword_options
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    Stopwords:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateStopwordOptionsResult:
+        :ignore: true
+        :children:
+          Stopwords:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer
+- :name: UpdateSynonymOptions
+  :method: :update_synonym_options
+  :inputs:
+    DomainName:
+    - :string
+    - :required
+    Synonyms:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      UpdateSynonymOptionsResult:
+        :ignore: true
+        :children:
+          Synonyms:
+            :children:
+              Status:
+                :children:
+                  CreationDate:
+                    :type: :time
+                  UpdateDate:
+                    :type: :time
+                  UpdateVersion:
+                    :type: :integer

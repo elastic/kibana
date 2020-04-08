@@ -1,0 +1,25 @@
+Hi there {{yourname}}.  Your home directory is {{HOME}}.
+
+{{#friend}}
+Your friend is named {{name}}
+  {{#morr}}
+   Hey {{word}} {{up}} {{{awesomesauce}}}.
+   {{/morr}}
+   {{^morr}}
+   Booooo.  {{hiss}}
+   {{/morr}}
+   {{notinmorr}}
+   {{> partial1}}
+{{/friend}}
+{{^friend}}
+You have no friends, {{person}}.  You suck.
+{{/friend}}
+
+{{> partial2}}
+{{! comments are awesome }}
+
+{{={% %}=}}
+
+{%love%}
+{%={{ }}=%}
+{{{triplestash}}}

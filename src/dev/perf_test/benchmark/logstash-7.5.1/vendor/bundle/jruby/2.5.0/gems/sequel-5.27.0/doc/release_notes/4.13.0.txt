@@ -1,0 +1,169 @@
+= New Features
+
+* A modification_detection plugin has been added, for automatic
+  detection of in-place column value modifications.  This makes
+  it so you don't have to call Model#modified! manually when
+  changing a value in place.
+
+* A column_select plugin has been added, for automatically
+  selecting explicitly qualified columns in model datasets.
+  Example:
+
+    Sequel::Model.plugin :column_select
+    class Album < Sequel::Model
+    end
+    Album.dataset.sql
+    # SELECT albums.id, albums.name, albums.artist_id
+    # FROM albums
+
+* An insert_returning_select plugin has been added, for automatically
+  setting up RETURNING clauses for models that select explicit
+  columns.  This is useful when using the column_select or
+  lazy_attributes plugins.
+
+* A pg_enum extension has been added, for easier dealing with
+  PostgreSQL enum types.  The possible values for the type
+  are then returned in the schema hashes under the :enum_values
+  key.  It also adds create_enum, drop_enum, and add_enum_value
+  Database methods for migration support.
+
+* A round_timestamps extension has been added, for automatically
+  rounding timestamps to database supported precision when
+  literalizing.
+
+* A dataset_source_alias extension has been added, for automatically
+  aliasing datasets to their first source, instead of using t1, t2.
+  Example:
+
+    DB.from(:a, DB[:b]).sql
+    # SELECT * FROM a, (SELECT * FROM b) AS t1
+
+    DB.extension(:dataset_source_alias)
+    DB.from(:a, DB[:b]).sql
+    # SELECT * FROM a, (SELECT * FROM b) AS b
+
+* On Microsoft SQL Server, Sequel now emulates RETURNING support
+  using the OUTPUT clause, as long as only simple column references
+  are used.
+
+= Other Improvements
+
+* A regression has been fixed in the timestamps and table
+  inheritance plugins, where column values would not be
+  saved when skipping validations.  This was first broken in
+  4.11.0.
+
+* A regression has been fixed on JRuby and Rubinius when using
+  Sequel::Model(dataset) if the dataset needs to literalize a
+  symbol (and most do).  This was first broken in 4.10.0.
+
+* Primary keys are now automatically setup for models even if
+  the models select specific columns.
+
+* The lazy_attributes plugin now uses qualified columns in its
+  selection, instead of unqualified columns.
+
+* When looking up model instances by primary key, Sequel now uses a
+  qualified primary key if the model uses a joined dataset.
+
+* For associations that require joins, Sequel will now use the
+  associated model's selection directly (instead of
+  associated_table.*) if the associated model's selection consists
+  solely of qualified columns.
+
+  Among other things, this means that a many_to_many association to 
+  a model that uses lazy attributes will not eagerly load the lazy
+  attributes by default.
+
+* Model#save now uses insert_select if there is an existing
+  RETURNING clause used by the underlying dataset, even if the model
+  selects specific columns.
+
+* In Dataset#insert, aliased tables are now automatically unaliased.
+  This allows you to use a dataset with an aliased table and have
+  full SELECT/INSERT/UPDATE/DELETE support, assuming the database
+  supports aliased tables in UPDATE and DELETE.
+
+* Dataset#graph now qualifies columns correctly if the current
+  dataset is a joined dataset and it moves the current dataset to
+  a subselect.
+
+* Dataset#joined_dataset? is now a public method, and can be used to
+  determine whether the dataset uses a join, either explicitly via
+  JOIN or implicitly via multiple FROM tables.
+
+* The Dataset#unqualified_column_for helper method has been added,
+  returning the unqualified version of a possibly qualified column.
+
+* The composition and serialization plugins now support validations
+  on the underlying columns.  Previously, they didn't update the
+  underlying columns until after validations were performed.  This
+  works better when using the auto_validations plugin.
+
+* The class_table_inheritance plugin now uses JOIN ON instead of
+  JOIN USING, which makes it work on all databases that Sequel
+  supports.  Additionally, the plugin now explicitly selects
+  qualified columns from all of the tables.
+
+* The list plugin now adds an after_destroy hook that will renumber
+  rows after the current row, similar to how moving existing values
+  in the list works.
+
+* The pg_json extension is now faster when json column value is a
+  plain string, number, true, false, or nil, if the underlying json
+  library handles such values natively.
+
+* External jdbc, odbc, and do subadapters can now be loaded
+  automatically without requiring them first, assuming proper
+  support in the external subadapter.
+
+* When using create_table on MySQL, correctly handle the :key
+  option to when calling foreign_key with a column reference.
+
+* On Oracle, use all_tab_cols instead of user_tab_cols for getting
+  default values when parsing the schema.  This makes it work if the
+  user does not own the table.
+
+* On Oracle, use all_tables and all_views for Database#tables and
+  Database#views.  This works better for users with limited rights.
+
+* Additional disconnect errors are now recognized in the postgres and
+  jdbc/mysql adapters.
+
+* Sequel::Model now uses copy constructors (e.g. initialize_copy)
+  instead of overriding #dup and #clone.
+
+* The rake default task now runs plugin specs in addition to
+  core and model specs.
+
+= bin/sequel Improvements
+
+* Add the sequel lib directory to the front of the load path
+  instead of the end, fixing cases where you end up requiring an
+  old version of the sequel gem (e.g. by using sequel_pg).
+
+* Add the sequel lib directory as an absolute path, fixing cases
+  where you later change the current directory.
+
+* Require sequel later in the code, so that bin/sequel -h doesn't
+  need to require sequel, and full backtrace is not printed if
+  requiring sequel raises an error (unless -t is used).
+
+* If an exception is raised, put a newline between the exception
+  message and backtrace.
+
+* Don't allow usage of -C with any of -cdDmS.
+
+* If sequel -v is given along with a database or code string to
+  execute, print the Sequel version but also continue, similar
+  to how ruby -v works.
+
+= Backwards Compatibility
+
+* The switch from JOIN ON to JOIN USING in the
+  class_table_inheritance can break certain usage, such as querying
+  using unqualified primary key.  Users should switch to using a
+  qualified primary key instead.
+
+* Calling Dataset#returning when the underlying database does not
+  support it now raises an Error.

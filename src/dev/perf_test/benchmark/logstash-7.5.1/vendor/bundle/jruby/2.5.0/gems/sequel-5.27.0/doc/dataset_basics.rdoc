@@ -1,0 +1,96 @@
+= Dataset Basics 
+
+== Introduction
+
+Datasets are the primary way Sequel uses to access the database. While most database libraries have specific support for updating all records or only a single record, Sequel's ability to represent SQL queries themselves as datasets is what gives Sequel most of its power.  This document aims to give a basic introduction to datasets and how to use them.
+
+== Basics
+
+The most basic dataset is the simple selection of all columns in a table:
+
+  ds = DB[:posts]
+  # SELECT * FROM posts
+  
+Here, DB represents your Sequel::Database object, and ds is your dataset, with the SQL query it represents below it.
+
+One of the core dataset ideas that should be understood is that datasets are frozen and use a functional style of modification, in which methods called on the dataset return modified copies of the dataset, they don't modify the dataset themselves:
+
+  ds2 = ds.where(id: 1)
+  ds2
+  # SELECT * FROM posts WHERE id = 1
+  ds
+  # SELECT * FROM posts
+  
+Note how ds itself is not modified.  This is because ds.where returns a modified copy of ds, instead of modifying ds itself.  This makes using datasets both thread safe and easy to chain:
+
+  # Thread safe:
+  100.times do |i|
+    Thread.new do
+      ds.where(id: i).first
+    end
+  end
+  
+  # Easy to chain:
+  ds3 = ds.select(:id, :name).order(:name).where{id < 100}
+  # SELECT id, name FROM posts WHERE id < 100 ORDER BY name
+
+Thread safety you don't really need to worry about, but chainability is core to how Sequel is generally used.  Almost all dataset methods that affect the SQL produced return modified copies of the receiving dataset.
+
+Another important thing to realize is that dataset methods that return modified datasets do not execute the dataset's code on the database.  Only dataset methods that return or yield results will execute the code on the database:
+
+  # No SQL queries sent:
+  ds3 = ds.select(:id, :name).order(:name).where{id < 100}
+  
+  # Until you call a method that returns results
+  results = ds3.all
+  
+One important consequence of this API style is that if you use a method chain that includes both methods that return modified copies and a method that executes the SQL, the method that executes the SQL should generally be the last method in the chain:
+
+  # Good
+  ds.select(:id, :name).order(:name).where{id < 100}.all
+  
+  # Bad
+  ds.all.select(:id, :name).order(:name).where{id < 100}
+  
+This is because all will return an array of hashes, and +select+, +order+, and +where+ are dataset methods, not array methods.
+
+== Methods
+
+Most Dataset methods that users will use can be broken down into two types:
+
+* Methods that return modified datasets
+* Methods that execute code on the database
+
+=== Methods that return modified datasets
+
+Most dataset methods fall into this category, which can be further broken down by the clause they affect:
+
+SELECT:: select, select_all, select_append, select_group, select_more
+FROM:: from, from_self
+JOIN:: join, left_join, right_join, full_join, natural_join, natural_left_join, natural_right_join, natural_full_join, cross_join, inner_join, left_outer_join, right_outer_join, full_outer_join, join_table
+WHERE:: where, filter, exclude, or, grep, invert, unfiltered
+GROUP:: group, group_by, group_and_count, group_append, select_group, ungrouped
+HAVING:: having, exclude_having, invert, unfiltered
+ORDER:: order, order_by, order_append, order_prepend, order_more, reverse, reverse_order, unordered
+LIMIT/OFFSET:: limit, offset, unlimited
+compounds:: union, intersect, except
+locking:: for_update, lock_style
+common table expressions:: with, with_recursive
+other:: distinct, naked, qualify, server, with_sql
+
+=== Methods that execute code on the database
+
+Most other dataset methods commonly used will execute the dataset's SQL on the database:
+
+SELECT (All Records):: all, each, map, as_hash, to_hash_groups, select_map, select_order_map, select_hash, select_hash_groups
+SELECT (First Record):: first, last, [], single_record
+SELECT (Single Value):: get, single_value
+SELECT (Aggregates):: count, avg, max, min, sum
+INSERT:: insert, <<, import, multi_insert
+UPDATE:: update
+DELETE:: delete
+other:: columns, columns!, truncate
+
+=== Other methods
+
+See the Sequel::Dataset RDoc for other methods that are less commonly used.

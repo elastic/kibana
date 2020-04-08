@@ -1,0 +1,57 @@
+{
+  "_comment": "Alert example from https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-activity-log-schema",
+  "caller": "Microsoft.Insights/alertRules",
+  "channels": "Admin, Operation",
+  "claims": {
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/spn": "Microsoft.Insights/alertRules"
+  },
+  "correlationId": "/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/microsoft.insights/alertrules/myalert/incidents/L3N1YnNjcmlwdGlvbnMvZGY2MDJjOWMtN2FhMC00MDdkLWE2ZmItZWIyMGM4YmQxMTkyL3Jlc291cmNlR3JvdXBzL0NzbUV2ZW50RE9HRk9PRC1XZXN0VVMvcHJvdmlkZXJzL21pY3Jvc29mdC5pbnNpZ2h0cy9hbGVydHJ1bGVzL215YWxlcnQwNjM2MzYyMjU4NTM1MjIxOTIw",
+  "description": "'Disk read LessThan 100000 ([Count]) in the last 5 minutes' has been resolved for CloudService: myResourceGroup/Production/Event.BackgroundJobsWorker.razzle (myResourceGroup)",
+  "eventDataId": "149d4baf-53dc-4cf4-9e29-17de37405cd9",
+  "eventName": {
+    "value": "Alert",
+    "localizedValue": "Alert"
+  },
+  "category": {
+    "value": "Alert",
+    "localizedValue": "Alert"
+  },
+  "id": "/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/Microsoft.ClassicCompute/domainNames/myResourceGroup/slots/Production/roles/Event.BackgroundJobsWorker.razzle/events/149d4baf-53dc-4cf4-9e29-17de37405cd9/ticks/636362258535221920",
+  "level": "Informational",
+  "resourceGroupName": "myResourceGroup",
+  "resourceProviderName": {
+    "value": "Microsoft.ClassicCompute",
+    "localizedValue": "Microsoft.ClassicCompute"
+  },
+  "resourceId": "/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/Microsoft.ClassicCompute/domainNames/myResourceGroup/slots/Production/roles/Event.BackgroundJobsWorker.razzle",
+  "resourceType": {
+    "value": "Microsoft.ClassicCompute/domainNames/slots/roles",
+    "localizedValue": "Microsoft.ClassicCompute/domainNames/slots/roles"
+  },
+  "operationId": "/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/microsoft.insights/alertrules/myalert/incidents/L3N1YnNjcmlwdGlvbnMvZGY2MDJjOWMtN2FhMC00MDdkLWE2ZmItZWIyMGM4YmQxMTkyL3Jlc291cmNlR3JvdXBzL0NzbUV2ZW50RE9HRk9PRC1XZXN0VVMvcHJvdmlkZXJzL21pY3Jvc29mdC5pbnNpZ2h0cy9hbGVydHJ1bGVzL215YWxlcnQwNjM2MzYyMjU4NTM1MjIxOTIw",
+  "operationName": {
+    "value": "Microsoft.Insights/AlertRules/Resolved/Action",
+    "localizedValue": "Microsoft.Insights/AlertRules/Resolved/Action"
+  },
+  "properties": {
+    "RuleUri": "/subscriptions/mySubscriptionID/resourceGroups/myResourceGroup/providers/microsoft.insights/alertrules/myalert",
+    "RuleName": "myalert",
+    "RuleDescription": "",
+    "Threshold": "100000",
+    "WindowSizeInMinutes": "5",
+    "Aggregation": "Average",
+    "Operator": "LessThan",
+    "MetricName": "Disk read",
+    "MetricUnit": "Count"
+  },
+  "status": {
+    "value": "Resolved",
+    "localizedValue": "Resolved"
+  },
+  "subStatus": {
+    "value": null
+  },
+  "eventTimestamp": "2017-07-21T09:24:13.522192Z",
+  "submissionTimestamp": "2017-07-21T09:24:15.6578651Z",
+  "subscriptionId": "mySubscriptionID"
+}

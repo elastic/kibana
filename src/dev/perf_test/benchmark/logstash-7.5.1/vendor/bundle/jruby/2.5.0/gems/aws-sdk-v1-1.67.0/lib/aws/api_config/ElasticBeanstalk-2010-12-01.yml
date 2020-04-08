@@ -1,0 +1,854 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2010-12-01'
+:operations:
+- :name: CheckDNSAvailability
+  :method: :check_dns_availability
+  :inputs:
+    CNAMEPrefix:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CheckDNSAvailabilityResult:
+        :ignore: true
+        :children:
+          Available:
+            :type: :boolean
+- :name: CreateApplication
+  :method: :create_application
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    Description:
+    - :string
+  :outputs:
+    :children:
+      CreateApplicationResult:
+        :ignore: true
+        :children:
+          Application:
+            :children:
+              DateCreated:
+                :type: :time
+              DateUpdated:
+                :type: :time
+              Versions:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :versions
+                    :list: true
+              ConfigurationTemplates:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :configuration_templates
+                    :list: true
+- :name: CreateApplicationVersion
+  :method: :create_application_version
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    VersionLabel:
+    - :string
+    - :required
+    Description:
+    - :string
+    SourceBundle:
+    - :structure:
+        S3Bucket:
+        - :string
+        S3Key:
+        - :string
+    AutoCreateApplication:
+    - :boolean
+  :outputs:
+    :children:
+      CreateApplicationVersionResult:
+        :ignore: true
+        :children:
+          ApplicationVersion:
+            :children:
+              DateCreated:
+                :type: :time
+              DateUpdated:
+                :type: :time
+- :name: CreateConfigurationTemplate
+  :method: :create_configuration_template
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    TemplateName:
+    - :string
+    - :required
+    SolutionStackName:
+    - :string
+    SourceConfiguration:
+    - :structure:
+        ApplicationName:
+        - :string
+        TemplateName:
+        - :string
+    EnvironmentId:
+    - :string
+    Description:
+    - :string
+    OptionSettings:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateConfigurationTemplateResult:
+        :ignore: true
+        :children:
+          DateCreated:
+            :type: :time
+          DateUpdated:
+            :type: :time
+          OptionSettings:
+            :ignore: true
+            :children:
+              member:
+                :rename: :option_settings
+                :list: true
+- :name: CreateEnvironment
+  :method: :create_environment
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    EnvironmentName:
+    - :string
+    - :required
+    Description:
+    - :string
+    CNAMEPrefix:
+    - :string
+    Tier:
+    - :structure:
+        Name:
+        - :string
+        Type:
+        - :string
+        Version:
+        - :string
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+    VersionLabel:
+    - :string
+    TemplateName:
+    - :string
+    SolutionStackName:
+    - :string
+    OptionSettings:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+          Value:
+          - :string
+    OptionsToRemove:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+  :outputs:
+    :children:
+      CreateEnvironmentResult:
+        :ignore: true
+        :children:
+          DateCreated:
+            :type: :time
+          DateUpdated:
+            :type: :time
+          Resources:
+            :children:
+              LoadBalancer:
+                :children:
+                  Listeners:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :listeners
+                        :list: true
+                        :children:
+                          Port:
+                            :type: :integer
+- :name: CreateStorageLocation
+  :method: :create_storage_location
+  :inputs: {}
+  :outputs:
+    :children:
+      CreateStorageLocationResult:
+        :ignore: true
+- :name: DeleteApplication
+  :method: :delete_application
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    TerminateEnvByForce:
+    - :boolean
+  :outputs:
+    :children:
+      DeleteApplicationResult:
+        :ignore: true
+- :name: DeleteApplicationVersion
+  :method: :delete_application_version
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    VersionLabel:
+    - :string
+    - :required
+    DeleteSourceBundle:
+    - :boolean
+  :outputs:
+    :children:
+      DeleteApplicationVersionResult:
+        :ignore: true
+- :name: DeleteConfigurationTemplate
+  :method: :delete_configuration_template
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    TemplateName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteConfigurationTemplateResult:
+        :ignore: true
+- :name: DeleteEnvironmentConfiguration
+  :method: :delete_environment_configuration
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    EnvironmentName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteEnvironmentConfigurationResult:
+        :ignore: true
+- :name: DescribeApplicationVersions
+  :method: :describe_application_versions
+  :inputs:
+    ApplicationName:
+    - :string
+    VersionLabels:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeApplicationVersionsResult:
+        :ignore: true
+        :children:
+          ApplicationVersions:
+            :ignore: true
+            :children:
+              member:
+                :rename: :application_versions
+                :list: true
+                :children:
+                  DateCreated:
+                    :type: :time
+                  DateUpdated:
+                    :type: :time
+- :name: DescribeApplications
+  :method: :describe_applications
+  :inputs:
+    ApplicationNames:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      DescribeApplicationsResult:
+        :ignore: true
+        :children:
+          Applications:
+            :ignore: true
+            :children:
+              member:
+                :rename: :applications
+                :list: true
+                :children:
+                  DateCreated:
+                    :type: :time
+                  DateUpdated:
+                    :type: :time
+                  Versions:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :versions
+                        :list: true
+                  ConfigurationTemplates:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :configuration_templates
+                        :list: true
+- :name: DescribeConfigurationOptions
+  :method: :describe_configuration_options
+  :inputs:
+    ApplicationName:
+    - :string
+    TemplateName:
+    - :string
+    EnvironmentName:
+    - :string
+    SolutionStackName:
+    - :string
+    Options:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+  :outputs:
+    :children:
+      DescribeConfigurationOptionsResult:
+        :ignore: true
+        :children:
+          Options:
+            :ignore: true
+            :children:
+              member:
+                :rename: :options
+                :list: true
+                :children:
+                  UserDefined:
+                    :type: :boolean
+                  ValueOptions:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :value_options
+                        :list: true
+                  MinValue:
+                    :type: :integer
+                  MaxValue:
+                    :type: :integer
+                  MaxLength:
+                    :type: :integer
+- :name: DescribeConfigurationSettings
+  :method: :describe_configuration_settings
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    TemplateName:
+    - :string
+    EnvironmentName:
+    - :string
+  :outputs:
+    :children:
+      DescribeConfigurationSettingsResult:
+        :ignore: true
+        :children:
+          ConfigurationSettings:
+            :ignore: true
+            :children:
+              member:
+                :rename: :configuration_settings
+                :list: true
+                :children:
+                  DateCreated:
+                    :type: :time
+                  DateUpdated:
+                    :type: :time
+                  OptionSettings:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :option_settings
+                        :list: true
+- :name: DescribeEnvironmentResources
+  :method: :describe_environment_resources
+  :inputs:
+    EnvironmentId:
+    - :string
+    EnvironmentName:
+    - :string
+  :outputs:
+    :children:
+      DescribeEnvironmentResourcesResult:
+        :ignore: true
+        :children:
+          EnvironmentResources:
+            :children:
+              AutoScalingGroups:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :auto_scaling_groups
+                    :list: true
+              Instances:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :instances
+                    :list: true
+              LaunchConfigurations:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :launch_configurations
+                    :list: true
+              LoadBalancers:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :load_balancers
+                    :list: true
+              Triggers:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :triggers
+                    :list: true
+              Queues:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :queues
+                    :list: true
+- :name: DescribeEnvironments
+  :method: :describe_environments
+  :inputs:
+    ApplicationName:
+    - :string
+    VersionLabel:
+    - :string
+    EnvironmentIds:
+    - :membered_list:
+      - :string
+    EnvironmentNames:
+    - :membered_list:
+      - :string
+    IncludeDeleted:
+    - :boolean
+    IncludedDeletedBackTo:
+    - :timestamp
+  :outputs:
+    :children:
+      DescribeEnvironmentsResult:
+        :ignore: true
+        :children:
+          Environments:
+            :ignore: true
+            :children:
+              member:
+                :rename: :environments
+                :list: true
+                :children:
+                  DateCreated:
+                    :type: :time
+                  DateUpdated:
+                    :type: :time
+                  Resources:
+                    :children:
+                      LoadBalancer:
+                        :children:
+                          Listeners:
+                            :ignore: true
+                            :children:
+                              member:
+                                :rename: :listeners
+                                :list: true
+                                :children:
+                                  Port:
+                                    :type: :integer
+- :name: DescribeEvents
+  :method: :describe_events
+  :inputs:
+    ApplicationName:
+    - :string
+    VersionLabel:
+    - :string
+    TemplateName:
+    - :string
+    EnvironmentId:
+    - :string
+    EnvironmentName:
+    - :string
+    RequestId:
+    - :string
+    Severity:
+    - :string
+    StartTime:
+    - :timestamp
+    EndTime:
+    - :timestamp
+    MaxRecords:
+    - :integer
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      DescribeEventsResult:
+        :ignore: true
+        :children:
+          Events:
+            :ignore: true
+            :children:
+              member:
+                :rename: :events
+                :list: true
+                :children:
+                  EventDate:
+                    :type: :time
+- :name: ListAvailableSolutionStacks
+  :method: :list_available_solution_stacks
+  :inputs: {}
+  :outputs:
+    :children:
+      ListAvailableSolutionStacksResult:
+        :ignore: true
+        :children:
+          SolutionStacks:
+            :ignore: true
+            :children:
+              member:
+                :rename: :solution_stacks
+                :list: true
+          SolutionStackDetails:
+            :ignore: true
+            :children:
+              member:
+                :rename: :solution_stack_details
+                :list: true
+                :children:
+                  PermittedFileTypes:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :permitted_file_types
+                        :list: true
+- :name: RebuildEnvironment
+  :method: :rebuild_environment
+  :inputs:
+    EnvironmentId:
+    - :string
+    EnvironmentName:
+    - :string
+  :outputs:
+    :children:
+      RebuildEnvironmentResult:
+        :ignore: true
+- :name: RequestEnvironmentInfo
+  :method: :request_environment_info
+  :inputs:
+    EnvironmentId:
+    - :string
+    EnvironmentName:
+    - :string
+    InfoType:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RequestEnvironmentInfoResult:
+        :ignore: true
+- :name: RestartAppServer
+  :method: :restart_app_server
+  :inputs:
+    EnvironmentId:
+    - :string
+    EnvironmentName:
+    - :string
+  :outputs:
+    :children:
+      RestartAppServerResult:
+        :ignore: true
+- :name: RetrieveEnvironmentInfo
+  :method: :retrieve_environment_info
+  :inputs:
+    EnvironmentId:
+    - :string
+    EnvironmentName:
+    - :string
+    InfoType:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      RetrieveEnvironmentInfoResult:
+        :ignore: true
+        :children:
+          EnvironmentInfo:
+            :ignore: true
+            :children:
+              member:
+                :rename: :environment_info
+                :list: true
+                :children:
+                  SampleTimestamp:
+                    :type: :time
+- :name: SwapEnvironmentCNAMEs
+  :method: :swap_environment_cnam_es
+  :inputs:
+    SourceEnvironmentId:
+    - :string
+    SourceEnvironmentName:
+    - :string
+    DestinationEnvironmentId:
+    - :string
+    DestinationEnvironmentName:
+    - :string
+  :outputs:
+    :children:
+      SwapEnvironmentCNAMEsResult:
+        :ignore: true
+- :name: TerminateEnvironment
+  :method: :terminate_environment
+  :inputs:
+    EnvironmentId:
+    - :string
+    EnvironmentName:
+    - :string
+    TerminateResources:
+    - :boolean
+  :outputs:
+    :children:
+      TerminateEnvironmentResult:
+        :ignore: true
+        :children:
+          DateCreated:
+            :type: :time
+          DateUpdated:
+            :type: :time
+          Resources:
+            :children:
+              LoadBalancer:
+                :children:
+                  Listeners:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :listeners
+                        :list: true
+                        :children:
+                          Port:
+                            :type: :integer
+- :name: UpdateApplication
+  :method: :update_application
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    Description:
+    - :string
+  :outputs:
+    :children:
+      UpdateApplicationResult:
+        :ignore: true
+        :children:
+          Application:
+            :children:
+              DateCreated:
+                :type: :time
+              DateUpdated:
+                :type: :time
+              Versions:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :versions
+                    :list: true
+              ConfigurationTemplates:
+                :ignore: true
+                :children:
+                  member:
+                    :rename: :configuration_templates
+                    :list: true
+- :name: UpdateApplicationVersion
+  :method: :update_application_version
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    VersionLabel:
+    - :string
+    - :required
+    Description:
+    - :string
+  :outputs:
+    :children:
+      UpdateApplicationVersionResult:
+        :ignore: true
+        :children:
+          ApplicationVersion:
+            :children:
+              DateCreated:
+                :type: :time
+              DateUpdated:
+                :type: :time
+- :name: UpdateConfigurationTemplate
+  :method: :update_configuration_template
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    TemplateName:
+    - :string
+    - :required
+    Description:
+    - :string
+    OptionSettings:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+          Value:
+          - :string
+    OptionsToRemove:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+  :outputs:
+    :children:
+      UpdateConfigurationTemplateResult:
+        :ignore: true
+        :children:
+          DateCreated:
+            :type: :time
+          DateUpdated:
+            :type: :time
+          OptionSettings:
+            :ignore: true
+            :children:
+              member:
+                :rename: :option_settings
+                :list: true
+- :name: UpdateEnvironment
+  :method: :update_environment
+  :inputs:
+    EnvironmentId:
+    - :string
+    EnvironmentName:
+    - :string
+    Description:
+    - :string
+    Tier:
+    - :structure:
+        Name:
+        - :string
+        Type:
+        - :string
+        Version:
+        - :string
+    VersionLabel:
+    - :string
+    TemplateName:
+    - :string
+    OptionSettings:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+          Value:
+          - :string
+    OptionsToRemove:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+  :outputs:
+    :children:
+      UpdateEnvironmentResult:
+        :ignore: true
+        :children:
+          DateCreated:
+            :type: :time
+          DateUpdated:
+            :type: :time
+          Resources:
+            :children:
+              LoadBalancer:
+                :children:
+                  Listeners:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :listeners
+                        :list: true
+                        :children:
+                          Port:
+                            :type: :integer
+- :name: ValidateConfigurationSettings
+  :method: :validate_configuration_settings
+  :inputs:
+    ApplicationName:
+    - :string
+    - :required
+    TemplateName:
+    - :string
+    EnvironmentName:
+    - :string
+    OptionSettings:
+    - :membered_list:
+      - :structure:
+          Namespace:
+          - :string
+          OptionName:
+          - :string
+          Value:
+          - :string
+    - :required
+  :outputs:
+    :children:
+      ValidateConfigurationSettingsResult:
+        :ignore: true
+        :children:
+          Messages:
+            :ignore: true
+            :children:
+              member:
+                :rename: :messages
+                :list: true

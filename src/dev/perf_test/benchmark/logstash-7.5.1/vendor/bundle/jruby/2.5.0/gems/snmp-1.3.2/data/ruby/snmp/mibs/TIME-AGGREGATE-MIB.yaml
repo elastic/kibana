@@ -1,0 +1,22 @@
+--- 
+tAggrMIB: 1.3.6.1.3.124
+tAggrCtlTable: 1.3.6.1.3.124.1
+tAggrCtlEntry: 1.3.6.1.3.124.1.1
+tAggrCtlEntryID: 1.3.6.1.3.124.1.1.1
+tAggrCtlMOInstance: 1.3.6.1.3.124.1.1.2
+tAggrCtlAgMODescr: 1.3.6.1.3.124.1.1.3
+tAggrCtlInterval: 1.3.6.1.3.124.1.1.4
+tAggrCtlSamples: 1.3.6.1.3.124.1.1.5
+tAggrCtlCompressionAlgorithm: 1.3.6.1.3.124.1.1.6
+tAggrCtlEntryOwner: 1.3.6.1.3.124.1.1.7
+tAggrCtlEntryStorageType: 1.3.6.1.3.124.1.1.8
+tAggrCtlEntryStatus: 1.3.6.1.3.124.1.1.9
+tAggrDataTable: 1.3.6.1.3.124.2
+tAggrDataEntry: 1.3.6.1.3.124.2.1
+tAggrDataRecord: 1.3.6.1.3.124.2.1.1
+tAggrDataRecordCompressed: 1.3.6.1.3.124.2.1.2
+tAggrDataErrorRecord: 1.3.6.1.3.124.2.1.3
+tAggrConformance: 1.3.6.1.3.124.3
+tAggrGroups: 1.3.6.1.3.124.3.1
+tAggrCompliances: 1.3.6.1.3.124.3.2
+

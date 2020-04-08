@@ -1,0 +1,146 @@
+= bin/sequel
+
+bin/sequel is the name used to refer to the "sequel" command line tool that ships with the sequel gem.  By default, bin/sequel provides an IRB shell with the +DB+ constant set to a Sequel::Database object created using the database connection string provided on the command line.  For example, to connect to a new in-memory SQLite database using the sqlite adapter, you can use the following:
+
+  sequel sqlite:/
+
+This is very useful for quick testing of ideas, and does not affect the environment, since the in-memory SQLite database is destroyed when the program exits.
+
+== Running from a git checkout
+
+If you've installed the sequel gem, then just running "sequel" should load the program, since rubygems should place the sequel binary in your load path.  However, if you want to run bin/sequel from the root of a repository checkout, you should probably do:
+
+  ruby bin/sequel
+
+== Choosing the Database to Connect to
+
+=== Connection String
+
+In general, you probably want to provide a connection string argument to bin/sequel, indicating the adapter and database connection information you want to use.  For example:
+
+  sequel sqlite:/
+  sequel postgres://user:pass@host/database_name
+  sequel mysql2://user:pass@host/database_name
+
+See the {Connecting to a database guide}[rdoc-ref:doc/opening_databases.rdoc] for more details about and examples of connection strings.
+
+=== YAML Connection File
+
+Instead of specifying the database connection using a connection string, you can provide the path to a YAML configuration file containing the connection information.  This YAML file can contain a single options hash, or it can contain a nested hash, where the top-level hash uses environment keys with hash values for
+each environment.  Using the -e option with a yaml connection file, you can choose which environment to use if using a nested hash.
+
+  sequel -e production config/database.yml
+
+Note that bin/sequel does not directly support ActiveRecord YAML configuration files, as they use different names for some options.
+
+=== Mock Connection
+
+If you don't provide a connection string or YAML connection file, Sequel will start with a mock database.  The mock database allows you to play around with Sequel without any database at all, and can be useful if you just want to test things out and generate SQL without actually getting results from a database.
+
+  sequel
+
+Sequel also has the ability to use the mock adapter with database-specific syntax, allowing you to pretend you are connecting to a specific type of database without actually connecting to one.  To do that, you need to use a connection string:
+
+  sequel mock://postgres
+
+== Not Just an IRB shell
+
+bin/sequel is not just an IRB shell, it can also do far more.
+
+=== Execute Code
+
+bin/sequel can also be used to execute other ruby files with +DB+ preset to the database given on the command line:
+
+  sequel postgres://host/database_name path/to/some_file.rb
+
+On modern versions of Linux, this means that you can use bin/sequel in a shebang line:
+
+  #!/path/to/bin/sequel postgres://host/database_name
+
+If you want to quickly execute a small piece of ruby code, you can use the -c option:
+
+  sequel -c "p DB.tables" postgres://host/database_name
+
+Similarly, if data is piped into bin/sequel, it will be executed:
+
+  echo "p DB.tables" | sequel postgres://host/database_name
+
+=== Migrate Databases
+
+With -m option, Sequel will migrate the database given using the migration directory provided by -m:
+
+  sequel -m /path/to/migrations/dir postgres://host/database
+
+You can use the -M attribute to set the version to migrate to:
+
+  sequel -m /path/to/migrations/dir -M 3 postgres://host/database
+
+See the {migration guide}[rdoc-ref:doc/migration.rdoc] for more details about migrations.
+
+=== Dump Schemas
+
+Using the -d or -D options, Sequel will dump the database's schema in Sequel migration format to the standard output:
+
+  sequel -d postgres://host/database
+
+To save this information to a file, use a standard shell redirection:
+
+  sequel -d postgres://host/database > /path/to/migrations/dir/001_base_schema.rb
+
+The -d option dumps the migration in database-independent format, the -D option dumps it in database-specific format.
+
+Note that the support for dumping schema is fairly limited.  It doesn't handle database views, functions, triggers, schemas, partial indexes, functional indexes, and many other things.  You should probably use the database specific tools to handle those.
+
+The -S option dumps the schema cache for all tables in the database, which can speed up the usage of Sequel with models when using the schema_caching extension.  You should provide this option with the path to which to dump the schema:
+
+  sequel -S /path/to/schema_cache.db postgres://host/database
+
+=== Copy Databases
+
+Using the -C option, Sequel can copy the contents of one database to another, even between different database types.  Using this option, you provide two connection strings on the command line:
+
+  sequel -C mysql://host1/database postgres://host2/database2
+
+This copies the table structure, table data, indexes, and foreign keys from the MySQL database to the PostgreSQL database.
+
+Note that the support for copying is fairly limited.  It doesn't handle database views, functions, triggers, schemas, partial indexes, functional indexes, and many other things. Also, the data type conversion may not be exactly what you want.  It is best designed for quick conversions and testing.  For serious production use, use the database's tools to copy databases for the same database type, and for different database types, use the Sequel API.
+
+== Other Options
+
+Other options not mentioned above are explained briefly here.
+
+=== -E
+
+-E logs all SQL queries to the standard output, so you can see all SQL that Sequel is sending the database.
+
+=== -I include_directory
+
+-I is similar to ruby -I, and specifies an additional $LOAD_PATH directory.
+
+=== -l log_file
+
+-l is similar to -E, but logs all SQL queries to the given file.
+
+=== -L load_directory
+
+-L loads all *.rb files under the given directory.  This is usually used to load Sequel::Model classes into bin/sequel.
+
+=== -N
+
+-N skips testing the connection when creating the Database object.  This is rarely needed.
+
+=== -r require_lib
+
+-r is similar to ruby -r, requiring the given library.
+
+=== -t
+
+-t tells bin/sequel to output full backtraces in the case of an error, which can aid in debugging.
+
+=== -h
+
+-h prints the usage information for bin/sequel.
+
+=== -v
+
+-v prints the Sequel version in use.

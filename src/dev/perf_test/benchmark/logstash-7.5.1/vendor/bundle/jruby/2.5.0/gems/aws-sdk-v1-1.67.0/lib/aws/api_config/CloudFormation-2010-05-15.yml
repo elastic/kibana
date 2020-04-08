@@ -1,0 +1,372 @@
+# Copyright 2011-2014 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+#     http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+
+---
+:api_version: '2010-05-15'
+:operations:
+- :name: CancelUpdateStack
+  :method: :cancel_update_stack
+  :inputs:
+    StackName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      CancelUpdateStackResult:
+        :ignore: true
+- :name: CreateStack
+  :method: :create_stack
+  :inputs:
+    StackName:
+    - :string
+    - :required
+    TemplateBody:
+    - :string
+    TemplateURL:
+    - :string
+    Parameters:
+    - :membered_list:
+      - :structure:
+          ParameterKey:
+          - :string
+          ParameterValue:
+          - :string
+          UsePreviousValue:
+          - :boolean
+    DisableRollback:
+    - :boolean
+    TimeoutInMinutes:
+    - :integer
+    NotificationARNs:
+    - :membered_list:
+      - :string
+    Capabilities:
+    - :membered_list:
+      - :string
+    OnFailure:
+    - :string
+    StackPolicyBody:
+    - :string
+    StackPolicyURL:
+    - :string
+    Tags:
+    - :membered_list:
+      - :structure:
+          Key:
+          - :string
+          Value:
+          - :string
+  :outputs:
+    :children:
+      CreateStackResult:
+        :ignore: true
+- :name: DeleteStack
+  :method: :delete_stack
+  :inputs:
+    StackName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DeleteStackResult:
+        :ignore: true
+- :name: DescribeStackEvents
+  :method: :describe_stack_events
+  :inputs:
+    StackName:
+    - :string
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      DescribeStackEventsResult:
+        :ignore: true
+        :children:
+          StackEvents:
+            :ignore: true
+            :children:
+              member:
+                :rename: :stack_events
+                :list: true
+                :children:
+                  Timestamp:
+                    :type: :time
+- :name: DescribeStackResource
+  :method: :describe_stack_resource
+  :inputs:
+    StackName:
+    - :string
+    - :required
+    LogicalResourceId:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      DescribeStackResourceResult:
+        :ignore: true
+        :children:
+          StackResourceDetail:
+            :children:
+              LastUpdatedTimestamp:
+                :type: :time
+- :name: DescribeStackResources
+  :method: :describe_stack_resources
+  :inputs:
+    StackName:
+    - :string
+    LogicalResourceId:
+    - :string
+    PhysicalResourceId:
+    - :string
+  :outputs:
+    :children:
+      DescribeStackResourcesResult:
+        :ignore: true
+        :children:
+          StackResources:
+            :ignore: true
+            :children:
+              member:
+                :rename: :stack_resources
+                :list: true
+                :children:
+                  Timestamp:
+                    :type: :time
+- :name: DescribeStacks
+  :method: :describe_stacks
+  :inputs:
+    StackName:
+    - :string
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      DescribeStacksResult:
+        :ignore: true
+        :children:
+          Stacks:
+            :ignore: true
+            :children:
+              member:
+                :rename: :stacks
+                :list: true
+                :children:
+                  Parameters:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :parameters
+                        :list: true
+                        :children:
+                          UsePreviousValue:
+                            :type: :boolean
+                  CreationTime:
+                    :type: :time
+                  LastUpdatedTime:
+                    :type: :time
+                  DisableRollback:
+                    :type: :boolean
+                  NotificationARNs:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :notification_arns
+                        :list: true
+                  TimeoutInMinutes:
+                    :type: :integer
+                  Capabilities:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :capabilities
+                        :list: true
+                  Outputs:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :outputs
+                        :list: true
+                  Tags:
+                    :ignore: true
+                    :children:
+                      member:
+                        :rename: :tags
+                        :list: true
+- :name: EstimateTemplateCost
+  :method: :estimate_template_cost
+  :inputs:
+    TemplateBody:
+    - :string
+    TemplateURL:
+    - :string
+    Parameters:
+    - :membered_list:
+      - :structure:
+          ParameterKey:
+          - :string
+          ParameterValue:
+          - :string
+          UsePreviousValue:
+          - :boolean
+  :outputs:
+    :children:
+      EstimateTemplateCostResult:
+        :ignore: true
+- :name: GetStackPolicy
+  :method: :get_stack_policy
+  :inputs:
+    StackName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetStackPolicyResult:
+        :ignore: true
+- :name: GetTemplate
+  :method: :get_template
+  :inputs:
+    StackName:
+    - :string
+    - :required
+  :outputs:
+    :children:
+      GetTemplateResult:
+        :ignore: true
+- :name: ListStackResources
+  :method: :list_stack_resources
+  :inputs:
+    StackName:
+    - :string
+    - :required
+    NextToken:
+    - :string
+  :outputs:
+    :children:
+      ListStackResourcesResult:
+        :ignore: true
+        :children:
+          StackResourceSummaries:
+            :ignore: true
+            :children:
+              member:
+                :rename: :stack_resource_summaries
+                :list: true
+                :children:
+                  LastUpdatedTimestamp:
+                    :type: :time
+- :name: ListStacks
+  :method: :list_stacks
+  :inputs:
+    NextToken:
+    - :string
+    StackStatusFilter:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      ListStacksResult:
+        :ignore: true
+        :children:
+          StackSummaries:
+            :ignore: true
+            :children:
+              member:
+                :rename: :stack_summaries
+                :list: true
+                :children:
+                  CreationTime:
+                    :type: :time
+                  LastUpdatedTime:
+                    :type: :time
+                  DeletionTime:
+                    :type: :time
+- :name: SetStackPolicy
+  :method: :set_stack_policy
+  :inputs:
+    StackName:
+    - :string
+    - :required
+    StackPolicyBody:
+    - :string
+    StackPolicyURL:
+    - :string
+  :outputs:
+    :children:
+      SetStackPolicyResult:
+        :ignore: true
+- :name: UpdateStack
+  :method: :update_stack
+  :inputs:
+    StackName:
+    - :string
+    - :required
+    TemplateBody:
+    - :string
+    TemplateURL:
+    - :string
+    UsePreviousTemplate:
+    - :boolean
+    StackPolicyDuringUpdateBody:
+    - :string
+    StackPolicyDuringUpdateURL:
+    - :string
+    Parameters:
+    - :membered_list:
+      - :structure:
+          ParameterKey:
+          - :string
+          ParameterValue:
+          - :string
+          UsePreviousValue:
+          - :boolean
+    Capabilities:
+    - :membered_list:
+      - :string
+    StackPolicyBody:
+    - :string
+    StackPolicyURL:
+    - :string
+    NotificationARNs:
+    - :membered_list:
+      - :string
+  :outputs:
+    :children:
+      UpdateStackResult:
+        :ignore: true
+- :name: ValidateTemplate
+  :method: :validate_template
+  :inputs:
+    TemplateBody:
+    - :string
+    TemplateURL:
+    - :string
+  :outputs:
+    :children:
+      ValidateTemplateResult:
+        :ignore: true
+        :children:
+          Parameters:
+            :ignore: true
+            :children:
+              member:
+                :rename: :parameters
+                :list: true
+                :children:
+                  NoEcho:
+                    :type: :boolean
+          Capabilities:
+            :ignore: true
+            :children:
+              member:
+                :rename: :capabilities
+                :list: true

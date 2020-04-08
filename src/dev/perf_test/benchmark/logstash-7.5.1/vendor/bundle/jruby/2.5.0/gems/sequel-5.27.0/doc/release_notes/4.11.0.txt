@@ -1,0 +1,147 @@
+= New SQL Function Features
+
+* SQL::Function now supports an options hash for functions.
+  Unfortunately, since SQL::Function#initialize does not support
+  an options hash, you need to use SQL::Function.new! to create
+  a function with an options hash.  You can also call methods on
+  the SQL::Function instance, which will return a new SQL::Function
+  with the appropriate option set.
+
+* SQL::Function#quoted has been added, which will return a new
+  SQL::Function instance that will quote the function name (if
+  the database supports quoting function names).
+
+* SQL::Function#unquoted has been added, which will return a new
+  SQL::Function instance that will not quote the function name.
+
+* SQL::Function#lateral has been added, which will return a new
+  SQL::Function instance that will be preceded by LATERAL when
+  literalized, useful for set-returning functions.
+
+* SQL::Function#within_group has been added, for creating
+  ordered-set and hypothetical-set functions that use WITHIN GROUP.
+
+* SQL::Function#filter has been added, for creating filtered
+  aggregate function calls using FILTER.
+
+* SQL::Function#with_ordinality has been added, for creating set
+  returning functions that also include a row number for every
+  row in the set, using WITH ORDINALITY.
+
+= New PostgreSQL Features
+
+* The jsonb type added in 9.4 is now supported in the pg_json
+  extension.  To create a jsonb type manually, you need to call
+  Sequel.pg_jsonb.
+
+  The new json and jsonb functions and operators added in 9.4 are
+  now supported in the pg_json_ops extension.  You can use the jsonb
+  functions and operators by creating a Postgres::JSONBOp using
+  Sequel.pg_jsonb_op.
+
+* Database#full_text_search now takes a :rank option to order by the
+  ranking.
+
+* Database#refresh_view now supports a :concurrently option, to
+  refresh a materialized view concurrently, supported on 9.4+.
+
+* Postgres::ArrayOp#cardinality has been added to the pg_array_ops
+  extension, for easy use of the cardinality method added in 9.4.
+
+* Postgres::ArrayOp#unnest in the pg_array_ops extension now accepts
+  arguments.  PostgreSQL 9.4+ supports this if unnest is used in the
+  FROM clause.
+
+= Other New Features
+
+* Sequel now supports derived column lists (table aliases that include
+  column aliases) via Sequel.as and SQL::AliasedMethods#as:
+
+    Sequel.as(:table, :alias, [:c1, :c2])
+    # table AS alias(c1, c2)
+
+  Not all databases support this, but it is in SQL92 and Sequel now
+  supports it by default.  Derived column lists make it easier to
+  alias columns when using set-returning functions.
+
+  Dataset#from_self now supports derived column lists via the new
+  :column_aliases option (which requires the :alias option to take
+  effect).
+
+* Database#create_view now supports a :check option, to use
+  WITH CHECK OPTION.  You can also use :check=>:local for
+  WITH LOCAL CHECK OPTION.  These clauses make it so when you are
+  inserting into/updating the view, you can only modify rows in the
+  underlying table if the result would be returned by the view.
+
+* The :after_connect Database option proc now can accept two
+  arguments.  If the arity of the proc is 2, Sequel will pass both
+  the connection object and the shard symbol.
+
+* The class_table_inheritance plugin now supports a :model_map
+  option similar to the single_table_inheritance plugin, allowing
+  use of the plugin without storing ruby class names in the database.
+  Note that if you use this option, you must set the correct value
+  for the kind column manually when creating the row.
+
+* Support for CUBRID/SQLAnywhere emulation has been added to the
+  mock adapter.
+
+= Other Improvements
+
+* Dataset#import now supports a default slice size, which Sequel
+  sets to 500 on SQLite as that is the limit that SQLite supports in
+  a single statement.
+
+* The serialization plugin now only modifies changed_columns in the
+  setter method if the deserialized value has changed, similar to
+  how Sequel's standard column setters work.  Note that if you are
+  mutating the deserialized value (i.e. not calling the setter
+  method), you still need to use the
+  serialization_modification_detection plugin.
+
+* Plugins that set column values for new objects before creation now
+  use before_validation instead of before_create, which works better
+  when the auto_validations plugin is used.
+
+* The :read_only transaction option is now applied per-savepoint on
+  PostgreSQL.  Note that this allows you to have a READ ONLY
+  savepoint in a READ WRITE transaction, it does not allow you to
+  have a READ WRITE savepoint in a READ ONLY transaction.
+
+* In the ibm_db adapter, fix warnings when using certain column names.
+
+* Support connecting to a DB2 catalog name in the ibm_db adapter, by
+  providing a :database option without a :host or :port option.
+
+* The mock adapter now sets an emulated version when using MySQL and
+  SQLite.  Additionally, the emulated version for PostgreSQL and
+  Microsoft SQL Server has been updated.
+
+= Backwards Compatibility
+
+* External adapters that override Dataset#as_sql_append now need to
+  have the method accept two arguments.
+
+* Model.eager_loading_dataset, .apply_association_dataset_opts, and
+  .def_{add_method,association_dataset_methods,remove_methods} have
+  been removed (they were deprecated in 4.10.0).
+
+* SQL::WindowFunction and SQL::EmulatedFunction classes are now
+  deprecated, as well as Dataset methods that literalize instances of
+  these classes.  These classes are replaced by using options on
+  SQL::Function instances.
+
+* Passing a table_alias argument when creating an SQL::JoinClause
+  manually is no longer supported.  You now need to pass the table as
+  an SQL::AliasedExpression if the table needs to be aliased.
+  
+* ASTTransformer no longer transforms the table alias for
+  SQL::JoinClause.  This is for consistency with
+  SQL::AliasedExpression.
+
+* SQL standard casts are now used in Database#full_text_search, which
+  can break tests that expect specific SQL.
+
+* The to_dot extension now uses slightly different output for
+  SQL::Function and SQL::JoinClause instances.
