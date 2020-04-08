@@ -20,13 +20,7 @@ export function deserializePipelines(pipelinesByName: PipelinesByName): Pipeline
       onFailure: on_failure,
     };
 
-    // Remove any undefined values
-    return Object.entries(pipeline).reduce((pipelineDefinition: any, [key, value]) => {
-      if (value !== undefined) {
-        pipelineDefinition[key] = value;
-      }
-      return pipelineDefinition;
-    }, {});
+    return pipeline;
   });
 
   return deserializedPipelines;

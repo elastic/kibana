@@ -35,7 +35,7 @@ export const registerUpdateRoute = ({
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
-      const { name } = req.params as typeof paramsSchema.type;
+      const { name } = req.params;
       const pipeline = req.body as Pipeline;
 
       const { description, processors, version, onFailure } = pipeline;
