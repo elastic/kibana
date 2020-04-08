@@ -36,7 +36,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     ));
 
   const addVariableButtonTitle = i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariableTitle',
+    'xpack.triggersActionsUI.components.addMessageVariables.addVariableTitle',
     {
       defaultMessage: 'Add alert variable',
     }
@@ -51,7 +51,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           onClick={() => setIsVariablesPopoverOpen(true)}
           iconType="indexOpen"
           aria-label={i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton5',
+            'xpack.triggersActionsUI.components.addMessageVariables.addVariablePopoverButton',
             {
               defaultMessage: 'Add variable',
             }
