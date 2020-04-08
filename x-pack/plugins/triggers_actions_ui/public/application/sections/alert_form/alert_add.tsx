@@ -24,7 +24,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
-import { AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
+import { HealthCheck } from '../../components/health_check';
 import { PLUGIN } from '../../constants/plugin';
 
 interface AlertAddProps {
@@ -153,62 +153,54 @@ export const AlertAdd = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionSecurityCallOut
-          docLinks={docLinks}
-          action={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertAdd.securityCalloutAction',
-            {
-              defaultMessage: 'creation',
-            }
-          )}
-          http={http}
-        />
-        <EuiFlyoutBody>
-          <AlertForm
-            alert={alert}
-            dispatch={dispatch}
-            errors={errors}
-            canChangeTrigger={canChangeTrigger}
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
-                {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="secondary"
-                data-test-subj="saveAlertButton"
-                type="submit"
-                iconType="check"
-                isDisabled={hasErrors || hasActionErrors}
-                isLoading={isSaving}
-                onClick={async () => {
-                  setIsSaving(true);
-                  const savedAlert = await onSaveAlert();
-                  setIsSaving(false);
-                  if (savedAlert) {
-                    closeFlyout();
-                    if (reloadAlerts) {
-                      reloadAlerts();
+        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
+          <EuiFlyoutBody>
+            <AlertForm
+              alert={alert}
+              dispatch={dispatch}
+              errors={errors}
+              canChangeTrigger={canChangeTrigger}
+            />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
+                  {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="secondary"
+                  data-test-subj="saveAlertButton"
+                  type="submit"
+                  iconType="check"
+                  isDisabled={hasErrors || hasActionErrors}
+                  isLoading={isSaving}
+                  onClick={async () => {
+                    setIsSaving(true);
+                    const savedAlert = await onSaveAlert();
+                    setIsSaving(false);
+                    if (savedAlert) {
+                      closeFlyout();
+                      if (reloadAlerts) {
+                        reloadAlerts();
+                      }
                     }
-                  }
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </HealthCheck>
       </EuiFlyout>
     </EuiPortal>
   );
