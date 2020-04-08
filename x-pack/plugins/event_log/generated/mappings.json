@@ -82,10 +82,6 @@
                 },
                 "saved_objects": {
                     "properties": {
-                        "store": {
-                            "type": "keyword",
-                            "ignore_above": 1024
-                        },
                         "namespace": {
                             "type": "keyword",
                             "ignore_above": 1024
