@@ -125,6 +125,10 @@ if [ -n "${JENKINS_URL}" ] ; then
   n=0
   until [ $n -ge 20 ]
   do
+    ## for debugging purposes only
+    curl --user admin:changeme \
+        "http://localhost:${KIBANA_PORT}/app/apm#/services?rangeFrom=2020-03-04T12:30:00.000Z&rangeTo=2020-03-04T13:00:00.000Z"
+
     curl --silent --user admin:changeme \
           "localhost:${KIBANA_PORT}/api/status" | \
             jq .status.overall.state | \
