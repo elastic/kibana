@@ -23,6 +23,7 @@ export function validateMetricThreshold({
       timeWindowSize: string[];
       threshold0: string[];
       threshold1: string[];
+      metric: string[];
     };
   } = {};
   validationResult.errors = errors;
@@ -41,6 +42,7 @@ export function validateMetricThreshold({
       timeWindowSize: [],
       threshold0: [],
       threshold1: [],
+      metric: [],
     };
     if (!c.aggType) {
       errors[id].aggField.push(
@@ -70,6 +72,14 @@ export function validateMetricThreshold({
       errors[id].timeWindowSize.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.timeRequred', {
           defaultMessage: 'Time size is Required.',
+        })
+      );
+    }
+
+    if (!c.metric && c.aggType !== 'count') {
+      errors[id].metric.push(
+        i18n.translate('xpack.infra.metrics.alertFlyout.error.metricRequired', {
+          defaultMessage: 'Metric is required.',
         })
       );
     }
