@@ -49,7 +49,7 @@ export const updateRulesNotifications = async ({
     enabled,
     name,
     actions: ruleActions.actions,
-    interval: ruleActions?.alertThrottle,
+    interval: ruleActions.alertThrottle,
   });
 
   return ruleActions;
