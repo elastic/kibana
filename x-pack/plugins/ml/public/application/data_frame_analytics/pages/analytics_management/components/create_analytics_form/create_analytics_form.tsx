@@ -246,7 +246,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           dependentVariableOptions: [] as State['form']['dependentVariableOptions'],
         };
 
-        await newJobCapsService.initializeFromIndexPattern(indexPattern);
+        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
