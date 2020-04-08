@@ -23,17 +23,19 @@ import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } fr
 export class IndexPatternCreationManager {
   private configs: IndexPatternCreationConfig[];
 
-  constructor(private readonly httpClient: HttpSetup) {
+  constructor() {
     this.configs = [];
   }
 
-  public addCreationConfig(Config: typeof IndexPatternCreationConfig) {
-    const config = new Config({ httpClient: this.httpClient });
+  public addCreationConfig = (httpClient: HttpSetup) => (
+    Config: typeof IndexPatternCreationConfig
+  ) => {
+    const config = new Config({ httpClient });
     if (this.configs.findIndex(c => c.key === config.key) !== -1) {
       throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
     }
     this.configs.push(config);
-  }
+  };
 
   public getType(key: string | undefined): IndexPatternCreationConfig | null {
     if (key) {
@@ -59,12 +61,12 @@ export class IndexPatternCreationManager {
     return options;
   }
 
-  setup = {
-    addCreationConfig: this.addCreationConfig.bind(this),
-  };
+  setup = (httpClient: HttpSetup) => ({
+    addCreationConfig: this.addCreationConfig(httpClient),
+  });
 
-  start = {
-    getType: this.getType.bind(this),
-    getIndexPatternCreationOptions: this.getIndexPatternCreationOptions.bind(this),
-  };
+  start = () => ({
+    getType: this.getType,
+    getIndexPatternCreationOptions: this.getIndexPatternCreationOptions,
+  });
 }

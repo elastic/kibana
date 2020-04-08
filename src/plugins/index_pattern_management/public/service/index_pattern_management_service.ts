@@ -31,26 +31,29 @@ interface SetupDependencies {
  * @internal
  */
 export class IndexPatternManagementService {
-  indexPatternCreationManager?: IndexPatternCreationManager;
-  indexPatternListConfig?: IndexPatternListManager;
+  indexPatternCreationManager: IndexPatternCreationManager;
+  indexPatternListConfig: IndexPatternListManager;
+
+  constructor() {
+    this.indexPatternCreationManager = new IndexPatternCreationManager();
+    this.indexPatternListConfig = new IndexPatternListManager();
+  }
 
   public setup({ httpClient }: SetupDependencies) {
-    this.indexPatternCreationManager = new IndexPatternCreationManager(httpClient);
-    this.indexPatternListConfig = new IndexPatternListManager();
-
-    this.indexPatternCreationManager.setup.addCreationConfig(IndexPatternCreationConfig);
-    this.indexPatternListConfig.setup.addListConfig(IndexPatternListConfig);
+    const creationManagerSetup = this.indexPatternCreationManager.setup(httpClient);
+    creationManagerSetup.addCreationConfig(IndexPatternCreationConfig);
+    this.indexPatternListConfig.setup().addListConfig(IndexPatternListConfig);
 
     return {
-      creation: this.indexPatternCreationManager.setup,
-      list: this.indexPatternListConfig.setup,
+      creation: creationManagerSetup,
+      list: this.indexPatternListConfig.setup(),
     };
   }
 
   public start() {
     return {
-      creation: this.indexPatternCreationManager!.start,
-      list: this.indexPatternListConfig!.start,
+      creation: this.indexPatternCreationManager.start(),
+      list: this.indexPatternListConfig.start(),
     };
   }
 

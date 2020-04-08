@@ -55,13 +55,13 @@ export class IndexPatternListManager {
     });
   }
 
-  setup = {
-    addListConfig: this.addListConfig.bind(this),
-  };
+  setup = () => ({
+    addListConfig: this.addListConfig,
+  });
 
-  start = {
-    getIndexPatternTags: this.getIndexPatternTags.bind(this),
-    getFieldInfo: this.getFieldInfo.bind(this),
-    areScriptedFieldsEnabled: this.areScriptedFieldsEnabled.bind(this),
-  };
+  start = () => ({
+    getIndexPatternTags: this.getIndexPatternTags,
+    getFieldInfo: this.getFieldInfo,
+    areScriptedFieldsEnabled: this.areScriptedFieldsEnabled,
+  });
 }
