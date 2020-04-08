@@ -24,6 +24,7 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   SET_LAYER_STYLE_META,
+  SET_LAYER_SYNC_DATA_TOKEN,
   SET_JOINS,
   UPDATE_SOURCE_PROP,
   SET_REFRESH_CONFIG,
@@ -57,8 +58,13 @@ const updateLayerInList = (state, layerId, attribute, newValue) => {
   if (!layerId) {
     return state;
   }
+
   const { layerList } = state;
   const layerIdx = getLayerIndex(layerList, layerId);
+  if (layerIdx === -1) {
+    return state;
+  }
+
   const updatedLayer = {
     ...layerList[layerIdx],
     // Update layer w/ new value. If no value provided, toggle boolean value
@@ -318,6 +324,8 @@ export function map(state = INITIAL_STATE, action) {
         ...state.layerList[index].style,
         __styleMeta: styleMeta,
       });
+    case SET_LAYER_SYNC_DATA_TOKEN:
+      return updateLayerInList(state, action.layerId, '__dataSyncToken', action.syncToken);
     case SET_SCROLL_ZOOM:
       return {
         ...state,
@@ -437,7 +445,7 @@ function updateWithDataResponse(state, action) {
 
   dataRequest.data = action.data;
   dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
-  dataRequest.dataMetaAtStart = null;
+  delete dataRequest.dataMetaAtStart;
   return resetDataRequest(state, action, dataRequest);
 }
 

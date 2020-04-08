@@ -20,6 +20,7 @@ export type SyncContext = {
   stopLoading(dataId: string, requestToken: symbol, data: unknown, meta: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   updateSourceData(newData: unknown): void;
+  isDataSyncActive(): boolean;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: MapFilters;

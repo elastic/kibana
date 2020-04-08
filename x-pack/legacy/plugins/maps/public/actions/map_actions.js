@@ -19,6 +19,7 @@ import {
   getOpenTooltips,
   getQuery,
   getDataRequestDescriptor,
+  getLayerSyncDataToken,
 } from '../selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FLYOUT_STATE } from '../../../../../plugins/maps/public/reducers/ui';
@@ -59,6 +60,7 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   SET_LAYER_STYLE_META,
+  SET_LAYER_SYNC_DATA_TOKEN,
   UPDATE_SOURCE_PROP,
   SET_REFRESH_CONFIG,
   SET_MOUSE_COORDINATES,
@@ -84,6 +86,13 @@ import {
 export * from '../../../../../plugins/maps/public/actions/map_actions';
 
 function getLayerLoadingCallbacks(dispatch, getState, layerId) {
+  const syncToken = Symbol();
+  dispatch({
+    type: SET_LAYER_SYNC_DATA_TOKEN,
+    layerId,
+    syncToken,
+  });
+
   return {
     startLoading: (dataId, requestToken, meta) =>
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
@@ -94,6 +103,15 @@ function getLayerLoadingCallbacks(dispatch, getState, layerId) {
     updateSourceData: newData => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
+    // Check to ensure data syncing action for layer is still active.
+    // Async actions may occur before startLoading is called.
+    // Use isDataSyncActive to check that the data sync is still active before startLoading is called for each data request.
+    isDataSyncActive: () => {
+      const currentToken = getLayerSyncDataToken(getState(), layerId);
+      return currentToken === syncToken;
+    },
+    // Check to ensure single data request for layer is still active.
+    // Use isRequestStillActive to check that the data request is still active after startLoading has been called.
     isRequestStillActive: (dataId, requestToken) => {
       const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
       if (!dataRequest) {
