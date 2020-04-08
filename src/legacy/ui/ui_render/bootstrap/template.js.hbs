@@ -40,6 +40,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
     function loadScript(url, cb) {
       var dom = document.createElement('script');
+      {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
       dom.async = false;
       dom.src = url;
       dom.addEventListener('error', failure);
