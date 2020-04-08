@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import { set as _set } from 'lodash/fp';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
@@ -14,19 +12,33 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 
 import { getExportTimelineByObjectIds } from './utils/export_timelines';
+import {
+  exportTimelinesQuerySchema,
+  exportTimelinesRequestBodySchema,
+  buildRouteValidation,
+  decodeOrThrow,
+} from './schemas/export_timelines_schema';
+
+interface ExportTimelinesQuery {
+  file_name: string;
+  exclude_export_details: 'true' | 'false';
+}
+
+interface ExportTimelinesRequestBody {
+  ids: string[];
+}
 
 export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
   router.post(
     {
       path: TIMELINE_EXPORT_URL,
       validate: {
-        query: schema.object({
-          file_name: schema.string(),
-          exclude_export_details: schema.boolean(),
-        }),
-        body: schema.object({
-          ids: schema.arrayOf(schema.string()),
-        }),
+        query: buildRouteValidation<ExportTimelinesQuery, ExportTimelinesQuery, unknown>(
+          exportTimelinesQuerySchema
+        ),
+        body: buildRouteValidation<ExportTimelinesRequestBody, ExportTimelinesRequestBody, unknown>(
+          exportTimelinesRequestBodySchema
+        ),
       },
       options: {
         tags: ['access:siem'],
