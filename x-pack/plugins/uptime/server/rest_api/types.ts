@@ -24,6 +24,7 @@ import { UMServerLibs } from '../lib/lib';
  */
 export interface UMServerRoute<T> {
   method: string;
+  writeAccess?: boolean;
   handler: T;
 }
 
