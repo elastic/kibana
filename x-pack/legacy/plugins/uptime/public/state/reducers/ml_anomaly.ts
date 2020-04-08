@@ -41,11 +41,11 @@ type Payload = IHttpFetchError;
 
 export const mlJobsReducer = handleActions<MLJobState>(
   {
-    ...handleAsyncAction<MLJobState, Payload>('mlJob', getExistingMLJobAction),
-    ...handleAsyncAction<MLJobState, Payload>('mlCapabilities', getMLCapabilitiesAction),
-    ...handleAsyncAction<MLJobState, Payload>('createJob', createMLJobAction),
-    ...handleAsyncAction<MLJobState, Payload>('deleteJob', deleteMLJobAction),
-    ...handleAsyncAction<MLJobState, Payload>('anomalies', getAnomalyRecordsAction),
+    ...handleAsyncAction<MLJobState>('mlJob', getExistingMLJobAction),
+    ...handleAsyncAction<MLJobState>('mlCapabilities', getMLCapabilitiesAction),
+    ...handleAsyncAction<MLJobState>('createJob', createMLJobAction),
+    ...handleAsyncAction<MLJobState>('deleteJob', deleteMLJobAction),
+    ...handleAsyncAction<MLJobState>('anomalies', getAnomalyRecordsAction),
     ...{
       [String(resetMLState)]: state => ({
         ...state,

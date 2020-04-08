@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import produce, { Draft } from 'immer';
+
 import { handleActions, Action } from 'redux-actions';
 import {
   getDynamicSettings,
@@ -30,13 +32,14 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
     [String(getDynamicSettings)]: state => ({
       ...state,
       loading: true,
+      loadErrors: [],
     }),
-    [String(getDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) => {
-      return {
-        loading: false,
-        settings: action.payload,
-      };
-    },
+    [String(getDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) =>
+      produce(state, (draft: Draft<DynamicSettingsState>) => {
+        draft.loading = false;
+        draft.settings = action.payload;
+        draft.err = 4;
+      }),
     [String(getDynamicSettingsFail)]: (state, action: Action<Error>) => {
       return {
         loading: false,

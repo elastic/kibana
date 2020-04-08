@@ -18,6 +18,7 @@ import {
 import { createGetPingHistogramRoute } from './pings/get_ping_histogram';
 import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
 import { createGetIndexPatternRoute, createGetIndexStatusRoute } from './index_state';
+import { createGetCertificatesRoute } from './certificates/get_certificates';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -37,4 +38,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createLogPageViewRoute,
   createGetPingHistogramRoute,
   createGetMonitorDurationRoute,
+  createGetCertificatesRoute,
 ];
