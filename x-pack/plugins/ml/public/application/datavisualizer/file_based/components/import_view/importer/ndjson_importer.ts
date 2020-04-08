@@ -12,27 +12,42 @@ export class NdjsonImporter extends Importer {
     super(settings);
   }
 
-  read(json: string) {
+  protected _createDocs(json: string) {
+    let remainder = 0;
     try {
       const splitJson = json.split(/}\s*\n/);
+      const incompleteLastLine = json.match(/}\s*\n?$/) === null;
 
-      const ndjson: any[] = [];
-      for (let i = 0; i < splitJson.length; i++) {
-        if (splitJson[i] !== '') {
-          // note the extra } at the end of the line, adding back
-          // the one that was eaten in the split
-          ndjson.push(`${splitJson[i]}}`);
+      const docs: string[] = [];
+      if (splitJson.length) {
+        for (let i = 0; i < splitJson.length - 1; i++) {
+          if (splitJson[i] !== '') {
+            // note the extra } at the end of the line, adding back
+            // the one that was eaten in the split
+            docs.push(`${splitJson[i]}}`);
+          }
+        }
+
+        const lastDoc = splitJson[splitJson.length - 1];
+        if (lastDoc) {
+          if (incompleteLastLine === true) {
+            remainder = lastDoc.length;
+          } else {
+            docs.push(`${lastDoc}}`);
+          }
         }
       }
 
-      this._docArray = ndjson;
-
       return {
         success: true,
+        docs,
+        remainder,
       };
     } catch (error) {
       return {
         success: false,
+        docs: [],
+        remainder,
         error,
       };
     }

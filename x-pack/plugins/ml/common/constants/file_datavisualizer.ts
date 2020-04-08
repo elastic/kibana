@@ -5,7 +5,7 @@
  */
 
 export const MAX_BYTES = 104857600;
-export const ABSOLUTE_MAX_BYTES = MAX_BYTES * 5;
+export const ABSOLUTE_MAX_BYTES = MAX_BYTES * 10;
 export const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 
 // Value to use in the Elasticsearch index mapping meta data to identify the
