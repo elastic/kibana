@@ -19,6 +19,7 @@ import { createPromiseFromStreams } from '../../../../../../../../src/legacy/uti
 
 import {
   createTimelines,
+  getTimeline,
   getTupleDuplicateErrorsAndUniqueTimeline,
   isBulkError,
   isImportRegular,
@@ -40,8 +41,6 @@ import { validate } from '../../detection_engine/routes/rules/validate';
 import { FrameworkRequest } from '../../framework';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
-
-const timelineLib = new Timeline();
 
 export const importTimelinesRoute = (
   router: IRouter,
@@ -140,14 +139,10 @@ export const importTimelinesRoute = (
                       parsedTimeline
                     );
                     try {
-                      let timeline = null;
-                      try {
-                        timeline = await timelineLib.getTimeline(
-                          (frameworkRequest as unknown) as FrameworkRequest,
-                          savedObjectId
-                        );
-                        // eslint-disable-next-line no-empty
-                      } catch (e) {}
+                      const timeline = getTimeline(
+                        (frameworkRequest as unknown) as FrameworkRequest,
+                        savedObjectId
+                      );
 
                       if (timeline == null) {
                         const newSavedObjectId = await createTimelines(

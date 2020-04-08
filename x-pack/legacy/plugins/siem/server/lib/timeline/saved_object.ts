@@ -14,6 +14,7 @@ import {
   SortTimeline,
   ResponseFavoriteTimeline,
   TimelineResult,
+  Maybe,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import { Note } from '../note/saved_object';
@@ -28,6 +29,14 @@ import { SavedTimeline, TimelineSavedObject } from './types';
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
   totalCount: number;
+}
+
+export interface ResponseTemplateTimeline {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  templateTimeline: TimelineResult;
 }
 
 export class Timeline {

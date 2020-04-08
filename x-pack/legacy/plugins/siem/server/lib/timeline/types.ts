@@ -172,6 +172,9 @@ export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
   runtimeTypes.partial({
     savedObjectId: runtimeTypes.string,
   }),
+  runtimeTypes.partial({
+    templateTimelineId: runtimeTypes.string,
+  }),
 ]);
 
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([

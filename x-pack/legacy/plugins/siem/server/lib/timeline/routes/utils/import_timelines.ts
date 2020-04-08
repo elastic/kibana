@@ -189,3 +189,12 @@ export const isBulkError = (
 ): importRuleResponse is BulkError => {
   return has('error', importRuleResponse);
 };
+
+export const getTimeline = async (frameworkRequest: FrameworkRequest, savedObjectId: string) => {
+  let timeline = null;
+  try {
+    timeline = await timelineLib.getTimeline(frameworkRequest, savedObjectId);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+  return timeline;
+};

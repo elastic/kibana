@@ -31,6 +31,8 @@ import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/fin
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
+import { createTemplateTimelinesRoute } from '../lib/timeline/routes/create_template_timelines';
+
 import { SetupPlugins } from '../plugin';
 
 export const initRoutes = (
@@ -60,6 +62,7 @@ export const initRoutes = (
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config);
+  createTemplateTimelinesRoute(router, config);
 
   findRulesStatusesRoute(router);
 
