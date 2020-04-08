@@ -11,6 +11,7 @@ import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public
 
 export abstract class ResolverQuery {
   constructor(
+    private readonly indexPattern: string,
     private readonly endpointID?: string,
     private readonly pagination?: PaginationParams
   ) {}
@@ -26,7 +27,7 @@ export abstract class ResolverQuery {
     if (this.endpointID) {
       return this.legacyQuery(this.endpointID, ids, EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
     }
-    return this.query(ids, EndpointAppConstants.EVENT_INDEX_NAME);
+    return this.query(ids, this.indexPattern);
   }
 
   async search(client: IScopedClusterClient, ...ids: string[]) {

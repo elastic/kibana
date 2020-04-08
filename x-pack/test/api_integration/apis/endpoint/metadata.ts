@@ -159,7 +159,7 @@ export default function({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `host.os.variant.keyword:${variantValue}`,
+            filter: `host.os.variant:${variantValue}`,
           })
           .expect(200);
         expect(body.total).to.eql(2);

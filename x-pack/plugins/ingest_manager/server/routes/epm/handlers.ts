@@ -129,7 +129,7 @@ export const installPackageHandler: RequestHandler<TypeOf<
       callCluster,
     });
     const body: InstallPackageResponse = {
-      response: res,
+      response: res.references,
       success: true,
     };
     return response.ok({ body });

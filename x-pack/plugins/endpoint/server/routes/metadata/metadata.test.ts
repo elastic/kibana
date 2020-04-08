@@ -11,24 +11,28 @@ import {
   RequestHandler,
   RequestHandlerContext,
   RouteConfig,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingServiceMock,
+  savedObjectsClientMock,
 } from '../../../../../../src/core/server/mocks';
 import { HostMetadata, HostResultList } from '../../../common/types';
 import { SearchResponse } from 'elasticsearch';
-import { EndpointConfigSchema } from '../../config';
-import * as data from '../../test_data/all_metadata_data.json';
 import { registerEndpointRoutes } from './index';
+import { EndpointConfigSchema } from '../../config';
+import { FakeIndexPatternRetriever } from '../../plugin.test';
+import * as data from '../test_data/all_metadata_data.json';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: jest.Mocked<IClusterClient>;
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
 
@@ -37,14 +41,32 @@ describe('test endpoint route', () => {
       IClusterClient
     >;
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockSavedObjectClient = savedObjectsClientMock.create();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
     registerEndpointRoutes(routerMock, {
+      indexPatternRetriever: FakeIndexPatternRetriever.buildMetadata(),
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
   });
+
+  function createRouteHandlerContext(
+    dataClient: jest.Mocked<IScopedClusterClient>,
+    savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
+  ) {
+    return ({
+      core: {
+        elasticsearch: {
+          dataClient,
+        },
+        savedObjects: {
+          client: savedObjectsClient,
+        },
+      },
+    } as unknown) as RequestHandlerContext;
+  }
 
   it('test find the latest of all endpoints', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({});
@@ -58,13 +80,7 @@ describe('test endpoint route', () => {
     )!;
 
     await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
+      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
       mockRequest,
       mockResponse
     );
@@ -100,13 +116,7 @@ describe('test endpoint route', () => {
     )!;
 
     await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
+      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
       mockRequest,
       mockResponse
     );
@@ -147,13 +157,7 @@ describe('test endpoint route', () => {
     )!;
 
     await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
+      createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
       mockRequest,
       mockResponse
     );
@@ -212,13 +216,7 @@ describe('test endpoint route', () => {
       )!;
 
       await routeHandler(
-        ({
-          core: {
-            elasticsearch: {
-              dataClient: mockScopedClient,
-            },
-          },
-        } as unknown) as RequestHandlerContext,
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
         mockResponse
       );
@@ -243,13 +241,7 @@ describe('test endpoint route', () => {
       )!;
 
       await routeHandler(
-        ({
-          core: {
-            elasticsearch: {
-              dataClient: mockScopedClient,
-            },
-          },
-        } as unknown) as RequestHandlerContext,
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
         mockResponse
       );

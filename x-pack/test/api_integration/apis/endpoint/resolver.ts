@@ -17,8 +17,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
   const esArchiver = getService('esArchiver');
 
   describe('Resolver', () => {
-    before(() => esArchiver.load('endpoint/resolver/api_feature'));
-    after(() => esArchiver.unload('endpoint/resolver/api_feature'));
+    before(async () => await esArchiver.load('endpoint/resolver/api_feature'));
+    after(async () => await esArchiver.unload('endpoint/resolver/api_feature'));
 
     describe('related events endpoint', () => {
       const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';

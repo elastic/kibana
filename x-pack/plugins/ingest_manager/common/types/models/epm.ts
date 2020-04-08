@@ -216,8 +216,13 @@ export type PackageInfo = Installable<
     PackageAdditions
 >;
 
+export interface InstalledReferences extends SavedObjectAttributes {
+  references: AssetReference[];
+  patterns: Record<string, string>;
+}
+
 export interface Installation extends SavedObjectAttributes {
-  installed: AssetReference[];
+  installed: InstalledReferences;
   name: string;
   version: string;
 }

@@ -8,9 +8,9 @@ import { IRouter, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
-import { HostMetadata, HostResultList } from '../../../common/types';
+import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
+import { HostMetadata, HostResultList, EndpointAppConstants } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
-import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 
 interface HitSource {
   _source: HostMetadata;
@@ -50,7 +50,15 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const queryParams = await kibanaRequestToMetadataListESQuery(req, endpointAppContext);
+        const index = await endpointAppContext.indexPatternRetriever.get(
+          context.core.savedObjects.client,
+          EndpointAppConstants.METADATA_DATASET
+        );
+        const queryParams = await kibanaRequestToMetadataListESQuery(
+          req,
+          endpointAppContext,
+          index
+        );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams
@@ -72,7 +80,12 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const doc = await getHostData(context, req.params.id);
+        const index = await endpointAppContext.indexPatternRetriever.get(
+          context.core.savedObjects.client,
+          EndpointAppConstants.METADATA_DATASET
+        );
+
+        const doc = await getHostData(context, req.params.id, index);
         if (doc) {
           return res.ok({ body: doc });
         }
@@ -86,9 +99,10 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 
 export async function getHostData(
   context: RequestHandlerContext,
-  id: string
+  id: string,
+  index: string
 ): Promise<HostMetadata | undefined> {
-  const query = getESQueryHostMetadataByID(id);
+  const query = getESQueryHostMetadataByID(id, index);
   const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
     'search',
     query

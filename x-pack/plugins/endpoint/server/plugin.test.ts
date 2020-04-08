@@ -3,10 +3,44 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable max-classes-per-file */
 
+import { SavedObjectsClientContract } from 'kibana/server';
 import { EndpointPlugin, EndpointPluginSetupDependencies } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { PluginSetupContract } from '../../features/server';
+import { IndexPatternService } from '../../ingest_manager/server';
+
+export const MetadataIndexPattern = 'metadata-endpoint-*';
+
+export interface IndexPatternRetriever {
+  get(client: SavedObjectsClientContract, datasetPath: string, version?: string): Promise<string>;
+}
+
+export class FakeIndexPatternRetriever implements IndexPatternRetriever {
+  constructor(private readonly indexPattern: string) {}
+
+  static buildMetadata() {
+    return new FakeIndexPatternRetriever(MetadataIndexPattern);
+  }
+
+  async get(client: SavedObjectsClientContract, datasetPath: string, version?: string) {
+    return this.indexPattern;
+  }
+}
+
+export class FakeIndexPatternService implements IndexPatternService {
+  constructor(private readonly indexPattern: string) {}
+
+  async get(
+    savedObjectsClient: SavedObjectsClientContract,
+    pkgName: string,
+    datasetPath: string,
+    version?: string
+  ): Promise<string | undefined> {
+    return this.indexPattern;
+  }
+}
 
 describe('test endpoint plugin', () => {
   let plugin: EndpointPlugin;
@@ -28,7 +62,10 @@ describe('test endpoint plugin', () => {
       getFeaturesUICapabilities: jest.fn(),
       registerLegacyAPI: jest.fn(),
     };
-    mockedEndpointPluginSetupDependencies = { features: mockedPluginSetupContract };
+    mockedEndpointPluginSetupDependencies = {
+      features: mockedPluginSetupContract,
+      ingestManager: { indexPatternService: new FakeIndexPatternService('') },
+    };
   });
 
   it('test properly setup plugin', async () => {

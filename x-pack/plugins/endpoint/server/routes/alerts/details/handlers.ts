@@ -22,22 +22,32 @@ export const alertDetailsHandlerWrapper = function(
     try {
       const alertId = req.params.id;
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
+        // Remove the hard coded reference to an alert index here
+        // https://github.com/elastic/endpoint-app-team/issues/311
         index: EndpointAppConstants.ALERT_INDEX_NAME,
         id: alertId,
       })) as GetResponse<AlertEvent>;
+
+      const indexPattern = await endpointAppContext.indexPatternRetriever.get(
+        ctx.core.savedObjects.client,
+        EndpointAppConstants.EVENT_DATASET
+      );
 
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(
         config,
         ctx,
         req.params,
-        response
+        response,
+        indexPattern
       );
 
-      const currentHostInfo = await getHostData(ctx, response._source.host.id);
+      const currentHostInfo = await getHostData(ctx, response._source.host.id, indexPattern);
 
       return res.ok({
         body: {
+          // base64 encode the index in the response
+          // https://github.com/elastic/endpoint-app-team/issues/311
           id: response._id,
           ...response._source,
           state: {

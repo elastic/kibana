@@ -150,10 +150,18 @@ export const savedObjectMappings = {
       version: { type: 'keyword' },
       internal: { type: 'boolean' },
       installed: {
-        type: 'nested',
         properties: {
-          id: { type: 'keyword' },
-          type: { type: 'keyword' },
+          references: {
+            type: 'nested',
+            properties: {
+              id: { type: 'keyword' },
+              type: { type: 'keyword' },
+            },
+          },
+          patterns: {
+            dynamic: false,
+            type: 'object',
+          },
         },
       },
     },
