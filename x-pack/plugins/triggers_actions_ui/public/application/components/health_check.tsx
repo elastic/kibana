@@ -82,24 +82,26 @@ const TlsAndEncryptionError = ({
       </h2>
     }
     body={
-      <p role="banner">
-        {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionError', {
-          defaultMessage:
-            'You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. ',
-        })}
-        <EuiLink
-          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`}
-          external
-          target="_blank"
-        >
-          {i18n.translate(
-            'xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorAction',
-            {
-              defaultMessage: 'Learn how',
-            }
-          )}
-        </EuiLink>
-      </p>
+      <div className={`${className}__body`}>
+        <p role="banner">
+          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionError', {
+            defaultMessage:
+              'You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. ',
+          })}
+          <EuiLink
+            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`}
+            external
+            target="_blank"
+          >
+            {i18n.translate(
+              'xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorAction',
+              {
+                defaultMessage: 'Learn how',
+              }
+            )}
+          </EuiLink>
+        </p>
+      </div>
     }
   />
 );
@@ -122,24 +124,35 @@ const EncryptionError = ({
       </h2>
     }
     body={
-      <p role="banner">
-        {i18n.translate('xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey', {
-          defaultMessage: 'To create an alert, set a value for ',
-        })}
-        <EuiCode>{'xpack.encrypted_saved_objects.encryptionKey'}</EuiCode>
-        {i18n.translate('xpack.triggersActionsUI.components.healthCheck.encryptionErrorAfterKey', {
-          defaultMessage: ' in your kibana.yml file. ',
-        })}
-        <EuiLink
-          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`}
-          external
-          target="_blank"
-        >
-          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.encryptionErrorAction', {
-            defaultMessage: 'Learn how.',
-          })}
-        </EuiLink>
-      </p>
+      <div className={`${className}__body`}>
+        <p role="banner">
+          {i18n.translate(
+            'xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey',
+            {
+              defaultMessage: 'To create an alert, set a value for ',
+            }
+          )}
+          <EuiCode>{'xpack.encrypted_saved_objects.encryptionKey'}</EuiCode>
+          {i18n.translate(
+            'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAfterKey',
+            {
+              defaultMessage: ' in your kibana.yml file. ',
+            }
+          )}
+          <EuiLink
+            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`}
+            external
+            target="_blank"
+          >
+            {i18n.translate(
+              'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAction',
+              {
+                defaultMessage: 'Learn how.',
+              }
+            )}
+          </EuiLink>
+        </p>
+      </div>
     }
   />
 );
@@ -162,21 +175,23 @@ const TlsError = ({
       </h2>
     }
     body={
-      <p role="banner">
-        {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsError', {
-          defaultMessage:
-            'Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. ',
-        })}
-        <EuiLink
-          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`}
-          external
-          target="_blank"
-        >
-          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsErrorAction', {
-            defaultMessage: 'Learn how to enable TLS.',
+      <div className={`${className}__body`}>
+        <p role="banner">
+          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsError', {
+            defaultMessage:
+              'Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. ',
           })}
-        </EuiLink>
-      </p>
+          <EuiLink
+            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`}
+            external
+            target="_blank"
+          >
+            {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsErrorAction', {
+              defaultMessage: 'Learn how to enable TLS.',
+            })}
+          </EuiLink>
+        </p>
+      </div>
     }
   />
 );
