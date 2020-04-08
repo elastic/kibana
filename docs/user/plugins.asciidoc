@@ -28,6 +28,8 @@ When you specify a plugin name without a URL, the plugin tool attempts to downlo
 ["source","shell",subs="attributes"]
 $ bin/kibana-plugin install x-pack
 
+To check the plugin status, go to the status endpoint. For example, `localhost:5601/status`. For JSON-formatted status details, use the `localhost:5601/api/status` API endpoint.
+
 [float]
 [[install-plugin-url]]
 === Install plugins from an arbitrary URL

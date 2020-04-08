@@ -1,22 +1,33 @@
 [[access]]
-== Accessing Kibana
+== Access {kib}
 
-Kibana is a web application that you access through port 5601. All you need to do is point your web browser at the
-machine where Kibana is running and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
-If you want to allow remote users to connect, set the parameter `server.host` in `kibana.yml` to a non-loopback address.
+If you are running our hosted {ess} on Elastic Cloud, you can easily access {kib} with a single click.
 
-When you access Kibana, the <<discover,Discover>> page loads by default with the default index pattern selected. The
-time filter is set to the last 15 minutes and the search query is set to match-all (\*).
+. Log in to the link:https://cloud.elastic.co/[{ess} Console].
++
+If you need an account, register for a link:https://www.elastic.co/cloud/elasticsearch-service/signup[free 14-day trial].
 
-If you don't see any documents, try setting the time filter to a wider time range.
-If you still don't see any results, it's possible that you don't *have* any documents.
+. Create a deployment.
+
+.. Click *Create deployment*, then give your deployment a name.
+
+.. Modify the other deployment options, or use the default options to get started.
+
+.. Click *Create deployment*.
+
+.. Copy down the password for the `elastic` user and Cloud ID information.
+
+. Under *Applications*, click *Launch* for {kib}.
+
+. Log into {kib} as the `elastic` user.
 
 [float]
 [[status]]
-=== Checking Kibana Status
+=== Check the {kib} server status
 
-You can reach the Kibana server's status page by navigating to the status endpoint, for example, `localhost:5601/status`. The status page displays
-information about the server's resource usage and lists the installed plugins.
+The {kib} server status displays the resource usage for the {kib} server.
+
+To check the {kib} server status page, go to the status endpoint. For example, `localhost:5601/status`.
 
 [role="screenshot"]
 image::images/kibana-status-page-7_5_0.png[]
