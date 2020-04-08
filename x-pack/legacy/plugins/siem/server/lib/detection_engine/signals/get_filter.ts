@@ -34,6 +34,7 @@ export const evaluateValues = listItem => {
       break;
     case 'match_all':
       const length = listItem.values?.length;
+      // eslint-disable-next-line no-unused-expressions
       listItem.values?.forEach((element, index) => {
         if (index !== length - 1) {
           queryBuilder.push(index === 0 ? `(${element.name} or ` : `${element.name} or `);
