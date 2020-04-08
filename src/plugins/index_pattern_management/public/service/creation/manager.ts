@@ -62,11 +62,11 @@ export class IndexPatternCreationManager {
   }
 
   setup = (httpClient: HttpSetup) => ({
-    addCreationConfig: this.addCreationConfig(httpClient),
+    addCreationConfig: this.addCreationConfig(httpClient).bind(this),
   });
 
   start = () => ({
-    getType: this.getType,
-    getIndexPatternCreationOptions: this.getIndexPatternCreationOptions,
+    getType: this.getType.bind(this),
+    getIndexPatternCreationOptions: this.getIndexPatternCreationOptions.bind(this),
   });
 }

@@ -56,12 +56,12 @@ export class IndexPatternListManager {
   }
 
   setup = () => ({
-    addListConfig: this.addListConfig,
+    addListConfig: this.addListConfig.bind(this),
   });
 
   start = () => ({
-    getIndexPatternTags: this.getIndexPatternTags,
-    getFieldInfo: this.getFieldInfo,
-    areScriptedFieldsEnabled: this.areScriptedFieldsEnabled,
+    getIndexPatternTags: this.getIndexPatternTags.bind(this),
+    getFieldInfo: this.getFieldInfo.bind(this),
+    areScriptedFieldsEnabled: this.areScriptedFieldsEnabled.bind(this),
   });
 }
