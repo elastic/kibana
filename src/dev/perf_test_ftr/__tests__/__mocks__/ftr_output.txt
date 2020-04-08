@@ -1,0 +1,176 @@
+20:37:27  ### Running FTR PERF TESTS
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+o.e.n.Node
+20:39:12   └-: empty dashboard
+20:39:12   └-> "before all" hook
+20:39:12   └-> "before all" hook
+20:39:12   │ proc [kibana]   log   [02:39:10.471] [info][savedobjects-service] Creating index .kibana_2.
+20:39:12   │ proc [kibana]   log   [02:39:10.552] [info][savedobjects-service] Reindexing .kibana to .kibana_1
+20:39:12   │ proc [kibana]   log   [02:39:10.938] [info][savedobjects-service] Migrating .kibana_1 saved objects to .kibana_2
+20:39:12   │ proc [kibana]   log   [02:39:11.278] [info][savedobjects-service] Pointing alias .kibana to .kibana_2.
+20:39:12   │ proc [kibana]   log   [02:39:11.352] [info][savedobjects-service] Finished in 883ms.
+20:39:34   └-> should display empty widget
+20:39:34   └-> "before each" hook: global before each
+20:39:34   └- ✓ pass  (66ms) "dashboard app using current data empty dashboard should display empty widget"
+20:39:34   └-> should open add panel when add button is clicked
+20:39:34   └-> should add new visualization from dashboard
+20:39:34   └-> "before each" hook: global before each
+20:40:00   └- ✓ pass  (23.0s) "dashboard app using current data empty dashboard should add new visualization from dashboard"
+20:40:00   └-> "after all" hook
+20:40:04   └-> "after all" hook
+20:40:04   └-: dashboard embeddable rendering
+20:40:04   └-> adding visualizations
+20:40:04   └-> adding saved searches
+20:40:04   └-> initial render test
+20:40:04   └-> data rendered correctly when dashboard is opened from listing page
+20:40:04   └-> data rendered correctly when dashboard is hard refreshed
+20:40:04   └-> panels are updated when time changes outside of data
+20:40:04   └-> panels are updated when time changes inside of data
+20:40:04   └-: create and add embeddables
+20:40:04   └-> "before all" hook
+20:40:04   └-> "before all" hook
+20:40:05   │ proc [kibana]   log   [02:40:05.173] [info][savedobjects-service] Creating index .kibana_2.
+20:40:05   │ proc [kibana]   log   [02:40:05.233] [info][savedobjects-service] Reindexing .kibana to .kibana_1
+20:40:05   │ proc [kibana]   log   [02:40:05.577] [info][savedobjects-service] Migrating .kibana_1 saved objects to .kibana_2
+20:40:05   │ proc [kibana]   log   [02:40:05.874] [info][savedobjects-service] Pointing alias .kibana to .kibana_2.
+20:40:05   │ proc [kibana]   log   [02:40:05.925] [info][savedobjects-service] Finished in 754ms.
+20:40:38   └-: add new visualization link
+20:40:38   └-> "before all" hook
+20:40:38   └-> adds new visualiztion via the top nav link
+20:40:38   └-> "before each" hook: global before each
+20:40:59   └- ✓ pass  (23.0s) "dashboard app using current data create and add embeddables add new visualization link adds new visualiztion via the top nav link"
+20:40:59   └-> adds a new visualization
+20:40:59   └-> "before each" hook: global before each
+20:41:26   └- ✓ pass  (24.1s) "dashboard app using current data create and add embeddables add new visualization link adds a new visualization"
+20:41:26   └-> saves the saved visualization url to the app link
+20:41:26   └-> "before each" hook: global before each
+20:41:26   └- ✓ pass  (962ms) "dashboard app using current data create and add embeddables add new visualization link saves the saved visualization url to the app link"
+20:41:26   └-> "after all" hook
+20:41:26   └-> "after all" hook
+20:41:26   └-: visualize:enableLabs advanced setting
+20:41:26   └-> "before all" hook
+20:41:26   └-> should display lab visualizations in add panel
+20:41:26   └-> "before each" hook: global before each
+20:41:53   └- ✓ pass  (25.0s) "dashboard app using current data create and add embeddables visualize:enableLabs advanced setting should display lab visualizations in add panel"
+20:41:53   └-: is false
+20:41:53   └-> "before all" hook
+20:41:53   └-> "before all" hook
+20:42:03   └-> should not display lab visualizations in add panel
+20:42:03   └-> "before each" hook: global before each
+20:42:29   └- ✓ pass  (23.5s) "dashboard app using current data create and add embeddables visualize:enableLabs advanced setting is false should not display lab visualizations in add panel"
+20:42:29   └-> "after all" hook
+20:42:44   └-> "after all" hook
+20:42:44   └-> "after all" hook
+20:42:44   └-> "after all" hook
+20:42:44   └-: dashboard time zones
+20:42:44   └-> "before all" hook
+20:42:44   └-> "before all" hook
+20:42:44   │ proc [kibana]   log   [02:42:44.617] [info][savedobjects-service] Creating index .kibana_2.
+20:42:44   │ proc [kibana]   log   [02:42:44.678] [info][savedobjects-service] Reindexing .kibana to .kibana_1
+20:42:45   │ proc [kibana]   log   [02:42:45.025] [info][savedobjects-service] Migrating .kibana_1 saved objects to .kibana_2
+20:42:45   │ proc [kibana]   log   [02:42:45.294] [info][savedobjects-service] Pointing alias .kibana to .kibana_2.
+20:42:45   │ proc [kibana]   log   [02:42:45.346] [info][savedobjects-service] Finished in 731ms.
+20:43:12   │ proc [kibana]   log   [02:43:11.690] [warning][savedobjects-service] Importing saved objects from a .json file has been deprecated
+20:43:38   └-> Exported dashboard adjusts EST time to UTC
+20:43:38   └-> "before each" hook: global before each
+!!! REDACTED LINES"
+20:43:40   └- ✓ pass  (4.1s) "dashboard app using current data dashboard time zones Exported dashboard adjusts EST time to UTC"
+20:43:40   └-> Changing timezone changes dashboard timestamp and shows the same data
+20:43:40   └-> "before each" hook: global before each
+!!! REDACTED LINES
+20:44:27   └- ✓ pass  (40.9s) "dashboard app using current data dashboard time zones Changing timezone changes dashboard timestamp and shows the same data"
+20:44:27   └-> "after all" hook
+20:44:27   └-> "after all" hook
+20:44:27   └-: dashboard data-shared attributes
+20:44:27   └-> "before all" hook
+20:44:27   └-> "before all" hook
+20:44:27   │ proc [kibana]   log   [02:44:21.971] [info][savedobjects-service] Creating index .kibana_2.
+20:44:27   │ proc [kibana]   log   [02:44:22.026] [info][savedobjects-service] Reindexing .kibana to .kibana_1
+20:44:27   │ proc [kibana]   log   [02:44:22.374] [info][savedobjects-service] Migrating .kibana_1 saved objects to .kibana_2
+20:44:27   │ proc [kibana]   log   [02:44:22.635] [info][savedobjects-service] Pointing alias .kibana to .kibana_2.
+20:44:27   │ proc [kibana]   log   [02:44:22.690] [info][savedobjects-service] Finished in 720ms.
+20:45:06   └-> should be able to hide all panel titles
+20:45:06   └-> "before each" hook: global before each
+20:45:06   └- ✓ pass  (3.5s) "dashboard app using current data dashboard data-shared attributes should be able to hide all panel titles"
+20:45:06   └-> should be able to unhide all panel titles
+20:45:06   └-> "before each" hook: global before each
+20:45:06   └- ✓ pass  (288ms) "dashboard app using current data dashboard data-shared attributes should be able to unhide all panel titles"
+20:45:06   └-> "after all" hook
+20:45:06   └-: dashboard data-shared attributes
+20:45:06   └-> "before all" hook
+20:45:06   └-> "before all" hook
+20:45:06   │ proc [kibana]   log   [02:45:03.793] [info][savedobjects-service] Creating index .kibana_2.
+20:45:06   │ proc [kibana]   log   [02:45:03.849] [info][savedobjects-service] Reindexing .kibana to .kibana_1
+20:45:06   │ proc [kibana]   log   [02:45:04.178] [info][savedobjects-service] Migrating .kibana_1 saved objects to .kibana_2
+20:45:06   │ proc [kibana]   log   [02:45:04.431] [info][savedobjects-service] Pointing alias .kibana to .kibana_2.
+20:45:06   │ proc [kibana]   log   [02:45:04.476] [info][savedobjects-service] Finished in 685ms.
+!!! REDACTED LINES
+20:45:42   └-> should have time picker with data-shared-timefilter-duration
+20:45:42   └-> "before each" hook: global before each
+20:45:42   └- ✓ pass  (28ms) "dashboard app using current data dashboard data-shared attributes should have time picker with data-shared-timefilter-duration"
+20:45:42   └-> should have data-shared-items-count set to the number of embeddables on the dashboard
+20:45:42   └-> "before each" hook: global before each
+20:45:42   └- ✓ pass  (382ms) "dashboard app using current data dashboard data-shared attributes should have data-shared-items-count set to the number of embeddables on the dashboard"
+20:45:42   └-> should have panels with expected data-shared-item title
+20:45:42   └-> "before each" hook: global before each
+20:45:42   └- ✓ pass  (1.0s) "dashboard app using current data dashboard data-shared attributes should have panels with expected data-shared-item title"
+20:45:42   └-> data shared item container data has description and title set
+20:45:42   └-> "before each" hook: global before each
+20:45:42   └- ✓ pass  (41ms) "dashboard app using current data dashboard data-shared attributes data shared item container data has description and title set"
+20:45:42   └-> data-shared-item title should update a viz when using a custom panel title
+20:45:42   └-> "before each" hook: global before each
+20:45:49   └- ✓ pass  (8.7s) "dashboard app using current data dashboard data-shared attributes data-shared-item title should update a viz when using a custom panel title"
+20:45:49   └-> data-shared-item title is cleared with an empty panel title string
+20:45:49   └-> "before each" hook: global before each
+20:45:59   └- ✓ pass  (8.9s) "dashboard app using current data dashboard data-shared attributes data-shared-item title is cleared with an empty panel title string"
+20:45:59   └-> data-shared-item title can be reset
+20:45:59   └-> "before each" hook: global before each
+20:46:05   └- ✓ pass  (6.7s) "dashboard app using current data dashboard data-shared attributes data-shared-item title can be reset"
+20:46:05   └-> data-shared-item title should update a saved search when using a custom panel title
+20:46:05   └-> "before each" hook: global before each
+20:46:10   └- ✓ pass  (5.4s) "dashboard app using current data dashboard data-shared attributes data-shared-item title should update a saved search when using a custom panel title"
+20:46:10   └-> "after all" hook
+20:46:11   └-: embed mode
+20:46:11   └-> "before all" hook
+20:46:11   └-> "before all" hook
+20:46:11   │ proc [kibana]   log   [02:46:11.515] [info][savedobjects-service] Creating index .kibana_2.
+20:46:11   │ proc [kibana]   log   [02:46:11.566] [info][savedobjects-service] Reindexing .kibana to .kibana_1
+20:46:11   │ proc [kibana]   log   [02:46:11.895] [info][savedobjects-service] Migrating .kibana_1 saved objects to .kibana_2
+20:46:12   │ proc [kibana]   log   [02:46:12.151] [info][savedobjects-service] Pointing alias .kibana to .kibana_2.
+20:46:12   │ proc [kibana]   log   [02:46:12.195] [info][savedobjects-service] Finished in 681ms.
+20:46:44   └-> hides the chrome
+20:46:44   └-> "before each" hook: global before each
+20:46:52   └- ✓ pass  (7.7s) "dashboard app using current data embed mode hides the chrome"
+20:46:52   └-> "after all" hook
+20:46:55   └-> "after all" hook
+20:46:58   └-: dashboard query bar
+20:46:58   └-> "before all" hook
+20:46:58   └-> "before all" hook
+20:46:58   │ proc [kibana]   log   [02:46:58.369] [info][savedobjects-service] Creating index .kibana_2.
+20:46:58   │ proc [kibana]   log   [02:46:58.430] [info][savedobjects-service] Reindexing .kibana to .kibana_1
+20:46:59   │ proc [kibana]   log   [02:46:58.762] [info][savedobjects-service] Migrating .kibana_1 saved objects to .kibana_2
+20:46:59   │ proc [kibana]   log   [02:46:58.975] [info][savedobjects-service] Pointing alias .kibana to .kibana_2.
+20:46:59   │ proc [kibana]   log   [02:46:59.018] [info][savedobjects-service] Finished in 651ms.
+20:47:31   └-> causes panels to reload when refresh is clicked
+20:47:31   └-> "before each" hook: global before each
+20:47:31   └- ✓ pass  (4.0s) "dashboard app using current data dashboard query bar causes panels to reload when refresh is clicked"
+20:47:31   └-> "after all" hook
+20:47:31   └-> "after all" hook: unloadCurrentData
+20:47:32   └-> "after all" hook
+20:47:32   └-> "after all" hook
+20:47:32   │
+20:47:32   │21 passing (8.0m)
+20:47:32   │8 pending

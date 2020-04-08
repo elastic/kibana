@@ -44,3 +44,4 @@ src/legacy/core_plugins/vis_type_vislib/public/vislib/__tests__/lib/fixtures/moc
 **/graphql/types.ts
 **/*.js.snap
 !/.eslintrc.js
+/src/dev/perf_test_ftr/benchmark/logstash-7.5.1/**

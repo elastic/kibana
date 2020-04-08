@@ -38,6 +38,7 @@ export default {
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
     '<rootDir>/src/dev/code_coverage/ingest_coverage',
+    '<rootDir>/src/dev/perf_test_ftr',
   ],
   collectCoverageFrom: [
     'src/plugins/**/*.{ts,tsx}',

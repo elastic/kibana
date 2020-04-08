@@ -1,0 +1,17 @@
+[2020-04-16T09:47:39.005Z]         └- ✓ pass  (7.3s) "dashboard app using current data dashboard data-shared attributes data-shared-item title can be reset"
+[2020-04-16T09:47:42.683Z]         └- ✓ pass  (6.2s) "dashboard app using current data dashboard data-shared attributes data-shared-item title should update a saved search when using a custom panel title"
+[2020-04-16T09:48:10.402Z]         └- ✓ pass  (7.6s) "dashboard app using current data embed mode hides the chrome"
+
+[2020-04-16T09:48:35.205Z]         └- ✓ pass  (4.1s) "dashboard app using current data dashboard query bar causes panels to reload when refresh is clicked"
+
+
+
+
+
+
+
+
+
+[2020-04-16T09:48:43.006Z]         │21 passing (8.0m)
+
+

@@ -53,7 +53,7 @@ def ossCiGroupProcess(ciGroup) {
       "JOB=kibana-ciGroup${ciGroup}",
     ]) {
       retryable("kibana-ciGroup${ciGroup}") {
-        runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
+        runbld("./test/scripts/jenkins_ci_group_with_perf_test_ftr.sh", "Execute kibana-ciGroup${ciGroup} w/ PERF TEST FTR")
       }
     }
   }

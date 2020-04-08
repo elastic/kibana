@@ -2,6 +2,33 @@
 
 source test/scripts/jenkins_test_setup_xpack.sh
 
+runTestsAndParseLines() {
+  counter=1
+  echo "Running each test suite $RUNS times"
+  while [[ $counter -le $RUNS ]]; do
+    echo "RUNNING: node scripts/functional_tests ${grepCommand}"
+    eval node ./scripts/functional_tests ${grepCommand} |
+      while read CMD; do
+        echo $CMD
+        parseLine "$CMD"
+        if [ "$?" = 1 ]; then
+          if [ "$testTime" != "" ]; then
+            trackTestTime=" TEST_TIME:${testTime}ms"
+          else
+            trackTestTime=""
+          fi
+
+          if [ "$testName" != "" ]; then
+            line="TEST_NAME:\"${testName}\"${trackTestTime} PASSED:${testPassed} THROTTLED:${throttled} ${APPEND}"
+            echo "TRACKING: ${line}"
+            echo $line >>"$resultsFile"
+          fi
+        fi
+      done
+    ((counter++))
+  done
+}
+
 if [[ -z "$CODE_COVERAGE" ]]; then
   echo " -> Running functional and api tests"
 

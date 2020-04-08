@@ -1,0 +1,5 @@
+
+
+
+[2020-04-16T09:46:48.919Z]         └- ✖ fail: "mock app using something else regular mode does nothing but it's kinda cool?"
+[2020-04-16T09:43:51.084Z]         └- ✓ pass  (23.6s) "dashboard app using current data create and add embeddables visualize:enableLabs advanced setting is false should not display lab visualizations in add panel"
