@@ -75,6 +75,12 @@ export class SearchService implements Plugin<ISearchSetup, void> {
     const api: ISearchSetup = {
       registerSearchStrategyContext: this.contextContainer!.registerContext,
       registerSearchStrategyProvider,
+      createScopedSearchApi: caller => {
+        return createApi({
+          caller,
+          searchStrategies: this.searchStrategies,
+        });
+      },
     };
 
     api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);

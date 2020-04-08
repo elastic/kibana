@@ -10,6 +10,7 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../src/core/server';
 import { Alert, AlertActionParams, ActionGroup } from '../common';
 import { AlertsClient } from './alerts_client';
+import { ISearchGeneric } from '../../../../src/plugins/data/server';
 export * from '../common';
 
 export type State = Record<string, any>;
@@ -31,6 +32,7 @@ declare module 'src/core/server' {
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
+  search: ISearchGeneric;
 }
 
 export interface AlertServices extends Services {

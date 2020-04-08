@@ -57,6 +57,7 @@ import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { PluginSetup as DataPluginSetup } from '../../../../src/plugins/data/server';
 
 const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -83,6 +84,7 @@ export interface AlertingPluginsSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
+  data: DataPluginSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -104,6 +106,7 @@ export class AlertingPlugin {
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
   private eventLogger?: IEventLogger;
+  private data?: DataPluginSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -123,6 +126,7 @@ export class AlertingPlugin {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.spaces = plugins.spaces?.spacesService;
     this.security = plugins.security;
+    this.data = plugins.data;
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 
@@ -265,10 +269,14 @@ export class AlertingPlugin {
     savedObjects: SavedObjectsServiceStart
   ): (request: KibanaRequest) => Services {
     const { adminClient } = this;
-    return request => ({
-      callCluster: adminClient!.asScoped(request).callAsCurrentUser,
-      savedObjectsClient: savedObjects.getScopedClient(request),
-    });
+    return request => {
+      const caller = adminClient!.asScoped(request).callAsCurrentUser;
+      return {
+        callCluster: caller,
+        savedObjectsClient: savedObjects.getScopedClient(request),
+        search: this.data!.search.createScopedSearchApi(caller).search,
+      };
+    };
   }
 
   private spaceIdToNamespace = (spaceId?: string): string | undefined => {

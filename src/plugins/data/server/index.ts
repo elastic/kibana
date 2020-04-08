@@ -166,6 +166,7 @@ export { ParsedInterval } from '../common';
 
 export {
   ISearch,
+  ISearchGeneric,
   ISearchCancel,
   ISearchOptions,
   IRequestTypesMap,

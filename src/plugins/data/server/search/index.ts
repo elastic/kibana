@@ -23,6 +23,7 @@ export { ISearchContext } from './i_search_context';
 
 export {
   ISearch,
+  ISearchGeneric,
   ISearchCancel,
   ISearchOptions,
   IRequestTypesMap,

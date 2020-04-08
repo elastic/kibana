@@ -17,25 +17,28 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
-import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/server';
+import React, { Fragment } from 'react';
+import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
-import { alertType as esQueryAlert } from './alert_types/es_query';
-import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
-import { alertType as peopleInSpaceAlert } from './alert_types/astros';
-
-// this plugin's dependendencies
-export interface AlertingExampleDeps {
-  alerting: AlertingSetup;
+interface EsQueryParamsProps {
+  alertParams: {};
+  setAlertParams: (property: string, value: any) => void;
+  errors: { [key: string]: string[] };
 }
 
-export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerting }: AlertingExampleDeps) {
-    alerting.registerType(alwaysFiringAlert);
-    alerting.registerType(peopleInSpaceAlert);
-    alerting.registerType(esQueryAlert);
-  }
-
-  public start() {}
-  public stop() {}
+export function getAlertType(): AlertTypeModel {
+  return {
+    id: 'example.es-query',
+    name: 'ES Query',
+    iconClass: 'bolt',
+    alertParamsExpression: () => <Fragment />,
+    validate: (alertParams: EsQueryParamsProps['alertParams']) => {
+      const validationResult = {
+        errors: {
+          instances: new Array<string>(),
+        },
+      };
+      return validationResult;
+    },
+  };
 }

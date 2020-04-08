@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { IContextProvider } from 'kibana/server';
+import { IContextProvider, APICaller } from 'kibana/server';
 import { ISearchContext } from './i_search_context';
 import { TRegisterSearchStrategyProvider, TSearchStrategyProvider } from './i_search_strategy';
+import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
 
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
@@ -37,4 +38,6 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategyProvider: TRegisterSearchStrategyProvider;
+
+  createScopedSearchApi: (caller: APICaller) => IRouteHandlerSearchContext;
 }

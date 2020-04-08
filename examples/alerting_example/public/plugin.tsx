@@ -24,6 +24,7 @@ import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/t
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
 import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
+import { getAlertType as getESQueryAlertType } from './alert_types/es_query';
 import { registerNavigation } from './alert_types';
 
 export type Setup = void;
@@ -58,6 +59,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
 
     triggers_actions_ui.alertTypeRegistry.register(getAlwaysFiringAlertType());
     triggers_actions_ui.alertTypeRegistry.register(getPeopleInSpaceAlertType());
+    triggers_actions_ui.alertTypeRegistry.register(getESQueryAlertType());
 
     registerNavigation(alerting);
   }
