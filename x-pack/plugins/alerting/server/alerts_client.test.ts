@@ -72,6 +72,7 @@ function getMockData(overwrites: Record<string, any> = {}) {
         params: {
           foo: true,
         },
+        actionTypeId: 'test',
       },
     ],
     ...overwrites,
@@ -1992,6 +1993,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test',
           },
           {
             group: 'default',
@@ -1999,6 +2001,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test',
           },
           {
             group: 'default',
@@ -2006,6 +2009,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test2',
           },
         ],
       },
@@ -2196,6 +2200,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test',
           },
         ],
       },
@@ -2344,6 +2349,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test',
           },
         ],
       },
@@ -2455,6 +2461,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: 'test',
             },
           ],
         },
@@ -2524,6 +2531,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test',
           },
         ],
       },
@@ -2629,6 +2637,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test',
           },
           {
             group: 'default',
@@ -2636,6 +2645,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test',
           },
           {
             group: 'default',
@@ -2643,6 +2653,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: 'test2',
           },
         ],
       },
@@ -2759,6 +2770,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: 'test',
             },
           ],
         },
@@ -2790,6 +2802,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: 'test',
             },
           ],
         },
@@ -2827,6 +2840,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: 'test',
             },
           ],
         },
@@ -2863,6 +2877,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: 'test',
             },
           ],
         },
