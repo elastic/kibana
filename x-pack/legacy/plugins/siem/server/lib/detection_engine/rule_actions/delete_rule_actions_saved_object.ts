@@ -16,7 +16,7 @@ interface DeleteRuleActionsSavedObject {
 export const deleteRuleActionsSavedObject = async ({
   ruleAlertId,
   savedObjectsClient,
-}: DeleteRuleActionsSavedObject) => {
+}: DeleteRuleActionsSavedObject): Promise<{} | null> => {
   const ruleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
 
   if (!ruleActions) return null;
