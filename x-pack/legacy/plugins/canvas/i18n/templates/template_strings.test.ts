@@ -11,7 +11,7 @@ import { asyncTemplateSpecs } from '../../canvas_plugin_src/templates';
 import { TagStrings } from '../tags';
 
 jest.mock('axios');
-axios.get.mockImplementation(url => Promise.resolve({ data: url }));
+(axios.get as any).mockImplementation((url: any) => Promise.resolve({ data: url }));
 
 describe('TemplateStrings', () => {
   const templateStrings = getTemplateStrings();
