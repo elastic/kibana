@@ -47,7 +47,8 @@ export const ConfirmCreateDatasourceModal: React.FunctionComponent<{
         <EuiCallOut
           iconType="iInCircle"
           title={i18n.translate('xpack.ingestManager.createDatasource.confirmModalCalloutTitle', {
-            defaultMessage: 'This action will update {agentCount} agents',
+            defaultMessage:
+              'This action will update {agentCount, plural, one {# agent} other {# agents}}',
             values: {
               agentCount,
             },

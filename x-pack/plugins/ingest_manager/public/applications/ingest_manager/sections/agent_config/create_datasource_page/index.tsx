@@ -14,6 +14,7 @@ import {
   EuiBottomBar,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
@@ -236,6 +237,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         />
       )}
       <EuiSteps steps={steps} />
+      <EuiSpacer size="l" />
       <EuiBottomBar className="ingestManager__bottomBar" paddingSize="m">
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
