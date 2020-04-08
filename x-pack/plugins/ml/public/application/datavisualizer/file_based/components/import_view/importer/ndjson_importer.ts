@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Importer, ImportConfig } from './importer';
+import { Importer, ImportConfig, CreateDocsResponse } from './importer';
 import { FindFileStructureResponse } from '../../../../../../../common/types/file_datavisualizer';
 
 export class NdjsonImporter extends Importer {
@@ -12,7 +12,7 @@ export class NdjsonImporter extends Importer {
     super(settings);
   }
 
-  protected _createDocs(json: string) {
+  protected _createDocs(json: string): CreateDocsResponse {
     let remainder = 0;
     try {
       const splitJson = json.split(/}\s*\n/);

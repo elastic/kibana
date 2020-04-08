@@ -39,24 +39,18 @@ export function readFile(file: File) {
 
       reader.onload = (() => {
         return () => {
-          const decoder = new TextDecoder('utf-8');
-          if (reader.result === null || typeof reader.result === 'string') {
+          const decoder = new TextDecoder();
+          const data = reader.result;
+          if (data === null || typeof data === 'string') {
             return reject();
           }
           const size = UPLOAD_SIZE_MB * Math.pow(2, 20);
-          const fileContents = decoder.decode(reader.result.slice(0, size));
-          // let w = 0;
-          // const chunkSize = 250;
-          // let fileContents = '';
-          // while (w * chunkSize < reader.result.byteLength) {
-          //   const r = reader.result.slice(w * chunkSize, (w + 1) * chunkSize);
-          //   fileContents += decoder.decode(r);
-          //   w++;
-          // }
+          const fileContents = decoder.decode(data.slice(0, size));
+
           if (fileContents === '') {
             reject();
           } else {
-            resolve({ fileContents, data: reader.result });
+            resolve({ fileContents, data });
           }
         };
       })();

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Importer, ImportConfig, ReadResponse } from './importer';
+import { Importer, ImportConfig, CreateDocsResponse } from './importer';
 import {
   Doc,
   FindFileStructureResponse,
@@ -33,7 +33,7 @@ export class MessageImporter extends Importer {
   // multiline_start_pattern regex
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a newline char inside a field value, so keep looking.
-  protected _createDocs(text: string): ReadResponse {
+  protected _createDocs(text: string): CreateDocsResponse {
     let remainder = 0;
     try {
       const docs: Doc[] = [];

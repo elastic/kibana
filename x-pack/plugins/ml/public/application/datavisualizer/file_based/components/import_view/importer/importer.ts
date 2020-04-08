@@ -20,7 +20,7 @@ import {
 const CHUNK_SIZE = 5000;
 const MAX_CHUNK_CHAR_COUNT = 1000000;
 const IMPORT_RETRIES = 5;
-const STRING_CHUNKS_MB = 50;
+const STRING_CHUNKS_MB = 100;
 
 export interface ImportConfig {
   settings: Settings;
@@ -35,7 +35,7 @@ export interface ImportResults {
   error?: any;
 }
 
-export interface ReadResponse {
+export interface CreateDocsResponse {
   success: boolean;
   remainder: number;
   docs: ImportDoc[];
@@ -56,9 +56,13 @@ export abstract class Importer {
   }
 
   public read(data: ArrayBuffer) {
-    const decoder = new TextDecoder('utf-8');
+    const decoder = new TextDecoder();
     const size = STRING_CHUNKS_MB * Math.pow(2, 20);
 
+    // chop the data up into 100MB chunks for processing.
+    // if the chop produces a partial line at the end, a character "remainder" count
+    // is returned which is used to roll the next chunk back that many chars so
+    // it is included in the next chunk.
     const parts = Math.ceil(data.byteLength / size);
     let remainder = 0;
     for (let i = 0; i < parts; i++) {
@@ -75,7 +79,7 @@ export abstract class Importer {
     return { success: true };
   }
 
-  protected abstract _createDocs(t: string): ReadResponse;
+  protected abstract _createDocs(t: string): CreateDocsResponse;
 
   public async initializeImport(index: string) {
     const settings = this._settings;
