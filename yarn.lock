@@ -1343,27 +1343,22 @@
   resolved "https://registry.yarnpkg.com/@elastic/maki/-/maki-6.2.0.tgz#d0a85aa248bdc14dca44e1f9430c0b670f65e489"
   integrity sha512-QkmRNpEY4Dy6eqwDimR5X9leMgdPFjdANmpEIwEW1XVUG2U4YtB2BXhDxsnMmNTUrJUjtnjnwgwBUyg0pU0FTg==
 
-"@elastic/node-crypto@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"
-  integrity sha1-wYrCgvY16I8EHMFVXYBuSSyo87E=
-
-"@elastic/node-crypto@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.0.0.tgz#4d325df333fe1319556bb4d54214098ada1171d4"
-  integrity sha512-bbjbEyILPRTRt0xnda18OttLtlkJBPuXx3CjISUSn9jhWqHoFMzfOaZ73D5jxZE2SaFZUrJYfPpqXP6qqPufAQ==
+"@elastic/node-crypto@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.1.1.tgz#619b70322c9cce4a7ee5fbf8f678b1baa7f06095"
+  integrity sha512-F6tIk8Txdqjg8Siv60iAvXzO9ZdQI87K3sS/fh5xd2XaWK+T5ZfqeTvsT7srwG6fr6uCBfuQEJV1KBBl+JpLZA==
 
 "@elastic/numeral@2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.4.0.tgz#883197b7f4bf3c2dd994f53b274769ddfa2bf79a"
   integrity sha512-uGBKGCNghTgUZPHClji/00v+AKt5nidPTGOIbcT+lbTPVxNB6QPpPLGWtXyrg3QZAxobPM/LAZB1mAqtJeq44Q==
 
-"@elastic/request-crypto@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.0.2.tgz#bf27bf009227166f3eeb2b5193a108752335ebd3"
-  integrity sha512-8FtGYl7LebhmJmEDWiGn3MorvNiGWSYPqhvgRlKXjNakEuLoPBBe0DHxbwLkj08CMLWczXcO2ixqBPY7fEhJpA==
+"@elastic/request-crypto@1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.1.2.tgz#2e323550f546f6286994126d462a9ea480a3bfb1"
+  integrity sha512-i73wjj1Qi8dGJIy170Z8xyJ760mFNjTbdmcp/nEczqWD0miNW6I5wZ5MNrv7M6CXn2m1wMXiT6qzDYd93Hv1Dw==
   dependencies:
-    "@elastic/node-crypto" "^0.1.2"
+    "@elastic/node-crypto" "1.1.1"
     "@types/node-jose" "1.1.0"
     node-jose "1.1.0"
 

@@ -65,6 +65,11 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.host = host;
     transportConfig.port = port;
     transportConfig.secure = !!secure;
+    if (!transportConfig.secure) {
+      transportConfig.tls = {
+        rejectUnauthorized: false,
+      };
+    }
   }
 
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
