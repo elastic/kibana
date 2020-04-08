@@ -8,7 +8,9 @@ import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
 export default async function({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional_endpoint/config.ts')
+  );
 
   return {
     ...xpackFunctionalConfig.getAll(),
@@ -17,9 +19,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.endpoint.enabled=true',
-        '--xpack.ingestManager.enabled=true',
-        '--xpack.ingestManager.fleet.enabled=true',
         // use a bogus port so the ingest manager setup will fail
         '--xpack.ingestManager.epm.registryUrl=http://127.0.0.1:12345',
       ],

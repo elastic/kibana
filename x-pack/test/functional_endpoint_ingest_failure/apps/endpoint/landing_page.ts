@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('home page', function() {
-    const pageObjects = getPageObjects(['common', 'endpoint']);
+    const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
 
     before(async () => {

@@ -6,13 +6,21 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { pageObjects } from './page_objects';
 
 export default async function({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   return {
     ...xpackFunctionalConfig.getAll(),
+    pageObjects,
     testFiles: [resolve(__dirname, './apps/endpoint')],
+    apps: {
+      ...xpackFunctionalConfig.get('apps'),
+      endpoint: {
+        pathname: '/app/endpoint',
+      },
+    },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
