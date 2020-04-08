@@ -199,9 +199,8 @@ export function XYChart({
 
   // use default number formatter for y axis and use formatting hint if there is just a single y column
   let yAxisFormatter = formatFactory({ id: 'number' });
-  let firstYAxisColumn: KibanaDatatableColumn | undefined;
-  if (layers.length >= 1 && layers[0].accessors.length === 1) {
-    firstYAxisColumn = Object.values(data.tables)[0].columns.find(
+  if (layers.length === 1 && layers[0].accessors.length === 1) {
+    const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
       ({ id }) => id === layers[0].accessors[0]
     );
     if (firstYAxisColumn && firstYAxisColumn.formatHint) {
@@ -229,48 +228,6 @@ export function XYChart({
         }
       : undefined;
 
-  const onBrushEnd = (min: number, max: number) => {
-    // in the future we want to make it also for histogram
-    if (!firstYAxisColumn || !xAxisColumn || xAxisColumn.meta?.type !== 'date_histogram') {
-      return;
-    }
-
-    const firstLayer = layers[0];
-    const table = data.tables[firstLayer.layerId];
-
-    const startRange = moment(min).toISOString();
-    const endRange = moment(max).toISOString();
-
-    const series = [
-      {
-        values: table.rows.map((row, rowIndex) => ({
-          xRaw: {
-            table,
-            column: table.columns.findIndex(el => el.id === xAxisColumn?.id), // index of X accessor in the table:
-            row: rowIndex,
-          },
-        })),
-      },
-    ];
-
-    const xAxisFieldName: string | undefined = xAxisColumn?.meta?.aggConfigParams?.field;
-    const timeFieldName = xDomain && xAxisFieldName;
-
-    const context: EmbeddableVisTriggerContext = {
-      data: {
-        range: [startRange, endRange],
-        data: {
-          ordered: {
-            date: xAxisColumn.formatHint?.id === 'date',
-          },
-          series,
-        },
-      },
-      timeFieldName,
-    };
-    executeTriggerActions(VIS_EVENT_TO_TRIGGER.brush, context);
-  };
-
   return (
     <Chart>
       <Settings
@@ -280,7 +237,41 @@ export function XYChart({
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={onBrushEnd}
+        onBrushEnd={(min: number, max: number) => {
+          // in the future we want to make it also for histogram
+          if (!xAxisColumn || xAxisColumn.meta?.type !== 'date_histogram') {
+            return;
+          }
+
+          const table = data.tables[layers[0].layerId];
+          const xAxisFieldName: string | undefined = xAxisColumn?.meta?.aggConfigParams?.field;
+          const timeFieldName = xDomain && xAxisFieldName;
+
+          // TODO: simplify the context structure: https://github.com/elastic/kibana/issues/62936
+          const context: EmbeddableVisTriggerContext = {
+            data: {
+              range: [moment(min).toISOString(), moment(max).toISOString()],
+              data: {
+                ordered: {
+                  date: xAxisColumn.formatHint?.id === 'date',
+                },
+                series: [
+                  {
+                    values: table.rows.map((row, rowIndex) => ({
+                      xRaw: {
+                        table,
+                        column: table.columns.findIndex(el => el.id === xAxisColumn?.id), // index of X accessor in the table:
+                        row: rowIndex,
+                      },
+                    })),
+                  },
+                ],
+              },
+            },
+            timeFieldName,
+          };
+          executeTriggerActions(VIS_EVENT_TO_TRIGGER.brush, context);
+        }}
         onElementClick={([[geometry, series]]) => {
           // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
           const xySeries = series as XYChartSeriesIdentifier;
