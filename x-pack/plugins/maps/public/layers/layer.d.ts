@@ -46,4 +46,5 @@ export class AbstractLayer implements ILayer {
   getMaxZoomForData(): number;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getQuery(): string;
 }

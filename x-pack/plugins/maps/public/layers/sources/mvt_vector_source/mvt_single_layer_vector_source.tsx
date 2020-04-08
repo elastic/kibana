@@ -17,7 +17,6 @@ import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
-import { ILayer } from '../../layer';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
   defaultMessage: 'Vector Tile Layer',
@@ -67,12 +66,15 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  createDefaultLayer(options): ILayer {
+  createDefaultLayer(options): SingleTiledVectorLayer {
     return new SingleTiledVectorLayer({
-      layerDescriptor: SingleTiledVectorLayer.createDescriptor({
-        sourceDescriptor: this._descriptor,
-        ...options,
-      }),
+      layerDescriptor: SingleTiledVectorLayer.createDescriptor(
+        {
+          sourceDescriptor: this._descriptor,
+          ...options,
+        },
+        []
+      ),
       source: this,
     });
   }

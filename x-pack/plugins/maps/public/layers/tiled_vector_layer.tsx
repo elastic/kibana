@@ -9,11 +9,13 @@ import { EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
 import { VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
-import { VectorLayer } from './vector_layer';
+import { VectorLayer, VectorLayerArguments } from './vector_layer';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import { ITiledSingleLayerVectorSource } from './sources/vector_source';
 import { SyncContext } from '../actions/map_actions';
-import { TiledSingleLayerVectorSourceDescriptor } from '../../common/descriptor_types';
+import { ISource } from './sources/source';
+import { DataRequest } from './util/data_request';
+import { DataMeta, LayerDescriptor } from '../../common/descriptor_types';
 
 export class SingleTiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -32,7 +34,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
 
   private readonly _source: ITiledSingleLayerVectorSource; // downcast to the more specific type
 
-  constructor({ layerDescriptor, source }) {
+  constructor({ layerDescriptor, source }: VectorLayerArguments) {
     super({ layerDescriptor, source });
 
     // reassignment is required due since _source is a shadowed property
@@ -46,7 +48,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
     };
   }
 
-  _getSearchFilters(dataFilters) {
+  _getSearchFilters(dataFilters): DataMeta {
     const fieldNames = [...this._source.getFieldNames(), ...this._style.getSourceFieldNames()];
 
     return {
@@ -65,10 +67,11 @@ export class SingleTiledVectorLayer extends VectorLayer {
     dataFilters,
   }: SyncContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
-    const searchFilters = this._getSearchFilters(dataFilters);
+    const searchFilters: DataMeta = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
+
     const canSkip = await canSkipSourceUpdate({
-      source: this._source,
+      source: this._source as ISource,
       prevDataRequest,
       nextMeta: searchFilters,
     });
@@ -95,7 +98,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
     await this._syncMVTUrlTemplate(syncContext);
   }
 
-  _syncSourceBindingWithMb(mbMap) {
+  _syncSourceBindingWithMb(mbMap: unknown) {
     const mbSource = mbMap.getSource(this.getId());
     if (!mbSource) {
       const sourceDataRequest = this.getSourceDataRequest();
@@ -106,7 +109,17 @@ export class SingleTiledVectorLayer extends VectorLayer {
         return;
       }
 
-      const sourceMeta: TiledSingleLayerVectorSourceDescriptor = sourceDataRequest.getData() as TiledSingleLayerVectorSourceDescriptor;
+      const sourceMeta: {
+        layerName: string;
+        urlTemplate: string;
+        minZoom: number;
+        maxZoom: number;
+      } | null = sourceDataRequest.getData() as {
+        layerName: string;
+        urlTemplate: string;
+        minZoom: number;
+        maxZoom: number;
+      };
       if (!sourceMeta) {
         return;
       }
@@ -123,7 +136,8 @@ export class SingleTiledVectorLayer extends VectorLayer {
     }
   }
 
-  _syncStylePropertiesWithMb(mbMap) {
+  _syncStylePropertiesWithMb(mbMap: unknown) {
+    // @ts-ignore
     const mbSource = mbMap.getSource(this.getId());
     if (!mbSource) {
       return;
@@ -133,42 +147,63 @@ export class SingleTiledVectorLayer extends VectorLayer {
     if (!sourceDataRequest) {
       return;
     }
-    const sourceMeta: TiledSingleLayerVectorSourceMeta = sourceDataRequest.getData() as TiledSingleLayerVectorSourceMeta;
+    const sourceMeta: {
+      layerName: string;
+    } = sourceDataRequest.getData() as {
+      layerName: string;
+    };
     const options = { mvtSourceLayer: sourceMeta.layerName };
 
     this._setMbPointsProperties(mbMap, options);
     this._setMbLinePolygonProperties(mbMap, options);
   }
 
-  _requiresPrevSourceCleanup(mbMap) {
-    const tileSource = mbMap.getSource(this.getId());
-    if (!tileSource) {
+  _requiresPrevSourceCleanup(mbMap: unknown) {
+    // @ts-ignore
+    const mbTileSource = mbMap.getSource(this.getId());
+    if (!mbTileSource) {
       return false;
     }
     const dataRequest = this.getSourceDataRequest();
     if (!dataRequest) {
       return false;
     }
-    const newUrl = dataRequest.getData();
-    if (tileSource.tiles[0] === newUrl) {
-      // TileURL captures all the state. If this does not change, no updates are required.
+    const tiledSourceMeta: {
+      urlTemplate: string;
+      minZoom: number;
+      maxZoom: number;
+    } | null = dataRequest.getData() as {
+      urlTemplate: string;
+      minZoom: number;
+      maxZoom: number;
+    };
+    if (
+      mbTileSource.tiles[0] === tiledSourceMeta.urlTemplate &&
+      mbTileSource.minzoom === tiledSourceMeta.minZoom &&
+      mbTileSource.maxzoom === tiledSourceMeta.maxZoom
+    ) {
+      // TileURL and zoom-range captures all the state. If this does not change, no updates are required.
       return false;
     }
 
     return true;
   }
 
-  syncLayerWithMB(mbMap) {
+  syncLayerWithMB(mbMap: unknown) {
     const requiresCleanup = this._requiresPrevSourceCleanup(mbMap);
     if (requiresCleanup) {
       const mbStyle = mbMap.getStyle();
+      // @ts-ignore
       mbStyle.layers.forEach(mbLayer => {
         if (this.ownsMbLayerId(mbLayer.id)) {
+          // @ts-ignore
           mbMap.removeLayer(mbLayer.id);
         }
       });
+      // @ts-ignore
       Object.keys(mbStyle.sources).some(mbSourceId => {
         if (this.ownsMbSourceId(mbSourceId)) {
+          // @ts-ignore
           mbMap.removeSource(mbSourceId);
         }
       });
@@ -180,22 +215,6 @@ export class SingleTiledVectorLayer extends VectorLayer {
 
   getJoins() {
     return [];
-  }
-
-  getGeometryByFeatureId(featureId, meta) {
-    return null;
-  }
-
-  async getFeaturePropertiesByFeatureId(featureId, meta) {
-    const test = await this._source.filterAndFormatPropertiesToHtml({
-      _id: meta.docId,
-      _index: meta.indexName,
-    });
-    return test;
-  }
-
-  async loadPreIndexedShapeByFeatureId(featureId, meta) {
-    return null;
   }
 
   getMinZoomForData(): number {
