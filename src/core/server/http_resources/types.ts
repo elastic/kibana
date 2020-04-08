@@ -27,23 +27,66 @@ import {
   RequestHandler,
 } from '../http';
 
+/**
+ * Options for static HttpResources declaration
+ * @public
+ */
 export interface StaticHttpResourcesRenderOptions extends HttpResourcesRenderOptions {
   path: string;
 }
 
+/**
+ * Allows to configure HTTP response parameters
+ * @public
+ */
 export interface HttpResourcesRenderOptions {
+  /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
 }
 
+/**
+ * HTTP Resources response parameters
+ * @public
+ */
 export type HttpResourcesResponseOptions = HttpResponseOptions;
 
+/**
+ * Extended set of {@link KibanaResponseFactory} helpers used to respond with HTML or JS resource.
+ * @public
+ */
 export interface HttpResourcesServiceToolkit {
+  /* To respond with HTML page bootstrapping Kibana application. */
   renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+  /* To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. */
   renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+  /* To respond with a custom HTML page. */
   renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;
+  /* To respond with a custom JS script file. */
   renderJs: (options: HttpResourcesResponseOptions) => IKibanaResponse;
 }
 
+/**
+ * Extended version of {@link RequestHandler} having access to {@link HttpResourcesServiceToolkit}
+ * to respond with HTML or JS resources.
+ * @param context {@link RequestHandlerContext} - the core context exposed for this request.
+ * @param request {@link KibanaRequest} - object containing information about requested resource,
+ * such as path, method, headers, parameters, query, body, etc.
+ * @param response {@link KibanaResponseFactory} {@libk HttpResourcesServiceToolkit} - a set of helper functions used to respond to a request.
+ *
+ *  @example
+ * ```typescript
+ * httpResources.register({
+ *   path: '/login',
+ *   validate: {
+ *     params: schema.object({ id: schema.string() }),
+ *   },
+ * },
+ * async (context, request, response) => {
+ *   //..
+ *   return response.renderCoreApp();
+ * });
+ * @public
+ */
 export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown> = RequestHandler<
   P,
   Q,
@@ -52,13 +95,28 @@ export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown> =
   KibanaResponseFactory & HttpResourcesServiceToolkit
 >;
 
+/**
+ * Allows to configure HTTP response parameters
+ * @internal
+ */
 export interface InternalHttpResourcesSetup {
   createRegistrar(router: IRouter): HttpResources;
 }
 
+/**
+ * HttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.
+ * Provides API allowing plug-ins to respond with:
+ * - a pre-configured HTML page bootstrapping Kibana client app
+ * - custom HTML page
+ * - custom JS script file.
+ * @public
+ */
 export interface HttpResources {
+  /* To register a route handler rendering HTML bootstrapping Kibana application. */
   registerCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
+  /* To register a route handler rendering HTML bootstrapping Kibana application without retrieving user-specific information. */
   registerAnonymousCoreApp: (route: StaticHttpResourcesRenderOptions) => void;
+  /* To register a route handler executing passed function to form response. */
   register: <P, Q, B>(
     route: RouteConfig<P, Q, B, 'get'>,
     handler: HttpResourcesRequestHandler<P, Q, B>
