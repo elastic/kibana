@@ -15,8 +15,7 @@ already activated a trial for 6.0, you cannot start a new trial until
 7.0. You can, however, contact `info@elastic.co` to request an extended trial
 license.
 
-When you activate a new license level, new features appear in the left sidebar
-of the *Management* page.
+When you activate a new license level, new features appear in *Management*.
 
 [role="screenshot"]
 image::images/management-license.png[]

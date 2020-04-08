@@ -71,7 +71,7 @@ describe('ES search strategy', () => {
     expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
     const { method, path, body } = mockApiCaller.mock.calls[0][1];
     expect(method).toBe('POST');
-    expect(path).toBe('logstash-*/_async_search');
+    expect(path).toBe('/logstash-*/_async_search');
     expect(body).toEqual({ query: {} });
   });
 
@@ -94,7 +94,7 @@ describe('ES search strategy', () => {
     expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
     const { method, path, body } = mockApiCaller.mock.calls[0][1];
     expect(method).toBe('GET');
-    expect(path).toBe('_async_search/foo');
+    expect(path).toBe('/_async_search/foo');
     expect(body).toEqual(undefined);
   });
 
@@ -117,7 +117,7 @@ describe('ES search strategy', () => {
     expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
     const { method, path } = mockApiCaller.mock.calls[0][1];
     expect(method).toBe('POST');
-    expect(path).toBe('foo-%E7%A8%8B/_async_search');
+    expect(path).toBe('/foo-%E7%A8%8B/_async_search');
   });
 
   it('calls the rollup API if the index is a rollup type', async () => {
@@ -139,6 +139,6 @@ describe('ES search strategy', () => {
     expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
     const { method, path } = mockApiCaller.mock.calls[0][1];
     expect(method).toBe('POST');
-    expect(path).toBe('foo-%E7%A8%8B/_rollup_search');
+    expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
   });
 });
