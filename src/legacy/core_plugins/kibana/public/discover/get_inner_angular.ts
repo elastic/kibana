@@ -201,7 +201,6 @@ function createDocTableModule() {
     .directive('docTable', createDocTableDirective)
     .directive('kbnTableHeader', createTableHeaderDirective)
     .directive('toolBarPagerText', createToolBarPagerTextDirective)
-    .directive('toolBarPagerText', createToolBarPagerTextDirective)
     .directive('kbnTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
