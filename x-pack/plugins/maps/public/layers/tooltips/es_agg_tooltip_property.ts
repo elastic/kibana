@@ -7,7 +7,7 @@ import { ESTooltipProperty } from './es_tooltip_property';
 import { AGG_TYPE } from '../../../common/constants';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 export class ESAggTooltipProperty extends ESTooltipProperty {
   private readonly _aggType: AGG_TYPE;
