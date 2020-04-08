@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const LOG_THRESHOLD_ALERT_TYPE_ID = 'logs.alert.threshold';
+export const LOG_DOCUMENT_COUNT_ALERT_TYPE_ID = 'logs.alert.document.count';
 
 export enum Comparator {
-  GT = '>',
-  GT_OR_EQ = '>=',
+  GT = 'more than',
+  GT_OR_EQ = 'more than or equals',
+  LT = 'less than',
+  LT_OR_EQ = 'less than or equals',
+  EQ = 'equals',
+  NOT_EQ = 'does not equal',
+  MATCH = 'matches',
+  NOT_MATCH = 'does not match',
 }
 
 export enum AlertStates {
@@ -24,3 +30,5 @@ export interface LogThresholdAlertParams {
   timeUnit: 's' | 'm' | 'h' | 'd';
   timeSize: number;
 }
+
+export type TimeUnit = 's' | 'm' | 'h' | 'd';

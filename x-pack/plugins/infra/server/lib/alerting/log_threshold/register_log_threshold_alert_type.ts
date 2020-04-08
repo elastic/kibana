@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerting/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
-import { LOG_THRESHOLD_ALERT_TYPE_ID } from './types';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID, Comparator } from './types';
 
 // const sampleActionVariableDescription = i18n.translate(
 //   'xpack.infra.logs.alerting.threshold.sampleActionVariableDescription',
@@ -18,22 +18,30 @@ import { LOG_THRESHOLD_ALERT_TYPE_ID } from './types';
 //   }
 // );
 
-const criteriaSchema = schema.object({
-  threshold: schema.oneOf([schema.number(), schema.string()]),
+const countSchema = schema.object({
+  value: schema.number(),
   comparator: schema.oneOf([
-    schema.literal('>'),
-    schema.literal('<'),
-    schema.literal('>='),
-    schema.literal('<='),
-    schema.literal('equals'),
-    schema.literal('does not equal'),
-    schema.literal('matches'),
-    schema.literal('does not match'),
+    schema.literal(Comparator.GT),
+    schema.literal(Comparator.LT),
+    schema.literal(Comparator.GT_OR_EQ),
+    schema.literal(Comparator.LT_OR_EQ),
+    schema.literal(Comparator.EQ),
   ]),
-  timeUnit: schema.string(),
-  timeSize: schema.number(),
+});
+
+const criteriaSchema = schema.object({
   field: schema.string(),
-  aggType: schema.oneOf([schema.literal('documentCount')]),
+  comparator: schema.oneOf([
+    schema.literal(Comparator.GT),
+    schema.literal(Comparator.LT),
+    schema.literal(Comparator.GT_OR_EQ),
+    schema.literal(Comparator.LT_OR_EQ),
+    schema.literal(Comparator.EQ),
+    schema.literal(Comparator.NOT_EQ),
+    schema.literal(Comparator.MATCH),
+    schema.literal(Comparator.NOT_MATCH),
+  ]),
+  value: schema.oneOf([schema.number(), schema.string()]),
 });
 
 export async function registerLogThresholdAlertType(alertingPlugin: PluginSetupContract) {
@@ -46,11 +54,14 @@ export async function registerLogThresholdAlertType(alertingPlugin: PluginSetupC
   const alertUUID = uuid.v4();
 
   alertingPlugin.registerType({
-    id: LOG_THRESHOLD_ALERT_TYPE_ID,
+    id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
     name: 'Log threshold',
     validate: {
       params: schema.object({
+        count: countSchema,
         criteria: schema.arrayOf(criteriaSchema),
+        timeUnit: schema.string(),
+        timeSize: schema.number(),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,

@@ -9,7 +9,7 @@ import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LOG_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/log_threshold/types';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../../../../server/lib/alerting/log_threshold/types';
 
 interface Props {
   visible?: boolean;
@@ -36,7 +36,7 @@ export const AlertFlyout = (props: Props) => {
           <AlertAdd
             addFlyoutVisible={props.visible!}
             setAddFlyoutVisibility={props.setVisible}
-            alertTypeId={LOG_THRESHOLD_ALERT_TYPE_ID}
+            alertTypeId={LOG_DOCUMENT_COUNT_ALERT_TYPE_ID}
             canChangeTrigger={false}
             consumer={'logs'}
           />
