@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
@@ -26,17 +25,17 @@ import ReactDOM from 'react-dom';
 import { useEffect, useRef } from 'react';
 
 import { AppMountContext, AppMountDeprecated } from 'kibana/public';
-import { DevTool } from './plugin';
+import { DevToolApp } from './dev_tool';
 
 interface DevToolsWrapperProps {
-  devTools: readonly DevTool[];
-  activeDevTool: DevTool;
+  devTools: readonly DevToolApp[];
+  activeDevTool: DevToolApp;
   appMountContext: AppMountContext;
   updateRoute: (newRoute: string) => void;
 }
 
 interface MountedDevToolDescriptor {
-  devTool: DevTool;
+  devTool: DevToolApp;
   mountpoint: HTMLElement;
   unmountHandler: () => void;
 }
@@ -64,10 +63,10 @@ function DevToolsWrapper({
         {devTools.map(currentDevTool => (
           <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
             <EuiTab
-              disabled={currentDevTool.disabled}
+              disabled={currentDevTool.isDisabled()}
               isSelected={currentDevTool === activeDevTool}
               onClick={() => {
-                if (!currentDevTool.disabled) {
+                if (!currentDevTool.isDisabled()) {
                   updateRoute(`/dev_tools/${currentDevTool.id}`);
                 }
               }}
@@ -151,7 +150,7 @@ export function renderApp(
   element: HTMLElement,
   appMountContext: AppMountContext,
   basePath: string,
-  devTools: readonly DevTool[]
+  devTools: readonly DevToolApp[]
 ) {
   if (redirectOnMissingCapabilities(appMountContext)) {
     return () => {};
@@ -162,21 +161,24 @@ export function renderApp(
     <I18nProvider>
       <Router>
         <Switch>
-          {devTools.map(devTool => (
-            <Route
-              key={devTool.id}
-              path={`/dev_tools/${devTool.id}`}
-              exact={!devTool.enableRouting}
-              render={props => (
-                <DevToolsWrapper
-                  updateRoute={props.history.push}
-                  activeDevTool={devTool}
-                  devTools={devTools}
-                  appMountContext={appMountContext}
-                />
-              )}
-            />
-          ))}
+          {devTools
+            // Only create routes for devtools that are not disabled
+            .filter(devTool => !devTool.isDisabled())
+            .map(devTool => (
+              <Route
+                key={devTool.id}
+                path={`/dev_tools/${devTool.id}`}
+                exact={!devTool.enableRouting}
+                render={props => (
+                  <DevToolsWrapper
+                    updateRoute={props.history.push}
+                    activeDevTool={devTool}
+                    devTools={devTools}
+                    appMountContext={appMountContext}
+                  />
+                )}
+              />
+            ))}
           <Route path="/dev_tools">
             <Redirect to={`/dev_tools/${devTools[0].id}`} />
           </Route>
