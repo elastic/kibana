@@ -99,16 +99,16 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
-    // Return dependency tree
-    return this.pluginsSystem.getPluginDependencies();
-  }
-
-  public getUiPlugins(): UiPlugins {
     const uiPlugins = this.pluginsSystem.uiPlugins();
+
     return {
-      internal: this.uiPluginInternalInfo,
-      public: uiPlugins,
-      browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
+      // Return dependency tree
+      pluginTree: this.pluginsSystem.getPluginDependencies(),
+      uiPlugins: {
+        internal: this.uiPluginInternalInfo,
+        public: uiPlugins,
+        browserConfigs: this.generateUiPluginsConfigs(uiPlugins),
+      },
     };
   }
 

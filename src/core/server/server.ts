@@ -105,8 +105,7 @@ export class Server {
     this.log.debug('setting up server');
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const pluginDependencies = await this.plugins.discover();
-    const uiPlugins = this.plugins.getUiPlugins();
+    const { pluginTree, uiPlugins } = await this.plugins.discover();
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
@@ -118,10 +117,7 @@ export class Server {
       // 1) Can access context from any NP plugin
       // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
       //    New Platform plugins.
-      pluginDependencies: new Map([
-        ...pluginDependencies,
-        [this.legacy.legacyId, [...pluginDependencies.keys()]],
-      ]),
+      pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
     });
 
     const uuidSetup = await this.uuid.setup();
