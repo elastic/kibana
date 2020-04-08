@@ -100,15 +100,12 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
 
   chart.yAxisLabel = table.columns[y.accessor].name;
 
-  chart.values = [];
-  table.rows.forEach((row, rowIndex) => {
-    if (row && row[yAccessor] !== 'NaN') {
-      chart.values.push({
-        x: row[xAccessor] as number,
-        y: row[yAccessor] as number,
-      });
-    }
-  });
+  chart.values = table.rows
+    .filter(row => row && row[yAccessor] !== 'NaN')
+    .map(row => ({
+      x: row[xAccessor] as number,
+      y: row[yAccessor] as number,
+    }));
 
   if (!chart.values.length) {
     chart.values.push({} as any);
