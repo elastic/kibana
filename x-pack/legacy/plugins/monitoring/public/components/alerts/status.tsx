@@ -38,7 +38,10 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
 
   React.useEffect(() => {
     async function fetchAlertsStatus() {
-      const alerts = await Legacy.shims.kfetch({ method: 'GET', pathname: `${BASE_ALERT_API_PATH}/_find` });
+      const alerts = await Legacy.shims.kfetch({
+        method: 'GET',
+        pathname: `${BASE_ALERT_API_PATH}/_find`,
+      });
       const monitoringAlerts = alerts.data.filter((alert: Alert) =>
         alert.alertTypeId.startsWith(ALERT_TYPE_PREFIX)
       );
@@ -56,7 +59,9 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
   }, [setupModeEnabled, showMigrationFlyout]);
 
   async function fetchSecurityConfigured() {
-    const response = await Legacy.shims.kfetch({ pathname: '/internal/security/api_key/privileges' });
+    const response = await Legacy.shims.kfetch({
+      pathname: '/internal/security/api_key/privileges',
+    });
     setIsSecurityConfigured(response.areApiKeysEnabled);
   }
 
