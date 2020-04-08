@@ -29,7 +29,7 @@ export class Plugin {
     });
 
     plugins.licensing.license$.subscribe(license => {
-      if (license.isActive && !devTool.isDisabled()) {
+      if (!license.isActive && !devTool.isDisabled()) {
         devTool.disable();
       } else if (devTool.isDisabled()) {
         devTool.enable();
