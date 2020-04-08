@@ -32,7 +32,7 @@ describe('Signal detection rules', () => {
     esArchiverUnload('prebuilt_rules_loaded');
   });
 
-  it('Sorts by activated rules', () => {
+  it.skip('Sorts by activated rules', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
