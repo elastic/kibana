@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostMetadata, HostResultList } from '../../../../../common/types';
+import { HostResultList, HostStatus } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 export const mockHostResultList: (options?: {
@@ -27,7 +27,10 @@ export const mockHostResultList: (options?: {
   const hosts = [];
   for (let index = 0; index < actualCountToReturn; index++) {
     const generator = new EndpointDocGenerator('seed');
-    hosts.push(generator.generateHostMetadata());
+    hosts.push({
+      metadata: generator.generateHostMetadata(),
+      host_status: HostStatus.ERROR,
+    });
   }
   const mock: HostResultList = {
     hosts,
