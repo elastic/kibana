@@ -117,7 +117,7 @@ export const initializeCanvas = async (
     restoreAction = action;
 
     startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, action.id);
-    startPlugins.uiActions.attachAction(VALUE_CLICK_TRIGGER, emptyAction);
+    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, emptyAction);
   }
 
   return canvasStore;
@@ -129,7 +129,7 @@ export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDe
 
   startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, emptyAction.id);
   if (restoreAction) {
-    startPlugins.uiActions.attachAction(VALUE_CLICK_TRIGGER, restoreAction);
+    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, restoreAction);
     restoreAction = undefined;
   }
 
