@@ -91,14 +91,15 @@ test('calls actionsPlugin.execute per selected action', async () => {
             "alerting": Object {
               "instance_id": "2",
             },
-            "namespace": "default",
             "saved_objects": Array [
               Object {
                 "id": "1",
+                "namespace": "default",
                 "type": "alert",
               },
               Object {
                 "id": "1",
+                "namespace": "default",
                 "type": "action",
               },
             ],
