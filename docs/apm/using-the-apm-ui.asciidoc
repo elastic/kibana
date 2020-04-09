@@ -31,6 +31,8 @@ include::transactions.asciidoc[]
 
 include::spans.asciidoc[]
 
+include::service-maps.asciidoc[]
+
 include::errors.asciidoc[]
 
 include::metrics.asciidoc[]

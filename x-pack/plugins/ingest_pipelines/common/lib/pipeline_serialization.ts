@@ -9,16 +9,19 @@ import { PipelinesByName, Pipeline } from '../types';
 export function deserializePipelines(pipelinesByName: PipelinesByName): Pipeline[] {
   const pipelineNames: string[] = Object.keys(pipelinesByName);
 
-  const deserializedTemplates = pipelineNames.map((name: string) => {
-    const { description, version, processors } = pipelinesByName[name];
+  const deserializedPipelines = pipelineNames.map((name: string) => {
+    const { description, version, processors, on_failure } = pipelinesByName[name];
 
-    return {
+    const pipeline = {
       name,
       description,
       version,
       processors,
+      onFailure: on_failure,
     };
+
+    return pipeline;
   });
 
-  return deserializedTemplates;
+  return deserializedPipelines;
 }

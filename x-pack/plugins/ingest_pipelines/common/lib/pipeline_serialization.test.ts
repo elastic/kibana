@@ -20,6 +20,14 @@ describe('pipeline_serialization', () => {
                 },
               },
             ],
+            on_failure: [
+              {
+                set: {
+                  field: 'error.message',
+                  value: '{{ failure_message }}',
+                },
+              },
+            ],
           },
           pipeline2: {
             description: 'pipeline2 description',
@@ -36,6 +44,14 @@ describe('pipeline_serialization', () => {
             {
               script: {
                 source: 'ctx._type = null',
+              },
+            },
+          ],
+          onFailure: [
+            {
+              set: {
+                field: 'error.message',
+                value: '{{ failure_message }}',
               },
             },
           ],

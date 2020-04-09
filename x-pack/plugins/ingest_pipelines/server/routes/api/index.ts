@@ -5,3 +5,7 @@
  */
 
 export { registerGetRoutes } from './get';
+
+export { registerCreateRoute } from './create';
+
+export { registerUpdateRoute } from './update';

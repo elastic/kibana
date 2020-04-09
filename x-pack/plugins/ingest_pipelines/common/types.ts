@@ -15,8 +15,14 @@ export interface Pipeline {
   description: string;
   version?: number;
   processors: Processor[];
+  onFailure?: Processor[];
 }
 
 export interface PipelinesByName {
-  [key: string]: Omit<Pipeline, 'name'>;
+  [key: string]: {
+    description: string;
+    version?: number;
+    processors: Processor[];
+    on_failure?: Processor[];
+  };
 }
