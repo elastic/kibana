@@ -123,7 +123,7 @@ export const ProcessEventDot = styled(
       const minimumFontSize = 18.75;
       const slopeOfFontScale = 12.5;
       const fontSizeAdjustmentForScale = magFactorX > 1 ? slopeOfFontScale * (magFactorX - 1) : 0;
-      const scaledTypeSize =  minimumFontSize + fontSizeAdjustmentForScale;
+      const scaledTypeSize = minimumFontSize + fontSizeAdjustmentForScale;
 
       const markerBaseSize = 15;
       const markerSize = markerBaseSize;
