@@ -12,7 +12,7 @@ import { useNavigateToAppEventHandler } from '../hooks/use_navigate_to_app_event
 export type LinkToAppProps = EuiLinkProps & {
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
   appId: string;
-  /** Any app specic path (route) */
+  /** Any app specific path (route) */
   appPath?: string;
   appState?: any;
   onClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
