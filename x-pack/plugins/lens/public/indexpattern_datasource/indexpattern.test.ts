@@ -8,13 +8,11 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
-import { pluginsMock } from 'ui/new_platform/__mocks__/helpers';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
-// Contains old and new platform data plugins, used for interpreter and filter ratio
-jest.mock('ui/new_platform');
 
 const expectedIndexPatterns = {
   1: {
@@ -140,7 +138,7 @@ describe('IndexPattern Data Source', () => {
     indexPatternDatasource = getIndexPatternDatasource({
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
-      data: pluginsMock.createStart().data,
+      data: dataPluginMock.createStartContract(),
     });
 
     persistedState = {

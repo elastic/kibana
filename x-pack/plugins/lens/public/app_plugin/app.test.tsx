@@ -21,21 +21,20 @@ import {
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
+import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
 
-jest.mock('ui/new_platform');
 jest.mock('../persistence');
 jest.mock('src/core/public');
 
-import { npStart } from 'ui/new_platform';
-jest
-  .spyOn(npStart.plugins.navigation.ui.TopNavMenu.prototype, 'constructor')
-  .mockImplementation(() => {
-    return <div className="topNavMenu" />;
-  });
+const navigationStartMock = navigationPluginMock.createStartContract();
 
-const { TopNavMenu } = npStart.plugins.navigation.ui;
+jest.spyOn(navigationStartMock.ui.TopNavMenu.prototype, 'constructor').mockImplementation(() => {
+  return <div className="topNavMenu" />;
+});
+
+const { TopNavMenu } = navigationStartMock.ui;
 
 function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   return {
@@ -99,6 +98,7 @@ describe('Lens App', () => {
   function makeDefaultArgs(): jest.Mocked<{
     editorFrame: EditorFrameInstance;
     data: typeof dataStartMock;
+    navigation: typeof navigationStartMock;
     core: typeof core;
     storage: Storage;
     docId?: string;
@@ -107,6 +107,7 @@ describe('Lens App', () => {
     addToDashboardMode?: boolean;
   }> {
     return ({
+      navigation: navigationStartMock,
       editorFrame: createMockFrame(),
       core: {
         ...core,
@@ -140,6 +141,7 @@ describe('Lens App', () => {
       },
       redirectTo: jest.fn(id => {}),
     } as unknown) as jest.Mocked<{
+      navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
       data: typeof dataStartMock;
       core: typeof core;
@@ -338,6 +340,7 @@ describe('Lens App', () => {
 
       let defaultArgs: jest.Mocked<{
         editorFrame: EditorFrameInstance;
+        navigation: typeof navigationStartMock;
         data: typeof dataStartMock;
         core: typeof core;
         storage: Storage;
@@ -654,6 +657,7 @@ describe('Lens App', () => {
     let defaultArgs: jest.Mocked<{
       editorFrame: EditorFrameInstance;
       data: typeof dataStartMock;
+      navigation: typeof navigationStartMock;
       core: typeof core;
       storage: Storage;
       docId?: string;

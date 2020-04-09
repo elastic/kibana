@@ -10,16 +10,15 @@ import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { FieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { npStart } from 'ui/new_platform';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';
-
-jest.mock('ui/new_platform');
 
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
   let indexPattern: IndexPattern;
   let core: ReturnType<typeof coreMock['createSetup']>;
+  let data: DataPublicPluginStart;
 
   beforeEach(() => {
     indexPattern = {
@@ -61,9 +60,11 @@ describe('IndexPattern Field Item', () => {
     } as IndexPattern;
 
     core = coreMock.createSetup();
+    data = dataPluginMock.createStartContract();
     core.http.post.mockClear();
     defaultProps = {
       indexPattern,
+      data,
       core,
       highlight: '',
       dateRange: {
@@ -81,7 +82,7 @@ describe('IndexPattern Field Item', () => {
       exists: true,
     };
 
-    npStart.plugins.data.fieldFormats = ({
+    data.fieldFormats = ({
       getDefaultInstance: jest.fn(() => ({
         convert: jest.fn((s: unknown) => JSON.stringify(s)),
       })),

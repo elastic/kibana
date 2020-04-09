@@ -11,7 +11,7 @@ import { Query, TimeRange, Filter, TimefilterContract } from 'src/plugins/data/p
 import { Document } from '../../persistence';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 
-jest.mock('../../../../../../../src/plugins/inspector/public/', () => ({
+jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
   open: false,
 }));
