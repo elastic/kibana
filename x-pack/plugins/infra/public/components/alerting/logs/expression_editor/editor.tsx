@@ -111,6 +111,29 @@ export const ExpressionEditor: React.FC<Props> = props => {
     [alertParams, setAlertParams]
   );
 
+  const updateTimeSize = useCallback(
+    (ts: number | undefined) => {
+      setTimeSize(ts || undefined);
+      setAlertParams('timeSize', ts);
+    },
+    [setTimeSize, setAlertParams]
+  );
+
+  const updateTimeUnit = useCallback(
+    (tu: string) => {
+      setTimeUnit(tu as TimeUnit);
+      setAlertParams('timeUnit', tu);
+    },
+    [setAlertParams]
+  );
+
+  const emptyError = useMemo(() => {
+    return {
+      timeSizeUnit: [],
+      timeWindowSize: [],
+    };
+  }, []);
+
   // Wait until field info has loaded
   if (supportedFields.length === 0) return null;
 
@@ -126,6 +149,14 @@ export const ExpressionEditor: React.FC<Props> = props => {
         fields={supportedFields}
         criteria={alertParams.criteria}
         updateCriteria={updateCriteria}
+      />
+
+      <ForLastExpression
+        timeWindowSize={timeSize}
+        timeWindowUnit={timeUnit}
+        errors={emptyError}
+        onChangeWindowSize={updateTimeSize}
+        onChangeWindowUnit={updateTimeUnit}
       />
     </>
   );

@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiSelect,
-  EuiFieldNumber,
-  EuiExpression,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../../server/lib/alerting/log_threshold/types';
 import { Criterion } from './criterion';
 
 export const Criteria: React.FC = ({ fields, criteria, updateCriteria }) => {
