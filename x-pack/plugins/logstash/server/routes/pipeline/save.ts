@@ -30,7 +30,7 @@ export function registerPipelineSaveRoute(
           description: schema.string(),
           pipeline: schema.string(),
           username: schema.string(),
-          settings: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
+          settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
       },
     },
