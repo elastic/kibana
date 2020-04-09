@@ -17,7 +17,7 @@ export const HeroCopy = memo(() => {
           <h1>
             <FormattedMessage
               id="xpack.ingestManager.epm.pageTitle"
-              defaultMessage="Elastic Package Manager"
+              defaultMessage="Elastic Integrations"
             />
           </h1>
         </EuiText>
@@ -27,7 +27,7 @@ export const HeroCopy = memo(() => {
           <p>
             <FormattedMessage
               id="xpack.ingestManager.epm.pageSubtitle"
-              defaultMessage="Browse packages for popular apps and services."
+              defaultMessage="Browse integrations for popular apps and services."
             />
           </p>
         </EuiText>

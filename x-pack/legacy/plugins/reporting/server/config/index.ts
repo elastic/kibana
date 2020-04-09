@@ -108,6 +108,7 @@ export interface ReportingConfigType {
     enablePanelActionDownload: boolean;
     checkForFormulas: boolean;
     maxSizeBytes: number;
+    useByteOrderMarkEncoding: boolean;
   };
   encryptionKey: string;
   kibanaServer: any;

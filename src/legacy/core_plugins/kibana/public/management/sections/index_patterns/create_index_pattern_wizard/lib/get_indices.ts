@@ -18,7 +18,7 @@
  */
 
 import { get, sortBy } from 'lodash';
-import { IndexPatternCreationConfig } from '../../../../../../../management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../../../plugins/index_pattern_management/public';
 import { DataPublicPluginStart } from '../../../../../../../../../plugins/data/public';
 import { MatchedIndex } from '../types';
 
