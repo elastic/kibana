@@ -20,8 +20,8 @@ export interface Props {
 }
 
 interface State {
-  tmsInput: '';
-  tmsCanPreview: false;
+  tmsInput: string;
+  tmsCanPreview: boolean;
   attributionText: string;
   attributionUrl: string;
 }
