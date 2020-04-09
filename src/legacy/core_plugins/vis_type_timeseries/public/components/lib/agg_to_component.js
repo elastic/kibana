@@ -33,6 +33,7 @@ import { PercentileRankAgg } from '../aggs/percentile_rank';
 import { Static } from '../aggs/static';
 import { MathAgg } from '../aggs/math';
 import { TopHitAgg } from '../aggs/top_hit';
+import { PositiveRateAgg } from '../aggs/positive_rate';
 
 export const aggToComponent = {
   count: StandardAgg,
@@ -65,4 +66,5 @@ export const aggToComponent = {
   static: Static,
   math: MathAgg,
   top_hit: TopHitAgg,
+  positive_rate: PositiveRateAgg,
 };
