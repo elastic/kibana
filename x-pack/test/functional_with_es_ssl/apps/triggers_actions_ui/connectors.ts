@@ -13,12 +13,20 @@ function generateUniqueKey() {
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const alerting = getService('alerting');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
 
   describe('Connectors', function() {
     before(async () => {
+      await alerting.actions.createAction({
+        name: `server-log-${Date.now()}`,
+        actionTypeId: '.server-log',
+        config: {},
+        secrets: {},
+      });
+
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('connectorsTab');
     });
