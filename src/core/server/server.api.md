@@ -638,6 +638,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
+    status: StatusServiceSetup;
+    // (undocumented)
     uiSettings: UiSettingsServiceSetup;
     // (undocumented)
     uuid: UuidServiceSetup;
@@ -653,6 +655,14 @@ export interface CoreStart {
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
+}
+
+// @public
+export interface CoreStatus {
+    // (undocumented)
+    elasticsearch: ServiceStatus;
+    // (undocumented)
+    savedObjects: ServiceStatus;
 }
 
 // @public
@@ -792,6 +802,14 @@ export interface ElasticsearchServiceStart {
         readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
         readonly client: IClusterClient;
     };
+}
+
+// @public (undocumented)
+export interface ElasticsearchStatusMeta {
+    // (undocumented)
+    incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+    // (undocumented)
+    warningNodes: NodesVersionCompatibility['warningNodes'];
 }
 
 // @public (undocumented)
@@ -1248,6 +1266,24 @@ export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critica
 
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
+
+// Warning: (ae-missing-release-tag) "NodesVersionCompatibility" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface NodesVersionCompatibility {
+    // Warning: (ae-forgotten-export) The symbol "NodeInfo" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    incompatibleNodes: NodeInfo[];
+    // (undocumented)
+    isCompatible: boolean;
+    // (undocumented)
+    kibanaVersion: string;
+    // (undocumented)
+    message?: string;
+    // (undocumented)
+    warningNodes: NodeInfo[];
+}
 
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 //
@@ -2167,6 +2203,16 @@ export interface SavedObjectsServiceStart {
     getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
+// @public
+export interface SavedObjectStatusMeta {
+    // (undocumented)
+    migratedIndices: {
+        [status: string]: number;
+        skipped: number;
+        migrated: number;
+    };
+}
+
 // @public (undocumented)
 export interface SavedObjectsType {
     convertToAliasScript?: string;
@@ -2236,6 +2282,38 @@ export class ScopedClusterClient implements IScopedClusterClient {
     }
 
 // @public
+export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
+    detail?: string;
+    documentationUrl?: string;
+    level: ServiceStatusLevel;
+    meta?: Meta;
+    summary: string;
+}
+
+// @public
+export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];
+
+// @public
+export const ServiceStatusLevels: Readonly<{
+    available: Readonly<{
+        toString: () => "available";
+        valueOf: () => 0;
+    }>;
+    degraded: Readonly<{
+        toString: () => "degraded";
+        valueOf: () => 1;
+    }>;
+    unavailable: Readonly<{
+        toString: () => "unavailable";
+        valueOf: () => 2;
+    }>;
+    critical: Readonly<{
+        toString: () => "critical";
+        valueOf: () => 3;
+    }>;
+}>;
+
+// @public
 export interface SessionCookieValidationResult {
     isValid: boolean;
     path?: string;
@@ -2271,6 +2349,11 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+// @public
+export interface StatusServiceSetup {
+    core$: Observable<CoreStatus>;
+}
 
 // @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
