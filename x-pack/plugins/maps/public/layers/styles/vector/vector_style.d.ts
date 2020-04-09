@@ -16,6 +16,7 @@ export interface IVectorStyle {
   getAllStyleProperties(): IStyleProperty[];
   getDescriptor(): VectorStyleDescriptor;
   getDynamicPropertiesArray(): IDynamicStyleProperty[];
+  getSourceFieldNames(): string[];
 }
 
 export class VectorStyle implements IVectorStyle {

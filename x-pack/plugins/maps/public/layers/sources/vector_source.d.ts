@@ -33,7 +33,7 @@ export interface IVectorSource extends ISource {
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
-  getFieldByName(fieldName: string): IField;
+  getFieldByName(fieldName: string): IField | null;
   getSyncMeta(): VectorSourceSyncMeta;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;

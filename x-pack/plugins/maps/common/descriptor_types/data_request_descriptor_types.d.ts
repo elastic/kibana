@@ -31,7 +31,7 @@ type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
 };
 
-export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta;
+export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta | null;
 
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;

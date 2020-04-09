@@ -8,7 +8,7 @@ import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
 
 export interface ISource {
-  createDefaultLayer(): ILayer;
+  createDefaultLayer(options: unknown): ILayer;
   destroy(): void;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
@@ -25,7 +25,7 @@ export class AbstractSource implements ISource {
   constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object);
 
   destroy(): void;
-  createDefaultLayer(): ILayer;
+  createDefaultLayer(options: unknown): ILayer;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
   isFieldAware(): boolean;

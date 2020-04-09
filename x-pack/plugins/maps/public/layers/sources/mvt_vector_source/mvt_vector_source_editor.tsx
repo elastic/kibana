@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
+import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
 
 export class MVTVectorSourceEditor extends React.Component {
   state = {
@@ -31,6 +31,7 @@ export class MVTVectorSourceEditor extends React.Component {
     }
   }, 2000);
 
+  // @ts-ignore
   _handleUrlTemplateChange = e => {
     const url = e.target.value;
 
@@ -45,6 +46,7 @@ export class MVTVectorSourceEditor extends React.Component {
     );
   };
 
+  // @ts-ignore
   _handleLayerNameInputChange = e => {
     const layerName = e.target.value;
     this.setState(
@@ -55,7 +57,7 @@ export class MVTVectorSourceEditor extends React.Component {
     );
   };
 
-  _handleZoomRangeChange = e => {
+  _handleZoomRangeChange = (e: Value) => {
     const minZoom = parseInt(e[0], 10);
     const maxZoom = parseInt(e[1], 10);
 

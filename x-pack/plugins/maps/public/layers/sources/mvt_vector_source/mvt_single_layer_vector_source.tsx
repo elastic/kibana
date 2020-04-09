@@ -16,7 +16,12 @@ import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
-import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
+import {
+  MapExtent,
+  TiledSingleLayerVectorSourceDescriptor,
+  VectorSourceRequestMeta,
+  VectorSourceSyncMeta,
+} from '../../../../common/descriptor_types';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzVectorTitle', {
   defaultMessage: 'Vector Tile Layer',
@@ -66,7 +71,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  createDefaultLayer(options): SingleTiledVectorLayer {
+  createDefaultLayer(options: unknown): SingleTiledVectorLayer {
     return new SingleTiledVectorLayer({
       layerDescriptor: SingleTiledVectorLayer.createDescriptor(
         {
@@ -128,6 +133,27 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   getMaxZoom() {
     return this._descriptor.maxZoom;
+  }
+
+  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent {
+    return {
+      maxLat: 90,
+      maxLon: 180,
+      minLat: -90,
+      minLon: -180,
+    };
+  }
+
+  getFieldByName(fieldName: string): IField | null {
+    return null;
+  }
+
+  getSyncMeta(): VectorSourceSyncMeta {
+    return null;
+  }
+
+  getApplyGlobalQuery(): boolean {
+    return false;
   }
 }
 

@@ -7,20 +7,19 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
-import { VectorStyle } from './styles/vector/vector_style';
+import { IVectorStyle, VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { VectorLayer, VectorLayerArguments } from './vector_layer';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
-import { ITiledSingleLayerVectorSource } from './sources/vector_source';
+import { ITiledSingleLayerVectorSource, IVectorSource } from './sources/vector_source';
 import { SyncContext } from '../actions/map_actions';
 import { ISource } from './sources/source';
-import { DataRequest } from './util/data_request';
-import { DataMeta, LayerDescriptor } from '../../common/descriptor_types';
+import { DataMeta, MapFilters, VectorLayerDescriptor } from '../../common/descriptor_types';
 
 export class SingleTiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
-  static createDescriptor(options, mapColors) {
+  static createDescriptor(options: VectorLayerDescriptor, mapColors: string[]) {
     const layerDescriptor = super.createDescriptor(options, mapColors);
     layerDescriptor.type = SingleTiledVectorLayer.type;
 
@@ -48,8 +47,8 @@ export class SingleTiledVectorLayer extends VectorLayer {
     };
   }
 
-  _getSearchFilters(dataFilters): DataMeta {
-    const fieldNames = [...this._source.getFieldNames(), ...this._style.getSourceFieldNames()];
+  _getSearchFilters(dataFilters: MapFilters, source: IVectorSource, style: IVectorStyle): DataMeta {
+    const fieldNames = [...source.getFieldNames(), ...style.getSourceFieldNames()];
 
     return {
       ...dataFilters,
@@ -88,7 +87,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
     }
   }
 
-  async syncData(syncContext) {
+  async syncData(syncContext: SyncContext) {
     if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
       return;
     }
@@ -99,6 +98,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
   }
 
   _syncSourceBindingWithMb(mbMap: unknown) {
+    // @ts-ignore
     const mbSource = mbMap.getSource(this.getId());
     if (!mbSource) {
       const sourceDataRequest = this.getSourceDataRequest();
@@ -192,6 +192,7 @@ export class SingleTiledVectorLayer extends VectorLayer {
   syncLayerWithMB(mbMap: unknown) {
     const requiresCleanup = this._requiresPrevSourceCleanup(mbMap);
     if (requiresCleanup) {
+      // @ts-ignore
       const mbStyle = mbMap.getStyle();
       // @ts-ignore
       mbStyle.layers.forEach(mbLayer => {
