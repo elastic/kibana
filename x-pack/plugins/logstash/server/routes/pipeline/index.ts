@@ -3,9 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { registerLoadRoute } from './register_load_route';
-
-export function registerLogstashClusterRoutes(server) {
-  registerLoadRoute(server);
-}
+export { registerPipelineDeleteRoute } from './delete';
+export { registerPipelineLoadRoute } from './load';
+export { registerPipelineSaveRoute } from './save';

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerLogstashPipelineRoutes } from './register_pipeline_routes';
+export { registerUpgradeRoute } from './execute';
