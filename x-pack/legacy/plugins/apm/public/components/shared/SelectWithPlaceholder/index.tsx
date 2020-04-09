@@ -31,11 +31,13 @@ export const SelectWithPlaceholder: typeof EuiSelect = props => {
       value={isEmpty(props.value) ? NO_SELECTION : props.value}
       onChange={e => {
         if (props.onChange) {
-          const customEvent = Object.assign(e, {
-            target: Object.assign(e.target, {
+          const customEvent = {
+            ...e,
+            target: {
+              ...e.target,
               value: e.target.value === NO_SELECTION ? '' : e.target.value
-            })
-          });
+            }
+          };
           props.onChange(customEvent);
         }
       }}
