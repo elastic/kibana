@@ -8,6 +8,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
+import { BASE_PATH } from '../../../../common/constants';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
 
@@ -31,7 +32,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
       return;
     }
 
-    // TODO navigate back to list page with flyout open
+    history.push(BASE_PATH);
   };
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps> = ({ 
         <EuiTitle size="l">
           <h1 data-test-subj="pageTitle">
             <FormattedMessage
-              id="xpack.ingestsPipelines.create.pageTitle"
+              id="xpack.ingestPipelines.create.pageTitle"
               defaultMessage="Create pipeline"
             />
           </h1>

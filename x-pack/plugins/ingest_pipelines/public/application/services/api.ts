@@ -7,7 +7,6 @@ import { HttpSetup } from 'src/core/public';
 
 import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
-import { Pipeline } from '../../../common/types';
 import {
   UseRequestConfig,
   SendRequestConfig,
