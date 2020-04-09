@@ -17,6 +17,8 @@
  * under the License.
  */
 import { DiscoverServices } from './build_services';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
+import { search } from '../../../../../plugins/data/public';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
@@ -50,8 +52,6 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
 }>('urlTracker');
 
-import { search } from '../../../../../plugins/data/public';
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/common';
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export {
   unhashUrl,
