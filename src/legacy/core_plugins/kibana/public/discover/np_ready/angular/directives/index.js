@@ -20,16 +20,12 @@
 import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
 import { DiscoverHistogram } from './histogram';
-import { getAngularModule, wrapInI18nContext } from '../../../kibana_services';
+import { getAngularModule } from '../../../kibana_services';
 
 const app = getAngularModule();
 
-app.directive('discoverNoResults', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverNoResults))
-);
+app.directive('discoverNoResults', reactDirective => reactDirective(DiscoverNoResults));
 
-app.directive('discoverUninitialized', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverUninitialized))
-);
+app.directive('discoverUninitialized', reactDirective => reactDirective(DiscoverUninitialized));
 
 app.directive('discoverHistogram', reactDirective => reactDirective(DiscoverHistogram));
