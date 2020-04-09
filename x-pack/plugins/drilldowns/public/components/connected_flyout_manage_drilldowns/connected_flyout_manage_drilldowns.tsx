@@ -22,7 +22,7 @@ import {
   SELECT_RANGE_TRIGGER,
   TriggerContextMapping,
 } from '../../../../../../src/plugins/ui_actions/public';
-import { useContainerState } from '../../../../../../src/plugins/kibana_utils/common';
+import { useContainerState } from '../../../../../../src/plugins/kibana_utils/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import {
   toastDrilldownCreated,

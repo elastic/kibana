@@ -40,7 +40,7 @@ const mockField = {
   format: new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
 };
 
-describe('createFiltersFromValueClickEvent', () => {
+describe.skip('createFiltersFromValueClickEvent', () => {
   let dataPoints: EventData[];
 
   beforeEach(() => {

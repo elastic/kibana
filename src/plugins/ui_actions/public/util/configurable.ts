@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/common';
+import { UiComponent } from 'src/plugins/kibana_utils/public';
 
 /**
  * Represents something that can be configured by user using UI.

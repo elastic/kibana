@@ -11,7 +11,7 @@ import {
   UiActionsSerializedAction,
   TriggerContextMapping,
 } from '../../../../../../src/plugins/ui_actions/public';
-import { createStateContainer } from '../../../../../../src/plugins/kibana_utils/common';
+import { createStateContainer } from '../../../../../../src/plugins/kibana_utils/public';
 
 class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> {
   public readonly state = createStateContainer<DynamicActionManagerState>({

@@ -26,7 +26,7 @@ import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns } from '../../../public/services';
 import { mockDataServices } from '../../../public/search/aggs/test_helpers';
 
-describe('createFiltersFromBrushEvent', () => {
+describe.skip('createFiltersFromBrushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
   let baseEvent: BrushEvent;

@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiNotificationBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
 import { txtDisplayName } from './i18n';
-import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/common';
+import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export const MenuItem: React.FC<{ context: EmbeddableContext }> = ({ context }) => {
   if (!context.embeddable.dynamicActions)
