@@ -74,8 +74,12 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
       ...state,
       location: action.payload,
     };
+    const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
+    const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);
 
-    if (isOnPolicyDetailsPage(newState)) {
+    // Did user just enter the Detail page? if so, then set the loading indicator and return new state
+    if (isCurrentlyOnDetailsPage && !wasPreviouslyOnDetailsPage) {
+      newState.isLoading = true;
       return newState;
     }
     return {

@@ -11,7 +11,7 @@ import {
 } from '../../../../../src/plugins/embeddable/public';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
 import { UiActionsSerializedEvent } from '../../../../../src/plugins/ui_actions/public';
-import { of } from '../../../../../src/plugins/kibana_utils/common';
+import { of } from '../../../../../src/plugins/kibana_utils/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableInput> {
   public readonly type = 'test';
