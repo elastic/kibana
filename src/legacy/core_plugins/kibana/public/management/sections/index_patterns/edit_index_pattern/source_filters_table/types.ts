@@ -20,5 +20,4 @@
 export interface SourceFiltersTableFilter {
   value: string;
   clientId: string | number;
-  [key: string]: any;
 }

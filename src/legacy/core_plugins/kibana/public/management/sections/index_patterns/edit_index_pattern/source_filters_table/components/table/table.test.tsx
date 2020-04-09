@@ -26,7 +26,7 @@ import { IIndexPattern } from '../../../../../../../../../../../plugins/data/pub
 import { SourceFiltersTableFilter } from '../../types';
 
 const indexPattern = {} as IIndexPattern;
-const items = [{ value: 'tim*' }];
+const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
@@ -111,7 +111,6 @@ describe('Table', () => {
       component.update();
 
       const cell = getTableColumnRender(component).render('tim*', { clientId });
-
       const filterNameTableCell = shallow(cell);
 
       expect(filterNameTableCell).toMatchSnapshot();
@@ -148,9 +147,7 @@ describe('Table', () => {
           })}
           items={items}
           deleteFilter={() => {}}
-          fieldWildcardMatcher={(query: string) => () => {
-            return query.includes('time*');
-          }}
+          fieldWildcardMatcher={(query: string) => () => query.includes('time*')}
           saveFilter={saveFilter}
           isSaving={false}
         />
@@ -161,6 +158,7 @@ describe('Table', () => {
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
         <div>{localComponent.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
+
       editingComponent
         .find('EuiButtonIcon')
         .at(1)
@@ -239,7 +237,6 @@ describe('Table', () => {
 
   test('should save when in edit mode and the enter key is pressed', () => {
     const saveFilter = jest.fn();
-    const clientId = 1;
 
     const component = shallow(
       <Table
@@ -255,7 +252,7 @@ describe('Table', () => {
     // Start the editing process
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-      <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
+      <div>{component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}</div>
     );
     editingComponent
       .find('EuiButtonIcon')
@@ -267,7 +264,7 @@ describe('Table', () => {
     // Get the rendered input cell
     const filterNameTableCell = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-      <div>{component.prop('columns')[0].render('tim*', { clientId })}</div>
+      <div>{component.prop('columns')[0].render('tim*', { clientId: 1 })}</div>
     );
 
     // Press the enter key
@@ -280,7 +277,6 @@ describe('Table', () => {
 
   test('should cancel when in edit mode and the esc key is pressed', () => {
     const saveFilter = jest.fn();
-    const clientId = 1;
 
     const component = shallow(
       <Table
@@ -296,7 +292,7 @@ describe('Table', () => {
     // Start the editing process
     const editingComponent = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-      <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
+      <div>{component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}</div>
     );
 
     editingComponent
@@ -310,7 +306,7 @@ describe('Table', () => {
     // Get the rendered input cell
     const filterNameTableCell = shallow(
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
-      <div>{component.prop('columns')[0].render('tim*', { clientId })}</div>
+      <div>{component.prop('columns')[0].render('tim*', { clientId: 1 })}</div>
     );
 
     // Press the ESCAPE key

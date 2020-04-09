@@ -71,7 +71,7 @@ const cancelAria = i18n.translate('kbn.management.editIndexPattern.source.table.
 
 export interface TableProps {
   indexPattern: IIndexPattern;
-  items: any[];
+  items: SourceFiltersTableFilter[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;
   saveFilter: (filter: SourceFiltersTableFilter) => any;
@@ -157,7 +157,7 @@ export class Table extends Component<TableProps, TableState> {
         render: (value, filter) => {
           const matches = indexPattern
             .getNonScriptedFields()
-            .map((currentFilter: SourceFiltersTableFilter) => currentFilter.name)
+            .map((currentFilter: any) => currentFilter.name)
             .filter(
               fieldWildcardMatcher([
                 this.state.editingFilterId === filter.clientId
