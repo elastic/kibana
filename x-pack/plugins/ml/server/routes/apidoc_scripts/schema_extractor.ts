@@ -42,44 +42,23 @@ export function extractDocumentation(
   return result;
 
   /** visit nodes finding exported schemas */
-  function visit(node: ts.Node) {
+  function visit(node: ts.Node, parentKey?: string) {
     if (isNodeExported(node) && ts.isVariableDeclaration(node)) {
       const key = node.name.getText();
+      parentKey = key;
       result.set(key, []);
     }
 
     if (node.getChildCount() > 0) {
-      ts.forEachChild(node, visit);
+      ts.forEachChild(node, n => visit(n, parentKey));
     }
 
-    if (ts.isPropertyAssignment(node) && node.name) {
-      let parentCheck: ts.Node = node.parent;
-      let schemaName: string | undefined;
-
-      while (
-        schemaName === undefined &&
-        !ts.isSourceFile(parentCheck) &&
-        !ts.isPropertyAssignment(parentCheck) &&
-        parentCheck !== undefined
-      ) {
-        for (const schemaKey of result.keys()) {
-          if (parentCheck.getFullText().includes(schemaKey)) {
-            schemaName = schemaKey;
-            break;
-          }
-        }
-        if (schemaName === undefined) {
-          parentCheck = parentCheck.parent;
-        }
-      }
-
-      if (schemaName !== undefined) {
-        const arr = result.get(schemaName);
-        const symbol = checker.getSymbolAtLocation(node.name);
-        if (symbol && arr) {
-          const foo = serializeSymbol(symbol);
-          arr.push(foo);
-        }
+    if (ts.isPropertyAssignment(node) && node.name && parentKey !== undefined) {
+      const arr = result.get(parentKey);
+      const symbol = checker.getSymbolAtLocation(node.name);
+      if (symbol && arr) {
+        const foo = serializeSymbol(symbol);
+        arr.push(foo);
       }
     }
 
