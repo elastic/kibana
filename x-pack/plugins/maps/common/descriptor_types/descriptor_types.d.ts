@@ -99,6 +99,16 @@ export type JoinDescriptor = {
   right: ESTermSourceDescriptor;
 };
 
+export type SourceDescriptor =
+  | XYZTMSSourceDescriptor
+  | WMSSourceDescriptor
+  | KibanaTilemapSourceDescriptor
+  | KibanaRegionmapSourceDescriptor
+  | ESTermSourceDescriptor
+  | ESSearchSourceDescriptor
+  | ESGeoGridSourceDescriptor
+  | EMSFileSourceDescriptor;
+
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
@@ -108,7 +118,7 @@ export type LayerDescriptor = {
   label?: string;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor: AbstractSourceDescriptor;
+  sourceDescriptor: SourceDescriptor;
   type?: string;
   visible?: boolean;
 };
