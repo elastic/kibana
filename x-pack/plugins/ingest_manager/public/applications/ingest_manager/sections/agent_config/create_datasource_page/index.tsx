@@ -89,6 +89,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     if (updatedPackageInfo) {
       setPackageInfo(updatedPackageInfo);
     } else {
+      setFormState('INVALID');
       setPackageInfo(undefined);
       setMaxStep('');
     }
@@ -102,6 +103,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     if (updatedAgentConfig) {
       setAgentConfig(updatedAgentConfig);
     } else {
+      setFormState('INVALID');
       setAgentConfig(undefined);
       setMaxStep('');
     }

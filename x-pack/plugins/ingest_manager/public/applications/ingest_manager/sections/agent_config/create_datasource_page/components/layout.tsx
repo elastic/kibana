@@ -30,6 +30,8 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
 }> = ({ from, basePath, cancelUrl, maxStep, agentConfig, packageInfo, children }) => {
   return (
     <WithHeaderLayout
+      restrictHeaderWidth={833}
+      restrictWidth={833}
       leftColumn={
         <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
           <EuiFlexItem>
@@ -45,7 +47,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
               <h1>
                 <FormattedMessage
                   id="xpack.ingestManager.createDatasource.pageTitle"
-                  defaultMessage="New data source"
+                  defaultMessage="Add data source"
                 />
               </h1>
             </EuiText>
@@ -100,9 +102,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
         </EuiFlexGroup>
       }
     >
-      <EuiFlexGroup style={{ maxWidth: 833 }}>
-        <EuiFlexItem>{children}</EuiFlexItem>
-      </EuiFlexGroup>
+      {children}
     </WithHeaderLayout>
   );
 };

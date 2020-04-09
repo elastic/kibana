@@ -5,10 +5,8 @@
  */
 
 import React from 'react';
-import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiOverlayMask, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AgentConfig } from '../../../../types';
 
@@ -21,7 +19,6 @@ export const ConfirmCreateDatasourceModal: React.FunctionComponent<{
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
-        maxWidth="566px"
         title={
           <FormattedMessage
             id="xpack.ingestManager.createDatasource.confirmModalTitle"

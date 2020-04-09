@@ -13,8 +13,8 @@ const Container = styled.div`
   background-color: ${props => props.theme.eui.euiPageBackgroundColor};
 `;
 
-const Wrapper = styled.div`
-  max-width: 1200px;
+const Wrapper = styled.div<{ maxWidth?: number }>`
+  max-width: ${props => props.maxWidth || 1200}px;
   margin-left: auto;
   margin-right: auto;
   padding-top: ${props => props.theme.eui.paddingSizes.xl};
@@ -30,6 +30,7 @@ const Tabs = styled(EuiTabs)`
 `;
 
 export interface HeaderProps {
+  restrictHeaderWidth?: number;
   leftColumn?: JSX.Element;
   rightColumn?: JSX.Element;
   tabs?: EuiTabProps[];
@@ -42,9 +43,14 @@ const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(({ leftColumn, r
   </EuiFlexGroup>
 ));
 
-export const Header: React.FC<HeaderProps> = ({ leftColumn, rightColumn, tabs }) => (
+export const Header: React.FC<HeaderProps> = ({
+  leftColumn,
+  rightColumn,
+  tabs,
+  restrictHeaderWidth,
+}) => (
   <Container>
-    <Wrapper>
+    <Wrapper maxWidth={restrictHeaderWidth}>
       <HeaderColumns leftColumn={leftColumn} rightColumn={rightColumn} />
       <EuiFlexGroup>
         {tabs ? (
