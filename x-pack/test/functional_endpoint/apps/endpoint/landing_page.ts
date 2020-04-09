@@ -7,8 +7,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getPageObjects }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint']);
+  const testSubjects = getService('testSubjects');
 
   describe('Endpoint landing page', function() {
     this.tags('ciGroup7');
@@ -19,6 +20,10 @@ export default ({ getPageObjects }: FtrProviderContext) => {
     it('Loads the endpoint app', async () => {
       const welcomeEndpointMessage = await pageObjects.endpoint.welcomeEndpointTitle();
       expect(welcomeEndpointMessage).to.be('Hello World');
+    });
+
+    it('Does not display a toast indicating that the ingest manager failed to initialize', async () => {
+      await testSubjects.missingOrFail('euiToastHeader');
     });
   });
 };
