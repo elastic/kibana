@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { createMetricVisTypeDefinition } from './metric_vis_type';
+import { MetricVisComponent } from './components/metric_vis_component';
 
-export const [getFormatService, setFormatService] = createGetterSetter<
-  DataPublicPluginStart['fieldFormats']
->('metric data.fieldFormats');
+// jest.mock('ui/new_platform');
+
+describe('metric_vis - createMetricVisTypeDefinition', () => {
+  it('has metric vis component set', () => {
+    const def = createMetricVisTypeDefinition();
+
+    expect(def.visConfig.component).toBe(MetricVisComponent);
+  });
+});

@@ -21,10 +21,10 @@ import { i18n } from '@kbn/i18n';
 
 import { MetricVisComponent } from './components/metric_vis_component';
 import { MetricVisOptions } from './components/metric_vis_options';
-import { ColorModes } from '../../vis_type_vislib/public';
-import { ColorSchemas, colorSchemas } from '../../../../plugins/charts/public';
-import { AggGroupNames } from '../../../../plugins/data/public';
-import { Schemas } from '../../../../plugins/vis_default_editor/public';
+import { ColorModes } from '../../../legacy/core_plugins/vis_type_vislib/public';
+import { ColorSchemas, colorSchemas } from '../../charts/public';
+import { AggGroupNames } from '../../data/public';
+import { Schemas } from '../../vis_default_editor/public';
 
 export const createMetricVisTypeDefinition = () => ({
   name: 'metric',

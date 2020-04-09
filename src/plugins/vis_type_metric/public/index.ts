@@ -16,16 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './index.scss';
+import { PluginInitializerContext } from 'kibana/public';
+import { MetricVisPlugin as Plugin } from './plugin';
 
-import { createMetricVisTypeDefinition } from './metric_vis_type';
-import { MetricVisComponent } from './components/metric_vis_component';
-
-jest.mock('ui/new_platform');
-
-describe('metric_vis - createMetricVisTypeDefinition', () => {
-  it('has metric vis component set', () => {
-    const def = createMetricVisTypeDefinition();
-
-    expect(def.visConfig.component).toBe(MetricVisComponent);
-  });
-});
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}
