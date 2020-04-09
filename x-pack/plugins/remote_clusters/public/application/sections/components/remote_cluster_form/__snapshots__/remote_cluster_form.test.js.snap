@@ -118,9 +118,12 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
   }
   save={[Function]}
 >
-  <EuiForm>
+  <EuiForm
+    data-test-subj="remoteClusterForm"
+  >
     <div
       className="euiForm"
+      data-test-subj="remoteClusterForm"
     >
       <EuiDescribedFormGroup
         description={
@@ -350,7 +353,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
         description={
           <React.Fragment>
             <FormattedMessage
-              defaultMessage="Use seed nodes by default, or switch to a single proxy address."
+              defaultMessage="Use seed nodes by default, or switch to proxy mode."
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
               values={Object {}}
             />
@@ -367,7 +370,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                 data-test-subj="remoteClusterFormConnectionModeToggle"
                 label={
                   <FormattedMessage
-                    defaultMessage="Use a single proxy address"
+                    defaultMessage="Use proxy mode"
                     id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                     values={Object {}}
                   />
@@ -443,11 +446,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           className="euiTextColor euiTextColor--subdued"
                         >
                           <FormattedMessage
-                            defaultMessage="Use seed nodes by default, or switch to a single proxy address."
+                            defaultMessage="Use seed nodes by default, or switch to proxy mode."
                             id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
                             values={Object {}}
                           >
-                            Use seed nodes by default, or switch to a single proxy address.
+                            Use seed nodes by default, or switch to proxy mode.
                           </FormattedMessage>
                           <EuiFormRow
                             describedByIds={Array []}
@@ -470,7 +473,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   id="mockId"
                                   label={
                                     <FormattedMessage
-                                      defaultMessage="Use a single proxy address"
+                                      defaultMessage="Use proxy mode"
                                       id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                                       values={Object {}}
                                     />
@@ -534,11 +537,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                       onClick={[Function]}
                                     >
                                       <FormattedMessage
-                                        defaultMessage="Use a single proxy address"
+                                        defaultMessage="Use proxy mode"
                                         id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                                         values={Object {}}
                                       >
-                                        Use a single proxy address
+                                        Use proxy mode
                                       </FormattedMessage>
                                     </span>
                                   </div>
@@ -680,120 +683,6 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               values={Object {}}
                             >
                               The address to use for remote connections.
-                            </FormattedMessage>
-                          </div>
-                        </EuiFormHelpText>
-                      </div>
-                    </div>
-                  </EuiFormRow>
-                  <EuiFormRow
-                    data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
-                    describedByIds={Array []}
-                    display="row"
-                    fullWidth={true}
-                    hasChildLabel={true}
-                    hasEmptyLabelSpace={false}
-                    helpText={
-                      <FormattedMessage
-                        defaultMessage="The number of socket connections to open per remote cluster."
-                        id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
-                        values={Object {}}
-                      />
-                    }
-                    label={
-                      <FormattedMessage
-                        defaultMessage="Socket connections"
-                        id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
-                        values={Object {}}
-                      />
-                    }
-                    labelType="label"
-                  >
-                    <div
-                      className="euiFormRow euiFormRow--fullWidth"
-                      data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
-                      id="mockId-row"
-                    >
-                      <div
-                        className="euiFormRow__labelWrapper"
-                      >
-                        <EuiFormLabel
-                          className="euiFormRow__label"
-                          htmlFor="mockId"
-                          isFocused={false}
-                          type="label"
-                        >
-                          <label
-                            className="euiFormLabel euiFormRow__label"
-                            htmlFor="mockId"
-                          >
-                            <FormattedMessage
-                              defaultMessage="Socket connections"
-                              id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
-                              values={Object {}}
-                            >
-                              Socket connections
-                            </FormattedMessage>
-                          </label>
-                        </EuiFormLabel>
-                      </div>
-                      <div
-                        className="euiFormRow__fieldWrapper"
-                      >
-                        <EuiFieldNumber
-                          aria-describedby="mockId-help"
-                          fullWidth={true}
-                          id="mockId"
-                          onBlur={[Function]}
-                          onChange={[Function]}
-                          onFocus={[Function]}
-                          value={18}
-                        >
-                          <EuiFormControlLayout
-                            compressed={false}
-                            fullWidth={true}
-                            inputId="mockId"
-                            isLoading={false}
-                          >
-                            <div
-                              className="euiFormControlLayout euiFormControlLayout--fullWidth"
-                            >
-                              <div
-                                className="euiFormControlLayout__childrenWrapper"
-                              >
-                                <EuiValidatableControl>
-                                  <input
-                                    aria-describedby="mockId-help"
-                                    className="euiFieldNumber euiFieldNumber--fullWidth"
-                                    id="mockId"
-                                    onBlur={[Function]}
-                                    onChange={[Function]}
-                                    onFocus={[Function]}
-                                    type="number"
-                                    value={18}
-                                  />
-                                </EuiValidatableControl>
-                                <EuiFormControlLayoutIcons
-                                  isLoading={false}
-                                />
-                              </div>
-                            </div>
-                          </EuiFormControlLayout>
-                        </EuiFieldNumber>
-                        <EuiFormHelpText
-                          className="euiFormRow__text"
-                          id="mockId-help"
-                        >
-                          <div
-                            className="euiFormHelpText euiFormRow__text"
-                            id="mockId-help"
-                          >
-                            <FormattedMessage
-                              defaultMessage="The number of socket connections to open per remote cluster."
-                              id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
-                              values={Object {}}
-                            >
-                              The number of socket connections to open per remote cluster.
                             </FormattedMessage>
                           </div>
                         </EuiFormHelpText>
@@ -952,6 +841,120 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   </FormattedMessage>
                                 </button>
                               </EuiLink>
+                            </FormattedMessage>
+                          </div>
+                        </EuiFormHelpText>
+                      </div>
+                    </div>
+                  </EuiFormRow>
+                  <EuiFormRow
+                    data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
+                    describedByIds={Array []}
+                    display="row"
+                    fullWidth={true}
+                    hasChildLabel={true}
+                    hasEmptyLabelSpace={false}
+                    helpText={
+                      <FormattedMessage
+                        defaultMessage="The number of socket connections to open per remote cluster."
+                        id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
+                        values={Object {}}
+                      />
+                    }
+                    label={
+                      <FormattedMessage
+                        defaultMessage="Socket connections"
+                        id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
+                        values={Object {}}
+                      />
+                    }
+                    labelType="label"
+                  >
+                    <div
+                      className="euiFormRow euiFormRow--fullWidth"
+                      data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
+                      id="mockId-row"
+                    >
+                      <div
+                        className="euiFormRow__labelWrapper"
+                      >
+                        <EuiFormLabel
+                          className="euiFormRow__label"
+                          htmlFor="mockId"
+                          isFocused={false}
+                          type="label"
+                        >
+                          <label
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="mockId"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Socket connections"
+                              id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
+                              values={Object {}}
+                            >
+                              Socket connections
+                            </FormattedMessage>
+                          </label>
+                        </EuiFormLabel>
+                      </div>
+                      <div
+                        className="euiFormRow__fieldWrapper"
+                      >
+                        <EuiFieldNumber
+                          aria-describedby="mockId-help"
+                          fullWidth={true}
+                          id="mockId"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          value={18}
+                        >
+                          <EuiFormControlLayout
+                            compressed={false}
+                            fullWidth={true}
+                            inputId="mockId"
+                            isLoading={false}
+                          >
+                            <div
+                              className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                            >
+                              <div
+                                className="euiFormControlLayout__childrenWrapper"
+                              >
+                                <EuiValidatableControl>
+                                  <input
+                                    aria-describedby="mockId-help"
+                                    className="euiFieldNumber euiFieldNumber--fullWidth"
+                                    id="mockId"
+                                    onBlur={[Function]}
+                                    onChange={[Function]}
+                                    onFocus={[Function]}
+                                    type="number"
+                                    value={18}
+                                  />
+                                </EuiValidatableControl>
+                                <EuiFormControlLayoutIcons
+                                  isLoading={false}
+                                />
+                              </div>
+                            </div>
+                          </EuiFormControlLayout>
+                        </EuiFieldNumber>
+                        <EuiFormHelpText
+                          className="euiFormRow__text"
+                          id="mockId-help"
+                        >
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="mockId-help"
+                          >
+                            <FormattedMessage
+                              defaultMessage="The number of socket connections to open per remote cluster."
+                              id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
+                              values={Object {}}
+                            >
+                              The number of socket connections to open per remote cluster.
                             </FormattedMessage>
                           </div>
                         </EuiFormHelpText>
@@ -1351,6 +1354,7 @@ exports[`RemoteClusterForm renders untouched state 1`] = `
 Array [
   <div
     class="euiForm"
+    data-test-subj="remoteClusterForm"
   >
     <div
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
@@ -1447,7 +1451,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Use seed nodes by default, or switch to a single proxy address.
+              Use seed nodes by default, or switch to proxy mode.
               <div
                 class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
                 id="mockId-row"
@@ -1491,7 +1495,7 @@ Array [
                       class="euiSwitch__label"
                       id="mockId"
                     >
-                      Use a single proxy address
+                      Use proxy mode
                     </span>
                   </div>
                 </div>
