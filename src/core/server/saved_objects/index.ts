@@ -70,6 +70,7 @@ export {
 
 export {
   SavedObjectsNamespaceType,
+  SavedObjectStatusMeta,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
 } from './types';
