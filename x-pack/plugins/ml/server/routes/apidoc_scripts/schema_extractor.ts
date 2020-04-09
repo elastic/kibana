@@ -98,23 +98,27 @@ export function extractDocumentation(
       typePropertySymbol!.valueDeclaration
     );
 
-    const resName = resultType && resultType.symbol && resultType.symbol.name;
+    return serializeWithType(symbol, resultType);
+  }
 
-    let type: DocEntry['type'] = checker.typeToString(resultType);
-    const nestedEntries = processNestedMembers(resultType);
+  function serializeWithType(symbol: ts.Symbol, type: ts.Type): DocEntry {
+    let typeAsString: DocEntry['type'] = checker.typeToString(type);
+    const nestedEntries = processNestedMembers(type);
+
+    const resName = type && type.symbol && type.symbol.name;
 
     if (nestedEntries && nestedEntries.length > 0) {
       if (resName === 'Array') {
-        type = `Array<${symbol.getName()}>`;
+        typeAsString = `Array<${symbol.getName()}>`;
       } else {
-        type = symbol.getName();
+        typeAsString = symbol.getName();
       }
     }
 
     return {
       name: symbol.getName(),
       documentation: getCommentString(symbol),
-      type,
+      type: typeAsString,
       ...(nestedEntries ? { nested: nestedEntries } : {}),
     };
   }
@@ -138,12 +142,9 @@ export function extractDocumentation(
       collection = [];
 
       members.forEach(member => {
-        collection.push({
-          name: member.escapedName,
-          documentation: getCommentString(member),
-          // @ts-ignore
-          type: checker.typeToString(member.type),
-        });
+        // @ts-ignore
+        const serializedMember = serializeWithType(member, member.type);
+        collection.push(serializedMember);
       });
     }
 
