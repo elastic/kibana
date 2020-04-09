@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { EuiSpacer, EuiText } from '@elastic/eui';
