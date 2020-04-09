@@ -38,7 +38,9 @@ const createPlugin = (
 ) => {
   const pluginInitializerContext = coreMock.createPluginInitializerContext();
   const uiActions = uiActionsPluginMock.createPlugin();
-  const embeddable = embeddablePluginMock.createInstance();
+  const embeddable = embeddablePluginMock.createInstance({
+    uiActions: uiActions.setup,
+  });
   const plugin = pluginInitializer(pluginInitializerContext);
   const setup = plugin.setup(coreSetup, {
     uiActions: uiActions.setup,
@@ -53,7 +55,9 @@ const createPlugin = (
     setup,
     doStart: (anotherCoreStart: CoreStart = coreStart) => {
       const uiActionsStart = uiActions.doStart();
-      const embeddableStart = embeddable.doStart();
+      const embeddableStart = embeddable.doStart({
+        uiActions: uiActionsStart,
+      });
       return plugin.start(anotherCoreStart, {
         uiActions: uiActionsStart,
         embeddable: embeddableStart,
