@@ -57,11 +57,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
       await filterSelectItem.click();
       await testSubjects.click('thresholdAlertTimeFieldSelect');
-      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
       await retry.try(async () => {
+        const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
         expect(fieldOptions[1]).not.to.be(undefined);
+        await fieldOptions[1].click();
       });
-      await fieldOptions[1].click();
       await testSubjects.click('closePopover');
       // need this two out of popup clicks to close them
       const nameInput = await testSubjects.find('alertNameInput');
@@ -155,7 +155,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await editLink[0].click();
 
       const updatedAlertName = `Changed Alert Name ${generateUniqueKey()}`;
-      await testSubjects.setValue('alertNameInput', updatedAlertName);
+      await testSubjects.setValue('alertNameInput', updatedAlertName, { clearWithKeyboard: true });
 
       await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
 
@@ -208,7 +208,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const editLink = await testSubjects.findAll('alertsTableCell-editLink');
       await editLink[0].click();
 
-      await testSubjects.setValue('throttleInput', '1');
+      await testSubjects.setValue('throttleInput', '1', { clearWithKeyboard: true });
 
       await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
 
