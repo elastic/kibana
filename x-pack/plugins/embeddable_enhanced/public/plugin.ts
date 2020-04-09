@@ -27,12 +27,12 @@ import {
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
-  uiActions: AdvancedUiActionsSetup;
+  advancedUiActions: AdvancedUiActionsSetup;
 }
 
 export interface StartDependencies {
   embeddable: EmbeddableStart;
-  uiActions: AdvancedUiActionsStart;
+  advancedUiActions: AdvancedUiActionsStart;
 }
 
 // eslint-disable-next-line
@@ -45,7 +45,7 @@ export class EmbeddableEnhancedPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   constructor(protected readonly context: PluginInitializerContext) {}
 
-  private uiActions?: StartDependencies['uiActions'];
+  private uiActions?: StartDependencies['advancedUiActions'];
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
@@ -54,7 +54,7 @@ export class EmbeddableEnhancedPlugin
   }
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
-    this.uiActions = plugins.uiActions;
+    this.uiActions = plugins.advancedUiActions;
 
     return {};
   }
