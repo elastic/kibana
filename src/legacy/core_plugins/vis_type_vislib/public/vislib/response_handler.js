@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { buildHierarchicalData, buildPointSeriesData } from '../legacy_imports';
 import { getFormatService } from '../services';
+import { buildHierarchicalData, buildPointSeriesData } from './helpers';
 
 function tableResponseHandler(table, dimensions) {
   const converted = { tables: [] };
@@ -72,7 +72,7 @@ function tableResponseHandler(table, dimensions) {
 function convertTableGroup(tableGroup, convertTable) {
   const tables = tableGroup.tables;
 
-  if (!tables.length) return;
+  if (!tables || !tables.length) return;
 
   const firstChild = tables[0];
   if (firstChild.columns) {
