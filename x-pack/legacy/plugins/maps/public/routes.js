@@ -5,13 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { capabilities } from 'ui/capabilities';
-import chrome from 'ui/chrome';
 import routes from 'ui/routes';
-import { docTitle } from 'ui/doc_title';
 import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
-import { npStart } from 'ui/new_platform';
+import {
+  getSavedObjectsClient,
+  getRecentlyAccessed,
+  getDocTitle,
+  getSaveCapabilities,
+} from './kibana_services';
 
 routes.enable();
 
@@ -43,19 +45,17 @@ routes
       $scope.delete = ids => {
         return gisMapSavedObjectLoader.delete(ids);
       };
-      $scope.readOnly = !capabilities.get().maps.save;
+      $scope.readOnly = !getSaveCapabilities();
     },
     resolve: {
       hasMaps: function(kbnUrl) {
-        chrome
-          .getSavedObjectsClient()
+        getSavedObjectsClient()
           .find({ type: 'map', perPage: 1 })
           .then(resp => {
             // Do not show empty listing page, just redirect to a new map
             if (resp.savedObjects.length === 0) {
               kbnUrl.redirect('/map');
             }
-
             return true;
           });
       },
@@ -83,8 +83,8 @@ routes
         return gisMapSavedObjectLoader
           .get(id)
           .then(savedMap => {
-            npStart.core.chrome.recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
-            docTitle.change(savedMap.title);
+            getRecentlyAccessed().add(savedMap.getFullPath(), savedMap.title, id);
+            getDocTitle().change(savedMap.title);
             return savedMap;
           })
           .catch(

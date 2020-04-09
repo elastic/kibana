@@ -13,10 +13,9 @@ import '../../../../plugins/maps/public/layers/load_layer_wizards';
 
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
-import { wrapInI18nContext } from 'ui/i18n';
-// @ts-ignore
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 // @ts-ignore
+import { wrapInI18nContext } from 'ui/i18n';
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
@@ -25,6 +24,10 @@ import {
   setTimeFilter,
   setInjectedVarFunc,
   setIndexPatternService,
+  setSavedObjectsClient,
+  setRecentlyAccessed,
+  setDocTitle,
+  setSaveCapabilities,
 } from './kibana_services';
 // @ts-ignore
 import {
@@ -74,6 +77,10 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
   setIndexPatternService(data.indexPatterns);
+  setSavedObjectsClient(core.savedObjects.client);
+  setRecentlyAccessed(core.chrome.recentlyAccessed);
+  setDocTitle(core.chrome.docTitle);
+  setSaveCapabilities(core.application.capabilities.maps.save);
 };
 
 /** @internal */

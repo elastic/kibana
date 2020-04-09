@@ -27,3 +27,22 @@ export const getIndexPatternSelectComponent = () => indexPatternSelectComponent;
 let dataTimeFilter;
 export const setTimeFilter = timeFilter => (dataTimeFilter = timeFilter);
 export const getTimeFilter = () => dataTimeFilter;
+
+let savedObjectsClient;
+export const setSavedObjectsClient = coreSavedObjectsClient =>
+  (savedObjectsClient = coreSavedObjectsClient);
+export const getSavedObjectsClient = () => savedObjectsClient;
+
+let recentlyAccessed;
+export const setRecentlyAccessed = coreChromeRecentlyAccessed =>
+  (recentlyAccessed = coreChromeRecentlyAccessed);
+export const getRecentlyAccessed = () => recentlyAccessed;
+
+let docTitle;
+export const setDocTitle = coreChromeDocTitle => (docTitle = coreChromeDocTitle);
+export const getDocTitle = () => docTitle;
+
+let mapsSaveCapabilities;
+export const setSaveCapabilities = coreAppMapsSaveCapabilities =>
+  (mapsSaveCapabilities = coreAppMapsSaveCapabilities);
+export const getSaveCapabilities = () => mapsSaveCapabilities;

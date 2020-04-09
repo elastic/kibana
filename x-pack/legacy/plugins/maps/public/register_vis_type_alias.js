@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { npSetup } from '../../../../../src/legacy/ui/public/new_platform';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_BASE_URL } from '../common/constants';
+import { getInjectedVarFunc } from './kibana_services';
 
-const showMapVisualizationTypes = chrome.getInjected('showMapVisualizationTypes', false);
+const showMapVisualizationTypes = getInjectedVarFunc()('showMapVisualizationTypes', false);
 
 const description = i18n.translate('xpack.maps.visTypeAlias.description', {
   defaultMessage: 'Create and style maps with multiple layers and indices.',

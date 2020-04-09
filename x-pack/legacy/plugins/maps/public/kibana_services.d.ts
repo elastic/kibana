@@ -21,3 +21,7 @@ export function setInjectedVarFunc(args: unknown): void;
 export function setToasts(args: unknown): void;
 export function setIndexPatternService(args: unknown): void;
 export function setAutocompleteService(args: unknown): void;
+export function setSavedObjectsClient(args: unknown): void;
+export function setRecentlyAccessed(args: unknown): void;
+export function setDocTitle(args: unknown): void;
+export function setSaveCapabilities(args: unknown): void;
