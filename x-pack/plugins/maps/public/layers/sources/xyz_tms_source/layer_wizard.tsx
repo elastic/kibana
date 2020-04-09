@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { XYZTMSEditor } from './xyz_tms_editor';
+import { XYZTMSEditor, SourceConfig } from './xyz_tms_editor';
 import { XYZTMSSource, sourceTitle } from './xyz_tms_source';
 
 export const tmsLayerWizardConfig = {
@@ -15,7 +15,7 @@ export const tmsLayerWizardConfig = {
   }),
   icon: 'grid',
   renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
+    const onSourceConfigChange = (sourceConfig: SourceConfig) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
       const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
