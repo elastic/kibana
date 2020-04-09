@@ -21,7 +21,8 @@ export interface ISource {
 }
 
 export class AbstractSource implements ISource {
-  constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object);
+  readonly _descriptor: AbstractSourceDescriptor;
+  constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters?: object);
 
   destroy(): void;
   createDefaultLayer(): ILayer;

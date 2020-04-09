@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import React, { Fragment } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { AbstractTMSSource } from './tms_source';
-import { TileLayer } from '../tile_layer';
 import { i18n } from '@kbn/i18n';
-import { getDataSourceLabel, getUrlLabel } from '../../../common/i18n_getters';
 import _ from 'lodash';
-import { EMS_XYZ } from '../../../common/constants';
-import { registerSource } from './source_registry';
+import { TileLayer } from '../../tile_layer';
+import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
+import { EMS_XYZ } from '../../../../common/constants';
+import { registerSource } from '../source_registry';
+import { AbstractTMSSource } from '../tms_source';
+import { LayerDescriptor, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 
 const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
@@ -22,13 +24,28 @@ const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
 export class XYZTMSSource extends AbstractTMSSource {
   static type = EMS_XYZ;
 
-  static createDescriptor({ urlTemplate, attributionText, attributionUrl }) {
+  readonly _descriptor: XYZTMSSourceDescriptor;
+
+  static createDescriptor({
+    urlTemplate,
+    attributionText,
+    attributionUrl,
+  }: {
+    urlTemplate: string;
+    attributionText: string;
+    attributionUrl: string;
+  }): XYZTMSSourceDescriptor {
     return {
       type: XYZTMSSource.type,
       urlTemplate,
       attributionText,
       attributionUrl,
     };
+  }
+
+  constructor(sourceDescriptor: XYZTMSSourceDescriptor) {
+    super(sourceDescriptor);
+    this._descriptor = sourceDescriptor;
   }
 
   async getImmutableProperties() {
@@ -38,14 +55,14 @@ export class XYZTMSSource extends AbstractTMSSource {
     ];
   }
 
-  _createDefaultLayerDescriptor(options) {
+  _createDefaultLayerDescriptor(options: LayerDescriptor): LayerDescriptor {
     return TileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options,
     });
   }
 
-  createDefaultLayer(options) {
+  createDefaultLayer(options: LayerDescriptor) {
     return new TileLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
       source: this,
@@ -119,7 +136,6 @@ class XYZTMSEditor extends React.Component {
 
   render() {
     const { attributionText, attributionUrl } = this.state;
-
     return (
       <Fragment>
         <EuiFormRow label="Url">

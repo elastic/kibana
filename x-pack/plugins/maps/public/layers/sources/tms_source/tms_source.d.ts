@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractSource, ISource } from './source';
+import { AbstractSource, ISource } from '../source';
 
 export interface ITMSSource extends ISource {
   getUrlTemplate(): Promise<string>;

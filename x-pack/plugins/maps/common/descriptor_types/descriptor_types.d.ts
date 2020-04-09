@@ -9,6 +9,11 @@ import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from 
 import { VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 
+export type AttributionDescriptor = {
+  attributionText?: string;
+  attributionUrl?: string;
+};
+
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
@@ -84,11 +89,12 @@ export type WMSSourceDescriptor = {
   attributionUrl: string;
 };
 
-export type XYZTMSSourceDescriptor = {
-  id: string;
-  type: string;
-  urlTemplate: string;
-};
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
+  AttributionDescriptor & {
+    id: string;
+    type: string;
+    urlTemplate: string;
+  };
 
 export type JoinDescriptor = {
   leftField: string;
