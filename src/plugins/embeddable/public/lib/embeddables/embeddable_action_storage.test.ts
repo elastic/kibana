@@ -22,7 +22,7 @@ import { EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
 import { UiActionsSerializedEvent } from '../../../../ui_actions/public';
-import { of } from '../../../../kibana_utils/common';
+import { of } from '../../../../kibana_utils/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableInput> {
   public readonly type = 'test';
