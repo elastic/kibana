@@ -22,6 +22,7 @@ export interface DashboardDrilldownConfigProps {
   onKeepRangeToggle?: () => void;
   onSearchChange: (searchString: string) => void;
   isLoading: boolean;
+  error?: string | null;
 }
 
 export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> = ({
@@ -34,12 +35,13 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
   onKeepRangeToggle,
   onSearchChange,
   isLoading,
+  error,
 }) => {
   const selectedTitle = dashboards.find(item => item.value === activeDashboardId)?.label || '';
 
   return (
     <>
-      <EuiFormRow label={txtChooseDestinationDashboard} fullWidth>
+      <EuiFormRow label={txtChooseDestinationDashboard} fullWidth isInvalid={!!error} error={error}>
         <EuiComboBox<string>
           async
           selectedOptions={
@@ -52,6 +54,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
           singleSelection={{ asPlainText: true }}
           fullWidth
           data-test-subj={'dashboardDrilldownSelectDashboard'}
+          isInvalid={!!error}
         />
       </EuiFormRow>
       {!!onCurrentFiltersToggle && (

@@ -10,6 +10,7 @@ import { debounce, findIndex } from 'lodash';
 import { CollectConfigProps } from './types';
 import { DashboardDrilldownConfig } from '../../../components/dashboard_drilldown_config';
 import { SimpleSavedObject } from '../../../../../../../src/core/public';
+import { txtDestinationDashboardNotFound } from './i18n';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,
@@ -36,7 +37,7 @@ interface CollectConfigContainerState {
   searchString?: string;
   isLoading: boolean;
   selectedDashboard?: EuiComboBoxOptionOption<string>;
-  delay: boolean;
+  error: string | null;
 }
 
 export class CollectConfigContainer extends React.Component<
@@ -49,7 +50,7 @@ export class CollectConfigContainer extends React.Component<
     isLoading: false,
     searchString: undefined,
     selectedDashboard: undefined,
-    delay: false,
+    error: null,
   };
 
   constructor(props: CollectConfigProps) {
@@ -74,6 +75,15 @@ export class CollectConfigContainer extends React.Component<
           .get<{ title: string }>('dashboard', config.dashboardId)
           .then(dashboard => {
             if (!this.isMounted) return;
+            if (dashboard.error?.statusCode === 404) {
+              this.setState({
+                error: txtDestinationDashboardNotFound(config.dashboardId),
+              });
+              this.props.onConfig({ ...config, dashboardId: undefined });
+              return;
+            }
+            if (dashboard.error) return;
+
             this.setState({ selectedDashboard: dashboardSavedObjectToMenuItem(dashboard) });
           });
       }
@@ -106,7 +116,7 @@ export class CollectConfigContainer extends React.Component<
 
   render() {
     const { config, onConfig } = this.props;
-    const { dashboards, selectedDashboard, isLoading } = this.state;
+    const { dashboards, selectedDashboard, isLoading, error } = this.state;
 
     return (
       <DashboardDrilldownConfig
@@ -115,8 +125,12 @@ export class CollectConfigContainer extends React.Component<
         currentFilters={config.useCurrentFilters}
         keepRange={config.useCurrentDateRange}
         isLoading={isLoading}
+        error={error}
         onDashboardSelect={dashboardId => {
           onConfig({ ...config, dashboardId });
+          if (this.state.error) {
+            this.setState({ error: null });
+          }
         }}
         onSearchChange={this.debouncedLoadDashboards}
         onCurrentFiltersToggle={() =>
