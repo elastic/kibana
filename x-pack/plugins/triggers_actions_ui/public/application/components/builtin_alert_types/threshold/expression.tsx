@@ -445,11 +445,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       ) : null}
       <EuiSpacer size="l" />
       <EuiSteps steps={firstSetOfSteps} />
-      <EuiSpacer size="l" />
       <div className="actAlertVisualization__chart">
         {canShowVizualization ? (
           <Fragment>
-            <EuiSpacer size="xl" />
             <EuiEmptyPrompt
               iconType="visBarVertical"
               body={
