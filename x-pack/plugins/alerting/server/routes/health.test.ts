@@ -10,6 +10,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockLicenseState } from '../lib/license_state.mock';
+import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -24,7 +25,9 @@ describe('healthRoute', () => {
     const router: RouterMock = mockRouter.create();
 
     const licenseState = mockLicenseState();
-    healthRoute(router, licenseState);
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    healthRoute(router, licenseState, encryptedSavedObjects);
 
     const [config] = router.get.mock.calls[0];
 
@@ -35,7 +38,9 @@ describe('healthRoute', () => {
     const router: RouterMock = mockRouter.create();
 
     const licenseState = mockLicenseState();
-    healthRoute(router, licenseState);
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
     const elasticsearch = elasticsearchServiceMock.createSetup();
@@ -58,11 +63,13 @@ describe('healthRoute', () => {
     `);
   });
 
-  it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
+  it('evaluates whether Encrypted Saved Objects is using an ephemeral encryption key', async () => {
     const router: RouterMock = mockRouter.create();
 
     const licenseState = mockLicenseState();
-    healthRoute(router, licenseState);
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    encryptedSavedObjects.usingEphemeralEncryptionKey = true;
+    healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
     const elasticsearch = elasticsearchServiceMock.createSetup();
@@ -73,6 +80,31 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasPermanentEncryptionKey": false,
+          "isSufficientlySecure": true,
+        },
+      }
+    `);
+  });
+
+  it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
+    const router: RouterMock = mockRouter.create();
+
+    const licenseState = mockLicenseState();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    healthRoute(router, licenseState, encryptedSavedObjects);
+    const [, handler] = router.get.mock.calls[0];
+
+    const elasticsearch = elasticsearchServiceMock.createSetup();
+    elasticsearch.adminClient.callAsInternalUser.mockReturnValue(Promise.resolve({}));
+
+    const [context, req, res] = mockHandlerArguments({ elasticsearch }, {}, ['ok']);
+
+    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
       }
@@ -83,7 +115,9 @@ describe('healthRoute', () => {
     const router: RouterMock = mockRouter.create();
 
     const licenseState = mockLicenseState();
-    healthRoute(router, licenseState);
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
     const elasticsearch = elasticsearchServiceMock.createSetup();
@@ -94,6 +128,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
       }
@@ -104,7 +139,9 @@ describe('healthRoute', () => {
     const router: RouterMock = mockRouter.create();
 
     const licenseState = mockLicenseState();
-    healthRoute(router, licenseState);
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
     const elasticsearch = elasticsearchServiceMock.createSetup();
@@ -117,6 +154,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": false,
         },
       }
@@ -127,7 +165,9 @@ describe('healthRoute', () => {
     const router: RouterMock = mockRouter.create();
 
     const licenseState = mockLicenseState();
-    healthRoute(router, licenseState);
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
     const elasticsearch = elasticsearchServiceMock.createSetup();
@@ -140,6 +180,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": false,
         },
       }
@@ -150,7 +191,9 @@ describe('healthRoute', () => {
     const router: RouterMock = mockRouter.create();
 
     const licenseState = mockLicenseState();
-    healthRoute(router, licenseState);
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
     const elasticsearch = elasticsearchServiceMock.createSetup();
@@ -163,6 +206,7 @@ describe('healthRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "hasPermanentEncryptionKey": true,
           "isSufficientlySecure": true,
         },
       }

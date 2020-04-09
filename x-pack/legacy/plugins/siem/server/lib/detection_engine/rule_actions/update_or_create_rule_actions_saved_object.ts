@@ -24,16 +24,17 @@ export const updateOrCreateRuleActionsSavedObject = async ({
   actions,
   throttle,
 }: UpdateOrCreateRuleActionsSavedObject): Promise<RuleActions> => {
-  const currentRuleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
+  const ruleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
 
-  if (currentRuleActions) {
+  if (ruleActions != null) {
     return updateRuleActionsSavedObject({
       ruleAlertId,
       savedObjectsClient,
       actions,
       throttle,
-    }) as Promise<RuleActions>;
+      ruleActions,
+    });
+  } else {
+    return createRuleActionsSavedObject({ ruleAlertId, savedObjectsClient, actions, throttle });
   }
-
-  return createRuleActionsSavedObject({ ruleAlertId, savedObjectsClient, actions, throttle });
 };

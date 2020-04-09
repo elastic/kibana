@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Alert } from '../../../../../../../plugins/alerting/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRuleParams } from './types';
@@ -42,6 +43,7 @@ export const createRules = async ({
   note,
   version,
   lists,
+  actions,
 }: CreateRuleParams): Promise<Alert> => {
   // TODO: Remove this and use regular lists once the feature is stable for a release
   const listsParam = hasListsFeature() ? { lists } : {};
@@ -81,7 +83,7 @@ export const createRules = async ({
       },
       schedule: { interval },
       enabled,
-      actions: [],
+      actions: actions.map(transformRuleToAlertAction),
       throttle: null,
     },
   });
