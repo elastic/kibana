@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { saturate, lighten } from 'polished';
+import { saturate } from 'polished';
 
 import {
   htmlIdGenerator,
