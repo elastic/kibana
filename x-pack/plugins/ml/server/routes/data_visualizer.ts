@@ -11,6 +11,7 @@ import { Field } from '../models/data_visualizer/data_visualizer';
 import {
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
+  indexPatternTitleSchema,
 } from './schemas/data_visualizer_schema';
 import { RouteInitialization } from '../types';
 
@@ -74,11 +75,17 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
    * @api {post} /api/ml/data_visualizer/get_field_stats/:indexPatternTitle Get stats for fields
    * @apiName GetStatsForFields
    * @apiDescription Returns fields stats of the index pattern.
+   *
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerFieldStatsSchema
    */
   router.post(
     {
       path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
-      validate: dataVisualizerFieldStatsSchema,
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerFieldStatsSchema,
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -124,11 +131,17 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
    * @api {post} /api/ml/data_visualizer/get_overall_stats/:indexPatternTitle Get overall stats
    * @apiName GetOverallStats
    * @apiDescription Returns overall stats of the index pattern.
+   *
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerOverallStatsSchema
    */
   router.post(
     {
       path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
-      validate: dataVisualizerOverallStatsSchema,
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerOverallStatsSchema,
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {

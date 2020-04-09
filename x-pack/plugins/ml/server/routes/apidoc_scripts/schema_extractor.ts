@@ -14,7 +14,7 @@ export interface DocEntry {
   nested?: DocEntry[];
 }
 
-/** Generate documentation for all classes in a set of .ts files */
+/** Generate documentation for all schema definitions in a set of .ts files */
 export function extractDocumentation(
   fileNames: string[],
   options: ts.CompilerOptions = {

@@ -156,6 +156,11 @@ export const getBucketsSchema = schema.object({
   start: schema.maybe(schema.string()),
 });
 
+export const getBucketParamsSchema = schema.object({
+  jobId: schema.string(),
+  timestamp: schema.maybe(schema.string()),
+});
+
 export const getOverallBucketsSchema = schema.object({
   topN: schema.number(),
   bucketSpan: schema.string(),
@@ -169,3 +174,5 @@ export const getCategoriesSchema = schema.object({
   /** Job id */
   jobId: schema.string(),
 });
+
+export const forecastAnomalyDetector = schema.object({ duration: schema.any() });

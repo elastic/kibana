@@ -5,7 +5,6 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { calendarSchema, calendarIdSchema } from './schemas/calendars_schema';
@@ -42,7 +41,13 @@ function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) 
 }
 
 export function calendars({ router, mlLicense }: RouteInitialization) {
-  // Gets calendars - size limit has been explicitly set to 1000
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {get} /api/ml/calendars Gets calendars
+   * @apiName GetCalendars
+   * @apiDescription Gets calendars - size limit has been explicitly set to 1000
+   */
   router.get(
     {
       path: '/api/ml/calendars',
@@ -61,11 +66,20 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {get} /api/ml/calendars/:calendarIds Gets a calendar
+   * @apiName GetCalendarById
+   * @apiDescription Gets calendar by id
+   *
+   * @apiSchema (params) calendarIdSchema
+   */
   router.get(
     {
       path: '/api/ml/calendars/{calendarIds}',
       validate: {
-        params: schema.object({ calendarIds: schema.string() }),
+        params: calendarIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -88,6 +102,15 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {put} /api/ml/calendars Creates a calendar
+   * @apiName PutCalendars
+   * @apiDescription Creates a calendar
+   *
+   * @apiSchema (body) calendarSchema
+   */
   router.put(
     {
       path: '/api/ml/calendars',
@@ -109,6 +132,16 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {put} /api/ml/calendars/:calendarId Updates a calendar
+   * @apiName UpdateCalendarById
+   * @apiDescription Updates a calendar
+   *
+   * @apiSchema (params) calendarIdSchema
+   * @apiSchema (body) calendarSchema
+   */
   router.put(
     {
       path: '/api/ml/calendars/{calendarId}',
@@ -132,6 +165,15 @@ export function calendars({ router, mlLicense }: RouteInitialization) {
     })
   );
 
+  /**
+   * @apiGroup Calendars
+   *
+   * @api {delete} /api/ml/calendars/:calendarId Deletes a calendar
+   * @apiName DeleteCalendarById
+   * @apiDescription Deletes a calendar
+   *
+   * @apiSchema (params) calendarIdSchema
+   */
   router.delete(
     {
       path: '/api/ml/calendars/{calendarId}',

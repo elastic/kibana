@@ -152,7 +152,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
    * @apiName SetupModule
    * @apiDescription Created module items.
    *
-   * @apiParam {String} moduleId Module id
+   * @apiSchema (body) setupModuleBodySchema
    */
   router.post(
     {

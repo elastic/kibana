@@ -42,3 +42,9 @@ export const datafeedConfigSchema = schema.object({
     })
   ),
 });
+
+export const datafeedIdSchema = schema.object({ datafeedId: schema.string() });
+
+export const deleteDatafeedQuerySchema = schema.maybe(
+  schema.object({ force: schema.maybe(schema.any()) })
+);

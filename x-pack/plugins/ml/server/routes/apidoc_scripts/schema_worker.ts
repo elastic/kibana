@@ -35,7 +35,10 @@ interface Local {
   success: { fields: ObjectConstructor[] };
   version: string;
   filename: string;
-  schema?: string;
+  schema?: {
+    name: string;
+    group: string;
+  };
 }
 
 interface Block {
@@ -57,21 +60,22 @@ export function postProcess(parsedFiles: any[]): void {
         local: { schema },
       } = block;
       if (!schema) return;
-      const schemaFields = schemaDocs.get(schema);
+      const { name: schemName, group: paramsGroup } = schema;
+      const schemaFields = schemaDocs.get(schemName);
       if (!schemaFields) return;
 
       // Init parameters collection
       if (!block.local.parameter) {
         block.local.parameter = {
-          fields: { Parameters: [] },
+          fields: { [paramsGroup]: [] },
         };
       }
 
-      if (!block.local.parameter.fields!.Parameters) {
-        block.local.parameter.fields!.Parameters = [];
+      if (!block.local.parameter.fields![paramsGroup]) {
+        block.local.parameter.fields![paramsGroup] = [];
       }
 
-      extractDocEntries(schemaFields, block);
+      extractDocEntries(schemaFields, block, paramsGroup);
     });
   });
 }
@@ -80,23 +84,23 @@ export function postProcess(parsedFiles: any[]): void {
  * Extracts schema's doc entries to apidoc parameters
  * @param docEntries
  * @param block
- * @param nestedPrefix
+ * @param paramsGroup
  */
-function extractDocEntries(docEntries: DocEntry[], block: Block, nestedPrefix = ''): void {
+function extractDocEntries(docEntries: DocEntry[], block: Block, paramsGroup = ''): void {
   for (const field of docEntries) {
     let collection = (block.local!.parameter!.fields!.Parameters as unknown) as ApiParameter[];
     let group = 'Parameters';
 
-    if (nestedPrefix.length > 0) {
+    if (paramsGroup.length > 0) {
       // @ts-ignore
-      if (!block.local.parameter.fields[nestedPrefix]) {
+      if (!block.local.parameter.fields[paramsGroup]) {
         // @ts-ignore
-        block.local.parameter.fields[nestedPrefix] = [];
+        block.local.parameter.fields[paramsGroup] = [];
       }
       // @ts-ignore
-      collection = block.local.parameter.fields[nestedPrefix];
+      collection = block.local.parameter.fields[paramsGroup];
 
-      group = nestedPrefix;
+      group = paramsGroup;
     }
 
     collection.push({

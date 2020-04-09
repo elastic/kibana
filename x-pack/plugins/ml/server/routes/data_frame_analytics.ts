@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
@@ -13,6 +12,7 @@ import {
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
+  stopsDataFrameAnalyticsJobQuerySchema,
 } from './schemas/data_analytics_schema';
 
 /**
@@ -53,7 +53,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName GetDataFrameAnalyticsById
    * @apiDescription Returns the data frame analytics job.
    *
-   * @apiSchema analyticsIdSchema
+   * @apiSchema (params) analyticsIdSchema
    */
   router.get(
     {
@@ -110,9 +110,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName GetDataFrameAnalyticsStatsById
    * @apiDescription Returns data frame analytics job statistics.
    *
-   * @apiSchema analyticsIdSchema
-   *
-   * @apiParam {String} analyticsId .
+   * @apiSchema (params) analyticsIdSchema
    */
   router.get(
     {
@@ -147,8 +145,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiDescription This API creates a data frame analytics job that performs an analysis
    *                 on the source index and stores the outcome in a destination index.
    *
-   * @apiSchema analyticsIdSchema
-   * @apiSchema dataAnalyticsJobConfigSchema
+   * @apiSchema (params) analyticsIdSchema
+   * @apiSchema (body) dataAnalyticsJobConfigSchema
    */
   router.put(
     {
@@ -183,6 +181,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @api {post} /api/ml/data_frame/_evaluate Evaluate the data frame analytics for an annotated index
    * @apiName EvaluateDataFrameAnalytics
    * @apiDescription Evaluates the data frame analytics for an annotated index.
+   *
+   * @apiSchema (body) dataAnalyticsEvaluateSchema
    */
   router.post(
     {
@@ -216,6 +216,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiDescription This API provides explanations for a data frame analytics config
    *                 that either exists already or one that has not been created yet.
    *
+   * @apiSchema (body) dataAnalyticsExplainSchema
    */
   router.post(
     {
@@ -247,6 +248,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @api {delete} /api/ml/data_frame/analytics/:analyticsId Delete specified analytics job
    * @apiName DeleteDataFrameAnalytics
    * @apiDescription Deletes specified data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
    */
   router.delete(
     {
@@ -279,6 +282,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @api {post} /api/ml/data_frame/analytics/:analyticsId/_start Start specified analytics job
    * @apiName StartDataFrameAnalyticsJob
    * @apiDescription Starts a data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
    */
   router.post(
     {
@@ -309,14 +314,15 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @apiName StopsDataFrameAnalyticsJob
    * @apiDescription Stops a data frame analytics job.
    *
-   * @apiParam {String} analyticsId Analytics ID.
+   * @apiSchema (params) analyticsIdSchema
+   * @apiSchema (query) stopsDataFrameAnalyticsJobQuerySchema
    */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stop',
       validate: {
         params: analyticsIdSchema,
-        query: schema.object({ force: schema.maybe(schema.boolean()) }),
+        query: stopsDataFrameAnalyticsJobQuerySchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -349,6 +355,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
    * @api {get} /api/ml/data_frame/analytics/:analyticsId/messages Get analytics job messages
    * @apiName GetDataFrameAnalyticsMessages
    * @apiDescription Returns the list of audit messages for data frame analytics jobs.
+   *
+   * @apiSchema (params) analyticsIdSchema
    */
   router.get(
     {

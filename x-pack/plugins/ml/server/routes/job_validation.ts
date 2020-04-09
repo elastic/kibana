@@ -123,7 +123,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @apiName ValidateCardinality
    * @apiDescription Validates cardinality for the given job configuration
    *
-   * @apiSchema validateCardinalitySchema
+   * @apiSchema (body) validateCardinalitySchema
    */
   router.post(
     {
@@ -155,7 +155,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    * @apiName ValidateJob
    * @apiDescription Validates the given job configuration
    *
-   * @apiSchema validateJobSchema
+   * @apiSchema (body) validateJobSchema
    */
   router.post(
     {

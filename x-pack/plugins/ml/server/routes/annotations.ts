@@ -43,7 +43,7 @@ export function annotationRoutes(
    * @apiName GetAnnotations
    * @apiDescription Gets annotations.
    *
-   * @apiSchema getAnnotationsSchema
+   * @apiSchema (body) getAnnotationsSchema
    *
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object} annotations
@@ -78,7 +78,7 @@ export function annotationRoutes(
    * @apiName IndexAnnotations
    * @apiDescription Index the annotation.
    *
-   * @apiSchema indexAnnotationSchema
+   * @apiSchema (body) indexAnnotationSchema
    */
   router.put(
     {
@@ -122,7 +122,7 @@ export function annotationRoutes(
    * @apiName DeleteAnnotation
    * @apiDescription Deletes specified annotation
    *
-   * @apiSchema deleteAnnotationSchema
+   * @apiSchema (params) deleteAnnotationSchema
    */
   router.delete(
     {

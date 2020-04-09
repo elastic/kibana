@@ -80,7 +80,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    * @apiName GetAnomaliesTableData
    * @apiDescription Retrieves anomaly records for an anomaly detection job and formats them for anomalies table display
    *
-   * @apiSchema anomaliesTableDataSchema
+   * @apiSchema (body) anomaliesTableDataSchema
    */
   router.post(
     {
@@ -109,7 +109,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    * @apiName GetCategoryDefinition
    * @apiDescription Returns the definition of the category with the specified ID and job ID
    *
-   * @apiSchema categoryDefinitionSchema
+   * @apiSchema (body) categoryDefinitionSchema
    */
   router.post(
     {
@@ -138,7 +138,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    * @apiName GetMaxAnomalyScore
    * @apiDescription Returns the maximum anomaly score of the bucket results for the request job ID(s) and time range
    *
-   * @apiSchema maxAnomalyScoreSchema
+   * @apiSchema (body) maxAnomalyScoreSchema
    */
   router.post(
     {
@@ -167,7 +167,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    * @apiName GetCategoryExamples
    * @apiDescription Returns examples for the categories with the specified IDs from the job with the supplied ID
    *
-   * @apiSchema categoryExamplesSchema
+   * @apiSchema (body) categoryExamplesSchema
    */
   router.post(
     {
@@ -196,7 +196,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    * @apiName GetPartitionFieldsValues
    * @apiDescription Returns the partition fields with values that match the provided criteria for the specified job ID.
    *
-   * @apiSchema partitionFieldValuesSchema
+   * @apiSchema (body) partitionFieldValuesSchema
    */
   router.post(
     {

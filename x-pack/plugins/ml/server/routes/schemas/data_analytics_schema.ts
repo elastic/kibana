@@ -56,3 +56,7 @@ export const analyticsIdSchema = schema.object({
    */
   analyticsId: schema.string(),
 });
+
+export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
+  force: schema.maybe(schema.boolean()),
+});

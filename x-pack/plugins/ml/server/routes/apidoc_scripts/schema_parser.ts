@@ -11,8 +11,19 @@ function parse(content?: string) {
     return null;
   }
 
+  const result = schema.match(/\((\w+)\)\s+(\w+)/);
+
+  if (result === null || result.length < 3) {
+    throw new Error(
+      'Invalid schema definition. Required format is `@apiSchema (<GROUP_NAME>) <SCHEMA_NAME>`'
+    );
+  }
+
   return {
-    schema,
+    schema: {
+      group: result[1],
+      name: result[2],
+    },
   };
 }
 
