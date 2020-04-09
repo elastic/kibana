@@ -149,3 +149,5 @@ export type CallWithRequest<T extends Record<string, any>, V> = (
   params: T,
   options?: CallAPIOptions
 ) => Promise<V>;
+
+export type RefreshTypes = false | 'wait_for';
