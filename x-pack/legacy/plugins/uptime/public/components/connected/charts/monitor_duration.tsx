@@ -6,7 +6,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useGetUrlParams, useUrlParams } from '../../../hooks';
+import { useGetUrlParams } from '../../../hooks';
 import {
   getAnomalyRecordsAction,
   getMLCapabilitiesAction,
