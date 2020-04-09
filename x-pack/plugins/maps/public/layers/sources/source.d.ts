@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
+import { AbstractSourceDescriptor, LayerDescriptor } from '../../../common/descriptor_types';
 import { ILayer } from '../layer';
 
 export interface ISource {
-  createDefaultLayer(options: unknown): ILayer;
+  createDefaultLayer(options: LayerDescriptor | undefined): ILayer;
   destroy(): void;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
@@ -21,11 +21,11 @@ export interface ISource {
 }
 
 export class AbstractSource implements ISource {
-  readonly _descriptor: AbstractSourceDescriptor;
+  private readonly _descriptor: AbstractSourceDescriptor;
   constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object);
 
   destroy(): void;
-  createDefaultLayer(options: unknown): ILayer;
+  createDefaultLayer(options: LayerDescriptor): ILayer;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
   isFieldAware(): boolean;

@@ -58,7 +58,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta;
-  syncLayerWithMb(mbMap: unknown): void;
+  syncLayerWithMB(mbMap: unknown): void;
   _syncData(syncContext: SyncContext, source: IVectorSource, style: IVectorStyle): Promise<void>;
   ownsMbSourceId(sourceId: string): boolean;
   ownsMbLayerId(sourceId: string): boolean;

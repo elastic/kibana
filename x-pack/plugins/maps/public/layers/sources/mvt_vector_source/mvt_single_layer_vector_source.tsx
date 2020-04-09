@@ -17,6 +17,7 @@ import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
+  LayerDescriptor,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
   VectorSourceRequestMeta,
@@ -44,12 +45,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     layerName,
     minZoom,
     maxZoom,
-  }: {
-    urlTemplate: string;
-    layerName: string;
-    minZoom: number;
-    maxZoom: number;
-  }) {
+  }: TiledSingleLayerVectorSourceDescriptor) {
     return {
       type: MVTSingleLayerVectorSource.type,
       id: uuid(),
@@ -71,7 +67,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return null;
   }
 
-  createDefaultLayer(options: unknown): SingleTiledVectorLayer {
+  createDefaultLayer(options: LayerDescriptor): SingleTiledVectorLayer {
     return new SingleTiledVectorLayer({
       layerDescriptor: SingleTiledVectorLayer.createDescriptor(
         {

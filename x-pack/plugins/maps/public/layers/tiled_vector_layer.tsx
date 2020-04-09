@@ -66,7 +66,11 @@ export class SingleTiledVectorLayer extends VectorLayer {
     dataFilters,
   }: SyncContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
-    const searchFilters: DataMeta = this._getSearchFilters(dataFilters);
+    const searchFilters: DataMeta = this._getSearchFilters(
+      dataFilters,
+      this.getSource(),
+      this._style
+    );
     const prevDataRequest = this.getSourceDataRequest();
 
     const canSkip = await canSkipSourceUpdate({
