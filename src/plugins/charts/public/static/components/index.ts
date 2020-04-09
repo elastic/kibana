@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export * from './color_maps';
-export * from './components';
+export { RangeOption } from './range';
+export { SwitchOption } from './switch';

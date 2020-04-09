@@ -24,6 +24,8 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { markdownVisDefinition } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
 
+import './index.scss';
+
 /** @internal */
 export interface MarkdownPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;

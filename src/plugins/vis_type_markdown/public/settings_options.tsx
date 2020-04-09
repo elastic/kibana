@@ -22,13 +22,13 @@ import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-// import { RangeOption, SwitchOption } from '../../../legacy/core_plugins/vis_type_vislib/public';
+import { RangeOption, SwitchOption } from '../../charts/public';
 import { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
   return (
     <EuiPanel paddingSize="s">
-      {/* <RangeOption
+      <RangeOption
         label={i18n.translate('visTypeMarkdown.params.fontSizeLabel', {
           defaultMessage: 'Base font size in points',
         })}
@@ -47,7 +47,7 @@ function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
         paramName="openLinksInNewTab"
         value={stateParams.openLinksInNewTab}
         setValue={setValue}
-      /> */}
+      />
     </EuiPanel>
   );
 }
