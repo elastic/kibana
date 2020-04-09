@@ -26,7 +26,6 @@ import { Lifecycle } from './lifecycle';
 export interface SuiteInProgress {
   startTime?: Date;
   endTime?: Date;
-  duration?: number;
   success?: boolean;
 }
 
@@ -93,8 +92,8 @@ export class SuiteTracker {
     lifecycle.afterTestSuite.add(suite => {
       const tracked = this.getTracked(suite);
       tracked.endTime = new Date();
-      tracked.duration = tracked.endTime.getTime() - (tracked.startTime || new Date()).getTime();
-      tracked.duration = Math.floor(tracked.duration / 1000);
+      let duration = tracked.endTime.getTime() - (tracked.startTime || new Date()).getTime();
+      duration = Math.floor(duration / 1000);
 
       const config = relative(REPO_ROOT, suite.ftrConfig.path);
       const file = relative(REPO_ROOT, suite.file);
@@ -105,6 +104,7 @@ export class SuiteTracker {
       // This is okay, because the last one that fires is always the root of the file, which is is the one we ultimately want
       this.finishedSuitesByConfig[config][file] = {
         ...tracked,
+        duration,
         config,
         file,
         tag: suite.suiteTag,
