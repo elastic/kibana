@@ -68,25 +68,32 @@ export enum IndexPatternType {
   metrics = 'metrics',
   events = 'events',
 }
-
+// TODO: use a function overload and make pkgName and pkgVersion required for install/update
+// and not for an update removal.  or separate out the functions
 export async function installIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
-  pkgkey?: string
+  pkgName?: string,
+  pkgVersion?: string
 ) {
   // get all user installed packages
   const installedPackages = await getPackageKeysByStatus(
     savedObjectsClient,
     InstallationStatus.installed
   );
-  // add this package to the array if it doesn't already exist
-  // this should not happen because a user can't "reinstall" a package
-  // if it does because the install endpoint is called directly, the install continues
-  if (pkgkey && !installedPackages.includes(pkgkey)) {
-    installedPackages.push(pkgkey);
+  if (pkgName && pkgVersion) {
+    // add this package to the array if it doesn't already exist
+    const foundPkg = installedPackages.find(pkg => pkg.pkgName === pkgName);
+    // this may be removed if we add the packged to saved objects before installing index patterns
+    // otherwise this is a first time install
+    // TODO: handle update case when versions are different
+    if (!foundPkg) {
+      installedPackages.push({ pkgName, pkgVersion });
+    }
   }
-
   // get each package's registry info
-  const installedPackagesFetchInfoPromise = installedPackages.map(pkg => Registry.fetchInfo(pkg));
+  const installedPackagesFetchInfoPromise = installedPackages.map(pkg =>
+    Registry.fetchInfo(pkg.pkgName, pkg.pkgVersion)
+  );
   const installedPackagesInfo = await Promise.all(installedPackagesFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
@@ -97,7 +104,7 @@ export async function installIndexPatterns(
   ];
   indexPatternTypes.forEach(async indexPatternType => {
     // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
-    if (!pkgkey && installedPackages.length === 0) {
+    if (!pkgName && installedPackages.length === 0) {
       try {
         await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, `${indexPatternType}-*`);
       } catch (err) {
