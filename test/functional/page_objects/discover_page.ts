@@ -244,15 +244,17 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldListItemVisualize(fieldName: string) {
-      const field = await testSubjects.find(`field-${fieldName}`);
-      const isActive = await field.elementHasClass('dscSidebarItem--active');
+      await retry.try(async () => {
+        const field = await testSubjects.find(`field-${fieldName}`);
+        const isActive = await field.elementHasClass('dscSidebarItem--active');
 
-      if (!isActive) {
-        // expand the field to show the "Visualize" button
-        await field.click();
-      }
+        if (!isActive) {
+          // expand the field to show the "Visualize" button
+          await field.click();
+        }
 
-      await testSubjects.click(`fieldVisualize-${fieldName}`);
+        await testSubjects.click(`fieldVisualize-${fieldName}`);
+      });
     }
 
     public async expectFieldListItemVisualize(field: string) {
