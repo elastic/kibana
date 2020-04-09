@@ -59,21 +59,9 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           title: `Installed ${title} package`,
           text: toMountPoint(SuccessMsg),
         });
-
-        // TODO: this should probably live somewhere else and use <Redirect />,
-        // this hook could return the request state and a component could
-        // use that state. the component should be able to unsubscribe to prevent memory leaks
-        const packageUrl = toDetailView({ name, version });
-        const dataSourcesUrl = toDetailView({
-          name,
-          version,
-          panel: 'data-sources',
-          withAppRoot: false,
-        });
-        if (window.location.href.includes(packageUrl)) window.location.hash = dataSourcesUrl;
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
+    [notifications.toasts, setPackageInstallStatus]
   );
 
   const getPackageInstallStatus = useCallback(
@@ -98,24 +86,15 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
-
         const SuccessMsg = <p>Successfully deleted {title}</p>;
 
         notifications.toasts.addSuccess({
           title: `Deleted ${title} package`,
           text: toMountPoint(SuccessMsg),
         });
-
-        const packageUrl = toDetailView({ name, version });
-        const dataSourcesUrl = toDetailView({
-          name,
-          version,
-          panel: 'data-sources',
-        });
-        if (window.location.href.includes(packageUrl)) window.location.href = dataSourcesUrl;
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
+    [notifications.toasts, setPackageInstallStatus]
   );
 
   return {

@@ -5,18 +5,17 @@
  */
 import { EuiButton } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { PackageInfo, InstallStatus } from '../../../../types';
 import { useCapabilities } from '../../../../hooks';
 import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
 import { ConfirmPackageDelete } from './confirm_package_delete';
 import { ConfirmPackageInstall } from './confirm_package_install';
 
-interface InstallationButtonProps {
-  package: PackageInfo;
-}
-
-export function InstallationButton(props: InstallationButtonProps) {
-  const { assets, name, title, version } = props.package;
+export function InstallationButton(
+  props: Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'>
+) {
+  const { assets, name, title, version } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
   const deletePackage = useDeletePackage();
@@ -41,6 +40,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     toggleModal();
   }, [deletePackage, name, title, toggleModal, version]);
 
+  // counts the number of assets in the package
   const numOfAssets = useMemo(
     () =>
       Object.entries(assets).reduce(
@@ -56,18 +56,50 @@ export function InstallationButton(props: InstallationButtonProps) {
   );
 
   const installButton = (
-    <EuiButton isLoading={isInstalling} fill={true} onClick={toggleModal}>
-      {isInstalling ? 'Installing' : 'Install package'}
+    <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleModal}>
+      {isInstalling ? (
+        <FormattedMessage
+          id="xpack.ingestManager.integrations.installPackage.installingPackageButtonLabel"
+          defaultMessage="Installing {title} assets"
+          values={{
+            title,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.ingestManager.integrations.installPackage.installPackageButtonLabel"
+          defaultMessage="Install {title} assets"
+          values={{
+            title,
+          }}
+        />
+      )}
     </EuiButton>
   );
 
-  const installedButton = (
-    <EuiButton isLoading={isRemoving} fill={true} onClick={toggleModal} color="danger">
-      {isInstalling ? 'Deleting' : 'Delete package'}
+  const uninstallButton = (
+    <EuiButton iconType={'trash'} isLoading={isRemoving} onClick={toggleModal} color="danger">
+      {isRemoving ? (
+        <FormattedMessage
+          id="xpack.ingestManager.integrations.uninstallPackage.uninstallingPackageButtonLabel"
+          defaultMessage="Uninstalling {title}"
+          values={{
+            title,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.ingestManager.integrations.uninstallPackage.uninstallPackageButtonLabel"
+          defaultMessage="Uninstall {title}"
+          values={{
+            title,
+          }}
+        />
+      )}
     </EuiButton>
   );
 
-  const deletionModal = (
+  const uninstallModal = (
     <ConfirmPackageDelete
       // this is number of which would be installed
       // deleted includes ingest-pipelines etc so could be larger
@@ -79,7 +111,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     />
   );
 
-  const installationModal = (
+  const installModal = (
     <ConfirmPackageInstall
       numOfAssets={numOfAssets}
       packageName={title}
@@ -90,8 +122,8 @@ export function InstallationButton(props: InstallationButtonProps) {
 
   return hasWriteCapabilites ? (
     <Fragment>
-      {isInstalled ? installedButton : installButton}
-      {isModalVisible && (isInstalled ? deletionModal : installationModal)}
+      {isInstalled || isRemoving ? uninstallButton : installButton}
+      {isModalVisible && (isInstalled ? uninstallModal : installModal)}
     </Fragment>
   ) : null;
 }
