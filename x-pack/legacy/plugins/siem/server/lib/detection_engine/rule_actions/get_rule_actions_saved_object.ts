@@ -15,15 +15,17 @@ interface GetRuleActionsSavedObject {
   savedObjectsClient: AlertServices['savedObjectsClient'];
 }
 
-export const getRuleActionsSavedObject = async ({
-  ruleAlertId,
-  savedObjectsClient,
-}: GetRuleActionsSavedObject): Promise<{
+export interface RulesActionsSavedObject {
   id: string;
   actions: RuleAlertAction[];
   alertThrottle: string | null;
   ruleThrottle: string;
-} | null> => {
+}
+
+export const getRuleActionsSavedObject = async ({
+  ruleAlertId,
+  savedObjectsClient,
+}: GetRuleActionsSavedObject): Promise<RulesActionsSavedObject | null> => {
   const { saved_objects } = await savedObjectsClient.find<
     IRuleActionsAttributesSavedObjectAttributes
   >({
@@ -35,7 +37,7 @@ export const getRuleActionsSavedObject = async ({
 
   if (!saved_objects[0]) {
     return null;
+  } else {
+    return getRuleActionsFromSavedObject(saved_objects[0]);
   }
-
-  return getRuleActionsFromSavedObject(saved_objects[0]);
 };
