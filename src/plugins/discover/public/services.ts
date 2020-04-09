@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../kibana_utils/common';
+import { createGetterSetter } from '../../kibana_utils/public';
 import { DocViewsRegistry } from './doc_views/doc_views_registry';
 
 export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
