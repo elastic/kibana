@@ -306,6 +306,9 @@ export class LegacyService implements CoreService {
         registerType: setupDeps.core.savedObjects.registerType,
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
+      status: {
+        core$: setupDeps.core.status.core$,
+      },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
@@ -334,6 +337,9 @@ export class LegacyService implements CoreService {
           plugins: startDeps.plugins,
         },
         __internals: {
+          http: {
+            registerStaticDir: setupDeps.core.http.registerStaticDir,
+          },
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
           uiPlugins: setupDeps.core.plugins.uiPlugins,

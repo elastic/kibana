@@ -173,6 +173,7 @@ export {
   ISearchContext,
   TSearchStrategyProvider,
   getDefaultSearchParams,
+  getTotalLoaded,
 } from './search';
 
 // Search namespace

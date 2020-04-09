@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
 
 /**
@@ -57,13 +56,14 @@ export const savedObjectManagementRegistry: ISavedObjectsManagementRegistry = {
 const services = {
   savedObjectsClient: npStart.core.savedObjects.client,
   indexPatterns: npStart.plugins.data.indexPatterns,
+  search: npStart.plugins.data.search,
   chrome: npStart.core.chrome,
   overlays: npStart.core.overlays,
 };
 
 savedObjectManagementRegistry.register({
   id: 'savedVisualizations',
-  service: visualizations.savedVisualizationsLoader,
+  service: npStart.plugins.visualizations.savedVisualizationsLoader,
   title: 'visualizations',
 });
 

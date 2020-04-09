@@ -33,7 +33,12 @@ import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { StepRuleActions } from '../components/step_rule_actions';
 import { formatRule } from '../create/helpers';
-import { getStepsData, redirectToDetections, getActionMessageParams } from '../helpers';
+import {
+  getStepsData,
+  redirectToDetections,
+  getActionMessageParams,
+  userHasNoPermissions,
+} from '../helpers';
 import * as ruleI18n from '../translations';
 import {
   RuleStep,
@@ -69,13 +74,9 @@ const EditRulePageComponent: FC = () => {
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
-    hasManageApiKey,
   } = useUserInfo();
   const { detailName: ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
-
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
   const [initForm, setInitForm] = useState(false);
   const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({
@@ -119,6 +120,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -140,6 +142,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -161,6 +164,7 @@ const EditRulePageComponent: FC = () => {
       {
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
+        disabled: rule?.immutable,
         content: (
           <>
             <EuiSpacer />
@@ -203,6 +207,7 @@ const EditRulePageComponent: FC = () => {
       },
     ],
     [
+      rule,
       loading,
       initLoading,
       isLoading,
@@ -331,17 +336,18 @@ const EditRulePageComponent: FC = () => {
   }, [rule]);
 
   useEffect(() => {
-    setSelectedTab(tabs[0]);
-  }, []);
+    const tabIndex = rule?.immutable ? 3 : 0;
+    setSelectedTab(tabs[tabIndex]);
+  }, [rule]);
 
-  if (isSaved || (rule != null && rule.immutable)) {
+  if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (userHasNoPermissions) {
+  } else if (userHasNoPermissions(canUserCRUD)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 

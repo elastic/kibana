@@ -22,20 +22,16 @@ import { PluginInitializerContext } from 'kibana/public';
 
 import { plugin } from '.';
 import { VisTypeXyPluginSetupDependencies, VisTypeXyPluginStartDependencies } from './plugin';
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../visualizations/public/np_ready/public/legacy';
 
 const setupPlugins: Readonly<VisTypeXyPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
-  visualizations: visualizationsSetup,
+  visualizations: npSetup.plugins.visualizations,
   charts: npSetup.plugins.charts,
 };
 
 const startPlugins: Readonly<VisTypeXyPluginStartDependencies> = {
   expressions: npStart.plugins.expressions,
-  visualizations: visualizationsStart,
+  visualizations: npStart.plugins.visualizations,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

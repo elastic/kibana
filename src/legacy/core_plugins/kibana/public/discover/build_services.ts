@@ -36,7 +36,7 @@ import {
 import { DiscoverStartPlugins } from './plugin';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
-import { VisualizationsStart } from '../../../visualizations/public';
+import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
 import {
   createSavedSearchesLoader,
   DocViewerComponent,
@@ -72,6 +72,7 @@ export async function buildServices(
   const services = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
+    search: plugins.data.search,
     chrome: core.chrome,
     overlays: core.overlays,
   };

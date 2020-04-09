@@ -12,6 +12,10 @@ import { EuiDataGrid, EuiDataGridPaginationProps, EuiDataGridSorting } from '@el
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from '../../../../common';
 
+import { mlFieldFormatService } from '../../../../../services/field_format_service';
+
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
 const FEATURE_INFLUENCE = 'feature_influence';
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
@@ -21,6 +25,7 @@ type TableItem = Record<string, any>;
 interface ExplorationDataGridProps {
   colorRange: (d: number) => string;
   columns: any[];
+  indexPattern: IndexPattern;
   pagination: Pagination;
   resultsField: string;
   rowCount: number;
@@ -35,6 +40,7 @@ interface ExplorationDataGridProps {
 export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
   colorRange,
   columns,
+  indexPattern,
   pagination,
   resultsField,
   rowCount,
@@ -63,6 +69,12 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
         return null;
       }
 
+      let format: any;
+
+      if (indexPattern !== undefined) {
+        format = mlFieldFormatService.getFieldFormatFromIndexPattern(indexPattern, columnId, '');
+      }
+
       const cellValue =
         fullItem.hasOwnProperty(columnId) && fullItem[columnId] !== undefined
           ? fullItem[columnId]
@@ -85,6 +97,10 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
         setCellProps({
           style: { backgroundColor },
         });
+      }
+
+      if (format !== undefined) {
+        return format.convert(cellValue, 'text');
       }
 
       if (typeof cellValue === 'string' || cellValue === null) {

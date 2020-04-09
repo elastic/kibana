@@ -47,6 +47,7 @@ describe('connector_edit_flyout', () => {
       actionTypeId: 'test-action-type-id',
       actionType: 'test-action-type-name',
       name: 'action-connector',
+      isPreconfigured: false,
       referencedByCount: 0,
       config: {},
     };

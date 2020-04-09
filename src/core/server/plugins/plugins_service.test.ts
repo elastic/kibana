@@ -540,13 +540,15 @@ describe('PluginsService', () => {
       it('includes disabled plugins', async () => {
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
         await pluginsService.discover();
-        const { uiPlugins } = await pluginsService.setup({} as any);
+        const { uiPlugins } = await pluginsService.setup(setupDeps);
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
           Map {
             "plugin-1" => Object {
+              "publicAssetsDir": <absolute path>/path-1/public/assets,
               "publicTargetDir": <absolute path>/path-1/target/public,
             },
             "plugin-2" => Object {
+              "publicAssetsDir": <absolute path>/path-2/public/assets,
               "publicTargetDir": <absolute path>/path-2/target/public,
             },
           }
@@ -558,7 +560,7 @@ describe('PluginsService', () => {
       it('does initialize if plugins.initialize is true', async () => {
         config$.next({ plugins: { initialize: true } });
         await pluginsService.discover();
-        const { initialized } = await pluginsService.setup({} as any);
+        const { initialized } = await pluginsService.setup(setupDeps);
         expect(mockPluginSystem.setupPlugins).toHaveBeenCalled();
         expect(initialized).toBe(true);
       });
@@ -566,7 +568,7 @@ describe('PluginsService', () => {
       it('does not initialize if plugins.initialize is false', async () => {
         config$.next({ plugins: { initialize: false } });
         await pluginsService.discover();
-        const { initialized } = await pluginsService.setup({} as any);
+        const { initialized } = await pluginsService.setup(setupDeps);
         expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
         expect(initialized).toBe(false);
       });

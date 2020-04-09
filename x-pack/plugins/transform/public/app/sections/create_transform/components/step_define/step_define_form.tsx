@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiCodeEditor,
+  EuiCode,
+  EuiInputPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -74,6 +76,11 @@ export interface StepDefineExposedState {
   searchQuery: string | SavedSearchQuery;
   sourceConfigUpdated: boolean;
   valid: boolean;
+}
+
+interface ErrorMessage {
+  query: string;
+  message: string;
 }
 
 const defaultSearch = '*';
@@ -256,6 +263,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     query: defaults.searchString || '',
     language: defaults.searchLanguage,
   });
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   // The state of the input query bar updated on every submit and to be exposed.
   const [searchLanguage, setSearchLanguage] = useState<StepDefineExposedState['searchLanguage']>(
@@ -272,18 +280,23 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
   const searchSubmitHandler = (query: Query) => {
     setSearchLanguage(query.language as QUERY_LANGUAGE);
     setSearchString(query.query !== '' ? (query.query as string) : undefined);
-    switch (query.language) {
-      case QUERY_LANGUAGE_KUERY:
-        setSearchQuery(
-          esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(query.query as string),
-            indexPattern
-          )
-        );
-        return;
-      case QUERY_LANGUAGE_LUCENE:
-        setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
-        return;
+    try {
+      switch (query.language) {
+        case QUERY_LANGUAGE_KUERY:
+          setSearchQuery(
+            esKuery.toElasticsearchQuery(
+              esKuery.fromKueryExpression(query.query as string),
+              indexPattern
+            )
+          );
+          return;
+        case QUERY_LANGUAGE_LUCENE:
+          setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
+          return;
+      }
+    } catch (e) {
+      console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
+      setErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
@@ -620,33 +633,54 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                           defaultMessage: 'Use a query to filter the source data (optional).',
                         })}
                       >
-                        <QueryStringInput
-                          bubbleSubmitEvent={true}
-                          query={searchInput}
-                          indexPatterns={[indexPattern]}
-                          onChange={searchChangeHandler}
-                          onSubmit={searchSubmitHandler}
-                          placeholder={
-                            searchInput.language === QUERY_LANGUAGE_KUERY
-                              ? i18n.translate(
-                                  'xpack.transform.stepDefineForm.queryPlaceholderKql',
-                                  {
-                                    defaultMessage: 'e.g. {example}',
-                                    values: { example: 'method : "GET" or status : "404"' },
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.transform.stepDefineForm.queryPlaceholderLucene',
-                                  {
-                                    defaultMessage: 'e.g. {example}',
-                                    values: { example: 'method:GET OR status:404' },
-                                  }
-                                )
+                        <EuiInputPopover
+                          style={{ maxWidth: '100%' }}
+                          closePopover={() => setErrorMessage(undefined)}
+                          input={
+                            <QueryStringInput
+                              bubbleSubmitEvent={true}
+                              query={searchInput}
+                              indexPatterns={[indexPattern]}
+                              onChange={searchChangeHandler}
+                              onSubmit={searchSubmitHandler}
+                              placeholder={
+                                searchInput.language === QUERY_LANGUAGE_KUERY
+                                  ? i18n.translate(
+                                      'xpack.transform.stepDefineForm.queryPlaceholderKql',
+                                      {
+                                        defaultMessage: 'e.g. {example}',
+                                        values: { example: 'method : "GET" or status : "404"' },
+                                      }
+                                    )
+                                  : i18n.translate(
+                                      'xpack.transform.stepDefineForm.queryPlaceholderLucene',
+                                      {
+                                        defaultMessage: 'e.g. {example}',
+                                        values: { example: 'method:GET OR status:404' },
+                                      }
+                                    )
+                              }
+                              disableAutoFocus={true}
+                              dataTestSubj="transformQueryInput"
+                              languageSwitcherPopoverAnchorPosition="rightDown"
+                            />
                           }
-                          disableAutoFocus={true}
-                          dataTestSubj="transformQueryInput"
-                          languageSwitcherPopoverAnchorPosition="rightDown"
-                        />
+                          isOpen={
+                            errorMessage?.query === searchInput.query &&
+                            errorMessage?.message !== ''
+                          }
+                        >
+                          <EuiCode>
+                            {i18n.translate(
+                              'xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar',
+                              {
+                                defaultMessage: 'Invalid query',
+                              }
+                            )}
+                            {': '}
+                            {errorMessage?.message.split('\n')[0]}
+                          </EuiCode>
+                        </EuiInputPopover>
                       </EuiFormRow>
                     )}
                   </Fragment>
@@ -671,6 +705,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                       width="100%"
                       value={advancedEditorSourceConfig}
                       onChange={(d: string) => {
+                        setSearchString(undefined);
                         setAdvancedEditorSourceConfig(d);
 
                         // Disable the "Apply"-Button if the config hasn't changed.

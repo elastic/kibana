@@ -5,23 +5,22 @@
  */
 
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
-import { ReportingCore } from '../../../server';
-import { ConditionalHeaders, ServerFacade } from '../../../types';
+import { ReportingConfig, ReportingCore } from '../../../server/types';
+import { ConditionalHeaders } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
 export const getCustomLogo = async ({
   reporting,
-  server,
+  config,
   job,
   conditionalHeaders,
 }: {
   reporting: ReportingCore;
-  server: ServerFacade;
+  config: ReportingConfig;
   job: JobDocPayloadPDF;
   conditionalHeaders: ConditionalHeaders;
 }) => {
-  const serverBasePath: string = server.config().get('server.basePath');
-
+  const serverBasePath: string = config.kbnConfig.get('server', 'basePath');
   const fakeRequest: any = {
     headers: conditionalHeaders.headers,
     // This is used by the spaces SavedObjectClientWrapper to determine the existing space.

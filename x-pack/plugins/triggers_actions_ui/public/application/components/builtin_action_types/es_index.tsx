@@ -31,6 +31,8 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../common/index_controls';
+import { useXJsonMode } from '../../lib/use_x_json_mode';
+import { AddMessageVariables } from '../add_message_variables';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -194,7 +196,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshTooltip',
                 {
                   defaultMessage:
-                    'Should Elasticsearch refresh the affected shards to make this operation visible to search',
+                    'Refresh the affected shards to make this operation visible to search.',
                 }
               )}
             />
@@ -217,7 +219,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           <>
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
-              defaultMessage="Define time field"
+              defaultMessage="Define time field for each document"
             />
             <EuiIconTip
               position="right"
@@ -225,7 +227,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               content={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
                 {
-                  defaultMessage: `Should a time field be added to each document automatically when it's indexed`,
+                  defaultMessage: `Automatically add a time field to each document when it's indexed.`,
                 }
               )}
             />
@@ -271,8 +273,18 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
   actionParams,
   index,
   editAction,
+  messageVariables,
 }) => {
   const { documents } = actionParams;
+  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(
+    documents && documents.length > 0 ? documents[0] : null
+  );
+  const onSelectMessageVariable = (variable: string) => {
+    const value = (xJson ?? '').concat(` {{${variable}}}`);
+    setXJson(value);
+    // Keep the documents in sync with the editor content
+    onDocumentsChange(convertToJson(value));
+  };
 
   function onDocumentsChange(updatedDocuments: string) {
     try {
@@ -291,27 +303,32 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
             defaultMessage: 'Document to index',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
+            paramsProperty="documents"
+          />
+        }
       >
         <EuiCodeEditor
-          aria-label={''}
-          mode={'json'}
+          mode={xJsonMode}
+          width="100%"
+          height="200px"
           theme="github"
           data-test-subj="actionIndexDoc"
-          value={JSON.stringify(documents && documents.length > 0 ? documents[0] : {}, null, 2)}
-          onChange={onDocumentsChange}
-          width="100%"
-          height="auto"
-          minLines={6}
-          maxLines={30}
-          isReadOnly={false}
-          setOptions={{
-            showLineNumbers: true,
-            tabSize: 2,
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
+            {
+              defaultMessage: 'Code editor',
+            }
+          )}
+          value={xJson}
+          onChange={(xjson: string) => {
+            setXJson(xjson);
+            // Keep the documents in sync with the editor content
+            onDocumentsChange(convertToJson(xjson));
           }}
-          editorProps={{
-            $blockScrolling: Infinity,
-          }}
-          showGutter={true}
         />
       </EuiFormRow>
     </Fragment>

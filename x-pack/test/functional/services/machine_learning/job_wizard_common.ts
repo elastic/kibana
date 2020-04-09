@@ -34,23 +34,23 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async assertTimeRangeSectionExists() {
-      await testSubjects.existOrFail('mlJobWizardStepTitleTimeRange');
+      await testSubjects.existOrFail('mlJobWizardStepTitleTimeRange', { timeout: 5000 });
     },
 
     async assertPickFieldsSectionExists() {
-      await testSubjects.existOrFail('mlJobWizardStepTitlePickFields');
+      await testSubjects.existOrFail('mlJobWizardStepTitlePickFields', { timeout: 5000 });
     },
 
     async assertJobDetailsSectionExists() {
-      await testSubjects.existOrFail('mlJobWizardStepTitleJobDetails');
+      await testSubjects.existOrFail('mlJobWizardStepTitleJobDetails', { timeout: 5000 });
     },
 
     async assertValidationSectionExists() {
-      await testSubjects.existOrFail('mlJobWizardStepTitleValidation');
+      await testSubjects.existOrFail('mlJobWizardStepTitleValidation', { timeout: 5000 });
     },
 
     async assertSummarySectionExists() {
-      await testSubjects.existOrFail('mlJobWizardStepTitleSummary');
+      await testSubjects.existOrFail('mlJobWizardStepTitleSummary', { timeout: 5000 });
     },
 
     async assertConfigureDatafeedSectionExists() {
@@ -58,23 +58,31 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async advanceToPickFieldsSection() {
-      await this.clickNextButton();
-      await this.assertPickFieldsSectionExists();
+      await retry.tryForTime(15 * 1000, async () => {
+        await this.clickNextButton();
+        await this.assertPickFieldsSectionExists();
+      });
     },
 
     async advanceToJobDetailsSection() {
-      await this.clickNextButton();
-      await this.assertJobDetailsSectionExists();
+      await retry.tryForTime(15 * 1000, async () => {
+        await this.clickNextButton();
+        await this.assertJobDetailsSectionExists();
+      });
     },
 
     async advanceToValidationSection() {
-      await this.clickNextButton();
-      await this.assertValidationSectionExists();
+      await retry.tryForTime(15 * 1000, async () => {
+        await this.clickNextButton();
+        await this.assertValidationSectionExists();
+      });
     },
 
     async advanceToSummarySection() {
-      await this.clickNextButton();
-      await this.assertSummarySectionExists();
+      await retry.tryForTime(15 * 1000, async () => {
+        await this.clickNextButton();
+        await this.assertSummarySectionExists();
+      });
     },
 
     async assertEventRateChartExists() {
@@ -322,9 +330,11 @@ export function MachineLearningJobWizardCommonProvider(
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      await mlCommon.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
-      await this.assertModelMemoryLimitValue(modelMemoryLimit, {
-        withAdvancedSection: sectionOptions.withAdvancedSection,
+      await retry.tryForTime(15 * 1000, async () => {
+        await mlCommon.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
+        await this.assertModelMemoryLimitValue(modelMemoryLimit, {
+          withAdvancedSection: sectionOptions.withAdvancedSection,
+        });
       });
     },
 

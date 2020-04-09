@@ -10,12 +10,11 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiButton,
-  EuiIcon,
-  EuiEmptyPrompt,
-  EuiTitle,
   EuiLink,
   EuiLoadingSpinner,
   EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -28,6 +27,7 @@ import { ActionsConnectorsContextProvider } from '../../../context/actions_conne
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
+import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
@@ -108,7 +108,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     setIsLoadingActions(true);
     try {
       const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse.data);
+      setActions(actionsResponse);
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -322,51 +322,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     />
   );
 
-  const emptyPrompt = (
-    <EuiEmptyPrompt
-      data-test-subj="createFirstConnectorEmptyPrompt"
-      title={
-        <Fragment>
-          <EuiIcon type="logoSlack" size="xl" className="actConnectorsList__logo" />
-          <EuiIcon type="logoGmail" size="xl" className="actConnectorsList__logo" />
-          <EuiIcon type="logoWebhook" size="xl" className="actConnectorsList__logo" />
-          <EuiSpacer size="s" />
-          <EuiTitle size="m">
-            <h2>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyTitle"
-                defaultMessage="Create your first connector"
-              />
-            </h2>
-          </EuiTitle>
-        </Fragment>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyBody"
-            defaultMessage="Configure email, Slack, Elasticsearch, and third-party services that Kibana can trigger."
-          />
-        </p>
-      }
-      actions={
-        <EuiButton
-          data-test-subj="createFirstActionButton"
-          key="create-action"
-          fill
-          iconType="plusInCircle"
-          iconSide="left"
-          onClick={() => setAddFlyoutVisibility(true)}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-            defaultMessage="Create connector"
-          />
-        </EuiButton>
-      }
-    />
-  );
-
   const noPermissionPrompt = (
     <h2>
       <FormattedMessage
@@ -410,9 +365,17 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && <EuiLoadingSpinner size="xl" />}
+      {(isLoadingActions || isLoadingActionTypes) && (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {data.length !== 0 && table}
-      {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && emptyPrompt}
+      {data.length === 0 && canSave && !isLoadingActions && !isLoadingActionTypes && (
+        <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
+      )}
       {data.length === 0 && !canSave && noPermissionPrompt}
       <ActionsConnectorsContextProvider
         value={{
