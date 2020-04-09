@@ -230,7 +230,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const domainStart = domain.min.valueOf();
     const domainEnd = domain.max.valueOf();
 
-    const domainMin = data[0].x > domainStart ? domainStart : data[0].x;
+    const domainMin = data[0]?.x > domainStart ? domainStart : data[0]?.x;
     const domainMax = domainEnd - xInterval > lastXValue ? domainEnd - xInterval : lastXValue;
 
     const xDomain = {
