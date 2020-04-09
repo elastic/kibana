@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { partial } from 'lodash';
 import { getPoint } from './_get_point';
 import { addToSiri, Serie } from './_add_to_siri';
 import { Chart } from './point_series';
@@ -30,57 +30,59 @@ export function getSeries(table: Table, chart: Chart) {
   const zAspect = aspects.z && aspects.z[0];
   const multiY = Array.isArray(aspects.y) && aspects.y.length > 1;
 
-  const partGetPoint = _.partial(getPoint, table, xAspect, aspects.series);
-  return _(table.rows)
-    .transform((seriesMap: any, row, rowIndex) => {
-      if (!multiY) {
-        const point = partGetPoint(row, rowIndex, yAspect, zAspect);
-        if (point) {
-          const id = `${point.series}-${yAspect.accessor}`;
-          point.seriesId = id;
-          addToSiri(
-            seriesMap as Map<string, Serie>,
-            point,
-            id,
-            point.series,
-            yAspect.format,
-            zAspect && zAspect.format,
-            zAspect && zAspect.title
-          );
-        }
-        return;
-      }
+  const partGetPoint = partial(getPoint, table, xAspect, aspects.series);
 
-      aspects.y.forEach(function(y) {
-        const point = partGetPoint(row, rowIndex, y, zAspect);
-        if (!point) {
-          return;
-        }
+  const seriesMap = new Map<string, Serie>();
 
-        // use the point's y-axis as it's series by default,
-        // but augment that with series aspect if it's actually
-        // available
-        let seriesId = y.accessor;
-        let seriesLabel = y.title;
-
-        if (aspects.series) {
-          const prefix = point.series ? point.series + ': ' : '';
-          seriesId = prefix + seriesId;
-          seriesLabel = prefix + seriesLabel;
-        }
-
-        point.seriesId = seriesId;
+  table.rows.forEach((row, rowIndex) => {
+    if (!multiY) {
+      const point = partGetPoint(row, rowIndex, yAspect, zAspect);
+      if (point) {
+        const id = `${point.series}-${yAspect.accessor}`;
+        point.seriesId = id;
         addToSiri(
           seriesMap,
           point,
-          seriesId as string,
-          seriesLabel,
-          y.format,
+          id,
+          point.series,
+          yAspect.format,
           zAspect && zAspect.format,
           zAspect && zAspect.title
         );
-      });
-    }, new Map<string, Serie>() as any)
-    .thru(s => [...s.values()])
-    .value() as Serie[];
+      }
+      return;
+    }
+
+    aspects.y.forEach(function(y) {
+      const point = partGetPoint(row, rowIndex, y, zAspect);
+      if (!point) {
+        return;
+      }
+
+      // use the point's y-axis as it's series by default,
+      // but augment that with series aspect if it's actually
+      // available
+      let seriesId = y.accessor;
+      let seriesLabel = y.title;
+
+      if (aspects.series) {
+        const prefix = point.series ? point.series + ': ' : '';
+        seriesId = prefix + seriesId;
+        seriesLabel = prefix + seriesLabel;
+      }
+
+      point.seriesId = seriesId;
+      addToSiri(
+        seriesMap,
+        point,
+        seriesId as string,
+        seriesLabel,
+        y.format,
+        zAspect && zAspect.format,
+        zAspect && zAspect.title
+      );
+    });
+  });
+
+  return [...seriesMap.values()];
 }

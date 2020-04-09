@@ -106,7 +106,8 @@ export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   initXAxis(chart, table);
   initYAxis(chart);
 
-  if ((chart.aspects.x[0].params as DateHistogramParams).date) {
+  if ('date' in chart.aspects.x[0].params) {
+    // initXAxis will turn `chart` into an `OrderedChart if it is a date axis`
     orderedDateAxis(chart as OrderedChart);
   }
 

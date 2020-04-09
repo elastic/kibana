@@ -17,21 +17,17 @@
  * under the License.
  */
 
-import { DateHistogramParams, OrderedChart } from './point_series';
+import { OrderedChart } from './point_series';
 
 export function orderedDateAxis(chart: OrderedChart) {
   const x = chart.aspects.x[0];
-  const { bounds } = x.params as DateHistogramParams;
+  const bounds = 'bounds' in x.params ? x.params.bounds : undefined;
 
   chart.ordered.date = true;
 
   if (bounds) {
-    chart.ordered.min = isNaN(bounds.min as number)
-      ? Date.parse(bounds.min as string)
-      : (bounds.min as number);
-    chart.ordered.max = isNaN(bounds.max as number)
-      ? Date.parse(bounds.max as string)
-      : (bounds.max as number);
+    chart.ordered.min = typeof bounds.min === 'string' ? Date.parse(bounds.min) : bounds.min;
+    chart.ordered.max = typeof bounds.max === 'string' ? Date.parse(bounds.max) : bounds.max;
   } else {
     chart.ordered.endzones = false;
   }

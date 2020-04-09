@@ -18,7 +18,7 @@
  */
 
 import { makeFakeXAspect } from './_fake_x_aspect';
-import { Dimensions, Dimension, Aspects } from './point_series';
+import { Dimensions, Aspects } from './point_series';
 import { Table } from '../../types';
 
 /**
@@ -29,12 +29,11 @@ import { Table } from '../../types';
  *                    may be undefined or an array of aspects.
  */
 export function getAspects(table: Table, dimensions: Dimensions) {
-  const aspects = {} as Aspects;
+  const aspects: Partial<Aspects> = {};
   (Object.keys(dimensions) as Array<keyof Dimensions>).forEach(name => {
-    const dimension = Array.isArray(dimensions[name])
-      ? (dimensions[name] as Dimension[])
-      : [dimensions[name] as Dimension];
-    dimension.forEach(d => {
+    const dimension = dimensions[name];
+    const dimensionList = Array.isArray(dimension) ? dimension : [dimension];
+    dimensionList.forEach(d => {
       if (!d) {
         return;
       }
@@ -59,5 +58,5 @@ export function getAspects(table: Table, dimensions: Dimensions) {
     aspects.x = [makeFakeXAspect()];
   }
 
-  return aspects;
+  return aspects as Aspects;
 }
