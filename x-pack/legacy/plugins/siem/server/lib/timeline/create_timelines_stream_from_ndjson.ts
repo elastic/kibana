@@ -5,6 +5,10 @@
  */
 
 import { Transform } from 'stream';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { failure } from 'io-ts/lib/PathReporter';
+import { identity } from 'fp-ts/lib/function';
 import {
   createConcatStream,
   createSplitStream,
@@ -18,13 +22,23 @@ import {
 
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
 import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
-import { decodeOrThrow } from '../../../../../../plugins/case/common/api';
 
-export const validateTimelines = (): Transform => {
-  return createMapStream((obj: ImportTimelineResponse) => {
-    return decodeOrThrow(ImportTimelinesSchemaRt)(obj);
-  });
+type ErrorFactory = (message: string) => Error;
+
+export const createPlainError = (message: string) => new Error(message);
+
+export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
+  throw createError(failure(errors).join('\n'));
 };
+
+export const decodeOrThrow = <A, O, I>(
+  runtimeType: rt.Type<A, O, I>,
+  createError: ErrorFactory = createPlainError
+) => (inputValue: I) =>
+  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+
+export const validateTimelines = (): Transform =>
+  createMapStream((obj: ImportTimelineResponse) => decodeOrThrow(ImportTimelinesSchemaRt)(obj));
 
 export const createTimelinesStreamFromNdJson = (ruleLimit: number) => {
   return [
