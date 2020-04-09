@@ -28,16 +28,23 @@ import {
   UrlGeneratorsSetup,
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
+import {
+  PersistableStateService,
+  PersistableStateSetup,
+  PersistableStateStart,
+} from './persistable_state';
 
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
+  private readonly persistableStateService = new PersistableStateService();
   private readonly urlGeneratorsService = new UrlGeneratorsService();
 
   public setup(core: CoreSetup): SharePluginSetup {
     core.application.register(createShortUrlRedirectApp(core, window.location));
     return {
       ...this.shareMenuRegistry.setup(),
+      persistableState: this.persistableStateService.setup(core),
       urlGenerators: this.urlGeneratorsService.setup(core),
     };
   }
@@ -45,6 +52,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   public start(core: CoreStart): SharePluginStart {
     return {
       ...this.shareContextMenu.start(core, this.shareMenuRegistry.start()),
+      persistableState: this.persistableStateService.start(core),
       urlGenerators: this.urlGeneratorsService.start(core),
     };
   }
@@ -52,10 +60,12 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
+  persistableState: PersistableStateSetup;
   urlGenerators: UrlGeneratorsSetup;
 };
 
 /** @public */
 export type SharePluginStart = ShareMenuManagerStart & {
+  persistableState: PersistableStateStart;
   urlGenerators: UrlGeneratorsStart;
 };
