@@ -724,4 +724,4 @@ double({ num: 3 }).then(console.log, console.error); // { num: 6 }
 Plugins should now define a category if they have a navigation item: 
 - If you want to fit into our default categories, you can use our `DEFAULT_APP_CATEGORIES` defined in `src/core/utils/default_app_categories.ts`.
 - If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
-
+a
