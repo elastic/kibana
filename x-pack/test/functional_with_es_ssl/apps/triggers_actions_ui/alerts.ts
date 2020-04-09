@@ -39,7 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/62472
-  describe.skip('alerts', function() {
+  describe('alerts', function() {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -65,18 +65,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // need this two out of popup clicks to close them
       await nameInput.click();
 
-      await testSubjects.click('.slack-ActionTypeSelectOption');
+      // test for normal connector
+      await testSubjects.click('.index-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
       const connectorNameInput = await testSubjects.find('nameInput');
       await connectorNameInput.click();
       await connectorNameInput.clearValue();
       const connectorName = generateUniqueKey();
       await connectorNameInput.type(connectorName);
-      const slackWebhookUrlInput = await testSubjects.find('slackWebhookUrlInput');
-      await slackWebhookUrlInput.click();
-      await slackWebhookUrlInput.clearValue();
-      await slackWebhookUrlInput.type('https://test');
+      const indexConnectorComboBox = await find.byCssSelector(
+        '[data-test-subj="connectorIndexesComboBox"]'
+      );
+      await indexConnectorComboBox.click();
+      await indexConnectorComboBox.type('k');
+      const indexConnectorFilterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
+      await indexConnectorFilterSelectItem.click();
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+
+      // pre-configured connector is loaded an displayed correctly
+      await testSubjects.click('.slack-ActionTypeSelectOption');
+      expect(await (await find.byCssSelector('#my-slack1')).isDisplayed()).to.be(true);
       const loggingMessageInput = await testSubjects.find('slackMessageTextArea');
       await loggingMessageInput.click();
       await loggingMessageInput.clearValue();

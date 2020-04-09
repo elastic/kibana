@@ -30,7 +30,6 @@ import { ActionsConnectorsContextProvider } from '../../../context/actions_conne
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
-import { PreconfiguredConnectorFlyout } from '../../action_connector_form/preconfigured_connector_flyout';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
@@ -45,7 +44,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [preconfiguredFlyoutVisible, setPreconfiguredFlyoutVisibility] = useState<boolean>(false);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [actionTypesList, setActionTypesList] = useState<Array<{ value: string; name: string }>>(
     []
@@ -130,13 +128,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   async function editItem(connectorTableItem: ActionConnectorTableItem) {
     setEditedConnectorItem(connectorTableItem);
-    if (connectorTableItem.isPreconfigured) {
-      setPreconfiguredFlyoutVisibility(true);
-      setEditFlyoutVisibility(false);
-    } else {
-      setEditFlyoutVisibility(true);
-      setPreconfiguredFlyoutVisibility(false);
-    }
+    setEditFlyoutVisibility(true);
   }
 
   const actionsTableColumns = [
@@ -219,13 +211,14 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
+                  data-test-subj="preConfiguredTitleMessage"
                   label={i18n.translate(
                     'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
                     {
                       defaultMessage: 'Pre-configured',
                     }
                   )}
-                  tooltipContent="This connector is not allowed to delete."
+                  tooltipContent="This connector can't be deleted."
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -434,12 +427,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               initialConnector={editedConnectorItem}
               editFlyoutVisible={editFlyoutVisible}
               setEditFlyoutVisibility={setEditFlyoutVisibility}
-            />
-            <PreconfiguredConnectorFlyout
-              key={`preconfigured${editedConnectorItem.id}`}
-              initialConnector={editedConnectorItem}
-              flyoutVisible={preconfiguredFlyoutVisible}
-              setFlyoutVisibility={setPreconfiguredFlyoutVisibility}
             />
           </>
         ) : null}

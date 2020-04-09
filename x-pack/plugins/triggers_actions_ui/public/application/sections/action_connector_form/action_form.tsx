@@ -142,7 +142,7 @@ export const ActionForm = ({
     }
   }
   const preconfiguredMessage = i18n.translate(
-    'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+    'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
     {
       defaultMessage: '(pre-configured)',
     }
@@ -152,7 +152,7 @@ export const ActionForm = ({
     if (!val) {
       return [];
     }
-    const optionTitle = `${val.name}${val.isPreconfigured ? preconfiguredMessage : ''}`;
+    const optionTitle = `${val.name} ${val.isPreconfigured ? preconfiguredMessage : ''}`;
     return [
       {
         label: optionTitle,
@@ -271,7 +271,7 @@ export const ActionForm = ({
                         defaultMessage="{actionConnectorName}"
                         id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                         values={{
-                          actionConnectorName: `${actionConnector.name}${
+                          actionConnectorName: `${actionConnector.name} ${
                             actionConnector.isPreconfigured ? preconfiguredMessage : ''
                           }`,
                         }}
