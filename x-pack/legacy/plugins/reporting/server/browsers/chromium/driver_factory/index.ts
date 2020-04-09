@@ -56,7 +56,7 @@ export class HeadlessChromiumDriverFactory {
 
   type = BROWSER_TYPE;
 
-  test(logger: Logger) {
+  async test(logger: Logger) {
     const chromiumArgs = args({
       userDataDir: this.userDataDir,
       viewport: { width: 800, height: 600 },
@@ -64,19 +64,21 @@ export class HeadlessChromiumDriverFactory {
       proxy: this.browserConfig.proxy,
     });
 
-    return puppeteerLaunch({
-      userDataDir: this.userDataDir,
-      executablePath: this.binaryPath,
-      ignoreHTTPSErrors: true,
-      args: chromiumArgs,
-    } as LaunchOptions).catch((error: Error) => {
+    try {
+      return await puppeteerLaunch({
+        userDataDir: this.userDataDir,
+        executablePath: this.binaryPath,
+        ignoreHTTPSErrors: true,
+        args: chromiumArgs,
+      } as LaunchOptions);
+    } catch (error) {
       logger.error(
         `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
       );
       logger.error(error);
       logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
       return null;
-    });
+    }
   }
 
   /*

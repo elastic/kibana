@@ -59,9 +59,7 @@ export interface ReportingConfig extends Config<ReportingConfigType> {
 type BrowserType = 'chromium';
 
 interface BrowserConfig {
-  inspect: boolean;
-  userDataDir: string;
-  viewport: { width: number; height: number };
+  inspect?: boolean;
   disableSandbox: boolean;
   proxy: {
     enabled: boolean;
@@ -84,8 +82,8 @@ interface CaptureConfig {
     waitForElements: number;
     renderComplete: number;
   };
-  viewport: any;
-  zoom: any;
+  viewport: { height: number; width: number };
+  zoom: number;
 }
 
 interface QueueConfig {

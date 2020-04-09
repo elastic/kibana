@@ -45,4 +45,5 @@ export interface ScreenshotResults {
   timeRange: TimeRange | null;
   screenshots: Screenshot[];
   error?: Error;
+  elementsPositionAndAttributes?: ElementsPositionAndAttribute[]; // NOTE: for testing
 }
