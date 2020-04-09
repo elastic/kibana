@@ -41,7 +41,7 @@ export class XYZTMSSource extends AbstractTMSSource {
     this._descriptor = sourceDescriptor;
   }
 
-  async getImmutableProperties(): ImmutableSourceProperty[] {
+  async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.urlTemplate },

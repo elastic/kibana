@@ -48,4 +48,5 @@ export class AbstractSource implements ISource {
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): ImmutableSourceProperty[];
+  getAttributions(): Promise<Attribution[]>;
 }
