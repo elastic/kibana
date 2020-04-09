@@ -19,16 +19,18 @@ Source: [https://en.wikipedia.org/wiki/Backporting](https://en.wikipedia.org/wik
 
 This tools is for anybody who is working on a codebase where they have to maintain multiple versions. If you manually cherry-pick commits from master and apply them to one or more branches, this tool might save you a lot of time.
 
-`backport` is a CLI that will ask you which commit(s) to backport and to which branch(es) and then cherry-pick accordingly, and create pull requests. It will always perform the git operation in a temporary folder (`~/.backport/repositories/`) separate from your working directory, thus never interfering with any unstages changes your might have.
+`backport` is a CLI tool that will let you backport commit(s) interactively and then cherry-pick and create pull requests automatically. `backport` will always perform the git operation in a temporary folder (`~/.backport/repositories/`) separate from your working directory, thereby never interfering with any unstages changes your might have.
 
 **Features:**
 
 - interactively backport one or more commits to one or more branches with an intuitive UI
+- will never run `git reset --hard` or other git commands in your working directory - all git operations are handled in a separate directory
 - backport a commit by specifying a PR (`--pr 1337`)
 - list and backport commits by a particular user (`--author john`)
 - list and backport commits by a particular path (`--path src/plugins/chatbot`)
+- forward port commits: `backport --sourceBranch 7.x --branch master` (will backport from 7.x to master)
 - see which commits have been backported and to which branches
-- add a custom title, description and labels to the created backport PR
+- add custom titles, descriptions and labels to the created backport PRs
 
 ## Requirements
 
@@ -75,7 +77,7 @@ You can now use `backport` as if it was installed on the host machine.
 
 ## Usage
 
-Run the CLI in your project folder (must contain a [`.backportrc.json`](https://github.com/sqren/backport/blob/master/docs/configuration.md#project-config-backportrcjson) file):
+Run `backport` in your project folder (must contain a [`.backportrc.json`](https://github.com/sqren/backport/blob/master/docs/configuration.md#project-config-backportrcjson) file):
 
 ```
 > backport
