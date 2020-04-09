@@ -91,6 +91,7 @@ interface BytesSetting extends BaseSetting {
 interface DurationSetting extends BaseSetting {
   type: 'duration';
   units?: string[];
+  min?: number;
 }
 
 export type RawSettingDefinition =

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { ruleActionsSavedObjectType } from './saved_object_mappings';
 import { IRuleActionsAttributesSavedObjectAttributes } from './types';
@@ -14,10 +15,17 @@ interface GetRuleActionsSavedObject {
   savedObjectsClient: AlertServices['savedObjectsClient'];
 }
 
+export interface RulesActionsSavedObject {
+  id: string;
+  actions: RuleAlertAction[];
+  alertThrottle: string | null;
+  ruleThrottle: string;
+}
+
 export const getRuleActionsSavedObject = async ({
   ruleAlertId,
   savedObjectsClient,
-}: GetRuleActionsSavedObject) => {
+}: GetRuleActionsSavedObject): Promise<RulesActionsSavedObject | null> => {
   const { saved_objects } = await savedObjectsClient.find<
     IRuleActionsAttributesSavedObjectAttributes
   >({
@@ -29,7 +37,7 @@ export const getRuleActionsSavedObject = async ({
 
   if (!saved_objects[0]) {
     return null;
+  } else {
+    return getRuleActionsFromSavedObject(saved_objects[0]);
   }
-
-  return getRuleActionsFromSavedObject(saved_objects[0]);
 };

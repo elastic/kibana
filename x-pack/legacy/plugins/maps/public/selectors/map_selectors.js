@@ -6,11 +6,16 @@
 
 import { createSelector } from 'reselect';
 import _ from 'lodash';
-import { TileLayer } from '../layers/tile_layer';
-import { VectorTileLayer } from '../layers/vector_tile_layer';
-import { VectorLayer } from '../layers/vector_layer';
-import { HeatmapLayer } from '../layers/heatmap_layer';
-import { BlendedVectorLayer } from '../layers/blended_vector_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TileLayer } from '../../../../../plugins/maps/public/layers/tile_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { VectorTileLayer } from '../../../../../plugins/maps/public/layers/vector_tile_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { VectorLayer } from '../../../../../plugins/maps/public/layers/vector_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { HeatmapLayer } from '../../../../../plugins/maps/public/layers/heatmap_layer';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BlendedVectorLayer } from '../../../../../plugins/maps/public/layers/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
@@ -19,8 +24,10 @@ import {
   TRACKED_LAYER_DESCRIPTOR,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../plugins/maps/public/reducers/util';
-import { InnerJoin } from '../layers/joins/inner_join';
-import { getSourceByType } from '../layers/sources/source_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { InnerJoin } from '../../../../../plugins/maps/public/layers/joins/inner_join';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getSourceByType } from '../../../../../plugins/maps/public/layers/sources/source_registry';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
