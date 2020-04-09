@@ -21,6 +21,7 @@ import { useLinks as useEPMLinks } from '../../epm/hooks';
 import { CreateDatasourcePageLayout } from './components';
 import { CreateDatasourceFrom, CreateDatasourceStep } from './types';
 import { CREATE_DATASOURCE_STEP_PATHS } from './constants';
+import { DatasourceValidationResults, validateDatasource } from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
 import { StepConfigureDatasource } from './step_configure_datasource';
@@ -50,6 +51,9 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     output_id: '', // TODO: Blank for now as we only support default output
     inputs: [],
   });
+
+  // Datasource validation state
+  const [validationResults, setValidationResults] = useState<DatasourceValidationResults>();
 
   // Update package info method
   const updatePackageInfo = (updatedPackageInfo: PackageInfo | undefined) => {
@@ -84,9 +88,18 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       ...updatedFields,
     };
     setDatasource(newDatasource);
-
     // eslint-disable-next-line no-console
     console.debug('Datasource updated', newDatasource);
+    updateDatasourceValidation(newDatasource);
+  };
+
+  const updateDatasourceValidation = (newDatasource?: NewDatasource) => {
+    if (packageInfo) {
+      const newValidationResult = validateDatasource(newDatasource || datasource, packageInfo);
+      setValidationResults(newValidationResult);
+      // eslint-disable-next-line no-console
+      console.debug('Datasource validation results', newValidationResult);
+    }
   };
 
   // Cancel url
@@ -202,6 +215,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
                 packageInfo={packageInfo}
                 datasource={datasource}
                 updateDatasource={updateDatasource}
+                validationResults={validationResults!}
                 backLink={
                   <EuiButtonEmpty href={firstStepUrl} iconType="arrowLeft" iconSide="left">
                     {from === 'config' ? (
