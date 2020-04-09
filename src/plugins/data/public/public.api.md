@@ -268,6 +268,7 @@ export interface DataPublicPluginStart {
     ui: {
         IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
         SearchBar: React.ComponentType<StatefulSearchBarProps>;
+        ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
     };
 }
 
@@ -1898,8 +1899,9 @@ export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearc
 // src/plugins/data/public/index.ts:412:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:33:33 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:37:1 - (ae-forgotten-export) The symbol "QueryStateChange" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:52:5 - (ae-forgotten-export) The symbol "createFiltersFromEvent" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:60:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:53:5 - (ae-forgotten-export) The symbol "createFiltersFromEvent" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:61:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:63:5 - (ae-forgotten-export) The symbol "EnsureDefaultIndexPattern" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
