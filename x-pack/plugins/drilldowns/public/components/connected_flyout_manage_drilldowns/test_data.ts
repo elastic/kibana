@@ -8,11 +8,9 @@ import uuid from 'uuid';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedDynamicActionManagerState as DynamicActionManagerState,
+  UiActionsEnhancedSerializedAction,
 } from '../../../../advanced_ui_actions/public';
-import {
-  UiActionsSerializedAction,
-  TriggerContextMapping,
-} from '../../../../../../src/plugins/ui_actions/public';
+import { TriggerContextMapping } from '../../../../../../src/plugins/ui_actions/public';
 import { createStateContainer } from '../../../../../../src/plugins/kibana_utils/common';
 
 class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> {
@@ -31,7 +29,7 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
   }
 
   async createEvent(
-    action: UiActionsSerializedAction<any>,
+    action: UiActionsEnhancedSerializedAction<any>,
     triggers: Array<keyof TriggerContextMapping>
   ) {
     const event = {
@@ -62,7 +60,7 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
 
   async updateEvent(
     eventId: string,
-    action: UiActionsSerializedAction<unknown>,
+    action: UiActionsEnhancedSerializedAction<unknown>,
     triggers: Array<keyof TriggerContextMapping>
   ) {
     const state = this.state.get();
