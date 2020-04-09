@@ -86,7 +86,7 @@ export const StepSelectPackage: React.FunctionComponent<{
         title={
           <FormattedMessage
             id="xpack.ingestManager.createDatasource.stepSelectPackage.errorLoadingPackagesTitle"
-            defaultMessage="Error loading packages"
+            defaultMessage="Error loading integrations"
           />
         }
         error={packagesError}
@@ -156,7 +156,7 @@ export const StepSelectPackage: React.FunctionComponent<{
             title={
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.stepSelectPackage.errorLoadingSelectedPackageTitle"
-                defaultMessage="Error loading selected package"
+                defaultMessage="Error loading selected integration"
               />
             }
             error={selectedPkgError}
