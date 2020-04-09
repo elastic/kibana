@@ -55,7 +55,7 @@ export const CustomLink = ({
       <EuiText size="xs" grow={false} style={{ width: px(300) }}>
         {i18n.translate('xpack.apm.customLink.empty', {
           defaultMessage:
-            'No custom links found. Set up your own custom links i.e. a link to a specific Dashboard or external link.'
+            'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.'
         })}
       </EuiText>
       <EuiSpacer size="s" />

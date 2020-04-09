@@ -6,7 +6,7 @@
 
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams } from '../types';
+import { RuleTypeParams, RefreshTypes } from '../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -30,6 +30,7 @@ interface SearchAfterAndBulkCreateParams {
   enabled: boolean;
   pageSize: number;
   filter: unknown;
+  refresh: RefreshTypes;
   tags: string[];
   throttle: string;
 }
@@ -39,6 +40,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
+  createdSignalsCount: number;
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -60,6 +62,7 @@ export const searchAfterAndBulkCreate = async ({
   interval,
   enabled,
   pageSize,
+  refresh,
   tags,
   throttle,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
@@ -68,6 +71,7 @@ export const searchAfterAndBulkCreate = async ({
     searchAfterTimes: [],
     bulkCreateTimes: [],
     lastLookBackDate: null,
+    createdSignalsCount: 0,
   };
   if (someResult.hits.hits.length === 0) {
     toReturn.success = true;
@@ -75,7 +79,7 @@ export const searchAfterAndBulkCreate = async ({
   }
 
   logger.debug('[+] starting bulk insertion');
-  const { bulkCreateDuration } = await singleBulkCreate({
+  const { bulkCreateDuration, createdItemsCount } = await singleBulkCreate({
     someResult,
     ruleParams,
     services,
@@ -90,6 +94,7 @@ export const searchAfterAndBulkCreate = async ({
     updatedBy,
     interval,
     enabled,
+    refresh,
     tags,
     throttle,
   });
@@ -97,6 +102,9 @@ export const searchAfterAndBulkCreate = async ({
     someResult.hits.hits.length > 0
       ? new Date(someResult.hits.hits[someResult.hits.hits.length - 1]?._source['@timestamp'])
       : null;
+  if (createdItemsCount) {
+    toReturn.createdSignalsCount = createdItemsCount;
+  }
   if (bulkCreateDuration) {
     toReturn.bulkCreateTimes.push(bulkCreateDuration);
   }
@@ -156,7 +164,10 @@ export const searchAfterAndBulkCreate = async ({
       }
       sortId = sortIds[0];
       logger.debug('next bulk index');
-      const { bulkCreateDuration: bulkDuration } = await singleBulkCreate({
+      const {
+        bulkCreateDuration: bulkDuration,
+        createdItemsCount: createdCount,
+      } = await singleBulkCreate({
         someResult: searchResult,
         ruleParams,
         services,
@@ -171,10 +182,12 @@ export const searchAfterAndBulkCreate = async ({
         updatedBy,
         interval,
         enabled,
+        refresh,
         tags,
         throttle,
       });
       logger.debug('finished next bulk index');
+      toReturn.createdSignalsCount += createdCount;
       if (bulkDuration) {
         toReturn.bulkCreateTimes.push(bulkDuration);
       }

@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../../../plugins/data/public';
-import { Schemas } from '../../vis_default_editor/public';
+import { Schemas } from '../../../../plugins/vis_default_editor/public';
 import { Vis } from '../../../../plugins/visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 // @ts-ignore

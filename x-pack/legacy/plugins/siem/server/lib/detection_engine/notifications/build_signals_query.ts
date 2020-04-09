@@ -32,6 +32,7 @@ export const buildSignalsSearchQuery = ({ ruleId, index, from, to }: BuildSignal
               '@timestamp': {
                 gt: from,
                 lte: to,
+                format: 'epoch_millis',
               },
             },
           },
