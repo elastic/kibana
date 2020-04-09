@@ -21,12 +21,12 @@ import { getFormatService } from '../../../services';
 import { Aspect } from './point_series';
 import { Table, Row } from '../../types';
 
-type RowValue = number | 'NaN';
+type RowValue = number | string | object | 'NaN';
 interface Raw {
   table: Table;
-  column: number;
-  row: number;
-  value: RowValue;
+  column: number | undefined;
+  row: number | undefined;
+  value?: RowValue;
 }
 export interface Point {
   x: RowValue | '_all';
@@ -61,7 +61,7 @@ export function getPoint(
   const yRow = row[y.accessor];
   const zRow = z && row[z.accessor];
 
-  const point = {
+  const point: Point = {
     x: xRow,
     y: yRow,
     z: zRow,
@@ -98,7 +98,7 @@ export function getPoint(
       title: table.$parent.name,
     },
     parent: series ? series[0] : null,
-  } as Point;
+  };
 
   if (point.y === 'NaN') {
     // filter out NaN from stats
