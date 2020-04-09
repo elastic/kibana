@@ -141,12 +141,18 @@ export const ActionForm = ({
       });
     }
   }
+  const preconfiguredMessage = i18n.translate(
+    'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+    {
+      defaultMessage: '(pre-configured)',
+    }
+  );
   const getSelectedOptions = (actionItemId: string) => {
     const val = connectors.find(connector => connector.id === actionItemId);
     if (!val) {
       return [];
     }
-    const optionTitle = `${val.name}${val.isPreconfigured ? '(pre-configured)' : ''}`;
+    const optionTitle = `${val.name}${val.isPreconfigured ? preconfiguredMessage : ''}`;
     return [
       {
         label: optionTitle,
@@ -266,7 +272,7 @@ export const ActionForm = ({
                         id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                         values={{
                           actionConnectorName: `${actionConnector.name}${
-                            actionConnector.isPreconfigured ? '(pre-configured)' : ''
+                            actionConnector.isPreconfigured ? preconfiguredMessage : ''
                           }`,
                         }}
                       />

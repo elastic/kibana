@@ -219,7 +219,12 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
-                  label="Pre-configured"
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+                    {
+                      defaultMessage: 'Pre-configured',
+                    }
+                  )}
                   tooltipContent="This connector is not allowed to delete."
                 />
               </EuiFlexItem>

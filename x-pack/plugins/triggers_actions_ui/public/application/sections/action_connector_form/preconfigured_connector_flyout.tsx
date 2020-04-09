@@ -44,7 +44,7 @@ export const PreconfiguredConnectorFlyout = ({
   const actionTypeModel = actionTypeRegistry.get(initialConnector.actionTypeId);
 
   return (
-    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
+    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutPreconfiguredtActionTitle" size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {actionTypeModel ? (
@@ -66,7 +66,7 @@ export const PreconfiguredConnectorFlyout = ({
                   tooltipContent={i18n.translate(
                     'xpack.triggersActionsUI.sections.preconfiguredConnectorForm.tooltipContent',
                     {
-                      defaultMessage: 'This connector is preconfigured and not allowed to edit',
+                      defaultMessage: 'This connector is preconfigured and cannot be edited',
                     }
                   )}
                 />
