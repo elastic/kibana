@@ -18,6 +18,7 @@ import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
 import { HeaderNavigation } from './components/header_nav';
 import { AppRootProvider } from './view/app_root_provider';
+import { Setup } from './view/setup';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -48,6 +49,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
   ({ history, store, coreStart, depsStart }) => {
     return (
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
+        <Setup ingestManager={depsStart.ingestManager} notifications={coreStart.notifications} />
         <HeaderNavigation />
         <Switch>
           <Route

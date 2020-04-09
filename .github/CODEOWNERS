@@ -202,7 +202,8 @@
 # Endpoint
 /x-pack/plugins/endpoint/ @elastic/endpoint-app-team
 /x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team
-/x-pack/test/functional/apps/endpoint/ @elastic/endpoint-app-team
+/x-pack/test/functional_endpoint/ @elastic/endpoint-app-team
+/x-pack/test/functional_endpoint_ingest_failure/ @elastic/endpoint-app-team
 /x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team
 
 # SIEM

@@ -124,7 +124,7 @@ Organize your ideas onto separate pages by adding more pages.
 
 . Click *Page 1*, then click *+*.
 
-. On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown.
+. On the *Page* editor panel, select the page transition from the *Transition* dropdown.
 +
 [role="screenshot"]
 image::images/canvas-add-pages.gif[Add pages]
