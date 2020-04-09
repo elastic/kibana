@@ -7,13 +7,13 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { htmlIdGenerator } from '@elastic/eui';
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventingCheckbox } from './checkbox';
 import { OS, UIPolicyConfig } from '../../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedMacEventing, totalMacEventing } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
+import { getIn, setIn } from '../../../../models/policy_details_config';
 
 export const MacEventing = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedMacEventing);
@@ -22,7 +22,6 @@ export const MacEventing = React.memo(() => {
   const checkboxes: Array<{
     name: string;
     os: 'mac';
-    protectionEvent: keyof UIPolicyConfig['mac'];
     protectionField: keyof UIPolicyConfig['mac']['events'];
   }> = useMemo(
     () => [
@@ -31,7 +30,6 @@ export const MacEventing = React.memo(() => {
           defaultMessage: 'File',
         }),
         os: OS.mac,
-        protectionEvent: 'events',
         protectionField: 'file',
       },
       {
@@ -39,7 +37,6 @@ export const MacEventing = React.memo(() => {
           defaultMessage: 'Process',
         }),
         os: OS.mac,
-        protectionEvent: 'events',
         protectionField: 'process',
       },
       {
@@ -47,7 +44,6 @@ export const MacEventing = React.memo(() => {
           defaultMessage: 'Network',
         }),
         os: OS.mac,
-        protectionEvent: 'events',
         protectionField: 'network',
       },
     ],
@@ -69,12 +65,12 @@ export const MacEventing = React.memo(() => {
         {checkboxes.map((item, index) => {
           return (
             <EventingCheckbox
-              id={useMemo(() => htmlIdGenerator()(), [])}
               name={item.name}
               key={index}
-              os={item.os}
-              protectionEvent={item.protectionEvent}
-              protectionField={item.protectionField}
+              setter={(config, checked) =>
+                setIn(config)(item.os)('events')(item.protectionField)(checked)
+              }
+              getter={config => getIn(config)(item.os)('events')(item.protectionField)}
             />
           );
         })}
