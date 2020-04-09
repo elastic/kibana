@@ -59,7 +59,6 @@ describe('state selectors', () => {
       errors: [],
     },
     pingList: {
-      errors: [],
       loading: false,
       pingList: {
         total: 0,

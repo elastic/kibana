@@ -10,7 +10,7 @@ import { getPings, getPingsSuccess, getPingsFail } from '../actions';
 
 export interface PingListState {
   pingList: PingsResponse;
-  errors: Error[];
+  error?: Error;
   loading: boolean;
 }
 
@@ -21,7 +21,6 @@ const initialState: PingListState = {
     pings: [],
   },
   loading: false,
-  errors: [],
 };
 
 type PingListPayload = PingsResponse & Error;
@@ -41,7 +40,7 @@ export const pingListReducer = handleActions<PingListState, PingListPayload>(
 
     [String(getPingsFail)]: (state, action: Action<Error>) => ({
       ...state,
-      errors: [...state.errors, action.payload],
+      error: action.payload,
       loading: false,
     }),
   },

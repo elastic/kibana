@@ -62,6 +62,7 @@ const SpanWithMargin = styled.span`
 interface Props extends PingListProps {
   dateRangeStart: string;
   dateRangeEnd: string;
+  error?: Error;
   getPings: (props: GetPingsParams) => void;
   lastRefresh: number;
   loading: boolean;
@@ -104,6 +105,7 @@ export const PingListComponent = (props: Props) => {
   const {
     dateRangeStart,
     dateRangeEnd,
+    error,
     getPings,
     lastRefresh,
     loading,
@@ -213,7 +215,7 @@ export const PingListComponent = (props: Props) => {
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
       }),
-      render: (error: string) => error ?? '-',
+      render: (errorType: string) => errorType ?? '-',
     },
     // Only add this column is there is any status present in list
     ...(hasStatus
@@ -325,6 +327,7 @@ export const PingListComponent = (props: Props) => {
       <EuiBasicTable
         loading={loading}
         columns={columns}
+        error={error?.message}
         isExpandable={true}
         hasActions={true}
         items={pings}

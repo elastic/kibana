@@ -20,6 +20,7 @@ export const PingList = (props: PingListProps) => {
   const {
     lastRefresh,
     pings: {
+      error,
       loading,
       pingList: { locations, pings, total },
     },
@@ -47,6 +48,7 @@ export const PingList = (props: PingListProps) => {
     <PingListComponent
       dateRangeStart={from}
       dateRangeEnd={to}
+      error={error}
       getPings={getPingsCallback}
       lastRefresh={lastRefresh}
       loading={loading}
