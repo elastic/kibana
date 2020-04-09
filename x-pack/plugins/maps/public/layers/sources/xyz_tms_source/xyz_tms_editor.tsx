@@ -4,12 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, Component, ChangeEvent } from 'react';
 import _ from 'lodash';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export class XYZTMSEditor extends React.Component {
+export interface SourceConfig {
+  urlTemplate: string;
+  attributionText?: string;
+  attributionUrl?: string;
+}
+
+export interface Props {
+  onSourceConfigChange: (sourceConfig: SourceConfig) => {};
+}
+
+interface State {
+  tmsInput: '';
+  tmsCanPreview: false;
+  attributionText: string;
+  attributionUrl: string;
+}
+
+export class XYZTMSEditor extends Component<Props, State> {
   state = {
     tmsInput: '',
     tmsCanPreview: false,
@@ -23,7 +40,7 @@ export class XYZTMSEditor extends React.Component {
     }
   }, 2000);
 
-  _handleTMSInputChange(e) {
+  _handleTMSInputChange(e: ChangeEvent<HTMLInputElement>) {
     const url = e.target.value;
 
     const canPreview =
@@ -37,7 +54,7 @@ export class XYZTMSEditor extends React.Component {
     );
   }
 
-  _handleTMSAttributionChange(attributionUpdate) {
+  _handleTMSAttributionChange(attributionUpdate: string) {
     this.setState(attributionUpdate, () => {
       const { attributionText, attributionUrl, tmsInput } = this.state;
 
@@ -72,7 +89,7 @@ export class XYZTMSEditor extends React.Component {
         >
           <EuiFieldText
             placeholder={'© OpenStreetMap contributors'}
-            onChange={({ target }) =>
+            onChange={({ target }: ChangeEvent<HTMLInputElement>) =>
               this._handleTMSAttributionChange({ attributionText: target.value })
             }
           />
@@ -88,7 +105,7 @@ export class XYZTMSEditor extends React.Component {
         >
           <EuiFieldText
             placeholder={'https://www.openstreetmap.org/copyright'}
-            onChange={({ target }) =>
+            onChange={({ target }: ChangeEvent<HTMLInputElement>) =>
               this._handleTMSAttributionChange({ attributionUrl: target.value })
             }
           />

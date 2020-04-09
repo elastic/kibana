@@ -5,10 +5,10 @@
  */
 
 import { XYZTMSSource } from './xyz_tms_source';
-import { ILayer } from '../layer';
-import { TileLayer } from '../tile_layer';
-import { EMS_XYZ } from '../../../common/constants';
-import { XYZTMSSourceDescriptor } from '../../../common/descriptor_types';
+import { ILayer } from '../../layer';
+import { TileLayer } from '../../tile_layer';
+import { EMS_XYZ } from '../../../../common/constants';
+import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 
 const descriptor: XYZTMSSourceDescriptor = {
   type: EMS_XYZ,
