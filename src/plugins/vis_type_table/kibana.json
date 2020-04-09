@@ -1,0 +1,11 @@
+{
+  "id": "visTypeTable",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "expressions",
+    "visualizations",
+    "data"
+  ]
+}

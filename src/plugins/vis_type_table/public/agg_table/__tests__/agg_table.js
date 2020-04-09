@@ -22,11 +22,11 @@ import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { npStart } from '../../legacy_imports';
 import { round } from 'lodash';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tabifiedData } from './tabified_data';
+import { coreMock } from '../../../../../core/public/mocks';
 
 describe('Table Vis - AggTable Directive', function() {
   let $rootScope;
@@ -34,7 +34,11 @@ describe('Table Vis - AggTable Directive', function() {
   let settings;
 
   const initLocalAngular = () => {
-    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    const tableVisModule = getAngularModule(
+      'kibana/table_vis',
+      coreMock.createStart(),
+      coreMock.createPluginInitializerContext()
+    );
     initTableVisLegacyModule(tableVisModule);
   };
 

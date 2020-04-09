@@ -25,10 +25,9 @@ import 'angular-mocks';
 
 import { getAngularModule } from '../get_inner_angular';
 import { initTableVisLegacyModule } from '../table_vis_legacy_module';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 
-jest.mock('ui/new_platform');
-jest.mock('../../../../../plugins/kibana_legacy/public/angular/angular_config', () => ({
+jest.mock('../../../kibana_legacy/public/angular/angular_config', () => ({
   configureAppAngularModule: () => {},
 }));
 
@@ -73,7 +72,11 @@ describe('Table Vis - Paginated table', () => {
   let paginatedTable: any;
 
   const initLocalAngular = () => {
-    const tableVisModule = getAngularModule('kibana/table_vis', coreMock.createStart());
+    const tableVisModule = getAngularModule(
+      'kibana/table_vis',
+      coreMock.createStart(),
+      coreMock.createPluginInitializerContext()
+    );
     initTableVisLegacyModule(tableVisModule);
   };
 

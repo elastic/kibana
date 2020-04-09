@@ -23,7 +23,7 @@
 import angular from 'angular';
 import 'angular-recursion';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
+import { CoreStart, IUiSettingsClient, PluginInitializerContext } from 'kibana/public';
 import {
   initAngularBootstrap,
   PaginateDirectiveProvider,
@@ -32,15 +32,15 @@ import {
   watchMultiDecorator,
   KbnAccessibleClickProvider,
   configureAppAngularModule,
-} from '../../../../plugins/kibana_legacy/public';
+} from '../../kibana_legacy/public';
 
 initAngularBootstrap();
 
 const thirdPartyAngularDependencies = ['ngSanitize', 'ui.bootstrap', 'RecursionHelper'];
 
-export function getAngularModule(name: string, core: CoreStart) {
+export function getAngularModule(name: string, core: CoreStart, context: PluginInitializerContext) {
   const uiModule = getInnerAngular(name, core);
-  configureAppAngularModule(uiModule, core as LegacyCoreStart, true);
+  configureAppAngularModule(uiModule, { core, env: context.env }, true);
   return uiModule;
 }
 

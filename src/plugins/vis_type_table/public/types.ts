@@ -17,4 +17,32 @@
  * under the License.
  */
 
-export { npSetup, npStart } from 'ui/new_platform';
+import { SchemaConfig } from '../../visualizations/public';
+
+export enum AggTypes {
+  SUM = 'sum',
+  AVG = 'avg',
+  MIN = 'min',
+  MAX = 'max',
+  COUNT = 'count',
+}
+
+export interface Dimensions {
+  buckets: SchemaConfig[];
+  metrics: SchemaConfig[];
+}
+
+export interface TableVisParams {
+  type: 'table';
+  perPage: number | '';
+  showPartialRows: boolean;
+  showMetricsAtAllLevels: boolean;
+  sort: {
+    columnIndex: number | null;
+    direction: string | null;
+  };
+  showTotal: boolean;
+  totalFunc: AggTypes;
+  percentageCol: string;
+  dimensions: Dimensions;
+}

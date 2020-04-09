@@ -20,17 +20,21 @@
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { npStart } from '../../legacy_imports';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tabifiedData } from './tabified_data';
+import { coreMock } from '../../../../../core/public/mocks';
 
 describe('Table Vis - AggTableGroup Directive', function() {
   let $rootScope;
   let $compile;
 
   const initLocalAngular = () => {
-    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    const tableVisModule = getAngularModule(
+      'kibana/table_vis',
+      coreMock.createStart(),
+      coreMock.createPluginInitializerContext()
+    );
     initTableVisLegacyModule(tableVisModule);
   };
 

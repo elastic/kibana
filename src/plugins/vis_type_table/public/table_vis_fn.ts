@@ -19,11 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
-import {
-  ExpressionFunctionDefinition,
-  KibanaDatatable,
-  Render,
-} from '../../../../plugins/expressions/public';
+import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
 
 export type Input = KibanaDatatable;
 

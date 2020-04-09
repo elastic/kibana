@@ -24,8 +24,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { search } from '../../../../../plugins/data/public';
-import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
+import { search } from '../../../data/public';
+import {
+  NumberInputOption,
+  SwitchOption,
+  SelectOption,
+} from '../../../../legacy/core_plugins/vis_type_vislib/public';
 import { TableVisParams } from '../types';
 import { totalAggregations } from './utils';
 
