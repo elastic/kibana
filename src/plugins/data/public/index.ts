@@ -366,6 +366,7 @@ export {
   SearchStrategyProvider,
   ISearchSource,
   SearchSource,
+  createSearchSource,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
