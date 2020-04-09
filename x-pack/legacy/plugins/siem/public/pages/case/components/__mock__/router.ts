@@ -5,9 +5,8 @@
  */
 
 import { Router } from 'react-router-dom';
-/* eslint-disable @kbn/eslint/module_migration */
+// eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
-/* eslint-enable @kbn/eslint/module_migration */
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 const location = {

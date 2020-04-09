@@ -13,6 +13,7 @@ import { TestProviders } from '../../../../mock';
 import { wait } from '../../../../lib/helpers';
 import { useForm } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks';
 import { act } from 'react-dom/test-utils';
+
 jest.mock(
   '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
@@ -77,6 +78,47 @@ describe('TagList ', () => {
         .simulate('click');
       await wait();
       expect(onSubmit).toBeCalledWith(sampleTags);
+    });
+  });
+  it('Cancels on cancel', async () => {
+    const props = {
+      ...defaultProps,
+      tags: ['pepsi'],
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <TagList {...props} />
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-tag"]`)
+        .last()
+        .exists()
+    ).toBeTruthy();
+    wrapper
+      .find(`[data-test-subj="tag-list-edit-button"]`)
+      .last()
+      .simulate('click');
+    await act(async () => {
+      expect(
+        wrapper
+          .find(`[data-test-subj="case-tag"]`)
+          .last()
+          .exists()
+      ).toBeFalsy();
+      wrapper
+        .find(`[data-test-subj="edit-tags-cancel"]`)
+        .last()
+        .simulate('click');
+      await wait();
+      wrapper.update();
+      expect(
+        wrapper
+          .find(`[data-test-subj="case-tag"]`)
+          .last()
+          .exists()
+      ).toBeTruthy();
     });
   });
   it('Renders disabled button', () => {

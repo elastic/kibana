@@ -12,9 +12,9 @@ import { TestProviders } from '../../../../mock';
 
 import { useGetTags } from '../../../../containers/case/use_get_tags';
 import { useGetReporters } from '../../../../containers/case/use_get_reporters';
+import { DEFAULT_FILTER_OPTIONS } from '../../../../containers/case/use_get_cases';
 jest.mock('../../../../components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../../../containers/case/use_get_reporters');
-import { DEFAULT_FILTER_OPTIONS } from '../../../../containers/case/use_get_cases';
 jest.mock('../../../../containers/case/use_get_tags');
 
 const onFilterChanged = jest.fn();

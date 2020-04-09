@@ -73,7 +73,6 @@ export const UserActionTree = React.memo(
 
     const handleSaveComment = useCallback(
       ({ id, version }: { id: string; version: string }, content: string) => {
-        // handleManageMarkdownEditId(id);
         patchComment({
           caseId: caseData.id,
           commentId: id,

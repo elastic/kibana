@@ -24,7 +24,7 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
 
   return showCallOut ? (
     <>
-      <EuiCallOut title={title} color="primary" iconType="gear">
+      <EuiCallOut title={title} color="primary" iconType="gear" data-test-subj="case-call-out">
         {!isEmpty(messages) && (
           <EuiDescriptionList data-test-subj="callout-messages" listItems={messages} />
         )}

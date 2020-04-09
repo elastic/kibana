@@ -174,7 +174,7 @@ export const UserActionItem = ({
       </EuiFlexGroup>
     </EuiFlexItem>
     {showTopFooter && (
-      <PushedContainer>
+      <PushedContainer data-test-subj="show-top-footer">
         <PushedInfoContainer>
           <EuiText size="xs" color="subdued">
             {i18n.ALREADY_PUSHED_TO_SERVICE}
@@ -182,7 +182,7 @@ export const UserActionItem = ({
         </PushedInfoContainer>
         <EuiHorizontalRule />
         {showBottomFooter && (
-          <PushedInfoContainer>
+          <PushedInfoContainer data-test-subj="show-bottom-footer">
             <EuiText size="xs" color="subdued">
               {i18n.REQUIRED_UPDATE_TO_SERVICE}
             </EuiText>

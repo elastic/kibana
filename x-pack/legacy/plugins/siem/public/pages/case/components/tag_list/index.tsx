@@ -75,13 +75,15 @@ export const TagList = React.memo(
           )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="xs">
+        <MyFlexGroup gutterSize="xs" data-test-subj="grr">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
           {tags.length > 0 &&
             !isEditTags &&
             tags.map((tag, key) => (
               <EuiFlexItem grow={false} key={`${tag}${key}`}>
-                <EuiBadge color="hollow">{tag}</EuiBadge>
+                <EuiBadge data-test-subj="case-tag" color="hollow">
+                  {tag}
+                </EuiBadge>
               </EuiFlexItem>
             ))}
           {isEditTags && (
@@ -117,6 +119,7 @@ export const TagList = React.memo(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="edit-tags-cancel"
                       iconType="cross"
                       onClick={setIsEditTags.bind(null, false)}
                       size="s"

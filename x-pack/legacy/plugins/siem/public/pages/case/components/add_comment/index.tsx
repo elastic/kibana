@@ -81,7 +81,7 @@ export const AddComment = React.memo<AddCommentProps>(
             componentProps={{
               idAria: 'caseComment',
               isDisabled: isLoading,
-              dataTestSubj: 'caseComment',
+              dataTestSubj: 'add-comment',
               placeholder: i18n.ADD_COMMENT_HELP_TEXT,
               onCursorPositionUpdate: handleCursorChange,
               bottomRightContent: (

@@ -61,10 +61,11 @@ describe('CaseCallOut ', () => {
       message: 'we have one message',
     };
     const wrapper = mount(<CaseCallOut {...props} />);
+    expect(wrapper.find(`[data-test-subj="case-call-out"]`).exists()).toBeTruthy();
     wrapper
       .find(`[data-test-subj="callout-dismiss"]`)
       .last()
       .simulate('click');
-    expect(wrapper).toEqual({});
+    expect(wrapper.find(`[data-test-subj="case-call-out"]`).exists()).toBeFalsy();
   });
 });

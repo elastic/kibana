@@ -55,7 +55,7 @@ describe('UserActionTree ', () => {
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
-  it('Loading spinner when user actions loading', () => {
+  it('Loading spinner when user actions loading and displays fullName/username', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -64,6 +64,56 @@ describe('UserActionTree ', () => {
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toBeTruthy();
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="user-action-avatar"]`)
+        .first()
+        .prop('name')
+    ).toEqual(defaultProps.data.createdBy.fullName);
+    expect(
+      wrapper
+        .find(`[data-test-subj="user-action-title"] strong`)
+        .first()
+        .text()
+    ).toEqual(defaultProps.data.createdBy.username);
+  });
+  it('Renders service now update line with top and bottom when push is required', () => {
+    const ourActions = [
+      getUserAction(['comment'], 'push-to-service'),
+      getUserAction(['comment'], 'update'),
+    ];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+      lastIndexPushToService: 0,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="show-top-footer"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="show-bottom-footer"]`).exists()).toBeTruthy();
+  });
+  it('Renders service now update line with top only when push is up to date', () => {
+    const ourActions = [getUserAction(['comment'], 'push-to-service')];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+      lastIndexPushToService: 0,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionTree {...props} />
+        </Router>
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="show-top-footer"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="show-bottom-footer"]`).exists()).toBeFalsy();
   });
 
   it('Outlines comment when update move to link is clicked', () => {

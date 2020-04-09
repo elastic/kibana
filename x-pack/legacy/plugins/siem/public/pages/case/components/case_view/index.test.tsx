@@ -113,7 +113,7 @@ describe('CaseView ', () => {
     ).toEqual(data.status);
     expect(
       wrapper
-        .find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`)
+        .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag"]`)
         .first()
         .text()
     ).toEqual(data.tags[0]);
