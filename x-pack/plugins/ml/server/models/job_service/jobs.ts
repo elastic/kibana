@@ -330,11 +330,12 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
       jobResults.jobs.forEach(job => {
         const tempJob = job as CombinedJobWithStats;
 
-        if (calendarsByJobId[tempJob.job_id].length) {
-          tempJob.calendars = calendarsByJobId[tempJob.job_id];
-        }
-        if (globalCalendars.length) {
-          tempJob.calendars = [...(tempJob.calendars || []), ...globalCalendars];
+        const calendars: string[] = [
+          ...(calendarsByJobId[tempJob.job_id] || []),
+          ...(globalCalendars || []),
+        ];
+        if (calendars.length) {
+          tempJob.calendars = calendars;
         }
 
         if (jobStatsResults && jobStatsResults.jobs) {
