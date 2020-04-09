@@ -13,6 +13,11 @@ export type ImmutableSourceProperty = {
   value: string;
 };
 
+export type Attribution = {
+  url: string;
+  label: string;
+};
+
 export interface ISource {
   createDefaultLayer(): ILayer;
   destroy(): void;
@@ -25,6 +30,7 @@ export interface ISource {
   isRefreshTimerAware(): Promise<boolean>;
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(): ImmutableSourceProperty[];
+  getAttributions(): Promise<Attribution[]>;
 }
 
 export class AbstractSource implements ISource {

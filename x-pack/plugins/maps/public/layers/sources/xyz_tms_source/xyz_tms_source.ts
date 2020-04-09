@@ -11,6 +11,7 @@ import { EMS_XYZ } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 import { AbstractTMSSource } from '../tms_source';
 import { LayerDescriptor, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import { Attribution, ImmutableSourceProperty } from '../source';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
   defaultMessage: 'Tile Map Service',
@@ -43,7 +44,7 @@ export class XYZTMSSource extends AbstractTMSSource {
     this._descriptor = sourceDescriptor;
   }
 
-  async getImmutableProperties() {
+  async getImmutableProperties(): ImmutableSourceProperty[] {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.urlTemplate },
@@ -61,11 +62,11 @@ export class XYZTMSSource extends AbstractTMSSource {
     });
   }
 
-  async getDisplayName() {
+  async getDisplayName(): string {
     return this._descriptor.urlTemplate;
   }
 
-  getAttributions() {
+  async getAttributions(): Attribution[] {
     const { attributionText, attributionUrl } = this._descriptor;
     const attributionComplete = !!attributionText && !!attributionUrl;
 
@@ -79,7 +80,7 @@ export class XYZTMSSource extends AbstractTMSSource {
       : [];
   }
 
-  getUrlTemplate() {
+  async getUrlTemplate(): string {
     return this._descriptor.urlTemplate;
   }
 }
