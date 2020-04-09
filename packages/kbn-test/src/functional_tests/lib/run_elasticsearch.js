@@ -42,10 +42,11 @@ export async function runElasticsearch({ config, options }) {
     esFrom: esFrom || config.get('esTestCluster.from'),
     dataArchive: config.get('esTestCluster.dataArchive'),
     esArgs,
+    esEnvVars,
     ssl,
   });
 
-  await cluster.start(esArgs, esEnvVars);
+  await cluster.start();
 
   if (isSecurityEnabled) {
     await setupUsers({

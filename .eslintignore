@@ -39,7 +39,7 @@ src/legacy/core_plugins/vis_type_vislib/public/vislib/__tests__/lib/fixtures/moc
 /x-pack/legacy/plugins/infra/common/graphql/types.ts
 /x-pack/legacy/plugins/infra/public/graphql/types.ts
 /x-pack/legacy/plugins/infra/server/graphql/types.ts
-/x-pack/legacy/plugins/apm/cypress/**/snapshots.js
+/x-pack/legacy/plugins/apm/e2e/cypress/**/snapshots.js
 /src/legacy/plugin_discovery/plugin_pack/__tests__/fixtures/plugins/broken
 **/graphql/types.ts
 **/*.js.snap

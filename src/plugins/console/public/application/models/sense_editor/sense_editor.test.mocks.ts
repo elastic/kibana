@@ -20,9 +20,6 @@
 
 import '../legacy_core_editor/legacy_core_editor.test.mocks';
 
-// TODO: Remove this mock
-jest.mock('../../../application', () => ({ legacyBackDoorToSettings: () => {} }));
-
 import jQuery from 'jquery';
 jest.spyOn(jQuery, 'ajax').mockImplementation(
   () =>

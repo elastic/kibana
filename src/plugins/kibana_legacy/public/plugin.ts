@@ -107,7 +107,17 @@ export class KibanaLegacyPlugin {
         this.forwards.push({ legacyAppId, newAppId, ...options });
       },
 
+      /**
+       * @deprecated
+       * The `defaultAppId` config key is temporarily exposed to be used in the legacy platform.
+       * As this setting is going away, no new code should depend on it.
+       */
       config: this.initializerContext.config.get(),
+      /**
+       * @deprecated
+       * Temporarily exposing the NP env to simulate initializer contexts in the LP.
+       */
+      env: this.initializerContext.env,
     };
   }
 

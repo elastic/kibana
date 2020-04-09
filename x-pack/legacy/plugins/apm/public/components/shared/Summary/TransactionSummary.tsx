@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { Summary } from './';
 import { TimestampTooltip } from '../TimestampTooltip';
 import { DurationSummaryItem } from './DurationSummaryItem';
 import { ErrorCountSummaryItemBadge } from './ErrorCountSummaryItemBadge';
-import { isRumAgentName } from '../../../../common/agent_name';
+import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
 import { HttpInfoSummaryItem } from './HttpInfoSummaryItem';
 import { TransactionResultSummaryItem } from './TransactionResultSummaryItem';
 import { UserAgentSummaryItem } from './UserAgentSummaryItem';

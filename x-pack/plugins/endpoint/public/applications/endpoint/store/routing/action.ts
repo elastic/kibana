@@ -4,11 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PageId } from '../../../../../common/types';
+import { PageId, Immutable } from '../../../../../common/types';
+import { EndpointAppLocation } from '../alerts';
 
 interface UserNavigatedToPage {
   readonly type: 'userNavigatedToPage';
   readonly payload: PageId;
 }
 
-export type RoutingAction = UserNavigatedToPage;
+interface UserNavigatedFromPage {
+  readonly type: 'userNavigatedFromPage';
+  readonly payload: PageId;
+}
+
+interface UserChangedUrl {
+  readonly type: 'userChangedUrl';
+  readonly payload: Immutable<EndpointAppLocation>;
+}
+
+export type RoutingAction = UserNavigatedToPage | UserNavigatedFromPage | UserChangedUrl;

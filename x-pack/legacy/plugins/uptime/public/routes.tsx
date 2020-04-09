@@ -6,22 +6,31 @@
 
 import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 import { OverviewPage } from './components/connected/pages/overview_container';
-import { MONITOR_ROUTE, OVERVIEW_ROUTE } from '../common/constants';
-import { MonitorPage, NotFoundPage } from './pages';
+import { MONITOR_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../common/constants';
+import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
 
 interface RouterProps {
-  autocomplete: DataPublicPluginStart['autocomplete'];
+  autocomplete: DataPublicPluginSetup['autocomplete'];
 }
 
 export const PageRouter: FC<RouterProps> = ({ autocomplete }) => (
   <Switch>
     <Route path={MONITOR_ROUTE}>
-      <MonitorPage />
+      <div data-test-subj="uptimeMonitorPage">
+        <MonitorPage />
+      </div>
+    </Route>
+    <Route path={SETTINGS_ROUTE}>
+      <div data-test-subj="uptimeSettingsPage">
+        <SettingsPage />
+      </div>
     </Route>
     <Route path={OVERVIEW_ROUTE}>
-      <OverviewPage autocomplete={autocomplete} />
+      <div data-test-subj="uptimeOverviewPage">
+        <OverviewPage autocomplete={autocomplete} />
+      </div>
     </Route>
     <Route component={NotFoundPage} />
   </Switch>

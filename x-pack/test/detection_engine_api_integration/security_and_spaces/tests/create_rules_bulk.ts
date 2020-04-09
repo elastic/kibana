@@ -79,7 +79,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
       });
 
-      // TODO: This is a valid issue and will be fixed in an upcoming PR and then enabled once that PR is merged
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id twice', async () => {
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)

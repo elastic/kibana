@@ -133,6 +133,9 @@
                   }
                 }
               },
+              "note": {
+                "type": "text"
+              },
               "type": {
                 "type": "keyword"
               },

@@ -79,14 +79,9 @@ describe('ZeekSignature', () => {
       ).toBeFalsy();
     });
 
-    test('should render value', () => {
-      const wrapper = mount(<TotalVirusLinkSha value={'abc'} />);
-      expect(wrapper.text()).toEqual('abc');
-    });
-
-    test('should render link with sha', () => {
-      const wrapper = mount(<TotalVirusLinkSha value={'abcdefg'} />);
-      expect(wrapper.find('a').prop('href')).toEqual('https://www.virustotal.com/#/search/abcdefg');
+    test('should render', () => {
+      const wrapper = shallow(<TotalVirusLinkSha value={'abc'} />);
+      expect(wrapper.find('[data-test-subj="reputationLinkSha"]').exists()).toBeTruthy();
     });
   });
 

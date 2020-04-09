@@ -5,30 +5,39 @@
  */
 
 import ApolloClient from 'apollo-client';
-import { getOr, set } from 'lodash/fp';
-import { ActionCreator } from 'typescript-fsa';
+import { getOr, set, isEmpty } from 'lodash/fp';
+import { Action } from 'typescript-fsa';
+import uuid from 'uuid';
 
 import { Dispatch } from 'redux';
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
 import { TimelineResult, GetOneTimeline, NoteResult } from '../../graphql/types';
-import { addNotes as dispatchAddNotes } from '../../store/app/actions';
+import {
+  addNotes as dispatchAddNotes,
+  updateNote as dispatchUpdateNote,
+} from '../../store/app/actions';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
 import {
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
+  addNote as dispatchAddGlobalTimelineNote,
 } from '../../store/timeline/actions';
 
-import { TimelineModel, timelineDefaults } from '../../store/timeline/model';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import {
   defaultColumnHeaderType,
   defaultHeaders,
 } from '../timeline/body/column_headers/default_headers';
-import { DEFAULT_DATE_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import {
+  DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  DEFAULT_COLUMN_MIN_WIDTH,
+} from '../timeline/body/constants';
 
 import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
+import { createNote } from '../notes/helpers';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -78,7 +87,7 @@ export const defaultTimelineToTimelineModel = (
     columns:
       timeline.columns != null
         ? timeline.columns.map(col => {
-            const timelineCols: ColumnHeader = {
+            const timelineCols: ColumnHeaderOptions = {
               ...col,
               columnHeaderType: defaultColumnHeaderType,
               id: col.id != null ? col.id : 'unknown',
@@ -183,7 +192,13 @@ export interface QueryTimelineById<TCache> {
   timelineId: string;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
-  updateIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
+  updateIsLoading: ({
+    id,
+    isLoading,
+  }: {
+    id: string;
+    isLoading: boolean;
+  }) => Action<{ id: string; isLoading: boolean }>;
   updateTimeline: DispatchUpdateTimeline;
 }
 
@@ -241,6 +256,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   notes,
   timeline,
   to,
+  ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
   dispatch(dispatchAddTimeline({ id, timeline }));
@@ -272,6 +288,14 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
       })
     );
   }
+
+  if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
+    const getNewNoteId = (): string => uuid.v4();
+    const newNote = createNote({ newNote: ruleNote, getNewNoteId });
+    dispatch(dispatchUpdateNote({ note: newNote }));
+    dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
+  }
+
   if (!duplicate) {
     dispatch(
       dispatchAddNotes({

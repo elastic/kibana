@@ -4,20 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBetaBadge,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-import { DefaultDraggable } from '../draggables';
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
+import { Title } from './title';
+import { DraggableArguments, BadgeOptions, TitleProp } from './types';
 
 interface HeaderProps {
   border?: boolean;
@@ -63,26 +57,9 @@ const Badge = styled(EuiBadge)`
 `;
 Badge.displayName = 'Badge';
 
-const StyledEuiBetaBadge = styled(EuiBetaBadge)`
-  vertical-align: middle;
-`;
-
-StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
-
 interface BackOptions {
   href: LinkIconProps['href'];
   text: LinkIconProps['children'];
-}
-
-interface BadgeOptions {
-  beta?: boolean;
-  text: string;
-  tooltip?: string;
-}
-
-interface DraggableArguments {
-  field: string;
-  value: string;
 }
 
 export interface HeaderPageProps extends HeaderProps {
@@ -92,7 +69,8 @@ export interface HeaderPageProps extends HeaderProps {
   draggableArguments?: DraggableArguments;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
-  title: string | React.ReactNode;
+  title: TitleProp;
+  titleNode?: React.ReactElement;
 }
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
@@ -105,6 +83,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   subtitle,
   subtitle2,
   title,
+  titleNode,
   ...rest
 }) => (
   <Header border={border} {...rest}>
@@ -118,34 +97,13 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           </LinkBack>
         )}
 
-        <EuiTitle size="l">
-          <h1 data-test-subj="header-page-title">
-            {!draggableArguments ? (
-              title
-            ) : (
-              <DefaultDraggable
-                data-test-subj="header-page-draggable"
-                id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
-                field={draggableArguments.field}
-                value={`${draggableArguments.value}`}
-              />
-            )}
-            {badgeOptions && (
-              <>
-                {' '}
-                {badgeOptions.beta ? (
-                  <StyledEuiBetaBadge
-                    label={badgeOptions.text}
-                    tooltipContent={badgeOptions.tooltip}
-                    tooltipPosition="bottom"
-                  />
-                ) : (
-                  <Badge color="hollow">{badgeOptions.text}</Badge>
-                )}
-              </>
-            )}
-          </h1>
-        </EuiTitle>
+        {titleNode || (
+          <Title
+            draggableArguments={draggableArguments}
+            title={title}
+            badgeOptions={badgeOptions}
+          />
+        )}
 
         {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
         {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}

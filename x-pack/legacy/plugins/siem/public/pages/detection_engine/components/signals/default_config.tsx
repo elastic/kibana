@@ -11,19 +11,24 @@ import ApolloClient from 'apollo-client';
 import React from 'react';
 
 import { Filter } from '../../../../../../../../../src/plugins/data/common/es_query';
-import { ColumnHeader } from '../../../../components/timeline/body/column_headers/column_header';
 import { TimelineAction, TimelineActionProps } from '../../../../components/timeline/body/actions';
 import { defaultColumnHeaderType } from '../../../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
-} from '../../../../components/timeline/body/helpers';
-import { SubsetTimelineModel, timelineDefaults } from '../../../../store/timeline/model';
+} from '../../../../components/timeline/body/constants';
+import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../../store/timeline/model';
+import { timelineDefaults } from '../../../../store/timeline/defaults';
 
 import { FILTER_OPEN } from './signals_filter_group';
 import { sendSignalToTimelineAction, updateSignalStatusAction } from './actions';
 import * as i18n from './translations';
-import { CreateTimeline, SetEventsDeletedProps, SetEventsLoadingProps } from './types';
+import {
+  CreateTimeline,
+  SetEventsDeletedProps,
+  SetEventsLoadingProps,
+  UpdateTimelineLoading,
+} from './types';
 
 export const signalsOpenFilters: Filter[] = [
   {
@@ -85,7 +90,7 @@ export const buildSignalsRuleIdFilter = (ruleId: string): Filter[] => [
   },
 ];
 
-export const signalsHeaders: ColumnHeader[] = [
+export const signalsHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
@@ -198,13 +203,13 @@ export const getSignalsActions = ({
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
+  updateTimelineIsLoading: UpdateTimelineLoading;
 }): TimelineAction[] => [
   {
     getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
       <EuiToolTip
         data-test-subj="send-signal-to-timeline-tool-tip"
-        content={i18n.ACTION_VIEW_IN_TIMELINE}
+        content={i18n.ACTION_INVESTIGATE_IN_TIMELINE}
       >
         <EuiButtonIcon
           data-test-subj="send-signal-to-timeline-button"

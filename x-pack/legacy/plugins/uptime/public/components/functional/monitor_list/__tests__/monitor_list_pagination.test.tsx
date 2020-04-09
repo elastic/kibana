@@ -89,9 +89,7 @@ describe('MonitorListPagination component', () => {
           },
         },
       ],
-      totalSummaryCount: {
-        count: 2,
-      },
+      totalSummaryCount: 2,
     };
   });
 
@@ -101,6 +99,8 @@ describe('MonitorListPagination component', () => {
         dangerColor="danger"
         data={{ monitorStates: result }}
         loading={false}
+        pageSize={25}
+        setPageSize={jest.fn()}
         successColor="primary"
         hasActiveFilters={false}
       />
@@ -116,6 +116,8 @@ describe('MonitorListPagination component', () => {
         data={{}}
         loading={false}
         successColor="primary"
+        pageSize={25}
+        setPageSize={jest.fn()}
         hasActiveFilters={false}
       />
     );

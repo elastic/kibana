@@ -5,29 +5,33 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ServerFacade, ExportTypesRegistry, ESCallCluster } from '../../types';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
+import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../../server/types';
+import { ESCallCluster, ExportTypesRegistry } from '../../types';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
+
+type XPackInfo = XPackMainPlugin['info'];
 
 // places the reporting data as kibana stats
 const METATYPE = 'kibana_stats';
 
 /*
- * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
+  config: ReportingConfig,
   usageCollection: UsageCollectionSetup,
-  server: ServerFacade,
-  isReady: () => boolean,
-  exportTypesRegistry: ExportTypesRegistry
+  xpackMainInfo: XPackInfo,
+  exportTypesRegistry: ExportTypesRegistry,
+  isReady: () => Promise<boolean>
 ) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-    isReady,
     fetch: (callCluster: ESCallCluster) =>
-      getReportingUsage(server, callCluster, exportTypesRegistry),
+      getReportingUsage(config, xpackMainInfo, callCluster, exportTypesRegistry),
+    isReady,
 
     /*
      * Format the response data into a model for internal upload
@@ -50,16 +54,24 @@ export function getReportingUsageCollector(
 }
 
 export function registerReportingUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  server: ServerFacade,
-  isReady: () => boolean,
-  exportTypesRegistry: ExportTypesRegistry
+  reporting: ReportingCore,
+  plugins: ReportingSetupDeps
 ) {
+  if (!plugins.usageCollection) {
+    return;
+  }
+  const xpackMainInfo = plugins.__LEGACY.plugins.xpack_main.info;
+
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
+  const collectionIsReady = reporting.pluginHasStarted.bind(reporting);
+  const config = reporting.getConfig();
+
   const collector = getReportingUsageCollector(
-    usageCollection,
-    server,
-    isReady,
-    exportTypesRegistry
+    config,
+    plugins.usageCollection,
+    xpackMainInfo,
+    exportTypesRegistry,
+    collectionIsReady
   );
-  usageCollection.registerCollector(collector);
+  plugins.usageCollection.registerCollector(collector);
 }

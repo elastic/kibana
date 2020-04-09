@@ -132,7 +132,8 @@ export class VegaBaseView {
 
   createViewConfig() {
     const config = {
-      logLevel: vega.Warn,
+      // eslint-disable-next-line import/namespace
+      logLevel: vega.Warn, // note: eslint has a false positive here
       renderer: this._parser.renderer,
     };
 
@@ -279,10 +280,17 @@ export class VegaBaseView {
    */
   async removeFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
+
+    const currentFilters = this._filterManager.getFilters();
+    const existingFilter = currentFilters.find(filter =>
+      esFilters.compareFilters(filter, filterToRemove)
+    );
+
+    if (!existingFilter) return;
 
     try {
-      this._filterManager.removeFilter(filter);
+      this._filterManager.removeFilter(existingFilter);
     } catch (err) {
       this.onError(err);
     }

@@ -34,7 +34,6 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-        pageNavigation: 'individual',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
@@ -42,9 +41,24 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('add new visualization link', () => {
-      it('adds a new visualization', async () => {
+      it('adds new visualiztion via the top nav link', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await PageObjects.dashboard.switchToEditMode();
+        await dashboardAddPanel.clickCreateNewLink();
+        await PageObjects.visualize.clickAreaChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'visualization from top nav add new panel'
+        );
+        await retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(originalPanelCount + 1);
+        });
+        await PageObjects.dashboard.waitForRenderComplete();
+      });
+
+      it('adds a new visualization', async () => {
+        const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await dashboardAddPanel.ensureAddPanelIsShowing();
         await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
         await PageObjects.visualize.clickAreaChart();

@@ -18,7 +18,7 @@
  */
 
 import {
-  UiSettingsParams,
+  PublicUiSettingsParams,
   UserProvidedValues,
   StringValidationRegexString,
   SavedObjectAttribute,
@@ -40,7 +40,7 @@ export function toEditableConfig({
   isCustom,
   isOverridden,
 }: {
-  def: UiSettingsParams & UserProvidedValues<any>;
+  def: PublicUiSettingsParams & UserProvidedValues<any>;
   name: string;
   value: SavedObjectAttribute;
   isCustom: boolean;

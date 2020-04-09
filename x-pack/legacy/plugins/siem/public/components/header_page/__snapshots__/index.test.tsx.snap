@@ -8,21 +8,16 @@ exports[`HeaderPage it renders 1`] = `
     alignItems="center"
   >
     <FlexItem>
-      <EuiTitle
-        size="l"
-      >
-        <h1
-          data-test-subj="header-page-title"
-        >
-          Test title
-           
-          <StyledEuiBetaBadge
-            label="Beta"
-            tooltipContent="Test tooltip"
-            tooltipPosition="bottom"
-          />
-        </h1>
-      </EuiTitle>
+      <Memo(TitleComponent)
+        badgeOptions={
+          Object {
+            "beta": true,
+            "text": "Beta",
+            "tooltip": "Test tooltip",
+          }
+        }
+        title="Test title"
+      />
       <Subtitle
         data-test-subj="header-page-subtitle"
         items="Test subtitle"

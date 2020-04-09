@@ -114,7 +114,6 @@ exports[`ChartWrapper component renders the component with loading false 1`] = `
     }
   >
     <SnapshotHeading
-      down={8}
       total={12}
     />
     <EuiSpacer
@@ -244,7 +243,6 @@ exports[`ChartWrapper component renders the component with loading true 1`] = `
     }
   >
     <SnapshotHeading
-      down={8}
       total={12}
     />
     <EuiSpacer

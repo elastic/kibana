@@ -10,14 +10,8 @@
 // vis_type_vislib UI styles
 @import 'src/legacy/core_plugins/vis_type_vislib/public/index';
 
-// Dev tools styles
-@import './dev_tools/index';
-
 // Discover styles
 @import 'discover/index';
-
-// Home styles
-@import './home/index';
 
 // Visualize styles
 @import './visualize/index';
@@ -25,12 +19,11 @@
 // bad cascading in the Editor layout
 @import 'src/legacy/ui/public/vis/index';
 
+// Home styles
+@import '../../../../plugins/home/public/application/index';
+
 // Management styles
 @import './management/index';
 
 // Local application mount wrapper styles
 @import 'local_application_service/index';
-
-// Dashboard styles
-// MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
-@import './dashboard/index';

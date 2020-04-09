@@ -5,22 +5,22 @@
  */
 
 import {
-  CoreSetup,
+  StartServicesAccessor,
   SavedObject,
-  SavedObjectAttributes,
   SavedObjectsBaseOptions,
+  SavedObjectsServiceSetup,
 } from 'src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
-  savedObjects: CoreSetup['savedObjects'];
-  getStartServices: CoreSetup['getStartServices'];
+  savedObjects: SavedObjectsServiceSetup;
+  getStartServices: StartServicesAccessor;
 }
 
 export interface SavedObjectsSetup {
-  getDecryptedAsInternalUser: <T extends SavedObjectAttributes = any>(
+  getDecryptedAsInternalUser: <T = unknown>(
     type: string,
     id: string,
     options?: SavedObjectsBaseOptions
@@ -47,7 +47,7 @@ export function setupSavedObjects({
     core.savedObjects.createInternalRepository()
   );
   return {
-    getDecryptedAsInternalUser: async <T extends SavedObjectAttributes = any>(
+    getDecryptedAsInternalUser: async <T = unknown>(
       type: string,
       id: string,
       options?: SavedObjectsBaseOptions
@@ -56,10 +56,10 @@ export function setupSavedObjects({
       const savedObject = await internalRepository.get(type, id, options);
       return {
         ...savedObject,
-        attributes: await service.decryptAttributes(
+        attributes: (await service.decryptAttributes(
           { type, id, namespace: options && options.namespace },
-          savedObject.attributes
-        ),
+          savedObject.attributes as Record<string, unknown>
+        )) as T,
       };
     },
   };

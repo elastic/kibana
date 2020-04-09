@@ -4,49 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
 import { merge } from 'lodash/fp';
+
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
-import { RulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
-import { callWithRequestFactory, transformError, getIndex } from '../utils';
+import { SetupPlugins } from '../../../../plugin';
+import { buildSiemResponse, transformError } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
-export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'GET',
-    path: DETECTION_ENGINE_PRIVILEGES_URL,
-    options: {
-      tags: ['access:siem'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
+export const readPrivilegesRoute = (
+  router: IRouter,
+  security: SetupPlugins['security'],
+  usingEphemeralEncryptionKey: boolean
+) => {
+  router.get(
+    {
+      path: DETECTION_ENGINE_PRIVILEGES_URL,
+      validate: false,
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: RulesRequest, headers) {
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
       try {
-        const callWithRequest = callWithRequestFactory(request, server);
-        const index = getIndex(request, server);
-        const permissions = await readPrivileges(callWithRequest, index);
-        const usingEphemeralEncryptionKey = server.usingEphemeralEncryptionKey;
-        return merge(permissions, {
-          is_authenticated: request?.auth?.isAuthenticated ?? false,
+        const clusterClient = context.core.elasticsearch.dataClient;
+        const siemClient = context.siem?.getSiemClient();
+
+        if (!siemClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const index = siemClient.signalsIndex;
+        const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
+        const privileges = merge(clusterPrivileges, {
+          is_authenticated: security?.authc.isAuthenticated(request) ?? false,
           has_encryption_key: !usingEphemeralEncryptionKey,
         });
+
+        return response.ok({ body: privileges });
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const readPrivilegesRoute = (server: ServerFacade): void => {
-  server.route(createReadPrivilegesRulesRoute(server));
+    }
+  );
 };

@@ -22,6 +22,8 @@ import { mount } from 'enzyme';
 
 import { AppContainer } from './app_container';
 import { Mounter, AppMountParameters, AppStatus } from '../types';
+import { createMemoryHistory } from 'history';
+import { ScopedHistory } from '../scoped_history';
 
 describe('AppContainer', () => {
   const appId = 'someApp';
@@ -60,10 +62,15 @@ describe('AppContainer', () => {
 
     const wrapper = mount(
       <AppContainer
+        appPath={`/app/${appId}`}
         appId={appId}
         appStatus={AppStatus.inaccessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        createScopedHistory={(appPath: string) =>
+          // Create a history using the appPath as the current location
+          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+        }
       />
     );
 

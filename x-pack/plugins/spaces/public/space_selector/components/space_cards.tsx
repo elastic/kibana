@@ -11,7 +11,7 @@ import { SpaceCard } from './space_card';
 
 interface Props {
   spaces: Space[];
-  onSpaceSelect: (space: Space) => void;
+  serverBasePath: string;
 }
 
 export class SpaceCards extends Component<Props, {}> {
@@ -25,15 +25,9 @@ export class SpaceCards extends Component<Props, {}> {
     );
   }
 
-  public renderSpace = (space: Space) => (
+  private renderSpace = (space: Space) => (
     <EuiFlexItem key={space.id} grow={false}>
-      <SpaceCard space={space} onClick={this.createSpaceClickHandler(space)} />
+      <SpaceCard space={space} serverBasePath={this.props.serverBasePath} />
     </EuiFlexItem>
   );
-
-  public createSpaceClickHandler = (space: Space) => {
-    return () => {
-      this.props.onSpaceSelect(space);
-    };
-  };
 }

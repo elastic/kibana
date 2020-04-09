@@ -18,7 +18,10 @@
  */
 
 import React from 'react';
+import { collectionActions } from './lib/collection_actions';
 import { ColorRules } from './color_rules';
+import { keyCodes } from '@elastic/eui';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js', () => {
@@ -58,6 +61,19 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
       const isNode = wrapper.find('div.tvbColorPicker').exists();
 
       expect(isNode).toBeTruthy();
+    });
+    it('should handle change of operator and value correctly', () => {
+      collectionActions.handleChange = jest.fn();
+      const wrapper = mountWithIntl(<ColorRules.WrappedComponent {...defaultProps} />);
+      const operatorInput = findTestSubject(wrapper, 'colorRuleOperator');
+      operatorInput.simulate('keyDown', { keyCode: keyCodes.DOWN });
+      operatorInput.simulate('keyDown', { keyCode: keyCodes.DOWN });
+      operatorInput.simulate('keyDown', { keyCode: keyCodes.ENTER });
+      expect(collectionActions.handleChange.mock.calls[0][1].operator).toEqual('gt');
+
+      const numberInput = findTestSubject(wrapper, 'colorRuleValue');
+      numberInput.simulate('change', { target: { value: '123' } });
+      expect(collectionActions.handleChange.mock.calls[1][1].value).toEqual(123);
     });
   });
 });

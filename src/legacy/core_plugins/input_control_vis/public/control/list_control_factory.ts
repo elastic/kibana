@@ -26,7 +26,7 @@ import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IFieldType, TimefilterSetup } from '../../../../../plugins/data/public';
+import { IFieldType, TimefilterContract } from '../../../../../plugins/data/public';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -74,7 +74,7 @@ const termsAgg = ({ field, size, direction, query }: TermsAggArgs) => {
 
 export class ListControl extends Control<PhraseFilterManager> {
   private getInjectedVar: InputControlVisDependencies['core']['injectedMetadata']['getInjectedVar'];
-  private timefilter: TimefilterSetup['timefilter'];
+  private timefilter: TimefilterContract;
 
   abortController?: AbortController;
   lastAncestorValues: any;

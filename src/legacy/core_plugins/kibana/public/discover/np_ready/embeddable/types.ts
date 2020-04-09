@@ -18,9 +18,9 @@
  */
 
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
-import { SavedSearch } from '../types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { Filter, IIndexPattern, TimeRange, Query } from '../../../../../../../plugins/data/public';
+import { SavedSearch } from '../../../../../../../plugins/discover/public';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;

@@ -11,9 +11,7 @@ import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
-import 'ui/agg_types';
 
-import 'ui/kbn_top_nav';
 import 'ui/autoload/all';
 import 'react-vis/dist/style.css';
 
@@ -27,3 +25,10 @@ import { MapsPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MapsPlugin();
 };
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export {
+  RenderTooltipContentParams,
+  ITooltipProperty,
+} from '../../../../plugins/maps/public/layers/tooltips/tooltip_property';
+export { MapEmbeddable, MapEmbeddableInput } from './embeddable';

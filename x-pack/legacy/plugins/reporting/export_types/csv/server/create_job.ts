@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReportingCore } from '../../../server';
 import { cryptoFactory } from '../../../server/lib/crypto';
 import {
-  CreateJobFactory,
   ConditionalHeaders,
-  ServerFacade,
-  RequestFacade,
+  CreateJobFactory,
   ESQueueCreateJobFn,
+  RequestFacade,
 } from '../../../types';
 import { JobParamsDiscoverCsv } from '../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsDiscoverCsv
->> = function createJobFactoryFn(server: ServerFacade) {
-  const crypto = cryptoFactory(server);
+>> = function createJobFactoryFn(reporting: ReportingCore) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
 
   return async function createJob(
     jobParams: JobParamsDiscoverCsv,

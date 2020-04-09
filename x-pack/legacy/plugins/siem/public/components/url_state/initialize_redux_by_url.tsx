@@ -6,8 +6,8 @@
 
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
-import { Query, Filter } from 'src/plugins/data/public';
 
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -16,11 +16,11 @@ import {
   AbsoluteTimeRange,
   RelativeTimeRange,
 } from '../../store/inputs/model';
-
+import { TimelineUrl } from '../../store/timeline/model';
 import { CONSTANTS } from './constants';
 import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
-import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl, Timeline } from './types';
+import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
 import { queryTimelineById } from '../open_timeline/helpers';
 
 export const dispatchSetInitialStateFromUrl = (
@@ -76,7 +76,7 @@ export const dispatchSetInitialStateFromUrl = (
     }
 
     if (urlKey === CONSTANTS.timeline) {
-      const timeline = decodeRisonUrlState<Timeline>(newUrlStateString);
+      const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
       if (timeline != null && timeline.id !== '') {
         queryTimelineById({
           apolloClient,

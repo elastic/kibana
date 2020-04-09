@@ -18,6 +18,7 @@
  */
 
 import ace from 'brace';
+import { workerModule } from './worker';
 
 const oop = ace.acequire('ace/lib/oop');
 const TextMode = ace.acequire('ace/mode/text').Mode;
@@ -29,7 +30,6 @@ const WorkerClient = ace.acequire('ace/worker/worker_client').WorkerClient;
 const AceTokenizer = ace.acequire('ace/tokenizer').Tokenizer;
 
 const HighlightRules = require('./input_highlight_rules').InputHighlightRules;
-import { workerModule } from './worker';
 
 export function Mode() {
   this.$tokenizer = new AceTokenizer(new HighlightRules().getRules());

@@ -20,7 +20,7 @@ import { Join } from './resources/join';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-export function JoinEditor({ joins, layer, onChange }) {
+export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDisplayName }) {
   const renderJoins = () => {
     return joins.map((joinDescriptor, index) => {
       const handleOnChange = updatedDescriptor => {
@@ -39,6 +39,8 @@ export function JoinEditor({ joins, layer, onChange }) {
             layer={layer}
             onChange={handleOnChange}
             onRemove={handleOnRemove}
+            leftFields={leftJoinFields}
+            leftSourceName={layerDisplayName}
           />
         </Fragment>
       );

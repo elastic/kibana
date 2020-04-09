@@ -8,7 +8,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
+import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import {
   DETECTION_ENGINE_PAGE_NAME,
   getDetectionEngineUrl,
@@ -20,17 +20,16 @@ import { SpyRoute } from '../../../utils/route/spy_routes';
 
 import { useUserInfo } from '../components/user_info';
 import { AllRules } from './all';
-import { ImportRuleModal } from './components/import_rule_modal';
+import { ImportDataModal } from '../../../components/import_data_modal';
 import { ReadOnlyCallOut } from './components/read_only_callout';
 import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/update_callout';
-import { getPrePackagedRuleStatus, redirectToDetections } from './helpers';
+import { getPrePackagedRuleStatus, redirectToDetections, userHasNoPermissions } from './helpers';
 import * as i18n from './translations';
 
-type Func = () => void;
+type Func = (refreshPrePackagedRule?: boolean) => void;
 
 const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
-  const [importCompleteToggle, setImportCompleteToggle] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
   const {
     loading,
@@ -39,7 +38,6 @@ const RulesPageComponent: React.FC = () => {
     hasEncryptionKey,
     canUserCRUD,
     hasIndexWrite,
-    hasManageApiKey,
   } = useUserInfo();
   const {
     createPrePackagedRules,
@@ -53,7 +51,6 @@ const RulesPageComponent: React.FC = () => {
   } = usePrePackagedRules({
     canUserCRUD,
     hasIndexWrite,
-    hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
@@ -64,17 +61,18 @@ const RulesPageComponent: React.FC = () => {
     rulesNotUpdated
   );
 
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const handleRefreshRules = useCallback(async () => {
+    if (refreshRulesData.current != null) {
+      refreshRulesData.current(true);
+    }
+  }, [refreshRulesData]);
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
       await createPrePackagedRules();
-      if (refreshRulesData.current != null) {
-        refreshRulesData.current();
-      }
+      handleRefreshRules();
     }
-  }, [createPrePackagedRules, refreshRulesData]);
+  }, [createPrePackagedRules, handleRefreshRules]);
 
   const handleRefetchPrePackagedRulesStatus = useCallback(() => {
     if (refetchPrePackagedRulesStatus != null) {
@@ -92,11 +90,21 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
-      {userHasNoPermissions && <ReadOnlyCallOut />}
-      <ImportRuleModal
-        showModal={showImportModal}
+      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <ImportDataModal
+        checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={() => setShowImportModal(false)}
-        importComplete={() => setImportCompleteToggle(!importCompleteToggle)}
+        description={i18n.SELECT_RULE}
+        errorMessage={i18n.IMPORT_FAILED}
+        failedDetailed={i18n.IMPORT_FAILED_DETAILED}
+        importComplete={handleRefreshRules}
+        importData={importRules}
+        successMessage={i18n.SUCCESSFULLY_IMPORTED_RULES}
+        showCheckBox={true}
+        showModal={showImportModal}
+        submitBtnText={i18n.IMPORT_RULE_BTN_TITLE}
+        subtitle={i18n.INITIAL_PROMPT_TEXT}
+        title={i18n.IMPORT_RULE}
       />
       <WrapperPage>
         <DetectionEngineHeaderPage
@@ -112,7 +120,7 @@ const RulesPageComponent: React.FC = () => {
                 <EuiButton
                   iconType="indexOpen"
                   isLoading={loadingCreatePrePackagedRules}
-                  isDisabled={userHasNoPermissions || loading}
+                  isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                   onClick={handleCreatePrePackagedRules}
                 >
                   {i18n.LOAD_PREPACKAGED_RULES}
@@ -122,9 +130,10 @@ const RulesPageComponent: React.FC = () => {
             {prePackagedRuleStatus === 'someRuleUninstall' && (
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="reloadPrebuiltRulesBtn"
                   iconType="plusInCircle"
                   isLoading={loadingCreatePrePackagedRules}
-                  isDisabled={userHasNoPermissions || loading}
+                  isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                   onClick={handleCreatePrePackagedRules}
                 >
                   {i18n.RELOAD_MISSING_PREPACKAGED_RULES(rulesNotInstalled ?? 0)}
@@ -134,7 +143,7 @@ const RulesPageComponent: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"
-                isDisabled={userHasNoPermissions || loading}
+                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                 onClick={() => {
                   setShowImportModal(true);
                 }}
@@ -144,10 +153,11 @@ const RulesPageComponent: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="create-new-rule"
                 fill
                 href={getCreateRuleUrl()}
                 iconType="plusInCircle"
-                isDisabled={userHasNoPermissions || loading}
+                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
               >
                 {i18n.ADD_NEW_RULE}
               </EuiButton>
@@ -165,8 +175,7 @@ const RulesPageComponent: React.FC = () => {
           createPrePackagedRules={createPrePackagedRules}
           loading={loading || prePackagedRuleLoading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-          hasNoPermissions={userHasNoPermissions}
-          importCompleteToggle={importCompleteToggle}
+          hasNoPermissions={userHasNoPermissions(canUserCRUD)}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}

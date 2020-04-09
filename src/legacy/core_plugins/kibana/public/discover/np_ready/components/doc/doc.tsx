@@ -17,12 +17,12 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { IndexPatternsContract } from 'src/plugins/data/public';
-import { DocViewer } from '../doc_viewer/doc_viewer';
 import { ElasticRequestState, useEsDocSearch } from './use_es_doc_search';
-import { ElasticSearchHit, getServices } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
+import { ElasticSearchHit } from '../../../../../../../../plugins/discover/public';
 
 export interface ElasticSearchResult {
   hits: {
@@ -61,86 +61,89 @@ export interface DocProps {
 }
 
 export function Doc(props: DocProps) {
+  const { DocViewer } = getServices();
   const [reqState, hit, indexPattern] = useEsDocSearch(props);
 
   return (
-    <EuiPageContent>
-      {reqState === ElasticRequestState.NotFoundIndexPattern && (
-        <EuiCallOut
-          color="danger"
-          data-test-subj={`doc-msg-notFoundIndexPattern`}
-          iconType="alert"
-          title={
-            <FormattedMessage
-              id="kbn.doc.failedToLocateIndexPattern"
-              defaultMessage="No index pattern matches ID {indexPatternId}"
-              values={{ indexPatternId: props.indexPatternId }}
-            />
-          }
-        />
-      )}
-      {reqState === ElasticRequestState.NotFound && (
-        <EuiCallOut
-          color="danger"
-          data-test-subj={`doc-msg-notFound`}
-          iconType="alert"
-          title={
-            <FormattedMessage
-              id="kbn.doc.failedToLocateDocumentDescription"
-              defaultMessage="Cannot find document"
-            />
-          }
-        >
-          <FormattedMessage
-            id="kbn.doc.couldNotFindDocumentsDescription"
-            defaultMessage="No documents match that ID."
+    <I18nProvider>
+      <EuiPageContent>
+        {reqState === ElasticRequestState.NotFoundIndexPattern && (
+          <EuiCallOut
+            color="danger"
+            data-test-subj={`doc-msg-notFoundIndexPattern`}
+            iconType="alert"
+            title={
+              <FormattedMessage
+                id="kbn.doc.failedToLocateIndexPattern"
+                defaultMessage="No index pattern matches ID {indexPatternId}"
+                values={{ indexPatternId: props.indexPatternId }}
+              />
+            }
           />
-        </EuiCallOut>
-      )}
-
-      {reqState === ElasticRequestState.Error && (
-        <EuiCallOut
-          color="danger"
-          data-test-subj={`doc-msg-error`}
-          iconType="alert"
-          title={
-            <FormattedMessage
-              id="kbn.doc.failedToExecuteQueryDescription"
-              defaultMessage="Cannot run search"
-            />
-          }
-        >
-          <FormattedMessage
-            id="kbn.doc.somethingWentWrongDescription"
-            defaultMessage="{indexName} is missing."
-            values={{ indexName: props.index }}
-          />{' '}
-          <EuiLink
-            href={`https://www.elastic.co/guide/en/elasticsearch/reference/${
-              getServices().metadata.branch
-            }/indices-exists.html`}
-            target="_blank"
+        )}
+        {reqState === ElasticRequestState.NotFound && (
+          <EuiCallOut
+            color="danger"
+            data-test-subj={`doc-msg-notFound`}
+            iconType="alert"
+            title={
+              <FormattedMessage
+                id="kbn.doc.failedToLocateDocumentDescription"
+                defaultMessage="Cannot find document"
+              />
+            }
           >
             <FormattedMessage
-              id="kbn.doc.somethingWentWrongDescriptionAddon"
-              defaultMessage="Please ensure the index exists."
+              id="kbn.doc.couldNotFindDocumentsDescription"
+              defaultMessage="No documents match that ID."
             />
-          </EuiLink>
-        </EuiCallOut>
-      )}
+          </EuiCallOut>
+        )}
 
-      {reqState === ElasticRequestState.Loading && (
-        <EuiCallOut data-test-subj={`doc-msg-loading`}>
-          <EuiLoadingSpinner size="m" />{' '}
-          <FormattedMessage id="kbn.doc.loadingDescription" defaultMessage="Loading…" />
-        </EuiCallOut>
-      )}
+        {reqState === ElasticRequestState.Error && (
+          <EuiCallOut
+            color="danger"
+            data-test-subj={`doc-msg-error`}
+            iconType="alert"
+            title={
+              <FormattedMessage
+                id="kbn.doc.failedToExecuteQueryDescription"
+                defaultMessage="Cannot run search"
+              />
+            }
+          >
+            <FormattedMessage
+              id="kbn.doc.somethingWentWrongDescription"
+              defaultMessage="{indexName} is missing."
+              values={{ indexName: props.index }}
+            />{' '}
+            <EuiLink
+              href={`https://www.elastic.co/guide/en/elasticsearch/reference/${
+                getServices().metadata.branch
+              }/indices-exists.html`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="kbn.doc.somethingWentWrongDescriptionAddon"
+                defaultMessage="Please ensure the index exists."
+              />
+            </EuiLink>
+          </EuiCallOut>
+        )}
 
-      {reqState === ElasticRequestState.Found && hit !== null && indexPattern && (
-        <div data-test-subj="doc-hit">
-          <DocViewer hit={hit} indexPattern={indexPattern} />
-        </div>
-      )}
-    </EuiPageContent>
+        {reqState === ElasticRequestState.Loading && (
+          <EuiCallOut data-test-subj={`doc-msg-loading`}>
+            <EuiLoadingSpinner size="m" />{' '}
+            <FormattedMessage id="kbn.doc.loadingDescription" defaultMessage="Loading…" />
+          </EuiCallOut>
+        )}
+
+        {reqState === ElasticRequestState.Found && hit !== null && indexPattern && (
+          <div data-test-subj="doc-hit">
+            <DocViewer hit={hit} indexPattern={indexPattern} />
+          </div>
+        )}
+      </EuiPageContent>
+    </I18nProvider>
   );
 }

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { anomaliesTableData } from '../api/anomalies_table_data';
 import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 import { useSiemJobs } from '../../ml_popover/hooks/use_siem_jobs';
-import { useStateToaster } from '../../toasters';
-import { errorToToaster } from '../api/error_to_toaster';
+import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
+import { useStateToaster, errorToToaster } from '../../toasters';
 
 import * as i18n from './translations';
 import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
@@ -60,7 +59,7 @@ export const useAnomaliesTableData = ({
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const [, siemJobs] = useSiemJobs(true);
   const [loading, setLoading] = useState(true);
-  const capabilities = useContext(MlCapabilitiesContext);
+  const capabilities = useMlCapabilities();
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
   const timeZone = useTimeZone();

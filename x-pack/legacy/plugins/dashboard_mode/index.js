@@ -33,6 +33,15 @@ export function dashboardMode(kibana) {
           ),
           value: ['kibana_dashboard_only_user'],
           category: ['dashboard'],
+          deprecation: {
+            message: i18n.translate(
+              'xpack.dashboardMode.uiSettings.dashboardsOnlyRolesDeprecation',
+              {
+                defaultMessage: 'This setting is deprecated and will be removed in Kibana 8.0.',
+              }
+            ),
+            docLinksKey: 'dashboardSettings',
+          },
         },
       },
       app: {

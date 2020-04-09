@@ -12,7 +12,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 
-import { buildEmbeddableFilters } from '../../../server/lib/build_embeddable_filters';
+import { buildEmbeddableFilters } from '../../../public/lib/build_embeddable_filters';
 import { Filter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 

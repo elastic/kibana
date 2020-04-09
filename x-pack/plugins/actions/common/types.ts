@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LicenseType } from '../../licensing/common/types';
+
 export interface ActionType {
   id: string;
   name: string;
   enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+  minimumLicenseRequired: LicenseType;
 }
 
 export interface ActionResult {
@@ -15,4 +20,5 @@ export interface ActionResult {
   actionTypeId: string;
   name: string;
   config: Record<string, any>;
+  isPreconfigured: boolean;
 }

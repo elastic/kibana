@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
+import { IndexMgmtSetup } from '../../../../plugins/index_management/server';
 import { registerLicenseChecker } from '../../../server/lib/register_license_checker';
 import { PLUGIN } from '../common';
 import { ServerShim, RouteDependencies } from './types';
@@ -38,10 +39,12 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
       __LEGACY: serverShim,
       usageCollection,
       metrics,
+      indexManagement,
     }: {
       __LEGACY: ServerShim;
       usageCollection?: UsageCollectionSetup;
       metrics?: VisTypeTimeseriesSetup;
+      indexManagement?: IndexMgmtSetup;
     }
   ) {
     const elasticsearch = await elasticsearchService.adminClient;
@@ -76,11 +79,8 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
         });
     }
 
-    if (
-      serverShim.plugins.index_management &&
-      serverShim.plugins.index_management.addIndexManagementDataEnricher
-    ) {
-      serverShim.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
+    if (indexManagement && indexManagement.indexDataEnricher) {
+      indexManagement.indexDataEnricher.add(rollupDataEnricher);
     }
 
     if (metrics) {

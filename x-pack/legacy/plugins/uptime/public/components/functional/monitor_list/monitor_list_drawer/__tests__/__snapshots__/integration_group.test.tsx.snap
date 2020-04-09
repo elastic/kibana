@@ -1,0 +1,193 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IntegrationGroup will not display APM links when APM is unavailable 1`] = `
+<EuiFlexGroup
+  direction="column"
+>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Search APM for this monitor"
+      href="/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-15m&rangeTo=now"
+      iconType="apmApp"
+      message="Check APM for domain"
+      tooltipContent="Click here to check APM for the domain \\"\\"."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this montor's ip address"
+      iconType="metricsApp"
+      message="Show host metrics"
+      tooltipContent="Check Infrastructure UI for the IP \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this monitor's pod UID"
+      iconType="metricsApp"
+      message="Show pod metrics"
+      tooltipContent="Check Infrastructure UI for pod UID \\"\\"."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this monitor's container ID"
+      iconType="metricsApp"
+      message="Show container metrics"
+      tooltipContent="Check Infrastructure UI for container ID \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Logging UI for this monitor's ip address"
+      iconType="logsApp"
+      message="Show host logs"
+      tooltipContent="Check Logging UI for the IP \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Show pod logs"
+      iconType="logsApp"
+      message="Show pod logs"
+      tooltipContent="Check for logs for pod UID \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Show container logs"
+      iconType="logsApp"
+      message="Show container logs"
+      tooltipContent="Check Logging UI for container ID \\"\\""
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`IntegrationGroup will not display infra links when infra is unavailable 1`] = `
+<EuiFlexGroup
+  direction="column"
+>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Search APM for this monitor"
+      href="/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-15m&rangeTo=now"
+      iconType="apmApp"
+      message="Check APM for domain"
+      tooltipContent="Click here to check APM for the domain \\"\\"."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this montor's ip address"
+      iconType="metricsApp"
+      message="Show host metrics"
+      tooltipContent="Check Infrastructure UI for the IP \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this monitor's pod UID"
+      iconType="metricsApp"
+      message="Show pod metrics"
+      tooltipContent="Check Infrastructure UI for pod UID \\"\\"."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this monitor's container ID"
+      iconType="metricsApp"
+      message="Show container metrics"
+      tooltipContent="Check Infrastructure UI for container ID \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Logging UI for this monitor's ip address"
+      iconType="logsApp"
+      message="Show host logs"
+      tooltipContent="Check Logging UI for the IP \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Show pod logs"
+      iconType="logsApp"
+      message="Show pod logs"
+      tooltipContent="Check for logs for pod UID \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Show container logs"
+      iconType="logsApp"
+      message="Show container logs"
+      tooltipContent="Check Logging UI for container ID \\"\\""
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`IntegrationGroup will not display logging links when logging is unavailable 1`] = `
+<EuiFlexGroup
+  direction="column"
+>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Search APM for this monitor"
+      href="/app/apm#/services?kuery=url.domain:%20%22undefined%22&rangeFrom=now-15m&rangeTo=now"
+      iconType="apmApp"
+      message="Check APM for domain"
+      tooltipContent="Click here to check APM for the domain \\"\\"."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this montor's ip address"
+      iconType="metricsApp"
+      message="Show host metrics"
+      tooltipContent="Check Infrastructure UI for the IP \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this monitor's pod UID"
+      iconType="metricsApp"
+      message="Show pod metrics"
+      tooltipContent="Check Infrastructure UI for pod UID \\"\\"."
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Infrastructure UI for this monitor's container ID"
+      iconType="metricsApp"
+      message="Show container metrics"
+      tooltipContent="Check Infrastructure UI for container ID \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Check Logging UI for this monitor's ip address"
+      iconType="logsApp"
+      message="Show host logs"
+      tooltipContent="Check Logging UI for the IP \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Show pod logs"
+      iconType="logsApp"
+      message="Show pod logs"
+      tooltipContent="Check for logs for pod UID \\"\\""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <IntegrationLink
+      ariaLabel="Show container logs"
+      iconType="logsApp"
+      message="Show container logs"
+      tooltipContent="Check Logging UI for container ID \\"\\""
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

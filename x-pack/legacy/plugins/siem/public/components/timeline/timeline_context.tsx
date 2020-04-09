@@ -11,10 +11,6 @@ const initTimelineContext = false;
 export const TimelineContext = createContext<boolean>(initTimelineContext);
 export const useTimelineContext = () => useContext(TimelineContext);
 
-const initTimelineWidth = 0;
-export const TimelineWidthContext = createContext<number>(initTimelineWidth);
-export const useTimelineWidthContext = () => useContext(TimelineWidthContext);
-
 export interface TimelineTypeContextProps {
   documentType?: string;
   footerText?: string;
@@ -41,7 +37,6 @@ export const useTimelineTypeContext = () => useContext(TimelineTypeContext);
 interface ManageTimelineContextProps {
   children: React.ReactNode;
   loading: boolean;
-  width: number;
   type?: TimelineTypeContextProps;
 }
 
@@ -50,11 +45,9 @@ interface ManageTimelineContextProps {
 const ManageTimelineContextComponent: React.FC<ManageTimelineContextProps> = ({
   children,
   loading,
-  width,
   type = initTimelineType,
 }) => {
   const [myLoading, setLoading] = useState(initTimelineContext);
-  const [myWidth, setWidth] = useState(initTimelineWidth);
   const [myType, setType] = useState(initTimelineType);
 
   useEffect(() => {
@@ -65,15 +58,9 @@ const ManageTimelineContextComponent: React.FC<ManageTimelineContextProps> = ({
     setType(type);
   }, [type]);
 
-  useEffect(() => {
-    setWidth(width);
-  }, [width]);
-
   return (
     <TimelineContext.Provider value={myLoading}>
-      <TimelineWidthContext.Provider value={myWidth}>
-        <TimelineTypeContext.Provider value={myType}>{children}</TimelineTypeContext.Provider>
-      </TimelineWidthContext.Provider>
+      <TimelineTypeContext.Provider value={myType}>{children}</TimelineTypeContext.Provider>
     </TimelineContext.Provider>
   );
 };

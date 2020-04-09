@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { Field } from './field';
+export { Field, getEditableValue } from './field';

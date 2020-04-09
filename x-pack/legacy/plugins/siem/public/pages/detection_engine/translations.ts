@@ -19,7 +19,7 @@ export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSign
 });
 
 export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
-  defaultMessage: 'Signals (SIEM Detections)',
+  defaultMessage: 'Detected signals',
 });
 
 export const ALERT = i18n.translate('xpack.siem.detectionEngine.alertTitle', {
@@ -86,3 +86,17 @@ export const USER_UNAUTHENTICATED_MSG_BODY = i18n.translate(
       'You do not have the required permissions for viewing the detection engine. For more help, contact your administrator.',
   }
 );
+
+export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
+  'xpack.siem.detectionEngine.mlRulesDisabledMessageTitle',
+  {
+    defaultMessage: 'ML rules require Platinum License and ML Admin Permissions',
+  }
+);
+
+export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
+  i18n.translate('xpack.siem.detectionEngine.mlUnavailableTitle', {
+    values: { totalRules },
+    defaultMessage:
+      '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
+  });

@@ -6,11 +6,11 @@
 
 import { Direction } from '../../../../../graphql/types';
 import { assertUnreachable } from '../../../../../lib/helpers';
+import { ColumnHeaderOptions } from '../../../../../store/timeline/model';
 import { Sort, SortDirection } from '../../sort';
-import { ColumnHeader } from '../column_header';
 
 interface GetNewSortDirectionOnClickParams {
-  clickedHeader: ColumnHeader;
+  clickedHeader: ColumnHeaderOptions;
   currentSort: Sort;
 }
 
@@ -36,7 +36,7 @@ export const getNextSortDirection = (currentSort: Sort): Direction => {
 };
 
 interface GetSortDirectionParams {
-  header: ColumnHeader;
+  header: ColumnHeaderOptions;
   sort: Sort;
 }
 

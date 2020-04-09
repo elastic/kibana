@@ -101,10 +101,9 @@ function convertPanelActionToContextMenuItem<A>({
 }): EuiContextMenuPanelItemDescriptor {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.MenuItem
-      ? // Cast to `any` because `name` typed to string.
-        (React.createElement(uiToReactComponent(action.MenuItem), {
+      ? React.createElement(uiToReactComponent(action.MenuItem), {
           context: actionContext,
-        }) as any)
+        })
       : action.getDisplayName(actionContext),
     icon: action.getIconType(actionContext),
     panel: _.get(action, 'childContextMenuPanel.id'),

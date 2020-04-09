@@ -31,21 +31,21 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
 
-  describe('doc link in discover', function contextSize() {
+  // FLAKY: https://github.com/elastic/kibana/issues/62281
+  describe.skip('doc link in discover', function contextSize() {
     this.tags('smoke');
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await Promise.all(
-        TEST_COLUMN_NAMES.map(columnName => PageObjects.discover.clickFieldListItemAdd(columnName))
-      );
-      await Promise.all(
-        TEST_FILTER_COLUMN_NAMES.map(async ([columnName, value]) => {
-          await PageObjects.discover.clickFieldListItem(columnName);
-          await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-        })
-      );
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+      for (const columnName of TEST_COLUMN_NAMES) {
+        await PageObjects.discover.clickFieldListItemAdd(columnName);
+      }
+      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+        await PageObjects.discover.clickFieldListItem(columnName);
+        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+      }
     });
 
     it('should open the doc view of the selected document', async function() {

@@ -20,7 +20,9 @@ import { addAllExtensions } from './np_ready/extend_index_management';
 if (chrome.getInjected('ilmUiEnabled')) {
   // We have to initialize this outside of the NP lifecycle, otherwise these extensions won't
   // be available in Index Management unless the user visits ILM first.
-  addAllExtensions();
+  if ((npSetup.plugins as any).indexManagement) {
+    addAllExtensions((npSetup.plugins as any).indexManagement.extensionsService);
+  }
 
   // This method handles the cleanup needed when route is scope is destroyed.  It also prevents Angular
   // from destroying scope when route changes and both old route and new route are this same route.
@@ -72,11 +74,13 @@ if (chrome.getInjected('ilmUiEnabled')) {
             ...core,
             application: {
               ...core.application,
-              async register(app: App) {
+              async register(app: App<any>) {
                 const unmountApp = await app.mount({ ...npStart } as any, {
                   element,
                   appBasePath: '',
                   onAppLeave: () => undefined,
+                  // TODO: adapt to use Core's ScopedHistory
+                  history: {} as any,
                 });
                 manageAngularLifecycle($scope, $route, unmountApp as any);
               },

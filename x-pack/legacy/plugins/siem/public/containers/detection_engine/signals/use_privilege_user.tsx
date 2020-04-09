@@ -6,39 +6,32 @@
 
 import { useEffect, useState } from 'react';
 
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
-import { useStateToaster } from '../../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { getUserPrivilege } from './api';
 import * as i18n from './translations';
 
-interface Return {
+export interface ReturnPrivilegeUser {
   loading: boolean;
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
   hasIndexManage: boolean | null;
-  hasManageApiKey: boolean | null;
   hasIndexWrite: boolean | null;
 }
 /**
  * Hook to get user privilege from
  *
  */
-export const usePrivilegeUser = (): Return => {
+export const usePrivilegeUser = (): ReturnPrivilegeUser => {
   const [loading, setLoading] = useState(true);
   const [privilegeUser, setPrivilegeUser] = useState<
     Pick<
-      Return,
-      | 'isAuthenticated'
-      | 'hasEncryptionKey'
-      | 'hasIndexManage'
-      | 'hasManageApiKey'
-      | 'hasIndexWrite'
+      ReturnPrivilegeUser,
+      'isAuthenticated' | 'hasEncryptionKey' | 'hasIndexManage' | 'hasIndexWrite'
     >
   >({
     isAuthenticated: null,
     hasEncryptionKey: null,
     hasIndexManage: null,
-    hasManageApiKey: null,
     hasIndexWrite: null,
   });
   const [, dispatchToaster] = useStateToaster();
@@ -66,10 +59,6 @@ export const usePrivilegeUser = (): Return => {
                 privilege.index[indexName].create_doc ||
                 privilege.index[indexName].index ||
                 privilege.index[indexName].write,
-              hasManageApiKey:
-                privilege.cluster.manage_security ||
-                privilege.cluster.manage_api_key ||
-                privilege.cluster.manage_own_api_key,
             });
           }
         }
@@ -79,7 +68,6 @@ export const usePrivilegeUser = (): Return => {
             isAuthenticated: false,
             hasEncryptionKey: false,
             hasIndexManage: false,
-            hasManageApiKey: false,
             hasIndexWrite: false,
           });
           errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });

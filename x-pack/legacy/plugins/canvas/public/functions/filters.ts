@@ -6,16 +6,14 @@
 
 import { fromExpression } from '@kbn/interpreter/common';
 import { get } from 'lodash';
-// @ts-ignore untyped Elastic lib
-import { interpretAst } from 'plugins/interpreter/interpreter';
-// @ts-ignore untyped Elastic lib
-import { registries } from 'plugins/interpreter/registries';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
+import { interpretAst } from '../lib/run_interpreter';
 // @ts-ignore untyped local
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';
 import { Filter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
+import { InitializeArguments } from '.';
 
 interface Arguments {
   group: string[];
@@ -43,39 +41,45 @@ function getFiltersByGroup(allFilters: string[], groups?: string[], ungrouped = 
   });
 }
 
-export function filters(): ExpressionFunctionDefinition<'filters', null, Arguments, Filter> {
-  const { help, args: argHelp } = getFunctionHelp().filters;
+type FiltersFunction = ExpressionFunctionDefinition<'filters', null, Arguments, Filter>;
 
-  return {
-    name: 'filters',
-    type: 'filter',
-    help,
-    inputTypes: ['null'],
-    args: {
-      group: {
-        aliases: ['_'],
-        types: ['string'],
-        help: argHelp.group,
-        multi: true,
-      },
-      ungrouped: {
-        aliases: ['nogroup', 'nogroups'],
-        types: ['boolean'],
-        help: argHelp.ungrouped,
-        default: false,
-      },
-    },
-    fn: (input, { group, ungrouped }) => {
-      const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
+export function filtersFunctionFactory(initialize: InitializeArguments): () => FiltersFunction {
+  return function filters(): FiltersFunction {
+    const { help, args: argHelp } = getFunctionHelp().filters;
 
-      if (filterList && filterList.length) {
-        const filterExpression = filterList.join(' | ');
-        const filterAST = fromExpression(filterExpression);
-        return interpretAst(filterAST);
-      } else {
-        const filterType = registries.types.get('filter');
-        return filterType.from(null);
-      }
-    },
+    return {
+      name: 'filters',
+      type: 'filter',
+      help,
+      context: {
+        types: ['null'],
+      },
+      args: {
+        group: {
+          aliases: ['_'],
+          types: ['string'],
+          help: argHelp.group,
+          multi: true,
+        },
+        ungrouped: {
+          aliases: ['nogroup', 'nogroups'],
+          types: ['boolean'],
+          help: argHelp.ungrouped,
+          default: false,
+        },
+      },
+      fn: (input, { group, ungrouped }) => {
+        const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
+
+        if (filterList && filterList.length) {
+          const filterExpression = filterList.join(' | ');
+          const filterAST = fromExpression(filterExpression);
+          return interpretAst(filterAST);
+        } else {
+          const filterType = initialize.typesRegistry.get('filter');
+          return filterType?.from(null, {});
+        }
+      },
+    };
   };
 }

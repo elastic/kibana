@@ -17,12 +17,21 @@ run(
       [resolve(__dirname, '../../public'), resolve(__dirname, '../../common')],
       {
         fileExtensions: ['ts', 'js', 'tsx'],
+        excludeRegExp: [
+          'test.ts$',
+          'test.tsx$',
+          'containers/detection_engine/rules/types.ts$',
+          'core/public/chrome/chrome_service.tsx$',
+          'src/core/server/types.ts$',
+          'src/core/server/saved_objects/types.ts$',
+          'src/core/public/overlays/banners/banners_service.tsx$',
+          'src/core/public/saved_objects/saved_objects_client.ts$',
+        ],
       }
     );
 
     const circularFound = result.circular();
-    // We can only care about SIEM code, we should not be penalyze for others
-    if (circularFound.filter(cf => cf.includes('siem')).length !== 0) {
+    if (circularFound.length !== 0) {
       throw createFailError(
         `SIEM circular dependencies of imports has been found:\n - ${circularFound.join('\n - ')}`
       );

@@ -23,7 +23,7 @@ interface Props {
   user: User;
   isUserChangingOwnPassword: boolean;
   onChangePassword?: () => void;
-  apiClient: PublicMethodsOf<UserAPIClient>;
+  userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsStart;
 }
 
@@ -279,7 +279,7 @@ export class ChangePasswordForm extends Component<Props, State> {
 
   private performPasswordChange = async () => {
     try {
-      await this.props.apiClient.changePassword(
+      await this.props.userAPIClient.changePassword(
         this.props.user.username,
         this.state.newPassword,
         this.state.currentPassword

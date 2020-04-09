@@ -8,12 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { demodata } from '../../../canvas_plugin_src/functions/server/demodata';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
-import { DemoRows } from '../../../canvas_plugin_src/functions/server/demodata/get_demo_rows';
+import { DemoRows } from '../../../canvas_plugin_src/functions/server/demodata/demo_rows_types';
 
 export const help: FunctionHelp<FunctionFactory<typeof demodata>> = {
   help: i18n.translate('xpack.canvas.functions.demodataHelpText', {
     defaultMessage:
-      'A mock data set that includes project {ci} times with usernames, countries, and run phases.',
+      'A sample data set that includes project {ci} times with usernames, countries, and run phases.',
     values: {
       ci: 'CI',
     },

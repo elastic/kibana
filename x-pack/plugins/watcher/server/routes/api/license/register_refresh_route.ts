@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 /*
@@ -13,16 +12,15 @@ it needs to make a round-trip to the kibana server. This refresh endpoint is pro
 for when the client needs to check the license, but doesn't need to pull data from the
 server for any reason, i.e., when adding a new watch.
 */
-export function registerRefreshRoute(deps: RouteDependencies) {
-  const handler: RequestHandler<any, any, any> = (ctx, request, response) => {
-    return response.ok({ body: { success: true } });
-  };
 
+export function registerRefreshRoute(deps: RouteDependencies) {
   deps.router.get(
     {
       path: '/api/watcher/license/refresh',
       validate: false,
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, (ctx, request, response) => {
+      return response.ok({ body: { success: true } });
+    })
   );
 }

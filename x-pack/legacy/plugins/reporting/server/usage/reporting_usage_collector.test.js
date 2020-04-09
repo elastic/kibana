@@ -3,9 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import sinon from 'sinon';
+import { createMockReportingCore } from '../../test_helpers';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
-import { getReportingUsageCollector } from './reporting_usage_collector';
+import {
+  registerReportingUsageCollector,
+  getReportingUsageCollector,
+} from './reporting_usage_collector';
 
 const exportTypesRegistry = getExportTypesRegistry();
 
@@ -19,63 +24,60 @@ function getMockUsageCollection() {
     makeUsageCollector: options => {
       return new MockUsageCollector(this, options);
     },
+    registerCollector: sinon.stub(),
   };
 }
 
-function getServerMock(customization) {
-  const getLicenseCheckResults = sinon.stub().returns({});
-  const defaultServerMock = {
-    plugins: {
-      security: {
-        isAuthenticated: sinon.stub().returns(true),
+function getPluginsMock(
+  { license, usageCollection = getMockUsageCollection() } = { license: 'platinum' }
+) {
+  const mockXpackMain = {
+    info: {
+      isAvailable: sinon.stub().returns(true),
+      feature: () => ({
+        getLicenseCheckResults: sinon.stub(),
+      }),
+      license: {
+        isOneOf: sinon.stub().returns(false),
+        getType: sinon.stub().returns(license),
       },
-      xpack_main: {
-        info: {
-          isAvailable: sinon.stub().returns(true),
-          feature: () => ({
-            getLicenseCheckResults,
-          }),
-          license: {
-            isOneOf: sinon.stub().returns(false),
-            getType: sinon.stub().returns('platinum'),
-          },
-          toJSON: () => ({ b: 1 }),
-        },
+      toJSON: () => ({ b: 1 }),
+    },
+  };
+  return {
+    usageCollection,
+    __LEGACY: {
+      plugins: {
+        xpack_main: mockXpackMain,
       },
     },
-    log: () => {},
-    config: () => ({
-      get: key => {
-        if (key === 'xpack.reporting.enabled') {
-          return true;
-        } else if (key === 'xpack.reporting.index') {
-          return '.reporting-index';
-        }
-      },
-    }),
   };
-  return Object.assign(defaultServerMock, customization);
 }
 
+const getMockReportingConfig = () => ({
+  get: () => {},
+  kbnConfig: { get: () => '' },
+});
 const getResponseMock = (customization = {}) => customization;
 
 describe('license checks', () => {
+  let mockConfig;
+  beforeAll(async () => {
+    mockConfig = getMockReportingConfig();
+  });
+
   describe('with a basic license', () => {
     let usageStats;
     beforeAll(async () => {
-      const serverWithBasicLicenseMock = getServerMock();
-      serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon
-        .stub()
-        .returns('basic');
+      const plugins = getPluginsMock({ license: 'basic' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const usageCollection = getMockUsageCollection();
-      const { fetch: getReportingUsage } = getReportingUsageCollector(
-        usageCollection,
-        serverWithBasicLicenseMock,
-        () => {},
+      const { fetch } = getReportingUsageCollector(
+        mockConfig,
+        plugins.usageCollection,
+        plugins.__LEGACY.plugins.xpack_main.info,
         exportTypesRegistry
       );
-      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
+      usageStats = await fetch(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -94,19 +96,15 @@ describe('license checks', () => {
   describe('with no license', () => {
     let usageStats;
     beforeAll(async () => {
-      const serverWithNoLicenseMock = getServerMock();
-      serverWithNoLicenseMock.plugins.xpack_main.info.license.getType = sinon
-        .stub()
-        .returns('none');
+      const plugins = getPluginsMock({ license: 'none' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const usageCollection = getMockUsageCollection();
-      const { fetch: getReportingUsage } = getReportingUsageCollector(
-        usageCollection,
-        serverWithNoLicenseMock,
-        () => {},
+      const { fetch } = getReportingUsageCollector(
+        mockConfig,
+        plugins.usageCollection,
+        plugins.__LEGACY.plugins.xpack_main.info,
         exportTypesRegistry
       );
-      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
+      usageStats = await fetch(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -125,19 +123,15 @@ describe('license checks', () => {
   describe('with platinum license', () => {
     let usageStats;
     beforeAll(async () => {
-      const serverWithPlatinumLicenseMock = getServerMock();
-      serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon
-        .stub()
-        .returns('platinum');
+      const plugins = getPluginsMock({ license: 'platinum' });
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const usageCollection = getMockUsageCollection();
-      const { fetch: getReportingUsage } = getReportingUsageCollector(
-        usageCollection,
-        serverWithPlatinumLicenseMock,
-        () => {},
+      const { fetch } = getReportingUsageCollector(
+        mockConfig,
+        plugins.usageCollection,
+        plugins.__LEGACY.plugins.xpack_main.info,
         exportTypesRegistry
       );
-      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
+      usageStats = await fetch(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -156,19 +150,15 @@ describe('license checks', () => {
   describe('with no usage data', () => {
     let usageStats;
     beforeAll(async () => {
-      const serverWithBasicLicenseMock = getServerMock();
-      serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon
-        .stub()
-        .returns('basic');
+      const plugins = getPluginsMock({ license: 'basic' });
       const callClusterMock = jest.fn(() => Promise.resolve({}));
-      const usageCollection = getMockUsageCollection();
-      const { fetch: getReportingUsage } = getReportingUsageCollector(
-        usageCollection,
-        serverWithBasicLicenseMock,
-        () => {},
+      const { fetch } = getReportingUsageCollector(
+        mockConfig,
+        plugins.usageCollection,
+        plugins.__LEGACY.plugins.xpack_main.info,
         exportTypesRegistry
       );
-      usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
+      usageStats = await fetch(callClusterMock, exportTypesRegistry);
     });
 
     test('sets enables to true', async () => {
@@ -182,22 +172,15 @@ describe('license checks', () => {
 });
 
 describe('data modeling', () => {
-  let getReportingUsage;
-  beforeAll(async () => {
-    const usageCollection = getMockUsageCollection();
-    const serverWithPlatinumLicenseMock = getServerMock();
-    serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon
-      .stub()
-      .returns('platinum');
-    ({ fetch: getReportingUsage } = getReportingUsageCollector(
-      usageCollection,
-      serverWithPlatinumLicenseMock,
-      () => {},
-      exportTypesRegistry
-    ));
-  });
-
   test('with normal looking usage data', async () => {
+    const mockConfig = getMockReportingConfig();
+    const plugins = getPluginsMock();
+    const { fetch } = getReportingUsageCollector(
+      mockConfig,
+      plugins.usageCollection,
+      plugins.__LEGACY.plugins.xpack_main.info,
+      exportTypesRegistry
+    );
     const callClusterMock = jest.fn(() =>
       Promise.resolve(
         getResponseMock({
@@ -320,96 +303,122 @@ describe('data modeling', () => {
       )
     );
 
-    const usageStats = await getReportingUsage(callClusterMock);
+    const usageStats = await fetch(callClusterMock);
     expect(usageStats).toMatchInlineSnapshot(`
-Object {
-  "PNG": Object {
-    "available": true,
-    "total": 4,
-  },
-  "_all": 54,
-  "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "available": true,
-    "total": 27,
-  },
-  "enabled": true,
-  "last7Days": Object {
-    "PNG": Object {
-      "available": true,
-      "total": 4,
-    },
-    "_all": 27,
-    "csv": Object {
-      "available": true,
-      "total": 10,
-    },
-    "printable_pdf": Object {
-      "app": Object {
-        "dashboard": 13,
-        "visualization": 0,
-      },
-      "available": true,
-      "layout": Object {
-        "preserve_layout": 3,
-        "print": 10,
-      },
-      "total": 13,
-    },
-    "status": Object {
-      "completed": 0,
-      "failed": 0,
-      "pending": 27,
-    },
-  },
-  "lastDay": Object {
-    "PNG": Object {
-      "available": true,
-      "total": 4,
-    },
-    "_all": 11,
-    "csv": Object {
-      "available": true,
-      "total": 5,
-    },
-    "printable_pdf": Object {
-      "app": Object {
-        "dashboard": 2,
-        "visualization": 0,
-      },
-      "available": true,
-      "layout": Object {
-        "preserve_layout": 0,
-        "print": 2,
-      },
-      "total": 2,
-    },
-    "status": Object {
-      "completed": 0,
-      "failed": 0,
-      "pending": 11,
-    },
-  },
-  "printable_pdf": Object {
-    "app": Object {
-      "dashboard": 23,
-      "visualization": 0,
-    },
-    "available": true,
-    "layout": Object {
-      "preserve_layout": 13,
-      "print": 10,
-    },
-    "total": 23,
-  },
-  "status": Object {
-    "completed": 20,
-    "failed": 0,
-    "pending": 33,
-    "processing": 1,
-  },
-}
-`);
+      Object {
+        "PNG": Object {
+          "available": true,
+          "total": 4,
+        },
+        "_all": 54,
+        "available": true,
+        "browser_type": undefined,
+        "csv": Object {
+          "available": true,
+          "total": 27,
+        },
+        "enabled": true,
+        "last7Days": Object {
+          "PNG": Object {
+            "available": true,
+            "total": 4,
+          },
+          "_all": 27,
+          "csv": Object {
+            "available": true,
+            "total": 10,
+          },
+          "printable_pdf": Object {
+            "app": Object {
+              "dashboard": 13,
+              "visualization": 0,
+            },
+            "available": true,
+            "layout": Object {
+              "preserve_layout": 3,
+              "print": 10,
+            },
+            "total": 13,
+          },
+          "status": Object {
+            "completed": 0,
+            "failed": 0,
+            "pending": 27,
+          },
+        },
+        "lastDay": Object {
+          "PNG": Object {
+            "available": true,
+            "total": 4,
+          },
+          "_all": 11,
+          "csv": Object {
+            "available": true,
+            "total": 5,
+          },
+          "printable_pdf": Object {
+            "app": Object {
+              "dashboard": 2,
+              "visualization": 0,
+            },
+            "available": true,
+            "layout": Object {
+              "preserve_layout": 0,
+              "print": 2,
+            },
+            "total": 2,
+          },
+          "status": Object {
+            "completed": 0,
+            "failed": 0,
+            "pending": 11,
+          },
+        },
+        "printable_pdf": Object {
+          "app": Object {
+            "dashboard": 23,
+            "visualization": 0,
+          },
+          "available": true,
+          "layout": Object {
+            "preserve_layout": 13,
+            "print": 10,
+          },
+          "total": 23,
+        },
+        "status": Object {
+          "completed": 20,
+          "failed": 0,
+          "pending": 33,
+          "processing": 1,
+        },
+      }
+    `);
+  });
+});
+
+describe('Ready for collection observable', () => {
+  test('converts observable to promise', async () => {
+    const mockConfig = getMockReportingConfig();
+    const mockReporting = await createMockReportingCore(mockConfig);
+
+    const usageCollection = getMockUsageCollection();
+    const makeCollectorSpy = sinon.spy();
+    usageCollection.makeUsageCollector = makeCollectorSpy;
+
+    const plugins = getPluginsMock({ usageCollection });
+    registerReportingUsageCollector(mockReporting, plugins);
+
+    const [args] = makeCollectorSpy.firstCall.args;
+    expect(args).toMatchInlineSnapshot(`
+      Object {
+        "fetch": [Function],
+        "formatForBulkUpload": [Function],
+        "isReady": [Function],
+        "type": "reporting",
+      }
+    `);
+
+    await expect(args.isReady()).resolves.toBe(true);
   });
 });

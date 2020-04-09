@@ -5,21 +5,18 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo, getOr } from 'lodash/fp';
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useCallback } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
-import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
-
-/** The height in pixels of the flyout header, exported for use in height calculations */
-export const flyoutHeaderHeight: number = 60;
+import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
+import { StatefulTimeline } from '../timeline';
+import { TimelineById } from '../../store/timeline/types';
 
 export const Badge = styled(EuiBadge)`
   position: absolute;
@@ -39,86 +36,76 @@ const Visible = styled.div<{ show?: boolean }>`
 Visible.displayName = 'Visible';
 
 interface OwnProps {
-  children?: React.ReactNode;
   flyoutHeight: number;
-  headerHeight: number;
   timelineId: string;
   usersViewing: string[];
 }
 
-interface DispatchProps {
-  showTimeline: ActionCreator<{ id: string; show: boolean }>;
-  applyDeltaToWidth?: ({
-    id,
-    delta,
-    bodyClientWidthPixels,
-    maxWidthPercent,
-    minWidthPixels,
-  }: {
-    id: string;
-    delta: number;
-    bodyClientWidthPixels: number;
-    maxWidthPercent: number;
-    minWidthPixels: number;
-  }) => void;
-}
-
-interface StateReduxProps {
-  dataProviders?: DataProvider[];
-  show: boolean;
-  width: number;
-}
-
-type Props = OwnProps & DispatchProps & StateReduxProps;
+type Props = OwnProps & ProsFromRedux;
 
 export const FlyoutComponent = React.memo<Props>(
-  ({
-    children,
-    dataProviders,
-    flyoutHeight,
-    headerHeight,
-    show,
-    showTimeline,
-    timelineId,
-    usersViewing,
-    width,
-  }) => (
-    <>
-      <Visible show={show}>
-        <Pane
-          flyoutHeight={flyoutHeight}
-          headerHeight={headerHeight}
-          onClose={() => showTimeline({ id: timelineId, show: false })}
+  ({ dataProviders, flyoutHeight, show, showTimeline, timelineId, usersViewing, width }) => {
+    const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
+      showTimeline,
+      timelineId,
+    ]);
+    const handleOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [
+      showTimeline,
+      timelineId,
+    ]);
+
+    return (
+      <>
+        <Visible show={show}>
+          <Pane
+            flyoutHeight={flyoutHeight}
+            onClose={handleClose}
+            timelineId={timelineId}
+            width={width}
+          >
+            <StatefulTimeline onClose={handleClose} usersViewing={usersViewing} id={timelineId} />
+          </Pane>
+        </Visible>
+        <FlyoutButton
+          dataProviders={dataProviders}
+          show={!show}
           timelineId={timelineId}
-          usersViewing={usersViewing}
-          width={width}
-        >
-          {children}
-        </Pane>
-      </Visible>
-      <FlyoutButton
-        dataProviders={dataProviders!}
-        show={!show}
-        timelineId={timelineId}
-        onOpen={() => showTimeline({ id: timelineId, show: true })}
-      />
-    </>
-  )
+          onOpen={handleOpen}
+        />
+      </>
+    );
+  }
 );
 
 FlyoutComponent.displayName = 'FlyoutComponent';
 
+const DEFAULT_DATA_PROVIDERS: DataProvider[] = [];
+const DEFAULT_TIMELINE_BY_ID = {};
+
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-  const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));
-  const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById);
-  const show = getOr('false', `${timelineId}.show`, timelineById);
-  const width = getOr(DEFAULT_TIMELINE_WIDTH, `${timelineId}.width`, timelineById);
+  const timelineById: TimelineById =
+    timelineSelectors.timelineByIdSelector(state) ?? DEFAULT_TIMELINE_BY_ID;
+  /*
+    In case timelineById[timelineId]?.dataProviders is an empty array it will cause unnecessary rerender
+    of StatefulTimeline which can be expensive, so to avoid that return DEFAULT_DATA_PROVIDERS
+  */
+  const dataProviders = timelineById[timelineId]?.dataProviders.length
+    ? timelineById[timelineId]?.dataProviders
+    : DEFAULT_DATA_PROVIDERS;
+  const show = timelineById[timelineId]?.show ?? false;
+  const width = timelineById[timelineId]?.width ?? DEFAULT_TIMELINE_WIDTH;
 
   return { dataProviders, show, width };
 };
 
-export const Flyout = connect(mapStateToProps, {
+const mapDispatchToProps = {
   showTimeline: timelineActions.showTimeline,
-})(FlyoutComponent);
+};
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
+
+type ProsFromRedux = ConnectedProps<typeof connector>;
+
+export const Flyout = connector(FlyoutComponent);
 
 Flyout.displayName = 'Flyout';

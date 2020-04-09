@@ -26,7 +26,7 @@ import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IFieldType, TimefilterSetup } from '../.../../../../../../plugins/data/public';
+import { IFieldType, TimefilterContract } from '../.../../../../../../plugins/data/public';
 
 const minMaxAgg = (field?: IFieldType) => {
   const aggBody: any = {};
@@ -52,7 +52,7 @@ const minMaxAgg = (field?: IFieldType) => {
 };
 
 export class RangeControl extends Control<RangeFilterManager> {
-  timefilter: TimefilterSetup['timefilter'];
+  timefilter: TimefilterContract;
   abortController: any;
   min: any;
   max: any;

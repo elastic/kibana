@@ -15,7 +15,7 @@ import { fromQuery, toQuery } from '../Links/url_helpers';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED
-} from '../../../../common/environment_filter_values';
+} from '../../../../../../../plugins/apm/common/environment_filter_values';
 
 function updateEnvironmentUrl(
   location: ReturnType<typeof useLocation>,

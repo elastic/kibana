@@ -26,6 +26,8 @@ import { NodeTypes } from './types';
 export { NodeTypes };
 
 export const nodeTypes: NodeTypes = {
+  // This requires better typing of the different typings and their return types.
+  // @ts-ignore
   function: functionType,
   literal,
   namedArg,

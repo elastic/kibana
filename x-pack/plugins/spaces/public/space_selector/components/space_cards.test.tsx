@@ -16,5 +16,5 @@ test('it renders without crashing', () => {
     disabledFeatures: [],
   };
 
-  shallow(<SpaceCards spaces={[space]} onSpaceSelect={jest.fn()} />);
+  shallow(<SpaceCards spaces={[space]} serverBasePath={'/server-base-path'} />);
 });

@@ -54,6 +54,15 @@ export const reportSchema = schema.object({
       })
     )
   ),
+  application_usage: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        minutesOnScreen: schema.number(),
+        numberOfClicks: schema.number(),
+      })
+    )
+  ),
 });
 
 export type ReportSchemaType = TypeOf<typeof reportSchema>;

@@ -22,8 +22,6 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from '../../../visualizations/public/np_ready/public/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -41,12 +39,16 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 // TODO This is an integration test and thus requires a running platform. When moving to the new platform,
 // this test has to be migrated to the newly created integration test environment.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
+import { setInjectedVars } from '../services';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -54,15 +56,20 @@ const PIXEL_DIFF = 30;
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
-  let indexPattern;
   let vis;
   let imageComparator;
   let vegaVisualizationDependencies;
-  let visRegComplete = false;
+  let vegaVisType;
+
+  setInjectedVars({
+    emsTileLayerId: {},
+    enableExternalUrls: true,
+    esShardTimeout: 10000,
+  });
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject((Private, $injector) => {
+    ngMock.inject($injector => {
       vegaVisualizationDependencies = {
         serviceSettings: $injector.get('serviceSettings'),
         core: {
@@ -82,15 +89,8 @@ describe('VegaVisualizations', () => {
         },
       };
 
-      if (!visRegComplete) {
-        visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(
-          createVegaTypeDefinition(vegaVisualizationDependencies)
-        );
-      }
-
+      vegaVisType = new BaseVisType(createVegaTypeDefinition(vegaVisualizationDependencies));
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
-      indexPattern = Private(LogstashIndexPatternStubProvider);
     })
   );
 
@@ -99,7 +99,9 @@ describe('VegaVisualizations', () => {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
-      vis = new Vis(indexPattern, { type: 'vega' });
+      vis = new ExprVis({
+        type: vegaVisType,
+      });
     });
 
     afterEach(function() {

@@ -8,13 +8,13 @@ import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from '../commo
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
-import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
+import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { initRoutes } from './routes';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin, home, licensing } = plugins;
+    const { featuresPlugin, home, licensing, usageCollection } = plugins;
     let routesInitialized = false;
 
     featuresPlugin.registerFeature({
@@ -22,12 +22,15 @@ export class MapPlugin {
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
+      order: 600,
       icon: APP_ICON,
       navLinkId: APP_ID,
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {
         all: {
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
             read: ['index-pattern'],
@@ -35,6 +38,8 @@ export class MapPlugin {
           ui: ['save', 'show', 'saveQuery'],
         },
         read: {
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [],
             read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
@@ -46,11 +51,15 @@ export class MapPlugin {
 
     licensing.license$.subscribe(license => {
       const { state } = license.check('maps', 'basic');
-      if (state === LICENSE_CHECK_STATE.Valid && !routesInitialized) {
+      if (state === 'valid' && !routesInitialized) {
         routesInitialized = true;
         initRoutes(__LEGACY, license.uid);
       }
     });
+
+    // Init telemetry
+    const { savedObjectsClient } = __LEGACY.savedObjects;
+    registerMapsUsageCollector(usageCollection, savedObjectsClient, __LEGACY.config);
 
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',

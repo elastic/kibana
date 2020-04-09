@@ -17,14 +17,37 @@
  * under the License.
  */
 
+import Path from 'path';
+
 import jestDiff from 'jest-diff';
 import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 import { reformatJestDiff, getOptimizerCacheKey, diffCacheKey } from './cache_keys';
 import { OptimizerConfig } from './optimizer_config';
 
-jest.mock('./get_changes.ts');
+jest.mock('./get_changes.ts', () => ({
+  getChanges: async () =>
+    new Map([
+      ['/foo/bar/a', 'modified'],
+      ['/foo/bar/b', 'modified'],
+      ['/foo/bar/c', 'deleted'],
+    ]),
+}));
+
+jest.mock('./get_mtimes.ts', () => ({
+  getMtimes: async (paths: string[]) => new Map(paths.map(path => [path, 12345])),
+}));
+
 jest.mock('execa');
+
+jest.mock('fs', () => {
+  const realFs = jest.requireActual('fs');
+  return {
+    ...realFs,
+    readFile: jest.fn(realFs.readFile),
+  };
+});
+
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 jest.requireMock('execa').mockImplementation(async (cmd: string, args: string[], opts: object) => {
@@ -46,28 +69,35 @@ jest.requireMock('execa').mockImplementation(async (cmd: string, args: string[],
   };
 });
 
-jest.requireMock('./get_changes.ts').getChanges.mockImplementation(
-  async () =>
-    new Map([
-      ['/foo/bar/a', 'modified'],
-      ['/foo/bar/b', 'modified'],
-      ['/foo/bar/c', 'deleted'],
-    ])
-);
-
 describe('getOptimizerCacheKey()', () => {
-  it('uses latest commit and changes files to create unique value', async () => {
+  it('uses latest commit, bootstrap cache, and changed files to create unique value', async () => {
+    jest
+      .requireMock('fs')
+      .readFile.mockImplementation(
+        (path: string, enc: string, cb: (err: null, file: string) => void) => {
+          expect(path).toBe(
+            Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/target/.bootstrap-cache')
+          );
+          expect(enc).toBe('utf8');
+          cb(null, '<bootstrap cache>');
+        }
+      );
+
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
     });
 
     await expect(getOptimizerCacheKey(config)).resolves.toMatchInlineSnapshot(`
             Object {
+              "bootstrap": "<bootstrap cache>",
               "deletedPaths": Array [
                 "/foo/bar/c",
               ],
               "lastCommit": "<last commit sha>",
-              "modifiedPaths": Object {},
+              "modifiedTimes": Object {
+                "/foo/bar/a": 12345,
+                "/foo/bar/b": 12345,
+              },
               "workerConfig": Object {
                 "browserslistEnv": "dev",
                 "cache": true,

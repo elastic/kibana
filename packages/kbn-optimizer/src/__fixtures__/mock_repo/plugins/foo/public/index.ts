@@ -19,3 +19,7 @@
 
 export * from './lib';
 export * from './ext';
+
+export async function getFoo() {
+  return await import('./async_import');
+}

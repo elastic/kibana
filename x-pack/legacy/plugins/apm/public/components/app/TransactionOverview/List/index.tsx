@@ -8,8 +8,9 @@ import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { ITransactionGroup } from '../../../../../server/lib/transaction_groups/transform';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ITransactionGroup } from '../../../../../../../../plugins/apm/server/lib/transaction_groups/transform';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { asDecimal, convertTo } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';

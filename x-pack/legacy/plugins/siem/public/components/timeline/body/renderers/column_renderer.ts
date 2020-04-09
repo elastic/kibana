@@ -5,7 +5,7 @@
  */
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-import { ColumnHeader } from '../column_headers/column_header';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
@@ -20,7 +20,7 @@ export interface ColumnRenderer {
   }: {
     columnName: string;
     eventId: string;
-    field: ColumnHeader;
+    field: ColumnHeaderOptions;
     timelineId: string;
     truncate?: boolean;
     values: string[] | null | undefined;

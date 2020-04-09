@@ -12,17 +12,26 @@ const fadeInEffect = keyframes`
   to { opacity: 1; }
 `;
 
+interface WidthProp {
+  width: number;
+}
+
 export const TimelineProperties = styled.div`
+  flex: 1;
   align-items: center;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   user-select: none;
 `;
+
 TimelineProperties.displayName = 'TimelineProperties';
 
-export const DatePicker = styled(EuiFlexItem)<{ width: number }>`
-  width: ${({ width }) => `${width}px`};
+export const DatePicker = styled(EuiFlexItem).attrs<WidthProp>(({ width }) => ({
+  style: {
+    width: `${width}px`,
+  },
+}))<WidthProp>`
   .euiSuperDatePicker__flexWrapper {
     max-width: none;
     width: auto;

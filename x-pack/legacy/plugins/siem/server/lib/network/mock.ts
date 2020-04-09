@@ -59,8 +59,7 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
 };
 
 export const mockRequest = {
-  params: {},
-  payload: {
+  body: {
     operationName: 'GetNetworkTopNFlowQuery',
     variables: {
       filterQuery: '',
@@ -1507,10 +1506,10 @@ export const mockOptionsIp: NetworkTopNFlowRequestOptions = {
 
 export const mockRequestIp = {
   ...mockRequest,
-  payload: {
-    ...mockRequest.payload,
+  body: {
+    ...mockRequest.body,
     variables: {
-      ...mockRequest.payload.variables,
+      ...mockRequest.body.variables,
       ip: '1.1.1.1',
     },
   },

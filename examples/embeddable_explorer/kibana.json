@@ -5,6 +5,6 @@
   "configPath": ["embeddable_explorer"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["embeddable", "embeddableExamples"],
+  "requiredPlugins": ["uiActions", "inspector", "embeddable", "embeddableExamples"],
   "optionalPlugins": []
 }

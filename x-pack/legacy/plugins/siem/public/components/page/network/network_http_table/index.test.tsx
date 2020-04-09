@@ -50,7 +50,7 @@ describe('NetworkHttp Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkHttpTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
     });
   });
 

@@ -12,7 +12,8 @@ import {
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap,
 } from './utils';
-import { getGlyphUrl, isRetina } from '../../../meta';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getGlyphUrl, isRetina } from '../../../../../../../plugins/maps/public/meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
@@ -23,6 +24,11 @@ import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
+import {
+  clampToLatBounds,
+  clampToLonBounds,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../plugins/maps/public/elasticsearch_geo_utils';
 
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
@@ -234,12 +240,12 @@ export class MBMapContainer extends React.Component {
       //clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
       const lnLatBounds = new mapboxgl.LngLatBounds(
         new mapboxgl.LngLat(
-          clamp(goto.bounds.min_lon, -180, 180),
-          clamp(goto.bounds.min_lat, -89, 89)
+          clampToLonBounds(goto.bounds.minLon),
+          clampToLatBounds(goto.bounds.minLat)
         ),
         new mapboxgl.LngLat(
-          clamp(goto.bounds.max_lon, -180, 180),
-          clamp(goto.bounds.max_lat, -89, 89)
+          clampToLonBounds(goto.bounds.maxLon),
+          clampToLatBounds(goto.bounds.maxLat)
         )
       );
       //maxZoom ensure we're not zooming in too far on single points or small shapes
@@ -305,10 +311,4 @@ export class MBMapContainer extends React.Component {
       </div>
     );
   }
-}
-
-function clamp(val, min, max) {
-  if (val > max) val = max;
-  else if (val < min) val = min;
-  return val;
 }

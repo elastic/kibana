@@ -1,0 +1,47 @@
+[role="xpack"]
+[[connector-management]]
+=== Managing Connectors
+
+beta[]
+
+Alerts use *Connectors* to route actions to different destinations like log files, ticketing systems, and messaging tools. While each {kib} app can offer their own types of alerts, they typically share connectors. The *Connectors* tab offers a central place to view and manage all the connectors in the current space.
+
+For more information on connectors and the types of actions available see <<action-types>>.
+
+[role="screenshot"]
+image::images/connector-listing.png[Example connector listing in the Alerts and Actions UI]
+
+
+[float]
+==== Connector list
+
+The *Connectors* tab lists all connectors in the current space. The *search bar* can be used to find specific connectors by name and/or type.
+
+[role="screenshot"]
+image::images/connector-filter-by-search.png[Filtering the connector list using the search bar]
+
+
+The *type* dropdown also lets you filter to a subset of action types.
+
+[role="screenshot"]
+image::images/connector-filter-by-type.png[Filtering the connector list by types of actions]
+
+The *Actions* column indicates the number of actions that reference the connector. This count helps you confirm a connector is unused before you delete it, and tells you how many actions will be affected when a connector is modified.
+
+[role="screenshot"]
+image::images/connector-action-count.png[Filtering the connector list by types of actions]
+
+You can delete individual connectors using the trash icon. Connectors can also be deleted in bulk by multi-selecting them and clicking the *Delete* button to the left of the search box. 
+
+[role="screenshot"]
+image::images/connector-delete.png[Deleting connectors individually or in bulk]
+
+[NOTE]
+============================================================================
+You can delete a connector even if there are still actions referencing it.
+When this happens the action will fail to execute, and appear as errors in the {kib} logs.
+============================================================================
+
+==== Creating a new connector
+
+New connectors can be created by clicking the *Create connector* button, which will guide you to select the type of connector and configure it's properties. Refer to <<action-types>> for the types of connectors available and how to configure them. Once you create a connector it will be made available to you anytime you set up an action in the current space.

@@ -6,12 +6,13 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { parseInterval, FIELD_FORMAT_IDS } from '../../../../../src/plugins/data/public';
+import { search, FIELD_FORMAT_IDS } from '../../../../../src/plugins/data/public';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
 } from './calc_es_interval';
+const { parseInterval } = search.aggs;
 
 function isValidMoment(m) {
   return m && 'isValid' in m && m.isValid();

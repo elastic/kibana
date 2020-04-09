@@ -27,7 +27,8 @@ export {
 } from './cluster_client';
 export { IScopedClusterClient, ScopedClusterClient, Headers } from './scoped_cluster_client';
 export { ElasticsearchClientConfig } from './elasticsearch_client_config';
-export { config } from './elasticsearch_config';
+export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
 export { ElasticsearchError, ElasticsearchErrorHelpers } from './errors';
 export * from './api_types';
 export * from './types';
+export { NodesVersionCompatibility } from './version_check/ensure_es_version';

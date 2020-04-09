@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'kibana/public';
-import { createCallApmApi } from './createCallApmApi';
+import { callApmApi } from './createCallApmApi';
 
-export const createStaticIndexPattern = async (http: HttpSetup) => {
-  const callApmApi = createCallApmApi(http);
+export const createStaticIndexPattern = async () => {
   return await callApmApi({
     method: 'POST',
     pathname: '/api/apm/index_pattern/static'

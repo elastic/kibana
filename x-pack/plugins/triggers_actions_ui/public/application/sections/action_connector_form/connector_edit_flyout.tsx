@@ -16,37 +16,42 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiButton,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { useAppDependencies } from '../../app_context';
 import { ActionConnectorTableItem, ActionConnector, IErrorObject } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { updateActionConnector } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { PLUGIN } from '../../constants/plugin';
 
 export interface ConnectorEditProps {
   initialConnector: ActionConnectorTableItem;
+  editFlyoutVisible: boolean;
+  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) => {
+export const ConnectorEditFlyout = ({
+  initialConnector,
+  editFlyoutVisible,
+  setEditFlyoutVisibility,
+}: ConnectorEditProps) => {
   let hasErrors = false;
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
-  const canSave = hasSaveActionsCapability(capabilities);
   const {
-    editFlyoutVisible,
-    setEditFlyoutVisibility,
+    http,
+    toastNotifications,
+    capabilities,
+    actionTypeRegistry,
     reloadConnectors,
   } = useActionsConnectorsContext();
+  const canSave = hasSaveActionsCapability(capabilities);
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
   const [{ connector }, dispatch] = useReducer(connectorReducer, {
     connector: { ...initialConnector, secrets: {} },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
 
   if (!editFlyoutVisible) {
     return null;
@@ -76,7 +81,13 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
         return savedConnector;
       })
       .catch(errorRes => {
-        setServerError(errorRes);
+        toastNotifications.addDanger(
+          errorRes.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
+              { defaultMessage: 'Cannot update a connector.' }
+            )
+        );
         return undefined;
       });
 
@@ -96,6 +107,20 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
                   defaultMessage="Edit connector"
                   id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutTitle"
                 />
+                &emsp;
+                <EuiBetaBadge
+                  label="Beta"
+                  tooltipContent={i18n.translate(
+                    'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
+                    {
+                      defaultMessage:
+                        '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                      values: {
+                        pluginName: PLUGIN.getI18nName(i18n),
+                      },
+                    }
+                  )}
+                />
               </h3>
             </EuiTitle>
           </EuiFlexItem>
@@ -104,11 +129,11 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
       <EuiFlyoutBody>
         <ActionConnectorForm
           connector={connector}
-          serverError={serverError}
           errors={errors}
           actionTypeName={connector.actionType}
           dispatch={dispatch}
           actionTypeRegistry={actionTypeRegistry}
+          http={http}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -139,7 +164,9 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
                   setIsSaving(false);
                   if (savedAction) {
                     closeFlyout();
-                    reloadConnectors();
+                    if (reloadConnectors) {
+                      reloadConnectors();
+                    }
                   }
                 }}
               >

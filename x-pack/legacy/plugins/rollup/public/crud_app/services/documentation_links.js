@@ -5,11 +5,9 @@
  */
 
 let esBase = '';
-let xPackBase = '';
 
 export function setEsBaseAndXPackBase(elasticWebsiteUrl, docLinksVersion) {
   esBase = `${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinksVersion}`;
-  xPackBase = `${elasticWebsiteUrl}guide/en/x-pack/${docLinksVersion}`;
 }
 
 export const getLogisticalDetailsUrl = () => `${esBase}/rollup-job-config.html#_logistical_details`;
@@ -21,4 +19,4 @@ export const getMetricsDetailsUrl = () => `${esBase}/rollup-job-config.html#roll
 
 export const getDateHistogramAggregationUrl = () =>
   `${esBase}/search-aggregations-bucket-datehistogram-aggregation.html`;
-export const getCronUrl = () => `${xPackBase}/trigger-schedule.html#_cron_expressions`;
+export const getCronUrl = () => `${esBase}/trigger-schedule.html#_cron_expressions`;

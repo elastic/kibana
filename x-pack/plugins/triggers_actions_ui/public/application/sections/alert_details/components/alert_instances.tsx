@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padLeft, difference } from 'lodash';
+import { padLeft, difference, chunk } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RawAlertInstance } from '../../../../../../../legacy/plugins/alerting/common';
-import { Alert, AlertTaskState } from '../../../../types';
+import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 type AlertInstancesProps = {
   alert: Alert;
   alertState: AlertTaskState;
   requestRefresh: () => Promise<void>;
+  durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 export const alertInstancesTableColumns = (
@@ -134,35 +135,65 @@ export function AlertInstances({
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
+  durationEpoch = Date.now(),
 }: AlertInstancesProps) {
+  const [pagination, setPagination] = useState<Pagination>({
+    index: 0,
+    size: DEFAULT_SEARCH_PAGE_SIZE,
+  });
+
+  const mergedAlertInstances = [
+    ...Object.entries(alertInstances).map(([instanceId, instance]) =>
+      alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
+    ),
+    ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
+      alertInstanceToListItem(durationEpoch, alert, instanceId)
+    ),
+  ];
+  const pageOfAlertInstances = getPage(mergedAlertInstances, pagination);
+
   const onMuteAction = async (instance: AlertInstanceListItem) => {
     await (instance.isMuted
       ? unmuteAlertInstance(alert, instance.instance)
       : muteAlertInstance(alert, instance.instance));
     requestRefresh();
   };
+
   return (
-    <EuiBasicTable
-      items={[
-        ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-          alertInstanceToListItem(alert, instanceId, instance)
-        ),
-        ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
-          alertInstanceToListItem(alert, instanceId)
-        ),
-      ]}
-      rowProps={() => ({
-        'data-test-subj': 'alert-instance-row',
-      })}
-      cellProps={() => ({
-        'data-test-subj': 'cell',
-      })}
-      columns={alertInstancesTableColumns(onMuteAction)}
-      data-test-subj="alertInstancesList"
-    />
+    <Fragment>
+      <input
+        type="hidden"
+        data-test-subj="alertInstancesDurationEpoch"
+        name="alertInstancesDurationEpoch"
+        value={durationEpoch}
+      />
+      <EuiBasicTable
+        items={pageOfAlertInstances}
+        pagination={{
+          pageIndex: pagination.index,
+          pageSize: pagination.size,
+          totalItemCount: mergedAlertInstances.length,
+        }}
+        onChange={({ page: changedPage }: { page: Pagination }) => {
+          setPagination(changedPage);
+        }}
+        rowProps={() => ({
+          'data-test-subj': 'alert-instance-row',
+        })}
+        cellProps={() => ({
+          'data-test-subj': 'cell',
+        })}
+        columns={alertInstancesTableColumns(onMuteAction)}
+        data-test-subj="alertInstancesList"
+      />
+    </Fragment>
   );
 }
 export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
+
+function getPage(items: any[], pagination: Pagination) {
+  return chunk(items, pagination.size)[pagination.index] || [];
+}
 
 interface AlertInstanceListItemStatus {
   label: string;
@@ -186,9 +217,11 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'Inactive' }
 );
 
-const durationSince = (start?: Date) => (start ? Date.now() - start.getTime() : 0);
+const durationSince = (durationEpoch: number, startTime?: number) =>
+  startTime ? durationEpoch - startTime : 0;
 
 export function alertInstanceToListItem(
+  durationEpoch: number,
   alert: Alert,
   instanceId: string,
   instance?: RawAlertInstance
@@ -200,7 +233,10 @@ export function alertInstanceToListItem(
       ? { label: ACTIVE_LABEL, healthColor: 'primary' }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' },
     start: instance?.meta?.lastScheduledActions?.date,
-    duration: durationSince(instance?.meta?.lastScheduledActions?.date),
+    duration: durationSince(
+      durationEpoch,
+      instance?.meta?.lastScheduledActions?.date?.getTime() ?? 0
+    ),
     isMuted,
   };
 }

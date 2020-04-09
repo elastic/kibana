@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerRoutes } from './routes';
 
 export class AutocompleteService implements Plugin<void> {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup) {
-    registerRoutes(core);
+    registerRoutes(core, this.initializerContext.config.legacy.globalConfig$);
   }
 
   public start() {}

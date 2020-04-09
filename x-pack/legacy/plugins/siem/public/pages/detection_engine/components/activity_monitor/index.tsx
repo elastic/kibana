@@ -13,32 +13,9 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../components/detection_engine/utility_bar';
+} from '../../../../components/utility_bar';
 import { columns } from './columns';
-
-export interface RuleTypes {
-  href: string;
-  name: string;
-}
-
-export interface ColumnTypes {
-  id: number;
-  rule: RuleTypes;
-  ran: string;
-  lookedBackTo: string;
-  status: string;
-  response?: string | undefined;
-}
-
-export interface PageTypes {
-  index: number;
-  size: number;
-}
-
-export interface SortTypes {
-  field: keyof ColumnTypes;
-  direction: 'asc' | 'desc';
-}
+import { ColumnTypes, PageTypes, SortTypes } from './types';
 
 export const ActivityMonitor = React.memo(() => {
   const sampleTableData: ColumnTypes[] = [

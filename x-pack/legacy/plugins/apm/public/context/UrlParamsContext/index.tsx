@@ -16,11 +16,12 @@ import { uniqueId, mapValues } from 'lodash';
 import { IUrlParams } from './types';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
-import { UIFilters } from '../../../typings/ui-filters';
+import { UIFilters } from '../../../../../../plugins/apm/typings/ui_filters';
 import {
   localUIFilterNames,
   LocalUIFilterName
-} from '../../../server/lib/ui_filters/local_ui_filters/config';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/apm/server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../utils/pickKeys';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 

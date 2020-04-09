@@ -20,15 +20,15 @@
 /** @public */
 export interface Environment {
   /**
-   * Flag whether the home app should advertize cloud features
+   * Flag whether the home app should advertise cloud features
    */
   readonly cloud: boolean;
   /**
-   * Flag whether the home app should advertize apm features
+   * Flag whether the home app should advertise apm features
    */
   readonly apmUi: boolean;
   /**
-   * Flag whether the home app should advertize ml features
+   * Flag whether the home app should advertise ml features
    */
   readonly ml: boolean;
 }
@@ -55,17 +55,9 @@ export class EnvironmentService {
     };
   }
 
-  public start() {
-    return {
-      /**
-       * Retrieve the current environment home is running in. This API is only intended for internal
-       * use and is only exposed during a transition period of migrating the home app to the new platform.
-       * @deprecated
-       */
-      get: (): Environment => this.environment,
-    };
+  public getEnvironment() {
+    return this.environment;
   }
 }
 
 export type EnvironmentServiceSetup = ReturnType<EnvironmentService['setup']>;
-export type EnvironmentServiceStart = ReturnType<EnvironmentService['start']>;

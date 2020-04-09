@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../meta', () => {
+jest.mock('../../../../../plugins/maps/public/meta', () => {
   return {};
 });
-
-jest.mock('ui/chrome', () => {
-  return {};
-});
+jest.mock('../kibana_services');
 
 import { getInitialLayers } from './get_initial_layers';
 
 const layerListNotProvided = undefined;
 
 describe('Saved object has layer list', () => {
+  beforeEach(() => {
+    require('../kibana_services').getInjectedVarFunc = () => jest.fn();
+  });
+
   it('Should get initial layers from saved object', () => {
     const layerListFromSavedObject = [
       {
@@ -31,7 +32,7 @@ describe('Saved object has layer list', () => {
 
 describe('kibana.yml configured with map.tilemap.url', () => {
   beforeAll(() => {
-    require('../meta').getKibanaTileMap = () => {
+    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
       return {
         url: 'myTileUrl',
       };
@@ -61,10 +62,10 @@ describe('kibana.yml configured with map.tilemap.url', () => {
 
 describe('EMS is enabled', () => {
   beforeAll(() => {
-    require('../meta').getKibanaTileMap = () => {
+    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
       return null;
     };
-    require('ui/chrome').getInjected = key => {
+    require('../kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'emsTileLayerId':
           return {
@@ -75,7 +76,7 @@ describe('EMS is enabled', () => {
         case 'isEmsEnabled':
           return true;
         default:
-          throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+          throw new Error(`Unexpected call to getInjectedVarFunc with key ${key}`);
       }
     };
   });
@@ -105,16 +106,16 @@ describe('EMS is enabled', () => {
 
 describe('EMS is not enabled', () => {
   beforeAll(() => {
-    require('../meta').getKibanaTileMap = () => {
+    require('../../../../../plugins/maps/public/meta').getKibanaTileMap = () => {
       return null;
     };
 
-    require('ui/chrome').getInjected = key => {
+    require('../kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'isEmsEnabled':
           return false;
         default:
-          throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+          throw new Error(`Unexpected call to getInjectedVarFunc with key ${key}`);
       }
     };
   });

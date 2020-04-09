@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AutoFollowPatternForm } from '../../public/app/components/auto_follow_pattern_form';
+import '../../public/np_ready/app/services/breadcrumbs.mock';
+import { AutoFollowPatternForm } from '../../public/np_ready/app/components/auto_follow_pattern_form';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { AUTO_FOLLOW_PATTERN_EDIT } from './helpers/constants';
 

@@ -30,7 +30,7 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('apps');
+    expect(actionTypeModel.iconClass).toEqual('test-file-stub');
   });
 });
 
@@ -183,5 +183,6 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="groupInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="pagerdutySummaryInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
   });
 });

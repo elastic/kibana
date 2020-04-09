@@ -23,7 +23,5 @@ import { plugin } from './index';
 
 // Legacy compatibility part - to be removed at cutover, replaced by a kibana.json file
 export const pluginInstance = plugin({} as PluginInitializerContext);
-export const setup = pluginInstance.setup(npSetup.core, {
-  ...npSetup.plugins,
-});
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
 export const start = pluginInstance.start(npStart.core, npStart.plugins);

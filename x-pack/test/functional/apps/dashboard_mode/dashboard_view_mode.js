@@ -12,6 +12,7 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const log = getService('log');
   const pieChart = getService('pieChart');
+  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -37,10 +38,7 @@ export default function({ getService, getPageObjects }) {
       log.debug('Dashboard View Mode:initTests');
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-        pageNavigation: 'individual',
-      });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
@@ -112,13 +110,15 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.security.clickSaveEditUser();
       });
 
-      after('logout', async () => {
-        await PageObjects.security.forceLogout();
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('shows only the dashboard app link', async () => {
+        await security.testUser.setRoles(['test_logstash_reader', 'kibana_dashboard_only_user']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.security.forceLogout();
-        await PageObjects.security.login('dashuser', '123456');
+        await PageObjects.security.login('test_user', 'changeme');
 
         const appLinks = await appsMenu.readLinks();
         expect(appLinks).to.have.length(1);
@@ -197,19 +197,23 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login('mixeduser', '123456');
+        await security.testUser.setRoles([
+          'test_logstash_reader',
+          'kibana_dashboard_only_user',
+          'kibana_admin',
+        ]);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (await appsMenu.linkExists('Stack Management')) {
+        if (await appsMenu.linkExists('Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
 
       it('is not loaded for a user who is assigned a superuser role', async () => {
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login('mysuperuser', '123456');
+        await security.testUser.setRoles(['kibana_dashboard_only_user', 'superuser']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (!(await appsMenu.linkExists('Stack Management'))) {
+        if (!(await appsMenu.linkExists('Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });

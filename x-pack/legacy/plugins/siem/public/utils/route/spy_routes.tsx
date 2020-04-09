@@ -5,7 +5,6 @@
  */
 
 import * as H from 'history';
-import { isEqual } from 'lodash/fp';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
@@ -35,17 +34,18 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
       }
     }, [search]);
     useEffect(() => {
-      if (pageName && !isEqual(route.pathName, pathname)) {
+      if (pageName && !deepEqual(route.pathName, pathname)) {
         if (isInitializing && detailName == null) {
           dispatch({
             type: 'updateRouteWithOutSearch',
             route: {
-              pageName,
               detailName,
-              tabName,
-              pathName: pathname,
-              history,
               flowTarget,
+              history,
+              pageName,
+              pathName: pathname,
+              state,
+              tabName,
             },
           });
           setIsInitializing(false);
@@ -53,13 +53,14 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           dispatch({
             type: 'updateRoute',
             route: {
-              pageName,
               detailName,
-              tabName,
-              search,
-              pathName: pathname,
-              history,
               flowTarget,
+              history,
+              pageName,
+              pathName: pathname,
+              search,
+              state,
+              tabName,
             },
           });
         }
@@ -68,14 +69,14 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
           dispatch({
             type: 'updateRoute',
             route: {
-              pageName,
               detailName,
-              tabName,
-              search,
-              pathName: pathname,
-              history,
               flowTarget,
+              history,
+              pageName,
+              pathName: pathname,
+              search,
               state,
+              tabName,
             },
           });
         }

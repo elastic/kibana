@@ -19,7 +19,8 @@
 
 import { IRequestConfig } from 'angular';
 
-const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
+const SYSTEM_REQUEST_HEADER_NAME = 'kbn-system-request';
+const LEGACY_SYSTEM_API_HEADER_NAME = 'kbn-system-api';
 
 /**
  * Adds a custom header designating request as system API
@@ -28,7 +29,7 @@ const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
  */
 export function addSystemApiHeader(originalHeaders: Record<string, string>) {
   const systemApiHeaders = {
-    [SYSTEM_API_HEADER_NAME]: true,
+    [SYSTEM_REQUEST_HEADER_NAME]: true,
   };
   return {
     ...originalHeaders,
@@ -44,5 +45,7 @@ export function addSystemApiHeader(originalHeaders: Record<string, string>) {
  */
 export function isSystemApiRequest(request: IRequestConfig) {
   const { headers } = request;
-  return headers && !!headers[SYSTEM_API_HEADER_NAME];
+  return (
+    headers && (!!headers[SYSTEM_REQUEST_HEADER_NAME] || !!headers[LEGACY_SYSTEM_API_HEADER_NAME])
+  );
 }

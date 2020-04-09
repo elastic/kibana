@@ -9,11 +9,11 @@ import uuid from 'uuid';
 
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTdContent, EventsTrData } from '../../styles';
 import { Actions } from '../actions';
-import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -23,7 +23,7 @@ interface Props {
   id: string;
   actionsColumnWidth: number;
   associateNote: AssociateNote;
-  columnHeaders: ColumnHeader[];
+  columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;

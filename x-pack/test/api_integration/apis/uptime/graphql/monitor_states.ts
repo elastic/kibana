@@ -5,10 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helpers/make_checks';
+import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
+import { MonitorSummary } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,6 +23,7 @@ export default function({ getService }: FtrProviderContext) {
       variables: {
         dateRangeStart,
         dateRangeEnd,
+        pageSize: 10,
         ...variables,
       },
     };
@@ -115,6 +117,7 @@ export default function({ getService }: FtrProviderContext) {
             }
             return d;
           });
+
           dateRangeEnd = new Date().toISOString();
           nonSummaryIp = checks[0][0].monitor.ip;
         });
@@ -174,6 +177,68 @@ export default function({ getService }: FtrProviderContext) {
             expect(nonSummaryRes.monitorStates.summaries.length).to.eql(0);
           });
         });
+      });
+    });
+
+    describe(' test status filter', async () => {
+      const upMonitorId = 'up-test-id';
+      const downMonitorId = 'down-test-id';
+      const mixMonitorId = 'mix-test-id';
+      before('generate three monitors with up, down, mix state', async () => {
+        await getService('esArchiver').load('uptime/blank');
+
+        const es = getService('legacyEs');
+
+        const observer = {
+          geo: {
+            name: 'US-East',
+            location: '40.7128, -74.0060',
+          },
+        };
+
+        // Generating three monitors each with two geo locations,
+        // One in a down state ,
+        // One in an up state,
+        // One in a mix state
+
+        dateRangeStart = new Date().toISOString();
+
+        await makeChecksWithStatus(es, upMonitorId, 1, 4, 1, {}, 'up');
+        await makeChecksWithStatus(es, upMonitorId, 1, 4, 1, { observer }, 'up');
+
+        await makeChecksWithStatus(es, downMonitorId, 1, 4, 1, {}, 'down');
+        await makeChecksWithStatus(es, downMonitorId, 1, 4, 1, { observer }, 'down');
+
+        await makeChecksWithStatus(es, mixMonitorId, 1, 4, 1, {}, 'up');
+        await makeChecksWithStatus(es, mixMonitorId, 1, 4, 1, { observer }, 'down');
+
+        dateRangeEnd = new Date().toISOString();
+      });
+
+      after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
+
+      it('should return all monitor when no status filter', async () => {
+        const { monitorStates } = await getMonitorStates({});
+        expect(monitorStates.summaries.length).to.eql(3);
+        // Summaries are by default sorted by monitor names
+        expect(
+          monitorStates.summaries.map((summary: MonitorSummary) => summary.monitor_id)
+        ).to.eql([downMonitorId, mixMonitorId, upMonitorId]);
+      });
+
+      it('should return a monitor with mix state if check status filter is down', async () => {
+        const { monitorStates } = await getMonitorStates({ statusFilter: 'down' });
+        expect(monitorStates.summaries.length).to.eql(2);
+        monitorStates.summaries.forEach((summary: MonitorSummary) => {
+          expect(summary.monitor_id).to.not.eql(upMonitorId);
+        });
+      });
+
+      it('should not return a monitor with mix state if check status filter is up', async () => {
+        const { monitorStates } = await getMonitorStates({ statusFilter: 'up' });
+
+        expect(monitorStates.summaries.length).to.eql(1);
+        expect(monitorStates.summaries[0].monitor_id).to.eql(upMonitorId);
       });
     });
   });

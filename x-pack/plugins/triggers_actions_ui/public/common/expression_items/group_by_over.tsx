@@ -5,11 +5,11 @@
  */
 
 import React, { useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { builtInGroupByTypes } from '../constants';
 import { GroupByType } from '../types';
+import { ClosablePopoverTitle } from './components';
 
 interface GroupByExpressionProps {
   groupBy: string;
@@ -61,6 +62,7 @@ export const GroupByExpression = ({
   const groupByTypes = customGroupByTypes ?? builtInGroupByTypes;
   const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
   const MIN_TERM_SIZE = 1;
+  const MAX_TERM_SIZE = 1000;
   const firstFieldOption = {
     text: i18n.translate(
       'xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel',
@@ -111,14 +113,12 @@ export const GroupByExpression = ({
       anchorPosition={popupPosition ?? 'downRight'}
     >
       <div>
-        <EuiPopoverTitle>
-          {i18n.translate(
-            'xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel',
-            {
-              defaultMessage: 'over',
-            }
-          )}
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setGroupByPopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel"
+            defaultMessage="over"
+          />
+        </ClosablePopoverTitle>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiSelect
@@ -159,6 +159,7 @@ export const GroupByExpression = ({
                       onChangeSelectedTermSize(termSizeVal);
                     }}
                     min={MIN_TERM_SIZE}
+                    max={MAX_TERM_SIZE}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

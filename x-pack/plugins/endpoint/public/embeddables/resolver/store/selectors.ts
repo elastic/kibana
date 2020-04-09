@@ -6,6 +6,7 @@
 
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
+import * as uiSelectors from './ui/selectors';
 import { ResolverState } from '../types';
 
 /**
@@ -16,6 +17,9 @@ export const projectionMatrix = composeSelectors(
   cameraStateSelector,
   cameraSelectors.projectionMatrix
 );
+
+export const clippingPlanes = composeSelectors(cameraStateSelector, cameraSelectors.clippingPlanes);
+export const translation = composeSelectors(cameraStateSelector, cameraSelectors.translation);
 
 /**
  * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.
@@ -41,9 +45,35 @@ export const scalingFactor = composeSelectors(cameraStateSelector, cameraSelecto
  */
 export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelectors.userIsPanning);
 
+/**
+ * Whether or not the camera is animating, at a given time.
+ */
+export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
+
 export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataStateSelector,
   dataSelectors.processNodePositionsAndEdgeLineSegments
+);
+
+export const processAdjacencies = composeSelectors(
+  dataStateSelector,
+  dataSelectors.processAdjacencies
+);
+
+/**
+ * Returns the id of the "current" tree node (fake-focused)
+ */
+export const uiActiveDescendantId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.activeDescendantId
+);
+
+/**
+ * Returns the id of the "selected" tree node (the node that is currently "pressed" and possibly controlling other popups / components)
+ */
+export const uiSelectedDescendantId = composeSelectors(
+  uiStateSelector,
+  uiSelectors.selectedDescendantId
 );
 
 /**
@@ -59,6 +89,18 @@ function cameraStateSelector(state: ResolverState) {
 function dataStateSelector(state: ResolverState) {
   return state.data;
 }
+
+/**
+ * Returns the ui state from within ResolverState
+ */
+function uiStateSelector(state: ResolverState) {
+  return state.ui;
+}
+
+/**
+ * Whether or not the resolver is pending fetching data
+ */
+export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

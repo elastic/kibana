@@ -18,6 +18,7 @@
  */
 
 import { Reporter, METRIC_TYPE } from '@kbn/analytics';
+import { Subject, merge } from 'rxjs';
 import { Storage } from '../../kibana_utils/public';
 import { createReporter } from './services';
 import {
@@ -27,6 +28,7 @@ import {
   CoreStart,
   HttpSetup,
 } from '../../../core/public';
+import { reportApplicationUsage } from './services/application_usage';
 
 interface PublicConfigType {
   uiMetric: {
@@ -39,6 +41,15 @@ export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
   reportUiStats: Reporter['reportUiStats'];
   METRIC_TYPE: typeof METRIC_TYPE;
+  __LEGACY: {
+    /**
+     * Legacy handler so we can report the actual app being used inside "kibana#/{appId}".
+     * To be removed when we get rid of the legacy world
+     *
+     * @deprecated
+     */
+    appChanged: (appId: string) => void;
+  };
 }
 
 export function isUnauthenticated(http: HttpSetup) {
@@ -47,6 +58,7 @@ export function isUnauthenticated(http: HttpSetup) {
 }
 
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
+  private readonly legacyAppId$ = new Subject<string>();
   private trackUserAgent: boolean = true;
   private reporter?: Reporter;
   private config: PublicConfigType;
@@ -70,10 +82,13 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       },
       reportUiStats: this.reporter.reportUiStats,
       METRIC_TYPE,
+      __LEGACY: {
+        appChanged: appId => this.legacyAppId$.next(appId),
+      },
     };
   }
 
-  public start({ http }: CoreStart) {
+  public start({ http, application }: CoreStart) {
     if (!this.reporter) {
       return;
     }
@@ -85,6 +100,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     if (this.trackUserAgent) {
       this.reporter.reportUserAgent('kibana');
     }
+    reportApplicationUsage(merge(application.currentAppId$, this.legacyAppId$), this.reporter);
   }
 
   public stop() {}

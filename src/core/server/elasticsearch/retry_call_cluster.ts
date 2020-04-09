@@ -64,7 +64,8 @@ export function migrationsRetryCallCluster(
                     error instanceof esErrors.AuthenticationException ||
                     error instanceof esErrors.AuthorizationException ||
                     // @ts-ignore
-                    error instanceof esErrors.Gone
+                    error instanceof esErrors.Gone ||
+                    error?.body?.error?.type === 'snapshot_in_progress_exception'
                   );
                 },
                 timer(delay),
@@ -85,15 +86,7 @@ export function migrationsRetryCallCluster(
  *
  * @param apiCaller
  */
-
-// TODO: Replace with APICaller from './scoped_cluster_client' once #46668 is merged
-export function retryCallCluster(
-  apiCaller: (
-    endpoint: string,
-    clientParams: Record<string, any>,
-    options?: CallAPIOptions
-  ) => Promise<any>
-) {
+export function retryCallCluster(apiCaller: APICaller) {
   return (endpoint: string, clientParams: Record<string, any> = {}, options?: CallAPIOptions) => {
     return defer(() => apiCaller(endpoint, clientParams, options))
       .pipe(

@@ -86,7 +86,7 @@ export const STACK_BY_USERS = i18n.translate(
 export const HISTOGRAM_HEADER = i18n.translate(
   'xpack.siem.detectionEngine.signals.histogram.headerTitle',
   {
-    defaultMessage: 'Signals count',
+    defaultMessage: 'Signal count',
   }
 );
 

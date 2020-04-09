@@ -490,7 +490,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
       isCombineEnabled={false}
       isDropDisabled={false}
       mode="standard"
-      renderClone={null}
+      renderClone={[Function]}
       type="drag-type-field"
     >
       <Component />

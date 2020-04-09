@@ -6,9 +6,10 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { SavedObjectsManagementAction } from 'src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
+import { FeaturesPluginStart } from '../../features/public';
 import { SecurityPluginStart, SecurityPluginSetup } from '../../security/public';
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
@@ -23,15 +24,13 @@ export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
   security?: SecurityPluginSetup;
+  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {
+  features: FeaturesPluginStart;
   management?: ManagementStart;
   security?: SecurityPluginStart;
-}
-
-interface LegacyAPI {
-  registerSavedObjectsManagementAction: (action: SavedObjectsManagementAction) => void;
 }
 
 export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
@@ -43,8 +42,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   private managementService?: ManagementService;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
-    this.spacesManager = new SpacesManager(serverBasePath, core.http);
+    this.spacesManager = new SpacesManager(core.http);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
@@ -54,7 +52,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService = new ManagementService();
       this.managementService.setup({
         management: plugins.management,
-        getStartServices: core.getStartServices,
+        getStartServices: core.getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: this.spacesManager,
         securityLicense: plugins.security?.license,
       });
@@ -68,34 +66,22 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    if (plugins.savedObjectsManagement) {
+      const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
+      copySavedObjectsToSpaceService.setup({
+        spacesManager: this.spacesManager,
+        notificationsSetup: core.notifications,
+        savedObjectsManagementSetup: plugins.savedObjectsManagement,
+      });
+    }
+
     spaceSelectorApp.create({
       getStartServices: core.getStartServices,
       application: core.application,
       spacesManager: this.spacesManager,
     });
 
-    return {
-      registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
-        copySavedObjectsToSpaceService.setup({
-          spacesManager: this.spacesManager,
-          managementSetup: {
-            savedObjects: {
-              registry: {
-                register: action => legacyAPI.registerSavedObjectsManagementAction(action),
-                has: () => {
-                  throw new Error('not available in legacy shim');
-                },
-                get: () => {
-                  throw new Error('not available in legacy shim');
-                },
-              },
-            },
-          },
-          notificationsSetup: core.notifications,
-        });
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {

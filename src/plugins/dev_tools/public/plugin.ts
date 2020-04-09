@@ -21,6 +21,8 @@ import { App, CoreSetup, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
+import './index.scss';
+
 export interface DevToolsSetup {
   /**
    * Register a developer tool. It will be available
@@ -130,4 +132,6 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
       getSortedDevTools: this.getSortedDevTools.bind(this),
     };
   }
+
+  public stop() {}
 }

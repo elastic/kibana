@@ -18,7 +18,10 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { FieldFormatsRegistry } from '../../common/field_formats';
+import { FieldFormatsRegistry } from '../../common';
+import { deserializeFieldFormat } from './utils/deserialize';
+import { FormatFactory } from '../../common/field_formats/utils';
+import { baseFormattersPublic } from './constants';
 
 export class FieldFormatsService {
   private readonly fieldFormatsRegistry: FieldFormatsRegistry = new FieldFormatsRegistry();
@@ -32,18 +35,26 @@ export class FieldFormatsService {
 
     const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
-    this.fieldFormatsRegistry.init(getConfig, {
-      parsedUrl: {
-        origin: window.location.origin,
-        pathname: window.location.pathname,
-        basePath: core.http.basePath.get(),
+    this.fieldFormatsRegistry.init(
+      getConfig,
+      {
+        parsedUrl: {
+          origin: window.location.origin,
+          pathname: window.location.pathname,
+          basePath: core.http.basePath.get(),
+        },
       },
-    });
+      baseFormattersPublic
+    );
 
     return this.fieldFormatsRegistry as FieldFormatsSetup;
   }
 
   public start() {
+    this.fieldFormatsRegistry.deserialize = deserializeFieldFormat.bind(
+      this.fieldFormatsRegistry as FieldFormatsStart
+    );
+
     return this.fieldFormatsRegistry as FieldFormatsStart;
   }
 }
@@ -52,4 +63,6 @@ export class FieldFormatsService {
 export type FieldFormatsSetup = Pick<FieldFormatsRegistry, 'register'>;
 
 /** @public */
-export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'>;
+export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'> & {
+  deserialize: FormatFactory;
+};

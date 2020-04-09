@@ -20,7 +20,6 @@
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
 import { npStart } from 'ui/new_platform';
-import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
@@ -33,7 +32,7 @@ uiRoutes.when('/management/kibana/index_pattern', {
     const kbnUrl = $injector.get('kbnUrl');
     $scope.$$postDigest(() => {
       const $routeParams = $injector.get('$routeParams');
-      const indexPatternCreationType = managementSetup.indexPattern.creation.getType(
+      const indexPatternCreationType = npStart.plugins.indexPatternManagement.creation.getType(
         $routeParams.type
       );
       const services = {
@@ -47,6 +46,7 @@ uiRoutes.when('/management/kibana/index_pattern', {
           $scope.$evalAsync(() => kbnUrl.changePath(url));
         },
         openConfirm: npStart.core.overlays.openConfirm,
+        uiSettings: npStart.core.uiSettings,
       };
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;

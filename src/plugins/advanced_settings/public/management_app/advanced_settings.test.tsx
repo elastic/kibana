@@ -22,7 +22,11 @@ import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import dedent from 'dedent';
-import { UiSettingsParams, UserProvidedValues, UiSettingsType } from '../../../../core/public';
+import {
+  PublicUiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+} from '../../../../core/public';
 import { FieldSetting } from './types';
 import { AdvancedSettingsComponent } from './advanced_settings';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
@@ -68,7 +72,7 @@ function mockConfig() {
     remove: (key: string) => Promise.resolve(true),
     isCustom: (key: string) => false,
     isOverridden: (key: string) => Boolean(config.getAll()[key].isOverridden),
-    getRegistered: () => ({} as Readonly<Record<string, UiSettingsParams>>),
+    getRegistered: () => ({} as Readonly<Record<string, PublicUiSettingsParams>>),
     overrideLocalDefault: (key: string, value: any) => {},
     getUpdate$: () =>
       new Observable<{
@@ -89,7 +93,7 @@ function mockConfig() {
     getUpdateErrors$: () => new Observable<Error>(),
     get: (key: string, defaultOverride?: any): any => config.getAll()[key] || defaultOverride,
     get$: (key: string) => new Observable<any>(config.get(key)),
-    getAll: (): Readonly<Record<string, UiSettingsParams & UserProvidedValues>> => {
+    getAll: (): Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>> => {
       return {
         'test:array:setting': {
           ...defaultConfig,

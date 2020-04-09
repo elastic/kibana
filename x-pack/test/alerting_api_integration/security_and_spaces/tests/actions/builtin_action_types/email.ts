@@ -39,6 +39,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       createdActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdActionId,
+        isPreconfigured: false,
         name: 'An email action',
         actionTypeId: '.email',
         config: {
@@ -58,6 +59,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'An email action',
         actionTypeId: '.email',
         config: {
@@ -226,6 +228,62 @@ export default function emailTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(typeof createdAction.id).to.be('string');
+    });
+
+    it('should handle an email action with no auth', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action with no auth',
+          actionTypeId: '.email',
+          config: {
+            service: '__json',
+            from: 'jim@example.com',
+          },
+        })
+        .expect(200);
+
+      await supertest
+        .post(`/api/action/${createdAction.id}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'email-subject',
+            message: 'email-message',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body.data.message.messageId).to.be.a('string');
+          expect(resp.body.data.messageId).to.be.a('string');
+
+          delete resp.body.data.message.messageId;
+          delete resp.body.data.messageId;
+
+          expect(resp.body.data).to.eql({
+            envelope: {
+              from: 'jim@example.com',
+              to: ['kibana-action-test@elastic.co'],
+            },
+            message: {
+              from: { address: 'jim@example.com', name: '' },
+              to: [
+                {
+                  address: 'kibana-action-test@elastic.co',
+                  name: '',
+                },
+              ],
+              cc: null,
+              bcc: null,
+              subject: 'email-subject',
+              html: '<p>email-message</p>\n',
+              text: 'email-message',
+              headers: {},
+            },
+          });
+        });
     });
   });
 }

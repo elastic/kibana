@@ -4,39 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import {
+  UpdateRuleAlertParamsRest,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { ServerFacade } from '../../../../types';
-import { getIdError, transform } from './utils';
-import { transformError, getIndex } from '../utils';
+import {
+  buildRouteValidation,
+  transformError,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
+import { getIdError } from './utils';
+import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 import { updateRules } from '../../rules/update_rules';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
-export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'PUT',
-    path: DETECTION_ENGINE_RULES_URL,
-    options: {
-      tags: ['access:siem'],
+export const updateRulesRoute = (router: IRouter) => {
+  router.put(
+    {
+      path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: updateRulesSchema,
+        body: buildRouteValidation<UpdateRuleAlertParamsRest>(updateRulesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: UpdateRulesRequest, headers) {
+    async (context, request, response) => {
       const {
+        actions,
+        anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
         from,
         query,
         language,
+        machine_learning_job_id: machineLearningJobId,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
@@ -55,33 +63,38 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         to,
         type,
         threat,
+        throttle,
         references,
+        note,
         version,
-      } = request.payload;
-
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
+        lists,
+      } = request.body;
+      const siemResponse = buildSiemResponse(response);
 
       try {
-        const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
+        validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+
+        const alertsClient = context.alerting?.getAlertsClient();
+        const actionsClient = context.actions?.getActionsClient();
+        const savedObjectsClient = context.core.savedObjects.client;
+        const siemClient = context.siem?.getSiemClient();
+
+        if (!siemClient || !actionsClient || !alertsClient) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
+        const finalIndex = outputIndex ?? siemClient.signalsIndex;
         const rule = await updateRules({
           alertsClient,
           actionsClient,
+          anomalyThreshold,
           description,
           enabled,
           falsePositives,
           from,
-          immutable: false,
           query,
           language,
+          machineLearningJobId,
           outputIndex: finalIndex,
           savedId,
           savedObjectsClient,
@@ -102,9 +115,22 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           type,
           threat,
           references,
+          note,
           version,
+          lists,
+          actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it
         });
+
         if (rule != null) {
+          const ruleActions = await updateRulesNotifications({
+            ruleAlertId: rule.id,
+            alertsClient,
+            savedObjectsClient,
+            enabled,
+            actions,
+            throttle,
+            name,
+          });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({
@@ -115,39 +141,30 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             search: rule.id,
             searchFields: ['alertId'],
           });
-          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
-            return headers
-              .response({
-                message: 'Internal error transforming rules',
-                status_code: 500,
-              })
-              .code(500);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleActions,
+            ruleStatuses.saved_objects[0]
+          );
+          if (errors != null) {
+            return siemResponse.error({ statusCode: 500, body: errors });
           } else {
-            return transformed;
+            return response.ok({ body: validated ?? {} });
           }
         } else {
           const error = getIdError({ id, ruleId });
-          return headers
-            .response({
-              message: error.message,
-              status_code: error.statusCode,
-            })
-            .code(error.statusCode);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const updateRulesRoute = (server: ServerFacade) => {
-  server.route(createUpdateRulesRoute(server));
+    }
+  );
 };

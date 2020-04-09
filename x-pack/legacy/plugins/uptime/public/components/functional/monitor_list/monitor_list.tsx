@@ -28,11 +28,12 @@ import {
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { ExpandedRowMap } from './types';
-import { MonitorListDrawer } from './monitor_list_drawer';
 import { MonitorBarSeries } from '../charts';
 import { MonitorPageLink } from './monitor_page_link';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
+import { MonitorListDrawer } from '../../connected';
+import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -43,6 +44,8 @@ interface MonitorListProps {
   hasActiveFilters: boolean;
   successColor: string;
   linkParameters?: string;
+  pageSize: number;
+  setPageSize: (size: number) => void;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -185,20 +188,27 @@ export const MonitorListComponent = (props: Props) => {
           columns={columns}
         />
         <EuiSpacer size="m" />
-        <EuiFlexGroup responsive={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <OverviewPageLink
-              dataTestSubj="xpack.uptime.monitorList.prevButton"
-              direction="prev"
-              pagination={prevPagePagination}
-            />
+            <MonitorListPageSizeSelect size={props.pageSize} setSize={props.setPageSize} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <OverviewPageLink
-              dataTestSubj="xpack.uptime.monitorList.nextButton"
-              direction="next"
-              pagination={nextPagePagination}
-            />
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={false}>
+                <OverviewPageLink
+                  dataTestSubj="xpack.uptime.monitorList.prevButton"
+                  direction="prev"
+                  pagination={prevPagePagination}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <OverviewPageLink
+                  dataTestSubj="xpack.uptime.monitorList.nextButton"
+                  direction="next"
+                  pagination={nextPagePagination}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

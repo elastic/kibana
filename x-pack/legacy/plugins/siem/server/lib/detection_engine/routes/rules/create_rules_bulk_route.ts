@@ -4,65 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction, countBy } from 'lodash/fp';
 import uuid from 'uuid';
+
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
-import { BulkRulesRequest } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
+import { RuleAlertParamsRest } from '../../types';
 import { readRules } from '../../rules/read_rules';
-import { transformOrBulkError, getDuplicates } from './utils';
+import { getDuplicates } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import {
-  callWithRequestFactory,
-  getIndex,
   transformBulkError,
   createBulkErrorObject,
+  buildRouteValidation,
+  buildSiemResponse,
+  validateLicenseForRuleType,
 } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
-export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-    options: {
-      tags: ['access:siem'],
+export const createRulesBulkRoute = (router: IRouter) => {
+  router.post(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: createRulesBulkSchema,
+        body: buildRouteValidation<RuleAlertParamsRest[]>(createRulesBulkSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: BulkRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      const alertsClient = context.alerting?.getAlertsClient();
+      const actionsClient = context.actions?.getActionsClient();
+      const clusterClient = context.core.elasticsearch.dataClient;
+      const savedObjectsClient = context.core.savedObjects.client;
+      const siemClient = context.siem?.getSiemClient();
+
+      if (!siemClient || !actionsClient || !alertsClient) {
+        return siemResponse.error({ statusCode: 404 });
       }
 
-      const ruleDefinitions = request.payload;
-      const mappedDuplicates = countBy('rule_id', ruleDefinitions);
-      const dupes = getDuplicates(mappedDuplicates);
+      const ruleDefinitions = request.body;
+      const dupes = getDuplicates(ruleDefinitions, 'rule_id');
 
       const rules = await Promise.all(
         ruleDefinitions
           .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async payloadRule => {
             const {
+              actions,
+              anomaly_threshold: anomalyThreshold,
               description,
               enabled,
               false_positives: falsePositives,
               from,
               query,
               language,
+              machine_learning_job_id: machineLearningJobId,
               output_index: outputIndex,
               saved_id: savedId,
               meta,
@@ -76,18 +78,22 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               severity,
               tags,
               threat,
+              throttle,
               to,
               type,
               references,
+              note,
               timeline_id: timelineId,
               timeline_title: timelineTitle,
               version,
+              lists,
             } = payloadRule;
             const ruleIdOrUuid = ruleId ?? uuid.v4();
             try {
-              const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-              const callWithRequest = callWithRequestFactory(request, server);
-              const indexExists = await getIndexExists(callWithRequest, finalIndex);
+              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+
+              const finalIndex = outputIndex ?? siemClient.signalsIndex;
+              const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({
                   ruleId: ruleIdOrUuid,
@@ -108,6 +114,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
+                anomalyThreshold,
                 description,
                 enabled,
                 falsePositives,
@@ -115,6 +122,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
                 immutable: false,
                 query,
                 language,
+                machineLearningJobId,
                 outputIndex: finalIndex,
                 savedId,
                 timelineId,
@@ -133,15 +141,29 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
                 type,
                 threat,
                 references,
+                note,
                 version,
+                lists,
+                actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is set to rule, otherwise we are a notification and should not enable it,
               });
-              return transformOrBulkError(ruleIdOrUuid, createdRule);
+
+              const ruleActions = await updateRulesNotifications({
+                ruleAlertId: createdRule.id,
+                alertsClient,
+                savedObjectsClient,
+                enabled,
+                actions,
+                throttle,
+                name,
+              });
+
+              return transformValidateBulkError(ruleIdOrUuid, createdRule, ruleActions);
             } catch (err) {
               return transformBulkError(ruleIdOrUuid, err);
             }
           })
       );
-      return [
+      const rulesBulk = [
         ...rules,
         ...dupes.map(ruleId =>
           createBulkErrorObject({
@@ -151,10 +173,12 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
           })
         ),
       ];
-    },
-  };
-};
-
-export const createRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createCreateRulesBulkRoute(server));
+      const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
+      if (errors != null) {
+        return siemResponse.error({ statusCode: 500, body: errors });
+      } else {
+        return response.ok({ body: validated ?? {} });
+      }
+    }
+  );
 };

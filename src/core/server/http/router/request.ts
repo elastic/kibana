@@ -18,18 +18,24 @@
  */
 
 import { Url } from 'url';
-import { Request } from 'hapi';
+import { Request, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
+import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 import { RouteValidator, RouteValidatorFullConfig } from './validator';
 
 const requestSymbol = Symbol('request');
 
+/**
+ * @internal
+ */
+export interface KibanaRouteState extends ApplicationState {
+  xsrfRequired: boolean;
+}
 /**
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
@@ -137,6 +143,10 @@ export class KibanaRequest<
   public readonly socket: IKibanaSocket;
   /** Request events {@link KibanaRequestEvents} */
   public readonly events: KibanaRequestEvents;
+  public readonly auth: {
+    /* true if the request has been successfully authenticated, otherwise false. */
+    isAuthenticated: boolean;
+  };
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -166,6 +176,11 @@ export class KibanaRequest<
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = new KibanaSocket(request.raw.req.socket);
     this.events = this.getEvents(request);
+
+    this.auth = {
+      // missing in fakeRequests, so we cast to false
+      isAuthenticated: Boolean(request.auth?.isAuthenticated),
+    };
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
@@ -183,9 +198,11 @@ export class KibanaRequest<
     const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
 
     const options = ({
-      authRequired: request.route.settings.auth !== false,
+      authRequired: this.getAuthRequired(request),
+      // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
-      body: ['get', 'options'].includes(method)
+      body: isSafeMethod(method)
         ? undefined
         : {
             parse,
@@ -200,6 +217,31 @@ export class KibanaRequest<
       method,
       options,
     };
+  }
+
+  private getAuthRequired(request: Request): boolean | 'optional' {
+    const authOptions = request.route.settings.auth;
+    if (typeof authOptions === 'object') {
+      // 'try' is used in the legacy platform
+      if (authOptions.mode === 'optional' || authOptions.mode === 'try') {
+        return 'optional';
+      }
+      if (authOptions.mode === 'required') {
+        return true;
+      }
+    }
+
+    // legacy platform routes
+    if (authOptions === undefined) {
+      return true;
+    }
+
+    if (authOptions === false) return false;
+    throw new Error(
+      `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
+        this.url.href
+      }`
+    );
   }
 }
 

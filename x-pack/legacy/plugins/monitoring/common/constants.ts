@@ -17,7 +17,7 @@ export const KIBANA_MONITORING_LOGGING_TAG = 'kibana-monitoring';
  * The Monitoring API version is the expected API format that we export and expect to import.
  * @type {string}
  */
-export const MONITORING_SYSTEM_API_VERSION = '6';
+export const MONITORING_SYSTEM_API_VERSION = '7';
 /**
  * The type name used within the Monitoring index to publish Kibana ops stats.
  * @type {string}
@@ -141,23 +141,12 @@ export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notificat
 
 export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';
 
-const INDEX_PATTERN_NEW = ',monitoring-*-7-*,monitoring-*-8-*';
-const INDEX_PATTERN_KIBANA_NEW = ',monitoring-kibana-7-*,monitoring-kibana-8-*';
-const INDEX_PATTERN_LOGSTASH_NEW = ',monitoring-logstash-7-*,monitoring-logstash-8-*';
-const INDEX_PATTERN_BEATS_NEW = ',monitoring-beats-7-*,monitoring-beats-8-*';
-const INDEX_ALERTS_NEW = ',monitoring-alerts-7,monitoring-alerts-8';
-const INDEX_PATTERN_ELASTICSEARCH_NEW = ',monitoring-es-7-*,monitoring-es-8-*';
-
-export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*' + INDEX_PATTERN_NEW;
-export const INDEX_PATTERN_KIBANA =
-  '.monitoring-kibana-6-*,.monitoring-kibana-7-*' + INDEX_PATTERN_KIBANA_NEW;
-export const INDEX_PATTERN_LOGSTASH =
-  '.monitoring-logstash-6-*,.monitoring-logstash-7-*' + INDEX_PATTERN_LOGSTASH_NEW;
-export const INDEX_PATTERN_BEATS =
-  '.monitoring-beats-6-*,.monitoring-beats-7-*' + INDEX_PATTERN_BEATS_NEW;
-export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7' + INDEX_ALERTS_NEW;
-export const INDEX_PATTERN_ELASTICSEARCH =
-  '.monitoring-es-6-*,.monitoring-es-7-*' + INDEX_PATTERN_ELASTICSEARCH_NEW;
+export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*';
+export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*,.monitoring-kibana-7-*';
+export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logstash-7-*';
+export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
+export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7';
+export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
@@ -250,11 +239,15 @@ export const ALERT_TYPE_PREFIX = 'monitoring_';
  * This is the alert type id for the license expiration alert
  */
 export const ALERT_TYPE_LICENSE_EXPIRATION = `${ALERT_TYPE_PREFIX}alert_type_license_expiration`;
+/**
+ * This is the alert type id for the cluster state alert
+ */
+export const ALERT_TYPE_CLUSTER_STATE = `${ALERT_TYPE_PREFIX}alert_type_cluster_state`;
 
 /**
  * A listing of all alert types
  */
-export const ALERT_TYPES = [ALERT_TYPE_LICENSE_EXPIRATION];
+export const ALERT_TYPES = [ALERT_TYPE_LICENSE_EXPIRATION, ALERT_TYPE_CLUSTER_STATE];
 
 /**
  * Matches the id for the built-in in email action type
@@ -265,7 +258,7 @@ export const ALERT_ACTION_TYPE_EMAIL = '.email';
 /**
  * The number of alerts that have been migrated
  */
-export const NUMBER_OF_MIGRATED_ALERTS = 1;
+export const NUMBER_OF_MIGRATED_ALERTS = 2;
 
 /**
  * The advanced settings config name for the email address

@@ -30,6 +30,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const rawDataTabLocator = 'a[id=rawdata-tab]';
 
       await PageObjects.common.navigateToApp('login');
+
+      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
+      // to use the yml setting, e.g. cloud
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
+
       await testSubjects.setValue('loginUsername', username);
       await testSubjects.setValue('loginPassword', password);
       await testSubjects.click('loginSubmit');
@@ -105,12 +110,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       }
 
       await userMenu.clickLogoutButton();
-
-      await retry.waitForWithTimeout(
-        'login form',
-        config.get('timeouts.waitFor') * 5,
-        async () => await find.existsByDisplayedByCssSelector('.login-form')
-      );
+      await this.waitForLoginForm();
     }
 
     async forceLogout() {
@@ -124,11 +124,17 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const url = PageObjects.common.getHostPort() + '/logout';
       await browser.get(url);
       log.debug('Waiting on the login form to appear');
-      await retry.waitForWithTimeout(
-        'login form',
-        config.get('timeouts.waitFor') * 5,
-        async () => await find.existsByDisplayedByCssSelector('.login-form')
-      );
+      await this.waitForLoginForm();
+    }
+
+    async waitForLoginForm() {
+      await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
+        const alert = await browser.getAlert();
+        if (alert && alert.accept) {
+          await alert.accept();
+        }
+        return await find.existsByDisplayedByCssSelector('.login-form');
+      });
     }
 
     async clickRolesSection() {
@@ -223,20 +229,19 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async getElasticsearchUsers() {
       const users = await testSubjects.findAll('userRow');
       return mapAsync(users, async user => {
-        const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
-        const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
-        const emailElement = await user.findByCssSelector('[data-test-subj="userRowEmail"]');
-        const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
-        const isReservedElementVisible = await user.findByCssSelector('td:last-child');
+        const fullnameElement = await user.findByTestSubject('userRowFullName');
+        const usernameElement = await user.findByTestSubject('userRowUserName');
+        const emailElement = await user.findByTestSubject('userRowEmail');
+        const rolesElement = await user.findByTestSubject('userRowRoles');
+        // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
+        const isUserReserved = (await user.findAllByTestSubject('userReserved', 1)).length > 0;
 
         return {
           username: await usernameElement.getVisibleText(),
           fullname: await fullnameElement.getVisibleText(),
           email: await emailElement.getVisibleText(),
-          roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
-          reserved: (await isReservedElementVisible.getAttribute('innerHTML')).includes(
-            'reservedUser'
-          ),
+          roles: (await rolesElement.getVisibleText()).split('\n').map(role => role.trim()),
+          reserved: isUserReserved,
         };
       });
     }
@@ -244,15 +249,18 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async getElasticsearchRoles() {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
-        const rolenameElement = await role.findByCssSelector('[data-test-subj="roleRowName"]');
-        const reservedRoleRow = await role.findByCssSelector('td:nth-last-child(2)');
+        const [rolename, reserved, deprecated] = await Promise.all([
+          role.findByTestSubject('roleRowName').then(el => el.getVisibleText()),
+          // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
+          role.findAllByTestSubject('roleReserved', 1).then(el => el.length > 0),
+          // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
+          role.findAllByTestSubject('roleDeprecated', 1).then(el => el.length > 0),
+        ]);
 
         return {
-          rolename: await rolenameElement.getVisibleText(),
-          reserved: await find.descendantExistsByCssSelector(
-            '[data-test-subj="reservedRole"]',
-            reservedRoleRow
-          ),
+          rolename,
+          reserved,
+          deprecated,
         };
       });
     }
@@ -395,7 +403,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async selectRole(role) {
-      const dropdown = await testSubjects.find('userFormRolesDropdown');
+      const dropdown = await testSubjects.find('rolesDropdown');
       const input = await dropdown.findByCssSelector('input');
       await input.type(role);
       await testSubjects.click(`roleOption-${role}`);

@@ -366,15 +366,22 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
               paddingSize="l"
               transparentBackground={false}
             >
+              <Portal
+                containerInfo={
+                  <div>
+                    xpack.monitoring.collection.interval
+                  </div>
+                }
+              >
+                xpack.monitoring.collection.interval
+              </Portal>
               <span
                 className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
                 style={Object {}}
               >
                 <code
                   className="euiCodeBlock__code"
-                >
-                  xpack.monitoring.collection.interval
-                </code>
+                />
               </span>
             </EuiCodeBlockImpl>
           </EuiCode>
@@ -387,15 +394,22 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
               paddingSize="l"
               transparentBackground={false}
             >
+              <Portal
+                containerInfo={
+                  <div>
+                    -1
+                  </div>
+                }
+              >
+                -1
+              </Portal>
               <span
                 className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
                 style={Object {}}
               >
                 <code
                   className="euiCodeBlock__code"
-                >
-                  -1
-                </code>
+                />
               </span>
             </EuiCodeBlockImpl>
           </EuiCode>
@@ -682,15 +696,22 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
               paddingSize="l"
               transparentBackground={false}
             >
+              <Portal
+                containerInfo={
+                  <div>
+                    xpack.monitoring.collection.interval
+                  </div>
+                }
+              >
+                xpack.monitoring.collection.interval
+              </Portal>
               <span
                 className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
                 style={Object {}}
               >
                 <code
                   className="euiCodeBlock__code"
-                >
-                  xpack.monitoring.collection.interval
-                </code>
+                />
               </span>
             </EuiCodeBlockImpl>
           </EuiCode>
@@ -703,15 +724,22 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
               paddingSize="l"
               transparentBackground={false}
             >
+              <Portal
+                containerInfo={
+                  <div>
+                    -1
+                  </div>
+                }
+              >
+                -1
+              </Portal>
               <span
                 className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
                 style={Object {}}
               >
                 <code
                   className="euiCodeBlock__code"
-                >
-                  -1
-                </code>
+                />
               </span>
             </EuiCodeBlockImpl>
           </EuiCode>

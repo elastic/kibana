@@ -1,0 +1,275 @@
+[role="xpack"]
+[[apm-api]]
+== API
+
+Some APM app features are provided via a REST API:
+
+* <<agent-config-api>>
+
+TIP: Kibana provides additional <<api,REST APIs>>,
+and general information on <<using-api,how to use APIs>>.
+
+////
+*******************************************************
+////
+
+[[agent-config-api]]
+=== Agent Configuration API
+
+The Agent configuration API allows you to fine-tune your APM agent configuration,
+without needing to redeploy your application.
+
+The following Agent configuration APIs are available:
+
+* <<apm-update-config>> to create or update an Agent configuration
+* <<apm-delete-config>> to delete an Agent configuration.
+* <<apm-list-config>> to list all Agent configurations.
+* <<apm-search-config>> to search for an Agent configuration.
+
+////
+*******************************************************
+////
+
+[[apm-update-config]]
+==== Create or update configuration
+
+[[apm-update-config-req]]
+===== Request
+
+`PUT /api/apm/settings/agent-configuration`
+
+[role="child_attributes"]
+[[apm-update-config-req-body]]
+===== Request body
+
+`service`::
+(required, object) Service identifying the configuration to create or update.
++
+.Properties of `service`
+[%collapsible%open]
+======
+`name` :::
+  (required, string) Name of service
+
+`environment` :::
+  (optional, string) Environment of service
+======
+
+`settings`::
+(required) Key/value object with settings and their corresponding value.
+
+`agent_name`::
+(optional) The agent name is used by the UI to determine which settings to display.
+
+
+[[apm-update-config-example]]
+===== Example
+
+[source,console]
+--------------------------------------------------
+PUT /api/apm/settings/agent-configuration
+{
+    "service" : {
+        "name" : "frontend",
+        "environment" : "production"
+    },
+    "settings" : {
+        "transaction_sample_rate" : 0.4,
+        "capture_body" : "off",
+        "transaction_max_spans" : 500
+    },
+    "agent_name": "nodejs"
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+
+[[apm-delete-config]]
+==== Delete configuration
+
+[[apm-delete-config-req]]
+===== Request
+
+`DELETE /api/apm/settings/agent-configuration`
+
+[role="child_attributes"]
+[[apm-delete-config-req-body]]
+===== Request body
+`service`::
+(required, object) Service identifying the configuration to delete
++
+.Properties of `service`
+[%collapsible%open]
+======
+`name` :::
+  (required, string) Name of service
+
+`environment` :::
+  (optional, string) Environment of service
+======
+
+
+[[apm-delete-config-example]]
+===== Example
+
+[source,console]
+--------------------------------------------------
+DELETE /api/apm/settings/agent-configuration
+{
+    "service" : {
+        "name" : "frontend",
+        "environment": "production"
+    }
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+
+[[apm-list-config]]
+==== List configuration
+
+
+[[apm-list-config-req]]
+===== Request
+
+`GET  /api/apm/settings/agent-configuration`
+
+[[apm-list-config-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+[
+  {
+    "agent_name": "go",
+    "service": {
+      "name": "opbeans-go",
+      "environment": "production"
+    },
+    "settings": {
+      "transaction_sample_rate": 1,
+      "capture_body": "off",
+      "transaction_max_spans": 200
+    },
+    "@timestamp": 1581934104843,
+    "applied_by_agent": false,
+    "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
+  },
+  {
+    "agent_name": "go",
+    "service": {
+      "name": "opbeans-go"
+    },
+    "settings": {
+      "transaction_sample_rate": 1,
+      "capture_body": "off",
+      "transaction_max_spans": 300
+    },
+    "@timestamp": 1581934111727,
+    "applied_by_agent": false,
+    "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
+  },
+  {
+    "agent_name": "nodejs",
+    "service": {
+      "name": "frontend"
+    },
+    "settings": {
+      "transaction_sample_rate": 1,
+    },
+    "@timestamp": 1582031336265,
+    "applied_by_agent": false,
+    "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+  }
+]
+--------------------------------------------------
+
+[[apm-list-config-example]]
+===== Example
+
+[source,console]
+--------------------------------------------------
+GET  /api/apm/settings/agent-configuration
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+
+[[apm-search-config]]
+==== Search configuration
+
+[[apm-search-config-req]]
+===== Request
+
+`POST /api/apm/settings/agent-configuration/search`
+
+[role="child_attributes"]
+[[apm-search-config-req-body]]
+===== Request body
+
+`service`::
+(required, object) Service identifying the configuration.
++
+.Properties of `service`
+[%collapsible%open]
+======
+`name` :::
+  (required, string) Name of service
+
+`environment` :::
+  (optional, string) Environment of service
+======
+
+`etag`::
+(required) etag is sent by the agent to indicate the etag of the last successfully applied configuration. If the etag matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
+
+[[apm-search-config-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "_index": ".apm-agent-configuration",
+  "_id": "CIaqXXABmQCdPphWj8EJ",
+  "_score": 2,
+  "_source": {
+    "agent_name": "nodejs",
+    "service": {
+      "name": "frontend"
+    },
+    "settings": {
+      "transaction_sample_rate": 1,
+    },
+    "@timestamp": 1582031336265,
+    "applied_by_agent": false,
+    "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+  }
+}
+--------------------------------------------------
+
+[[apm-search-config-example]]
+===== Example
+
+[source,console]
+--------------------------------------------------
+POST /api/apm/settings/agent-configuration/search
+{
+    "etag" : "1e58c178efeebae15c25c539da740d21dee422fc",
+    "service" : {
+        "name" : "frontend",
+        "environment": "production"
+    }
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////

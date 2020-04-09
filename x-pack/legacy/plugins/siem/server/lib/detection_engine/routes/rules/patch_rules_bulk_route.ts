@@ -4,49 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { IRouter } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  BulkPatchRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
+  PatchRuleAlertParamsRest,
 } from '../../rules/types';
-import { ServerFacade } from '../../../../types';
-import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
+import {
+  transformBulkError,
+  buildRouteValidation,
+  buildSiemResponse,
+  validateLicenseForRuleType,
+} from '../utils';
+import { getIdBulkError } from './utils';
+import { transformValidateBulkError, validate } from './validate';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
+import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 
-export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
-  return {
-    method: 'PATCH',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    options: {
-      tags: ['access:siem'],
+export const patchRulesBulkRoute = (router: IRouter) => {
+  router.patch(
+    {
+      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: patchRulesBulkSchema,
+        body: buildRouteValidation<PatchRuleAlertParamsRest[]>(patchRulesBulkSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: BulkPatchRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from((request as unknown) as Hapi.Request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
+      const alertsClient = context.alerting?.getAlertsClient();
+      const actionsClient = context.actions?.getActionsClient();
+      const savedObjectsClient = context.core.savedObjects.client;
+
+      if (!actionsClient || !alertsClient) {
+        return siemResponse.error({ statusCode: 404 });
       }
 
       const rules = await Promise.all(
-        request.payload.map(async payloadRule => {
+        request.body.map(async payloadRule => {
           const {
+            actions,
             description,
             enabled,
             false_positives: falsePositives,
@@ -71,11 +74,19 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
             to,
             type,
             threat,
+            throttle,
             references,
+            note,
             version,
+            anomaly_threshold: anomalyThreshold,
+            machine_learning_job_id: machineLearningJobId,
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
+            if (type) {
+              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+            }
+
             const rule = await patchRules({
               alertsClient,
               actionsClient,
@@ -105,9 +116,21 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
               type,
               threat,
               references,
+              note,
               version,
+              anomalyThreshold,
+              machineLearningJobId,
             });
-            if (rule != null) {
+            if (rule != null && rule.enabled != null && rule.name != null) {
+              const ruleActions = await updateRulesNotifications({
+                ruleAlertId: rule.id,
+                alertsClient,
+                savedObjectsClient,
+                enabled: rule.enabled,
+                actions,
+                throttle,
+                name: rule.name,
+              });
               const ruleStatuses = await savedObjectsClient.find<
                 IRuleSavedAttributesSavedObjectAttributes
               >({
@@ -118,7 +141,12 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformOrBulkError(rule.id, rule, ruleStatuses.saved_objects[0]);
+              return transformValidateBulkError(
+                rule.id,
+                rule,
+                ruleActions,
+                ruleStatuses.saved_objects[0]
+              );
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -127,11 +155,13 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
           }
         })
       );
-      return rules;
-    },
-  };
-};
 
-export const patchRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createPatchRulesBulkRoute(server));
+      const [validated, errors] = validate(rules, rulesBulkSchema);
+      if (errors != null) {
+        return siemResponse.error({ statusCode: 500, body: errors });
+      } else {
+        return response.ok({ body: validated ?? {} });
+      }
+    }
+  );
 };

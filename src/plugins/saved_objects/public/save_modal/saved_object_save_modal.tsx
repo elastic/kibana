@@ -39,7 +39,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../legacy/core_plugins/visualizations/public/embeddable/constants';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -58,6 +57,7 @@ interface Props {
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode;
   description?: string;
+  showDescription: boolean;
 }
 
 interface State {
@@ -108,7 +108,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
               {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
               <EuiForm>
-                {this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE && this.props.description && (
+                {!this.props.showDescription && this.props.description && (
                   <EuiFormRow>
                     <EuiText color="subdued">{this.props.description}</EuiText>
                   </EuiFormRow>
@@ -160,7 +160,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
   }
 
   private renderViewDescription = () => {
-    if (this.props.objectType !== VISUALIZE_EMBEDDABLE_TYPE) {
+    if (!this.props.showDescription) {
       return;
     }
 
@@ -289,7 +289,7 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
             <p>
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
-                defaultMessage="Clicking {confirmSaveLabel} overwrites the existing {objectType}."
+                defaultMessage="Clicking {confirmSaveLabel} will save the {objectType} with this duplicate title."
                 values={{
                   objectType: this.props.objectType,
                   confirmSaveLabel: (

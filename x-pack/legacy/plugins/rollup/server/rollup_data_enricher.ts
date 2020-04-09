@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Index {
-  name: string;
-  [key: string]: unknown;
-}
+import { Index } from '../../../../plugins/index_management/server';
 
 export const rollupDataEnricher = async (indicesList: Index[], callWithRequest: any) => {
   if (!indicesList || !indicesList.length) {
-    return indicesList;
+    return Promise.resolve(indicesList);
   }
 
   const params = {

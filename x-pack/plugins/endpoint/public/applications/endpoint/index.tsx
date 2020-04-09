@@ -6,39 +6,51 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart, AppMountParameters } from 'kibana/public';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { Route, BrowserRouter, Switch } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import { CoreStart, AppMountParameters, ScopedHistory } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { Route, Switch } from 'react-router-dom';
 import { Store } from 'redux';
+import { EndpointPluginStartDependencies } from '../../plugin';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
+import { HostList } from './view/hosts';
+import { PolicyList } from './view/policy';
+import { PolicyDetails } from './view/policy';
+import { HeaderNavigation } from './components/header_nav';
+import { AppRootProvider } from './view/app_root_provider';
+import { Setup } from './view/setup';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
-  coreStart.http.get('/api/endpoint/hello-world');
-
-  const [store, stopSagas] = appStoreFactory(coreStart);
-
-  ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
-
+export function renderApp(
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies,
+  { element, history }: AppMountParameters
+) {
+  const store = appStoreFactory({ coreStart, depsStart });
+  ReactDOM.render(
+    <AppRoot history={history} store={store} coreStart={coreStart} depsStart={depsStart} />,
+    element
+  );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-    stopSagas();
   };
 }
 
 interface RouterProps {
-  basename: string;
+  history: ScopedHistory;
   store: Store;
+  coreStart: CoreStart;
+  depsStart: EndpointPluginStartDependencies;
 }
 
-const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
-  <Provider store={store}>
-    <I18nProvider>
-      <BrowserRouter basename={basename}>
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
+  ({ history, store, coreStart, depsStart }) => {
+    return (
+      <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
+        <Setup ingestManager={depsStart.ingestManager} notifications={coreStart.notifications} />
+        <HeaderNavigation />
         <Switch>
           <Route
             exact
@@ -49,30 +61,17 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
               </h1>
             )}
           />
-          <Route
-            path="/management"
-            render={() => {
-              // FIXME: This is temporary. Will be removed in next PR for endpoint list
-              store.dispatch({ type: 'userEnteredEndpointListPage' });
-
-              return (
-                <h1 data-test-subj="endpointManagement">
-                  <FormattedMessage
-                    id="xpack.endpoint.endpointManagement"
-                    defaultMessage="Manage Endpoints"
-                  />
-                </h1>
-              );
-            }}
-          />
+          <Route path="/hosts" component={HostList} />
           <Route path="/alerts" component={AlertIndex} />
+          <Route path="/policy" exact component={PolicyList} />
+          <Route path="/policy/:id" exact component={PolicyDetails} />
           <Route
             render={() => (
               <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
             )}
           />
         </Switch>
-      </BrowserRouter>
-    </I18nProvider>
-  </Provider>
-));
+      </AppRootProvider>
+    );
+  }
+);

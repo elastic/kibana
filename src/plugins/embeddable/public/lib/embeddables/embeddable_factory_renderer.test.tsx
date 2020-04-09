@@ -21,18 +21,18 @@ import {
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddableFactory,
 } from '../../../../../../examples/embeddable_examples/public';
-import { EmbeddableFactory } from './embeddable_factory';
-import { GetEmbeddableFactory } from '../types';
 import { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { embeddablePluginMock } from '../../mocks';
 
 test('EmbeddableFactoryRenderer renders an embeddable', async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
+
+  const getEmbeddableFactory = doStart().getEmbeddableFactory;
 
   const component = mount(
     <EmbeddableFactoryRenderer
@@ -54,7 +54,7 @@ test('EmbeddableFactoryRenderer renders an embeddable', async () => {
 });
 
 test('EmbeddableRoot renders an error if the type does not exist', async () => {
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => undefined;
+  const getEmbeddableFactory = (id: string) => undefined;
 
   const component = mount(
     <EmbeddableFactoryRenderer

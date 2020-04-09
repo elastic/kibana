@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './legacy/styles.scss';
 import { fooLibFn } from '../../foo/public/index';
 export * from './lib';
 export { fooLibFn };

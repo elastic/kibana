@@ -12,5 +12,5 @@ import { RowRenderer } from './row_renderer';
 
 export const plainRowRenderer: RowRenderer = {
   isInstance: _ => true,
-  renderRow: ({ children }) => <>{children}</>,
+  renderRow: () => <></>,
 };

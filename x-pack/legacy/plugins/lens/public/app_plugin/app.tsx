@@ -20,6 +20,7 @@ import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
+  esFilters,
   Filter,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
@@ -93,8 +94,23 @@ export function App({
         trackUiEvent('app_filters_updated');
       },
     });
+
+    const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
+      next: () => {
+        const currentRange = data.query.timefilter.timefilter.getTime();
+        setState(s => ({
+          ...s,
+          dateRange: {
+            fromDate: currentRange.from,
+            toDate: currentRange.to,
+          },
+        }));
+      },
+    });
+
     return () => {
       filterSubscription.unsubscribe();
+      timeSubscription.unsubscribe();
     };
   }, []);
 
@@ -320,8 +336,22 @@ export function App({
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModal
             onSave={props => {
+              const [pinnedFilters, appFilters] = _.partition(
+                lastKnownDoc.state?.filters,
+                esFilters.isFilterPinned
+              );
+              const lastDocWithoutPinned = pinnedFilters?.length
+                ? {
+                    ...lastKnownDoc,
+                    state: {
+                      ...lastKnownDoc.state,
+                      filters: appFilters,
+                    },
+                  }
+                : lastKnownDoc;
+
               const doc = {
-                ...lastKnownDoc,
+                ...lastDocWithoutPinned,
                 id: props.newCopyOnSave ? undefined : lastKnownDoc.id,
                 title: props.newTitle,
               };
@@ -359,6 +389,7 @@ export function App({
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
+            showDescription={false}
             confirmButtonLabel={confirmButton}
           />
         )}

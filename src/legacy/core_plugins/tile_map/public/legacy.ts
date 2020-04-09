@@ -20,14 +20,13 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 import { TileMapPluginSetupDependencies } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
 
 const plugins: Readonly<TileMapPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
-  visualizations: visualizationsSetup,
+  visualizations: npSetup.plugins.visualizations,
 
   // Temporary solution
   // It will be removed when all dependent services are migrated to the new platform.

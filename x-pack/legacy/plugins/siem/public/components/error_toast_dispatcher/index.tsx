@@ -5,10 +5,9 @@
  */
 
 import { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
-import { appModel, appSelectors, State } from '../../store';
+import { appSelectors, State } from '../../store';
 import { appActions } from '../../store/app';
 import { useStateToaster } from '../toasters';
 
@@ -16,15 +15,7 @@ interface OwnProps {
   toastLifeTimeMs?: number;
 }
 
-interface ReduxProps {
-  errors?: appModel.Error[];
-}
-
-interface DispatchProps {
-  removeError: ActionCreator<{ id: string }>;
-}
-
-type Props = OwnProps & ReduxProps & DispatchProps;
+type Props = OwnProps & PropsFromRedux;
 
 const ErrorToastDispatcherComponent = ({
   toastLifeTimeMs = 5000,
@@ -58,6 +49,12 @@ const makeMapStateToProps = () => {
   return (state: State) => getErrorSelector(state);
 };
 
-export const ErrorToastDispatcher = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   removeError: appActions.removeError,
-})(ErrorToastDispatcherComponent);
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const ErrorToastDispatcher = connector(ErrorToastDispatcherComponent);

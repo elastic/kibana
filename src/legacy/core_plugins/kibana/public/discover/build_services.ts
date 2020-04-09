@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createHashHistory, History } from 'history';
+
 import {
   Capabilities,
   ChromeStart,
@@ -30,12 +32,16 @@ import {
   IndexPatternsContract,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
-import { createSavedSearchesLoader } from './saved_searches';
+
 import { DiscoverStartPlugins } from './plugin';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { SavedSearch } from './np_ready/types';
-import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
+import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
+import {
+  createSavedSearchesLoader,
+  DocViewerComponent,
+  SavedSearch,
+} from '../../../../../plugins/discover/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -44,7 +50,8 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
-  docViewsRegistry: DocViewsRegistry;
+  DocViewer: DocViewerComponent;
+  history: History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
@@ -56,15 +63,16 @@ export interface DiscoverServices {
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
+  visualizations: VisualizationsStart;
 }
 export async function buildServices(
   core: CoreStart,
-  plugins: DiscoverStartPlugins,
-  docViewsRegistry: DocViewsRegistry
+  plugins: DiscoverStartPlugins
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
+    search: plugins.data.search,
     chrome: core.chrome,
     overlays: core.overlays,
   };
@@ -76,7 +84,8 @@ export async function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
-    docViewsRegistry,
+    DocViewer: plugins.discover.docViews.DocViewer,
+    history: createHashHistory(),
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
@@ -89,5 +98,6 @@ export async function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
+    visualizations: plugins.visualizations,
   };
 }

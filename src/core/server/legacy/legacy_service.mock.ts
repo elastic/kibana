@@ -29,6 +29,7 @@ const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
     savedObjectMappings: [],
     savedObjectMigrations: {},
     savedObjectValidations: {},
+    savedObjectsManagement: {},
   },
   navLinks: [],
   pluginExtendedConfig: {

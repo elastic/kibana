@@ -20,10 +20,8 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { SavedObjectLoader } from 'ui/saved_objects';
-import { createSavedDashboardLoader } from '../dashboard';
-import { createSavedSearchesLoader } from '../discover';
-import { TypesService, createSavedVisLoader } from '../../../visualizations/public';
+import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
+import { createSavedSearchesLoader } from '../../../../../plugins/discover/public';
 
 /**
  * This registry is used for the editing mode of Saved Searches, Visualizations,
@@ -35,9 +33,15 @@ interface SavedObjectRegistryEntry {
   title: string;
 }
 
+export interface ISavedObjectsManagementRegistry {
+  register(service: SavedObjectRegistryEntry): void;
+  all(): SavedObjectRegistryEntry[];
+  get(id: string): SavedObjectRegistryEntry | undefined;
+}
+
 const registry: SavedObjectRegistryEntry[] = [];
 
-export const savedObjectManagementRegistry = {
+export const savedObjectManagementRegistry: ISavedObjectsManagementRegistry = {
   register: (service: SavedObjectRegistryEntry) => {
     registry.push(service);
   },
@@ -52,22 +56,20 @@ export const savedObjectManagementRegistry = {
 const services = {
   savedObjectsClient: npStart.core.savedObjects.client,
   indexPatterns: npStart.plugins.data.indexPatterns,
+  search: npStart.plugins.data.search,
   chrome: npStart.core.chrome,
   overlays: npStart.core.overlays,
 };
 
 savedObjectManagementRegistry.register({
   id: 'savedVisualizations',
-  service: createSavedVisLoader({
-    ...services,
-    ...{ visualizationTypes: new TypesService().start() },
-  }),
+  service: npStart.plugins.visualizations.savedVisualizationsLoader,
   title: 'visualizations',
 });
 
 savedObjectManagementRegistry.register({
   id: 'savedDashboards',
-  service: createSavedDashboardLoader(services),
+  service: npStart.plugins.dashboard.getSavedDashboardLoader(),
   title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
     defaultMessage: 'dashboards',
   }),

@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import aggTableTemplate from './agg_table.html';
-import { getFormat } from '../legacy_imports';
+import { getFormatService } from '../services';
 import { i18n } from '@kbn/i18n';
 
 export function KbnAggTable(config, RecursionHelper) {
@@ -127,7 +127,7 @@ export function KbnAggTable(config, RecursionHelper) {
 
               if (!dimension) return;
 
-              const formatter = getFormat(dimension.format);
+              const formatter = getFormatService().deserialize(dimension.format);
 
               const formattedColumn = {
                 id: col.id,
@@ -247,7 +247,7 @@ export function KbnAggTable(config, RecursionHelper) {
 function addPercentageCol(columns, title, rows, insertAtIndex) {
   const { id, sumTotal } = columns[insertAtIndex];
   const newId = `${id}-percents`;
-  const formatter = getFormat({ id: 'percent' });
+  const formatter = getFormatService().deserialize({ id: 'percent' });
   const i18nTitle = i18n.translate('visTypeTable.params.percentageTableColumnName', {
     defaultMessage: '{title} percentages',
     values: { title },

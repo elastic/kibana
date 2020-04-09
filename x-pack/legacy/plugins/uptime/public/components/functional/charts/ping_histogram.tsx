@@ -5,7 +5,7 @@
  */
 
 import { Axis, BarSeries, Chart, Position, Settings, timeFormatter } from '@elastic/charts';
-import { EuiEmptyPrompt, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -15,6 +15,7 @@ import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/types';
 import { useUrlParams } from '../../../hooks';
+import { ChartEmptyState } from './chart_empty_state';
 
 export interface PingHistogramComponentProps {
   /**
@@ -31,9 +32,15 @@ export interface PingHistogramComponentProps {
    */
   height?: string;
 
-  data?: HistogramResult;
+  data: HistogramResult | null;
 
   loading?: boolean;
+}
+
+interface BarPoint {
+  x?: number;
+  y?: number;
+  type: string;
 }
 
 export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
@@ -49,71 +56,46 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 
   const [, updateUrlParams] = useUrlParams();
 
-  if (!data || !data.histogram)
-    /**
-     * TODO: the Fragment, EuiTitle, and EuiPanel should be extracted to a dumb component
-     * that we can reuse in the subsequent return statement at the bottom of this function.
-     */
-    return (
-      <>
-        <EuiTitle size="xs">
-          <h5>
-            <FormattedMessage
-              id="xpack.uptime.snapshot.pingsOverTimeTitle"
-              defaultMessage="Pings over time"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiPanel paddingSize="s" style={{ height: 170 }}>
-          <EuiEmptyPrompt
-            title={
-              <EuiTitle>
-                <h5>
-                  <FormattedMessage
-                    id="xpack.uptime.snapshot.noDataTitle"
-                    defaultMessage="No histogram data available"
-                  />
-                </h5>
-              </EuiTitle>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.uptime.snapshot.noDataDescription"
-                  defaultMessage="Sorry, there is no data available for the histogram"
-                />
-              </p>
-            }
-          />
-        </EuiPanel>
-      </>
+  let content: JSX.Element | undefined;
+  if (!data?.histogram?.length) {
+    content = (
+      <ChartEmptyState
+        title={i18n.translate('xpack.uptime.snapshot.noDataTitle', {
+          defaultMessage: 'No ping data available',
+        })}
+        body={i18n.translate('xpack.uptime.snapshot.noDataDescription', {
+          defaultMessage: 'There are no pings in the selected time range.',
+        })}
+      />
     );
-  const { histogram } = data;
+  } else {
+    const { histogram } = data;
 
-  const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
-    defaultMessage: 'Down Monitors',
-  });
-
-  const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
-    defaultMessage: 'Up',
-  });
-
-  const onBrushEnd = (min: number, max: number) => {
-    updateUrlParams({
-      dateRangeStart: moment(min).toISOString(),
-      dateRangeEnd: moment(max).toISOString(),
+    const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
+      defaultMessage: 'Down',
     });
-  };
-  return (
-    <>
-      <EuiTitle size="xs">
-        <h2>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.pingsOverTimeTitle"
-            defaultMessage="Pings over time"
-          />
-        </h2>
-      </EuiTitle>
+
+    const upMonitorsId = i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
+      defaultMessage: 'Up',
+    });
+
+    const onBrushEnd = (min: number, max: number) => {
+      updateUrlParams({
+        dateRangeStart: moment(min).toISOString(),
+        dateRangeEnd: moment(max).toISOString(),
+      });
+    };
+
+    const barData: BarPoint[] = [];
+
+    histogram.forEach(({ x, upCount, downCount }) => {
+      barData.push(
+        { x, y: downCount ?? 0, type: downSpecId },
+        { x, y: upCount ?? 0, type: upMonitorsId }
+      );
+    });
+
+    content = (
       <ChartWrapper
         height={height}
         loading={loading}
@@ -156,33 +138,36 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
           />
 
           <BarSeries
-            customSeriesColors={[danger]}
-            data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
+            color={[danger, gray]}
+            data={barData}
             id={downSpecId}
-            name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
-              defaultMessage: 'Down',
+            name={i18n.translate('xpack.uptime.snapshotHistogram.series.pings', {
+              defaultMessage: 'Monitor Pings',
             })}
-            stackAccessors={[0]}
+            stackAccessors={['x']}
+            splitSeriesAccessors={['type']}
             timeZone="local"
-            xAccessor={0}
+            xAccessor="x"
             xScaleType="time"
-            yAccessors={[1]}
-            yScaleType="linear"
-          />
-          <BarSeries
-            customSeriesColors={[gray]}
-            data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
-            id={upMonitorsId}
-            name={upMonitorsId}
-            stackAccessors={[0]}
-            timeZone="local"
-            xAccessor={0}
-            xScaleType="time"
-            yAccessors={[1]}
+            yAccessors={['y']}
             yScaleType="linear"
           />
         </Chart>
       </ChartWrapper>
+    );
+  }
+
+  return (
+    <>
+      <EuiTitle size="xs">
+        <h2>
+          <FormattedMessage
+            id="xpack.uptime.snapshot.pingsOverTimeTitle"
+            defaultMessage="Pings over time"
+          />
+        </h2>
+      </EuiTitle>
+      {content}
     </>
   );
 };

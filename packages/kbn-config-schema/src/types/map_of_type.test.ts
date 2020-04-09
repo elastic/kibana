@@ -40,7 +40,7 @@ test('properly parse the value if input is a string', () => {
 test('fails if string input cannot be parsed', () => {
   const type = schema.mapOf(schema.string(), schema.string());
   expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse map value from [invalidjson]"`
+    `"could not parse map value from json input"`
   );
 });
 
@@ -159,6 +159,24 @@ test('object within mapOf', () => {
   expect(type.validate(value)).toEqual(expected);
 });
 
+test('enforces required object fields within mapOf', () => {
+  const type = schema.mapOf(
+    schema.string(),
+    schema.object({
+      bar: schema.object({
+        baz: schema.number(),
+      }),
+    })
+  );
+  const value = {
+    foo: {},
+  };
+
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[foo.bar.baz]: expected value of type [number] but got [undefined]"`
+  );
+});
+
 test('error preserves full path', () => {
   const type = schema.object({
     grandParentKey: schema.object({
@@ -169,7 +187,7 @@ test('error preserves full path', () => {
   expect(() =>
     type.validate({ grandParentKey: { parentKey: { a: 'some-value' } } })
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[grandParentKey.parentKey.key(\\"a\\")]: value is [a] but it must have a minimum length of [2]."`
+    `"[grandParentKey.parentKey.key(\\"a\\")]: value has length [1] but it must have a minimum length of [2]."`
   );
 
   expect(() =>

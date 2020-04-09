@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render popover when appLinks is not empty 1`] = `
+<EuiPopover
+  anchorPosition="downCenter"
+  button={
+    <EuiButton
+      aria-label="View Sample eCommerce orders"
+      iconSide="right"
+      iconType="arrowDown"
+      onClick={[Function]}
+    >
+      View data
+    </EuiButton>
+  }
+  closePopover={[Function]}
+  data-test-subj="launchSampleDataSetecommerce"
+  display="inlineBlock"
+  hasArrow={true}
+  id="sampleDataLinksecommerce"
+  isOpen={false}
+  ownFocus={false}
+  panelPaddingSize="none"
+>
+  <EuiContextMenu
+    initialPanelId={0}
+    panels={
+      Array [
+        Object {
+          "id": 0,
+          "items": Array [
+            Object {
+              "href": "root/app/kibana#/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+              "icon": <EuiIcon
+                size="m"
+                type="dashboardApp"
+              />,
+              "name": "Dashboard",
+            },
+            Object {
+              "href": "rootapp/myAppPath",
+              "icon": <EuiIcon
+                size="m"
+                type="logoKibana"
+              />,
+              "name": "myAppLabel",
+            },
+          ],
+        },
+      ]
+    }
+  />
+</EuiPopover>
+`;
+
+exports[`should render simple button when appLinks is empty 1`] = `
+<EuiButton
+  aria-label="View Sample eCommerce orders"
+  data-test-subj="launchSampleDataSetecommerce"
+  href="root/app/kibana#/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f"
+>
+  View data
+</EuiButton>
+`;

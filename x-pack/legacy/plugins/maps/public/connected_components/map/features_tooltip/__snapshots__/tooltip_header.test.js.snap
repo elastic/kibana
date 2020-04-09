@@ -18,25 +18,6 @@ exports[`TooltipHeader multiple features, multiple layers: locked should show pa
       />
     </EuiFlexItem>
     <EuiFlexItem
-      grow={false}
-      key="pageNumber"
-    >
-      <EuiTextColor
-        color="subdued"
-      >
-        <FormattedMessage
-          defaultMessage="{pageNumber} of {total}"
-          id="xpack.maps.tooltip.pageNumerText"
-          values={
-            Object {
-              "pageNumber": 1,
-              "total": 3,
-            }
-          }
-        />
-      </EuiTextColor>
-    </EuiFlexItem>
-    <EuiFlexItem
       key="layerSelect"
     >
       <EuiFormRow
@@ -138,25 +119,6 @@ exports[`TooltipHeader multiple features, single layer: locked should show pagin
         onPageClick={[Function]}
         pageCount={2}
       />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={true}
-      key="pageNumber"
-    >
-      <EuiTextColor
-        color="subdued"
-      >
-        <FormattedMessage
-          defaultMessage="{pageNumber} of {total}"
-          id="xpack.maps.tooltip.pageNumerText"
-          values={
-            Object {
-              "pageNumber": 1,
-              "total": 2,
-            }
-          }
-        />
-      </EuiTextColor>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}

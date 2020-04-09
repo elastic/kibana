@@ -6,6 +6,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
 
@@ -49,7 +50,7 @@ module.exports = async ({ config }) => {
   // Parse props data for .tsx files
   // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
   // See: https://github.com/storybookjs/storybook/issues/7998
-  // 
+  //
   // config.module.rules.push({
   //   test: /\.tsx$/,
   //   // Exclude example files, as we don't display props info for them
@@ -73,7 +74,20 @@ module.exports = async ({ config }) => {
           path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
         },
       },
-      { loader: 'sass-loader' },
+      {
+        loader: 'sass-loader',
+        options: {
+          prependData(loaderContext) {
+            return `@import ${stringifyRequest(
+              loaderContext,
+              path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+            )};\n`;
+          },
+          sassOptions: {
+            includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
+          },
+        },
+      },
     ],
   });
 
@@ -86,8 +100,9 @@ module.exports = async ({ config }) => {
         loader: 'css-loader',
         options: {
           importLoaders: 2,
-          modules: true,
-          localIdentName: '[name]__[local]___[hash:base64:5]',
+          modules: {
+            localIdentName: '[name]__[local]___[hash:base64:5]',
+          },
         },
       },
       {
@@ -159,7 +174,11 @@ module.exports = async ({ config }) => {
         // what require() calls it will execute within the bundle
         JSON.stringify({ type, modules: extensions[type] || [] }),
       ].join('');
-    })
+    }),
+
+    // Mock out libs used by a few componets to avoid loading in kibana_legacy and platform
+    new webpack.NormalModuleReplacementPlugin(/lib\/notify/, path.resolve(__dirname, '../tasks/mocks/uiNotify')),
+    new webpack.NormalModuleReplacementPlugin(/lib\/download_workpad/, path.resolve(__dirname, '../tasks/mocks/downloadWorkpad')),
   );
 
   // Tell Webpack about relevant extensions
@@ -177,14 +196,6 @@ module.exports = async ({ config }) => {
   config.resolve.alias['ui/chrome'] = path.resolve(__dirname, '../tasks/mocks/uiChrome');
   config.resolve.alias.ui = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public');
   config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');
-  config.resolve.alias['plugins/interpreter/interpreter'] = path.resolve(
-    KIBANA_ROOT,
-    'packages/kbn-interpreter/target/common'
-  );
-  config.resolve.alias['plugins/interpreter/registries'] = path.resolve(
-    KIBANA_ROOT,
-    'packages/kbn-interpreter/target/common/registries'
-  );
 
   return config;
 };

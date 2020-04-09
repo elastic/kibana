@@ -18,6 +18,8 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
+import { promisify } from 'util';
 
 import Chalk from 'chalk';
 import execa from 'execa';
@@ -116,9 +118,10 @@ export function reformatJestDiff(diff: string | null) {
 
 export interface OptimizerCacheKey {
   readonly lastCommit: string | undefined;
+  readonly bootstrap: string | undefined;
   readonly workerConfig: WorkerConfig;
   readonly deletedPaths: string[];
-  readonly modifiedPaths: Record<string, number>;
+  readonly modifiedTimes: Record<string, number>;
 }
 
 async function getLastCommit() {
@@ -133,21 +136,45 @@ async function getLastCommit() {
   return stdout.trim() || undefined;
 }
 
+async function getBootstrapCacheKey() {
+  try {
+    return await promisify(Fs.readFile)(
+      Path.resolve(OPTIMIZER_DIR, 'target/.bootstrap-cache'),
+      'utf8'
+    );
+  } catch (error) {
+    if (error?.code !== 'ENOENT') {
+      throw error;
+    }
+    return undefined;
+  }
+}
+
 export async function getOptimizerCacheKey(config: OptimizerConfig) {
-  const changes = Array.from((await getChanges(OPTIMIZER_DIR)).entries());
+  const [changes, lastCommit, bootstrap] = await Promise.all([
+    getChanges(OPTIMIZER_DIR),
+    getLastCommit(),
+    getBootstrapCacheKey(),
+  ] as const);
+
+  const deletedPaths: string[] = [];
+  const modifiedPaths: string[] = [];
+  for (const [path, type] of changes) {
+    (type === 'deleted' ? deletedPaths : modifiedPaths).push(path);
+  }
 
   const cacheKeys: OptimizerCacheKey = {
-    lastCommit: await getLastCommit(),
     workerConfig: config.getWorkerConfig('♻'),
-    deletedPaths: changes.filter(e => e[1] === 'deleted').map(e => e[0]),
-    modifiedPaths: {} as Record<string, number>,
+    lastCommit,
+    bootstrap,
+    deletedPaths,
+    modifiedTimes: {} as Record<string, number>,
   };
 
-  const modified = changes.filter(e => e[1] === 'modified').map(e => e[0]);
-  const mtimes = await getMtimes(modified);
+  const mtimes = await getMtimes(modifiedPaths);
   for (const [path, mtime] of Array.from(mtimes.entries()).sort(ascending(e => e[0]))) {
     if (typeof mtime === 'number') {
-      cacheKeys.modifiedPaths[path] = mtime;
+      cacheKeys.modifiedTimes[path] = mtime;
     }
   }
 

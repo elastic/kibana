@@ -23,15 +23,17 @@ import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { getFormat } from '../legacy_imports';
+import { getFormatService } from '../services';
 
 import { Label } from './label';
 import { TagCloud } from './tag_cloud';
 import { FeedbackMessage } from './feedback_message';
+import d3 from 'd3';
 
 const MAX_TAG_COUNT = 200;
 
 export function createTagCloudVisualization({ colors }) {
+  const colorScale = d3.scale.ordinal().range(colors.seedColors);
   return class TagCloudVisualization {
     constructor(node, vis) {
       this._containerNode = node;
@@ -48,7 +50,7 @@ export function createTagCloudVisualization({ colors }) {
 
       this._vis = vis;
       this._truncated = false;
-      this._tagCloud = new TagCloud(cloudContainer, colors);
+      this._tagCloud = new TagCloud(cloudContainer, colorScale);
       this._tagCloud.on('select', event => {
         if (!this._visParams.bucket) {
           return;
@@ -77,17 +79,10 @@ export function createTagCloudVisualization({ colors }) {
       render(<Label ref={this._label} />, this._labelNode);
     }
 
-    async render(data, visParams, status) {
-      if (!(status.resize || status.data || status.params)) return;
-
-      if (status.params || status.data) {
-        this._updateParams(visParams);
-        this._updateData(data);
-      }
-
-      if (status.resize) {
-        this._resize();
-      }
+    async render(data, visParams) {
+      this._updateParams(visParams);
+      this._updateData(data);
+      this._resize();
 
       await this._renderComplete$.pipe(take(1)).toPromise();
 
@@ -123,7 +118,7 @@ export function createTagCloudVisualization({ colors }) {
 
       const bucket = this._visParams.bucket;
       const metric = this._visParams.metric;
-      const bucketFormatter = bucket ? getFormat(bucket.format) : null;
+      const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
       const tagColumn = bucket ? data.columns[bucket.accessor].id : -1;
       const metricColumn = data.columns[metric.accessor].id;
       const tags = data.rows.map((row, rowIndex) => {

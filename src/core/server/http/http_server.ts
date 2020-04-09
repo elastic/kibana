@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Server } from 'hapi';
+import HapiStaticFiles from 'inert';
 import url from 'url';
 
 import { Logger, LoggerFactory } from '../logging';
@@ -26,8 +27,7 @@ import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
-
-import { IRouter } from './router';
+import { IRouter, RouteConfigOptions, KibanaRouteState, isSafeMethod } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -45,6 +45,7 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouter: (router: IRouter) => void;
+  registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
@@ -98,10 +99,11 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  public setup(config: HttpConfig): HttpServerSetup {
+  public async setup(config: HttpConfig): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
+    await this.server.register([HapiStaticFiles]);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);
@@ -110,6 +112,7 @@ export class HttpServer {
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      registerStaticDir: this.registerStaticDir.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
@@ -147,16 +150,21 @@ export class HttpServer {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
-        const { authRequired = true, tags, body = {} } = route.options;
+        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
+        const { authRequired, tags, body = {} } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
+
+        const kibanaRouteState: KibanaRouteState = {
+          xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+        };
+
         this.server.route({
           handler: route.handler,
           method: route.method,
           path: route.path,
           options: {
-            // Enforcing the comparison with true because plugins could overwrite the auth strategy by doing `options: { authRequired: authStrategy as any }`
-            auth: authRequired === true ? undefined : false,
+            auth: this.getAuthOption(authRequired),
+            app: kibanaRouteState,
             tags: tags ? Array.from(tags) : undefined,
             // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
             // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
@@ -188,6 +196,22 @@ export class HttpServer {
     this.log.debug('stopping http server');
     await this.server.stop();
     this.server = undefined;
+  }
+
+  private getAuthOption(
+    authRequired: RouteConfigOptions<any>['authRequired'] = true
+  ): undefined | false | { mode: 'required' | 'optional' } {
+    if (this.authRegistered === false) return undefined;
+
+    if (authRequired === true) {
+      return { mode: 'required' };
+    }
+    if (authRequired === 'optional') {
+      return { mode: 'optional' };
+    }
+    if (authRequired === false) {
+      return false;
+    }
   }
 
   private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
@@ -317,6 +341,25 @@ export class HttpServer {
     this.registerOnPreResponse((request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
+    });
+  }
+
+  private registerStaticDir(path: string, dirPath: string) {
+    if (this.server === undefined) {
+      throw new Error('Http server is not setup up yet');
+    }
+
+    this.server.route({
+      path,
+      method: 'GET',
+      handler: {
+        directory: {
+          path: dirPath,
+          listing: false,
+          lookupCompressed: true,
+        },
+      },
+      options: { auth: false },
     });
   }
 }

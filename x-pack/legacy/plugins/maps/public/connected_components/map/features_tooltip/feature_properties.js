@@ -170,7 +170,10 @@ export class FeatureProperties extends React.Component {
     });
 
     return (
-      <table className="mapFeatureTooltip_table" ref={node => (this._node = node)}>
+      <table
+        className="eui-yScrollWithShadows mapFeatureTooltip_table"
+        ref={node => (this._node = node)}
+      >
         <tbody>{rows}</tbody>
       </table>
     );

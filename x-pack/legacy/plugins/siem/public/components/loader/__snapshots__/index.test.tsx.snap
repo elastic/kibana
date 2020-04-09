@@ -16,6 +16,7 @@ exports[`rendering renders correctly 1`] = `
       grow={false}
     >
       <EuiLoadingSpinner
+        data-test-subj="loading-spinner"
         size="xl"
       />
     </EuiFlexItem>

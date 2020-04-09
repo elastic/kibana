@@ -68,18 +68,6 @@ export const eventsSchema = gql`
     network
   }
 
-  type MatrixOverTimeHistogramData {
-    x: Float!
-    y: Float!
-    g: String!
-  }
-
-  type EventsOverTimeData {
-    inspect: Inspect
-    matrixHistogramData: [MatrixOverTimeHistogramData!]!
-    totalCount: Float!
-  }
-
   extend type Source {
     Timeline(
       pagination: PaginationInput!
@@ -100,11 +88,5 @@ export const eventsSchema = gql`
       details: LastTimeDetails!
       defaultIndex: [String!]!
     ): LastEventTimeData!
-    EventsHistogram(
-      timerange: TimerangeInput!
-      filterQuery: String
-      defaultIndex: [String!]!
-      stackByField: String
-    ): EventsOverTimeData!
   }
 `;

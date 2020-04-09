@@ -54,11 +54,13 @@ export class LicenseViewController {
   }
 
   renderReact($scope) {
+    const injector = chrome.dangerouslyGetActiveInjector();
+    const timezone = injector.get('config').get('dateFormat:tz');
     $scope.$evalAsync(() => {
       const { isPrimaryCluster, license, isExpired, uploadLicensePath } = this;
       let expiryDate = license.expiry_date_in_millis;
       if (license.expiry_date_in_millis !== undefined) {
-        expiryDate = formatDateTimeLocal(license.expiry_date_in_millis);
+        expiryDate = formatDateTimeLocal(license.expiry_date_in_millis, timezone);
       }
 
       // Mount the React component to the template

@@ -32,11 +32,11 @@ const numberIntegerRequired = Joi.number()
   .integer()
   .required();
 const numberOptional = Joi.number().optional();
-const numberRequired = Joi.number().required();
 const queryObject = Joi.object({
   language: Joi.string().allow(''),
   query: Joi.string().allow(''),
 });
+const numberOptionalOrEmptyString = Joi.alternatives(numberOptional, Joi.string().valid(''));
 
 const annotationsItems = Joi.object({
   color: stringOptionalNullable,
@@ -63,6 +63,7 @@ const backgroundColorRulesItems = Joi.object({
 
 const gaugeColorRulesItems = Joi.object({
   gauge: stringOptionalNullable,
+  text: stringOptionalNullable,
   id: stringOptionalNullable,
   operator: stringOptionalNullable,
   value: Joi.number(),
@@ -74,6 +75,16 @@ const metricsItems = Joi.object({
   numerator: stringOptionalNullable,
   denominator: stringOptionalNullable,
   sigma: stringOptionalNullable,
+  unit: stringOptionalNullable,
+  model_type: stringOptionalNullable,
+  mode: stringOptionalNullable,
+  lag: numberOptional,
+  alpha: numberOptional,
+  beta: numberOptional,
+  gamma: numberOptional,
+  period: numberOptional,
+  multiplicative: Joi.boolean(),
+  window: numberOptional,
   function: stringOptionalNullable,
   script: stringOptionalNullable,
   variables: Joi.array()
@@ -82,6 +93,18 @@ const metricsItems = Joi.object({
         field: stringOptionalNullable,
         id: stringRequired,
         name: stringOptionalNullable,
+      })
+    )
+    .optional(),
+  percentiles: Joi.array()
+    .items(
+      Joi.object({
+        id: stringRequired,
+        field: stringOptionalNullable,
+        mode: Joi.string().allow('line', 'band'),
+        shade: Joi.alternatives(numberOptional, stringOptionalNullable),
+        value: Joi.alternatives(numberOptional, stringOptionalNullable),
+        percentile: stringOptionalNullable,
       })
     )
     .optional(),
@@ -121,21 +144,24 @@ const seriesItems = Joi.object({
       })
     )
     .optional(),
-  fill: numberOptional,
-  filter: Joi.object({
-    query: stringRequired,
-    language: stringOptionalNullable,
-  }).optional(),
+  fill: numberOptionalOrEmptyString,
+  filter: Joi.alternatives(
+    Joi.object({
+      query: stringRequired,
+      language: stringOptionalNullable,
+    }).optional(),
+    Joi.string().valid('')
+  ),
   formatter: stringRequired,
   hide_in_legend: numberIntegerOptional,
   hidden: Joi.boolean().optional(),
   id: stringRequired,
   label: stringOptionalNullable,
-  line_width: numberOptional,
+  line_width: numberOptionalOrEmptyString,
   metrics: Joi.array().items(metricsItems),
   offset_time: stringOptionalNullable,
   override_index_pattern: numberOptional,
-  point_size: numberRequired,
+  point_size: numberOptionalOrEmptyString,
   separate_axis: numberIntegerOptional,
   seperate_axis: numberIntegerOptional,
   series_index_pattern: stringOptionalNullable,

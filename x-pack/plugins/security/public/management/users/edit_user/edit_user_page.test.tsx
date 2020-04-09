@@ -15,13 +15,14 @@ import { mockAuthenticatedUser } from '../../../../common/model/authenticated_us
 import { securityMock } from '../../../mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
+import { findTestSubject } from 'test_utils/find_test_subject';
 
-const createUser = (username: string) => {
+const createUser = (username: string, roles = ['idk', 'something']) => {
   const user: User = {
     username,
     full_name: 'my full name',
     email: 'foo@bar.com',
-    roles: ['idk', 'something'],
+    roles,
     enabled: true,
   };
 
@@ -34,9 +35,9 @@ const createUser = (username: string) => {
   return user;
 };
 
-const buildClients = () => {
+const buildClients = (user: User) => {
   const apiClient = userAPIClientMock.create();
-  apiClient.getUser.mockImplementation(async (username: string) => createUser(username));
+  apiClient.getUser.mockResolvedValue(user);
 
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRoles.mockImplementation(() => {
@@ -58,6 +59,18 @@ const buildClients = () => {
           run_as: ['bar'],
         },
         kibana: [],
+      },
+      {
+        name: 'deprecated-role',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: ['bar'],
+        },
+        kibana: [],
+        metadata: {
+          _deprecated: true,
+        },
       },
     ] as Role[]);
   });
@@ -83,12 +96,13 @@ function expectMissingSaveButton(wrapper: ReactWrapper<any, any>) {
 
 describe('EditUserPage', () => {
   it('allows reserved users to be viewed', async () => {
-    const { apiClient, rolesAPIClient } = buildClients();
+    const user = createUser('reserved_user');
+    const { apiClient, rolesAPIClient } = buildClients(user);
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
       <EditUserPage
-        username={'reserved_user'}
-        apiClient={apiClient}
+        username={user.username}
+        userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
@@ -104,12 +118,13 @@ describe('EditUserPage', () => {
   });
 
   it('allows new users to be created', async () => {
-    const { apiClient, rolesAPIClient } = buildClients();
+    const user = createUser('');
+    const { apiClient, rolesAPIClient } = buildClients(user);
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
       <EditUserPage
-        username={''}
-        apiClient={apiClient}
+        username={user.username}
+        userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
@@ -125,12 +140,13 @@ describe('EditUserPage', () => {
   });
 
   it('allows existing users to be edited', async () => {
-    const { apiClient, rolesAPIClient } = buildClients();
+    const user = createUser('existing_user');
+    const { apiClient, rolesAPIClient } = buildClients(user);
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
       <EditUserPage
-        username={'existing_user'}
-        apiClient={apiClient}
+        username={user.username}
+        userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
@@ -142,7 +158,31 @@ describe('EditUserPage', () => {
     expect(apiClient.getUser).toBeCalledTimes(1);
     expect(securitySetup.authc.getCurrentUser).toBeCalledTimes(1);
 
+    expect(findTestSubject(wrapper, 'hasDeprecatedRolesAssignedHelpText')).toHaveLength(0);
     expectSaveButton(wrapper);
+  });
+
+  it('warns when user is assigned a deprecated role', async () => {
+    const user = createUser('existing_user', ['deprecated-role']);
+    const { apiClient, rolesAPIClient } = buildClients(user);
+    const securitySetup = buildSecuritySetup();
+
+    const wrapper = mountWithIntl(
+      <EditUserPage
+        username={user.username}
+        userAPIClient={apiClient}
+        rolesAPIClient={rolesAPIClient}
+        authc={securitySetup.authc}
+        notifications={coreMock.createStart().notifications}
+      />
+    );
+
+    await waitForRender(wrapper);
+
+    expect(apiClient.getUser).toBeCalledTimes(1);
+    expect(securitySetup.authc.getCurrentUser).toBeCalledTimes(1);
+
+    expect(findTestSubject(wrapper, 'hasDeprecatedRolesAssignedHelpText')).toHaveLength(1);
   });
 });
 

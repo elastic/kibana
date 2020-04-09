@@ -14,6 +14,7 @@ import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
+import { ActionTypeDisabledError } from './errors';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -63,6 +64,7 @@ const actionExecutorInitializerParams = {
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
+  actionTypeRegistry,
   logger: loggingServiceMock.create().get(),
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
@@ -307,4 +309,33 @@ test(`doesn't use API key when not provided`, async () => {
       },
     },
   });
+});
+
+test(`throws an error when license doesn't support the action type`, async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+  mockedActionExecutor.execute.mockImplementation(() => {
+    throw new ActionTypeDisabledError('Fail', 'license_invalid');
+  });
+
+  try {
+    await taskRunner.run();
+    throw new Error('Should have thrown');
+  } catch (e) {
+    expect(e instanceof ExecutorError).toEqual(true);
+    expect(e.data).toEqual({});
+    expect(e.retry).toEqual(false);
+  }
 });

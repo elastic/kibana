@@ -6,9 +6,7 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { Dispatch } from 'react';
-import * as H from 'history';
 import * as i18n from '../translations';
-import { TableData } from '../types';
 import { Action } from './reducer';
 import {
   deleteRulesAction,
@@ -16,19 +14,41 @@ import {
   enableRulesAction,
   exportRulesAction,
 } from './actions';
-import { ActionToaster } from '../../../../components/toasters';
+import { ActionToaster, displayWarningToast } from '../../../../components/toasters';
+import { Rule } from '../../../../containers/detection_engine/rules';
+import * as detectionI18n from '../../translations';
 
-export const getBatchItems = (
-  selectedState: TableData[],
-  dispatch: Dispatch<Action>,
-  dispatchToaster: Dispatch<ActionToaster>,
-  history: H.History,
-  closePopover: () => void
-) => {
-  const containsEnabled = selectedState.some(v => v.activate);
-  const containsDisabled = selectedState.some(v => !v.activate);
-  const containsLoading = selectedState.some(v => v.isLoading);
-  const containsImmutable = selectedState.some(v => v.immutable);
+interface GetBatchItems {
+  closePopover: () => void;
+  dispatch: Dispatch<Action>;
+  dispatchToaster: Dispatch<ActionToaster>;
+  hasMlPermissions: boolean;
+  loadingRuleIds: string[];
+  reFetchRules: (refreshPrePackagedRule?: boolean) => void;
+  rules: Rule[];
+  selectedRuleIds: string[];
+}
+
+export const getBatchItems = ({
+  closePopover,
+  dispatch,
+  dispatchToaster,
+  hasMlPermissions,
+  loadingRuleIds,
+  reFetchRules,
+  rules,
+  selectedRuleIds,
+}: GetBatchItems) => {
+  const containsEnabled = selectedRuleIds.some(
+    id => rules.find(r => r.id === id)?.enabled ?? false
+  );
+  const containsDisabled = selectedRuleIds.some(
+    id => !rules.find(r => r.id === id)?.enabled ?? false
+  );
+  const containsLoading = selectedRuleIds.some(id => loadingRuleIds.includes(id));
+  const containsImmutable = selectedRuleIds.some(
+    id => rules.find(r => r.id === id)?.immutable ?? false
+  );
 
   return [
     <EuiContextMenuItem
@@ -37,8 +57,25 @@ export const getBatchItems = (
       disabled={containsLoading || !containsDisabled}
       onClick={async () => {
         closePopover();
-        const deactivatedIds = selectedState.filter(s => !s.activate).map(s => s.id);
-        await enableRulesAction(deactivatedIds, true, dispatch, dispatchToaster);
+        const deactivatedIds = selectedRuleIds.filter(
+          id => !rules.find(r => r.id === id)?.enabled ?? false
+        );
+
+        const deactivatedIdsNoML = deactivatedIds.filter(
+          id => rules.find(r => r.id === id)?.type !== 'machine_learning' ?? false
+        );
+
+        const mlRuleCount = deactivatedIds.length - deactivatedIdsNoML.length;
+        if (!hasMlPermissions && mlRuleCount > 0) {
+          displayWarningToast(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount), dispatchToaster);
+        }
+
+        await enableRulesAction(
+          hasMlPermissions ? deactivatedIds : deactivatedIdsNoML,
+          true,
+          dispatch,
+          dispatchToaster
+        );
       }}
     >
       {i18n.BATCH_ACTION_ACTIVATE_SELECTED}
@@ -49,7 +86,9 @@ export const getBatchItems = (
       disabled={containsLoading || !containsEnabled}
       onClick={async () => {
         closePopover();
-        const activatedIds = selectedState.filter(s => s.activate).map(s => s.id);
+        const activatedIds = selectedRuleIds.filter(
+          id => rules.find(r => r.id === id)?.enabled ?? false
+        );
         await enableRulesAction(activatedIds, false, dispatch, dispatchToaster);
       }}
     >
@@ -58,11 +97,11 @@ export const getBatchItems = (
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_EXPORT_SELECTED}
       icon="exportAction"
-      disabled={containsImmutable || containsLoading || selectedState.length === 0}
-      onClick={async () => {
+      disabled={containsImmutable || containsLoading || selectedRuleIds.length === 0}
+      onClick={() => {
         closePopover();
-        await exportRulesAction(
-          selectedState.map(s => s.sourceRule),
+        exportRulesAction(
+          rules.filter(r => selectedRuleIds.includes(r.id)).map(r => r.rule_id),
           dispatch
         );
       }}
@@ -72,30 +111,30 @@ export const getBatchItems = (
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_DUPLICATE_SELECTED}
       icon="copy"
-      disabled={containsLoading || selectedState.length === 0}
+      disabled={containsLoading || selectedRuleIds.length === 0}
       onClick={async () => {
         closePopover();
         await duplicateRulesAction(
-          selectedState.map(s => s.sourceRule),
+          rules.filter(r => selectedRuleIds.includes(r.id)),
+          selectedRuleIds,
           dispatch,
           dispatchToaster
         );
+        reFetchRules(true);
       }}
     >
       {i18n.BATCH_ACTION_DUPLICATE_SELECTED}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      data-test-subj="deleteRuleBulk"
       key={i18n.BATCH_ACTION_DELETE_SELECTED}
       icon="trash"
       title={containsImmutable ? i18n.BATCH_ACTION_DELETE_SELECTED_IMMUTABLE : undefined}
-      disabled={containsLoading || selectedState.length === 0}
+      disabled={containsLoading || selectedRuleIds.length === 0}
       onClick={async () => {
         closePopover();
-        await deleteRulesAction(
-          selectedState.map(({ sourceRule: { id } }) => id),
-          dispatch,
-          dispatchToaster
-        );
+        await deleteRulesAction(selectedRuleIds, dispatch, dispatchToaster);
+        reFetchRules(true);
       }}
     >
       {i18n.BATCH_ACTION_DELETE_SELECTED}

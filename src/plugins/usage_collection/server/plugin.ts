@@ -18,18 +18,22 @@
  */
 
 import { first } from 'rxjs/operators';
+import {
+  PluginInitializerContext,
+  Logger,
+  CoreSetup,
+  CoreStart,
+  ISavedObjectsRepository,
+  Plugin,
+} from 'kibana/server';
 import { ConfigType } from './config';
-import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
-export type UsageCollectionSetup = CollectorSet & {
-  registerLegacySavedObjects: (legacySavedObjects: any) => void;
-};
-
-export class UsageCollectionPlugin {
-  logger: Logger;
-  private legacySavedObjects: any;
+export type UsageCollectionSetup = CollectorSet;
+export class UsageCollectionPlugin implements Plugin<CollectorSet> {
+  private readonly logger: Logger;
+  private savedObjects?: ISavedObjectsRepository;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
@@ -41,24 +45,19 @@ export class UsageCollectionPlugin {
       .toPromise();
 
     const collectorSet = new CollectorSet({
-      logger: this.logger,
+      logger: this.logger.get('collector-set'),
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
     const router = core.http.createRouter();
-    const getLegacySavedObjects = () => this.legacySavedObjects;
-    setupRoutes(router, getLegacySavedObjects);
+    setupRoutes(router, () => this.savedObjects);
 
-    return {
-      ...collectorSet,
-      registerLegacySavedObjects: (legacySavedObjects: any) => {
-        this.legacySavedObjects = legacySavedObjects;
-      },
-    };
+    return collectorSet;
   }
 
-  public start() {
+  public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
+    this.savedObjects = savedObjects.createInternalRepository();
   }
 
   public stop() {

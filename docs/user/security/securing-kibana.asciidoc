@@ -86,7 +86,7 @@ xpack.security.session.lifespan: "8h"
 --------------------------------------------------------------------------------
 --
 
-. Optional: <<configuring-tls,Configure {kib} to encrypt communications>>. 
+. Optional: <<configuring-tls,Configure {kib} to encrypt communications>>.
 
 . Optional: <<elasticsearch-mutual-tls,Configure {kib} to authenticate to {es} with a client certificate>>.
 
@@ -103,8 +103,8 @@ You can manage privileges on the *Management / Security / Roles* page in {kib}.
 
 If you're using the native realm with Basic Authentication, you can assign roles
 using the *Management / Security / Users* page in {kib} or the
-{ref}/security-api.html#security-user-apis[user management APIs]. For example, 
-the following creates a user named `jacknich` and assigns it the `kibana_admin` 
+{ref}/security-api.html#security-user-apis[user management APIs]. For example,
+the following creates a user named `jacknich` and assigns it the `kibana_admin`
 role:
 
 [source,js]
@@ -131,8 +131,8 @@ on specific index patterns. For more information, see
 
 . Verify that you can log in as a user. If you are running
 {kib} locally, go to `https://localhost:5601` and enter the credentials for a
-user you've assigned a {kib} user role. For example, you could log in as the
-`jacknich` user created above.
+user you've assigned a {kib} user role. For example, you could log in as the user
+`jacknich`.
 +
 --
 

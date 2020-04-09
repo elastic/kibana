@@ -10,7 +10,7 @@ export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProvide
   describe('Endpoint plugin', function() {
     this.tags(['endpoint']);
     loadTestFile(require.resolve('./resolver'));
-    loadTestFile(require.resolve('./endpoints'));
+    loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./alerts'));
   });
 }

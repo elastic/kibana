@@ -36,6 +36,7 @@ export class Plugin {
   public setup(setup: SetupObject) {
     const { core, plugins } = setup;
     const { home } = plugins;
+
     home.featureCatalogue.register({
       category: FeatureCatalogueCategory.DATA,
       description: PLUGIN.DESCRIPTION,
@@ -45,8 +46,8 @@ export class Plugin {
       showOnHomePage: true,
       title: PLUGIN.TITLE,
     });
+
     core.application.register({
-      appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
       euiIconType: 'uptimeApp',
       order: 8900,

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import {
   SavedObjectsService,
   InternalSavedObjectsServiceSetup,
@@ -29,6 +31,7 @@ import { savedObjectsClientProviderMock } from './service/lib/scoped_client_prov
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
+import { ServiceStatusLevels } from '../status';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
@@ -38,11 +41,13 @@ const createStartContractMock = () => {
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
     createSerializer: jest.fn(),
+    getTypeRegistry: jest.fn(),
   };
 
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
   startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  startContrat.getTypeRegistry.mockReturnValue(typeRegistryMock.create());
 
   return startContrat;
 };
@@ -52,7 +57,6 @@ const createInternalStartContractMock = () => {
     ...createStartContractMock(),
     clientProvider: savedObjectsClientProviderMock.create(),
     migrator: mockKibanaMigrator.create(),
-    typeRegistry: typeRegistryMock.create(),
   };
 
   return internalStartContract;
@@ -62,7 +66,11 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<SavedObjectsServiceSetup> = {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
+    registerType: jest.fn(),
+    getImportExportObjectLimit: jest.fn(),
   };
+
+  setupContract.getImportExportObjectLimit.mockReturnValue(100);
 
   return setupContract;
 };
@@ -70,7 +78,10 @@ const createSetupContractMock = () => {
 const createInternalSetupContractMock = () => {
   const internalSetupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
     ...createSetupContractMock(),
-    registerType: jest.fn(),
+    status$: new BehaviorSubject({
+      level: ServiceStatusLevels.available,
+      summary: `SavedObjects is available`,
+    }),
   };
   return internalSetupContract;
 };

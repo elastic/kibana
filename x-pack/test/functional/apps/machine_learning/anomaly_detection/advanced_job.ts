@@ -279,6 +279,7 @@ export default function({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('ml/ecommerce');
       await ml.api.createCalendar('wizard-test-calendar');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
@@ -681,7 +682,9 @@ export default function({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.assertInfluencerSelection(testData.pickFieldsConfig.influencers);
         });
 
-        it('job cloning pre-fills the model memory limit', async () => {
+        // MML during clone has changed in #61589
+        // TODO: adjust test code to reflect the new behavior
+        it.skip('job cloning pre-fills the model memory limit', async () => {
           await ml.jobWizardCommon.assertModelMemoryLimitInputExists({
             withAdvancedSection: false,
           });

@@ -8,6 +8,10 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import {
+  HTTPAuthorizationHeader,
+  BasicHTTPAuthorizationHeaderCredentials,
+} from '../http_authentication';
 import { BaseAuthenticationProvider } from './base';
 
 /**
@@ -28,6 +32,16 @@ interface ProviderState {
    * Elasticsearch on behalf of the authenticated user.
    */
   authorization?: string;
+}
+
+/**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication and client
+  // can be redirected to the login page where they can enter username and password.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
 }
 
 /**
@@ -53,7 +67,10 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to perform a login.');
 
     const authHeaders = {
-      authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+      authorization: new HTTPAuthorizationHeader(
+        'Basic',
+        new BasicHTTPAuthorizationHeaderCredentials(username, password).toString()
+      ).toString(),
     };
 
     try {
@@ -75,36 +92,39 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    // try header-based auth
-    const {
-      authenticationResult: headerAuthResult,
-      headerNotRecognized,
-    } = await this.authenticateViaHeader(request);
-    if (headerNotRecognized) {
-      return headerAuthResult;
+    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+      this.logger.debug('Cannot authenticate requests with `Authorization` header.');
+      return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = headerAuthResult;
-    if (authenticationResult.notHandled() && state) {
-      authenticationResult = await this.authenticateViaState(request, state);
-    } else if (authenticationResult.notHandled() && canRedirectRequest(request)) {
-      // If we couldn't handle authentication let's redirect user to the login page.
-      const nextURL = encodeURIComponent(
-        `${this.options.basePath.get(request)}${request.url.path}`
-      );
-      authenticationResult = AuthenticationResult.redirectTo(
-        `${this.options.basePath.get(request)}/login?next=${nextURL}`
+    if (state) {
+      return await this.authenticateViaState(request, state);
+    }
+
+    // If state isn't present let's redirect user to the login page.
+    if (canStartNewSession(request)) {
+      this.logger.debug('Redirecting request to Login page.');
+      const basePath = this.options.basePath.get(request);
+      return AuthenticationResult.redirectTo(
+        `${basePath}/login?next=${encodeURIComponent(`${basePath}${request.url.path}`)}`
       );
     }
 
-    return authenticationResult;
+    return AuthenticationResult.notHandled();
   }
 
   /**
    * Redirects user to the login page preserving query string parameters.
    * @param request Request instance.
+   * @param [state] Optional state object associated with the provider.
    */
-  public async logout(request: KibanaRequest) {
+  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+
+    if (!state) {
+      return DeauthenticationResult.notHandled();
+    }
+
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
     const queryString = request.url.search || `?msg=LOGGED_OUT`;
@@ -114,37 +134,11 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Validates whether request contains `Basic ***` Authorization header and just passes it
-   * forward to Elasticsearch backend.
-   * @param request Request instance.
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
-  private async authenticateViaHeader(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate via header.');
-
-    const authorization = request.headers.authorization;
-    if (!authorization || typeof authorization !== 'string') {
-      this.logger.debug('Authorization header is not presented.');
-      return { authenticationResult: AuthenticationResult.notHandled() };
-    }
-
-    const authenticationSchema = authorization.split(/\s+/)[0];
-    if (authenticationSchema.toLowerCase() !== 'basic') {
-      this.logger.debug(`Unsupported authentication schema: ${authenticationSchema}`);
-      return {
-        authenticationResult: AuthenticationResult.notHandled(),
-        headerNotRecognized: true,
-      };
-    }
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated via header.');
-      return { authenticationResult: AuthenticationResult.succeeded(user) };
-    } catch (err) {
-      this.logger.debug(`Failed to authenticate request via header: ${err.message}`);
-      return { authenticationResult: AuthenticationResult.failed(err) };
-    }
+  public getHTTPAuthenticationScheme() {
+    return 'basic';
   }
 
   /**
@@ -157,7 +151,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate via state.');
 
     if (!authorization) {
-      this.logger.debug('Access token is not found in state.');
+      this.logger.debug('Authorization header is not found in state.');
       return AuthenticationResult.notHandled();
     }
 

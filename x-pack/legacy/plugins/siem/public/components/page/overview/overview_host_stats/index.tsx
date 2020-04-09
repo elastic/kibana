@@ -266,6 +266,4 @@ const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading
   );
 };
 
-OverviewHostStatsComponent.displayName = 'OverviewHostStatsComponent';
-
 export const OverviewHostStats = React.memo(OverviewHostStatsComponent);

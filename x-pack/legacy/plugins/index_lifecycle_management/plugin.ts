@@ -41,14 +41,14 @@ export class Plugin {
     registerPoliciesRoutes(server);
     registerTemplatesRoutes(server);
 
-    const serverPlugins = server.plugins as any;
+    const serverPlugins = server.newPlatform.setup.plugins as any;
 
     if (
       server.config().get('xpack.ilm.ui.enabled') &&
-      serverPlugins.index_management &&
-      serverPlugins.index_management.addIndexManagementDataEnricher
+      serverPlugins.indexManagement &&
+      serverPlugins.indexManagement.indexDataEnricher
     ) {
-      serverPlugins.index_management.addIndexManagementDataEnricher(indexLifecycleDataEnricher);
+      serverPlugins.indexManagement.indexDataEnricher.add(indexLifecycleDataEnricher);
     }
   }
 }

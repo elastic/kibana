@@ -90,34 +90,68 @@ test('`format()` correctly formats record with meta-data', () => {
   const layout = new JsonLayout();
 
   expect(
-    layout.format({
-      context: 'context-with-meta',
-      level: LogLevel.Debug,
-      message: 'message-with-meta',
-      timestamp,
-      pid: 5355,
-      meta: {
-        from: 'v7',
-        to: 'v8',
-      },
-    })
-  ).toMatchSnapshot();
+    JSON.parse(
+      layout.format({
+        context: 'context-with-meta',
+        level: LogLevel.Debug,
+        message: 'message-with-meta',
+        timestamp,
+        pid: 5355,
+        meta: {
+          from: 'v7',
+          to: 'v8',
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    context: 'context-with-meta',
+    level: 'DEBUG',
+    message: 'message-with-meta',
+    meta: {
+      from: 'v7',
+      to: 'v8',
+    },
+    pid: 5355,
+  });
 });
 
 test('`format()` correctly formats error record with meta-data', () => {
   const layout = new JsonLayout();
 
   expect(
-    layout.format({
-      context: 'context-with-meta',
-      level: LogLevel.Debug,
-      message: 'message-with-meta',
-      timestamp,
-      pid: 5355,
-      meta: {
-        from: 'v7',
-        to: 'v8',
-      },
-    })
-  ).toMatchSnapshot();
+    JSON.parse(
+      layout.format({
+        context: 'error-with-meta',
+        level: LogLevel.Debug,
+        error: {
+          message: 'Some error message',
+          name: 'Some error name',
+          stack: 'Some error stack',
+        },
+        message: 'Some error message',
+        timestamp,
+        pid: 5355,
+        meta: {
+          from: 'v7',
+          to: 'v8',
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    context: 'error-with-meta',
+    level: 'DEBUG',
+    error: {
+      message: 'Some error message',
+      name: 'Some error name',
+      stack: 'Some error stack',
+    },
+    message: 'Some error message',
+    meta: {
+      from: 'v7',
+      to: 'v8',
+    },
+    pid: 5355,
+  });
 });

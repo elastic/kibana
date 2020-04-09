@@ -19,11 +19,13 @@ type Context = Datatable | null;
 interface Arguments {
   content: string[];
   font: Style;
+  openLinksInNewTab: boolean;
 }
 
 interface Return {
   content: string;
   font: Style;
+  openLinksInNewTab: boolean;
 }
 
 export function markdown(): ExpressionFunctionDefinition<
@@ -53,6 +55,11 @@ export function markdown(): ExpressionFunctionDefinition<
         help: argHelp.font,
         default: '{font}',
       },
+      openLinksInNewTab: {
+        types: ['boolean'],
+        help: argHelp.openLinksInNewTab,
+        default: false,
+      },
     },
     fn: (input, args) => {
       const compileFunctions = args.content.map(str =>
@@ -71,6 +78,7 @@ export function markdown(): ExpressionFunctionDefinition<
         value: {
           content: compileFunctions.map(fn => fn(ctx)).join(''),
           font: args.font,
+          openLinksInNewTab: args.openLinksInNewTab,
         },
       };
     },

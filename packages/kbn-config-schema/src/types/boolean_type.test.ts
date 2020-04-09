@@ -35,13 +35,17 @@ test('handles boolean strings', () => {
 });
 
 test('is required by default', () => {
-  expect(() => schema.boolean().validate(undefined)).toThrowErrorMatchingSnapshot();
+  expect(() => schema.boolean().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [boolean] but got [undefined]"`
+  );
 });
 
 test('includes namespace in failure', () => {
   expect(() =>
     schema.boolean().validate(undefined, {}, 'foo-namespace')
-  ).toThrowErrorMatchingSnapshot();
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace]: expected value of type [boolean] but got [undefined]"`
+  );
 });
 
 describe('#defaultValue', () => {
@@ -55,13 +59,23 @@ describe('#defaultValue', () => {
 });
 
 test('returns error when not boolean', () => {
-  expect(() => schema.boolean().validate(123)).toThrowErrorMatchingSnapshot();
+  expect(() => schema.boolean().validate(123)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [boolean] but got [number]"`
+  );
 
-  expect(() => schema.boolean().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
+  expect(() => schema.boolean().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [boolean] but got [Array]"`
+  );
 
-  expect(() => schema.boolean().validate('abc')).toThrowErrorMatchingSnapshot();
+  expect(() => schema.boolean().validate('abc')).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [boolean] but got [string]"`
+  );
 
-  expect(() => schema.boolean().validate(0)).toThrowErrorMatchingSnapshot();
+  expect(() => schema.boolean().validate(0)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [boolean] but got [number]"`
+  );
 
-  expect(() => schema.boolean().validate('no')).toThrowErrorMatchingSnapshot();
+  expect(() => schema.boolean().validate('no')).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [boolean] but got [string]"`
+  );
 });

@@ -19,6 +19,9 @@ describe('state selectors', () => {
       errors: [],
       loading: false,
     },
+    dynamicSettings: {
+      loading: false,
+    },
     monitor: {
       monitorDetailsList: [],
       monitorLocationsList: new Map(),
@@ -35,6 +38,7 @@ describe('state selectors', () => {
       loading: false,
     },
     ui: {
+      alertFlyoutVisible: false,
       basePath: 'yyz',
       esKuery: '',
       integrationsPopoverOpen: null,
@@ -42,7 +46,6 @@ describe('state selectors', () => {
     },
     monitorStatus: {
       status: null,
-      monitor: null,
       loading: false,
     },
     indexPattern: {
@@ -54,6 +57,30 @@ describe('state selectors', () => {
       pingHistogram: null,
       loading: false,
       errors: [],
+    },
+    monitorDuration: {
+      durationLines: null,
+      loading: false,
+      errors: [],
+    },
+    ml: {
+      mlJob: {
+        data: null,
+        loading: false,
+      },
+      createJob: { data: null, loading: false },
+      deleteJob: { data: null, loading: false },
+      mlCapabilities: { data: null, loading: false },
+      anomalies: {
+        data: null,
+        loading: false,
+      },
+    },
+    indexStatus: {
+      indexStatus: {
+        data: null,
+        loading: false,
+      },
     },
   };
 

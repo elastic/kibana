@@ -6,7 +6,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
@@ -38,7 +38,7 @@ import { NetworkRouteType } from './navigation/types';
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
 
-const NetworkComponent = React.memo<NetworkComponentProps>(
+const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
   ({
     filters,
     query,
@@ -183,6 +183,12 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const Network = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(NetworkComponent);
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const Network = connector(NetworkComponent);

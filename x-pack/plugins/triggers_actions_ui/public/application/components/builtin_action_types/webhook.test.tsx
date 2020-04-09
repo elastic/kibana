@@ -39,6 +39,7 @@ describe('webhook connector validation', () => {
       id: 'test',
       actionTypeId: '.webhook',
       name: 'webhook',
+      isPreconfigured: false,
       config: {
         method: 'PUT',
         url: 'http:\\test',
@@ -106,6 +107,7 @@ describe('WebhookActionConnectorFields renders', () => {
       },
       id: 'test',
       actionTypeId: '.webhook',
+      isPreconfigured: false,
       name: 'webhook',
       config: {
         method: 'PUT',
@@ -160,6 +162,7 @@ describe('WebhookParamsFields renders', () => {
         .first()
         .prop('value')
     ).toStrictEqual('test message');
+    expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
   });
 
   test('params validation fails when body is not valid', () => {

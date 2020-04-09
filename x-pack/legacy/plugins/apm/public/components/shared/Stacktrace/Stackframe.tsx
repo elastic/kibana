@@ -11,7 +11,7 @@ import { EuiAccordion } from '@elastic/eui';
 import {
   IStackframe,
   IStackframeWithLineContext
-} from '../../../../typings/es_schemas/raw/fields/Stackframe';
+} from '../../../../../../../plugins/apm/typings/es_schemas/raw/fields/stackframe';
 import {
   borderRadius,
   fontFamilyCode,

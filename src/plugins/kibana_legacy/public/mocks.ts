@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { EnvironmentMode, PackageInfo } from 'kibana/server';
 import { KibanaLegacyPlugin } from './plugin';
 
 export type Setup = jest.Mocked<ReturnType<KibanaLegacyPlugin['setup']>>;
@@ -27,6 +28,10 @@ const createSetupContract = (): Setup => ({
   registerLegacyApp: jest.fn(),
   config: {
     defaultAppId: 'home',
+  },
+  env: {} as {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
   },
 });
 

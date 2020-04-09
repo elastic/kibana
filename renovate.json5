@@ -266,6 +266,14 @@
         ],
       },
       {
+        groupSlug: 'estree',
+        groupName: 'estree related packages',
+        packageNames: [
+          'estree',
+          '@types/estree',
+        ],
+      },
+      {
         groupSlug: 'fancy-log',
         groupName: 'fancy-log related packages',
         packageNames: [
@@ -295,6 +303,14 @@
         packageNames: [
           'flot',
           '@types/flot',
+        ],
+      },
+      {
+        groupSlug: 'geojson',
+        groupName: 'geojson related packages',
+        packageNames: [
+          'geojson',
+          '@types/geojson',
         ],
       },
       {
@@ -429,6 +445,14 @@
         packageNames: [
           'jquery',
           '@types/jquery',
+        ],
+      },
+      {
+        groupSlug: 'js-search',
+        groupName: 'js-search related packages',
+        packageNames: [
+          'js-search',
+          '@types/js-search',
         ],
       },
       {
@@ -666,6 +690,14 @@
         ],
       },
       {
+        groupSlug: 'normalize-path',
+        groupName: 'normalize-path related packages',
+        packageNames: [
+          'normalize-path',
+          '@types/normalize-path',
+        ],
+      },
+      {
         groupSlug: 'numeral',
         groupName: 'numeral related packages',
         packageNames: [
@@ -870,6 +902,14 @@
         ],
       },
       {
+        groupSlug: 'tar',
+        groupName: 'tar related packages',
+        packageNames: [
+          'tar',
+          '@types/tar',
+        ],
+      },
+      {
         groupSlug: 'tar-fs',
         groupName: 'tar-fs related packages',
         packageNames: [
@@ -911,6 +951,14 @@
         packageNames: [
           'tslib',
           '@types/tslib',
+        ],
+      },
+      {
+        groupSlug: 'use-resize-observer',
+        groupName: 'use-resize-observer related packages',
+        packageNames: [
+          'use-resize-observer',
+          '@types/use-resize-observer',
         ],
       },
       {

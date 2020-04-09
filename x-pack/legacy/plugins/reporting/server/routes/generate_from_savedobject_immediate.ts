@@ -10,14 +10,13 @@ import { createJobFactory, executeJobFactory } from '../../export_types/csv_from
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import {
-  HeadlessChromiumDriverFactory,
   JobDocOutput,
   Logger,
   ReportingResponseToolkit,
   ResponseFacade,
   ServerFacade,
 } from '../../types';
-import { ReportingSetupDeps } from '../plugin';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 
@@ -31,12 +30,13 @@ import { getRouteOptionsCsv } from './lib/route_config_factories';
  *     - local (transient) changes the user made to the saved object
  */
 export function registerGenerateCsvFromSavedObjectImmediate(
+  reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server, plugins, parentLogger);
-  const { elasticsearch } = plugins;
+  const config = reporting.getConfig();
+  const routeOptions = getRouteOptionsCsv(config, plugins, parentLogger);
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
@@ -51,17 +51,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const request = makeRequestFacade(legacyRequest);
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
-
-      /* TODO these functions should be made available in the export types registry:
-       *
-       *     const { createJobFn, executeJobFn } = exportTypesRegistry.getById(CSV_FROM_SAVEDOBJECT_JOB_TYPE)
-       *
-       * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
-       */
-      const createJobFn = createJobFactory(server, elasticsearch, logger);
-      const executeJobFn = executeJobFactory(server, elasticsearch, logger, {
-        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
-      });
+      const createJobFn = createJobFactory(reporting, logger);
+      const executeJobFn = await executeJobFactory(reporting, logger); // FIXME: does not "need" to be async
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
         jobParams,
         request.headers,

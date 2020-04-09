@@ -4,15 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../../src/core/server';
-import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
-import { CancellationToken } from '../../../../common/cancellation_token';
-import { ServerFacade, RequestFacade, Logger } from '../../../../types';
+import { IUiSettingsClient, KibanaRequest } from '../../../../../../../../src/core/server';
 import {
-  JobParamsDiscoverCsv,
+  esQuery,
+  EsQueryConfig,
+  Filter,
+  IIndexPattern,
+  Query,
+  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
+  // be moved under reporting/server/
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../../src/plugins/data/server';
+import { CancellationToken } from '../../../../common/cancellation_token';
+import { ReportingCore } from '../../../../server';
+import { Logger, RequestFacade } from '../../../../types';
+import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
+import {
   CsvResultFromSearch,
-  SearchRequest,
   GenerateCsvParams,
+  JobParamsDiscoverCsv,
+  SearchRequest,
 } from '../../../csv/types';
 import {
   IndexPatternField,
@@ -24,18 +35,7 @@ import {
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
 
-import {
-  esQuery,
-  EsQueryConfig,
-  Filter,
-  IIndexPattern,
-  Query,
-  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
-  // be moved under reporting/server/
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../../src/plugins/data/server';
-
-const getEsQueryConfig = async (config: any) => {
+const getEsQueryConfig = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
     config.get('query:allowLeadingWildcards'),
     config.get('query:queryString:options'),
@@ -49,7 +49,7 @@ const getEsQueryConfig = async (config: any) => {
   } as EsQueryConfig;
 };
 
-const getUiSettings = async (config: any) => {
+const getUiSettings = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([config.get('csv:separator'), config.get('csv:quoteValues')]);
   const [separator, quoteValues] = configs;
   return { separator, quoteValues };
@@ -57,14 +57,12 @@ const getUiSettings = async (config: any) => {
 
 export async function generateCsvSearch(
   req: RequestFacade,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
+  reporting: ReportingCore,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
-  const { savedObjects, uiSettingsServiceFactory } = server;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+  const savedObjectsClient = await reporting.getSavedObjectsClient(
     KibanaRequest.from(req.getRawRequest())
   );
   const { indexPatternSavedObjectId, timerange } = searchPanel;
@@ -73,7 +71,8 @@ export async function generateCsvSearch(
     savedObjectsClient,
     indexPatternSavedObjectId
   );
-  const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
+
+  const uiConfig = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
   const esQueryConfig = await getEsQueryConfig(uiConfig);
 
   const {
@@ -154,11 +153,12 @@ export async function generateCsvSearch(
     },
   };
 
+  const config = reporting.getConfig();
+  const elasticsearch = await reporting.getElasticsearchService();
   const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
     KibanaRequest.from(req.getRawRequest())
   );
   const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
-  const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 
   const generateCsvParams: GenerateCsvParams = {
@@ -171,8 +171,8 @@ export async function generateCsvSearch(
     cancellationToken: new CancellationToken(),
     settings: {
       ...uiSettings,
-      maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
-      scroll: config.get('xpack.reporting.csv.scroll'),
+      maxSizeBytes: config.get('csv', 'maxSizeBytes'),
+      scroll: config.get('csv', 'scroll'),
       timezone,
     },
   };

@@ -25,7 +25,17 @@ export const distDir: string;
 /**
  * Filename of the main bundle file in the distributable directory
  */
-export const distFilename: string;
+export const jsFilename: string;
+
+/**
+ * Filename of files that must be loaded before the jsFilename
+ */
+export const jsDepFilenames: string[];
+
+/**
+ * Filename of the unthemed css file in the distributable directory
+ */
+export const baseCssDistFilename: string;
 
 /**
  * Filename of the dark-theme css file in the distributable directory

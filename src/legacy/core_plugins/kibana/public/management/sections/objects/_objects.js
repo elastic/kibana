@@ -28,7 +28,6 @@ import { ObjectsTable } from './components/objects_table';
 import { I18nContext } from 'ui/i18n';
 import { get } from 'lodash';
 import { npStart } from 'ui/new_platform';
-
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';

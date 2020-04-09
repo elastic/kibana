@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './errors_types';
-
 export interface BasicSignals {
   signal: AbortSignal;
 }
@@ -56,7 +54,6 @@ export interface Privilege {
     monitor_watcher: boolean;
     monitor_transform: boolean;
     read_ilm: boolean;
-    manage_api_key: boolean;
     manage_security: boolean;
     manage_own_api_key: boolean;
     manage_saml: boolean;

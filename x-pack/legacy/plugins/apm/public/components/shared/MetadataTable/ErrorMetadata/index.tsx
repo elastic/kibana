@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { ERROR_METADATA_SECTIONS } from './sections';
-import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 import { getSectionsWithRows } from '../helper';
 import { MetadataTable } from '..';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body/helpers';
+import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body/constants';
 import {
   Direction,
   FlowTarget,

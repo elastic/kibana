@@ -5,25 +5,20 @@
  */
 import { handleActions, Action } from 'redux-actions';
 import {
-  getSelectedMonitor,
-  getSelectedMonitorSuccess,
-  getSelectedMonitorFail,
-  getMonitorStatus,
-  getMonitorStatusSuccess,
-  getMonitorStatusFail,
+  getMonitorStatusAction,
+  getMonitorStatusActionSuccess,
+  getMonitorStatusActionFail,
 } from '../actions';
 import { Ping } from '../../../common/graphql/types';
 import { QueryParams } from '../actions/types';
 
 export interface MonitorStatusState {
   status: Ping | null;
-  monitor: Ping | null;
   loading: boolean;
 }
 
 const initialState: MonitorStatusState = {
   status: null,
-  monitor: null,
   loading: false,
 };
 
@@ -31,34 +26,24 @@ type MonitorStatusPayload = QueryParams & Ping;
 
 export const monitorStatusReducer = handleActions<MonitorStatusState, MonitorStatusPayload>(
   {
-    [String(getSelectedMonitor)]: (state, action: Action<QueryParams>) => ({
+    [String(getMonitorStatusAction)]: (state, action: Action<QueryParams>) => ({
       ...state,
       loading: true,
     }),
 
-    [String(getSelectedMonitorSuccess)]: (state, action: Action<Ping>) => ({
-      ...state,
-      loading: false,
-      monitor: { ...action.payload } as Ping,
-    }),
+    [String(getMonitorStatusActionSuccess)]: (state, action: Action<Ping>) => {
+      return {
+        ...state,
+        loading: false,
+        // Keeping url from prev request to display, if there is no latest status
+        status: {
+          url: action.payload?.url || state.status?.url,
+          ...action.payload,
+        } as Ping,
+      };
+    },
 
-    [String(getSelectedMonitorFail)]: (state, action: Action<any>) => ({
-      ...state,
-      loading: false,
-    }),
-
-    [String(getMonitorStatus)]: (state, action: Action<QueryParams>) => ({
-      ...state,
-      loading: true,
-    }),
-
-    [String(getMonitorStatusSuccess)]: (state, action: Action<Ping>) => ({
-      ...state,
-      loading: false,
-      status: { ...action.payload } as Ping,
-    }),
-
-    [String(getMonitorStatusFail)]: (state, action: Action<any>) => ({
+    [String(getMonitorStatusActionFail)]: (state, action: Action<any>) => ({
       ...state,
       loading: false,
     }),

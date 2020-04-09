@@ -22,12 +22,8 @@ exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/
       },
     }
   }
+  color="rgb(0, 156, 224)"
   curve={9}
-  customSeriesColors={
-    Array [
-      "rgb(0, 156, 224)",
-    ]
-  }
   data={
     Array [
       Array [

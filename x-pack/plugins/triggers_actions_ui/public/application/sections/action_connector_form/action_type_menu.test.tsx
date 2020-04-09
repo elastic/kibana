@@ -6,31 +6,28 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
+import {
+  ActionsConnectorsContextProvider,
+  ActionsConnectorsContextValue,
+} from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
 import { ValidationResult } from '../../../types';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
-  let deps: any;
+  let deps: ActionsConnectorsContextValue;
 
   beforeAll(async () => {
     const mockes = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
         application: { capabilities },
       },
     ] = await mockes.getStartServices();
     deps = {
-      chrome,
-      docLinks,
-      toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
-      uiSettings: mockes.uiSettings,
+      toastNotifications: mockes.notifications.toasts,
       capabilities: {
         ...capabilities,
         actions: {
@@ -39,11 +36,7 @@ describe('connector_add_flyout', () => {
           show: true,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
       actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: {} as any,
     };
   });
 
@@ -68,14 +61,10 @@ describe('connector_add_flyout', () => {
     const wrapper = mountWithIntl(
       <ActionsConnectorsContextProvider
         value={{
-          addFlyoutVisible: true,
-          setAddFlyoutVisibility: state => {},
-          editFlyoutVisible: false,
-          setEditFlyoutVisibility: state => {},
-          actionTypesIndex: {
-            'first-action-type': { id: 'first-action-type', name: 'first', enabled: true },
-            'second-action-type': { id: 'second-action-type', name: 'second', enabled: true },
-          },
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
@@ -83,12 +72,118 @@ describe('connector_add_flyout', () => {
       >
         <ActionTypeMenu
           onActionTypeChange={onActionTypeChange}
-          actionTypeRegistry={deps.actionTypeRegistry}
+          actionTypes={[
+            {
+              id: actionType.id,
+              enabled: true,
+              name: 'Test',
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
+            },
+          ]}
         />
       </ActionsConnectorsContextProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="first-action-type-card"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="second-action-type-card"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
+  });
+
+  it(`doesn't renders action types that are disabled via config`, () => {
+    const onActionTypeChange = jest.fn();
+    const actionType = {
+      id: 'my-action-type',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): ValidationResult => {
+        return { errors: {} };
+      },
+      validateParams: (): ValidationResult => {
+        const validationResult = { errors: {} };
+        return validationResult;
+      },
+      actionConnectorFields: null,
+      actionParamsFields: null,
+    };
+    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+    const wrapper = mountWithIntl(
+      <ActionsConnectorsContextProvider
+        value={{
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+        }}
+      >
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypes={[
+            {
+              id: actionType.id,
+              enabled: false,
+              name: 'Test',
+              enabledInConfig: false,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+          ]}
+        />
+      </ActionsConnectorsContextProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeFalsy();
+  });
+
+  it(`renders action types as disabled when disabled by license`, () => {
+    const onActionTypeChange = jest.fn();
+    const actionType = {
+      id: 'my-action-type',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): ValidationResult => {
+        return { errors: {} };
+      },
+      validateParams: (): ValidationResult => {
+        const validationResult = { errors: {} };
+        return validationResult;
+      },
+      actionConnectorFields: null,
+      actionParamsFields: null,
+    };
+    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+    const wrapper = mountWithIntl(
+      <ActionsConnectorsContextProvider
+        value={{
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+        }}
+      >
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypes={[
+            {
+              id: actionType.id,
+              enabled: false,
+              name: 'Test',
+              enabledInConfig: true,
+              enabledInLicense: false,
+              minimumLicenseRequired: 'gold',
+            },
+          ]}
+        />
+      </ActionsConnectorsContextProvider>
+    );
+
+    expect(wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
   });
 });

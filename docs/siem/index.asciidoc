@@ -4,7 +4,6 @@
 
 [partintro]
 --
-beta[]
 
 The SIEM app in Kibana provides an interactive workspace for security teams to
 triage events and perform initial investigations. It enables analysis of

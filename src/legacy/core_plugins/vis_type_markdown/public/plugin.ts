@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 
 import { markdownVisDefinition } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
@@ -39,7 +39,7 @@ export class MarkdownPlugin implements Plugin<void, void> {
   }
 
   public setup(core: CoreSetup, { expressions, visualizations }: MarkdownPluginSetupDependencies) {
-    visualizations.types.createReactVisualization(markdownVisDefinition);
+    visualizations.createReactVisualization(markdownVisDefinition);
     expressions.registerFunction(createMarkdownVisFn);
   }
 

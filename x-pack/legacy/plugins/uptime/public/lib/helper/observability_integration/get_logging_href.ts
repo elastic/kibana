@@ -19,7 +19,7 @@ export const getLoggingContainerHref = (
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(
       basePath,
-      `/app/infra#/logs?logFilter=${encodeURI(`(expression:'container.id : ${ret}',kind:kuery)`)}`
+      `/app/logs?logFilter=${encodeURI(`(expression:'container.id : ${ret}',kind:kuery)`)}`
     );
   };
   return buildHref(summary.state.checks || [], 'container.id', getHref);
@@ -33,7 +33,7 @@ export const getLoggingKubernetesHref = (summary: MonitorSummary, basePath: stri
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(
       basePath,
-      `/app/infra#/logs?logFilter=${encodeURI(`(expression:'pod.uid : ${ret}',kind:kuery)`)}`
+      `/app/logs?logFilter=${encodeURI(`(expression:'pod.uid : ${ret}',kind:kuery)`)}`
     );
   };
   return buildHref(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
@@ -47,9 +47,7 @@ export const getLoggingIpHref = (summary: MonitorSummary, basePath: string) => {
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(
       basePath,
-      `/app/infra#/logs?logFilter=(expression:'${encodeURIComponent(
-        `host.ip : ${ret}`
-      )}',kind:kuery)`
+      `/app/logs?logFilter=(expression:'${encodeURIComponent(`host.ip : ${ret}`)}',kind:kuery)`
     );
   };
   return buildHref(summary.state.checks || [], 'monitor.ip', getHref);

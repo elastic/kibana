@@ -47,6 +47,11 @@ Object {
     },
     "settleTime": 1000,
     "timeout": 20000,
+    "timeouts": Object {
+      "openUrl": 30000,
+      "renderComplete": 30000,
+      "waitForElements": 30000,
+    },
     "viewport": Object {
       "height": 1200,
       "width": 1950,
@@ -61,6 +66,7 @@ Object {
       "duration": "30s",
       "size": 500,
     },
+    "useByteOrderMarkEncoding": false,
   },
   "enabled": true,
   "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -138,6 +144,11 @@ Object {
     },
     "settleTime": 1000,
     "timeout": 20000,
+    "timeouts": Object {
+      "openUrl": 30000,
+      "renderComplete": 30000,
+      "waitForElements": 30000,
+    },
     "viewport": Object {
       "height": 1200,
       "width": 1950,
@@ -152,6 +163,7 @@ Object {
       "duration": "30s",
       "size": 500,
     },
+    "useByteOrderMarkEncoding": false,
   },
   "enabled": true,
   "index": ".reporting",
@@ -228,6 +240,11 @@ Object {
     },
     "settleTime": 1000,
     "timeout": 20000,
+    "timeouts": Object {
+      "openUrl": 30000,
+      "renderComplete": 30000,
+      "waitForElements": 30000,
+    },
     "viewport": Object {
       "height": 1200,
       "width": 1950,
@@ -242,6 +259,7 @@ Object {
       "duration": "30s",
       "size": 500,
     },
+    "useByteOrderMarkEncoding": false,
   },
   "enabled": true,
   "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -319,6 +337,11 @@ Object {
     },
     "settleTime": 1000,
     "timeout": 20000,
+    "timeouts": Object {
+      "openUrl": 30000,
+      "renderComplete": 30000,
+      "waitForElements": 30000,
+    },
     "viewport": Object {
       "height": 1200,
       "width": 1950,
@@ -333,6 +356,7 @@ Object {
       "duration": "30s",
       "size": 500,
     },
+    "useByteOrderMarkEncoding": false,
   },
   "enabled": true,
   "index": ".reporting",

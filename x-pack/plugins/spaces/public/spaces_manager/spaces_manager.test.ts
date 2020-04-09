@@ -12,14 +12,14 @@ describe('SpacesManager', () => {
   describe('#constructor', () => {
     it('attempts to retrieve the active space', () => {
       const coreStart = coreMock.createStart();
-      new SpacesManager('/server-base-path', coreStart.http);
+      new SpacesManager(coreStart.http);
       expect(coreStart.http.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
     });
 
     it('does not retrieve the active space if on an anonymous path', () => {
       const coreStart = coreMock.createStart();
       coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
-      new SpacesManager('/server-base-path', coreStart.http);
+      new SpacesManager(coreStart.http);
       expect(coreStart.http.get).not.toHaveBeenCalled();
     });
   });
@@ -31,7 +31,7 @@ describe('SpacesManager', () => {
         id: 'my-space',
         name: 'my space',
       });
-      const spacesManager = new SpacesManager('/server-base-path', coreStart.http);
+      const spacesManager = new SpacesManager(coreStart.http);
       expect(coreStart.http.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
 
       await nextTick();
@@ -47,7 +47,7 @@ describe('SpacesManager', () => {
     it('throws if on an anonymous path', () => {
       const coreStart = coreMock.createStart();
       coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
-      const spacesManager = new SpacesManager('/server-base-path', coreStart.http);
+      const spacesManager = new SpacesManager(coreStart.http);
       expect(coreStart.http.get).not.toHaveBeenCalled();
 
       expect(() => spacesManager.getActiveSpace()).toThrowErrorMatchingInlineSnapshot(
@@ -67,7 +67,7 @@ describe('SpacesManager', () => {
           name: 'my other space',
         });
 
-      const spacesManager = new SpacesManager('/server-base-path', coreStart.http);
+      const spacesManager = new SpacesManager(coreStart.http);
       expect(coreStart.http.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
 
       await nextTick();
@@ -95,7 +95,7 @@ describe('SpacesManager', () => {
         name: 'my space',
       });
 
-      const spacesManager = new SpacesManager('/server-base-path', coreStart.http);
+      const spacesManager = new SpacesManager(coreStart.http);
 
       expect(() =>
         spacesManager.getActiveSpace({ forceRefresh: true })

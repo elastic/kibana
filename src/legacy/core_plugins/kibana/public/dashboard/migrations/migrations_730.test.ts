@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { migrations } from '../../../migrations/';
+import { migrations } from '../../../migrations';
 import { migrations730 } from './migrations_730';
 import {
   DashboardDoc700To720,
   DashboardDoc730ToLatest,
   RawSavedDashboardPanel730ToLatest,
   DashboardDocPre700,
-} from './types';
+} from '../../../../../../plugins/dashboard/public';
 
 const mockLogger = {
   warning: () => {},

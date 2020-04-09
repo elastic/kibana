@@ -52,6 +52,7 @@ run(
 
     log.verbose('Loading Storybook:', absolute);
     process.chdir(join(absolute, '..', '..'));
+
     require(absolute);
   },
   {
@@ -69,9 +70,10 @@ run(
     flags: {
       default: {},
       string: [],
-      boolean: ['clean'],
+      boolean: ['clean', 'site'],
       help: `
       --clean            Clean Storybook build folder.
+      --site             Build static version of Storybook.
     `,
     },
   }

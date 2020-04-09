@@ -126,12 +126,14 @@ export function setupJUnitReportGeneration(runner, options = {}) {
 
     [...results, ...skippedResults].forEach(result => {
       const el = addTestcaseEl(result.node);
-      el.ele('system-out').dat(escapeCdata(getSnapshotOfRunnableLogs(result.node) || ''));
 
       if (result.failed) {
+        el.ele('system-out').dat(escapeCdata(getSnapshotOfRunnableLogs(result.node) || ''));
         el.ele('failure').dat(escapeCdata(inspect(result.error)));
         return;
       }
+
+      el.ele('system-out').dat('-- logs are only reported for failed tests --');
 
       if (result.skipped) {
         el.ele('skipped');

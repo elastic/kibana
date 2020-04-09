@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { EmbeddablePanel } from './embeddable_panel';
-export { ADD_PANEL_ACTION_ID, AddPanelAction, openAddPanelFlyout } from './panel_header';
+export * from './embeddable_panel';
+export * from './panel_header';

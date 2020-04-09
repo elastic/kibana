@@ -70,10 +70,11 @@
  */
 
 import _ from 'lodash';
+import { SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { SearchRequest } from '../..';
+import { IIndexPattern, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 
@@ -339,11 +340,20 @@ export class SearchSource {
     return searchRequest;
   }
 
+  private getIndexType(index: IIndexPattern) {
+    if (this.searchStrategyId) {
+      return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
+    } else {
+      return index?.type;
+    }
+  }
+
   private flatten() {
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
+    searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};
 
@@ -409,5 +419,86 @@ export class SearchSource {
     })(body.aggs || body.aggregations);
 
     return searchRequest;
+  }
+
+  /**
+   * Serializes the instance to a JSON string and a set of referenced objects.
+   * Use this method to get a representation of the search source which can be stored in a saved object.
+   *
+   * The references returned by this function can be mixed with other references in the same object,
+   * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
+   * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
+   *
+   * Using `createSearchSource`, the instance can be re-created.
+   * @param searchSource The search source to serialize
+   * @public */
+  public serialize() {
+    const references: SavedObjectReference[] = [];
+
+    const {
+      filter: originalFilters,
+      ...searchSourceFields
+    }: Omit<SearchSourceFields, 'sort' | 'size'> = _.omit(this.getFields(), ['sort', 'size']);
+    let serializedSearchSourceFields: Omit<SearchSourceFields, 'sort' | 'size' | 'filter'> & {
+      indexRefName?: string;
+      filter?: Array<Omit<Filter, 'meta'> & { meta: Filter['meta'] & { indexRefName?: string } }>;
+    } = searchSourceFields;
+    if (searchSourceFields.index) {
+      const indexId = searchSourceFields.index.id!;
+      const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+      references.push({
+        name: refName,
+        type: 'index-pattern',
+        id: indexId,
+      });
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        indexRefName: refName,
+        index: undefined,
+      };
+    }
+    if (originalFilters) {
+      const filters = this.getFilters(originalFilters);
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        filter: filters.map((filterRow, i) => {
+          if (!filterRow.meta || !filterRow.meta.index) {
+            return filterRow;
+          }
+          const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+          references.push({
+            name: refName,
+            type: 'index-pattern',
+            id: filterRow.meta.index,
+          });
+          return {
+            ...filterRow,
+            meta: {
+              ...filterRow.meta,
+              indexRefName: refName,
+              index: undefined,
+            },
+          };
+        }),
+      };
+    }
+
+    return { searchSourceJSON: JSON.stringify(serializedSearchSourceFields), references };
+  }
+
+  private getFilters(filterField: SearchSourceFields['filter']): Filter[] {
+    if (!filterField) {
+      return [];
+    }
+
+    if (Array.isArray(filterField)) {
+      return filterField;
+    }
+
+    if (_.isFunction(filterField)) {
+      return this.getFilters(filterField());
+    }
+
+    return [filterField];
   }
 }

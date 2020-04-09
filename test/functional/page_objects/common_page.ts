@@ -43,42 +43,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     appConfig: {};
     ensureCurrentUrl: boolean;
     shouldLoginIfPrompted: boolean;
-    shouldAcceptAlert: boolean;
     useActualUrl: boolean;
   }
 
   class CommonPage {
-    /**
-     * Navigates the browser window to provided URL
-     * @param url URL
-     * @param shouldAcceptAlert pass 'true' if browser alert should be accepted
-     */
-    private static async navigateToUrlAndHandleAlert(url: string, shouldAcceptAlert: boolean) {
-      log.debug('Navigate to: ' + url);
-      try {
-        await browser.get(url);
-      } catch (navigationError) {
-        log.debug('Error navigating to url');
-        const alert = await browser.getAlert();
-        if (alert && alert.accept) {
-          if (shouldAcceptAlert) {
-            log.debug('Should accept alert');
-            try {
-              await alert.accept();
-            } catch (alertException) {
-              log.debug('Error accepting alert');
-              throw alertException;
-            }
-          } else {
-            log.debug('Will not accept alert');
-            throw navigationError;
-          }
-        } else {
-          throw navigationError;
-        }
-      }
-    }
-
     /**
      * Returns Kibana host URL
      */
@@ -100,21 +68,24 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
+      await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout); // 60 sec waiting
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
       if (loginPage && !wantedLoginPage) {
-        log.debug(
-          `Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`
-        );
-        await PageObjects.shield.login(
-          config.get('servers.kibana.username'),
-          config.get('servers.kibana.password')
-        );
+        log.debug('Found login page');
+        if (config.get('security.disableTestUser')) {
+          await PageObjects.shield.login(
+            config.get('servers.kibana.username'),
+            config.get('servers.kibana.password')
+          );
+        } else {
+          await PageObjects.shield.login('test_user', 'changeme');
+        }
+
         await find.byCssSelector(
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-          2 * defaultFindTimeout
+          6 * defaultFindTimeout
         );
         await browser.get(appUrl);
         currentUrl = await browser.getCurrentUrl();
@@ -124,13 +95,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     private async navigate(navigateProps: NavigateProps) {
-      const {
-        appConfig,
-        ensureCurrentUrl,
-        shouldLoginIfPrompted,
-        shouldAcceptAlert,
-        useActualUrl,
-      } = navigateProps;
+      const { appConfig, ensureCurrentUrl, shouldLoginIfPrompted, useActualUrl } = navigateProps;
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
 
       await retry.try(async () => {
@@ -138,7 +103,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           log.debug(`navigateToActualUrl ${appUrl}`);
           await browser.get(appUrl);
         } else {
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          log.debug(`navigateToUrl ${appUrl}`);
+          await browser.get(appUrl);
+          // accept alert if it pops up
+          const alert = await browser.getAlert();
+          await alert?.accept();
         }
 
         const currentUrl = shouldLoginIfPrompted
@@ -164,7 +133,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         basePath = '',
         ensureCurrentUrl = true,
         shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
         useActualUrl = false,
       } = {}
     ) {
@@ -177,7 +145,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         appConfig,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl,
       });
     }
@@ -192,24 +159,24 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     public async navigateToUrlWithBrowserHistory(
       appName: string,
       subUrl?: string,
+      search?: string,
       {
         basePath = '',
         ensureCurrentUrl = true,
         shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
         useActualUrl = true,
       } = {}
     ) {
       const appConfig = {
         // subUrl following the basePath, assumes no hashes.  Ex: 'app/endpoint/management'
         pathname: `${basePath}${config.get(['apps', appName]).pathname}${subUrl}`,
+        search,
       };
 
       await this.navigate({
         appConfig,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl,
       });
     }
@@ -223,18 +190,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async navigateToActualUrl(
       appName: string,
       hash?: string,
-      {
-        basePath = '',
-        ensureCurrentUrl = true,
-        shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
-      } = {}
+      { basePath = '', ensureCurrentUrl = true, shouldLoginIfPrompted = true } = {}
     ) {
       await this.navigateToUrl(appName, hash, {
         basePath,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl: true,
       });
     }
@@ -247,7 +208,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}
+      { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}
     ) {
       let appUrl: string;
       if (config.has(['apps', appName])) {
@@ -269,7 +230,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await retry.tryForTime(defaultTryTimeout * 2, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          log.debug('navigate to: ' + appUrl);
+          await browser.get(appUrl);
+          // accept alert if it pops up
+          const alert = await browser.getAlert();
+          await alert?.accept();
           await this.sleep(700);
           log.debug('returned from get, calling refresh');
           await browser.refresh();
@@ -433,6 +398,13 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       return title;
     }
 
+    async closeToastIfExists() {
+      const toastShown = await find.existsByCssSelector('.euiToast');
+      if (toastShown) {
+        await this.closeToast();
+      }
+    }
+
     async clearAllToasts() {
       const toasts = await find.allByCssSelector('.euiToast');
       for (const toastElement of toasts) {
@@ -501,6 +473,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           throw new Error('save modal still open');
         }
       });
+    }
+
+    async setFileInputPath(path: string) {
+      log.debug(`Setting the path '${path}' on the file input`);
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
     }
   }
 

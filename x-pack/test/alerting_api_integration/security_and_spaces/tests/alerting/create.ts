@@ -213,12 +213,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "consumer" fails because ["consumer" is required]. child "schedule" fails because ["schedule" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['name', 'alertTypeId', 'consumer', 'schedule', 'params', 'actions'],
-                },
+                message: '[request body.name]: expected value of type [string] but got [undefined]',
               });
               break;
             default:
@@ -285,19 +280,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
-                statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "schedule" fails because [child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]]',
-                validation: {
-                  source: 'payload',
-                  keys: [
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                  ],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 10x',
+                statusCode: 400,
               });
               break;
             default:
@@ -327,19 +312,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
-                statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "schedule" fails because [child "interval" fails because ["interval" with value "0s" fails to match the seconds pattern, "interval" with value "0s" fails to match the minutes pattern, "interval" with value "0s" fails to match the hours pattern, "interval" with value "0s" fails to match the days pattern]]',
-                validation: {
-                  source: 'payload',
-                  keys: [
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                  ],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 0s',
+                statusCode: 400,
               });
               break;
             default:

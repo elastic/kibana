@@ -36,8 +36,8 @@ export function defineRoleMappingPostRoutes(params: RouteDefinitionParams) {
           // and keeping this in sync (and testable!) with ES could prove problematic.
           // We do not interpret any of these rules within this route handler;
           // they are simply passed to ES for processing.
-          rules: schema.object({}, { allowUnknowns: true }),
-          metadata: schema.object({}, { allowUnknowns: true }),
+          rules: schema.object({}, { unknowns: 'allow' }),
+          metadata: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },

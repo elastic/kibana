@@ -49,6 +49,7 @@ export function overviewFiltersReducer(
       return {
         ...state,
         errors: [...state.errors, action.payload],
+        loading: false,
       };
     default:
       return state;

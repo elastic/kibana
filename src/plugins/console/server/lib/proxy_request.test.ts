@@ -30,11 +30,6 @@ describe(`Console's send request`, () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox();
     stub = sandbox.stub(http, 'request').callsFake(() => {
-      fakeRequest = {
-        abort: sinon.stub(),
-        on() {},
-        once() {},
-      } as any;
       return fakeRequest;
     });
   });
@@ -45,6 +40,11 @@ describe(`Console's send request`, () => {
   });
 
   it('correctly implements timeout and abort mechanism', async () => {
+    fakeRequest = {
+      abort: sinon.stub(),
+      on() {},
+      once() {},
+    } as any;
     try {
       await proxyRequest({
         agent: null as any,
@@ -59,5 +59,56 @@ describe(`Console's send request`, () => {
       expect(e.message).toEqual('Client request timeout');
       expect((fakeRequest.abort as sinon.SinonStub).calledOnce).toBe(true);
     }
+  });
+
+  it('correctly sets the "host" header entry', async () => {
+    fakeRequest = {
+      abort: sinon.stub(),
+      on() {},
+      once(event: string, fn: any) {
+        if (event === 'response') {
+          return fn('done');
+        }
+      },
+    } as any;
+
+    // Don't set a host header this time
+    const result1 = await proxyRequest({
+      agent: null as any,
+      headers: {},
+      method: 'get',
+      payload: null as any,
+      timeout: 30000,
+      uri: new URL('http://noone.nowhere.none'),
+    });
+
+    expect(result1).toEqual('done');
+
+    const [httpRequestOptions1] = stub.firstCall.args;
+
+    expect((httpRequestOptions1 as any).headers).toEqual({
+      'content-type': 'application/json',
+      host: 'noone.nowhere.none', // Defaults to the provided host name
+      'transfer-encoding': 'chunked',
+    });
+
+    // Set a host header
+    const result2 = await proxyRequest({
+      agent: null as any,
+      headers: { Host: 'myhost' },
+      method: 'get',
+      payload: null as any,
+      timeout: 30000,
+      uri: new URL('http://noone.nowhere.none'),
+    });
+
+    expect(result2).toEqual('done');
+
+    const [httpRequestOptions2] = stub.secondCall.args;
+    expect((httpRequestOptions2 as any).headers).toEqual({
+      'content-type': 'application/json',
+      Host: 'myhost', // Uses provided host name
+      'transfer-encoding': 'chunked',
+    });
   });
 });

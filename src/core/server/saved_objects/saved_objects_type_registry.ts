@@ -23,14 +23,23 @@ import { SavedObjectsType } from './types';
 /**
  * See {@link SavedObjectTypeRegistry} for documentation.
  *
- * @internal
- * */
-export type ISavedObjectTypeRegistry = PublicMethodsOf<SavedObjectTypeRegistry>;
+ * @public
+ */
+export type ISavedObjectTypeRegistry = Pick<
+  SavedObjectTypeRegistry,
+  | 'getType'
+  | 'getAllTypes'
+  | 'getIndex'
+  | 'isNamespaceAgnostic'
+  | 'isHidden'
+  | 'getImportableAndExportableTypes'
+  | 'isImportableAndExportable'
+>;
 
 /**
- * Registry holding information about all the registered {@link SavedObjectsType | savedObject types}.
+ * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
  *
- * @internal
+ * @public
  */
 export class SavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
@@ -61,6 +70,13 @@ export class SavedObjectTypeRegistry {
   }
 
   /**
+   * Return all {@link SavedObjectsType | types} currently registered that are importable/exportable.
+   */
+  public getImportableAndExportableTypes() {
+    return this.getAllTypes().filter(type => this.isImportableAndExportable(type.name));
+  }
+
+  /**
    * Returns the `namespaceAgnostic` property for given type, or `false` if
    * the type is not registered.
    */
@@ -82,5 +98,13 @@ export class SavedObjectTypeRegistry {
    */
   public getIndex(type: string) {
     return this.types.get(type)?.indexPattern;
+  }
+
+  /**
+   * Returns the `management.importableAndExportable` property for given type, or
+   * `false` if the type is not registered or does not define a management section.
+   */
+  public isImportableAndExportable(type: string) {
+    return this.types.get(type)?.management?.importableAndExportable ?? false;
   }
 }

@@ -12,13 +12,13 @@ import {
 } from 'kibana/server';
 import { RouteDependencies } from '../../types';
 
-export const licensePreRoutingFactory = (
+export const licensePreRoutingFactory = <P, Q, B>(
   { getLicenseStatus }: RouteDependencies,
-  handler: RequestHandler
+  handler: RequestHandler<P, Q, B>
 ) => {
   return function licenseCheck(
     ctx: RequestHandlerContext,
-    request: KibanaRequest,
+    request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) {
     const licenseStatus = getLicenseStatus();

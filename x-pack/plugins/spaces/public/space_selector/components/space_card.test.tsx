@@ -7,6 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { SpaceCard } from './space_card';
+import { EuiCard } from '@elastic/eui';
 
 test('it renders without crashing', () => {
   const space = {
@@ -16,21 +17,33 @@ test('it renders without crashing', () => {
     disabledFeatures: [],
   };
 
-  shallow(<SpaceCard space={space} onClick={jest.fn()} />);
+  shallow(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
 });
 
-test('it is clickable', () => {
+test('links to the indicated space', () => {
   const space = {
-    id: '',
+    id: 'some-space',
     name: 'space name',
     description: 'space description',
     disabledFeatures: [],
   };
 
-  const clickHandler = jest.fn();
+  const wrapper = mount(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  expect(wrapper.find(EuiCard).props()).toMatchObject({
+    href: '/server-base-path/s/some-space/spaces/enter',
+  });
+});
 
-  const wrapper = mount(<SpaceCard space={space} onClick={clickHandler} />);
-  wrapper.find('button').simulate('click');
+test('links to the default space too', () => {
+  const space = {
+    id: 'default',
+    name: 'default space',
+    description: 'space description',
+    disabledFeatures: [],
+  };
 
-  expect(clickHandler).toHaveBeenCalledTimes(1);
+  const wrapper = mount(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  expect(wrapper.find(EuiCard).props()).toMatchObject({
+    href: '/server-base-path/spaces/enter',
+  });
 });

@@ -5,11 +5,8 @@
  */
 import { createAction } from 'redux-actions';
 import { QueryParams } from './types';
+import { Ping } from '../../../common/graphql/types';
 
-export const getSelectedMonitor = createAction<{ monitorId: string }>('GET_SELECTED_MONITOR');
-export const getSelectedMonitorSuccess = createAction<QueryParams>('GET_SELECTED_MONITOR_SUCCESS');
-export const getSelectedMonitorFail = createAction<QueryParams>('GET_SELECTED_MONITOR_FAIL');
-
-export const getMonitorStatus = createAction<QueryParams>('GET_MONITOR_STATUS');
-export const getMonitorStatusSuccess = createAction<QueryParams>('GET_MONITOR_STATUS_SUCCESS');
-export const getMonitorStatusFail = createAction<QueryParams>('GET_MONITOR_STATUS_FAIL');
+export const getMonitorStatusAction = createAction<QueryParams>('GET_MONITOR_STATUS');
+export const getMonitorStatusActionSuccess = createAction<Ping>('GET_MONITOR_STATUS_SUCCESS');
+export const getMonitorStatusActionFail = createAction<Error>('GET_MONITOR_STATUS_FAIL');

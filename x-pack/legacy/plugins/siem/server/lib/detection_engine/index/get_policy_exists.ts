@@ -7,7 +7,7 @@
 import { CallWithRequest } from '../types';
 
 export const getPolicyExists = async (
-  callWithRequest: CallWithRequest<{ path: string; method: 'GET' }, {}, unknown>,
+  callWithRequest: CallWithRequest<{ path: string; method: 'GET' }, unknown>,
   policy: string
 ): Promise<boolean> => {
   try {

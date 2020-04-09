@@ -127,7 +127,7 @@ export function registerJobsRoute(deps: RouteDependencies, legacy: ServerShim) {
             {
               id: schema.string(),
             },
-            { allowUnknowns: true }
+            { unknowns: 'allow' }
           ),
         }),
       },

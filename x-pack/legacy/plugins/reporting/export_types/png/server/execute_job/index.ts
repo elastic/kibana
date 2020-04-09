@@ -5,44 +5,40 @@
  */
 
 import * as Rx from 'rxjs';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
-import {
-  ServerFacade,
-  ExecuteJobFactory,
-  ESQueueWorkerExecuteFn,
-  HeadlessChromiumDriverFactory,
-  Logger,
-} from '../../../../types';
+import { ReportingCore } from '../../../../server';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
 import {
   decryptJobHeaders,
-  omitBlacklistedHeaders,
   getConditionalHeaders,
   getFullUrls,
+  omitBlacklistedHeaders,
 } from '../../../common/execute_job/';
 import { JobDocPayloadPNG } from '../../types';
 import { generatePngObservableFactory } from '../lib/generate_png';
 
 type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPNG>>;
 
-export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger,
-  { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
+export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
+  reporting: ReportingCore,
+  parentLogger: Logger
 ) {
-  const generatePngObservable = generatePngObservableFactory(server, browserDriverFactory);
+  const config = reporting.getConfig();
+  const captureConfig = config.get('capture');
+  const encryptionKey = config.get('encryptionKey');
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+  return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+    const browserDriverFactory = await reporting.getBrowserDriverFactory();
+    const generatePngObservable = generatePngObservableFactory(captureConfig, browserDriverFactory);
     const jobLogger = logger.clone([jobId]);
-    const process$ = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders({ server, job, logger })),
+    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
+      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
+      map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
       mergeMap(conditionalHeaders => {
-        const urls = getFullUrls({ server, job });
+        const urls = getFullUrls({ config, job });
         const hashUrl = urls[0];
         return generatePngObservable(
           jobLogger,
@@ -52,11 +48,12 @@ export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFa
           job.layout
         );
       }),
-      map((buffer: Buffer) => {
+      map(({ buffer, warnings }) => {
         return {
           content_type: 'image/png',
           content: buffer.toString('base64'),
           size: buffer.byteLength,
+          warnings,
         };
       }),
       catchError(err => {

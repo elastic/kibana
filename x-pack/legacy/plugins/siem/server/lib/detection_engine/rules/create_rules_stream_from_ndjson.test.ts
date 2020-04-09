@@ -5,12 +5,11 @@
  */
 import { Readable } from 'stream';
 import { createRulesStreamFromNdJson } from './create_rules_stream_from_ndjson';
-import { createPromiseFromStreams, createConcatStream } from 'src/legacy/utils/streams';
+import { createPromiseFromStreams } from 'src/legacy/utils/streams';
 import { ImportRuleAlertRest } from '../types';
+import { BadRequestError } from '../errors/bad_request_error';
 
-const readStreamToCompletion = (stream: Readable) => {
-  return createPromiseFromStreams([stream, createConcatStream([])]);
-};
+type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 export const getOutputSample = (): Partial<ImportRuleAlertRest> => ({
   rule_id: 'rule-1',
@@ -43,10 +42,14 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -63,13 +66,16 @@ describe('create_rules_stream_from_ndjson', () => {
           immutable: false,
           query: '',
           language: 'kuery',
+          lists: [],
           max_signals: 100,
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -86,13 +92,31 @@ describe('create_rules_stream_from_ndjson', () => {
           immutable: false,
           query: '',
           language: 'kuery',
+          lists: [],
           max_signals: 100,
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
       ]);
+    });
+
+    test('returns error when ndjson stream is larger than limit', async () => {
+      const sample1 = getOutputSample();
+      const sample2 = getOutputSample();
+      sample2.rule_id = 'rule-2';
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(getSampleAsNdjson(sample1));
+          this.push(getSampleAsNdjson(sample2));
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1);
+      await expect(
+        createPromiseFromStreams<PromiseFromStreams[]>([ndJsonStream, ...rulesObjectsStream])
+      ).rejects.toThrowError("Can't import more than 1 rules");
     });
 
     test('skips empty lines', async () => {
@@ -108,10 +132,14 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -130,11 +158,14 @@ describe('create_rules_stream_from_ndjson', () => {
           language: 'kuery',
           max_signals: 100,
           tags: [],
+          lists: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -152,8 +183,10 @@ describe('create_rules_stream_from_ndjson', () => {
           query: '',
           language: 'kuery',
           max_signals: 100,
+          lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -172,10 +205,14 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       expect(result).toEqual([
         {
+          actions: [],
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -193,12 +230,15 @@ describe('create_rules_stream_from_ndjson', () => {
           query: '',
           language: 'kuery',
           max_signals: 100,
+          lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
         {
+          actions: [],
           rule_id: 'rule-2',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -216,8 +256,10 @@ describe('create_rules_stream_from_ndjson', () => {
           query: '',
           language: 'kuery',
           max_signals: 100,
+          lists: [],
           tags: [],
           threat: [],
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -236,10 +278,14 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
       const resultOrError = result as Error[];
       expect(resultOrError[0]).toEqual({
+        actions: [],
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -257,13 +303,16 @@ describe('create_rules_stream_from_ndjson', () => {
         query: '',
         language: 'kuery',
         max_signals: 100,
+        lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
       expect(resultOrError[1].message).toEqual('Unexpected token , in JSON at position 1');
       expect(resultOrError[2]).toEqual({
+        actions: [],
         rule_id: 'rule-2',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -281,8 +330,10 @@ describe('create_rules_stream_from_ndjson', () => {
         query: '',
         language: 'kuery',
         max_signals: 100,
+        lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -300,10 +351,14 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
-      const resultOrError = result as TypeError[];
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      const resultOrError = result as BadRequestError[];
       expect(resultOrError[0]).toEqual({
+        actions: [],
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -321,8 +376,10 @@ describe('create_rules_stream_from_ndjson', () => {
         query: '',
         language: 'kuery',
         max_signals: 100,
+        lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -330,6 +387,7 @@ describe('create_rules_stream_from_ndjson', () => {
         'child "description" fails because ["description" is required]'
       );
       expect(resultOrError[2]).toEqual({
+        actions: [],
         rule_id: 'rule-2',
         output_index: '.siem-signals',
         risk_score: 50,
@@ -347,14 +405,16 @@ describe('create_rules_stream_from_ndjson', () => {
         query: '',
         language: 'kuery',
         max_signals: 100,
+        lists: [],
         tags: [],
         threat: [],
+        throttle: null,
         references: [],
         version: 1,
       });
     });
 
-    test('non validated data is an instanceof TypeError', async () => {
+    test('non validated data is an instanceof BadRequestError', async () => {
       const sample1 = getOutputSample();
       const sample2 = getOutputSample();
       sample2.rule_id = 'rule-2';
@@ -366,10 +426,13 @@ describe('create_rules_stream_from_ndjson', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
-      const result = await readStreamToCompletion(rulesObjectsStream);
-      const resultOrError = result as TypeError[];
-      expect(resultOrError[1] instanceof TypeError).toEqual(true);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const result = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      const resultOrError = result as BadRequestError[];
+      expect(resultOrError[1] instanceof BadRequestError).toEqual(true);
     });
   });
 });

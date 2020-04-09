@@ -8,9 +8,10 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useUrlParams } from '../../../hooks';
 import { AppState } from '../../../state';
-import { fetchSnapshotCount } from '../../../state/actions';
+import { getSnapshotCountAction } from '../../../state/actions';
 import { SnapshotComponent } from '../../functional/snapshot';
 import { Snapshot as SnapshotType } from '../../../../common/runtime_types';
+import { SnapShotQueryParams } from '../../../state/api';
 
 /**
  * Props expected from parent components.
@@ -37,7 +38,7 @@ interface StoreProps {
  * for this component's life cycle
  */
 interface DispatchProps {
-  loadSnapshotCount: typeof fetchSnapshotCount;
+  loadSnapshotCount: typeof getSnapshotCountAction;
 }
 
 /**
@@ -57,7 +58,7 @@ export const Container: React.FC<Props> = ({
   const { dateRangeStart, dateRangeEnd, statusFilter } = getUrlParams();
 
   useEffect(() => {
-    loadSnapshotCount(dateRangeStart, dateRangeEnd, esKuery, statusFilter);
+    loadSnapshotCount({ dateRangeStart, dateRangeEnd, filters: esKuery, statusFilter });
   }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, loadSnapshotCount, statusFilter]);
   return <SnapshotComponent count={count} height={height} loading={loading} />;
 };
@@ -81,13 +82,8 @@ const mapStateToProps = ({
  * @param dispatch redux-provided action dispatcher
  */
 const mapDispatchToProps = (dispatch: any) => ({
-  loadSnapshotCount: (
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string,
-    statusFilter?: string
-  ): DispatchProps => {
-    return dispatch(fetchSnapshotCount(dateRangeStart, dateRangeEnd, filters, statusFilter));
+  loadSnapshotCount: (params: SnapShotQueryParams): DispatchProps => {
+    return dispatch(getSnapshotCountAction(params));
   },
 });
 

@@ -37,7 +37,6 @@ export {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionDataHandler } from './execute';
 export { ExpressionRenderHandler } from './render';
 export {
   AnyExpressionFunctionDefinition,
@@ -48,6 +47,7 @@ export {
   DatatableColumnType,
   DatatableRow,
   Execution,
+  ExecutionContract,
   ExecutionContainer,
   ExecutionContext,
   ExecutionParams,
@@ -94,6 +94,7 @@ export {
   KibanaContext,
   KibanaDatatable,
   KibanaDatatableColumn,
+  KibanaDatatableColumnMeta,
   KibanaDatatableRow,
   KnownTypeToString,
   Overflow,

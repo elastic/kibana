@@ -49,7 +49,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1' }])
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -69,7 +68,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -89,7 +87,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ id: bodyWithCreatedRule.id }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -101,7 +98,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ rule_id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         expect(body).to.eql([
@@ -120,7 +116,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         expect(body).to.eql([
@@ -129,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message: 'id: "fake_id" not found',
               status_code: 404,
             },
-            rule_id: 'fake_id', // TODO This is a known issue where it should be id and not rule_id
+            id: 'fake_id',
           },
         ]);
       });
@@ -146,13 +141,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ id: bodyWithCreatedRule.id }, { id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
           getSimpleRuleOutputWithoutRuleId(),
-          { rule_id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
         ]);
       });
     });
@@ -182,7 +176,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1' }])
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -202,7 +195,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ rule_id: bodyWithCreatedRule.rule_id }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -222,7 +214,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ id: bodyWithCreatedRule.id }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
@@ -234,7 +225,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ rule_id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         expect(body).to.eql([
@@ -253,7 +243,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         expect(body).to.eql([
@@ -262,7 +251,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message: 'id: "fake_id" not found',
               status_code: 404,
             },
-            rule_id: 'fake_id', // TODO This is a known issue where it should be id and not rule_id
+            id: 'fake_id',
           },
         ]);
       });
@@ -279,13 +268,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ id: bodyWithCreatedRule.id }, { id: 'fake_id' }])
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         expect([bodyToCompare, body[1]]).to.eql([
           getSimpleRuleOutputWithoutRuleId(),
-          { rule_id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
+          { id: 'fake_id', error: { status_code: 404, message: 'id: "fake_id" not found' } },
         ]);
       });
     });

@@ -17,8 +17,15 @@
  * under the License.
  */
 
-// @ts-ignore not typed yet
-export { runTestsCli, startServersCli } from './functional_tests/cli';
+import {
+  runTestsCli,
+  processRunTestsCliOptions,
+  startServersCli,
+  processStartServersCliOptions,
+  // @ts-ignore not typed yet
+} from './functional_tests/cli';
+
+export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
 // @ts-ignore not typed yet
 export { runTests, startServers } from './functional_tests/tasks';
@@ -51,3 +58,5 @@ export {
 export { runFailedTestsReporterCli } from './failed_tests_reporter';
 
 export { makeJunitReportPath } from './junit_report_path';
+
+export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';

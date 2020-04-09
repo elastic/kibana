@@ -31,6 +31,7 @@ describe('SavedObjectSaveModal', () => {
         title={'Saved Object title'}
         showCopyOnSave={false}
         objectType="visualization"
+        showDescription={true}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -44,6 +45,7 @@ describe('SavedObjectSaveModal', () => {
         title={'Saved Object title'}
         showCopyOnSave={false}
         objectType="visualization"
+        showDescription={true}
         confirmButtonLabel="Save and done"
       />
     );

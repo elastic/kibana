@@ -9,11 +9,11 @@ experimental[] Create {kib} saved objects.
 [[saved-objects-api-create-request]]
 ==== Request
 
-`POST /api/saved_objects/<type>` +
+`POST <kibana host>:<port>/api/saved_objects/<type>` +
 
-`POST /api/saved_objects/<type>/<id>`
+`POST <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-`POST /s/<space_id>/saved_objects/<type>`
+`POST <kibana host>:<port>/s/<space_id>/saved_objects/<type>`
 
 [[saved-objects-api-create-path-params]]
 ==== Path parameters
@@ -55,9 +55,9 @@ any data that you send to the API is properly formed.
 [[saved-objects-api-create-example]]
 ==== Example
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/index-pattern/my-pattern
+$ curl -X POST "localhost:5601/api/saved_objects/index-pattern/my-pattern"
 {
   "attributes": {
     "title": "my-pattern-*"
@@ -68,7 +68,7 @@ POST api/saved_objects/index-pattern/my-pattern
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "my-pattern", <1>

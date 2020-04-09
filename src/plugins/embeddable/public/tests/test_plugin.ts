@@ -18,26 +18,28 @@
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
+import { UiActionsStart } from '../../../ui_actions/public';
 // eslint-disable-next-line
-import { uiActionsTestPlugin } from 'src/plugins/ui_actions/public/tests';
-import { UiActionsApi } from 'src/plugins/ui_actions/public';
+import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
+// eslint-disable-next-line
+import { inspectorPluginMock } from '../../../inspector/public/mocks';
 import { coreMock } from '../../../../core/public/mocks';
-import { EmbeddablePublicPlugin, IEmbeddableSetup, IEmbeddableStart } from '../plugin';
+import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 
 export interface TestPluginReturn {
   plugin: EmbeddablePublicPlugin;
   coreSetup: CoreSetup;
   coreStart: CoreStart;
-  setup: IEmbeddableSetup;
-  doStart: (anotherCoreStart?: CoreStart) => IEmbeddableStart;
-  uiActions: UiActionsApi;
+  setup: EmbeddableSetup;
+  doStart: (anotherCoreStart?: CoreStart) => EmbeddableStart;
+  uiActions: UiActionsStart;
 }
 
 export const testPlugin = (
   coreSetup: CoreSetup = coreMock.createSetup(),
   coreStart: CoreStart = coreMock.createStart()
 ): TestPluginReturn => {
-  const uiActions = uiActionsTestPlugin(coreSetup, coreStart);
+  const uiActions = uiActionsPluginMock.createPlugin(coreSetup, coreStart);
   const initializerContext = {} as any;
   const plugin = new EmbeddablePublicPlugin(initializerContext);
   const setup = plugin.setup(coreSetup, { uiActions: uiActions.setup });
@@ -48,7 +50,10 @@ export const testPlugin = (
     coreStart,
     setup,
     doStart: (anotherCoreStart: CoreStart = coreStart) => {
-      const start = plugin.start(anotherCoreStart);
+      const start = plugin.start(anotherCoreStart, {
+        uiActions: uiActionsPluginMock.createStartContract(),
+        inspector: inspectorPluginMock.createStartContract(),
+      });
       return start;
     },
     uiActions: uiActions.doStart(coreStart),
