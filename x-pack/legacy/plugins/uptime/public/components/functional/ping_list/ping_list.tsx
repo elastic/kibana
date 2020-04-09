@@ -30,10 +30,6 @@ import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
 import { PingListProps } from '../../connected/pings';
 
-interface ExpandedRowMap {
-  [key: string]: JSX.Element;
-}
-
 export const AllLocationOption = {
   'data-test-subj': 'xpack.uptime.pingList.locationOptions.all',
   text: 'All',
@@ -42,19 +38,21 @@ export const AllLocationOption = {
 
 export const toggleDetails = (
   ping: Ping,
-  itemIdToExpandedRowMap: ExpandedRowMap,
-  setItemIdToExpandedRowMap: (update: ExpandedRowMap) => any
+  expandedRows: Record<string, JSX.Element>,
+  setExpandedRows: (update: Record<string, JSX.Element>) => any
 ) => {
-  // If the user has clicked on the expanded map, close all expanded rows.
-  if (itemIdToExpandedRowMap[ping['@timestamp']]) {
-    setItemIdToExpandedRowMap({});
+  // If already expanded, collapse
+  if (expandedRows[ping['@timestamp']]) {
+    delete expandedRows[ping['@timestamp']];
+    setExpandedRows({ ...expandedRows });
     return;
   }
 
   // Otherwise expand this row
-  const newItemIdToExpandedRowMap: ExpandedRowMap = {};
-  newItemIdToExpandedRowMap[ping['@timestamp']] = <PingListExpandedRowComponent ping={ping} />;
-  setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
+  setExpandedRows({
+    ...expandedRows,
+    [ping['@timestamp']]: <PingListExpandedRowComponent ping={ping} />,
+  });
 };
 
 const SpanWithMargin = styled.span`
@@ -135,7 +133,7 @@ export const PingListComponent = (props: Props) => {
     status,
   ]);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
+  const [expandedRows, setExpandedRows] = useState<Record<string, JSX.Element>>({});
 
   const locationOptions = !locations
     ? [AllLocationOption]
@@ -245,16 +243,16 @@ export const PingListComponent = (props: Props) => {
       render: (item: Ping) => {
         return (
           <EuiButtonIcon
-            onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
+            onClick={() => toggleDetails(item, expandedRows, setExpandedRows)}
             disabled={!item.error && !(item.http?.response?.body?.content_bytes ?? 0 > 0)}
             aria-label={
-              itemIdToExpandedRowMap[item.monitor.id]
+              expandedRows[item['@timestamp']]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {
                     defaultMessage: 'Collapse',
                   })
                 : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
             }
-            iconType={itemIdToExpandedRowMap[item.monitor.id] ? 'arrowUp' : 'arrowDown'}
+            iconType={expandedRows[item['@timestamp']] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
@@ -331,7 +329,7 @@ export const PingListComponent = (props: Props) => {
         hasActions={true}
         items={pings}
         itemId="@timestamp"
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        itemIdToExpandedRowMap={expandedRows}
         pagination={pagination}
         onChange={(criteria: any) => {
           setPageSize(criteria.page!.size);
