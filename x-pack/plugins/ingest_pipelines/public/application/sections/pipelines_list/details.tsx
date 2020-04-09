@@ -12,15 +12,15 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiDescriptionList,
-  EuiText,
   EuiSpacer,
-  EuiCodeBlock,
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { Pipeline } from '../../../../common/types';
+
+import { PipelineDetailsJsonBlock } from './details_json_block';
 
 export interface Props {
   pipeline: Pipeline;
@@ -71,23 +71,31 @@ export const PipelineDetails: FunctionComponent<Props> = ({
 
         <EuiSpacer size="m" />
 
-        <EuiText size="s">
-          <label htmlFor="piplineDetailsProcessorsJson">
-            <b>
-              {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-                defaultMessage: 'Processors JSON',
-              })}
-            </b>
-          </label>
-        </EuiText>
-        <EuiCodeBlock
-          id="piplineDetailsProcessorsJson"
-          language="json"
-          overflowHeight={500}
-          isCopyable
-        >
-          {JSON.stringify(pipeline.processors, null, 2)}
-        </EuiCodeBlock>
+        <PipelineDetailsJsonBlock
+          htmlForId="pipelineDetailsProcessorsJson"
+          label={i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
+            defaultMessage: 'Processors JSON',
+          })}
+          json={pipeline.processors}
+        />
+
+        {/* On Failure Processor JSON */}
+        {pipeline.onFailure?.length && (
+          <>
+            <EuiSpacer size="m" />
+            <PipelineDetailsJsonBlock
+              htmlForId="pipelineDetailsOnFailureProcessorsJson"
+              label={i18n.translate(
+                'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
+                {
+                  defaultMessage: 'On failure processors JSON',
+                }
+              )}
+              json={pipeline.onFailure}
+            />
+          </>
+        )}
+        {/* End On Failure Processor JSON */}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
