@@ -48,7 +48,7 @@ export const WindowsEventing = React.memo(() => {
     []
   );
 
-  const renderCheckboxes = () => {
+  const renderCheckboxes = useMemo(() => {
     return (
       <>
         <EuiTitle size="xxs">
@@ -63,7 +63,6 @@ export const WindowsEventing = React.memo(() => {
         {checkboxes.map((item, index) => {
           return (
             <EventingCheckbox
-              id={`eventing${item.name}`}
               name={item.name}
               key={index}
               os={item.os}
@@ -74,9 +73,9 @@ export const WindowsEventing = React.memo(() => {
         })}
       </>
     );
-  };
+  }, [checkboxes]);
 
-  const collectionsEnabled = () => {
+  const collectionsEnabled = useMemo(() => {
     return (
       <EuiText size="s" color="subdued">
         <FormattedMessage
@@ -86,19 +85,22 @@ export const WindowsEventing = React.memo(() => {
         />
       </EuiText>
     );
-  };
+  }, [selected, total]);
 
   return (
     <ConfigForm
       type={i18n.translate('xpack.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={[
-        i18n.translate('xpack.endpoint.policy.details.windows', { defaultMessage: 'Windows' }),
-      ]}
+      supportedOss={useMemo(
+        () => [
+          i18n.translate('xpack.endpoint.policy.details.windows', { defaultMessage: 'Windows' }),
+        ],
+        []
+      )}
       id="windowsEventingForm"
       rightCorner={collectionsEnabled()}
-      children={renderCheckboxes()}
+      children={renderCheckboxes}
     />
   );
 });
