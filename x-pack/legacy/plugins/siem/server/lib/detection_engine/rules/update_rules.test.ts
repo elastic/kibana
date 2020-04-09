@@ -35,6 +35,7 @@ describe('updateRules', () => {
       interval: '',
       name: '',
       tags: [],
+      actions: [],
     });
 
     expect(alertsClient.disable).toHaveBeenCalledWith(
@@ -61,6 +62,7 @@ describe('updateRules', () => {
       interval: '',
       name: '',
       tags: [],
+      actions: [],
     });
 
     expect(alertsClient.enable).toHaveBeenCalledWith(
@@ -89,6 +91,7 @@ describe('updateRules', () => {
       interval: '',
       name: '',
       tags: [],
+      actions: [],
     });
 
     expect(alertsClient.update).toHaveBeenCalledWith(

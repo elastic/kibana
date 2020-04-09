@@ -14,7 +14,8 @@ import {
   EuiFormErrorText,
   EuiFormHelpText,
 } from '@elastic/eui';
-import { MetricsEditor } from '../../../../components/metrics_editor';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MetricsEditor } from '../../../../../../../../plugins/maps/public/components/metrics_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AGG_TYPE } from '../../../../../common/constants';
 

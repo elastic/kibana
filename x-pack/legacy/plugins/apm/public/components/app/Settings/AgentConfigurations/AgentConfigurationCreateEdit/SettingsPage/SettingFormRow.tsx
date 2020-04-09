@@ -90,6 +90,7 @@ function FormRow({
             <EuiFieldNumber
               placeholder={setting.placeholder}
               value={(amount as unknown) as number}
+              min={'min' in setting ? setting.min : 1}
               onChange={e =>
                 onChange(
                   setting.key,

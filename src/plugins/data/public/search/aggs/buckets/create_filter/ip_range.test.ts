@@ -17,17 +17,26 @@
  * under the License.
  */
 
-import { ipRangeBucketAgg } from '../ip_range';
+import { getIpRangeBucketAgg } from '../ip_range';
 import { createFilterIpRange } from './ip_range';
 import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { IpFormat } from '../../../../../common';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('IP range', () => {
-    const typesRegistry = mockAggTypesRegistry([ipRangeBucketAgg]);
+    const typesRegistry = mockAggTypesRegistry([
+      getIpRangeBucketAgg({
+        getInternalStartServices: () => ({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        }),
+      }),
+    ]);
     const getAggConfigs = (aggs: CreateAggConfigParams[]) => {
       const field = {
         name: 'ip',
@@ -46,7 +55,7 @@ describe('AggConfig Filters', () => {
       return new AggConfigs(indexPattern, aggs, { typesRegistry });
     };
 
-    it('should return a range filter for ip_range agg', () => {
+    test('should return a range filter for ip_range agg', () => {
       const aggConfigs = getAggConfigs([
         {
           type: BUCKET_TYPES.IP_RANGE,
@@ -75,7 +84,7 @@ describe('AggConfig Filters', () => {
       expect(filter.range.ip).toHaveProperty('lte', '1.1.1.1');
     });
 
-    it('should return a range filter for ip_range agg using a CIDR mask', () => {
+    test('should return a range filter for ip_range agg using a CIDR mask', () => {
       const aggConfigs = getAggConfigs([
         {
           type: BUCKET_TYPES.IP_RANGE,
