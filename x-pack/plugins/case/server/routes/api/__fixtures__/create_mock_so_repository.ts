@@ -11,14 +11,20 @@ import {
   SavedObjectsBulkUpdateObject,
 } from 'src/core/server';
 
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../saved_object_types';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+} from '../../../saved_object_types';
 
 export const createMockSavedObjectsRepository = ({
   caseSavedObject = [],
   caseCommentSavedObject = [],
+  caseConfigureSavedObject = [],
 }: {
   caseSavedObject?: any[];
   caseCommentSavedObject?: any[];
+  caseConfigureSavedObject?: any[];
 }) => {
   const mockSavedObjectsClientContract = ({
     bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
@@ -70,6 +76,7 @@ export const createMockSavedObjectsRepository = ({
         }
         return result[0];
       }
+
       const result = caseSavedObject.filter(s => s.id === id);
       if (!result.length) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -79,6 +86,15 @@ export const createMockSavedObjectsRepository = ({
     find: jest.fn(findArgs => {
       if (findArgs.hasReference && findArgs.hasReference.id === 'bad-guy') {
         throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
+      }
+
+      if (findArgs.type === CASE_CONFIGURE_SAVED_OBJECT) {
+        return {
+          page: 1,
+          per_page: 5,
+          total: caseConfigureSavedObject.length,
+          saved_objects: caseConfigureSavedObject,
+        };
       }
 
       if (findArgs.type === CASE_COMMENT_SAVED_OBJECT) {
