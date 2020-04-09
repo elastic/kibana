@@ -159,6 +159,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -192,6 +193,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -217,6 +219,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -243,6 +246,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -271,6 +275,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
@@ -365,6 +370,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
     });
