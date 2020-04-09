@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiDataGrid,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiButtonIcon,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   certificatesSelector,
@@ -28,26 +19,26 @@ const columns = [
     defaultSortDirection: 'asc',
   },
   {
+    display: 'Common Name',
+
     id: 'common_name',
   },
   {
     id: 'Monitors',
   },
   {
-    id: 'Issued By',
+    display: 'Issued By',
+    id: 'issued_by',
   },
   {
     id: 'certificate_not_valid_after',
-    defaultSortDirection: 'desc',
   },
   {
-    id: 'Issued At',
+    id: 'sh256',
   },
 ];
 
-
 export const CertificateList = () => {
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -56,27 +47,16 @@ export const CertificateList = () => {
 
   const certificates = useSelector(certificatesSelector);
 
-  // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id)); // initialize to the full set of columns
-
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId, setCellProps }) => {
-      useEffect(() => {
-        if (columnId === 'amount') {
-          if (certificates.hasOwnProperty(rowIndex)) {
-            const numeric = 1;
-            setCellProps({
-              style: {
-                backgroundColor: `rgba(0, 255, 0, ${numeric * 0.0002})`,
-              },
-            });
-          }
-        }
-      }, [rowIndex, columnId, setCellProps]);
-
-      return certificates.hasOwnProperty(rowIndex) ? certificates[rowIndex]?.[columnId] ?? 0 : null;
+      return certificates.hasOwnProperty(rowIndex)
+        ? certificates[rowIndex]?.[columnId] ?? '-'
+        : null;
     };
   }, [certificates]);
+
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id)); // initialize to the full set of columns
 
   return (
     <EuiDataGrid
@@ -89,7 +69,12 @@ export const CertificateList = () => {
       gridStyle={{
         border: 'horizontal',
       }}
-      toolbarVisibility={false}
+      toolbarVisibility={{
+        showColumnSelector: true,
+        showFullScreenSelector: false,
+        showSortSelector: false,
+        showStyleSelector: false,
+      }}
     />
   );
 };
