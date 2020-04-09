@@ -6,7 +6,6 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import {
   canCreateMLJobSelector,
   hasMLJobSelector,
@@ -26,6 +25,7 @@ import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
+import { useMonitorId } from '../../../hooks/use_monitor';
 
 interface Props {
   onClose: () => void;
@@ -77,8 +77,7 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
 
   const { refreshApp } = useContext(UptimeRefreshContext);
 
-  let { monitorId } = useParams();
-  monitorId = atob(monitorId || '');
+  const monitorId = useMonitorId();
 
   const canCreateMLJob = useSelector(canCreateMLJobSelector) && heartbeatIndices !== '';
 
