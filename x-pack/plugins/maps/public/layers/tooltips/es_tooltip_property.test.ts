@@ -7,10 +7,10 @@
 import { IFieldType, IndexPattern } from '../../../../../../src/plugins/data/public';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
-import { AbstractField, IField } from '../fields/field';
+import { AbstractField } from '../fields/field';
 import { FIELD_ORIGIN } from '../../../common/constants';
 
-class MockField extends AbstractField implements IField {}
+class MockField extends AbstractField {}
 
 const indexPatternField = {
   name: 'machine.os',
