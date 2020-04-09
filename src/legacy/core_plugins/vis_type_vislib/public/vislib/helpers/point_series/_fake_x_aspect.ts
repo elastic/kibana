@@ -17,23 +17,18 @@
  * under the License.
  */
 
-export function initYAxis(chart) {
-  const y = chart.aspects.y;
+import { i18n } from '@kbn/i18n';
+import { Aspect } from './point_series';
 
-  if (Array.isArray(y)) {
-    // TODO: vis option should allow choosing this format
-    chart.yAxisFormat = y[0].format;
-    chart.yAxisLabel = y.length > 1 ? '' : y[0].title;
-  }
-
-  const z = chart.aspects.series;
-  if (z) {
-    if (Array.isArray(z)) {
-      chart.zAxisFormat = z[0].format;
-      chart.zAxisLabel = '';
-    } else {
-      chart.zAxisFormat = z.format;
-      chart.zAxisLabel = z.title;
-    }
-  }
+export function makeFakeXAspect() {
+  return {
+    accessor: -1,
+    title: i18n.translate('visTypeVislib.aggResponse.allDocsTitle', {
+      defaultMessage: 'All docs',
+    }),
+    params: {
+      defaultValue: '_all',
+    },
+    format: {},
+  } as Aspect;
 }

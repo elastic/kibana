@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
-import { initYAxis } from '../_init_y_axis';
+import { initYAxis } from './_init_y_axis';
+import { Chart } from './point_series';
 
 describe('initYAxis', function() {
   const baseChart = {
@@ -34,7 +34,7 @@ describe('initYAxis', function() {
         },
       ],
     },
-  };
+  } as Chart;
 
   describe('with a single y aspect', function() {
     const singleYBaseChart = _.cloneDeep(baseChart);
@@ -43,13 +43,13 @@ describe('initYAxis', function() {
     it('sets the yAxisFormatter the the field formats convert fn', function() {
       const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
-      expect(chart).to.have.property('yAxisFormat');
+      expect(chart).toHaveProperty('yAxisFormat');
     });
 
     it('sets the yAxisLabel', function() {
       const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
-      expect(chart).to.have.property('yAxisLabel', 'y1');
+      expect(chart).toHaveProperty('yAxisLabel', 'y1');
     });
   });
 
@@ -58,16 +58,15 @@ describe('initYAxis', function() {
       const chart = _.cloneDeep(baseChart);
       initYAxis(chart);
 
-      expect(chart).to.have.property('yAxisFormat');
-      expect(chart.yAxisFormat)
-        .to.be(chart.aspects.y[0].format)
-        .and.not.be(chart.aspects.y[1].format);
+      expect(chart).toHaveProperty('yAxisFormat');
+      expect(chart.yAxisFormat).toBe(chart.aspects.y[0].format);
+      expect(chart.yAxisFormat).not.toBe(chart.aspects.y[1].format);
     });
 
     it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function() {
       const chart = _.cloneDeep(baseChart);
       initYAxis(chart);
-      expect(chart).to.have.property('yAxisLabel', '');
+      expect(chart).toHaveProperty('yAxisLabel', '');
     });
   });
 });
