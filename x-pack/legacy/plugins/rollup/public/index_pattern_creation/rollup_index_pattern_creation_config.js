@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { RollupPrompt } from './components/rollup_prompt';
-import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';
+import { IndexPatternCreationConfig } from '../../../../../../src/plugins/index_pattern_management/public';
 
 const rollupIndexPatternTypeName = i18n.translate(
   'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultTypeName',
