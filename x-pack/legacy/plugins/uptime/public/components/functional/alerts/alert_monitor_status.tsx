@@ -268,7 +268,21 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
           />
         }
         data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesExpression"
-        description="any monitor is down >"
+        description={
+          filters
+            ? i18n.translate(
+                'xpack.uptime.alerts.monitorStatus.numTimesExpression.matchingMonitors.description',
+                {
+                  defaultMessage: 'matching monitors are down >',
+                }
+              )
+            : i18n.translate(
+                'xpack.uptime.alerts.monitorStatus.numTimesExpression.anyMonitors.description',
+                {
+                  defaultMessage: 'any monitor is down >',
+                }
+              )
+        }
         id="ping-count"
         value={`${numTimes} times`}
       />
