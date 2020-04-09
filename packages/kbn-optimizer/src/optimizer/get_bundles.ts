@@ -25,7 +25,7 @@ import { KibanaPlatformPlugin } from './kibana_platform_plugins';
 
 export function getBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
   const coreBundle = new Bundle({
-    type: 'standalone',
+    type: 'entry',
     id: 'core',
     entry: './public/entry_point',
     sourceRoot: repoRoot,
