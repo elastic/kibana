@@ -63,3 +63,17 @@ test('tests loading system.yml', () => {
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
+
+test('tests processing multi fields', () => {
+  const fields: Field[] = safeLoad(multiFieldsLiteralYml);
+  const processedFields = processFields(fields);
+  expect(true).toBe(true);
+});
+
+const multiFieldsLiteralYml = `
+- name: thread
+  type: keyword
+  multi_fields:
+    - name: text
+      type: text
+`;
