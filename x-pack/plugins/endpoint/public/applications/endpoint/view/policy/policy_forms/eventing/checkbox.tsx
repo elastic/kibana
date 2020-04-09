@@ -8,47 +8,34 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { htmlIdGenerator } from '@elastic/eui';
-import { setIn } from '../../../../models/policy_details_config';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../../store/policy_details';
 import { UIPolicyConfig } from '../../../../types';
 
-export const EventingCheckbox = React.memo(function<
-  T extends keyof UIPolicyConfig & string,
-  TT extends keyof UIPolicyConfig[T] & string,
-  TTT extends keyof UIPolicyConfig[T][TT] & string
->({
+export const EventingCheckbox = React.memo(function({
   name,
-  os,
-  protectionEvent,
-  protectionField,
+  setter,
+  getter,
 }: {
   name: string;
-  os: T;
-  protectionEvent: TT;
-  protectionField: TTT;
+  setter: (config: UIPolicyConfig, checked: boolean) => UIPolicyConfig;
+  getter: (config: UIPolicyConfig) => boolean;
 }) {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
-  const selected = policyDetailsConfig[os][protectionEvent][protectionField];
+  const selected = getter(policyDetailsConfig);
   const dispatch = useDispatch<(action: PolicyDetailsAction) => void>();
 
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (policyDetailsConfig) {
-        const payload = setIn(
-          policyDetailsConfig,
-          [os, protectionEvent, protectionField],
-          event.target.checked
-        );
-
         dispatch({
           type: 'userChangedPolicyConfig',
-          payload: { policyConfig: payload },
+          payload: { policyConfig: setter(policyDetailsConfig, event.target.checked) },
         });
       }
     },
-    [dispatch, os, policyDetailsConfig, protectionEvent, protectionField]
+    [dispatch, policyDetailsConfig, setter]
   );
 
   return (

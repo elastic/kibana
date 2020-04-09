@@ -16,6 +16,7 @@ import {
   totalWindowsEventing,
 } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
+import { setIn, getIn } from '../../../../models/policy_details_config';
 
 export const WindowsEventing = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedWindowsEventing);
@@ -24,7 +25,6 @@ export const WindowsEventing = React.memo(() => {
   const checkboxes: Array<{
     name: string;
     os: 'windows';
-    protectionEvent: keyof UIPolicyConfig['windows'];
     protectionField: keyof UIPolicyConfig['windows']['events'];
   }> = useMemo(
     () => [
@@ -33,7 +33,6 @@ export const WindowsEventing = React.memo(() => {
           defaultMessage: 'Process',
         }),
         os: OS.windows,
-        protectionEvent: 'events',
         protectionField: 'process',
       },
       {
@@ -41,7 +40,6 @@ export const WindowsEventing = React.memo(() => {
           defaultMessage: 'Network',
         }),
         os: OS.windows,
-        protectionEvent: 'events',
         protectionField: 'network',
       },
     ],
@@ -65,9 +63,10 @@ export const WindowsEventing = React.memo(() => {
             <EventingCheckbox
               name={item.name}
               key={index}
-              os={item.os}
-              protectionEvent={item.protectionEvent}
-              protectionField={item.protectionField}
+              setter={(config, checked) =>
+                setIn(config)(item.os)('events')(item.protectionField)(checked)
+              }
+              getter={config => getIn(config)(item.os)('events')(item.protectionField)}
             />
           );
         })}
@@ -99,7 +98,7 @@ export const WindowsEventing = React.memo(() => {
         []
       )}
       id="windowsEventingForm"
-      rightCorner={collectionsEnabled()}
+      rightCorner={collectionsEnabled}
       children={renderCheckboxes}
     />
   );
