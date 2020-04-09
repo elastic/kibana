@@ -24,7 +24,6 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   SET_LAYER_STYLE_META,
-  SET_LAYER_SYNC_DATA_TOKEN,
   SET_JOINS,
   UPDATE_SOURCE_PROP,
   SET_REFRESH_CONFIG,
@@ -324,8 +323,6 @@ export function map(state = INITIAL_STATE, action) {
         ...state.layerList[index].style,
         __styleMeta: styleMeta,
       });
-    case SET_LAYER_SYNC_DATA_TOKEN:
-      return updateLayerInList(state, action.layerId, '__dataSyncToken', action.syncToken);
     case SET_SCROLL_ZOOM:
       return {
         ...state,

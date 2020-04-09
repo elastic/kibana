@@ -96,7 +96,6 @@ export type JoinDescriptor = {
 };
 
 export type LayerDescriptor = {
-  __dataSyncToken?: symbol;
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
   __errorMessage?: string;

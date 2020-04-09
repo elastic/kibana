@@ -230,7 +230,6 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncJoin({
     join,
-    isDataSyncActive,
     startLoading,
     stopLoading,
     onLoadError,
@@ -253,8 +252,7 @@ export class VectorLayer extends AbstractLayer {
       prevDataRequest,
       nextMeta: searchFilters,
     });
-
-    if (canSkipFetch || !isDataSyncActive()) {
+    if (canSkipFetch) {
       return {
         dataHasChanged: false,
         join: join,
@@ -362,7 +360,6 @@ export class VectorLayer extends AbstractLayer {
       onLoadError,
       registerCancelCallback,
       dataFilters,
-      isDataSyncActive,
       isRequestStillActive,
     } = syncContext;
     const dataRequestId = SOURCE_DATA_ID_ORIGIN;
@@ -374,8 +371,7 @@ export class VectorLayer extends AbstractLayer {
       prevDataRequest,
       nextMeta: searchFilters,
     });
-
-    if (canSkipFetch || !isDataSyncActive()) {
+    if (canSkipFetch) {
       return {
         refreshed: false,
         featureCollection: prevDataRequest.getData(),
@@ -462,7 +458,6 @@ export class VectorLayer extends AbstractLayer {
     startLoading,
     stopLoading,
     onLoadError,
-    isDataSyncActive,
     registerCancelCallback,
   }) {
     if (!source.isESSource() || dynamicStyleProps.length === 0) {
@@ -481,8 +476,7 @@ export class VectorLayer extends AbstractLayer {
     };
     const prevDataRequest = this.getDataRequest(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
-
-    if (canSkipFetch || !isDataSyncActive()) {
+    if (canSkipFetch) {
       return;
     }
 

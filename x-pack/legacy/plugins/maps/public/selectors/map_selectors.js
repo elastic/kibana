@@ -161,11 +161,6 @@ export function getDataRequestDescriptor(state = {}, layerId, dataId) {
   });
 }
 
-export function getLayerSyncDataToken(state = {}, layerId) {
-  const layerDescriptor = getLayerDescriptor(state, layerId);
-  return _.get(layerDescriptor, '__dataSyncToken');
-}
-
 export const getDataFilters = createSelector(
   getMapExtent,
   getMapBuffer,
