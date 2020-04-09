@@ -6,8 +6,7 @@
 
 import React, { Fragment } from 'react';
 import _ from 'lodash';
-import { EuiFormRow } from '@elastic/eui/src/components/form/form_row/form_row';
-import { EuiFieldText } from '@elastic/eui/src/components/form/field_text/field_text';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export class XYZTMSEditor extends React.Component {

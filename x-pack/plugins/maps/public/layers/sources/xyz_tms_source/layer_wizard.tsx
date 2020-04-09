@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { XYZTMSEditor } from './xyz_tms_editor';
-import { XYZTMSSource } from './xyz_tms_source';
+import { XYZTMSSource, sourceTitle } from './xyz_tms_source';
 
 export const tmsLayerWizardConfig = {
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
