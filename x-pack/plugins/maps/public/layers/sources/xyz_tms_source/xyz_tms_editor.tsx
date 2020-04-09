@@ -16,7 +16,7 @@ export interface XYZTMSSourceConfig {
 }
 
 export interface Props {
-  onSourceConfigChange: (sourceConfig: XYZTMSSourceConfig) => {};
+  onSourceConfigChange: (sourceConfig: XYZTMSSourceConfig) => void;
 }
 
 interface State {

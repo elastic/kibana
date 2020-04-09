@@ -36,8 +36,8 @@ export class XYZTMSSource extends AbstractTMSSource {
     };
   }
 
-  constructor(sourceDescriptor: XYZTMSSourceDescriptor) {
-    super(sourceDescriptor);
+  constructor(sourceDescriptor: XYZTMSSourceDescriptor, inspectorAdapters) {
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 

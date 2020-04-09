@@ -7,13 +7,13 @@
 
 import { FeatureCollection } from 'geojson';
 import { AbstractSource, ISource } from '../source';
-import { IField } from '../fields/field';
+import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
-} from '../../../common/descriptor_types';
+} from '../../../../common/descriptor_types';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
