@@ -421,14 +421,12 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           setAddFlyoutVisibility={setAddFlyoutVisibility}
         />
         {editedConnectorItem ? (
-          <>
-            <ConnectorEditFlyout
-              key={editedConnectorItem.id}
-              initialConnector={editedConnectorItem}
-              editFlyoutVisible={editFlyoutVisible}
-              setEditFlyoutVisibility={setEditFlyoutVisibility}
-            />
-          </>
+          <ConnectorEditFlyout
+            key={editedConnectorItem.id}
+            initialConnector={editedConnectorItem}
+            editFlyoutVisible={editFlyoutVisible}
+            setEditFlyoutVisibility={setEditFlyoutVisibility}
+          />
         ) : null}
       </ActionsConnectorsContextProvider>
     </section>
