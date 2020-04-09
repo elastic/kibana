@@ -15,10 +15,10 @@ export const tmsLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Tile map service configured in interface',
   }),
   icon: 'grid',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }: RenderWizardArguments) => {
+  renderWizard: ({ onPreviewSource }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: XYZTMSSourceConfig) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
-      const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
+      const source = new XYZTMSSource(sourceDescriptor);
       onPreviewSource(source);
     };
     return <XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />;
