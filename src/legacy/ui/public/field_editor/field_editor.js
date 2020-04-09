@@ -100,7 +100,6 @@ export class FieldEditor extends PureComponent {
     indexPattern: PropTypes.object.isRequired,
     field: PropTypes.object.isRequired,
     helpers: PropTypes.shape({
-      Field: PropTypes.func.isRequired,
       getConfig: PropTypes.func.isRequired,
       $http: PropTypes.func.isRequired,
       fieldFormatEditors: PropTypes.object.isRequired,
