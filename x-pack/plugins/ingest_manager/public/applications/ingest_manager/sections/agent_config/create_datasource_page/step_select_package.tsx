@@ -149,7 +149,7 @@ export const StepSelectPackage: React.FunctionComponent<{
             placeholder: i18n.translate(
               'xpack.ingestManager.createDatasource.stepSelectPackage.filterPackagesInputPlaceholder',
               {
-                defaultMessage: 'Search for packages',
+                defaultMessage: 'Search for integrations',
               }
             ),
           }}
@@ -179,7 +179,7 @@ export const StepSelectPackage: React.FunctionComponent<{
             title={
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.stepSelectPackage.errorLoadingSelectedPackageTitle"
-                defaultMessage="Error loading selected package"
+                defaultMessage="Error loading selected integration"
               />
             }
             error={selectedPkgError}
