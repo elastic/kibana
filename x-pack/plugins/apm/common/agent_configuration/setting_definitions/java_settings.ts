@@ -20,27 +20,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.enableLogCorrelation.description',
       {
         defaultMessage:
-          "A boolean specifying if the agent should integrate into SLF4J's MDC to enable trace-log correlation. If set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC. While it's allowed to enable this setting at runtime, you can't disable it without a restart."
-      }
-    ),
-    includeAgents: ['java']
-  },
-
-  // TRACE_METHODS_DURATION_THRESHOLD
-  {
-    key: 'trace_methods_duration_threshold',
-    type: 'integer',
-    label: i18n.translate(
-      'xpack.apm.agentConfig.traceMethodsDurationThreshold.label',
-      {
-        defaultMessage: 'Trace methods duration threshold'
-      }
-    ),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.traceMethodsDurationThreshold.description',
-      {
-        defaultMessage:
-          'If trace_methods config option is set, provides a threshold to limit spans based on duration. When set to a value greater than 0, spans representing methods traced based on trace_methods will be discarded by default.'
+          "A boolean specifying if the agent should integrate into SLF4J's MDC to enable trace-log correlation. If set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC. Since Java agent version 1.16.0, the agent also adds `error.id` of captured error to the MDC just before the error message is logged. NOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
       }
     ),
     includeAgents: ['java']
@@ -61,7 +41,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.circuitBreakerEnabled.description',
       {
         defaultMessage:
-          'A boolean specifying whether the circuit breaker should be enabled or not.  When enabled, the agent periodically polls stress monitors to detect system/process/JVM stress state. If ANY of the monitors detects a stress indication, the agent will become inactive, as if the `active` configuration option has been set to `false`, thus reducing resource consumption to a minimum. When inactive, the agent continues polling the same monitors in order to detect whether the stress state has been relieved. If ALL monitors approve that the system/process/JVM is not under stress anymore, the agent will resume and become fully functional.'
+          'A boolean specifying whether the circuit breaker should be enabled or not.  When enabled, the agent periodically polls stress monitors to detect system/process/JVM stress state. If ANY of the monitors detects a stress indication, the agent will pause, as if the `recording` configuration option has been set to `false`, thus reducing resource consumption to a minimum. When paused, the agent continues polling the same monitors in order to detect whether the stress state has been relieved. If ALL monitors approve that the system/process/JVM is not under stress anymore, the agent will resume and become fully functional.'
       }
     ),
     includeAgents: ['java']
@@ -72,7 +52,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.stressMonitorGcStressThreshold.label',
       { defaultMessage: 'Stress monitor gc stress threshold' }
     ),
-    type: 'boolean',
+    type: 'float',
     category: 'Circuit-Breaker',
     defaultValue: '0.95',
     description: i18n.translate(
@@ -175,7 +155,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.profilingInferredSpansEnabled.description',
       {
         defaultMessage:
-          'Set to `true` to make the agent create spans for method executions based on async-profiler, a sampling aka statistical profiler. Due to the nature of how sampling profilers work, the duration of the inferred spans are not exact, but only estimations. The `profiling_inferred_spans_sampling_interval` lets you fine tune the trade-off between accuracy and overhead. The inferred spans are created after a profiling session has ended. This means there is a delay between the regular and the inferred spans being visible in the UI. This feature is not available on Windows'
+          'Set to `true` to make the agent create spans for method executions based on async-profiler, a sampling aka statistical profiler. Due to the nature of how sampling profilers work, the duration of the inferred spans are not exact, but only estimations. The `profiling_inferred_spans_sampling_interval` lets you fine tune the trade-off between accuracy and overhead. The inferred spans are created after a profiling session has ended. This means there is a delay between the regular and the inferred spans being visible in the UI. NOTE: This feature is not available on Windows.'
       }
     ),
     includeAgents: ['java']
@@ -229,7 +209,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.profilingInferredSpansIncludedClasses.description',
       {
         defaultMessage:
-          'If set, the agent will only create inferred spans for methods which match this list. Setting a value may slightly increase performance and can reduce clutter by only creating spans for the classes you are interested in. Example: `org.example.myapp.*` This option supports the wildcard `*`, which matches zero or more characters. Examples: `/foo/*/bar/*/baz*`, `*foo*`. Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.'
+          'If set, the agent will only create inferred spans for methods which match this list. Setting a value may slightly reduce overhead and can reduce clutter by only creating spans for the classes you are interested in. This option supports the wildcard `*`, which matches zero or more characters. Example: `org.example.myapp.*`. Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.'
       }
     ),
     includeAgents: ['java']
@@ -248,7 +228,7 @@ export const javaSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.profilingInferredSpansExcludedClasses.description',
       {
         defaultMessage:
-          'Excludes classes for which no profiler-inferred spans should be created. This option supports the wildcard `*`, which matches zero or more characters. Examples: `/foo/*/bar/*/baz*`, `*foo*`. Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.'
+          'Excludes classes for which no profiler-inferred spans should be created. This option supports the wildcard `*`, which matches zero or more characters. Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.'
       }
     ),
     includeAgents: ['java']

@@ -17,11 +17,20 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
 
 import { IngestManagerConfigType } from '../common/types';
+import { setupRouteService } from '../common';
 
 export { IngestManagerConfigType } from '../common/types';
 
 export type IngestManagerSetup = void;
-export type IngestManagerStart = void;
+/**
+ * Describes public IngestManager plugin contract returned at the `start` stage.
+ */
+export interface IngestManagerStart {
+  success: boolean;
+  error?: {
+    message: string;
+  };
+}
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -61,7 +70,14 @@ export class IngestManagerPlugin
     });
   }
 
-  public start(core: CoreStart) {}
+  public async start(core: CoreStart): Promise<IngestManagerStart> {
+    try {
+      const { isInitialized: success } = await core.http.post(setupRouteService.getSetupPath());
+      return { success };
+    } catch (error) {
+      return { success: false, error: { message: error.body?.message || 'Unknown error' } };
+    }
+  }
 
   public stop() {}
 }

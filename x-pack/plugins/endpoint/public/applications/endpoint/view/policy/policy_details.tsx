@@ -35,6 +35,7 @@ import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
+import { MalwareProtections } from './policy_forms/protections/malware';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -148,7 +149,10 @@ export const PolicyDetails = React.memo(() => {
         <VerticalDivider spacing="l" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleBackToListOnClick}>
+        <EuiButtonEmpty
+          onClick={handleBackToListOnClick}
+          data-test-subj="policyDetailsCancelButton"
+        >
           <FormattedMessage id="xpack.endpoint.policy.details.cancel" defaultMessage="Cancel" />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -156,6 +160,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiButton
           fill={true}
           iconType="save"
+          data-test-subj="policyDetailsSaveButton"
           // FIXME: need to disable if User has no write permissions to ingest - see: https://github.com/elastic/endpoint-app-team/issues/296
           onClick={handleSaveOnClick}
           isLoading={isPolicyLoading}
@@ -184,6 +189,17 @@ export const PolicyDetails = React.memo(() => {
         <EuiText size="xs" color="subdued">
           <h4>
             <FormattedMessage
+              id="xpack.endpoint.policy.details.protections"
+              defaultMessage="Protections"
+            />
+          </h4>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <MalwareProtections />
+        <EuiSpacer size="l" />
+        <EuiText size="xs" color="subdued">
+          <h4>
+            <FormattedMessage
               id="xpack.endpoint.policy.details.settings"
               defaultMessage="Settings"
             />
@@ -204,6 +220,7 @@ const ConfirmUpdate = React.memo<{
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
+        data-test-subj="policyDetailsConfirmModal"
         title={i18n.translate('xpack.endpoint.policy.details.updateConfirm.title', {
           defaultMessage: 'Save and deploy changes',
         })}
@@ -225,6 +242,7 @@ const ConfirmUpdate = React.memo<{
         {hostCount > 0 && (
           <>
             <EuiCallOut
+              data-test-subj="policyDetailsWarningCallout"
               title={i18n.translate('xpack.endpoint.policy.details.updateConfirm.warningTitle', {
                 defaultMessage:
                   'This action will update {hostCount, plural, one {# host} other {# hosts}}',
