@@ -28,79 +28,91 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
   agentConfig?: AgentConfig;
   packageInfo?: PackageInfo;
 }> = ({ from, basePath, cancelUrl, maxStep, agentConfig, packageInfo, children }) => {
+  const leftColumn = (
+    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+      <EuiFlexItem>
+        <EuiButtonEmpty size="s" iconType="arrowLeft" flush="left" href={cancelUrl}>
+          <FormattedMessage
+            id="xpack.ingestManager.createDatasource.cancelLinkText"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText>
+          <h1>
+            <FormattedMessage
+              id="xpack.ingestManager.createDatasource.pageTitle"
+              defaultMessage="Add data source"
+            />
+          </h1>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="s">
+          <FormattedMessage
+            id="xpack.ingestManager.createDatasource.pageDescription"
+            defaultMessage="Follow the instructions below to add a data source to the selected agent configuration."
+          />
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+  const rightColumn = (
+    <EuiFlexGroup justifyContent="flexEnd" direction={'row'} gutterSize="xl">
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+        {agentConfig && from === 'config' ? (
+          <EuiDescriptionList style={{ textAlign: 'right' }} textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.agentConfigurationNameLabel"
+                defaultMessage="Configuration"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {agentConfig?.name || '-'}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        ) : null}
+        {packageInfo && from === 'package' ? (
+          <EuiDescriptionList style={{ textAlign: 'right' }} textStyle="reverse">
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.packageNameLabel"
+                defaultMessage="Integration"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <PackageIcon
+                    packageName={packageInfo?.name || ''}
+                    version={packageInfo?.version || ''}
+                    icons={packageInfo?.icons}
+                    size="m"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {packageInfo?.title || packageInfo?.name || '-'}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        ) : null}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const maxWidth = 770;
   return (
     <WithHeaderLayout
-      restrictHeaderWidth={833}
-      restrictWidth={833}
-      leftColumn={
-        <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-          <EuiFlexItem>
-            <EuiButtonEmpty size="s" iconType="arrowLeft" flush="left" href={cancelUrl}>
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.cancelLinkText"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.pageTitle"
-                  defaultMessage="Add data source"
-                />
-              </h1>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup direction={from === 'config' ? 'row' : 'rowReverse'} gutterSize="xl">
-              {agentConfig && from === 'config' ? (
-                <EuiFlexItem grow={false}>
-                  <EuiDescriptionList textStyle="reverse">
-                    <EuiDescriptionListTitle>
-                      <FormattedMessage
-                        id="xpack.ingestManager.createDatasource.agentConfigurationNameLabel"
-                        defaultMessage="Configuration"
-                      />
-                    </EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      {agentConfig?.name || '-'}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              ) : null}
-              {packageInfo && from === 'package' ? (
-                <EuiFlexItem grow={false}>
-                  <EuiDescriptionList textStyle="reverse">
-                    <EuiDescriptionListTitle>
-                      <FormattedMessage
-                        id="xpack.ingestManager.createDatasource.packageNameLabel"
-                        defaultMessage="Integration"
-                      />
-                    </EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      <EuiFlexGroup alignItems="center" gutterSize="s">
-                        <EuiFlexItem grow={false}>
-                          <PackageIcon
-                            packageName={packageInfo?.name || ''}
-                            version={packageInfo?.version || ''}
-                            icons={packageInfo?.icons}
-                            size="m"
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          {packageInfo?.title || packageInfo?.name || '-'}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      restrictHeaderWidth={maxWidth}
+      restrictWidth={maxWidth}
+      leftColumn={leftColumn}
+      rightColumn={rightColumn}
+      rightColumnGrow={false}
     >
       {children}
     </WithHeaderLayout>

@@ -7,6 +7,7 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 
 const Container = styled.div`
   border-bottom: ${props => props.theme.eui.euiBorderThin};
@@ -33,25 +34,33 @@ export interface HeaderProps {
   restrictHeaderWidth?: number;
   leftColumn?: JSX.Element;
   rightColumn?: JSX.Element;
+  rightColumnGrow?: EuiFlexItemProps['grow'];
   tabs?: EuiTabProps[];
 }
 
-const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(({ leftColumn, rightColumn }) => (
-  <EuiFlexGroup alignItems="center">
-    {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
-    {rightColumn ? <EuiFlexItem>{rightColumn}</EuiFlexItem> : null}
-  </EuiFlexGroup>
-));
+const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
+  ({ leftColumn, rightColumn, rightColumnGrow }) => (
+    <EuiFlexGroup alignItems="center">
+      {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
+      {rightColumn ? <EuiFlexItem grow={rightColumnGrow}>{rightColumn}</EuiFlexItem> : null}
+    </EuiFlexGroup>
+  )
+);
 
 export const Header: React.FC<HeaderProps> = ({
   leftColumn,
   rightColumn,
+  rightColumnGrow,
   tabs,
   restrictHeaderWidth,
 }) => (
   <Container>
     <Wrapper maxWidth={restrictHeaderWidth}>
-      <HeaderColumns leftColumn={leftColumn} rightColumn={rightColumn} />
+      <HeaderColumns
+        leftColumn={leftColumn}
+        rightColumn={rightColumn}
+        rightColumnGrow={rightColumnGrow}
+      />
       <EuiFlexGroup>
         {tabs ? (
           <EuiFlexItem>
