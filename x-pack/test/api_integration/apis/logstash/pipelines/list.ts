@@ -5,9 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import pipeline from './fixtures/load';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import pipelineList from './fixtures/list.json';
 
-export default function({ getService }) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('list', () => {
@@ -21,10 +22,10 @@ export default function({ getService }) {
       return esArchiver.unload(archive);
     });
 
-    it('should return the specified pipeline', async () => {
-      const { body } = await supertest.get('/api/logstash/pipeline/tweets_and_beats').expect(200);
+    it('should return all the pipelines', async () => {
+      const { body } = await supertest.get('/api/logstash/pipelines').expect(200);
 
-      expect(body).to.eql(pipeline);
+      expect(body).to.eql(pipelineList);
     });
   });
 }

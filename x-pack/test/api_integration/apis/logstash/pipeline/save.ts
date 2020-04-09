@@ -4,15 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ getService }) {
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  describe('delete', () => {
+  describe('save', () => {
     const archive = 'logstash/empty';
 
-    before('load pipelines archive', async () => {
-      await esArchiver.load(archive);
+    before('load pipelines archive', () => {
+      return esArchiver.load(archive);
+    });
 
+    after('unload pipelines archive', () => {
+      return esArchiver.unload(archive);
+    });
+
+    it('should create the specified pipeline', async () => {
       await supertest
         .put('/api/logstash/pipeline/fast_generator')
         .set('kbn-xsrf', 'xxx')
@@ -24,20 +33,9 @@ export default function({ getService }) {
         })
         .expect(204);
 
-      await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
-    });
+      const { body } = await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
 
-    after('unload pipelines archive', () => {
-      return esArchiver.unload(archive);
-    });
-
-    it('should delete the specified pipeline', async () => {
-      await supertest
-        .delete('/api/logstash/pipeline/fast_generator')
-        .set('kbn-xsrf', 'xxx')
-        .expect(204);
-
-      await supertest.get('/api/logstash/pipeline/fast_generator').expect(404);
+      expect(body.description).to.eql('foobar baz');
     });
   });
 }
