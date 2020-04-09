@@ -25,65 +25,26 @@ import { search } from '../../../../data/public';
 import { SimpleNumberList } from './components/simple_number_list';
 const { isNumberType } = search.aggs;
 
-export function IncludeExcludeParamEditor({
-  agg,
-  aggParam,
-  value,
-  setValue,
-  setValidity,
-  showValidation,
-  setTouched,
-  editorConfig,
-  formIsTouched,
-  metricAggs,
-  schemas,
-  state,
-}: AggParamEditorProps<string | Array<number | undefined>>) {
+export function IncludeExcludeParamEditor(props: AggParamEditorProps<string | Array<number | ''>>) {
+  const { agg, value, setValue } = props;
   const isAggOfNumberType = isNumberType(agg);
 
   // This useEffect converts value from string type to number and back when the field type is changed
   useEffect(() => {
     if (isAggOfNumberType && !isArray(value) && value !== undefined) {
-      setValue(
-        value
-          .split(',')
-          .map(item => parseFloat(item))
-          .filter(number => !isNaN(number)) as number[]
-      );
+      const numberArray = value
+        .split(',')
+        .map(item => parseFloat(item))
+        .filter(number => !isNaN(number));
+      setValue(numberArray.length ? numberArray : ['']);
     } else if (!isAggOfNumberType && isArray(value) && value !== undefined) {
       setValue((value as Array<number | ''>).filter(item => item !== '').toString());
     }
   }, [isAggOfNumberType, setValue, value]);
 
   return isAggOfNumberType ? (
-    <SimpleNumberList
-      agg={agg}
-      aggParam={aggParam}
-      showValidation={showValidation}
-      value={value as Array<number | undefined>}
-      setValidity={setValidity}
-      setValue={setValue}
-      setTouched={setTouched}
-      editorConfig={editorConfig}
-      formIsTouched={formIsTouched}
-      metricAggs={metricAggs}
-      schemas={schemas}
-      state={state}
-    />
+    <SimpleNumberList {...props} value={value as Array<number | ''>} />
   ) : (
-    <StringParamEditor
-      agg={agg}
-      aggParam={aggParam}
-      showValidation={showValidation}
-      value={value as string}
-      setValidity={setValidity}
-      setValue={setValue}
-      setTouched={setTouched}
-      editorConfig={editorConfig}
-      formIsTouched={formIsTouched}
-      metricAggs={metricAggs}
-      schemas={schemas}
-      state={state}
-    />
+    <StringParamEditor {...props} value={value as string} />
   );
 }

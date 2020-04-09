@@ -21,9 +21,8 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import { isArray } from 'lodash';
 import { EuiButtonEmpty, EuiFlexItem, EuiFormRow, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getInitModelList, getRange, hasInvalidValues, parse } from './number_list/utils';
+import { EMPTY_STRING, getInitModelList, getRange, parse } from './number_list/utils';
 import { NumberRow, NumberRowModel } from './number_list/number_row';
-import { useValidation } from '../utils';
 import { AggParamEditorProps } from '../../agg_param_props';
 
 const generateId = htmlIdGenerator();
@@ -33,50 +32,34 @@ function SimpleNumberList({
   aggParam,
   value,
   setValue,
-  setValidity,
-  showValidation,
   setTouched,
-}: AggParamEditorProps<Array<number | undefined>>) {
+}: AggParamEditorProps<Array<number | ''>>) {
   const [numbers, setNumbers] = useState(
-    getInitModelList(value && isArray(value) ? (value as Array<number | undefined>) : [undefined])
+    getInitModelList(value && isArray(value) ? value : [EMPTY_STRING])
   );
   const numberRange = useMemo(() => getRange('[-Infinity,Infinity]'), []);
-  const [isValid, setIsValid] = useState(true);
 
   // This useEffect is needed to discard changes, it sets numbers a mapped value if they are different
   useEffect(() => {
     if (
       isArray(value) &&
       (value?.length !== numbers.length ||
-        !(value as number[]).every((numberValue, index) => numberValue === numbers[index].value))
+        !value.every((numberValue, index) => numberValue === numbers[index].value))
     ) {
       setNumbers(
-        value.map(
-          numberValue =>
-            ({
-              id: generateId(),
-              value: numberValue,
-              isInvalid: false,
-            } as NumberRowModel)
-        )
+        value.map(numberValue => ({
+          id: generateId(),
+          value: numberValue,
+          isInvalid: false,
+        }))
       );
     }
   }, [numbers, value]);
 
-  const setNumbersValidity = useCallback(
-    (isListValid: boolean) => {
-      setIsValid(isListValid);
-      setValidity(isListValid);
-    },
-    [setValidity]
-  );
-
-  useValidation(setNumbersValidity, !hasInvalidValues(numbers));
-
   const onUpdate = useCallback(
     (numberList: NumberRowModel[]) => {
       setNumbers(numberList);
-      setValue(numberList.map(({ value: numberValue }) => numberValue) as number[]);
+      setValue(numberList.map(({ value: numberValue }) => numberValue));
     },
     [setValue]
   );
@@ -104,9 +87,9 @@ function SimpleNumberList({
       ...numbers,
       {
         id: generateId(),
-        value: '',
+        value: EMPTY_STRING as '',
         isInvalid: false,
-      } as NumberRowModel,
+      },
     ];
     onUpdate(newArray);
   }, [numbers, onUpdate]);
@@ -122,7 +105,6 @@ function SimpleNumberList({
       label={aggParam.displayName || aggParam.name}
       fullWidth={true}
       compressed
-      isInvalid={showValidation ? !isValid : false}
     >
       <>
         {numbers.map((number, arrayIndex) => (
