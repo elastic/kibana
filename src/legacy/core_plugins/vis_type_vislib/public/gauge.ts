@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues, Schemas } from '../../vis_default_editor/public';
+import { RangeValues, Schemas } from '../../../../plugins/vis_default_editor/public';
 import { AggGroupNames } from '../../../../plugins/data/public';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
