@@ -28,7 +28,6 @@ interface Local {
   description: string;
   parameter: {
     fields?: {
-      Parameter?: ApiParameter[];
       [key: string]: ApiParameter[] | undefined;
     };
   };
@@ -64,17 +63,6 @@ export function postProcess(parsedFiles: any[]): void {
       const schemaFields = schemaDocs.get(schemName);
       if (!schemaFields) return;
 
-      // Init parameters collection
-      if (!block.local.parameter) {
-        block.local.parameter = {
-          fields: { [paramsGroup]: [] },
-        };
-      }
-
-      if (!block.local.parameter.fields![paramsGroup]) {
-        block.local.parameter.fields![paramsGroup] = [];
-      }
-
       extractDocEntries(schemaFields, block, paramsGroup);
     });
   });
@@ -86,25 +74,21 @@ export function postProcess(parsedFiles: any[]): void {
  * @param block
  * @param paramsGroup
  */
-function extractDocEntries(docEntries: DocEntry[], block: Block, paramsGroup = ''): void {
+function extractDocEntries(docEntries: DocEntry[], block: Block, paramsGroup: string): void {
+  if (!block.local.parameter) {
+    block.local.parameter = {
+      fields: {},
+    };
+  }
+
+  if (!block.local.parameter.fields![paramsGroup]) {
+    block.local.parameter.fields![paramsGroup] = [];
+  }
+  const collection = block.local.parameter.fields![paramsGroup] as ApiParameter[];
+
   for (const field of docEntries) {
-    let collection = (block.local!.parameter!.fields!.Parameters as unknown) as ApiParameter[];
-    let group = 'Parameters';
-
-    if (paramsGroup.length > 0) {
-      // @ts-ignore
-      if (!block.local.parameter.fields[paramsGroup]) {
-        // @ts-ignore
-        block.local.parameter.fields[paramsGroup] = [];
-      }
-      // @ts-ignore
-      collection = block.local.parameter.fields[paramsGroup];
-
-      group = paramsGroup;
-    }
-
     collection.push({
-      group,
+      group: paramsGroup,
       type: escapeSpecial(field.type),
       size: undefined,
       allowedValues: undefined,
