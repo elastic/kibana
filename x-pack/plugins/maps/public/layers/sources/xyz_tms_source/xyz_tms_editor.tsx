@@ -24,8 +24,8 @@ export interface Props {
 interface State {
   tmsInput: string;
   tmsCanPreview: boolean;
-  attributionText: string;
-  attributionUrl: string;
+  attributionText?: string;
+  attributionUrl?: string;
 }
 
 export class XYZTMSEditor extends Component<Props, State> {
