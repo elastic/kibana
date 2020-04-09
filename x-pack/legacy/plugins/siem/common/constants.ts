@@ -84,6 +84,8 @@ export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
 
+export const TEMPLATE_TIMELINE_URL = '/api/template_timeline';
+
 /**
  * Default signals index key for kibana.dev.yml
  */

@@ -55,3 +55,5 @@ export const importTimelinesSchema = Joi.object({
   version,
   pinnedEventIds,
 });
+
+export const templateTimelineSchema = importTimelinesSchema;

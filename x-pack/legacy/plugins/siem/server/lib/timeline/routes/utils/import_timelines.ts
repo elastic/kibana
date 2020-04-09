@@ -198,3 +198,15 @@ export const getTimeline = async (frameworkRequest: FrameworkRequest, savedObjec
   } catch (e) {}
   return timeline;
 };
+
+export const timelineSavedObjectOmittedFields = [
+  'globalNotes',
+  'eventNotes',
+  'pinnedEventIds',
+  'version',
+  'savedObjectId',
+  'created',
+  'createdBy',
+  'updated',
+  'updatedBy',
+];

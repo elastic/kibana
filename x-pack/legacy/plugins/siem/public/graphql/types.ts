@@ -1944,6 +1944,8 @@ export interface TimelineResult {
 
   title?: Maybe<string>;
 
+  templateTimelineId?: Maybe<string>;
+
   updated?: Maybe<number>;
 
   updatedBy?: Maybe<string>;

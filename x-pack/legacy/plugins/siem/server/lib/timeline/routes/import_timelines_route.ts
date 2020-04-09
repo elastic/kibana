@@ -27,6 +27,7 @@ import {
   ImportTimelinesRequestParams,
   ImportTimelinesSchema,
   PromiseFromStreams,
+  timelineSavedObjectOmittedFields,
 } from './utils/import_timelines';
 
 import { IRouter } from '../../../../../../../../src/core/server';
@@ -36,7 +37,6 @@ import { importTimelinesPayloadSchema } from './schemas/import_timelines_schema'
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
 import { LegacyServices } from '../../../types';
 
-import { Timeline } from '../saved_object';
 import { validate } from '../../detection_engine/routes/rules/validate';
 import { FrameworkRequest } from '../../framework';
 
@@ -125,21 +125,11 @@ export const importTimelinesRoute = (
                       eventNotes,
                     } = parsedTimeline;
                     const parsedTimelineObject = omit(
-                      [
-                        'globalNotes',
-                        'eventNotes',
-                        'pinnedEventIds',
-                        'version',
-                        'savedObjectId',
-                        'created',
-                        'createdBy',
-                        'updated',
-                        'updatedBy',
-                      ],
+                      timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
                     try {
-                      const timeline = getTimeline(
+                      const timeline = await getTimeline(
                         (frameworkRequest as unknown) as FrameworkRequest,
                         savedObjectId
                       );

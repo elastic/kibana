@@ -1946,6 +1946,8 @@ export interface TimelineResult {
 
   title?: Maybe<string>;
 
+  templateTimelineId?: Maybe<string>;
+
   updated?: Maybe<number>;
 
   updatedBy?: Maybe<string>;
@@ -8023,6 +8025,8 @@ export namespace TimelineResultResolvers {
 
     title?: TitleResolver<Maybe<string>, TypeParent, TContext>;
 
+    templateTimelineId?: TemplateTimelineIdResolver<Maybe<string>, TypeParent, TContext>;
+
     updated?: UpdatedResolver<Maybe<number>, TypeParent, TContext>;
 
     updatedBy?: UpdatedByResolver<Maybe<string>, TypeParent, TContext>;
@@ -8126,6 +8130,11 @@ export namespace TimelineResultResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type TitleResolver<
+    R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineIdResolver<
     R = Maybe<string>,
     Parent = TimelineResult,
     TContext = SiemContext

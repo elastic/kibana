@@ -232,6 +232,9 @@ export const timelineSavedObjectMappings: {
           },
         },
       },
+      templateTimelineId: {
+        type: 'text',
+      },
       title: {
         type: 'text',
       },

@@ -3,19 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { set } from 'lodash/fp';
-import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
-import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
-import { createTemplateTimelines, getTemplateTimeline } from './utils/create_template_timelines';
+import { set, omit } from 'lodash/fp';
+import { TEMPLATE_TIMELINE_URL } from '../../../../common/constants';
+import {
+  transformError,
+  buildSiemResponse,
+  buildRouteValidation,
+} from '../../detection_engine/routes/utils';
+import { createTemplateTimelines } from './utils/create_template_timelines';
 import { FrameworkRequest } from '../../framework';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
+import { SetupPlugins } from '../../../plugin';
+import { Templatetimeline } from '../types';
 
-export const createTemplateTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
+import { getTimeline, timelineSavedObjectOmittedFields } from './utils/import_timelines';
+import { templateTimelineSchema } from './schemas/import_timelines_schema';
+export const createTemplateTimelinesRoute = (
+  router: IRouter,
+  config: LegacyServices['config'],
+  security: SetupPlugins['security']
+) => {
   router.post(
     {
-      path: TIMELINE_EXPORT_URL,
-      validate: false,
+      path: TEMPLATE_TIMELINE_URL,
+      validate: {
+        body: buildRouteValidation<Templatetimeline>(templateTimelineSchema),
+      },
       options: {
         tags: ['access:siem'],
       },
@@ -25,23 +39,23 @@ export const createTemplateTimelinesRoute = (router: IRouter, config: LegacyServ
 
       try {
         const savedObjectsClient = context.core.savedObjects.client;
-        const frameworkRequest = set(
-          'context.core.savedObjects.client',
-          savedObjectsClient,
-          request
-        );
+        const user = await security?.authc.getCurrentUser(request);
 
-        const templateTeimeline = getTemplateTimeline(
-          frameworkRequest as FrameworkRequest,
-          request.body.timeline.templateId
-        );
+        let frameworkRequest = set('context.core.savedObjects.client', savedObjectsClient, request);
+        frameworkRequest = set('user', user, frameworkRequest);
 
-        if (templateTeimeline === null) {
-          await createTemplateTimelines(
-            frameworkRequest as FrameworkRequest,
-            request.body.timeline
+        const templateTeimeline = await getTimeline(
+          (frameworkRequest as unknown) as FrameworkRequest,
+          request.body.savedObjectId
+        );
+        if (templateTeimeline == null) {
+          const newTemplateTimeline = await createTemplateTimelines(
+            (frameworkRequest as unknown) as FrameworkRequest,
+            omit(timelineSavedObjectOmittedFields, request.body)
           );
-          return response.ok({ body: request.body.timeline });
+          return response.ok({
+            body: newTemplateTimeline,
+          });
         }
       } catch (err) {
         const error = transformError(err);

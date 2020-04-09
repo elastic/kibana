@@ -13,14 +13,16 @@ const timelineLib = new Timeline();
 export const saveTemplateTimelines = async (
   frameworkRequest: FrameworkRequest,
   templateTimeline: SavedTimeline,
-  templateTimelineId?: string | null,
-  timelineVersion?: string | null
+  timelineId?: string | null,
+  timelineVersion?: string | null,
+  templateTimelineId?: string | null
 ) => {
   const newTimelineRes = await timelineLib.persistTimeline(
     frameworkRequest,
-    templateTimelineId ?? null,
+    timelineId ?? null,
     timelineVersion ?? null,
-    templateTimeline
+    templateTimeline,
+    templateTimelineId ?? null
   );
 
   return {
@@ -32,27 +34,17 @@ export const saveTemplateTimelines = async (
 export const createTemplateTimelines = async (
   frameworkRequest: FrameworkRequest,
   templateTimeline: SavedTimeline,
-  templateTimelineId?: string | null,
-  timelineVersion?: string | null
+  timelineId?: string | null,
+  timelineVersion?: string | null,
+  templateTimelineId?: string | null
 ) => {
-  const { newTemplateTimelineId } = await saveTemplateTimelines(
+  const newTemplateTimeline = await saveTemplateTimelines(
     frameworkRequest,
     templateTimeline,
-    templateTimelineId,
-    timelineVersion
+    timelineId,
+    timelineVersion,
+    templateTimelineId
   );
 
-  return newTemplateTimelineId;
-};
-
-export const getTemplateTimeline = async (
-  frameworkRequest: FrameworkRequest,
-  templateTimelineId: string
-) => {
-  let timeline = null;
-  try {
-    timeline = await timelineLib.getTimeline(frameworkRequest, templateTimelineId);
-    // eslint-disable-next-line no-empty
-  } catch (e) {}
-  return timeline;
+  return newTemplateTimeline;
 };

@@ -149,6 +149,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
   savedQueryId: unionWithNullType(runtimeTypes.string),
   sort: unionWithNullType(SavedSortRuntimeType),
+  templateTimelineId: unionWithNullType(runtimeTypes.string),
   created: unionWithNullType(runtimeTypes.number),
   createdBy: unionWithNullType(runtimeTypes.string),
   updated: unionWithNullType(runtimeTypes.number),
@@ -171,8 +172,6 @@ export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
   }),
   runtimeTypes.partial({
     savedObjectId: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
     templateTimelineId: runtimeTypes.string,
   }),
 ]);
@@ -189,6 +188,7 @@ export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection(
     notes: runtimeTypes.array(NoteSavedObjectToReturnRuntimeType),
     pinnedEventIds: runtimeTypes.array(runtimeTypes.string),
     pinnedEventsSaveObject: runtimeTypes.array(PinnedEventToReturnSavedObjectRuntimeType),
+    templateTimelineId: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
@@ -247,6 +247,8 @@ export type ExportedTimelines = TimelineSavedObject &
   ExportedNotes & {
     pinnedEventIds: string[];
   };
+
+export type Templatetimeline = ExportedTimelines;
 
 export interface BulkGetInput {
   type: string;

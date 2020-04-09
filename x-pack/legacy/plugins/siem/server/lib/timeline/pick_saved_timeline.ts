@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { SavedTimeline } from './types';
@@ -11,7 +12,8 @@ import { SavedTimeline } from './types';
 export const pickSavedTimeline = (
   timelineId: string | null,
   savedTimeline: SavedTimeline,
-  userInfo: AuthenticatedUser | null
+  userInfo: AuthenticatedUser | null,
+  templateTimelineId?: string | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
   const dateNow = new Date().valueOf();
@@ -23,6 +25,10 @@ export const pickSavedTimeline = (
   } else if (timelineId != null) {
     savedTimeline.updated = dateNow;
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+  }
+
+  if (templateTimelineId === null) {
+    savedTimeline.templateTimelineId = uuid.v4();
   }
   return savedTimeline;
 };

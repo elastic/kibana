@@ -50,6 +50,10 @@ export class Timeline {
     return this.getSavedTimeline(request, timelineId);
   }
 
+  public async getTemplateTimeline(request: FrameworkRequest, templateTimelineId: string) {
+    return this.getSavedTemplateTimeline(request, templateTimelineId);
+  }
+
   public async getAllTimeline(
     request: FrameworkRequest,
     onlyUserFavorite: boolean | null,
@@ -144,7 +148,8 @@ export class Timeline {
     request: FrameworkRequest,
     timelineId: string | null,
     version: string | null,
-    timeline: SavedTimeline
+    timeline: SavedTimeline,
+    templateTimelineId?: string | null
   ): Promise<ResponseTimeline> {
     const savedObjectsClient = request.context.core.savedObjects.client;
     try {
@@ -153,7 +158,7 @@ export class Timeline {
         const newTimeline = convertSavedObjectToSavedTimeline(
           await savedObjectsClient.create(
             timelineSavedObjectType,
-            pickSavedTimeline(timelineId, timeline, request.user)
+            pickSavedTimeline(timelineId, timeline, request.user, templateTimelineId)
           )
         );
         return {
@@ -166,7 +171,7 @@ export class Timeline {
       await savedObjectsClient.update(
         timelineSavedObjectType,
         timelineId,
-        pickSavedTimeline(timelineId, timeline, request.user),
+        pickSavedTimeline(timelineId, timeline, request.user, templateTimelineId),
         {
           version: version || undefined,
         }
@@ -236,6 +241,17 @@ export class Timeline {
     const [notes, pinnedEvents, timeline] = timelineWithNotesAndPinnedEvents;
 
     return timelineWithReduxProperties(notes, pinnedEvents, timeline, userName);
+  }
+
+  private async getSavedTemplateTimeline(request: FrameworkRequest, templateTimelineId: string) {
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+
+    const savedObjectsClient = request.context.core.savedObjects.client;
+    const savedObject = await savedObjectsClient.get(timelineSavedObjectType, templateTimelineId);
+    const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
+    const timeline = await Promise.resolve(timelineSaveObject);
+
+    return timelineWithReduxProperties([], [], timeline, userName);
   }
 
   private async getAllSavedTimeline(request: FrameworkRequest, options: SavedObjectsFindOptions) {
