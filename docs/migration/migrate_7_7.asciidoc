@@ -1,0 +1,27 @@
+[[breaking-changes-7.7]]
+== Breaking changes in 7.7
+++++
+<titleabbrev>7.7</titleabbrev>
+++++
+
+This page discusses the breaking changes that you need to be aware of when migrating
+your application to Kibana 7.7.
+
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+////
+The following section is re-used in the Installation and Upgrade Guide
+[[breaking_70_notable]]
+=== Notable breaking changes
+////
+
+[float]
+=== Breaking changes for users
+
+// tag::notable-breaking-changes[]
+There are no user-facing breaking changes in 7.7.
+// end::notable-breaking-changes[]
+
+[float]
+=== Breaking changes for plugin developers
