@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IField } from '../fields/field';
-import { IESAggSource } from './es_agg_source';
+import { IField } from '../../fields/field';
+import { IESAggSource } from '../es_agg_source';
 
 export interface IESTermSource extends IESAggSource {
   getTermField(): IField;

@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
-import { AbstractSource, ISource } from './source';
+import { AbstractSource, ISource } from '../source';
 import { IField } from '../fields/field';
 import {
   ESSearchSourceResponseMeta,
