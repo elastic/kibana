@@ -92,6 +92,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
@@ -108,6 +109,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
