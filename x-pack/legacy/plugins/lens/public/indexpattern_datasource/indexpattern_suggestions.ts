@@ -198,7 +198,7 @@ function addFieldAsMetricOperation(
   });
   const addedColumnId = generateId();
 
-  const [buckets, metrics] = separateBucketColumns(layer);
+  const [, metrics] = separateBucketColumns(layer);
 
   // Add metrics if there are 0 or > 1 metric
   if (metrics.length !== 1) {
