@@ -22,7 +22,7 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: AbstractSourceDescriptor;
-  constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object);
+  constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters?: object);
 
   destroy(): void;
   createDefaultLayer(options?: LayerDescriptor): ILayer;

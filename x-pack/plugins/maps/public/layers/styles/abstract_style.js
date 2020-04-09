@@ -15,12 +15,12 @@ export class AbstractStyle {
     return {};
   }
 
-  renderEditor(/* { layer, onStyleDescriptorChange } */) {
-    return null;
-  }
-
   getDescriptor() {
     return this._descriptor;
+  }
+
+  renderEditor(/* { layer, onStyleDescriptorChange } */) {
+    return null;
   }
 
   getSourceFieldNames() {

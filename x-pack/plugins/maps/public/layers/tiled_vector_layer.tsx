@@ -14,12 +14,20 @@ import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import { ITiledSingleLayerVectorSource, IVectorSource } from './sources/vector_source';
 import { SyncContext } from '../actions/map_actions';
 import { ISource } from './sources/source';
-import { DataMeta, MapFilters, VectorSourceRequestMeta } from '../../common/descriptor_types';
+import {
+  DataMeta,
+  MapFilters,
+  VectorLayerDescriptor,
+  VectorSourceRequestMeta,
+} from '../../common/descriptor_types';
 
 export class SingleTiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
 
-  static createDescriptor(options: VectorLayerArguments, mapColors: string[]) {
+  static createDescriptor(
+    options: VectorLayerArguments,
+    mapColors: string[]
+  ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(options, mapColors);
     layerDescriptor.type = SingleTiledVectorLayer.type;
 
@@ -35,9 +43,6 @@ export class SingleTiledVectorLayer extends VectorLayer {
 
   constructor({ layerDescriptor, source }: VectorLayerArguments) {
     super({ layerDescriptor, source });
-
-    // reassignment is required due since _source is a shadowed property
-    // and in the transpiled JS-code, the .source assignment in super() is getting voided in this constructor.
     this._source = source as ITiledSingleLayerVectorSource;
   }
 

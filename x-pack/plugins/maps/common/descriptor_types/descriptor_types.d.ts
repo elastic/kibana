@@ -96,9 +96,7 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & 
   maxZoom: number;
 };
 
-export type XYZTMSSourceDescriptor = {
-  id: string;
-  type: string;
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
   urlTemplate: string;
 };
 

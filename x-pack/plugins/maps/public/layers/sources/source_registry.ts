@@ -11,7 +11,7 @@ import { ISource } from './source';
 type SourceRegistryEntry = {
   ConstructorFunction: new (
     sourceDescriptor: AbstractSourceDescriptor,
-    inspectorAdapters: object
+    inspectorAdapters?: object
   ) => ISource;
   type: string;
 };

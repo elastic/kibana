@@ -95,7 +95,6 @@ export class VectorStyleEditor extends Component {
       this.setState({ supportedFeatures });
     }
 
-    //todo: this should be fixed separately
     if (this.state.selectedFeature === null) {
       let selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
       if (this.props.isPointsOnly) {

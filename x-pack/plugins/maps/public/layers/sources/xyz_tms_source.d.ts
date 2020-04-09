@@ -8,7 +8,7 @@ import { XYZTMSSourceDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../layer_wizard_registry';
 
 export class XYZTMSSource extends AbstractTMSSource {
-  constructor(sourceDescriptor: XYZTMSSourceDescriptor, inspectorAdapters: unknown);
+  constructor(sourceDescriptor: XYZTMSSourceDescriptor, inspectorAdapters?: object);
 }
 
 export const tmsLayerWizardConfig: LayerWizard;
