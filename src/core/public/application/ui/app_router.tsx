@@ -21,7 +21,7 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { Observable } from 'rxjs';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
