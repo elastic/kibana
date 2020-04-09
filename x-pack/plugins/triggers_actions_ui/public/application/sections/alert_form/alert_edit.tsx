@@ -26,7 +26,7 @@ import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
-import { AlertActionSecurityCallOut } from '../../components/alert_action_security_call_out';
+import { HealthCheck } from '../../components/health_check';
 import { PLUGIN } from '../../constants/plugin';
 
 interface AlertEditProps {
@@ -137,77 +137,69 @@ export const AlertEdit = ({
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertActionSecurityCallOut
-          docLinks={docLinks}
-          action={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertEdit.securityCalloutAction',
-            {
-              defaultMessage: 'editing',
-            }
-          )}
-          http={http}
-        />
-        <EuiFlyoutBody>
-          {hasActionsDisabled && (
-            <Fragment>
-              <EuiCallOut
-                size="s"
-                color="danger"
-                iconType="alert"
-                title={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
-                  { defaultMessage: 'This alert has actions that are disabled' }
-                )}
-              />
-              <EuiSpacer />
-            </Fragment>
-          )}
-          <AlertForm
-            alert={alert}
-            dispatch={dispatch}
-            errors={errors}
-            canChangeTrigger={false}
-            setHasActionsDisabled={setHasActionsDisabled}
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty data-test-subj="cancelSaveEditedAlertButton" onClick={closeFlyout}>
-                {i18n.translate('xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="secondary"
-                data-test-subj="saveEditedAlertButton"
-                type="submit"
-                iconType="check"
-                isDisabled={hasErrors || hasActionErrors}
-                isLoading={isSaving}
-                onClick={async () => {
-                  setIsSaving(true);
-                  const savedAlert = await onSaveAlert();
-                  setIsSaving(false);
-                  if (savedAlert) {
-                    closeFlyout();
-                    if (reloadAlerts) {
-                      reloadAlerts();
-                    }
-                  }
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertEdit.saveButtonLabel"
-                  defaultMessage="Save"
+        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
+          <EuiFlyoutBody>
+            {hasActionsDisabled && (
+              <Fragment>
+                <EuiCallOut
+                  size="s"
+                  color="danger"
+                  iconType="alert"
+                  title={i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
+                    { defaultMessage: 'This alert has actions that are disabled' }
+                  )}
                 />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+                <EuiSpacer />
+              </Fragment>
+            )}
+            <AlertForm
+              alert={alert}
+              dispatch={dispatch}
+              errors={errors}
+              canChangeTrigger={false}
+              setHasActionsDisabled={setHasActionsDisabled}
+            />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty data-test-subj="cancelSaveEditedAlertButton" onClick={closeFlyout}>
+                  {i18n.translate('xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="secondary"
+                  data-test-subj="saveEditedAlertButton"
+                  type="submit"
+                  iconType="check"
+                  isDisabled={hasErrors || hasActionErrors}
+                  isLoading={isSaving}
+                  onClick={async () => {
+                    setIsSaving(true);
+                    const savedAlert = await onSaveAlert();
+                    setIsSaving(false);
+                    if (savedAlert) {
+                      closeFlyout();
+                      if (reloadAlerts) {
+                        reloadAlerts();
+                      }
+                    }
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertEdit.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </HealthCheck>
       </EuiFlyout>
     </EuiPortal>
   );
